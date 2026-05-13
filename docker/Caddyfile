@@ -1,0 +1,8 @@
+{
+    auto_https off
+    admin off
+}
+
+http://hub.emeq.test:80, http://localhost:80 {
+    reverse_proxy host.docker.internal:8001
+}
