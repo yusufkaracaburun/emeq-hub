@@ -135,9 +135,10 @@ routes/webhooks.php  /webhooks/{provider} — inkomend van partners (no auth, si
 ## Documentatie
 
 - **`CLAUDE.md`** (dit bestand) — entry-point voor Claude Code.
-- **`.ai/rules/`** — altijd-actieve principes (`global.md`, `engineering.md`, `claude-mem-context.md`).
-- **`.ai/plans/`** — gitignored scratchpads voor multi-step werk.
-- **`.ai/skills/`** — project-specifieke skills (vooralsnog leeg; add when needed).
+- **`.claude/rules/`** — altijd-actieve principes (`global.md`, `engineering.md`, `claude-mem-context.md`). `.cursor/rules/` heeft een onafhankelijke kopie voor Cursor.
+- **`.claude/plans/`** — gitignored scratchpads voor multi-step werk.
+- **`.claude/skills/`** — project-specifieke skills (`docs-sync`).
+- **`.claude/hooks/`** — PostToolUse hooks (`docs-drift-check.sh`).
 
 ## Git policy — harde regels
 
@@ -151,4 +152,69 @@ routes/webhooks.php  /webhooks/{provider} — inkomend van partners (no auth, si
 
 - Codepatronen die uit het lezen van sibling-files volgen.
 - File-paden die met `find` / `grep` triviaal te vinden zijn.
-- Generieke development-clichés ("schrijf goede tests") — die staan in `.ai/rules/` of skills.
+- Generieke development-clichés ("schrijf goede tests") — die staan in `.claude/rules/` of skills.
+
+<!-- GSD:project-start source:PROJECT.md -->
+## Project
+
+**Emeq integration stack (v0.1)**
+
+Een set van losse, Saloon-gebaseerde Laravel SDK-packages (`emeq/snelstart-api`, `emeq/mollie-api`) voor Nederlandse boekhoud- en betaal-partner-API's, plus integratie-wiring in Emeq's eerste consumer-app (Naschool). Doelgroep v0.1: Emeq's eigen SaaS-apps die nu ad-hoc partner-integraties hebben. Doelgroep v1.0+ (later): commercieel beschikbaar voor andere NL dev-shops.
+
+**Core Value:** **Twee fundamenteel verschillende providers (OData/clientkey + REST/OAuth2) productie-gevalideerd via één SDK-pattern, en beide live in één concrete Naschool-feature.** Dat valideert het pattern voor toekomstige SDKs en levert directe DRY-winst in Naschool.
+
+### Constraints
+
+- **Tech stack**: PHP 8.4, Laravel 13.9, Saloon v3 (met openstaande v4-upgrade-overweging), Spatie laravel-data, Pest. Geen afwijking zonder approval.
+- **Timeline**: v0.1-deadline ~4 weken vanaf 2026-05-14.
+- **Repo-grenzen**: SDK-packages krijgen géén Hub-domeinmodellen (`Connection`, `Account`, etc.) — invariant uit CLAUDE.md.
+- **Tokens encrypted at rest**: gevoelige credentials (clientkey, subscription-key, API-key) nooit raw in DB of logs. Fingerprint-only voor debugging.
+- **Geen verzonnen partner-features**: code moet exact kloppen met officiële Snelstart/Mollie docs (zie `.docs/partners/snelstart/`).
+- **Git-policy**: nooit op `main` werken, nooit pushen zonder approval, geen `--no-verify`.
+<!-- GSD:project-end -->
+
+<!-- GSD:stack-start source:STACK.md -->
+## Technology Stack
+
+Technology stack not yet documented. Will populate after codebase mapping or first phase.
+<!-- GSD:stack-end -->
+
+<!-- GSD:conventions-start source:CONVENTIONS.md -->
+## Conventions
+
+Conventions not yet established. Will populate as patterns emerge during development.
+<!-- GSD:conventions-end -->
+
+<!-- GSD:architecture-start source:ARCHITECTURE.md -->
+## Architecture
+
+Architecture not yet mapped. Follow existing patterns found in the codebase.
+<!-- GSD:architecture-end -->
+
+<!-- GSD:skills-start source:skills/ -->
+## Project Skills
+
+| Skill | Description | Path |
+|-------|-------------|------|
+| docs-sync | Detecteert en herstelt documentatie-drift én organisatie-issues in `.docs/`, `CLAUDE.md` en memory voor de emeq-hub repo. Triggert proactief na domein-wijzigingen — niet wachten op merge: model/entity hernoemd, kolom verplaatst, nieuwe migration, nieuwe Sanctum-ability of Connection-provider, OAuth-flow gewijzigd, SDK-package toegevoegd of verwijderd uit `packages/`, route toegevoegd of verwijderd. Triggert ook bij doc-toevoegingen of -verplaatsingen in `.docs/`. Reactief op vragen als "check de docs", "update de docs", "klopt de documentatie nog", "synchroniseer docs", "klaar voor commit?", "ruim de docs op". Vangt zes problemen af: (1) stale class-/file-references, (2) ontbrekende ADR voor architecturele wijzigingen, (3) completed TODOs die niet als ✅ zijn gemarkeerd, (4) structuur-drift (nieuwe folders/files niet in `.docs/README.md` index, files op verkeerde plek), (5) verweesde docs (gemergde plans nog in `plans/`, lange ongewijzigde files), en (6) dode links (markdown-links naar non-existing files of code-paden). Use proactively whenever the user wraps up a domein-wijziging, just merged a branch, ran a refactor, added/moved a doc, or before any commit/push. | `.claude/skills/docs-sync/SKILL.md` |
+<!-- GSD:skills-end -->
+
+<!-- GSD:workflow-start source:GSD defaults -->
+## GSD Workflow Enforcement
+
+Before using Edit, Write, or other file-changing tools, start work through a GSD command so planning artifacts and execution context stay in sync.
+
+Use these entry points:
+- `/gsd-quick` for small fixes, doc updates, and ad-hoc tasks
+- `/gsd-debug` for investigation and bug fixing
+- `/gsd-execute-phase` for planned phase work
+
+Do not make direct repo edits outside a GSD workflow unless the user explicitly asks to bypass it.
+<!-- GSD:workflow-end -->
+
+<!-- GSD:profile-start -->
+## Developer Profile
+
+> Profile not yet configured. Run `/gsd-profile-user` to generate your developer profile.
+> This section is managed by `generate-claude-profile` -- do not edit manually.
+<!-- GSD:profile-end -->
