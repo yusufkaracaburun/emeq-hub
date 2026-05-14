@@ -103,7 +103,13 @@ v0.2 bouwt drie samenhangende lagen: (1) `emeq/mollie-api` SDK die `mollie/molli
   3. Een Connection met `expires_at` < 5 minuten triggert automatische refresh (`refreshToken()`) en updatet `access_token`/`expires_at` zonder dat de pass-through-API een 401 ziet
   4. `OAuthFlow`-contract heeft een tweede dummy-implementatie (test-fixture, niet productie) die laat zien dat het pattern niet Mollie-specifiek is
   5. Tampered `state`-parameter (CSRF-check) wordt afgewezen met 400
-**Plans:** TBD
+**Plans:** 5 plans
+
+- [ ] 04-01-PLAN.md — OAuthFlow-contract + FakeOAuthFlow + migration + Connection-model edit + factory-states + OAuthFlowContractTest (SC-4 bewezen)
+- [ ] 04-02-PLAN.md — MollieConnectOAuthFlow (Http::post direct) + OAuthFlowRegistry + config/services.mollie + .env.example + AppServiceProvider OAuthFlow-binding + Http::fake-test
+- [ ] 04-03-PLAN.md — MollieConnectionContext (scoped) + HubMollieCredentialResolver (lazy refresh D-04/D-06) + AppServiceProvider SDK-bindings + 3 testpaden
+- [ ] 04-04-PLAN.md — InitController + CallbackController + routes/api.php + 7 feature-tests (SC-1 + SC-2 + SC-5 bewezen)
+- [ ] 04-05-PLAN.md — PruneOAuthPendingConnections command + test + BLOCKING migrate + full test-suite Phase-acceptance
 
 #### Phase 5a: Mollie SDK Resources + Webhooks + Pass-through API
 **Goal:** Een werkende end-to-end Mollie-pass-through: Consumer doet HTTP-call naar Hub, Hub resolved Connection, SDK doet Mollie-call, response stroomt terug — voor alle 6 in-scope resources, inclusief inkomende webhook-verificatie.
