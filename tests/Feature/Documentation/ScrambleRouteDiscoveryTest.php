@@ -79,6 +79,94 @@ class ScrambleRouteDiscoveryTest extends TestCase
         $this->assertTrue($hasAnyMethod, 'Catch-all moet minstens één HTTP-method exposeren in de spec.');
     }
 
+    public function test_openapi_spec_contains_mollie_payments_routes(): void
+    {
+        $spec = $this->fetchSpec();
+        $paths = $spec['paths'] ?? [];
+
+        $this->assertArrayHasKey('/mollie/payments', $paths);
+        $this->assertArrayHasKey('post', $paths['/mollie/payments']);
+        $this->assertArrayHasKey('/mollie/payments/{id}', $paths);
+        $this->assertArrayHasKey('get', $paths['/mollie/payments/{id}']);
+        $this->assertArrayHasKey('delete', $paths['/mollie/payments/{id}']);
+    }
+
+    public function test_openapi_spec_contains_mollie_customers_routes(): void
+    {
+        $spec = $this->fetchSpec();
+        $paths = $spec['paths'] ?? [];
+
+        $this->assertArrayHasKey('/mollie/customers', $paths);
+        $this->assertArrayHasKey('get', $paths['/mollie/customers']);
+        $this->assertArrayHasKey('post', $paths['/mollie/customers']);
+        $this->assertArrayHasKey('/mollie/customers/{id}', $paths);
+        $this->assertArrayHasKey('get', $paths['/mollie/customers/{id}']);
+    }
+
+    public function test_openapi_spec_contains_mollie_payment_methods_route(): void
+    {
+        $spec = $this->fetchSpec();
+        $paths = $spec['paths'] ?? [];
+
+        $this->assertArrayHasKey('/mollie/payment-methods', $paths);
+        $this->assertArrayHasKey('get', $paths['/mollie/payment-methods']);
+    }
+
+    public function test_openapi_spec_contains_mollie_refunds_routes(): void
+    {
+        // Scramble gebruikt controller-argument-namen voor path-variables
+        // i.p.v. de route-placeholder-naam. RefundsController's nested
+        // routes nemen `$payment_id` als argument, dus Scramble rendert
+        // `{payment_id}` (NIET `{id}` zoals de route-definitie).
+        $spec = $this->fetchSpec();
+        $paths = $spec['paths'] ?? [];
+
+        $this->assertArrayHasKey('/mollie/payments/{payment_id}/refunds', $paths);
+        $this->assertArrayHasKey('post', $paths['/mollie/payments/{payment_id}/refunds']);
+        $this->assertArrayHasKey('get', $paths['/mollie/payments/{payment_id}/refunds']);
+        $this->assertArrayHasKey('/mollie/refunds/{id}', $paths);
+        $this->assertArrayHasKey('get', $paths['/mollie/refunds/{id}']);
+    }
+
+    public function test_openapi_spec_contains_mollie_mandates_routes(): void
+    {
+        // Scramble rendert `{customer_id}` (uit controller-argument), niet
+        // `{id}` (uit route-placeholder). Zie test_openapi_spec_contains_mollie_refunds_routes.
+        $spec = $this->fetchSpec();
+        $paths = $spec['paths'] ?? [];
+
+        $this->assertArrayHasKey('/mollie/customers/{customer_id}/mandates', $paths);
+        $this->assertArrayHasKey('get', $paths['/mollie/customers/{customer_id}/mandates']);
+        $this->assertArrayHasKey('/mollie/customers/{customer_id}/mandates/{mandate_id}', $paths);
+        $this->assertArrayHasKey('get', $paths['/mollie/customers/{customer_id}/mandates/{mandate_id}']);
+        $this->assertArrayHasKey('delete', $paths['/mollie/customers/{customer_id}/mandates/{mandate_id}']);
+    }
+
+    public function test_openapi_spec_contains_mollie_subscriptions_routes(): void
+    {
+        $spec = $this->fetchSpec();
+        $paths = $spec['paths'] ?? [];
+
+        $this->assertArrayHasKey('/mollie/customers/{customer_id}/subscriptions', $paths);
+        $this->assertArrayHasKey('get', $paths['/mollie/customers/{customer_id}/subscriptions']);
+        $this->assertArrayHasKey('post', $paths['/mollie/customers/{customer_id}/subscriptions']);
+        $this->assertArrayHasKey('/mollie/customers/{customer_id}/subscriptions/{sub_id}', $paths);
+        $this->assertArrayHasKey('get', $paths['/mollie/customers/{customer_id}/subscriptions/{sub_id}']);
+        $this->assertArrayHasKey('delete', $paths['/mollie/customers/{customer_id}/subscriptions/{sub_id}']);
+    }
+
+    public function test_openapi_spec_contains_mollie_payment_links_routes(): void
+    {
+        $spec = $this->fetchSpec();
+        $paths = $spec['paths'] ?? [];
+
+        $this->assertArrayHasKey('/mollie/payment-links', $paths);
+        $this->assertArrayHasKey('get', $paths['/mollie/payment-links']);
+        $this->assertArrayHasKey('post', $paths['/mollie/payment-links']);
+        $this->assertArrayHasKey('/mollie/payment-links/{id}', $paths);
+        $this->assertArrayHasKey('get', $paths['/mollie/payment-links/{id}']);
+    }
+
     /**
      * @return array<string, mixed>
      */
