@@ -71,6 +71,14 @@ class PassThroughController extends Controller
 
             $sdkResponse = $snelstart->connector()->send($sdkRequest);
 
+            // De SDK throwt niet automatisch op failed-status — geef de
+            // Snelstart-mapped exception (Authentication/Validation/Server/
+            // NotFound/RateLimit) een kans om door UpstreamErrorMapper te
+            // worden gemapt naar de juiste Hub-response.
+            if ($sdkResponse->failed()) {
+                $sdkResponse->throw();
+            }
+
             $status = $sdkResponse->status();
             $responseBody = $sdkResponse->body();
             $contentType = $sdkResponse->header('Content-Type') ?? 'application/json';
