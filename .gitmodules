@@ -1,0 +1,3 @@
+[submodule "packages/snelstart-api"]
+	path = packages/snelstart-api
+	url = git@github.com:yusufkaracaburun/emeq-snelstart-api.git

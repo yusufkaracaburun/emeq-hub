@@ -20,7 +20,8 @@
 /storage/*.key
 /storage/pail
 /vendor
-/packages
+/packages/*
+!/packages/snelstart-api
 /.ai/*
 !/.ai/guidelines/
 /.claude
