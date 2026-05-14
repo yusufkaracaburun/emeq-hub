@@ -20,7 +20,7 @@ Requirements voor v0.2 (~8-10 weken). Elke vereiste mapt naar één roadmap-fase
 
 ### Hub-skeleton
 
-- [ ] **HUB-01**: `consumers`/`accounts`/`connections` tabellen + Sanctum-PAT auth voor Consumer-routes. `consumers` houdt SaaS-app-registraties (Naschool, Planny, derde-partijen). `accounts` houdt klanten van die SaaS-apps (school A, vereniging C) by `consumer_id + external_id`. `connections` houdt per-provider credentials per Account, encrypted-at-rest. Provider-specifieke credentials: voor OAuth-providers (Mollie) `access_token` + `refresh_token` + `expires_at` + `scopes`; voor key-based providers (Snelstart) `client_key` + `subscription_key` + `subscription_id`. Provider-specifieke velden worden of in dedicated kolommen of in een `metadata` JSON-kolom opgeslagen — te beslissen bij Phase 3-planning.
+- [x] **HUB-01**: `consumers`/`accounts`/`connections` tabellen + Sanctum-PAT auth voor Consumer-routes. `consumers` houdt SaaS-app-registraties (Naschool, Planny, derde-partijen). `accounts` houdt klanten van die SaaS-apps (school A, vereniging C) by `consumer_id + external_id`. `connections` houdt per-provider credentials per Account, encrypted-at-rest. Provider-specifieke credentials: voor OAuth-providers (Mollie) `access_token` + `refresh_token` + `expires_at` + `scopes`; voor key-based providers (Snelstart) `client_key` + `subscription_key` + `subscription_id`. Provider-specifieke velden worden of in dedicated kolommen of in een `metadata` JSON-kolom opgeslagen — te beslissen bij Phase 3-planning.
 
 - [ ] **HUB-02**: `OAuthFlow`-contract provider-agnostisch (`getAuthorizationUrl()`, `exchangeCode()`, `refreshToken()`, `revoke()`). Eerste implementatie `MollieConnectOAuthFlow`. Pattern toekomst-bestendig voor Snelstart-OAuth, Exact-OAuth, Ibanity-OAuth in latere milestones.
 
@@ -82,7 +82,7 @@ Expliciet uitgesloten voor v0.2. Niet re-adden zonder PROJECT.md herziening.
 | MOLL-02 | Phase 4 | Pending |
 | MOLL-03 | Phase 5a | Pending |
 | MOLL-04 | Phase 5a | Pending |
-| HUB-01 | Phase 3 | Pending |
+| HUB-01 | Phase 3 | Complete |
 | HUB-02 | Phase 4 | Pending |
 | HUB-03 | Phase 5a | Pending |
 | HUB-04 | Phase 9 | Pending |

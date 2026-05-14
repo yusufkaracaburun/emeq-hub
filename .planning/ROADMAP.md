@@ -21,7 +21,7 @@ v0.2 bouwt drie samenhangende lagen: (1) `emeq/mollie-api` SDK die `mollie/molli
 ### Phases
 
 - [ ] **Phase 2: emeq/mollie-api foundation** — SDK skeleton + multi-tenant resolver + dual creds + Pest-suite groen
-- [ ] **Phase 3: Hub-skeleton** — `consumers`/`accounts`/`connections`-tabellen + Sanctum-PAT-auth + Consumer-routing + Snelstart-credential-velden encrypted
+- [x] **Phase 3: Hub-skeleton** — `consumers`/`accounts`/`connections`-tabellen + Sanctum-PAT-auth + Consumer-routing + Snelstart-credential-velden encrypted *(voltooid 2026-05-14; 5/5 plans, HUB-01 SC-1 t/m SC-5 bewezen)*
 - [ ] **Phase 4: Mollie Connect OAuth-broker** — provider-agnostisch `OAuthFlow`-contract + `MollieConnectOAuthFlow` + encrypted token-storage
 - [ ] **Phase 5a: Mollie SDK Resources + Webhooks + Pass-through API** — Payments/Customers/PaymentMethods/Refunds/Mandates/Subscriptions + Connect-webhook verifier + `/v1/mollie/*` audit-logged
 - [ ] **Phase 5b: Snelstart-pass-through API** — `/v1/snelstart/{path}` pass-through via `HubSnelstartCredentialResolver` + `POST /v1/accounts` + `POST /v1/connections` provisioning-endpoints + audit-logging. Parallel met Phase 4 mogelijk.
@@ -84,7 +84,7 @@ v0.2 bouwt drie samenhangende lagen: (1) `emeq/mollie-api` SDK die `mollie/molli
 - [x] 03-02-PLAN.md — Sanctum-config (auth.guards.sanctum + consumers-provider + bootstrap apiPrefix:v1) + App\Sanctum\TokenAbilities constants-class + routes/api.php skeleton
 - [x] 03-03-PLAN.md — routes/api.php /v1/ping + PingController + PingTest (3 tests) + SanctumAbilityTest (3 tests, 1 incomplete placeholder voor Phase 5b)
 - [x] 03-04-PLAN.md — ConnectionEncryptionTest (7 tests: at-rest + Hidden + fingerprint) + ConsumerAccountScopingTest (4 tests: cross-Consumer query-isolation)
-- [ ] 03-05-PLAN.md — hub:consumer:create artisan-command + DatabaseSeeder demo-data (production-guarded) + HubConsumerCreateTest (5 tests) + Phase 3 acceptance-run
+- [x] 03-05-PLAN.md — hub:consumer:create artisan-command + DatabaseSeeder demo-data (production-guarded) + HubConsumerCreateTest (5 tests) + Phase 3 acceptance-run
 
 #### Phase 4: Mollie Connect OAuth-broker
 **Goal:** Een werkende OAuth-broker waarmee Accounts hun eigen Mollie-account aan een Consumer kunnen koppelen via Mollie Connect, met provider-agnostisch contract voor toekomstige providers.

@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v0.2
 milestone_name: — Mollie + Connect + Subscriptions + Hub-skeleton
 status: executing
-stopped_at: Plan 03-03 voltooid — /v1/ping achter auth:sanctum + PingController + 6 nieuwe tests (3 PingTest + 3 SanctumAbilityTest, waarvan 1 incomplete); HUB-01 SC-2 end-to-end bewezen
-last_updated: "2026-05-14T14:20:31.268Z"
+stopped_at: "Phase 03 volledig afgerond — plan 03-05 voltooid (hub:consumer:create + DatabaseSeeder + acceptance-run); alle 5 HUB-01 SC bewezen; 27/27 tests groen + 1 geplande incomplete"
+last_updated: "2026-05-14T14:32:02.157Z"
 last_activity: 2026-05-14
 progress:
   total_phases: 9
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 13
-  completed_plans: 4
-  percent: 31
+  completed_plans: 5
+  percent: 38
 ---
 
 # Project State
@@ -25,10 +25,10 @@ See: .planning/PROJECT.md (updated 2026-05-14 na v0.1 milestone-close)
 
 ## Current Position
 
-Phase: 03 (hub-skeleton) — EXECUTING
-Plan: 4 of 5 (alleen 03-05 nog openstaand; 03-01/03-02/03-03/03-04 voltooid)
-Status: Ready to execute plan 03-05
-Last activity: 2026-05-14 — Phase 03 plan 03 voltooid
+Phase: 03 (hub-skeleton) — **COMPLETE** ✅
+Plan: 5 of 5 voltooid (03-01/03-02/03-03/03-04/03-05)
+Status: Ready for Phase 4 (Mollie Connect OAuth-broker) of Phase 5b (Snelstart pass-through) — beide parallelliseerbaar
+Last activity: 2026-05-14 — Phase 03 plan 03-05 voltooid
 
 ## Performance Metrics
 
@@ -43,17 +43,17 @@ Last activity: 2026-05-14 — Phase 03 plan 03 voltooid
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01-snelstart-sdk-finalize | 3 | ~16 min | ~5 min |
-| 03-hub-skeleton | 4/5 | ~20 min | ~5 min |
+| 03-hub-skeleton | 5/5 | ~27 min | ~5 min |
 
 **Recent Trend:**
 
-- Last 3 plans: 03-02 (Sanctum-config + TokenAbilities + api-skeleton, ~4 min, 3 commits, 2 nieuwe + 2 modified files); 03-04 (ConnectionEncryptionTest + ConsumerAccountScopingTest, ~6 min, 2 commits, 2 nieuwe files, 11 tests groen); 03-03 (PingController + /v1/ping + PingTest + SanctumAbilityTest, ~5 min, 3 commits, 3 nieuwe + 1 modified file, 6 nieuwe tests waarvan 1 incomplete)
+- Last 3 plans: 03-04 (ConnectionEncryptionTest + ConsumerAccountScopingTest, ~6 min, 2 commits, 2 nieuwe files, 11 tests groen); 03-03 (PingController + /v1/ping + PingTest + SanctumAbilityTest, ~5 min, 3 commits, 3 nieuwe + 1 modified file, 6 nieuwe tests waarvan 1 incomplete); 03-05 (hub:consumer:create + DatabaseSeeder + acceptance-run, ~7 min, 4 commits, 2 nieuwe + 2 modified files, 5 nieuwe tests groen + 1 Rule-1-deviation voor User-seeder-idempotency)
 - Trend v0.1: phase 1 sneller dan ingeschat (master-plan-aanname 30-60 min crash-fix; bleek NO CRASH REPRO)
-- Trend v0.2 (start): plans 03-01 t/m 03-04 binnen gepland tijdsvenster; PATTERNS.md analog-mapping leverde copy-targets aan zonder context-switches
+- Trend v0.2 (Phase 3 closed): alle 5 plans binnen ~5-7 min/plan; PATTERNS.md analog-mapping + duidelijke `<read_first>`-sectie hielden context-switches minimaal; één Rule-1-deviation (DatabaseSeeder User-pad idempotency) die het plan-success-criterion afdwong bovenop de plan-action
 
-| Phase 03 P03-03 | 5 | 3 tasks | 4 files |
+| Phase 03 P03-05 | 7 | 4 tasks | 4 files |
 
-*Updated 2026-05-14 — plan 03-03 voltooid.*
+*Updated 2026-05-14 — plan 03-05 voltooid; Phase 03 volledig afgerond.*
 
 ## Accumulated Context
 
@@ -78,14 +78,16 @@ Decisions zijn gelogd in PROJECT.md Key Decisions table. Decisions die uit v0.1 
 - 🆕 **New 2026-05-14 (03-03):** `PingController` is single-action `__invoke` retournerend plain array (Laravel cast't naar JSON); single-action gekozen i.p.v. resourceful controller voor één smoke-route — copy-target voor Phase 5b's `Snelstart\PassthroughController`
 - 🆕 **New 2026-05-14 (03-03):** `SanctumAbilityTest::test_token_without_required_ability_is_rejected` blijft `markTestIncomplete` tot Phase 5b een route met `->middleware('ability:snelstart:read')` heeft — suite blijft groen (incomplete ≠ failed), placeholder wordt scherp ingevuld bij Phase 5b
 - 🆕 **New 2026-05-14 (03-03):** `Tests\Feature\Api` sub-namespace voor HTTP-feature-tests (eigen directory `tests/Feature/Api/`); `Tests\Feature` root blijft voor model-laag-bewijs (encryption + scoping)
+- 🆕 **New 2026-05-14 (03-05):** `DatabaseSeeder` `User::factory()`-pad krijgt eigen `exists()`-guard — plan-action stond `User::factory()->create()` als-is maar dat crasht op `users.email_unique` bij 2× `db:seed` zonder `migrate:fresh`. Minimale Rule-1-fix die plan-acceptance-grep (`User::factory == 1`) én plan-success-criterion (idempotency) tegelijk respecteert
+- 🆕 **New 2026-05-14 (03-05):** `hub:consumer:create`-command gebruikt property-stijl `protected $signature`/`$description` i.p.v. de nieuwere `#[Signature]`/`#[Description]`-attributes uit Laravel 12+ `make:command`-output — matched `routes/console.php`-conventie en blijft compatibel met acceptance-grep
 
 ### Pending Todos
 
-- Plan 03-05 — `hub:consumer:create` artisan-command + `DatabaseSeeder` demo-data + acceptance-run
-- Scramble (`dedoc/scramble`) installeren met `/docs/api` + Sanctum-bearer-extension (quick-task) — voorbereiding op Phase 5a/5b
-- `/gsd-plan-phase 5b` runnen na Phase 3 — Snelstart-pass-through API
-- Mollie-tak (Phase 2 + 4 + 5a) blijft parallel werk; aparte sessie/working-copy
-- **Out-of-scope cleanup (deferred-items.md):** Pint formatting-drift op vendor-published `webhook_calls`-migrations — quick-task of meenemen in Phase 5a/5b
+- ✅ Phase 03 hub-skeleton voltooid (alle 5 plans + HUB-01 SC-1 t/m SC-5 bewezen)
+- `/gsd-plan-phase 5b` runnen — Snelstart-pass-through API (depends on Phase 3 only, parallelliseerbaar met Phase 4)
+- Scramble (`dedoc/scramble`) `/docs/api` + Sanctum-bearer-extension is al gepubliceerd op deze branch — verifieer + commit als quick-task wanneer Phase 5a/5b begint
+- Mollie-tak (Phase 2 + 4 + 5a) parallel werk; aparte sessie/working-copy
+- **Out-of-scope cleanup (deferred-items.md):** Pint-drift op vendor-published `webhook_calls`-migrations + `routes/web.php` + `packages/**` — pakken bij Phase 5a/5b wanneer audit-logging / webhooks worden aangeraakt
 
 ### Blockers/Concerns
 
@@ -107,6 +109,7 @@ Decisions zijn gelogd in PROJECT.md Key Decisions table. Decisions die uit v0.1 
 - 2026-05-14 — Plan 03-02 voltooid: Sanctum-guard + consumers-provider in `config/auth.php`, `apiPrefix: 'v1'` in `bootstrap/app.php`, `App\Sanctum\TokenAbilities` constants-class, `routes/api.php` skeleton. Auth-laag staat; plan 03-03 kan `/v1/ping` op deze stack landen.
 - 2026-05-14 — Plan 03-04 voltooid (Wave 2b parallel afgehandeld vóór 03-03): `ConnectionEncryptionTest` (7 tests) + `ConsumerAccountScopingTest` (4 tests). HUB-01 SC-3 (geen raw credentials in `toArray()`) volledig bewezen; SC-4 query-laag bewezen — route-laag wacht op Phase 5b's pass-through-API.
 - 2026-05-14 — Plan 03-03 voltooid: `routes/api.php` `/v1/ping` + `App\Http\Controllers\Api\V1\PingController` + `PingTest` (3 tests) + `SanctumAbilityTest` (2 passed + 1 incomplete-placeholder voor Phase 5b ability-middleware). HUB-01 SC-2 end-to-end bewezen (Bearer-PAT → Consumer-slug → 200-respond). Volledige suite 22/22 + 1 incomplete.
+- 2026-05-14 — Plan 03-05 voltooid: `hub:consumer:create`-artisan-command (4 options, SUCCESS/INVALID/FAILURE-exit-codes, plain-token via `warn()`) + `DatabaseSeeder` met production-guard + idempotente demo-Consumer (naschool) + demo-Account (school1) + `HubConsumerCreateTest` (5 tests groen). HUB-01 SC-1 bewezen via tinker-verify; end-to-end smoke (CLI-token → `/v1/ping` in-process → `{"pong":true,"consumer":"smoke-test","abilities":["snelstart:read"]}`). Volledige suite 27 passed / 1 incomplete / 0 failed. **Phase 3 volledig afgerond.**
 
 ## Deferred Items
 
@@ -124,7 +127,7 @@ Items acknowledged en deferred bij milestone-close 2026-05-14:
 
 ## Session Continuity
 
-Last session: 2026-05-14 — Phase 03 plan 03 voltooid
-Stopped at: Plan 03-03 voltooid — /v1/ping achter auth:sanctum + PingController + PingTest (3) + SanctumAbilityTest (2 passed + 1 incomplete); HUB-01 SC-2 end-to-end bewezen
-Resume file: `.planning/phases/03-hub-skeleton/03-05-PLAN.md` (hub:consumer:create + DatabaseSeeder)
-Next action: Plan 03-05 — hub:consumer:create artisan-command + DatabaseSeeder demo-data + Phase 3 acceptance-run
+Last session: 2026-05-14 — Phase 03 plan 03-05 voltooid; Phase 3 afgerond
+Stopped at: Phase 03 volledig afgerond — plan 03-05 voltooid (hub:consumer:create + DatabaseSeeder + acceptance-run); alle 5 HUB-01 SC bewezen; 27/27 tests groen + 1 geplande incomplete
+Resume file: None — Phase 3 closed
+Next action: `/gsd-plan-phase 5b` voor Snelstart-pass-through API (depends on Phase 3 only) of `/gsd-plan-phase 4` voor Mollie Connect OAuth-broker
