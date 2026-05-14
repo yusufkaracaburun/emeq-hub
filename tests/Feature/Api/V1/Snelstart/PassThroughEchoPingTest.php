@@ -109,6 +109,25 @@ class PassThroughEchoPingTest extends TestCase
         $this->assertSame(0, PassThroughCall::count(), 'Ability-fail mag geen audit-rij produceren');
     }
 
+    public function test_post_with_non_json_content_type_returns_415_and_writes_no_audit_row(): void
+    {
+        [, $token, $account, $connection] = $this->setupSnelstartConsumer([TokenAbilities::SNELSTART_WRITE]);
+        $this->primeSnelstartToken($connection);
+
+        MockClient::global([
+            RawSnelstartRequest::class => MockResponse::make(['should' => 'not-be-called'], 500),
+        ]);
+
+        $response = $this->withHeader('Authorization', "Bearer {$token}")
+            ->withHeader('X-Account-Id', $account->external_id)
+            ->withHeader('Content-Type', 'application/x-www-form-urlencoded')
+            ->post('/v1/snelstart/relaties', ['naam' => 'should-not-pass']);
+
+        $response->assertStatus(415);
+        $response->assertJsonPath('error', 'unsupported_content_type');
+        $this->assertSame(0, PassThroughCall::count(), '415-pad mag geen audit-rij schrijven');
+    }
+
     /**
      * @param  list<string>  $abilities
      * @return array{0: Consumer, 1: string, 2: Account, 3: Connection}
