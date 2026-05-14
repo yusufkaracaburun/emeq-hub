@@ -9,11 +9,21 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Laravel\Sanctum\HasApiTokens;
 
-#[Fillable(['name', 'slug'])]
+#[Fillable(['name', 'slug', 'webhook_callback_url', 'webhook_callback_secret'])]
 class Consumer extends Authenticatable
 {
     /** @use HasFactory<ConsumerFactory> */
     use HasApiTokens, HasFactory;
+
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'webhook_callback_secret' => 'encrypted',
+        ];
+    }
 
     public function accounts(): HasMany
     {
