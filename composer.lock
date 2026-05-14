@@ -714,14 +714,14 @@
             "dist": {
                 "type": "path",
                 "url": "packages/snelstart-api",
-                "reference": "6d5f00e8972630034c301b8f2bae77c5733af7cf"
+                "reference": "f3634da3c44e7cf3b87584b19911e652e20bb3fb"
             },
             "require": {
                 "ext-json": "*",
                 "illuminate/contracts": "^11.0||^12.0||^13.0",
                 "php": "^8.3",
-                "saloonphp/laravel-plugin": "^3.0",
-                "saloonphp/saloon": "^3.0",
+                "saloonphp/laravel-plugin": "^4.0",
+                "saloonphp/saloon": "^4.0",
                 "spatie/laravel-data": "^4.0",
                 "spatie/laravel-package-tools": "^1.16"
             },
@@ -790,7 +790,7 @@
                     "role": "Developer"
                 }
             ],
-            "description": "Modern Laravel SDK voor de Snelstart B2B API v2 — OAuth2 (clientkey), Saloon v3, OData query builder en gegenereerde Spatie laravel-data DTOs.",
+            "description": "Modern Laravel SDK voor de Snelstart B2B API v2 — OAuth2 (clientkey), Saloon v4, OData query builder en gegenereerde Spatie laravel-data DTOs.",
             "homepage": "https://github.com/emeq/snelstart-api",
             "keywords": [
                 "api-client",
@@ -4413,23 +4413,23 @@
         },
         {
             "name": "saloonphp/laravel-plugin",
-            "version": "v3.11.0",
+            "version": "v4.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/saloonphp/laravel-plugin.git",
-                "reference": "7bca1ddaceed3ace9d19838cf183f99bf7b418d6"
+                "reference": "c9754084dabe1002000d01cc2192fd08cfa6079d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/saloonphp/laravel-plugin/zipball/7bca1ddaceed3ace9d19838cf183f99bf7b418d6",
-                "reference": "7bca1ddaceed3ace9d19838cf183f99bf7b418d6",
+                "url": "https://api.github.com/repos/saloonphp/laravel-plugin/zipball/c9754084dabe1002000d01cc2192fd08cfa6079d",
+                "reference": "c9754084dabe1002000d01cc2192fd08cfa6079d",
                 "shasum": ""
             },
             "require": {
-                "illuminate/console": "^11.0 || ^v12.39.0 || ^13.0",
+                "illuminate/console": "^11.0 || ^12.39.0 || ^13.0",
                 "illuminate/support": "^11.0 || ^12.39.0 || ^13.0",
                 "php": "^8.2",
-                "saloonphp/saloon": "^3.5",
+                "saloonphp/saloon": "^4.0",
                 "symfony/finder": "^6.4 || ^7.0 || ^8.0"
             },
             "require-dev": {
@@ -4477,22 +4477,22 @@
                 "sdk"
             ],
             "support": {
-                "source": "https://github.com/saloonphp/laravel-plugin/tree/v3.11.0"
+                "source": "https://github.com/saloonphp/laravel-plugin/tree/v4.3.0"
             },
-            "time": "2026-03-24T23:30:06+00:00"
+            "time": "2026-04-23T23:22:12+00:00"
         },
         {
             "name": "saloonphp/saloon",
-            "version": "v3.15.0",
+            "version": "v4.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/saloonphp/saloon.git",
-                "reference": "8039c76132ca52d08c887407773a770c15ab04a0"
+                "reference": "1307b1d72cacdd2c9c20978cdf7a0b720b4bf3bb"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/saloonphp/saloon/zipball/8039c76132ca52d08c887407773a770c15ab04a0",
-                "reference": "8039c76132ca52d08c887407773a770c15ab04a0",
+                "url": "https://api.github.com/repos/saloonphp/saloon/zipball/1307b1d72cacdd2c9c20978cdf7a0b720b4bf3bb",
+                "reference": "1307b1d72cacdd2c9c20978cdf7a0b720b4bf3bb",
                 "shasum": ""
             },
             "require": {
@@ -4552,7 +4552,7 @@
             ],
             "support": {
                 "issues": "https://github.com/saloonphp/saloon/issues",
-                "source": "https://github.com/saloonphp/saloon/tree/v3.15.0"
+                "source": "https://github.com/saloonphp/saloon/tree/v4.0.0"
             },
             "funding": [
                 {
@@ -4560,7 +4560,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-03-02T22:04:13+00:00"
+            "time": "2026-03-17T22:58:33+00:00"
         },
         {
             "name": "spatie/laravel-data",
