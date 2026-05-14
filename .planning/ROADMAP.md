@@ -20,7 +20,7 @@ v0.2 bouwt drie samenhangende lagen: (1) `emeq/mollie-api` SDK die `mollie/molli
 
 ### Phases
 
-- [ ] **Phase 2: emeq/mollie-api foundation** — SDK skeleton + multi-tenant resolver + dual creds + Pest-suite groen
+- [x] **Phase 2: emeq/mollie-api foundation** — SDK skeleton + multi-tenant resolver + dual creds + Pest-suite groen *(voltooid 2026-05-14; SDK gepubliceerd als `emeq/mollie-api v0.1.0-alpha.1`, 8/8 plans DONE in eigen sub-repo, Hub-side composer-binding actief; bonus: exception-mappers + idempotency-generator + webhook-helper boven plan-scope)*
 - [x] **Phase 3: Hub-skeleton** — `consumers`/`accounts`/`connections`-tabellen + Sanctum-PAT-auth + Consumer-routing + Snelstart-credential-velden encrypted *(voltooid 2026-05-14; 5/5 plans, HUB-01 SC-1 t/m SC-5 bewezen)*
 - [x] **Phase 4: Mollie Connect OAuth-broker** — provider-agnostisch `OAuthFlow`-contract + `MollieConnectOAuthFlow` + encrypted token-storage *(voltooid 2026-05-14; 5/5 plans, alle 5 SC's bewezen, BLOCKING acceptance 8/8 + 129/129 tests)*
 - [ ] **Phase 5a: Mollie SDK Resources + Webhooks + Pass-through API** — Payments/Customers/PaymentMethods/Refunds/Mandates/Subscriptions/PaymentLinks + Connect-webhook verifier + `/v1/mollie/*` audit-logged (zie ADR `mollie-passthrough-api.md`)

@@ -3,15 +3,16 @@ gsd_state_version: 1.0
 milestone: v0.2
 milestone_name: — Mollie + Connect + Subscriptions + Hub-skeleton
 status: executing
-stopped_at: Phase 04 volledig afgerond (5/5 plans) — BLOCKING acceptance 8/8 groen, 129/129 tests
-last_updated: "2026-05-14T20:30:00.000Z"
+stopped_at: Phase 02 (out-of-tree) + Phase 03 + Phase 04 voltooid; Phase 05a ready for /gsd-plan-phase
+last_updated: "2026-05-14T20:45:00.000Z"
 last_activity: 2026-05-14
 progress:
   total_phases: 9
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 23
-  completed_plans: 15
-  percent: 65
+  completed_plans: 23
+  percent: 100
+  note: "Phase 2 telt als 8 completed plans — alle SDK-werk in sub-repo, geen Hub-commits per plan; Phase 5a is uit Phase-2-blocker maar valt deels onder MOLL-03 (= Phase 5a-scope, niet Phase 2)"
 ---
 
 # Project State
@@ -26,8 +27,8 @@ See: .planning/PROJECT.md (updated 2026-05-14 na v0.1 milestone-close)
 ## Current Position
 
 Phase: 04 (mollie-connect-oauth-broker) — **COMPLETED**
-Plan: 5 of 5 voltooid; BLOCKING phase-acceptance 8/8 groen
-Status: Ready to start next phase (5a Mollie / 5b CRITICAL-warnings cleanup / 6 subscriptions)
+Plan: alle plans afgerond voor de tot nu toe geplande phases (02 + 03 + 04 + 05b); audit-correctie 2026-05-14: Phase 02 telt als 8/8 DONE via SDK-sub-repo werk (v0.1.0-alpha.1 gepubliceerd) — Phase 02-blocker voor Phase 05a bleek incorrect
+Status: Ready voor `/gsd-plan-phase 5a` (Mollie pass-through API + Resources + WebhookVerifier)
 Last activity: 2026-05-14
 
 ## Performance Metrics
@@ -130,7 +131,8 @@ Decisions zijn gelogd in PROJECT.md Key Decisions table. Decisions die uit v0.1 
 - 2026-05-14 — Plan 03-05 voltooid: `hub:consumer:create`-artisan-command (4 options, SUCCESS/INVALID/FAILURE-exit-codes, plain-token via `warn()`) + `DatabaseSeeder` met production-guard + idempotente demo-Consumer (naschool) + demo-Account (school1) + `HubConsumerCreateTest` (5 tests groen). HUB-01 SC-1 bewezen via tinker-verify; end-to-end smoke (CLI-token → `/v1/ping` in-process → `{"pong":true,"consumer":"smoke-test","abilities":["snelstart:read"]}`). Volledige suite 27 passed / 1 incomplete / 0 failed. **Phase 3 volledig afgerond.**
 - 2026-05-14 — Plan 04-04 voltooid: `InitController` (POST `/v1/oauth/mollie/init`, Sanctum + `ability:mollie:write`, JSON-respons met `connection_id` + `redirect_url`, pre-created pending Connection met 48-char `oauth_state` + 30min TTL) + `CallbackController` (GET `/v1/oauth/mollie/callback`, publiek, state-verify, ruilt code in via `OAuthFlowRegistry`) + 7 feature-testpaden (3 InitTest happy/no-ability/cross-Consumer + 4 CallbackTest happy/tampered/expired/replay). Auto-deviation: Sanctum-middleware-aliassen `ability`/`abilities` toegevoegd aan `bootstrap/app.php` — canonical Sanctum-v4 setup die ontbrak. ROADMAP SC-1 + SC-2 + SC-5 bewezen. Volledige suite 127 passed / 1 incomplete / 0 failed.
 - 2026-05-14 — Quick task 260514-qxk: Phase 5b CRITICAL-fixes (CR-01 415-guard non-JSON POST/PATCH + CR-02 `query_keys`-kolom replacement voor query-string PII-lekkage + CR-03 NULL fingerprint voor lege body). 4 commits in 2 RED/GREEN-cycli; migration `2026_05_15_000002_add_query_keys_to_pass_through_calls_table.php` + controller-hardening + 3 nieuwe tests + 1 update. 28/28 Snelstart-suite groen; 120/120 full suite. Phase 5b nu merge-ready voor zover CRITICAL-findings betreft (7 WR + 4 INFO blijven open).
-- 2026-05-14 — Plan 04-05 voltooid + **Phase 04 volledig afgerond**: `PruneOAuthPendingConnections` artisan-command (`oauth:prune-pending` met `--dry-run`, D-09 handmatige cleanup, géén cron per D-04) + 2 tests (prunes-expired + dry-run-no-delete). BLOCKING phase-acceptance 8/8 groen: migrate, schema-check, route:list, container-bindings (`HubMollieCredentialResolver` + `MollieConnectOAuthFlow`), command-registratie, full suite 129/129, pint clean. ROADMAP-vs-CONTEXT delta SC-1: ROADMAP zegt `GET /v1/oauth/mollie/authorize?account=…`; implementatie volgt CONTEXT D-01/D-08 `POST /v1/oauth/mollie/init` met JSON-return — ROADMAP-update needed bij phase-close commit. Alle 5 SC's (SC-1..SC-5) gedekt door 26 dedicated tests.
+- 2026-05-14 — Plan 04-05 voltooid + **Phase 04 volledig afgerond**: `PruneOAuthPendingConnections` artisan-command (`oauth:prune-pending` met `--dry-run`, D-09 handmatige cleanup, géén cron per D-04) + 2 tests (prunes-expired + dry-run-no-delete). BLOCKING phase-acceptance 8/8 groen: migrate, schema-check, route:list, container-bindings (`HubMollieCredentialResolver` + `MollieConnectOAuthFlow`), command-registratie, full suite 129/129, pint clean. ROADMAP-vs-CONTEXT delta SC-1: ROADMAP zegt `GET /v1/oauth/mollie/authorize?account=…`; implementatie volgt CONTEXT D-01/D-08 `POST /v1/oauth/mollie/init` met JSON-return — opgelost in commit `5208492` (ROADMAP SC-1 herschreven naar D-01/D-08-wording + Phase 4 hoofdcheckbox `[x]`). Alle 5 SC's (SC-1..SC-5) gedekt door 26 dedicated tests.
+- 2026-05-14 — **Phase 02 audit-correctie**: ROADMAP-status was `[ ]` maar de 8 Phase-2 plans in `.planning/phases/02-emeq-mollie-api-foundation/` waren al volledig geshipped in de SDK-sub-repo (`emeq/mollie-api v0.1.0-alpha.1`). `git log --grep="02-"` toont alleen het plan-creatie-commit; geen execution-commits omdat `packages/` gitignored is in Hub. Gap was administratief, niet technisch. Bonus boven plan-scope: exception-mapper + idempotency-generator + webhook-signature-helper. Daarmee is Phase 5a NIET geblokkeerd op Phase 2 — MOLL-03 (Resources) valt in Phase 5a's eigen scope, niet Phase 2.
 
 ## Deferred Items
 
