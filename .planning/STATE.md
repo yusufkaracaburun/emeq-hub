@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v0.2
 milestone_name: — Mollie + Connect + Subscriptions + Hub-skeleton
-status: Ready for Phase 4 (Mollie Connect OAuth-broker) of Phase 5b (Snelstart pass-through) — beide parallelliseerbaar
+status: executing
 stopped_at: Phase 4 context gathered (16 decisions, 5 areas)
-last_updated: "2026-05-14T15:43:34.670Z"
-last_activity: 2026-05-14
+last_updated: "2026-05-14T15:55:50.264Z"
+last_activity: 2026-05-14 -- Phase 05b planning complete
 progress:
   total_phases: 9
   completed_phases: 1
-  total_plans: 15
+  total_plans: 18
   completed_plans: 5
-  percent: 33
+  percent: 28
 ---
 
 # Project State
@@ -27,8 +27,8 @@ See: .planning/PROJECT.md (updated 2026-05-14 na v0.1 milestone-close)
 
 Phase: 09
 Plan: Not started
-Status: Ready for Phase 4 (Mollie Connect OAuth-broker) of Phase 5b (Snelstart pass-through) — beide parallelliseerbaar
-Last activity: 2026-05-14
+Status: Ready to execute
+Last activity: 2026-05-14 -- Phase 05b planning complete
 
 ## Performance Metrics
 
