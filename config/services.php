@@ -35,4 +35,23 @@ return [
         ],
     ],
 
+    'mollie' => [
+        'connect' => [
+            'client_id' => env('MOLLIE_CONNECT_CLIENT_ID'),
+            'client_secret' => env('MOLLIE_CONNECT_CLIENT_SECRET'),
+            'redirect_uri' => env('MOLLIE_CONNECT_REDIRECT_URI'),
+            'scopes' => [
+                'payments.read',
+                'payments.write',
+                'customers.read',
+                'customers.write',
+                'subscriptions.read',
+                'subscriptions.write',
+                'mandates.read',
+                'organizations.read',
+                'onboarding.read',
+            ],
+        ],
+    ],
+
 ];

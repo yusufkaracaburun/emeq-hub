@@ -3,10 +3,13 @@
 namespace App\Providers;
 
 use App\Models\User;
+use App\OAuth\Mollie\MollieConnectOAuthFlow;
+use App\OAuth\OAuthFlowRegistry;
 use Dedoc\Scramble\Scramble;
 use Dedoc\Scramble\Support\Generator\OpenApi;
 use Dedoc\Scramble\Support\Generator\SecurityScheme;
 use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
@@ -16,7 +19,12 @@ class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        //
+        $this->app->singleton(OAuthFlowRegistry::class, function (Application $app): OAuthFlowRegistry {
+            $registry = new OAuthFlowRegistry($app);
+            $registry->register('mollie', MollieConnectOAuthFlow::class);
+
+            return $registry;
+        });
     }
 
     public function boot(): void
