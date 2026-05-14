@@ -1,0 +1,40 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('pass_through_calls', function (Blueprint $table): void {
+            $table->id();
+            $table->foreignId('consumer_id')->constrained('consumers')->cascadeOnDelete();
+            $table->foreignId('account_id')->constrained('accounts')->cascadeOnDelete();
+            $table->foreignId('connection_id')->nullable()->constrained('connections')->nullOnDelete();
+            $table->string('provider');
+            $table->string('method', 10);
+            $table->text('path');
+            $table->smallInteger('status');
+            $table->integer('duration_ms');
+            $table->string('request_fingerprint', 12)->nullable();
+            $table->integer('response_size_bytes')->nullable();
+            $table->string('upstream_error')->nullable();
+            $table->timestamp('created_at')->useCurrent();
+            $table->index(['consumer_id', 'created_at']);
+            $table->index(['account_id', 'created_at']);
+        });
+
+        DB::statement(
+            'CREATE INDEX pass_through_calls_status_failures '
+            .'ON pass_through_calls (status) WHERE status >= 500'
+        );
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('pass_through_calls');
+    }
+};
