@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Consumer;
 use App\Models\User;
 
 return [
@@ -42,6 +43,11 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+
+        'sanctum' => [
+            'driver' => 'sanctum',
+            'provider' => 'consumers',
+        ],
     ],
 
     /*
@@ -65,6 +71,11 @@ return [
         'users' => [
             'driver' => 'eloquent',
             'model' => env('AUTH_MODEL', User::class),
+        ],
+
+        'consumers' => [
+            'driver' => 'eloquent',
+            'model' => Consumer::class,
         ],
 
         // 'users' => [
