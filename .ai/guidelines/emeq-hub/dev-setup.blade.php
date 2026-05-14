@@ -12,17 +12,20 @@ php artisan key:generate
 # 2. Stack omhoog (postgres + redis + caddy)
 docker compose up -d
 
-# 3. SDK clonen in packages/ (voor live-edit; anders volstaat composer install vanaf VCS)
-mkdir -p packages
-git clone git@github.com:yusufkaracaburun/emeq-snelstart-api.git packages/snelstart-api
-
-# 4. Composer + migraties
+# 3. Composer + migraties (SDK wordt automatisch vanaf GitHub gepakt)
 composer install
 php artisan migrate
+
+# 4. (Optioneel) SDK clonen in packages/ voor referentie/grep — geen live-edit-link
+mkdir -p packages
+git clone git@github.com:yusufkaracaburun/emeq-snelstart-api.git packages/snelstart-api
 
 # 5. Laravel + Horizon op host
 php artisan serve --port=8001
 php artisan horizon  # in 2e terminal
+
+# 6. SDK-changes: edit in de SDK-repo zelf, commit + push, daarna in de Hub:
+#    composer update emeq/snelstart-api
 ```
 @endverbatim
 

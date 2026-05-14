@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "4b887cd3f6a629e2087ec5b34452df6b",
+    "content-hash": "4e743b153c2f70862d69f665d9b5f264",
     "packages": [
         {
             "name": "brick/math",
@@ -711,10 +711,16 @@
         {
             "name": "emeq/snelstart-api",
             "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/yusufkaracaburun/emeq-snelstart-api.git",
+                "reference": "caa15d477c7cc22ef557d51d2dad029e3f7e0b15"
+            },
             "dist": {
-                "type": "path",
-                "url": "packages/snelstart-api",
-                "reference": "f3634da3c44e7cf3b87584b19911e652e20bb3fb"
+                "type": "zip",
+                "url": "https://api.github.com/repos/yusufkaracaburun/emeq-snelstart-api/zipball/caa15d477c7cc22ef557d51d2dad029e3f7e0b15",
+                "reference": "caa15d477c7cc22ef557d51d2dad029e3f7e0b15",
+                "shasum": ""
             },
             "require": {
                 "ext-json": "*",
@@ -739,6 +745,7 @@
                 "phpstan/phpstan-phpunit": "^2.0",
                 "symfony/yaml": "^6.0||^7.0"
             },
+            "default-branch": true,
             "type": "library",
             "extra": {
                 "laravel": {
@@ -801,10 +808,11 @@
                 "snelstart",
                 "snelstart-api"
             ],
-            "transport-options": {
-                "symlink": true,
-                "relative": true
-            }
+            "support": {
+                "source": "https://github.com/yusufkaracaburun/emeq-snelstart-api/tree/master",
+                "issues": "https://github.com/yusufkaracaburun/emeq-snelstart-api/issues"
+            },
+            "time": "2026-05-14T10:13:31+00:00"
         },
         {
             "name": "fruitcake/php-cors",

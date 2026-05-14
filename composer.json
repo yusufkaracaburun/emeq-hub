@@ -100,15 +100,6 @@
     "prefer-stable": true,
     "repositories": [
         {
-            "name": "snelstart-path",
-            "type": "path",
-            "url": "packages/snelstart-api",
-            "options": {
-                "symlink": true
-            }
-        },
-        {
-            "name": "snelstart-vcs",
             "type": "vcs",
             "url": "https://github.com/yusufkaracaburun/emeq-snelstart-api.git"
         }
