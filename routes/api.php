@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\V1\ConnectionController;
 use App\Http\Controllers\Api\V1\Mollie\CustomersController;
 use App\Http\Controllers\Api\V1\Mollie\PaymentMethodsController;
 use App\Http\Controllers\Api\V1\Mollie\PaymentsController;
+use App\Http\Controllers\Api\V1\Mollie\RefundsController;
 use App\Http\Controllers\Api\V1\OAuth\CallbackController;
 use App\Http\Controllers\Api\V1\OAuth\InitController;
 use App\Http\Controllers\Api\V1\PingController;
@@ -48,6 +49,10 @@ Route::middleware('auth:sanctum')->group(function (): void {
         Route::post('/customers', [CustomersController::class, 'store'])->name('api.mollie.customers.store');
 
         Route::get('/payment-methods', PaymentMethodsController::class)->name('api.mollie.payment-methods.list');
+
+        Route::post('/payments/{id}/refunds', [RefundsController::class, 'store'])->name('api.mollie.payments.refunds.store');
+        Route::get('/payments/{id}/refunds', [RefundsController::class, 'index'])->name('api.mollie.payments.refunds.index');
+        Route::get('/refunds/{id}', [RefundsController::class, 'show'])->name('api.mollie.refunds.show');
     });
 });
 
