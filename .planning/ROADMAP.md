@@ -160,7 +160,7 @@ v0.2 bouwt drie samenhangende lagen: (1) `emeq/mollie-api` SDK die `mollie/molli
 - [x] 05b-01-PLAN.md — pass_through_calls migratie + PassThroughCall-model + factory + ADR (deviatie van `webhook_calls`)
 - [x] 05b-02-PLAN.md — HubSnelstartCredentialResolver service + contract-conformance + decryption tests
 - [x] 05b-03-PLAN.md — UpstreamErrorMapper + HeaderForwarder support-classes + upstream-error-mapping ADR
-- [ ] 05b-04-PLAN.md — Provisioning-endpoints (POST /v1/accounts, POST /v1/connections, GET/DELETE /v1/connections/{id}) + Form-Requests + Resources + feature-tests
+- [x] 05b-04-PLAN.md — Provisioning-endpoints (POST /v1/accounts, POST /v1/connections, GET/DELETE /v1/connections/{id}) + Form-Requests + Resources + feature-tests
 - [ ] 05b-05-PLAN.md — ResolveSnelstartAccount middleware + PassThroughController + catch-all route + audit-write + 6 feature-tests + Scramble discovery test + SanctumAbility-completion
 
 #### Phase 6: Cashier-Mollie integratie (use-case A)
