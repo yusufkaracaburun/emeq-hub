@@ -4,8 +4,8 @@ milestone: v0.2
 milestone_name: — Mollie + Connect + Subscriptions + Hub-skeleton
 status: executing
 stopped_at: Phase 5a unblocked — `.docs/partners/mollie/` ingericht (11 refs + indexed README via quick `260514-tny`). Klaar voor `/gsd-plan-phase 5a`.
-last_updated: "2026-05-14T21:49:41.865Z"
-last_activity: 2026-05-14 -- Phase 5a planning complete
+last_updated: "2026-05-14T22:01:26.564Z"
+last_activity: 2026-05-14 -- Phase 05a execution started
 progress:
   total_phases: 9
   completed_phases: 3
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-05-14 na v0.1 milestone-close)
 
 **Core value:** Twee fundamenteel verschillende providers (OData/clientkey + REST/OAuth2) productie-gevalideerd via één SDK-pattern, en beide live in één concrete consumer-feature. v0.1 heeft Snelstart-deel bewezen; v0.2 zet Mollie + Connect + Subscriptions + Hub-skeleton op.
-**Current focus:** Phase 04 — mollie-connect-oauth-broker
+**Current focus:** Phase 05a — mollie-sdk-resources-webhooks-pass-through-api
 
 ## Current Position
 
-Phase: 04 (mollie-connect-oauth-broker) — **COMPLETED**
-Plan: alle plans afgerond voor de tot nu toe geplande phases (02 + 03 + 04 + 05b); audit-correctie 2026-05-14: Phase 02 telt als 8/8 DONE via SDK-sub-repo werk (v0.1.0-alpha.1 gepubliceerd) — Phase 02-blocker voor Phase 05a bleek incorrect
-Status: Ready to execute
-Last activity: 2026-05-14 -- Phase 5a planning complete
+Phase: 05a (mollie-sdk-resources-webhooks-pass-through-api) — EXECUTING
+Plan: 1 of 5
+Status: Executing Phase 05a
+Last activity: 2026-05-14 -- Phase 05a execution started
 
 ## Performance Metrics
 
