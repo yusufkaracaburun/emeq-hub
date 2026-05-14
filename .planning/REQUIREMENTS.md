@@ -1,0 +1,98 @@
+# Requirements: Emeq integration stack (v0.2)
+
+**Defined:** 2026-05-14
+**Milestone:** v0.2 — Mollie + Connect + Subscriptions + Hub-skeleton
+**Core Value:** Naschool's vrijwillige-bijdrage flow loopt namens School A op School A's eigen Mollie-account via Hub-Connect, met `emeq/mollie-api` SDK + Hub-skeleton + Subscriptions-laag als generieke fundatie voor toekomstige Consumers en providers.
+
+## v1 Requirements
+
+Requirements voor v0.2 (~8-10 weken). Elke vereiste mapt naar één roadmap-fase (Phase 2-9, continued numbering vanaf v0.1).
+
+### Mollie SDK
+
+- [ ] **MOLL-01**: `emeq/mollie-api` skeleton + ServiceProvider + `MollieCredentialResolver`-contract + dual-credential Data-classes (`MollieApiKeyCredentials` met `test_|live_`-prefix-validatie + `MollieOAuthCredentials` met `access_`-prefix-validatie). Wraping van `mollie/mollie-api-php` ^3.11 (BSD-2-Clause). Facade-alias = `EmeqMollie`. ≥10 Pest-tests groen op auth + multi-tenant resolver + error-mapping.
+
+- [ ] **MOLL-02**: Mollie Connect OAuth-broker — `client_id`/`client_secret` config (Emeq als Mollie Partner) + redirect-handler endpoint + authorization-code → token-exchange + refresh-token-flow met automatische renewal vóór expiry. Access-tokens + refresh-tokens encrypted-at-rest opgeslagen via Eloquent `encrypted` cast. Geen raw tokens in logs/exceptions — alleen fingerprints.
+
+- [ ] **MOLL-03**: `emeq/mollie-api` Resources + DTOs voor Payments (create/read/cancel), Customers (read/create), PaymentMethods (list), Refunds (create/read), Mandates (list/get/revoke), Subscriptions (create/read/cancel). Idempotency-Key auto-injectie op writes via Mollie's `IdempotencyKeyGeneratorContract`.
+
+- [ ] **MOLL-04**: `MollieWebhookVerifier` voor Connect-webhooks — HMAC-SHA256 signature-verificatie (`Mollie-Signature` header) namens platform-secret. Happy + tampered signature paths gedekt door tests. Queueable optie voor langlopende webhook-handlers via `spatie/laravel-webhook-client`.
+
+### Hub-skeleton
+
+- [ ] **HUB-01**: `consumers`/`accounts`/`connections` tabellen + Sanctum-PAT auth voor Consumer-routes. `consumers` houdt SaaS-app-registraties (Naschool, Planny, derde-partijen). `accounts` houdt klanten van die SaaS-apps (school A, vereniging C) by `consumer_id + external_id`. `connections` houdt per-provider credentials per Account, encrypted-at-rest, met `expires_at` + `scopes` + `refresh_token`.
+
+- [ ] **HUB-02**: `OAuthFlow`-contract provider-agnostisch (`getAuthorizationUrl()`, `exchangeCode()`, `refreshToken()`, `revoke()`). Eerste implementatie `MollieConnectOAuthFlow`. Pattern toekomst-bestendig voor Snelstart-OAuth, Exact-OAuth, Ibanity-OAuth in latere milestones.
+
+- [ ] **HUB-03**: Pass-through REST API `/v1/mollie/*` — Bearer Consumer-PAT-resolutie → `Account` → `Connection.access_token` → `emeq/mollie-api` SDK-call. Audit-logging van inkomende + uitgaande requests in `webhook_calls`-tabel (al gepland in PROJECT.md architectuur). `dedoc/scramble` genereert OpenAPI spec op `/docs/api`.
+
+### Subscriptions
+
+- [ ] **SUB-01**: Cashier-Mollie integratie voor use-case A (Emeq rekent aan Consumers via Emeq's eigen Mollie-account). PHP 8.4 / Laravel 13 compatibiliteit gevalideerd of fork-and-update uitgevoerd. `Billable` trait op `Consumer`-model; subscription-plans (Naschool-license, Planny-license, etc.) gedefinieerd via Cashier's `Plan` model. Recurring billing via Mandates-flow.
+
+- [ ] **SUB-02**: Account-level subscriptions via Connect voor use-case B (Accounts rekenen aan eindgebruikers via hun eigen Mollie via Connect). Eigen `AccountSubscription`-model + service-laag boven Mollie's Subscriptions + Mandates API. Multi-tenant: subscription-state per `Account`-Connection, niet single-tenant zoals Cashier. Tests dekken create/cancel/webhook-update happy paths + edge cases (revoked mandate, failed retry).
+
+### Naschool wiring
+
+- [ ] **NSCH-01**: Naschool `backend/composer.json` heeft path/VCS-repository-entry voor `emeq/snelstart-api` + `emeq/mollie-api` (publiek, geen private-token). `StancltenancyCredentialResolver` voor Snelstart geïmplementeerd in `backend/app/Services/Snelstart/` + gebonden in `AppServiceProvider`. Mollie-deel werkt via Hub (zie NSCH-03) — geen directe Stancl-resolver voor Mollie.
+
+- [ ] **NSCH-02**: `SyncEnrollmentToSnelstartJob` als event-handler op `EnrollmentConfirmed`. Maakt verkoopfactuur aan in Snelstart's test-omgeving. Smoke-test groen op `php artisan migrate:fresh --seed` (school1 demo-seed) — factuur zichtbaar in Snelstart-UI of via API-GET.
+
+- [ ] **NSCH-03**: Mollie checkout-flow op één activiteit met vrijwillige bijdrage **via Hub-Connect**. Naschool POSTs naar Hub `/v1/mollie/payments` met Consumer-PAT + Account-id (school A) → Hub haalt Connection.access_token van school A → Mollie checkout aangemaakt op school A's eigen Mollie-account → checkout-URL terug naar Naschool → ouder doorloopt Mollie test-mode → webhook signature-verified door Hub → Hub doet pass-through fan-out naar Naschool's callback-URL → Naschool update enrollment-status. End-to-end smoke handmatig doorlopen.
+
+## Future Requirements
+
+Deferred to v0.3+. Tracked, niet in v0.2 roadmap.
+
+### Snelstart Saloon v4
+- **SNEL-V4**: Upgrade Saloon v3 → v4 (3 ignored security advisories oplossen, o.a. SSRF via endpoint-override)
+
+### Andere providers (volgende milestones)
+- **PROV-MONEYBIRD**: `emeq/moneybird-api` SDK
+- **PROV-EXACT**: `emeq/exact-api` SDK + OAuth-flow
+- **PROV-IBANITY**: `emeq/ibanity-api` SDK (PSD2 met eIDAS/QSEAL certificaten)
+- **PROV-STRIPE**: `emeq/stripe-api` SDK (positie-3-uitbreiding)
+
+### Hub commerciële features
+- **HUB-BILLING**: Cashier-Mollie publieke billing-flow voor derde-partij Consumers (self-service Mollie-subscription voor Hub-toegang)
+- **HUB-DOCS**: Public docs-site (Scramble + landing-page) op `docs.hub.emeq.nl`
+- **HUB-ONBOARDING**: Self-service Consumer-onboarding-flow (registratie → PAT-uitgifte → eerste Connection)
+
+## Out of Scope
+
+Expliciet uitgesloten voor v0.2. Niet re-adden zonder PROJECT.md herziening.
+
+| Feature | Reason |
+|---------|--------|
+| OAuth Connect voor andere providers (Snelstart oAuth, Exact, Ibanity) | OAuthFlow-contract wordt provider-agnostisch ontworpen, maar concrete implementaties wachten op v0.3+ |
+| Cashier-Mollie als zelfstandig package upstream-fixen voor PHP 8.4 | Als compat-check faalt: fork-and-update in v0.2 of zelf subscription-laag bouwen — geen upstream-PR-pad in deze milestone |
+| Snelstart-resource-classes + DTO-codegen | `RawSnelstartRequest` + OData QueryBuilder dekken alle 96 endpoints; geen typed-response consumers in v0.2 |
+| Mollie's volledige API-oppervlak | Alleen Payments/Customers/PaymentMethods/Refunds/Mandates/Subscriptions; geen Settlements, Chargebacks, Invoices, Onboarding, Profiles-management, etc. — wachten tot host-apps het concreet nodig hebben |
+| Naschool's volledige financiële module | Alleen vrijwillige-bijdrage checkout-flow + Snelstart-verkoopfactuur-flow als POC; geen full ledger, geen multi-currency, geen tax-rule-engine |
+
+## Traceability
+
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| MOLL-01 | TBD (roadmap) | Pending |
+| MOLL-02 | TBD (roadmap) | Pending |
+| MOLL-03 | TBD (roadmap) | Pending |
+| MOLL-04 | TBD (roadmap) | Pending |
+| HUB-01 | TBD (roadmap) | Pending |
+| HUB-02 | TBD (roadmap) | Pending |
+| HUB-03 | TBD (roadmap) | Pending |
+| SUB-01 | TBD (roadmap) | Pending |
+| SUB-02 | TBD (roadmap) | Pending |
+| NSCH-01 | TBD (roadmap) | Pending |
+| NSCH-02 | TBD (roadmap) | Pending |
+| NSCH-03 | TBD (roadmap) | Pending |
+
+**Coverage:**
+- v1 requirements: 12 total
+- Mapped to phases: 0 (roadmap not yet created)
+- Unmapped: 12 (pending roadmap)
+
+---
+
+*Requirements defined: 2026-05-14*
+*Roadmap zal traceability table updaten zodra ROADMAP.md is gecreëerd.*
