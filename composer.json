@@ -61,7 +61,11 @@
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
             "@php artisan package:discover --ansi"
         ],
+        "post-install-cmd": [
+            "git submodule update --init --recursive --remote --merge"
+        ],
         "post-update-cmd": [
+            "git submodule update --init --recursive --remote --merge",
             "@php artisan vendor:publish --tag=laravel-assets --ansi --force",
             "@php artisan boost:update --ansi"
         ],
