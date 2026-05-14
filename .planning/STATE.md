@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v0.2
 milestone_name: — Mollie + Connect + Subscriptions + Hub-skeleton
 status: Ready for Phase 4 (Mollie Connect OAuth-broker) of Phase 5b (Snelstart pass-through) — beide parallelliseerbaar
-stopped_at: "Phase 03 volledig afgerond — plan 03-05 voltooid (hub:consumer:create + DatabaseSeeder + acceptance-run); alle 5 HUB-01 SC bewezen; 27/27 tests groen + 1 geplande incomplete"
-last_updated: "2026-05-14T15:03:26.620Z"
+stopped_at: Phase 5b context gathered
+last_updated: "2026-05-14T15:33:26.124Z"
 last_activity: 2026-05-14
 progress:
   total_phases: 9
@@ -130,7 +130,7 @@ Items acknowledged en deferred bij milestone-close 2026-05-14:
 
 ## Session Continuity
 
-Last session: 2026-05-14 — Phase 03 plan 03-05 voltooid; Phase 3 afgerond
-Stopped at: Phase 03 volledig afgerond — plan 03-05 voltooid (hub:consumer:create + DatabaseSeeder + acceptance-run); alle 5 HUB-01 SC bewezen; 27/27 tests groen + 1 geplande incomplete
-Resume file: None — Phase 3 closed
+Last session: 2026-05-14T15:33:26.121Z
+Stopped at: Phase 5b context gathered
+Resume file: .planning/phases/05b-snelstart-pass-through-api/05b-CONTEXT.md
 Next action: `/gsd-plan-phase 5b` voor Snelstart-pass-through API (depends on Phase 3 only) of `/gsd-plan-phase 4` voor Mollie Connect OAuth-broker
