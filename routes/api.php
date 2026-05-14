@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\V1\AccountController;
 use App\Http\Controllers\Api\V1\ConnectionController;
+use App\Http\Controllers\Api\V1\Mollie\PaymentsController;
 use App\Http\Controllers\Api\V1\OAuth\CallbackController;
 use App\Http\Controllers\Api\V1\OAuth\InitController;
 use App\Http\Controllers\Api\V1\PingController;
@@ -34,6 +35,12 @@ Route::middleware('auth:sanctum')->group(function (): void {
         ->where('path', '.*')
         ->middleware('resolve.snelstart.account')
         ->name('api.snelstart.passthrough');
+
+    Route::prefix('mollie')->middleware('resolve.mollie.account')->group(function (): void {
+        Route::post('/payments', [PaymentsController::class, 'store'])->name('api.mollie.payments.store');
+        Route::get('/payments/{id}', [PaymentsController::class, 'show'])->name('api.mollie.payments.show');
+        Route::delete('/payments/{id}', [PaymentsController::class, 'destroy'])->name('api.mollie.payments.destroy');
+    });
 });
 
 // Publiek — state-parameter is de auth (D-07).
