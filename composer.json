@@ -102,6 +102,14 @@
         {
             "type": "vcs",
             "url": "https://github.com/yusufkaracaburun/emeq-snelstart-api.git"
+        },
+        {
+            "name": "mollie-path",
+            "type": "path",
+            "url": "packages/mollie-api",
+            "options": {
+                "symlink": true
+            }
         }
     ]
 }
