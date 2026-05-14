@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'provider',
     'method',
     'path',
+    'query_keys',
     'status',
     'duration_ms',
     'request_fingerprint',
