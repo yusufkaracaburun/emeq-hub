@@ -15,7 +15,7 @@ Twee Saloon-gebaseerde Laravel SDK-packages (`emeq/snelstart-api`, `emeq/mollie-
 - Integer phases (1-5): geplande v0.1-mijlpaal-werk
 - Decimal phases (X.Y): gereserveerd voor urgent ingevoegde fixes (nog geen)
 
-- [ ] **Phase 1: Snelstart-SDK finalize** — Pest-crash debuggen, tests groen, push naar GitHub met upstream-tracking
+- [x] **Phase 1: Snelstart-SDK finalize** — Pest-crash debuggen, tests groen, push naar GitHub met upstream-tracking ✓ 2026-05-14
 - [ ] **Phase 2: Mollie-SDK foundation** — Nieuwe repo aanmaken, skeleton + ServiceProvider + auth + connector
 - [ ] **Phase 3: Mollie-SDK resources + webhooks** — Payments/Customers/PaymentMethods/Refunds resources + webhook-verifier
 - [ ] **Phase 4: Naschool wiring — Snelstart** — Composer-wiring + Stancl-tenancy resolvers + verkoopfactuur-flow live op school1
@@ -40,9 +40,9 @@ Twee Saloon-gebaseerde Laravel SDK-packages (`emeq/snelstart-api`, `emeq/mollie-
   4. De SDK is `composer require`-baar via VCS-repository-entry door een derde Laravel-project (smoke: `composer require emeq/snelstart-api:dev-main` slaagt zonder VCS-auth)
 
 **Plans:** 3 plans
-- [ ] 01-01-PLAN.md — Diagnose Pest-crash op feature-branch (root-cause vastleggen, geen code-fix)
-- [ ] 01-02-PLAN.md — Fix Pest-crash + uitbreiden SnelstartConnectorTest met directe getRequestException-coverage (≥30 groene tests)
-- [ ] 01-03-PLAN.md — Merge + push naar GitHub met upstream-tracking (checkpoint) + VCS-smoke-test vanuit derde directory
+- [x] 01-01-PLAN.md — Diagnose Pest-crash op feature-branch (NO CRASH REPRO; 86 passed op `main @ 76e0797`)
+- [x] 01-02-PLAN.md — SnelstartConnectorTest uitgebreid van 1 → 12 cases (107 passed / 187 assertions, drempel ≥30 × 3.6)
+- [x] 01-03-PLAN.md — Merge + push naar `origin/main` (`16c9ecc`) met upstream-tracking + VCS-smoke groen vanuit `/tmp/snelstart-vcs-smoke/`
 
 ### Phase 2: Mollie-SDK foundation
 **Goal**: De `emeq/mollie-api` SDK heeft een leefbaar skeleton met API-key-auth en een werkende Saloon-connector, gespiegeld op het Snelstart-pattern.
@@ -129,7 +129,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Snelstart-SDK finalize | 0/3 | Not started | - |
+| 1. Snelstart-SDK finalize | 3/3 | Completed | 2026-05-14 |
 | 2. Mollie-SDK foundation | 0/TBD | Not started | - |
 | 3. Mollie-SDK resources + webhooks | 0/TBD | Not started | - |
 | 4. Naschool wiring — Snelstart | 0/TBD | Not started | - |
