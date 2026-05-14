@@ -6,7 +6,7 @@ status: planning
 last_updated: "2026-05-14T11:30:00.000Z"
 last_activity: 2026-05-14
 progress:
-  total_phases: 7
+  total_phases: 8
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-05-14 na v0.1 milestone-close)
 Phase: Not started — next phase = 2 (emeq/mollie-api foundation)
 Plan: —
 Status: Roadmap gedefinieerd, klaar voor `/gsd-plan-phase 2`
-Last activity: 2026-05-14 — Completed quick task 260514-iai: app-wide noindex/nofollow voor bots
+Last activity: 2026-05-14 — Phase 9 (Filament admin-UI) toegevoegd aan v0.2 ROADMAP
 
 ## Performance Metrics
 
@@ -81,6 +81,10 @@ Geen actieve todos. v0.2-roadmap gedefinieerd; klaar voor `/gsd-plan-phase 2`.
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
 | 260514-iai | App-wide noindex/nofollow voor bots | 2026-05-14 | 0354074 | [260514-iai-app-wide-noindex-nofollow-voor-bots](./quick/260514-iai-app-wide-noindex-nofollow-voor-bots/) |
+
+### Roadmap Evolution
+
+- 2026-05-14 — Phase 9 (Filament admin-UI voor Emeq-medewerkers) toegevoegd aan v0.2 milestone; HUB-04 toegevoegd aan REQUIREMENTS.md. Plan-bron: `.claude/plans/ow-dit-wil-ik-immutable-snowglobe.md`. Depends on Phase 3 + Phase 4; parallel met Phase 6/7.
 
 ## Deferred Items
 

@@ -1,8 +1,8 @@
 # Roadmap: Emeq integration stack
 
 **Project code:** EMEQ
-**Granularity:** ~7 phases voor v0.2 (standard band, requirements-driven)
-**Execution:** sequentieel — Phase 6 en Phase 7 zijn parallelliseerbaar (beide afhankelijk van Phase 5)
+**Granularity:** ~8 phases voor v0.2 (standard band, requirements-driven)
+**Execution:** sequentieel — Phase 6 en Phase 7 zijn parallelliseerbaar (beide afhankelijk van Phase 5); Phase 9 is parallelliseerbaar met Phase 6/7 (afhankelijk van Phase 3 + Phase 4)
 
 ## Shipped Milestones
 
@@ -27,6 +27,7 @@ v0.2 bouwt drie samenhangende lagen: (1) `emeq/mollie-api` SDK die `mollie/molli
 - [ ] **Phase 6: Cashier-Mollie integratie (use-case A)** — Emeq → Consumers billing op Emeq's eigen Mollie
 - [ ] **Phase 7: Account-level subscriptions (use-case B)** — Accounts → eindgebruikers via Connect + Mandates + Subscriptions
 - [ ] **Phase 8: Naschool wiring** — composer-wiring + Snelstart Stancl-resolver + `SyncEnrollmentToSnelstartJob` + Mollie checkout-flow via Hub-Connect
+- [ ] **Phase 9: Filament admin-UI voor Emeq-medewerkers** — `/admin`-panel met Consumer-CRUD, Connection read+revoke, Account read-only, WebhookCall viewer
 
 ### Phase Details
 
@@ -170,6 +171,40 @@ v0.2 bouwt drie samenhangende lagen: (1) `emeq/mollie-api` SDK die `mollie/molli
 **Plans:** TBD
 **UI hint:** yes
 
+#### Phase 9: Filament admin-UI voor Emeq-medewerkers
+**Goal:** Een intern Filament v4 admin-paneel op `/admin` waarmee Emeq-medewerkers Consumers, Connections, Accounts en WebhookCalls kunnen beheren zonder tinker — met de Hub-invariant dat raw tokens nooit in de UI verschijnen.
+**Depends on:** Phase 3 (Hub-skeleton — `Consumer`/`Account`/`Connection` modellen + Sanctum-PAT), Phase 4 (`OAuthFlow`-contract voor upstream revoke). Parallelliseerbaar met Phase 6/7. Blokkeert Phase 8 niet.
+**Requirements:** HUB-04
+**Working repo:** `emeq-hub` (deze repo)
+**Context:**
+- Stack: Filament v4 als PHP-only admin-paneel (Livewire onder de motorkap); past bij API-first Hub, geen aparte SPA/Inertia-laag nodig
+- Eigen panel-auth via Filament's ingebouwde login op `/admin/login` — géén Fortify, géén Sanctum SPA-tokens
+- `User`-model krijgt `implements FilamentUser` + `canAccessPanel()` check op nieuwe `is_emeq_staff` boolean (default false, niet fillable, alleen via seeder/command)
+- 4 resources met scope:
+  - `ConsumerResource`: CRUD + table-actions `Issue PAT` (modal → Sanctum `createToken()` → plain-token éénmalig in `Notification`) en `Revoke token`
+  - `ConnectionResource`: read + revoke action via `OAuthFlow::revoke()`; toont alleen `access_token_fingerprint` (computed accessor `sha256(decrypted)[0..12]`) — raw `access_token` / `refresh_token` velden komen nooit in form/table
+  - `AccountResource`: read-only met `connections_count` via `withCount()`
+  - `WebhookCallResource`: read-only viewer met collapsible JSON-payload, status-badge, filters op `direction`/`provider`/date-range
+- Tailwind v4 al in de stack — Filament v4 brengt eigen Vite-asset-build via `php artisan filament:assets`
+- Seeder `EmeqStaffSeeder` leest `EMEQ_STAFF_SEED_EMAIL` + `EMEQ_STAFF_SEED_PASSWORD` uit env — geen hardcoded creds
+- `webhook_calls`-tabel bestaat al via `spatie/laravel-webhook-client`; `direction`-kolom (incoming/outgoing) komt in Phase 5-aanvullende migratie
+- Plan-bron: `.claude/plans/ow-dit-wil-ik-immutable-snowglobe.md` (goedgekeurd 2026-05-14)
+**Success Criteria** (what must be TRUE):
+  1. Een geseede staff-user kan inloggen op `/admin` en zien Consumers/Connections/Accounts/WebhookCalls in 4 aparte resource-lijsten
+  2. Een non-staff `User` (waar `is_emeq_staff = false`) krijgt 403 op `/admin` — `canAccessPanel()` blokkeert
+  3. `ConsumerResource` issue-PAT-action retourneert plain-text token in een notification (éénmalig zichtbaar) + maakt een rij in `personal_access_tokens`
+  4. `ConnectionResource` toont alleen fingerprints (sha256[0..12]) — een feature-test asserteert dat de plain-text `access_token` waarde nooit in de HTML-respons van `livewire(ListConnections::class)` voorkomt
+  5. `ConnectionResource` revoke-action roept `OAuthFlow::revoke($connection)` aan (uit Phase 4-contract) en zet `revoked_at` — niet alleen een DB-flag zonder upstream revoke
+**Out of scope (geparkeerd):**
+- Multi-rol RBAC (alleen `is_emeq_staff` boolean — Spatie-permission pas als meer rollen ontstaan)
+- Consumer self-service dashboard (`/portal` met eigen creds → v1.0+, React+shadcn op aparte panel-route)
+- E-mail notificaties uit Filament
+- 2FA/MFA voor admin login
+- Audit-log via `spatie/laravel-activitylog` (geparkeerd als `HUB-AUDIT` backlog-item)
+- Tailwind-thema-customizing — default Filament-look is goed genoeg voor intern gebruik
+**Plans:** TBD
+**UI hint:** yes
+
 ### Progress
 
 | Phase | Plans Complete | Status | Completed |
@@ -181,6 +216,7 @@ v0.2 bouwt drie samenhangende lagen: (1) `emeq/mollie-api` SDK die `mollie/molli
 | 6. Cashier-Mollie integratie | 0/0 (TBD) | Not started | - |
 | 7. Account-level subscriptions | 0/0 (TBD) | Not started | - |
 | 8. Naschool wiring | 0/0 (TBD) | Not started | - |
+| 9. Filament admin-UI voor Emeq-medewerkers | 0/0 (TBD) | Not started | - |
 
 ### Coverage
 
@@ -198,8 +234,9 @@ v0.2 bouwt drie samenhangende lagen: (1) `emeq/mollie-api` SDK die `mollie/molli
 | NSCH-01 | Phase 8 | Naschool-consumerwerk geclusterd in één wiring-fase |
 | NSCH-02 | Phase 8 | Snelstart-job is onafhankelijk van Mollie maar samen Naschool-eindstand |
 | NSCH-03 | Phase 8 | End-to-end smoke vereist alle Hub-fasen 2-5 live |
+| HUB-04 | Phase 9 | Admin-paneel leunt op `Consumer`/`Account`/`Connection` modellen (Phase 3) + `OAuthFlow::revoke()` (Phase 4); parallel met Phase 6/7 |
 
-**Coverage:** 12/12 v1-requirements gemapped naar exact één fase. Geen orphans.
+**Coverage:** 13/13 v1-requirements gemapped naar exact één fase. Geen orphans.
 
 ## Backlog (v0.3+)
 
@@ -210,7 +247,8 @@ Verzamelpunt voor ideeën die nog geen milestone hebben. Bij milestone-kickoff w
 - OAuth Connect-implementaties voor providers die in v0.2 alleen contract-level zijn gedekt (Snelstart-OAuth, Exact-OAuth, Ibanity-OAuth)
 - DTO-codegen vanuit OpenAPI specs voor providers die typed-response consumers nodig hebben
 - Hub commerciële features: public billing-flow voor derde-partij Consumers (`HUB-BILLING`), public docs-site `docs.hub.emeq.nl` (`HUB-DOCS`), self-service onboarding (`HUB-ONBOARDING`)
+- `HUB-AUDIT`: admin-acties audit-log via `spatie/laravel-activitylog` (Phase 9 admin-paneel out-of-scope) — pas als compliance of incident-respons het vereist
 
 ---
 
-*Roadmap defined: 2026-05-14. v0.2 active milestone. v0.1 archived in `.planning/milestones/`.*
+*Roadmap defined: 2026-05-14. v0.2 active milestone (Phase 9 added 2026-05-14). v0.1 archived in `.planning/milestones/`.*

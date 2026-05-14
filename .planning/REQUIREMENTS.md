@@ -6,7 +6,7 @@
 
 ## v1 Requirements
 
-Requirements voor v0.2 (~8-10 weken). Elke vereiste mapt naar één roadmap-fase (Phase 2-8, continued numbering vanaf v0.1).
+Requirements voor v0.2 (~8-10 weken). Elke vereiste mapt naar één roadmap-fase (Phase 2-9, continued numbering vanaf v0.1).
 
 ### Mollie SDK
 
@@ -25,6 +25,8 @@ Requirements voor v0.2 (~8-10 weken). Elke vereiste mapt naar één roadmap-fase
 - [ ] **HUB-02**: `OAuthFlow`-contract provider-agnostisch (`getAuthorizationUrl()`, `exchangeCode()`, `refreshToken()`, `revoke()`). Eerste implementatie `MollieConnectOAuthFlow`. Pattern toekomst-bestendig voor Snelstart-OAuth, Exact-OAuth, Ibanity-OAuth in latere milestones.
 
 - [ ] **HUB-03**: Pass-through REST API `/v1/mollie/*` — Bearer Consumer-PAT-resolutie → `Account` → `Connection.access_token` → `emeq/mollie-api` SDK-call. Audit-logging van inkomende + uitgaande requests in `webhook_calls`-tabel (al gepland in PROJECT.md architectuur). `dedoc/scramble` genereert OpenAPI spec op `/docs/api`.
+
+- [ ] **HUB-04**: Filament v4 admin-paneel op `/admin` voor Emeq-medewerkers — 4 resources (Consumer CRUD + PAT issue/revoke, Connection read+revoke met fingerprint-only, Account read-only, WebhookCall viewer). Eigen panel-auth via `is_emeq_staff` boolean op `User` + `canAccessPanel()`-check. Raw tokens nooit in UI (computed `Connection::fingerprint()`-accessor). Out-of-scope: multi-rol RBAC, MFA, e-mail notificaties, audit-log (HUB-AUDIT backlog), Consumer self-service dashboard (v1.0+).
 
 ### Subscriptions
 
@@ -81,6 +83,7 @@ Expliciet uitgesloten voor v0.2. Niet re-adden zonder PROJECT.md herziening.
 | HUB-01 | Phase 3 | Pending |
 | HUB-02 | Phase 4 | Pending |
 | HUB-03 | Phase 5 | Pending |
+| HUB-04 | Phase 9 | Pending |
 | SUB-01 | Phase 6 | Pending |
 | SUB-02 | Phase 7 | Pending |
 | NSCH-01 | Phase 8 | Pending |
@@ -88,10 +91,10 @@ Expliciet uitgesloten voor v0.2. Niet re-adden zonder PROJECT.md herziening.
 | NSCH-03 | Phase 8 | Pending |
 
 **Coverage:**
-- v1 requirements: 12 total
-- Mapped to phases: 12 (Phase 2-8)
+- v1 requirements: 13 total
+- Mapped to phases: 13 (Phase 2-9)
 - Unmapped: 0
 
 ---
 
-*Requirements defined: 2026-05-14. Traceability gemapped naar ROADMAP.md Phase 2-8 op dezelfde datum.*
+*Requirements defined: 2026-05-14. Traceability gemapped naar ROADMAP.md Phase 2-9 op dezelfde datum (Phase 9 added 2026-05-14).*
