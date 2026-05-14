@@ -6,7 +6,7 @@
 
 ## v1 Requirements
 
-Requirements voor v0.2 (~8-10 weken). Elke vereiste mapt naar één roadmap-fase (Phase 2-9, continued numbering vanaf v0.1).
+Requirements voor v0.2 (~8-10 weken). Elke vereiste mapt naar één roadmap-fase (Phase 2-8, continued numbering vanaf v0.1).
 
 ### Mollie SDK
 
@@ -74,25 +74,24 @@ Expliciet uitgesloten voor v0.2. Niet re-adden zonder PROJECT.md herziening.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| MOLL-01 | TBD (roadmap) | Pending |
-| MOLL-02 | TBD (roadmap) | Pending |
-| MOLL-03 | TBD (roadmap) | Pending |
-| MOLL-04 | TBD (roadmap) | Pending |
-| HUB-01 | TBD (roadmap) | Pending |
-| HUB-02 | TBD (roadmap) | Pending |
-| HUB-03 | TBD (roadmap) | Pending |
-| SUB-01 | TBD (roadmap) | Pending |
-| SUB-02 | TBD (roadmap) | Pending |
-| NSCH-01 | TBD (roadmap) | Pending |
-| NSCH-02 | TBD (roadmap) | Pending |
-| NSCH-03 | TBD (roadmap) | Pending |
+| MOLL-01 | Phase 2 | Pending |
+| MOLL-02 | Phase 4 | Pending |
+| MOLL-03 | Phase 5 | Pending |
+| MOLL-04 | Phase 5 | Pending |
+| HUB-01 | Phase 3 | Pending |
+| HUB-02 | Phase 4 | Pending |
+| HUB-03 | Phase 5 | Pending |
+| SUB-01 | Phase 6 | Pending |
+| SUB-02 | Phase 7 | Pending |
+| NSCH-01 | Phase 8 | Pending |
+| NSCH-02 | Phase 8 | Pending |
+| NSCH-03 | Phase 8 | Pending |
 
 **Coverage:**
 - v1 requirements: 12 total
-- Mapped to phases: 0 (roadmap not yet created)
-- Unmapped: 12 (pending roadmap)
+- Mapped to phases: 12 (Phase 2-8)
+- Unmapped: 0
 
 ---
 
-*Requirements defined: 2026-05-14*
-*Roadmap zal traceability table updaten zodra ROADMAP.md is gecreëerd.*
+*Requirements defined: 2026-05-14. Traceability gemapped naar ROADMAP.md Phase 2-8 op dezelfde datum.*

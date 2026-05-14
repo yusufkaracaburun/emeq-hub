@@ -6,11 +6,13 @@ status: planning
 last_updated: "2026-05-14T10:11:40.878Z"
 last_activity: 2026-05-14
 progress:
-  total_phases: 0
+  total_phases: 7
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
   percent: 0
+current_position:
+  next_phase: 2
 ---
 
 # Project State
@@ -20,14 +22,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-05-14 na v0.1 milestone-close)
 
 **Core value:** Twee fundamenteel verschillende providers (OData/clientkey + REST/OAuth2) productie-gevalideerd via één SDK-pattern, en beide live in één concrete consumer-feature. v0.1 heeft Snelstart-deel bewezen; v0.2 zet Mollie + Connect + Subscriptions + Hub-skeleton op.
-**Current focus:** Geen actieve milestone. v0.2 voorbereid, wacht op `/gsd-new-milestone v0.2`.
+**Current focus:** v0.2 milestone met ROADMAP gedefinieerd (Phase 2-8). Wacht op `/gsd-plan-phase 2` om eerste fase (emeq/mollie-api foundation) te plannen.
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: Not started — next phase = 2 (emeq/mollie-api foundation)
 Plan: —
-Status: Defining requirements
-Last activity: 2026-05-14 — Milestone v0.2 started
+Status: Roadmap gedefinieerd, klaar voor `/gsd-plan-phase 2`
+Last activity: 2026-05-14 — ROADMAP.md v0.2 gedefinieerd (12/12 requirements gemapped naar Phase 2-8)
 
 ## Performance Metrics
 
@@ -66,12 +68,13 @@ Decisions zijn gelogd in PROJECT.md Key Decisions table. Decisions die uit v0.1 
 
 ### Pending Todos
 
-Geen actieve todos. v0.2-werk staat in `.claude/plans/fancy-honking-spring.md` en wacht op formele kickoff.
+Geen actieve todos. v0.2-roadmap gedefinieerd; klaar voor `/gsd-plan-phase 2`.
 
 ### Blockers/Concerns
 
-- **Cashier-Mollie compat-risico (v0.2)**: `mollie/laravel-cashier-mollie` master-branch hangt op PHP 7.2 / Laravel 6-8. Compatibiliteit met PHP 8.4 / Laravel 13 moet worden gecheckt in v0.2 Fase 6 (use-case A integratie). Mogelijk fork-and-update of zelf subscription-laag bouwen.
-- **`yusufkaracaburun/emeq-mollie-api` repo description is stale**: zegt nog "Saloon v3" terwijl die keuze is gereverseerd. Wordt bijgewerkt bij eerste push in v0.2 Fase 1.
+- **Cashier-Mollie compat-risico (v0.2)**: `mollie/laravel-cashier-mollie` master-branch hangt op PHP 7.2 / Laravel 6-8. Compatibiliteit met PHP 8.4 / Laravel 13 moet worden gecheckt in Phase 6 (use-case A integratie). Mogelijk fork-and-update of zelf subscription-laag bouwen. Phase 6 success criterion 1 vereist expliciete ADR met conclusie.
+- **`yusufkaracaburun/emeq-mollie-api` repo description is stale**: zegt nog "Saloon v3" terwijl die keuze is gereverseerd. Wordt bijgewerkt bij eerste push in Phase 2.
+- **`.docs/partners/mollie/` bestaat nog niet**: moet aangemaakt worden bij start van Phase 2 (PROJECT.md "geen verzonnen partner-features" invariant).
 
 ## Deferred Items
 
@@ -89,7 +92,7 @@ Items acknowledged en deferred bij milestone-close 2026-05-14:
 
 ## Session Continuity
 
-Last session: 2026-05-14 — v0.1 milestone-close voltooid
-Stopped at: v0.1 SHIPPED; v0.2 voorbereid maar nog niet gestart
-Resume file: `.claude/plans/fancy-honking-spring.md` (volledige v0.2-scope + faseringsindicatie)
-Next action: `/gsd-new-milestone v0.2`
+Last session: 2026-05-14 — v0.2 ROADMAP gedefinieerd
+Stopped at: ROADMAP.md geschreven; 12/12 requirements gemapped; traceability bijgewerkt in REQUIREMENTS.md
+Resume file: `.planning/ROADMAP.md` (Phase 2-8) + `.claude/plans/fancy-honking-spring.md` (master-plan context)
+Next action: `/gsd-plan-phase 2` — plan emeq/mollie-api foundation
