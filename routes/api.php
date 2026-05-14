@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\V1\AccountController;
 use App\Http\Controllers\Api\V1\ConnectionController;
 use App\Http\Controllers\Api\V1\Mollie\CustomersController;
+use App\Http\Controllers\Api\V1\Mollie\MandatesController;
 use App\Http\Controllers\Api\V1\Mollie\PaymentMethodsController;
 use App\Http\Controllers\Api\V1\Mollie\PaymentsController;
 use App\Http\Controllers\Api\V1\Mollie\RefundsController;
@@ -53,6 +54,10 @@ Route::middleware('auth:sanctum')->group(function (): void {
         Route::post('/payments/{id}/refunds', [RefundsController::class, 'store'])->name('api.mollie.payments.refunds.store');
         Route::get('/payments/{id}/refunds', [RefundsController::class, 'index'])->name('api.mollie.payments.refunds.index');
         Route::get('/refunds/{id}', [RefundsController::class, 'show'])->name('api.mollie.refunds.show');
+
+        Route::get('/customers/{id}/mandates', [MandatesController::class, 'index'])->name('api.mollie.customers.mandates.index');
+        Route::get('/customers/{id}/mandates/{mandate_id}', [MandatesController::class, 'show'])->name('api.mollie.customers.mandates.show');
+        Route::delete('/customers/{id}/mandates/{mandate_id}', [MandatesController::class, 'destroy'])->name('api.mollie.customers.mandates.destroy');
     });
 });
 
