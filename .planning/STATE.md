@@ -4,14 +4,14 @@ milestone: v0.2
 milestone_name: — Mollie + Connect + Subscriptions + Hub-skeleton
 status: executing
 stopped_at: Phase 4 context gathered (16 decisions, 5 areas)
-last_updated: "2026-05-14T16:23:51.281Z"
-last_activity: 2026-05-14 -- Phase 4 planning complete
+last_updated: "2026-05-14T17:02:24.329Z"
+last_activity: 2026-05-14
 progress:
   total_phases: 9
   completed_phases: 1
   total_plans: 23
-  completed_plans: 5
-  percent: 22
+  completed_plans: 10
+  percent: 43
 ---
 
 # Project State
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-05-14 na v0.1 milestone-close)
 
 **Core value:** Twee fundamenteel verschillende providers (OData/clientkey + REST/OAuth2) productie-gevalideerd via één SDK-pattern, en beide live in één concrete consumer-feature. v0.1 heeft Snelstart-deel bewezen; v0.2 zet Mollie + Connect + Subscriptions + Hub-skeleton op.
-**Current focus:** Phase 05b — snelstart-pass-through-api
+**Current focus:** Phase 04 — mollie-connect-oauth-broker
 
 ## Current Position
 
-Phase: 05b (snelstart-pass-through-api) — EXECUTING
-Plan: 1 of 5
+Phase: 04 (mollie-connect-oauth-broker) — EXECUTING
+Plan: 2 of 5
 Status: Ready to execute
-Last activity: 2026-05-14 -- Phase 4 planning complete
+Last activity: 2026-05-14
 
 ## Performance Metrics
 
@@ -55,6 +55,7 @@ Last activity: 2026-05-14 -- Phase 4 planning complete
 | Phase 03 P03-05 | 7 | 4 tasks | 4 files |
 
 *Updated 2026-05-14 — plan 03-05 voltooid; Phase 03 volledig afgerond.*
+| Phase 04 P01 | 25 | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -81,6 +82,7 @@ Decisions zijn gelogd in PROJECT.md Key Decisions table. Decisions die uit v0.1 
 - 🆕 **New 2026-05-14 (03-03):** `Tests\Feature\Api` sub-namespace voor HTTP-feature-tests (eigen directory `tests/Feature/Api/`); `Tests\Feature` root blijft voor model-laag-bewijs (encryption + scoping)
 - 🆕 **New 2026-05-14 (03-05):** `DatabaseSeeder` `User::factory()`-pad krijgt eigen `exists()`-guard — plan-action stond `User::factory()->create()` als-is maar dat crasht op `users.email_unique` bij 2× `db:seed` zonder `migrate:fresh`. Minimale Rule-1-fix die plan-acceptance-grep (`User::factory == 1`) én plan-success-criterion (idempotency) tegelijk respecteert
 - 🆕 **New 2026-05-14 (03-05):** `hub:consumer:create`-command gebruikt property-stijl `protected $signature`/`$description` i.p.v. de nieuwere `#[Signature]`/`#[Description]`-attributes uit Laravel 12+ `make:command`-output — matched `routes/console.php`-conventie en blijft compatibel met acceptance-grep
+- [Phase ?]: Phase 04-01: OAuthFlow-contract in Hub-laag (app/OAuth/Contracts/, D-13); FakeOAuthFlow test-fixture in app/OAuth/Testing/ runtime-namespace (D-12) — container-bindable in feature-tests
 
 ### Pending Todos
 
@@ -130,7 +132,7 @@ Items acknowledged en deferred bij milestone-close 2026-05-14:
 
 ## Session Continuity
 
-Last session: 2026-05-14T15:43:34.666Z
+Last session: 2026-05-14T17:02:19.093Z
 Stopped at: Phase 4 context gathered (16 decisions, 5 areas)
-Resume file: .planning/phases/04-mollie-connect-oauth-broker/04-CONTEXT.md
+Resume file: None
 Next action: `/gsd-plan-phase 5b` voor Snelstart-pass-through API (depends on Phase 3 only) of `/gsd-plan-phase 4` voor Mollie Connect OAuth-broker

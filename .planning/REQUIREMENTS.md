@@ -79,11 +79,11 @@ Expliciet uitgesloten voor v0.2. Niet re-adden zonder PROJECT.md herziening.
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | MOLL-01 | Phase 2 | Pending |
-| MOLL-02 | Phase 4 | Pending |
+| MOLL-02 | Phase 4 | In Progress (04-01 done) |
 | MOLL-03 | Phase 5a | Pending |
 | MOLL-04 | Phase 5a | Pending |
 | HUB-01 | Phase 3 | Complete |
-| HUB-02 | Phase 4 | Pending |
+| HUB-02 | Phase 4 | In Progress (04-01 done) |
 | HUB-03 | Phase 5a | Pending |
 | HUB-04 | Phase 9 | Pending |
 | HUB-05 | Phase 5b | Pending |
