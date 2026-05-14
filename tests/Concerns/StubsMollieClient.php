@@ -17,8 +17,12 @@ use Mollie\Api\Resources\MandateCollection;
 use Mollie\Api\Resources\Method;
 use Mollie\Api\Resources\MethodCollection;
 use Mollie\Api\Resources\Payment;
+use Mollie\Api\Resources\PaymentLink;
+use Mollie\Api\Resources\PaymentLinkCollection;
 use Mollie\Api\Resources\Refund;
 use Mollie\Api\Resources\RefundCollection;
+use Mollie\Api\Resources\Subscription;
+use Mollie\Api\Resources\SubscriptionCollection;
 use Tests\Feature\Api\V1\Mollie\StubMollieClient;
 use Throwable;
 
@@ -57,6 +61,15 @@ trait StubsMollieClient
         'mandate_page_for_id' => [],
         'mandate_get_for_id' => [],
         'mandate_revoke_for_id' => [],
+        // Subscriptions (Plan 05a-05 Task 1) — nested onder Customer
+        'subscription_create_for_id' => [],
+        'subscription_get_for_id' => [],
+        'subscription_page_for_id' => [],
+        'subscription_cancel_for_id' => [],
+        // PaymentLinks (Plan 05a-05 Task 1) — top-level
+        'payment_link_create' => [],
+        'payment_link_get' => [],
+        'payment_link_page' => [],
     ];
 
     protected ?StubMollieClient $mollieClient = null;
@@ -88,6 +101,11 @@ trait StubsMollieClient
      *  - 'mandates'         : callable(string $op, mixed $arg): Mandate|MandateCollection|null|Throwable
      *                         ($op = pageForId | getForId | revokeForId)
      *                         (Mollie SDK exposes het op `MollieApiClient::$mandates`, niet `$customerMandates`)
+     *  - 'subscriptions'    : callable(string $op, mixed $arg): Subscription|SubscriptionCollection|Throwable
+     *                         ($op = createForId | getForId | pageForId | cancelForId)
+     *                         (Vendor: `MollieApiClient::$subscriptions` — NIET `$customerSubscriptions`)
+     *  - 'paymentLinks'     : callable(string $op, mixed $arg): PaymentLink|PaymentLinkCollection|Throwable
+     *                         ($op = create | get | page)
      *
      * @param  array<string, callable>  $resolvers
      */
@@ -117,6 +135,12 @@ trait StubsMollieClient
         }
         if (isset($resolvers['mandates'])) {
             $extras['mandates'] = $this->makeMandatesStub($resolvers['mandates'], $captured);
+        }
+        if (isset($resolvers['subscriptions'])) {
+            $extras['subscriptions'] = $this->makeSubscriptionsStub($resolvers['subscriptions'], $captured, $clientRef);
+        }
+        if (isset($resolvers['paymentLinks'])) {
+            $extras['paymentLinks'] = $this->makePaymentLinksStub($resolvers['paymentLinks'], $captured, $clientRef);
         }
 
         $this->mollieClient = new StubMollieClient($paymentsStub, $extras);
@@ -348,6 +372,183 @@ trait StubsMollieClient
                 }
             }
         };
+    }
+
+    /**
+     * @param  callable(string, mixed): (Subscription|SubscriptionCollection|Throwable)  $resolver
+     * @param  array<string, array<int, mixed>>  $captured
+     */
+    private function makeSubscriptionsStub(callable $resolver, array &$captured, ?StubMollieClient &$clientRef): object
+    {
+        return new class($resolver, $captured, $clientRef)
+        {
+            public function __construct(
+                private $resolver,
+                private array &$captured,
+                private ?StubMollieClient &$mollieClient,
+            ) {}
+
+            public function createForId(string $customerId, array $payload = [], bool $testmode = false): Subscription
+            {
+                $this->captured['subscription_create_for_id'][] = ['customer_id' => $customerId, 'payload' => $payload];
+                $this->captured['idempotency_keys'][] = $this->mollieClient?->getIdempotencyKey();
+                $result = ($this->resolver)('createForId', ['customer_id' => $customerId, 'payload' => $payload]);
+                if ($result instanceof Throwable) {
+                    throw $result;
+                }
+
+                return $result;
+            }
+
+            public function getForId(string $customerId, string $subscriptionId, bool|array $testmode = false): Subscription
+            {
+                $this->captured['subscription_get_for_id'][] = ['customer_id' => $customerId, 'subscription_id' => $subscriptionId];
+                $result = ($this->resolver)('getForId', ['customer_id' => $customerId, 'subscription_id' => $subscriptionId]);
+                if ($result instanceof Throwable) {
+                    throw $result;
+                }
+
+                return $result;
+            }
+
+            public function pageForId(string $customerId, ?string $from = null, ?int $limit = null, array $filters = []): mixed
+            {
+                $this->captured['subscription_page_for_id'][] = ['customer_id' => $customerId, 'from' => $from, 'limit' => $limit];
+                $result = ($this->resolver)('pageForId', ['customer_id' => $customerId, 'from' => $from, 'limit' => $limit]);
+                if ($result instanceof Throwable) {
+                    throw $result;
+                }
+
+                return $result;
+            }
+
+            public function cancelForId(string $customerId, string $subscriptionId, bool $testmode = false): Subscription
+            {
+                $this->captured['subscription_cancel_for_id'][] = ['customer_id' => $customerId, 'subscription_id' => $subscriptionId];
+                $result = ($this->resolver)('cancelForId', ['customer_id' => $customerId, 'subscription_id' => $subscriptionId]);
+                if ($result instanceof Throwable) {
+                    throw $result;
+                }
+
+                return $result;
+            }
+        };
+    }
+
+    /**
+     * @param  callable(string, mixed): (PaymentLink|PaymentLinkCollection|Throwable)  $resolver
+     * @param  array<string, array<int, mixed>>  $captured
+     */
+    private function makePaymentLinksStub(callable $resolver, array &$captured, ?StubMollieClient &$clientRef): object
+    {
+        return new class($resolver, $captured, $clientRef)
+        {
+            public function __construct(
+                private $resolver,
+                private array &$captured,
+                private ?StubMollieClient &$mollieClient,
+            ) {}
+
+            public function create(array $payload = [], bool $testmode = false): PaymentLink
+            {
+                $this->captured['payment_link_create'][] = $payload;
+                $this->captured['idempotency_keys'][] = $this->mollieClient?->getIdempotencyKey();
+                $result = ($this->resolver)('create', $payload);
+                if ($result instanceof Throwable) {
+                    throw $result;
+                }
+
+                return $result;
+            }
+
+            public function get(string $paymentLinkId, bool|array $testmode = false): PaymentLink
+            {
+                $this->captured['payment_link_get'][] = $paymentLinkId;
+                $result = ($this->resolver)('get', $paymentLinkId);
+                if ($result instanceof Throwable) {
+                    throw $result;
+                }
+
+                return $result;
+            }
+
+            public function page(?string $from = null, ?int $limit = null, bool|array $testmode = false): mixed
+            {
+                $this->captured['payment_link_page'][] = ['from' => $from, 'limit' => $limit];
+                $result = ($this->resolver)('page', ['from' => $from, 'limit' => $limit]);
+                if ($result instanceof Throwable) {
+                    throw $result;
+                }
+
+                return $result;
+            }
+        };
+    }
+
+    /**
+     * Helper voor een Subscription-resource met dynamic-properties gevuld.
+     *
+     * @param  array<string, mixed>  $attributes
+     */
+    protected function makeSubscription(array $attributes): Subscription
+    {
+        $subscription = new Subscription(new MollieApiClient);
+        foreach ($attributes as $key => $value) {
+            $subscription->{$key} = $value;
+        }
+
+        return $subscription;
+    }
+
+    /**
+     * @param  array<int, array<string, mixed>>  $items
+     */
+    protected function makeSubscriptionCollection(array $items): SubscriptionCollection
+    {
+        $client = new MollieApiClient;
+        $subscriptions = [];
+        foreach ($items as $item) {
+            $subscription = new Subscription($client);
+            foreach ($item as $k => $v) {
+                $subscription->{$k} = $v;
+            }
+            $subscriptions[] = $subscription;
+        }
+
+        return new SubscriptionCollection($client, $subscriptions, null);
+    }
+
+    /**
+     * Helper voor een PaymentLink-resource met dynamic-properties gevuld.
+     *
+     * @param  array<string, mixed>  $attributes
+     */
+    protected function makePaymentLink(array $attributes): PaymentLink
+    {
+        $link = new PaymentLink(new MollieApiClient);
+        foreach ($attributes as $key => $value) {
+            $link->{$key} = $value;
+        }
+
+        return $link;
+    }
+
+    /**
+     * @param  array<int, array<string, mixed>>  $items
+     */
+    protected function makePaymentLinkCollection(array $items): PaymentLinkCollection
+    {
+        $client = new MollieApiClient;
+        $links = [];
+        foreach ($items as $item) {
+            $link = new PaymentLink($client);
+            foreach ($item as $k => $v) {
+                $link->{$k} = $v;
+            }
+            $links[] = $link;
+        }
+
+        return new PaymentLinkCollection($client, $links, null);
     }
 
     /**
