@@ -108,7 +108,7 @@ Decisions zijn gelogd in PROJECT.md Key Decisions table. Decisions die uit v0.1 
 
 - **Cashier-Mollie compat-risico (v0.2)**: `mollie/laravel-cashier-mollie` master-branch hangt op PHP 7.2 / Laravel 6-8. Compatibiliteit met PHP 8.4 / Laravel 13 moet worden gecheckt in Phase 6 (use-case A integratie). Mogelijk fork-and-update of zelf subscription-laag bouwen. Phase 6 success criterion 1 vereist expliciete ADR met conclusie.
 - **`yusufkaracaburun/emeq-mollie-api` repo description is stale**: zegt nog "Saloon v3" terwijl die keuze is gereverseerd. Wordt bijgewerkt bij eerste push in Phase 2.
-- **`.docs/partners/mollie/` bestaat nog niet**: moet aangemaakt worden bij start van Phase 2 (PROJECT.md "geen verzonnen partner-features" invariant).
+- ~~**`.docs/partners/mollie/` bestaat nog niet**~~: ✅ **Resolved 2026-05-14 via quick `260514-tny`** — 11 references + indexed README geland. Phase 5a planning unblocked.
 
 ### Quick Tasks Completed
 
@@ -118,6 +118,7 @@ Decisions zijn gelogd in PROJECT.md Key Decisions table. Decisions die uit v0.1 
 | 260514-ndk | Sluit Phase 3 SC-3-gap: refresh_token encryption-at-rest test | 2026-05-14 | d4c31d3 | [260514-ndk-sluit-sc-3-gap-voor-phase-3-voeg-refresh](./quick/260514-ndk-sluit-sc-3-gap-voor-phase-3-voeg-refresh/) |
 | 260514-nup | Cleanup Phase 3 review-findings (BL-02 + WR-01 + WR-03) | 2026-05-14 | 1fcde28 | [260514-nup-cleanup-phase-3-review-findings-bl-02-ab](./quick/260514-nup-cleanup-phase-3-review-findings-bl-02-ab/) |
 | 260514-qxk | Fix 05b CRITICAL findings (CR-01 + CR-02 + CR-03) | 2026-05-14 | 286dd99 | [260514-qxk-fix-05b-critical-findings-body-forwardin](./quick/260514-qxk-fix-05b-critical-findings-body-forwardin/) |
+| 260514-tny | Import Mollie API docs (11 references + indexed README) als Phase 5a precondition — `.docs/` gitignored, plan-deviated van 4 commits naar SUMMARY-only | 2026-05-14 | (n/a — `.docs/` gitignored) | [260514-tny-import-mollie-api-docs-into-docs-partner](./quick/260514-tny-import-mollie-api-docs-into-docs-partner/) |
 
 ### Roadmap Evolution
 
@@ -149,7 +150,7 @@ Items acknowledged en deferred bij milestone-close 2026-05-14:
 
 ## Session Continuity
 
-Last session: 2026-05-14T19:02:38.384Z
-Stopped at: Phase 5a context gathered
+Last session: 2026-05-14T19:02:38.384Z (resumed: 2026-05-14)
+Stopped at: Phase 5a unblocked — `.docs/partners/mollie/` ingericht (11 refs + indexed README via quick `260514-tny`). Klaar voor `/gsd-plan-phase 5a`.
 Resume file: .planning/phases/05a-mollie-sdk-resources-webhooks-pass-through-api/05a-CONTEXT.md
-Next action: `/gsd-plan-phase 5b` voor Snelstart-pass-through API (depends on Phase 3 only) of `/gsd-plan-phase 4` voor Mollie Connect OAuth-broker
+Next action: `/clear` → `/gsd-plan-phase 5a` (Mollie SDK Resources + Webhooks + pass-through API).
