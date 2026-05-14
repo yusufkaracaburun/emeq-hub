@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v0.2
 milestone_name: — Mollie + Connect + Subscriptions + Hub-skeleton
 status: executing
-stopped_at: Plan 03-04 voltooid — ConnectionEncryptionTest (7 tests) + ConsumerAccountScopingTest (4 tests) groen; HUB-01 SC-3 + SC-4 query-laag bewezen
-last_updated: "2026-05-14T16:30:00.000Z"
-last_activity: 2026-05-14 — Phase 03 plan 04 voltooid (Wave 2b parallel afgehandeld vooruit op plan 03-03)
+stopped_at: Plan 03-03 voltooid — /v1/ping achter auth:sanctum + PingController + 6 nieuwe tests (3 PingTest + 3 SanctumAbilityTest, waarvan 1 incomplete); HUB-01 SC-2 end-to-end bewezen
+last_updated: "2026-05-14T14:20:31.268Z"
+last_activity: 2026-05-14
 progress:
   total_phases: 9
   completed_phases: 0
   total_plans: 13
-  completed_plans: 3
-  percent: 23
+  completed_plans: 4
+  percent: 31
 ---
 
 # Project State
@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-05-14 na v0.1 milestone-close)
 ## Current Position
 
 Phase: 03 (hub-skeleton) — EXECUTING
-Plan: 3 of 5 (03-03 + 03-05 nog openstaand; 03-04 vooruit afgehandeld als Wave 2b)
-Status: Executing Phase 03 — plans 01 + 02 + 04 voltooid; 03-03 + 03-05 resteren
-Last activity: 2026-05-14 — Phase 03 plan 04 voltooid
+Plan: 4 of 5 (alleen 03-05 nog openstaand; 03-01/03-02/03-03/03-04 voltooid)
+Status: Ready to execute plan 03-05
+Last activity: 2026-05-14 — Phase 03 plan 03 voltooid
 
 ## Performance Metrics
 
@@ -43,15 +43,17 @@ Last activity: 2026-05-14 — Phase 03 plan 04 voltooid
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01-snelstart-sdk-finalize | 3 | ~16 min | ~5 min |
-| 03-hub-skeleton | 3/5 | ~15 min | ~5 min |
+| 03-hub-skeleton | 4/5 | ~20 min | ~5 min |
 
 **Recent Trend:**
 
-- Last 3 plans: 03-01 (migrations+models+factories, ~5 min, 3 commits, 10 nieuwe files); 03-02 (Sanctum-config + TokenAbilities + api-skeleton, ~4 min, 3 commits, 2 nieuwe + 2 modified files); 03-04 (ConnectionEncryptionTest + ConsumerAccountScopingTest, ~6 min, 2 commits, 2 nieuwe files, 11 tests groen)
+- Last 3 plans: 03-02 (Sanctum-config + TokenAbilities + api-skeleton, ~4 min, 3 commits, 2 nieuwe + 2 modified files); 03-04 (ConnectionEncryptionTest + ConsumerAccountScopingTest, ~6 min, 2 commits, 2 nieuwe files, 11 tests groen); 03-03 (PingController + /v1/ping + PingTest + SanctumAbilityTest, ~5 min, 3 commits, 3 nieuwe + 1 modified file, 6 nieuwe tests waarvan 1 incomplete)
 - Trend v0.1: phase 1 sneller dan ingeschat (master-plan-aanname 30-60 min crash-fix; bleek NO CRASH REPRO)
-- Trend v0.2 (start): plans 03-01 + 03-02 + 03-04 binnen gepland tijdsvenster; PATTERNS.md analog-mapping leverde copy-targets aan zonder context-switches
+- Trend v0.2 (start): plans 03-01 t/m 03-04 binnen gepland tijdsvenster; PATTERNS.md analog-mapping leverde copy-targets aan zonder context-switches
 
-*Updated 2026-05-14 — plan 03-04 voltooid.*
+| Phase 03 P03-03 | 5 | 3 tasks | 4 files |
+
+*Updated 2026-05-14 — plan 03-03 voltooid.*
 
 ## Accumulated Context
 
@@ -73,10 +75,12 @@ Decisions zijn gelogd in PROJECT.md Key Decisions table. Decisions die uit v0.1 
 - 🆕 **New 2026-05-14 (03-02):** `web`-guard + `users`-provider blijven naast `sanctum`/`consumers` — User-model is voor Filament admin in Phase 9, niet verwijderen
 - 🆕 **New 2026-05-14 (03-04):** Encryption-at-rest is via `DB::table()->value()` bewezen op productiestack (echte `APP_KEY`, geen MockEncrypter) — Phase 5b mag erop bouwen dat een DB-dump geen plain credentials lekt
 - 🆕 **New 2026-05-14 (03-04):** Cross-Consumer query-isolation is op Eloquent-laag bewezen voor zowel directe `Account::where('consumer_id', ...)` als de relatie-syntax `$consumer->accounts()` — Phase 5b's pass-through-API kan deze patterns zonder extra row-level filter veilig gebruiken
+- 🆕 **New 2026-05-14 (03-03):** `PingController` is single-action `__invoke` retournerend plain array (Laravel cast't naar JSON); single-action gekozen i.p.v. resourceful controller voor één smoke-route — copy-target voor Phase 5b's `Snelstart\PassthroughController`
+- 🆕 **New 2026-05-14 (03-03):** `SanctumAbilityTest::test_token_without_required_ability_is_rejected` blijft `markTestIncomplete` tot Phase 5b een route met `->middleware('ability:snelstart:read')` heeft — suite blijft groen (incomplete ≠ failed), placeholder wordt scherp ingevuld bij Phase 5b
+- 🆕 **New 2026-05-14 (03-03):** `Tests\Feature\Api` sub-namespace voor HTTP-feature-tests (eigen directory `tests/Feature/Api/`); `Tests\Feature` root blijft voor model-laag-bewijs (encryption + scoping)
 
 ### Pending Todos
 
-- Plan 03-03 — `routes/api.php` `/v1/ping` + `PingController` + PingTest + SanctumAbilityTest (gebruikt `auth:sanctum`-middleware uit 03-02 + `TokenAbilities` constants)
 - Plan 03-05 — `hub:consumer:create` artisan-command + `DatabaseSeeder` demo-data + acceptance-run
 - Scramble (`dedoc/scramble`) installeren met `/docs/api` + Sanctum-bearer-extension (quick-task) — voorbereiding op Phase 5a/5b
 - `/gsd-plan-phase 5b` runnen na Phase 3 — Snelstart-pass-through API
@@ -102,6 +106,7 @@ Decisions zijn gelogd in PROJECT.md Key Decisions table. Decisions die uit v0.1 
 - 2026-05-14 — Plan 03-01 voltooid: `consumers`/`accounts`/`connections` migrations + `Consumer`/`Account`/`Connection` Eloquent-models + factories. Fundatie voor HUB-01 staat; HUB-01 blijft Pending tot Phase 3 in z'n geheel geland is (Sanctum + ping + tests).
 - 2026-05-14 — Plan 03-02 voltooid: Sanctum-guard + consumers-provider in `config/auth.php`, `apiPrefix: 'v1'` in `bootstrap/app.php`, `App\Sanctum\TokenAbilities` constants-class, `routes/api.php` skeleton. Auth-laag staat; plan 03-03 kan `/v1/ping` op deze stack landen.
 - 2026-05-14 — Plan 03-04 voltooid (Wave 2b parallel afgehandeld vóór 03-03): `ConnectionEncryptionTest` (7 tests) + `ConsumerAccountScopingTest` (4 tests). HUB-01 SC-3 (geen raw credentials in `toArray()`) volledig bewezen; SC-4 query-laag bewezen — route-laag wacht op Phase 5b's pass-through-API.
+- 2026-05-14 — Plan 03-03 voltooid: `routes/api.php` `/v1/ping` + `App\Http\Controllers\Api\V1\PingController` + `PingTest` (3 tests) + `SanctumAbilityTest` (2 passed + 1 incomplete-placeholder voor Phase 5b ability-middleware). HUB-01 SC-2 end-to-end bewezen (Bearer-PAT → Consumer-slug → 200-respond). Volledige suite 22/22 + 1 incomplete.
 
 ## Deferred Items
 
@@ -119,7 +124,7 @@ Items acknowledged en deferred bij milestone-close 2026-05-14:
 
 ## Session Continuity
 
-Last session: 2026-05-14 — Phase 03 plan 04 voltooid
-Stopped at: Plan 03-04 voltooid — 11 security-tests groen (7 encryption + 4 scoping); HUB-01 SC-3 + SC-4 query-laag bewezen; geen model/migration/factory-mutaties nodig
-Resume file: `.planning/phases/03-hub-skeleton/03-03-PLAN.md` (PingController + /v1/ping)
-Next action: Plan 03-03 — routes/api.php /v1/ping + PingController + PingTest + SanctumAbilityTest
+Last session: 2026-05-14 — Phase 03 plan 03 voltooid
+Stopped at: Plan 03-03 voltooid — /v1/ping achter auth:sanctum + PingController + PingTest (3) + SanctumAbilityTest (2 passed + 1 incomplete); HUB-01 SC-2 end-to-end bewezen
+Resume file: `.planning/phases/03-hub-skeleton/03-05-PLAN.md` (hub:consumer:create + DatabaseSeeder)
+Next action: Plan 03-05 — hub:consumer:create artisan-command + DatabaseSeeder demo-data + Phase 3 acceptance-run
