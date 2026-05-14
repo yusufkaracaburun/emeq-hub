@@ -85,8 +85,9 @@ trait StubsMollieClient
      *  - 'methods'          : callable(array $query): MethodCollection|Throwable
      *  - 'paymentRefunds'   : callable(string $op, mixed $arg): Refund|RefundCollection|Throwable
      *                         ($op = createForId | pageForId | getForId)
-     *  - 'customerMandates' : callable(string $op, mixed $arg): Mandate|MandateCollection|null|Throwable
+     *  - 'mandates'         : callable(string $op, mixed $arg): Mandate|MandateCollection|null|Throwable
      *                         ($op = pageForId | getForId | revokeForId)
+     *                         (Mollie SDK exposes het op `MollieApiClient::$mandates`, niet `$customerMandates`)
      *
      * @param  array<string, callable>  $resolvers
      */
@@ -114,8 +115,8 @@ trait StubsMollieClient
         if (isset($resolvers['paymentRefunds'])) {
             $extras['paymentRefunds'] = $this->makePaymentRefundsStub($resolvers['paymentRefunds'], $captured, $clientRef);
         }
-        if (isset($resolvers['customerMandates'])) {
-            $extras['customerMandates'] = $this->makeCustomerMandatesStub($resolvers['customerMandates'], $captured);
+        if (isset($resolvers['mandates'])) {
+            $extras['mandates'] = $this->makeMandatesStub($resolvers['mandates'], $captured);
         }
 
         $this->mollieClient = new StubMollieClient($paymentsStub, $extras);
@@ -307,7 +308,7 @@ trait StubsMollieClient
      * @param  callable(string, mixed): (Mandate|mixed|Throwable|null)  $resolver
      * @param  array<string, array<int, mixed>>  $captured
      */
-    private function makeCustomerMandatesStub(callable $resolver, array &$captured): object
+    private function makeMandatesStub(callable $resolver, array &$captured): object
     {
         return new class($resolver, $captured)
         {
