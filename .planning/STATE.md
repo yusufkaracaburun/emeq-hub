@@ -100,6 +100,7 @@ Decisions zijn gelogd in PROJECT.md Key Decisions table. Decisions die uit v0.1 
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
 | 260514-iai | App-wide noindex/nofollow voor bots | 2026-05-14 | 0354074 | [260514-iai-app-wide-noindex-nofollow-voor-bots](./quick/260514-iai-app-wide-noindex-nofollow-voor-bots/) |
+| 260514-ndk | Sluit Phase 3 SC-3-gap: refresh_token encryption-at-rest test | 2026-05-14 | d4c31d3 | [260514-ndk-sluit-sc-3-gap-voor-phase-3-voeg-refresh](./quick/260514-ndk-sluit-sc-3-gap-voor-phase-3-voeg-refresh/) |
 
 ### Roadmap Evolution
 
