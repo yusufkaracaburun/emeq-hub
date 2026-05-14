@@ -13,7 +13,7 @@ Een set van losse, Saloon-gebaseerde Laravel SDK-packages (`emeq/snelstart-api`,
 
 ### Constraints
 
-- **Tech stack**: PHP 8.4, Laravel 13.9, Saloon v3 (met openstaande v4-upgrade-overweging), Spatie laravel-data. Tests: PHPUnit 12 in de Hub, Pest in SDK-packages (`packages/snelstart-api/`). Geen afwijking zonder approval.
+- **Tech stack**: PHP 8.4, Laravel 13.9, Saloon v4, Spatie laravel-data. Tests: PHPUnit 12 in de Hub, Pest in SDK-packages (`packages/snelstart-api/`). Geen afwijking zonder approval.
 - **Timeline**: v0.1-deadline ~4 weken vanaf 2026-05-14.
 - **Repo-grenzen**: SDK-packages krijgen géén Hub-domeinmodellen (`Connection`, `Account`, etc.) — invariant uit CLAUDE.md.
 - **Tokens encrypted at rest**: gevoelige credentials (clientkey, subscription-key, API-key) nooit raw in DB of logs. Fingerprint-only voor debugging.
@@ -24,7 +24,7 @@ Een set van losse, Saloon-gebaseerde Laravel SDK-packages (`emeq/snelstart-api`,
 <!-- GSD:stack-start source:STACK.md -->
 ## Technology Stack
 
-Zie de Laravel Boost-guidelines onderaan dit bestand (`.ai/project rules` block) voor de canonical stack-beschrijving: PHP 8.4 / Laravel 13.9 / Postgres 16 / Redis 7 / Caddy 2 / Sanctum v4 / Horizon v5 / Spatie webhook-server+client / dedoc/scramble. SDK-laag: Saloon v3 + Spatie laravel-data.
+Zie de Laravel Boost-guidelines onderaan dit bestand (`.ai/project rules` block) voor de canonical stack-beschrijving: PHP 8.4 / Laravel 13.9 / Postgres 16 / Redis 7 / Caddy 2 / Sanctum v4 / Horizon v5 / Spatie webhook-server+client / dedoc/scramble. SDK-laag: Saloon v4 + Spatie laravel-data.
 
 Een aparte `.planning/STACK.md` wordt aangemaakt bij `/gsd-map-codebase` of de eerste phase die diepere stack-conventies vastlegt.
 <!-- GSD:stack-end -->
