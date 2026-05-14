@@ -54,6 +54,20 @@ class ConnectionEncryptionTest extends TestCase
         $this->assertSame('access_secret-789', $connection->fresh()->access_token);
     }
 
+    public function test_mollie_refresh_token_is_encrypted_at_rest(): void
+    {
+        $connection = Connection::factory()
+            ->forMollie()
+            ->create(['refresh_token' => 'refresh_secret-789']);
+
+        $rawAtRest = DB::table('connections')
+            ->where('id', $connection->id)
+            ->value('refresh_token');
+
+        $this->assertNotSame('refresh_secret-789', $rawAtRest);
+        $this->assertSame('refresh_secret-789', $connection->fresh()->refresh_token);
+    }
+
     public function test_to_array_hides_all_credential_fields(): void
     {
         $snelstart = Connection::factory()->forSnelstart()->create();
