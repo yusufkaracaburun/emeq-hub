@@ -2,17 +2,17 @@
 gsd_state_version: 1.0
 milestone: v0.2
 milestone_name: Mollie + Connect + Subscriptions + Hub-skeleton
-status: planning
-last_updated: "2026-05-14T11:30:00.000Z"
+status: executing
+last_updated: "2026-05-14T12:51:53.209Z"
 last_activity: 2026-05-14
 progress:
   total_phases: 8
-  completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
-  percent: 0
+  completed_phases: 1
+  total_plans: 8
+  completed_plans: 8
+  percent: 12
 current_position:
-  next_phase: 2
+  next_phase: 3
 ---
 
 # Project State
@@ -22,20 +22,20 @@ current_position:
 See: .planning/PROJECT.md (updated 2026-05-14 na v0.1 milestone-close)
 
 **Core value:** Twee fundamenteel verschillende providers (OData/clientkey + REST/OAuth2) productie-gevalideerd via één SDK-pattern, en beide live in één concrete consumer-feature. v0.1 heeft Snelstart-deel bewezen; v0.2 zet Mollie + Connect + Subscriptions + Hub-skeleton op.
-**Current focus:** v0.2 milestone met ROADMAP gedefinieerd (Phase 2-8). Wacht op `/gsd-plan-phase 2` om eerste fase (emeq/mollie-api foundation) te plannen.
+**Current focus:** Phase 02 — emeq-mollie-api-foundation
 
 ## Current Position
 
-Phase: Not started — next phase = 2 (emeq/mollie-api foundation)
+Phase: 3 (next — Hub-skeleton, niet gestart)
 Plan: —
-Status: Roadmap gedefinieerd, klaar voor `/gsd-plan-phase 2`
-Last activity: 2026-05-14 — Phase 9 (Filament admin-UI) toegevoegd aan v0.2 ROADMAP
+Status: Phase 2 complete (8/8 plans, verified passed); Phase 9 (Filament admin-UI) ook in v0.2 ROADMAP
+Last activity: 2026-05-14 — Phase 2 emeq/mollie-api foundation afgesloten; sub-repo `emeq-mollie-api` gepusht naar GitHub default branch `feat/foundation`
 
 ## Performance Metrics
 
 **v0.1 Velocity:**
 
-- Total plans completed: 3 (Phase 1)
+- Total plans completed: 11 (Phase 1)
 - Total execution time: ~12 uur (2026-05-14 00:42 → 12:02 CEST)
 - Sub-repo werk: snelstart-sdk submodule wiring + Pest-coverage + push
 
@@ -44,6 +44,7 @@ Last activity: 2026-05-14 — Phase 9 (Filament admin-UI) toegevoegd aan v0.2 RO
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01-snelstart-sdk-finalize | 3 | ~16 min | ~5 min |
+| 02 | 8 | - | - |
 
 **Recent Trend:**
 
