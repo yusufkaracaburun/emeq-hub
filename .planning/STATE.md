@@ -1,17 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: shipped-v0.1
-milestone_name: Snelstart-SDK finale
-status: v0.1 SHIPPED 2026-05-14 — ready voor `/gsd-new-milestone v0.2`
-stopped_at: v0.1 milestone-close voltooid (Snelstart-SDK only); v0.2 voorbereid in `.claude/plans/fancy-honking-spring.md`
-last_updated: "2026-05-14T12:30:00.000Z"
+milestone: v0.2
+milestone_name: Mollie + Connect + Subscriptions + Hub-skeleton
+status: planning
+last_updated: "2026-05-14T10:11:40.878Z"
 last_activity: 2026-05-14
 progress:
-  total_phases: 1
-  completed_phases: 1
-  total_plans: 3
-  completed_plans: 3
-  percent: 100
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -25,11 +24,10 @@ See: .planning/PROJECT.md (updated 2026-05-14 na v0.1 milestone-close)
 
 ## Current Position
 
-Milestone: v0.1 → SHIPPED
-Next: v0.2 (Mollie + Connect + Subscriptions + Hub-skeleton, ~8-10 weken)
-Last activity: 2026-05-14 (milestone close)
-
-Progress: v0.1 [██████████] 100% — SHIPPED
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-05-14 — Milestone v0.2 started
 
 ## Performance Metrics
 

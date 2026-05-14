@@ -56,11 +56,26 @@ Carry-forward requirements (formaliseren bij `/gsd-new-milestone v0.2`):
 - **Snelstart Saloon v3 → v4** — 3 ignored security advisories oplossen; v0.3-werk.
 - **Commerciële Hub-features** (billing, public docs-site, self-service onboarding) — pas in latere milestone na v0.2.
 
-## Current State (per 2026-05-14, na v0.1 ship)
+## Current State (per 2026-05-14, na v0.1 ship + v0.2 kickoff)
 
 - **Shipped:** v0.1 — `emeq/snelstart-api` SDK live op `github.com:yusufkaracaburun/emeq-snelstart-api` (`main` @ `16c9ecc`), Pest-suite groen (107/187), VCS-installeerbaar zonder auth.
-- **Active milestone:** geen. v0.2 voorbereid in `.claude/plans/fancy-honking-spring.md`, wacht op `/gsd-new-milestone v0.2`.
+- **Active milestone:** v0.2 — Mollie + Connect + Subscriptions + Hub-skeleton (~8-10 weken). Gestart 2026-05-14.
 - **Architectuur-vision** (geverifieerd 2026-05-14): Emeq = Mollie Connect Partner. Consumers (Naschool, Planny, derde-partij SaaS) routeren door Hub. Accounts (klanten van die SaaS-apps) koppelen eigen partner-credentials via OAuth (Mollie Connect, Snelstart oAuth, etc.). Subscriptions: zowel Emeq→Consumers (Cashier-Mollie pattern) als Accounts→eindgebruikers (Connect + eigen subscription-laag).
+
+## Current Milestone: v0.2 Mollie + Connect + Subscriptions + Hub-skeleton
+
+**Goal:** `emeq/mollie-api` SDK + Mollie Connect OAuth-broker + Hub-skeleton (Consumer/Account/Connection-tabellen) + Subscriptions voor beide use-cases + Naschool wiring — eindstand: Naschool's vrijwillige-bijdrage flow loopt namens School A op School A's eigen Mollie-account via Hub-Connect.
+
+**Target features:**
+- `emeq/mollie-api` foundation (wrap `mollie/mollie-api-php`, multi-tenant `MollieCredentialResolver`, dual creds API-key + OAuth)
+- Hub-skeleton: `consumers`/`accounts`/`connections` tabellen + Sanctum-PAT-auth + pass-through `/v1/mollie/*` REST API
+- Mollie Connect OAuth-broker (client_id/client_secret, redirect-handler, token-exchange, refresh-flow, encrypted token-storage)
+- `emeq/mollie-api` Resources + Webhooks (Payments, Customers, PaymentMethods, Refunds, Mandates, Subscriptions; Connect-webhook HMAC-verifier)
+- Cashier-Mollie integratie (use-case A: Emeq → Naschool/Planny billing)
+- Account-level subscriptions via Connect (use-case B: Accounts → eindgebruikers)
+- Naschool wiring (Snelstart Stancl-resolver + EnrollmentConfirmed-job + Mollie-via-Hub checkout-flow)
+
+**Phases:** 2-9 (continued numbering vanaf v0.1's Phase 1). Volledig plan in [`.claude/plans/fancy-honking-spring.md`](../.claude/plans/fancy-honking-spring.md).
 
 ## Context
 
