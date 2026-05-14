@@ -52,6 +52,7 @@ return [
                 'onboarding.read',
             ],
         ],
+        'webhook_secret' => env('MOLLIE_WEBHOOK_SECRET'),
     ],
 
 ];
