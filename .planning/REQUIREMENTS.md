@@ -10,7 +10,7 @@ Requirements voor v0.2 (~8-10 weken). Elke vereiste mapt naar één roadmap-fase
 
 ### Mollie SDK
 
-- [ ] **MOLL-01**: `emeq/mollie-api` skeleton + ServiceProvider + `MollieCredentialResolver`-contract + dual-credential Data-classes (`MollieApiKeyCredentials` met `test_|live_`-prefix-validatie + `MollieOAuthCredentials` met `access_`-prefix-validatie). Wraping van `mollie/mollie-api-php` ^3.11 (BSD-2-Clause). Facade-alias = `EmeqMollie`. ≥10 Pest-tests groen op auth + multi-tenant resolver + error-mapping.
+- [x] **MOLL-01**: `emeq/mollie-api` skeleton + ServiceProvider + `MollieCredentialResolver`-contract + dual-credential Data-classes (`MollieApiKeyCredentials` met `test_|live_`-prefix-validatie + `MollieOAuthCredentials` met `access_`-prefix-validatie). Wraping van `mollie/mollie-api-php` ^3.11 (BSD-2-Clause). Facade-alias = `Mollie` *(gewijzigd in CONTEXT.md: niet `EmeqMollie` — consistency met Snelstart-pattern; collision-resolutie deferred naar Phase 6 SUB-01)*. ≥10 Pest-tests groen op auth + multi-tenant resolver + error-mapping. *Completed 2026-05-14: 33 Pest-tests groen (86 assertions); sub-repo gepusht naar `github.com:yusufkaracaburun/emeq-mollie-api` met default branch `feat/foundation`.*
 
 - [ ] **MOLL-02**: Mollie Connect OAuth-broker — `client_id`/`client_secret` config (Emeq als Mollie Partner) + redirect-handler endpoint + authorization-code → token-exchange + refresh-token-flow met automatische renewal vóór expiry. Access-tokens + refresh-tokens encrypted-at-rest opgeslagen via Eloquent `encrypted` cast. Geen raw tokens in logs/exceptions — alleen fingerprints.
 
@@ -76,7 +76,7 @@ Expliciet uitgesloten voor v0.2. Niet re-adden zonder PROJECT.md herziening.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| MOLL-01 | Phase 2 | Pending |
+| MOLL-01 | Phase 2 | Complete (2026-05-14) |
 | MOLL-02 | Phase 4 | Pending |
 | MOLL-03 | Phase 5 | Pending |
 | MOLL-04 | Phase 5 | Pending |
