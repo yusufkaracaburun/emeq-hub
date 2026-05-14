@@ -3,7 +3,7 @@ gsd_state_version: 1.0
 milestone: v0.2
 milestone_name: Mollie + Connect + Subscriptions + Hub-skeleton
 status: planning
-last_updated: "2026-05-14T10:11:40.878Z"
+last_updated: "2026-05-14T11:30:00.000Z"
 last_activity: 2026-05-14
 progress:
   total_phases: 7
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-05-14 na v0.1 milestone-close)
 Phase: Not started — next phase = 2 (emeq/mollie-api foundation)
 Plan: —
 Status: Roadmap gedefinieerd, klaar voor `/gsd-plan-phase 2`
-Last activity: 2026-05-14 — ROADMAP.md v0.2 gedefinieerd (12/12 requirements gemapped naar Phase 2-8)
+Last activity: 2026-05-14 — Completed quick task 260514-iai: app-wide noindex/nofollow voor bots
 
 ## Performance Metrics
 
@@ -75,6 +75,12 @@ Geen actieve todos. v0.2-roadmap gedefinieerd; klaar voor `/gsd-plan-phase 2`.
 - **Cashier-Mollie compat-risico (v0.2)**: `mollie/laravel-cashier-mollie` master-branch hangt op PHP 7.2 / Laravel 6-8. Compatibiliteit met PHP 8.4 / Laravel 13 moet worden gecheckt in Phase 6 (use-case A integratie). Mogelijk fork-and-update of zelf subscription-laag bouwen. Phase 6 success criterion 1 vereist expliciete ADR met conclusie.
 - **`yusufkaracaburun/emeq-mollie-api` repo description is stale**: zegt nog "Saloon v3" terwijl die keuze is gereverseerd. Wordt bijgewerkt bij eerste push in Phase 2.
 - **`.docs/partners/mollie/` bestaat nog niet**: moet aangemaakt worden bij start van Phase 2 (PROJECT.md "geen verzonnen partner-features" invariant).
+
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 260514-iai | App-wide noindex/nofollow voor bots | 2026-05-14 | 0354074 | [260514-iai-app-wide-noindex-nofollow-voor-bots](./quick/260514-iai-app-wide-noindex-nofollow-voor-bots/) |
 
 ## Deferred Items
 
