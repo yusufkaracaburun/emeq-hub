@@ -1,11 +1,11 @@
-# Emeq integration stack (v0.1)
+# Emeq integration stack (v0.2)
 
 > **Master-plan**: [`.claude/plans/2026-05-14-emeq-integration-strategy.md`](../.claude/plans/2026-05-14-emeq-integration-strategy.md) — bron-van-waarheid voor scope, locked decisions en track-breakdown.
 > Deze PROJECT.md is de operationele synthese voor de GSD-workflow.
 
 ## What This Is
 
-Een set van losse, Saloon-gebaseerde Laravel SDK-packages (`emeq/snelstart-api`, `emeq/mollie-api`) voor Nederlandse boekhoud- en betaal-partner-API's, plus integratie-wiring in Emeq's eerste consumer-app (Naschool). Doelgroep v0.1: Emeq's eigen SaaS-apps die nu ad-hoc partner-integraties hebben. Doelgroep v1.0+ (later): commercieel beschikbaar voor andere NL dev-shops.
+Een Hub-platform en losse, Saloon-gebaseerde Laravel SDK-packages (`emeq/snelstart-api`, `emeq/mollie-api`) voor Nederlandse boekhoud- en betaal-partner-API's. De Hub (`emeq-hub`) host multi-tenant OAuth-koppelingen, webhook-routing en een pass-through REST-API; SDKs leveren de partner-specifieke wrapping. v0.2 bouwt Mollie + Connect + Subscriptions + Hub-skeleton bovenop het in v0.1 gevalideerde Snelstart-pattern, met Naschool als eerste concrete consumer-feature. Doelgroep v0.2: Emeq's eigen SaaS-apps die nu ad-hoc partner-integraties hebben. Doelgroep v1.0+ (later): commercieel beschikbaar voor andere NL dev-shops.
 
 ## Core Value
 
@@ -89,7 +89,7 @@ Carry-forward requirements (formaliseren bij `/gsd-new-milestone v0.2`):
 
 ## Constraints
 
-- **Tech stack**: PHP 8.4, Laravel 13.9, Saloon v3 (alleen relevant voor `emeq/snelstart-api`), Spatie laravel-data. Tests: PHPUnit 12 in de Hub, Pest in SDK-packages. Geen afwijking zonder approval.
+- **Tech stack**: PHP 8.4, Laravel 13.9, Saloon v4 (gebruikt in `emeq/snelstart-api`; `emeq/mollie-api` wrapt `mollie/mollie-api-php` rechtstreeks, geen Saloon-laag), Spatie laravel-data. Tests: PHPUnit 12 in de Hub, Pest in SDK-packages. Geen afwijking zonder approval.
 - **Timeline**: v0.2-indicatie ~8-10 weken vanaf milestone-kickoff.
 - **Repo-grenzen**: SDK-packages krijgen géén Hub-domeinmodellen (`Connection`, `Account`, etc.) — invariant uit CLAUDE.md. Hub-tabellen leven in `emeq-hub` zelf.
 - **Tokens encrypted at rest**: gevoelige credentials (clientkey, subscription-key, API-key, OAuth access/refresh tokens) nooit raw in DB of logs. Fingerprint-only voor debugging.
@@ -127,4 +127,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-14 after v0.1 milestone close (Snelstart-SDK shipped; v0.2 voorbereid)*
+*Last updated: 2026-05-14 — header + scope-paragraaf + Saloon-versie gesynced naar v0.2 actieve milestone (drift fix vanuit docs-sync). Open: "Active" + "Next Milestone Goals" secties beschrijven nog "voorbereid, niet gestart" terwijl v0.2 evident gestart is (REQUIREMENTS.md + ROADMAP.md gepubliceerd) — formele cleanup volgt bij `/gsd-new-milestone v0.2` of een aparte restructure.*
