@@ -6,7 +6,6 @@
 .phpactor.json
 .phpunit.result.cache
 /.codex
-/.cursor/
 /.idea
 /.nova
 /.phpunit.cache
@@ -22,11 +21,15 @@
 /storage/pail
 /vendor
 /packages
-/.ai/plans
-/.ai/memory
+/.ai/*
+!/.ai/guidelines/
 /.claude
 /.cursor
+/.junie
 /.docs
+/.mcp.json
+/AGENTS.md
+/boost.json
 _ide_helper.php
 Homestead.json
 Homestead.yaml

@@ -62,7 +62,7 @@ Een set van losse, Saloon-gebaseerde Laravel SDK-packages (`emeq/snelstart-api`,
 - **Repo-grenzen**: SDK-packages krijgen géén Hub-domeinmodellen (`Connection`, `Account`, etc.) — invariant uit CLAUDE.md.
 - **Tokens encrypted at rest**: gevoelige credentials (clientkey, subscription-key, API-key) nooit raw in DB of logs. Fingerprint-only voor debugging.
 - **Geen verzonnen partner-features**: code moet exact kloppen met officiële Snelstart/Mollie docs (zie `.docs/partners/snelstart/`).
-- **Git-policy**: nooit op `main` werken, nooit pushen zonder approval, geen `--no-verify`.
+- **Git-policy**: nooit op `master` werken, nooit pushen zonder approval, geen `--no-verify`.
 
 ## Key Decisions
 
