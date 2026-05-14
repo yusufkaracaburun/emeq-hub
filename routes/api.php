@@ -4,9 +4,11 @@ use App\Http\Controllers\Api\V1\AccountController;
 use App\Http\Controllers\Api\V1\ConnectionController;
 use App\Http\Controllers\Api\V1\Mollie\CustomersController;
 use App\Http\Controllers\Api\V1\Mollie\MandatesController;
+use App\Http\Controllers\Api\V1\Mollie\PaymentLinksController;
 use App\Http\Controllers\Api\V1\Mollie\PaymentMethodsController;
 use App\Http\Controllers\Api\V1\Mollie\PaymentsController;
 use App\Http\Controllers\Api\V1\Mollie\RefundsController;
+use App\Http\Controllers\Api\V1\Mollie\SubscriptionsController;
 use App\Http\Controllers\Api\V1\OAuth\CallbackController;
 use App\Http\Controllers\Api\V1\OAuth\InitController;
 use App\Http\Controllers\Api\V1\PingController;
@@ -58,6 +60,15 @@ Route::middleware('auth:sanctum')->group(function (): void {
         Route::get('/customers/{id}/mandates', [MandatesController::class, 'index'])->name('api.mollie.customers.mandates.index');
         Route::get('/customers/{id}/mandates/{mandate_id}', [MandatesController::class, 'show'])->name('api.mollie.customers.mandates.show');
         Route::delete('/customers/{id}/mandates/{mandate_id}', [MandatesController::class, 'destroy'])->name('api.mollie.customers.mandates.destroy');
+
+        Route::get('/customers/{id}/subscriptions', [SubscriptionsController::class, 'index'])->name('api.mollie.customers.subscriptions.index');
+        Route::post('/customers/{id}/subscriptions', [SubscriptionsController::class, 'store'])->name('api.mollie.customers.subscriptions.store');
+        Route::get('/customers/{id}/subscriptions/{sub_id}', [SubscriptionsController::class, 'show'])->name('api.mollie.customers.subscriptions.show');
+        Route::delete('/customers/{id}/subscriptions/{sub_id}', [SubscriptionsController::class, 'destroy'])->name('api.mollie.customers.subscriptions.destroy');
+
+        Route::get('/payment-links', [PaymentLinksController::class, 'index'])->name('api.mollie.payment-links.index');
+        Route::post('/payment-links', [PaymentLinksController::class, 'store'])->name('api.mollie.payment-links.store');
+        Route::get('/payment-links/{id}', [PaymentLinksController::class, 'show'])->name('api.mollie.payment-links.show');
     });
 });
 
