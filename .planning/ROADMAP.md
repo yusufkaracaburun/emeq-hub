@@ -150,7 +150,12 @@ v0.2 bouwt drie samenhangende lagen: (1) `emeq/mollie-api` SDK die `mollie/molli
   6. Mismatched `X-Account-Id` (Account hoort niet bij deze Consumer) → 404; ontbrekende header op pass-through-route → 400 met duidelijke error
   7. Elke pass-through-call landt één regel in `webhook_calls` met Consumer-ID, Account-ID, Connection-fingerprint, request-summary; raw `client_key`/`subscription_key` komen nergens in de log voor
   8. `/docs/api` toont alle `/v1/accounts`, `/v1/connections` en `/v1/snelstart/*`-routes met "Try it out"-knop die werkt met een geplakte Bearer-PAT
-**Plans:** TBD
+**Plans:** 5 plans
+- [ ] 05b-01-PLAN.md — pass_through_calls migratie + PassThroughCall-model + factory + ADR (deviatie van `webhook_calls`)
+- [ ] 05b-02-PLAN.md — HubSnelstartCredentialResolver service + contract-conformance + decryption tests
+- [ ] 05b-03-PLAN.md — UpstreamErrorMapper + HeaderForwarder support-classes + upstream-error-mapping ADR
+- [ ] 05b-04-PLAN.md — Provisioning-endpoints (POST /v1/accounts, POST /v1/connections, GET/DELETE /v1/connections/{id}) + Form-Requests + Resources + feature-tests
+- [ ] 05b-05-PLAN.md — ResolveSnelstartAccount middleware + PassThroughController + catch-all route + audit-write + 6 feature-tests + Scramble discovery test + SanctumAbility-completion
 
 #### Phase 6: Cashier-Mollie integratie (use-case A)
 **Goal:** Emeq factureert zijn eigen Consumers (Naschool, Planny) recurring via Emeq's eigen Mollie-account met de Cashier-Mollie pattern.
@@ -249,7 +254,7 @@ v0.2 bouwt drie samenhangende lagen: (1) `emeq/mollie-api` SDK die `mollie/molli
 | 3. Hub-skeleton | 3/5 | In Progress|  |
 | 4. Mollie Connect OAuth-broker | 0/0 (TBD) | Not started | - |
 | 5a. Mollie SDK Resources + Webhooks + Pass-through API | 0/0 (TBD) | Not started | - |
-| 5b. Snelstart-pass-through API | 0/0 (TBD) | Not started | - |
+| 5b. Snelstart-pass-through API | 0/5 | Planned | - |
 | 6. Cashier-Mollie integratie | 0/0 (TBD) | Not started | - |
 | 7. Account-level subscriptions | 0/0 (TBD) | Not started | - |
 | 8. Naschool wiring | 0/0 (TBD) | Not started | - |
