@@ -74,4 +74,17 @@ class HubConsumerCreateTest extends TestCase
 
         $this->assertSame(['snelstart:read', 'snelstart:write'], $token->abilities);
     }
+
+    public function test_unknown_ability_is_rejected_before_consumer_creation(): void
+    {
+        $this->artisan('hub:consumer:create', [
+            '--slug' => 'typo-test',
+            '--name' => 'Typo Test',
+            '--abilities' => 'snelstart:reed',
+        ])
+            ->expectsOutputToContain('Onbekende abilities: snelstart:reed')
+            ->assertExitCode(2);
+
+        $this->assertSame(0, Consumer::where('slug', 'typo-test')->count());
+    }
 }

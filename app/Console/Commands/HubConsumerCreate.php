@@ -28,6 +28,16 @@ class HubConsumerCreate extends Command
             return self::INVALID;
         }
 
+        $abilities = $this->resolveAbilities();
+        $invalid = array_values(array_diff($abilities, TokenAbilities::all()));
+
+        if ($invalid !== []) {
+            $this->error('Onbekende abilities: '.implode(', ', $invalid));
+            $this->line('Geldige abilities: '.implode(', ', TokenAbilities::all()));
+
+            return self::INVALID;
+        }
+
         try {
             $consumer = Consumer::create(['slug' => $slug, 'name' => $name]);
         } catch (QueryException $e) {
@@ -36,7 +46,6 @@ class HubConsumerCreate extends Command
             return self::FAILURE;
         }
 
-        $abilities = $this->resolveAbilities();
         $tokenName = (string) $this->option('token-name');
         $token = $consumer->createToken($tokenName, $abilities);
 
