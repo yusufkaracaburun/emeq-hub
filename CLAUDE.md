@@ -213,7 +213,7 @@ Geen live-edit-symlink meer. Voor snelle iteratie in de SDK: werk daar gewoon ze
 
 `emeq/hub` — multi-tenant integration platform. Eén centrale Laravel-app die OAuth-koppelingen, webhook-routing en een uniforme REST-API exposeert naar boekhoud-/betaal-partner-API's:
 
-- **Snelstart** (boekhouden, NL) — via lokale SDK `emeq/snelstart-api` in `packages/`
+- **Snelstart** (boekhouden, NL) — via eigen SDK `emeq/snelstart-api` (VCS-repo, zie packages-conventie)
 - **Mollie** (betalingen, NL/EU) — via officiële `mollie/mollie-api-php`
 - **Moneybird** (boekhouden, NL) — gepland, via toekomstige `emeq/moneybird-api` SDK
 - **Ibanity** (PSD2/banking) — gepland
