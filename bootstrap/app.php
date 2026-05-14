@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\ResolveSnelstartAccount;
 use App\Http\Middleware\SetNoIndexHeaders;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -16,6 +17,9 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->append(SetNoIndexHeaders::class);
         $middleware->api(prepend: ['throttle:api']);
+        $middleware->alias([
+            'resolve.snelstart.account' => ResolveSnelstartAccount::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
