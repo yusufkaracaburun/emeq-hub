@@ -47,7 +47,15 @@ v0.2 bouwt drie samenhangende lagen: (1) `emeq/mollie-api` SDK die `mollie/molli
   3. `EmeqMollie`-facade en `Mollie`-facade (uit `laravel-mollie`) kunnen tegelijk geregistreerd zijn zonder Laravel-alias-conflict
   4. Pest-suite groen met ≥10 cases over auth-laag, credential-resolver, en error-mapping (`Mollie\Api\Exceptions\ApiException` → SDK-eigen exceptions)
   5. Geen raw API-key/access-token in logs of exception-messages — alleen sha256-fingerprint (eerste 12 chars)
-**Plans:** TBD
+**Plans:** 8 plans
+- [ ] 02-01-PLAN.md — Sub-repo package-skeleton + composer.json + tooling-config + composer install groen
+- [ ] 02-02-PLAN.md — MollieCredentialResolver-contract + abstract MollieCredentials + dual creds (API key + OAuth) + Data-tests
+- [ ] 02-03-PLAN.md — MollieException + MissingCredentialResolverException (package-base + ::notBound() factory)
+- [ ] 02-04-PLAN.md — MollieServiceProvider + Mollie facade-target met type-discriminator + Facades\Mollie
+- [ ] 02-05-PLAN.md — Pest-bootstrap: TestCase + Pest.php + ArchTest + PackageSmokeTest + FakeMollieCredentialResolver
+- [ ] 02-06-PLAN.md — MollieTest (multi-tenant key-wissel + env-guard + idempotency) + MollieServiceProviderTest (binding shapes)
+- [ ] 02-07-PLAN.md — ErrorMappingTest (ValidationException::getField + Authorization: Bearer header) via MollieApiClient::fake()
+- [ ] 02-08-PLAN.md — Sub-repo commit + push (checkpoint) + GitHub repo-description update + Hub composer.json path-repo entry
 
 #### Phase 3: Hub-skeleton
 **Goal:** Een werkende Hub-app met multi-tenant data-model en Consumer-authenticatie waarop de OAuth-broker en pass-through API in latere fasen kunnen landen.
@@ -166,7 +174,7 @@ v0.2 bouwt drie samenhangende lagen: (1) `emeq/mollie-api` SDK die `mollie/molli
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 2. emeq/mollie-api foundation | 0/0 (TBD) | Not started | - |
+| 2. emeq/mollie-api foundation | 0/8 | Not started | - |
 | 3. Hub-skeleton | 0/0 (TBD) | Not started | - |
 | 4. Mollie Connect OAuth-broker | 0/0 (TBD) | Not started | - |
 | 5. SDK Resources + Webhooks + Pass-through API | 0/0 (TBD) | Not started | - |
