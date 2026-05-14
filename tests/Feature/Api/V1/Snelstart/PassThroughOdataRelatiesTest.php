@@ -9,6 +9,7 @@ use App\Models\PassThroughCall;
 use App\Sanctum\TokenAbilities;
 use Emeq\SnelstartApi\Http\Request\RawSnelstartRequest;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Saloon\Http\Faking\MockClient;
 use Saloon\Http\Faking\MockResponse;
 use Saloon\Http\PendingRequest;
@@ -63,8 +64,39 @@ class PassThroughOdataRelatiesTest extends TestCase
 
         $row = PassThroughCall::query()->first();
         $this->assertNotNull($row);
-        $this->assertStringStartsWith('/relaties', $row->path);
-        $this->assertStringContainsString('top=5', $row->path);
+        $this->assertSame('/relaties', $row->path);
+        $this->assertNotNull($row->query_keys);
+        $this->assertStringContainsString('$top', (string) $row->query_keys);
+    }
+
+    public function test_complex_odata_query_stores_only_query_keys_no_values_in_audit(): void
+    {
+        [, $token, $account] = $this->setupSnelstartConsumer();
+
+        MockClient::global([
+            RawSnelstartRequest::class => MockResponse::make(['value' => []], 200),
+        ]);
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->withHeader('X-Account-Id', $account->external_id)
+            ->getJson('/v1/snelstart/relaties?%24filter=Email%20eq%20%27a%40b.nl%27&%24select=Id%2CNaam&%24top=10')
+            ->assertOk();
+
+        $row = (array) DB::table('pass_through_calls')->latest('id')->first();
+
+        foreach ($row as $col => $val) {
+            if (is_string($val)) {
+                $this->assertStringNotContainsString('a@b.nl', $val, "Audit-kolom {$col} lekt e-mail uit OData filter.");
+                $this->assertStringNotContainsString('Email eq', $val, "Audit-kolom {$col} lekt filter-expression.");
+            }
+        }
+
+        $this->assertSame('/relaties', $row['path']);
+        $this->assertNotNull($row['query_keys']);
+        $keys = explode(',', (string) $row['query_keys']);
+        $this->assertContains('$filter', $keys);
+        $this->assertContains('$select', $keys);
+        $this->assertContains('$top', $keys);
     }
 
     public function test_complex_odata_query_with_filter_and_select_is_proxied(): void

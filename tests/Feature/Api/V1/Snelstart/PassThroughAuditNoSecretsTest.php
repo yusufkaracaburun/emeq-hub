@@ -116,6 +116,28 @@ class PassThroughAuditNoSecretsTest extends TestCase
         $this->assertMatchesRegularExpression('/^[a-f0-9]{12}$/', (string) $row['request_fingerprint']);
     }
 
+    public function test_empty_post_body_yields_null_fingerprint(): void
+    {
+        $consumer = Consumer::factory()->create();
+        $account = Account::factory()->for($consumer)->create(['external_id' => 'school-A']);
+        $connection = Connection::factory()->forSnelstart()->for($account)->create();
+        $this->primeSnelstartToken($connection);
+
+        $token = $consumer->createToken('test', [TokenAbilities::SNELSTART_WRITE])->plainTextToken;
+
+        MockClient::global([
+            RawSnelstartRequest::class => MockResponse::make(['ok' => true], 201),
+        ]);
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->withHeader('X-Account-Id', 'school-A')
+            ->postJson('/v1/snelstart/relaties', [])
+            ->assertCreated();
+
+        $row = (array) DB::table('pass_through_calls')->latest('id')->first();
+        $this->assertNull($row['request_fingerprint'], 'Lege POST-body mag geen constante fingerprint produceren');
+    }
+
     private function doPassThroughCallWithRawSecrets(): void
     {
         $consumer = Consumer::factory()->create();

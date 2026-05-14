@@ -45,10 +45,22 @@ class PassThroughController extends Controller
             ], Response::HTTP_FORBIDDEN);
         }
 
+        if (in_array($method, ['POST', 'PATCH'], true)) {
+            $contentType = strtolower((string) $request->header('Content-Type', ''));
+            if (! str_starts_with($contentType, 'application/json')) {
+                return response()->json([
+                    'error' => 'unsupported_content_type',
+                    'message' => 'Pass-through accepteert alleen application/json voor POST/PATCH.',
+                ], Response::HTTP_UNSUPPORTED_MEDIA_TYPE);
+            }
+            $body = $request->json()->all();
+        } else {
+            $body = null;
+        }
+
         $endpoint = '/'.ltrim($path, '/');
         $query = $request->query();
         $headers = HeaderForwarder::forward($request);
-        $body = in_array($method, ['POST', 'PATCH'], true) ? ($request->json()->all() ?: []) : null;
 
         $start = microtime(true);
         $upstreamError = null;
@@ -102,12 +114,13 @@ class PassThroughController extends Controller
             'connection_id' => $connection->getKey(),
             'provider' => 'snelstart',
             'method' => $method,
-            'path' => $endpoint.($request->getQueryString() !== null ? '?'.$request->getQueryString() : ''),
+            'path' => $endpoint,
+            'query_keys' => $query !== [] ? implode(',', array_keys($query)) : null,
             'status' => $status,
             'duration_ms' => (int) round((microtime(true) - $start) * 1000),
-            'request_fingerprint' => $body === null
-                ? null
-                : substr(hash('sha256', json_encode($body, JSON_THROW_ON_ERROR)), 0, 12),
+            'request_fingerprint' => (is_array($body) && $body !== [])
+                ? substr(hash('sha256', json_encode($body, JSON_THROW_ON_ERROR)), 0, 12)
+                : null,
             'response_size_bytes' => strlen($responseBody),
             'upstream_error' => $upstreamError,
             'created_at' => now(),
