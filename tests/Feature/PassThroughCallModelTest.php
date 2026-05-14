@@ -28,6 +28,22 @@ class PassThroughCallModelTest extends TestCase
         $this->assertFalse(Schema::hasColumn('pass_through_calls', 'updated_at'));
     }
 
+    public function test_query_keys_column_exists_and_is_mass_assignable(): void
+    {
+        $this->assertTrue(Schema::hasColumn('pass_through_calls', 'query_keys'));
+
+        $call = PassThroughCall::factory()->create(['query_keys' => '$top,$filter']);
+
+        $this->assertSame('$top,$filter', $call->fresh()->query_keys);
+    }
+
+    public function test_query_keys_column_is_nullable_by_default(): void
+    {
+        $call = PassThroughCall::factory()->create();
+
+        $this->assertNull($call->fresh()->query_keys);
+    }
+
     public function test_connection_id_survives_connection_delete(): void
     {
         $call = PassThroughCall::factory()->create();
