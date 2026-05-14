@@ -23,7 +23,7 @@ v0.2 bouwt drie samenhangende lagen: (1) `emeq/mollie-api` SDK die `mollie/molli
 - [ ] **Phase 2: emeq/mollie-api foundation** — SDK skeleton + multi-tenant resolver + dual creds + Pest-suite groen
 - [x] **Phase 3: Hub-skeleton** — `consumers`/`accounts`/`connections`-tabellen + Sanctum-PAT-auth + Consumer-routing + Snelstart-credential-velden encrypted *(voltooid 2026-05-14; 5/5 plans, HUB-01 SC-1 t/m SC-5 bewezen)*
 - [ ] **Phase 4: Mollie Connect OAuth-broker** — provider-agnostisch `OAuthFlow`-contract + `MollieConnectOAuthFlow` + encrypted token-storage
-- [ ] **Phase 5a: Mollie SDK Resources + Webhooks + Pass-through API** — Payments/Customers/PaymentMethods/Refunds/Mandates/Subscriptions + Connect-webhook verifier + `/v1/mollie/*` audit-logged
+- [ ] **Phase 5a: Mollie SDK Resources + Webhooks + Pass-through API** — Payments/Customers/PaymentMethods/Refunds/Mandates/Subscriptions/PaymentLinks + Connect-webhook verifier + `/v1/mollie/*` audit-logged (zie ADR `mollie-passthrough-api.md`)
 - [ ] **Phase 5b: Snelstart-pass-through API** — `/v1/snelstart/{path}` pass-through via `HubSnelstartCredentialResolver` + `POST /v1/accounts` + `POST /v1/connections` provisioning-endpoints + audit-logging. Parallel met Phase 4 mogelijk.
 - [ ] **Phase 6: Cashier-Mollie integratie (use-case A)** — Emeq → Consumers billing op Emeq's eigen Mollie
 - [ ] **Phase 7: Account-level subscriptions (use-case B)** — Accounts → eindgebruikers via Connect + Mandates + Subscriptions
@@ -111,7 +111,7 @@ v0.2 bouwt drie samenhangende lagen: (1) `emeq/mollie-api` SDK die `mollie/molli
 **Requirements:** MOLL-03, MOLL-04, HUB-03
 **Working repo:** `packages/mollie-api/` (Resources + DTOs + WebhookVerifier) + `emeq-hub` (`/v1/mollie/*` controllers + audit-log)
 **Context:**
-- MOLL-03 Resources: Payments (create/read/cancel), Customers (read/create), PaymentMethods (list), Refunds (create/read), Mandates (list/get/revoke), Subscriptions (create/read/cancel) — alle 6 in één fase omdat ze dezelfde wrapping-pattern delen
+- MOLL-03 Resources: Payments (create/read/cancel), Customers (read/create), PaymentMethods (list), Refunds (create/read), Mandates (list/get/revoke), Subscriptions (create/read/cancel), PaymentLinks (create/read/list) — alle 7 in één fase omdat ze dezelfde pass-through-pattern delen (zie `.docs/decisions/mollie-passthrough-api.md`)
 - `Idempotency-Key` auto-injectie op writes via Mollie's `IdempotencyKeyGeneratorContract`
 - MOLL-04: `MollieWebhookVerifier` met HMAC-SHA256 (`Mollie-Signature` header) namens platform-secret; Connect-flow betekent platform-signed (niet per-Connection-signed)
 - HUB-03: pass-through `/v1/mollie/*` met Bearer Consumer-PAT → Account → Connection.access_token → SDK-call; audit in `webhook_calls`-tabel (inkomend Consumer-request + uitgaand Mollie-call); fan-out via `spatie/laravel-webhook-client` queueable
@@ -119,7 +119,7 @@ v0.2 bouwt drie samenhangende lagen: (1) `emeq/mollie-api` SDK die `mollie/molli
 - Mollie-docs in `.docs/partners/mollie/` moeten gelinkt staan voor elk endpoint dat geïmplementeerd wordt (geen verzonnen velden)
 **Success Criteria** (what must be TRUE):
   1. Een Consumer kan `POST /v1/mollie/payments` doen met Bearer PAT + Account-ID en krijgt een Mollie-checkout-URL terug die door Mollie als test-mode geldig wordt geaccepteerd
-  2. Alle 6 resources (Payments, Customers, PaymentMethods, Refunds, Mandates, Subscriptions) zijn callable via pass-through API en hun pad in `/docs/api` OpenAPI-spec
+  2. Alle 7 resources (Payments, Customers, PaymentMethods, Refunds, Mandates, Subscriptions, PaymentLinks) zijn callable via pass-through API en hun pad in `/docs/api` OpenAPI-spec
   3. Een inkomende Mollie Connect-webhook met geldige `Mollie-Signature` wordt geaccepteerd en gerouteerd; tampered signature retourneert 400 en wordt niet doorgegeven aan Consumer-callback
   4. Elke pass-through-call schrijft één regel in `webhook_calls` met Consumer-ID, Account-ID, Connection-ID-fingerprint, request-summary en response-status
   5. Twee identieke `POST /v1/mollie/payments` met dezelfde idempotency-key retourneren één Mollie-payment-ID (geen duplicate)
@@ -286,6 +286,7 @@ Verzamelpunt voor ideeën die nog geen milestone hebben. Bij milestone-kickoff w
 - DTO-codegen vanuit OpenAPI specs voor providers die typed-response consumers nodig hebben
 - Hub commerciële features: public billing-flow voor derde-partij Consumers (`HUB-BILLING`), public docs-site `docs.hub.emeq.nl` (`HUB-DOCS`), self-service onboarding (`HUB-ONBOARDING`)
 - `HUB-AUDIT`: admin-acties audit-log via `spatie/laravel-activitylog` (Phase 9 admin-paneel out-of-scope) — pas als compliance of incident-respons het vereist
+- **`MOLL-CONNECT-RES`**: Mollie Connect partner-resources via pass-through (Onboarding-status, Organizations, Profiles, Permissions, ClientLinks) — pad onbekend in v0.2, maar **blokkerend voor host-app productie-go-live** wanneer een Connect-merchant via de Hub moet onboarden. Volgt hetzelfde pass-through-pattern als Phase 5a (zie ADR `mollie-passthrough-api.md`). Promote naar active milestone zodra een host-app dit nodig heeft.
 
 ---
 
