@@ -229,4 +229,5 @@ De Phase 3 `SanctumAbilityTest`-placeholder kan in deze phase tot concrete tests
 | Audit timing | Synchroon na response | Geen queue-dependency, ~1ms cost, geen verlies-risico |
 | Header forward | Whitelist (Accept, Content-Type, If-Match, If-None-Match) | Voorkomt automatische leak van toekomstige Hub-headers |
 | Missing Connection error | 404 + `connection_not_found` | Consistent met cross-Consumer-policy, geen Account-existence-disclosure |
+| Cross-Consumer `account_id` in `POST /v1/connections` | 422 via `Rule::exists` (validation-laag); GET/DELETE `/v1/connections/{id}` blijven 404 via controller-scope | Validation-laag schiet eerder af dan controller-scope; semantisch equivalent (geen info-disclosure over of de Account bestaat). Beide pad-vormen lekken geen state. |
 </gray_areas_resolved>
