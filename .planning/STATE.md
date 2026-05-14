@@ -1,13 +1,13 @@
 ---
 gsd_state_version: 1.0
-milestone: v0.1
-milestone_name: milestone
-status: Phase 01 afgesloten — ready voor `/gsd-plan-phase 2` (Mollie-SDK foundation)
-stopped_at: Phase 01 (snelstart-sdk-finalize) afgesloten; ready voor `/gsd-plan-phase 2` (Mollie-SDK foundation)
-last_updated: "2026-05-14T09:11:53.248Z"
+milestone: shipped-v0.1
+milestone_name: Snelstart-SDK finale
+status: v0.1 SHIPPED 2026-05-14 — ready voor `/gsd-new-milestone v0.2`
+stopped_at: v0.1 milestone-close voltooid (Snelstart-SDK only); v0.2 voorbereid in `.claude/plans/fancy-honking-spring.md`
+last_updated: "2026-05-14T12:30:00.000Z"
 last_activity: 2026-05-14
 progress:
-  total_phases: 5
+  total_phases: 1
   completed_phases: 1
   total_plans: 3
   completed_plans: 3
@@ -18,76 +18,80 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-05-14)
+See: .planning/PROJECT.md (updated 2026-05-14 na v0.1 milestone-close)
 
-**Core value:** Twee fundamenteel verschillende providers (OData/clientkey + REST/OAuth2) productie-gevalideerd via één SDK-pattern, en beide live in één concrete Naschool-feature.
-**Current focus:** Phase 01 — snelstart-sdk-finalize
+**Core value:** Twee fundamenteel verschillende providers (OData/clientkey + REST/OAuth2) productie-gevalideerd via één SDK-pattern, en beide live in één concrete consumer-feature. v0.1 heeft Snelstart-deel bewezen; v0.2 zet Mollie + Connect + Subscriptions + Hub-skeleton op.
+**Current focus:** Geen actieve milestone. v0.2 voorbereid, wacht op `/gsd-new-milestone v0.2`.
 
 ## Current Position
 
-Phase: 2
-Plan: Not started
-Status: Phase 01 afgesloten — ready voor `/gsd-plan-phase 2` (Mollie-SDK foundation)
-Last activity: 2026-05-14
+Milestone: v0.1 → SHIPPED
+Next: v0.2 (Mollie + Connect + Subscriptions + Hub-skeleton, ~8-10 weken)
+Last activity: 2026-05-14 (milestone close)
 
-Progress: [██░░░░░░░░] 20%
+Progress: v0.1 [██████████] 100% — SHIPPED
 
 ## Performance Metrics
 
-**Velocity:**
+**v0.1 Velocity:**
 
-- Total plans completed: 3
-- Average duration: —
-- Total execution time: —
+- Total plans completed: 3 (Phase 1)
+- Total execution time: ~12 uur (2026-05-14 00:42 → 12:02 CEST)
+- Sub-repo werk: snelstart-sdk submodule wiring + Pest-coverage + push
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01-snelstart-sdk-finalize | 3 | ~16 min | ~5 min |
-| 01 | 3 | - | - |
 
 **Recent Trend:**
 
 - Last 3 plans: 01-01 (diagnose, ~6 min), 01-02 (coverage, ~3 min), 01-03 (push + smoke, ~7 min)
-- Trend: phase 1 sneller dan ingeschat (master-plan-aanname ging uit van 30-60 min crash-fix; bleek NO CRASH REPRO)
+- Trend v0.1: phase 1 sneller dan ingeschat (master-plan-aanname 30-60 min crash-fix; bleek NO CRASH REPRO)
 
-*Updated after each plan completion*
+*Updated bij milestone-close 2026-05-14.*
 
 ## Accumulated Context
 
 ### Decisions
 
-Decisions are logged in PROJECT.md Key Decisions table. Recent decisions affecting current work:
+Decisions zijn gelogd in PROJECT.md Key Decisions table. Decisions die uit v0.1 zijn gekomen:
 
-- SDK-first, geen Hub-platform in v0.1 — eerst twee providers productie-valideren
-- Eigen Saloon-wrapper voor Mollie (geen `mollie/mollie-api-php`-dep) — consistency met snelstart-api
-- API-key auth voor Mollie in v0.1 — geen OAuth2 Connect-flow
-- Sequential execution — Track C (Naschool) heeft Track A+B nodig
-- Snelstart `Dto/`+`Resources/` blijven leeg — `RawSnelstartRequest` + OData QueryBuilder dekt 96 endpoints
-- **2026-05-14** — Managed hosting v0.1: Laravel Cloud (Growth, Frankfurt) geaccepteerd; 3 POC-gates vereist vóór go-live. Fallback: Forge + DO AMS3. Zie `.docs/decisions/hosting-platform.md` en `.docs/plans/2026-05-14-laravel-cloud-poc.md`.
-- **2026-05-14** (01-03) — Snelstart-SDK gepusht naar `origin/main` (`16c9ecc`) met `[origin/main]` upstream-tracking; VCS-smoke groen vanuit fresh derde directory. Phase 1 afgesloten (SNEL-01 + SNEL-02 alle success criteria groen).
-- **2026-05-14** (01-03) — Composer-VCS-recept gevalideerd: HTTPS-URL + `"type": "vcs"` + `"emeq/snelstart-api": "dev-main"` werkt zonder authenticatie. Phase 4 (Naschool wiring) kan deze template 1-op-1 hergebruiken.
-- **2026-05-14** (01-03) — Sha-bewijs voor composer-zipball-installs gaat via `composer.lock` `packages[].source.reference`, niet via `vendor/<pkg>/.git rev-parse` (die directory bestaat niet bij `--prefer-dist`). Aanbevolen voor toekomstige Mollie-smoke.
+- ✅ Drop Saloon `MockClient`-pipeline voor exception-mapping tests; PHPUnit-mocks op `Response` zijn cleaner (01-02)
+- ✅ VCS-distributie zonder auth voor publieke SDKs is voldoende (01-03)
+- ✅ `Dto/` + `Resources/` leeg in Snelstart — `RawSnelstartRequest` + OData QueryBuilder dekken 96 endpoints
+- ❌ **Reversed 2026-05-14:** Eigen Saloon-wrapper voor Mollie → vervangen door wrap `mollie/mollie-api-php` direct
+- ❌ **Reversed 2026-05-14:** API-key auth voor Mollie in v0.1 → Mollie Connect vanaf v0.2 dag 1
+- 🆕 **New 2026-05-14:** Subscriptions in v0.2 voor beide use-cases (Emeq→Consumers + Accounts→eindgebruikers)
+- 🆕 **New 2026-05-14:** Mollie facade-alias = `EmeqMollie` (niet `Mollie`) i.v.m. collision met laravel-mollie
 
 ### Pending Todos
 
-None yet.
+Geen actieve todos. v0.2-werk staat in `.claude/plans/fancy-honking-spring.md` en wacht op formele kickoff.
 
 ### Blockers/Concerns
 
-- ~~**Phase 1 risk:** Snelstart fase-4 Pest-crash root-cause is onbekend.~~ **Resolved (01-01 NO CRASH REPRO, 01-02 coverage versterkt naar 107 passed).**
-- **Phase 2 prerequisite:** GitHub-repo `yusufkaracaburun/emeq-mollie-api` bestaat nog niet — moet aangemaakt worden via `gh repo create` als eerste sub-stap van plan 02-01.
-- **Phase 4+5 working-repo:** Code-werk gebeurt in `/Users/yusufkaracaburun/Sites/localhost/school-activities-hub/backend/` (buiten deze workspace). Verificatie van success criteria gebeurt daar, niet hier.
+- **Cashier-Mollie compat-risico (v0.2)**: `mollie/laravel-cashier-mollie` master-branch hangt op PHP 7.2 / Laravel 6-8. Compatibiliteit met PHP 8.4 / Laravel 13 moet worden gecheckt in v0.2 Fase 6 (use-case A integratie). Mogelijk fork-and-update of zelf subscription-laag bouwen.
+- **`yusufkaracaburun/emeq-mollie-api` repo description is stale**: zegt nog "Saloon v3" terwijl die keuze is gereverseerd. Wordt bijgewerkt bij eerste push in v0.2 Fase 1.
 
 ## Deferred Items
 
+Items acknowledged en deferred bij milestone-close 2026-05-14:
+
 | Category | Item | Status | Deferred At |
 |----------|------|--------|-------------|
-| *(none)* | | | |
+| requirement | MOLL-01 (Mollie-SDK skeleton) | Herzien voor v0.2 (wrap mollie-api-php) | 2026-05-14 |
+| requirement | MOLL-02 (Mollie auth + connector) | Herzien voor v0.2 (Connect OAuth-broker) | 2026-05-14 |
+| requirement | MOLL-03 (Mollie resources) | Uitgebreid voor v0.2 (+ Mandates + Subscriptions) | 2026-05-14 |
+| requirement | MOLL-04 (Mollie webhook verifier) | Herzien voor v0.2 (Connect-webhook signing) | 2026-05-14 |
+| requirement | NSCH-01 (Composer-wiring + resolvers) | Mollie-deel verandert (via Hub); Snelstart-deel ongewijzigd | 2026-05-14 |
+| requirement | NSCH-02 (SyncEnrollmentToSnelstartJob) | Ongewijzigd voor v0.2 | 2026-05-14 |
+| requirement | NSCH-03 (Mollie checkout-flow) | Herzien voor v0.2 (via Hub-Connect) | 2026-05-14 |
 
 ## Session Continuity
 
-Last session: 2026-05-14 — Phase 01 voltooid (plan 01-03 SUMMARY geland)
-Stopped at: Phase 01 (snelstart-sdk-finalize) afgesloten; ready voor `/gsd-plan-phase 2` (Mollie-SDK foundation)
-Resume file: None
+Last session: 2026-05-14 — v0.1 milestone-close voltooid
+Stopped at: v0.1 SHIPPED; v0.2 voorbereid maar nog niet gestart
+Resume file: `.claude/plans/fancy-honking-spring.md` (volledige v0.2-scope + faseringsindicatie)
+Next action: `/gsd-new-milestone v0.2`
