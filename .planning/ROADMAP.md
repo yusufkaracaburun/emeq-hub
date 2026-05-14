@@ -79,11 +79,11 @@ v0.2 bouwt drie samenhangende lagen: (1) `emeq/mollie-api` SDK die `mollie/molli
   3. Een Connection bewaard met test-credentials (zowel OAuth-shape als Snelstart-key-shape) toont nooit raw waardes in `php artisan tinker` `->toArray()` output zonder expliciete decrypt-call
   4. Cross-Consumer query-poging (Consumer A's PAT → Account van Consumer B) faalt met 403/404 voor route-level scoping check
   5. Een Snelstart-Connection kan worden aangemaakt met alleen `client_key` + `subscription_key` + `subscription_id` (zonder OAuth-velden); een Mollie-Connection kan worden aangemaakt met alleen `access_token` + `refresh_token` + `expires_at` — beide vormen passeren validatie
-**Plans:** 2/5 plans executed
+**Plans:** 3/5 plans executed
 - [x] 03-01-PLAN.md — Migrations + Eloquent-models + factories voor consumers/accounts/connections (encrypted casts + #[Hidden] + fingerprint-accessor + forSnelstart/forMollie states)
 - [x] 03-02-PLAN.md — Sanctum-config (auth.guards.sanctum + consumers-provider + bootstrap apiPrefix:v1) + App\Sanctum\TokenAbilities constants-class + routes/api.php skeleton
 - [ ] 03-03-PLAN.md — routes/api.php /v1/ping + PingController + PingTest (3 tests) + SanctumAbilityTest (3 tests, 1 incomplete placeholder voor Phase 5b)
-- [ ] 03-04-PLAN.md — ConnectionEncryptionTest (7 tests: at-rest + Hidden + fingerprint) + ConsumerAccountScopingTest (4 tests: cross-Consumer query-isolation)
+- [x] 03-04-PLAN.md — ConnectionEncryptionTest (7 tests: at-rest + Hidden + fingerprint) + ConsumerAccountScopingTest (4 tests: cross-Consumer query-isolation)
 - [ ] 03-05-PLAN.md — hub:consumer:create artisan-command + DatabaseSeeder demo-data (production-guarded) + HubConsumerCreateTest (5 tests) + Phase 3 acceptance-run
 
 #### Phase 4: Mollie Connect OAuth-broker
@@ -246,7 +246,7 @@ v0.2 bouwt drie samenhangende lagen: (1) `emeq/mollie-api` SDK die `mollie/molli
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 2. emeq/mollie-api foundation | 0/8 | Not started | - |
-| 3. Hub-skeleton | 2/5 | In Progress|  |
+| 3. Hub-skeleton | 3/5 | In Progress|  |
 | 4. Mollie Connect OAuth-broker | 0/0 (TBD) | Not started | - |
 | 5a. Mollie SDK Resources + Webhooks + Pass-through API | 0/0 (TBD) | Not started | - |
 | 5b. Snelstart-pass-through API | 0/0 (TBD) | Not started | - |
