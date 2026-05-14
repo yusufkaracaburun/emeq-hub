@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\ResolveMollieAccount;
 use App\Http\Middleware\ResolveSnelstartAccount;
 use App\Http\Middleware\SetNoIndexHeaders;
 use Illuminate\Foundation\Application;
@@ -21,6 +22,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->api(prepend: ['throttle:api']);
         $middleware->alias([
             'resolve.snelstart.account' => ResolveSnelstartAccount::class,
+            'resolve.mollie.account' => ResolveMollieAccount::class,
             'abilities' => CheckAbilities::class,
             'ability' => CheckForAnyAbility::class,
         ]);
