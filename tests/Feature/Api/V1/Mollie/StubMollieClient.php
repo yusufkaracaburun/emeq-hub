@@ -23,6 +23,8 @@ use Mollie\Api\MollieApiClient;
  * @property mixed $paymentRefunds
  * @property mixed $refunds
  * @property mixed $mandates
+ * @property mixed $subscriptions
+ * @property mixed $paymentLinks
  */
 class StubMollieClient extends MollieApiClient
 {
