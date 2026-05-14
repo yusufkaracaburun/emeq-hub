@@ -39,7 +39,10 @@ Twee Saloon-gebaseerde Laravel SDK-packages (`emeq/snelstart-api`, `emeq/mollie-
   3. `git branch -vv` toont upstream-tracking ingesteld (`[origin/main]`) op de main-branch
   4. De SDK is `composer require`-baar via VCS-repository-entry door een derde Laravel-project (smoke: `composer require emeq/snelstart-api:dev-main` slaagt zonder VCS-auth)
 
-**Plans**: TBD
+**Plans:** 3 plans
+- [ ] 01-01-PLAN.md — Diagnose Pest-crash op feature-branch (root-cause vastleggen, geen code-fix)
+- [ ] 01-02-PLAN.md — Fix Pest-crash + uitbreiden SnelstartConnectorTest met directe getRequestException-coverage (≥30 groene tests)
+- [ ] 01-03-PLAN.md — Merge + push naar GitHub met upstream-tracking (checkpoint) + VCS-smoke-test vanuit derde directory
 
 ### Phase 2: Mollie-SDK foundation
 **Goal**: De `emeq/mollie-api` SDK heeft een leefbaar skeleton met API-key-auth en een werkende Saloon-connector, gespiegeld op het Snelstart-pattern.
@@ -126,7 +129,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Snelstart-SDK finalize | 0/TBD | Not started | - |
+| 1. Snelstart-SDK finalize | 0/3 | Not started | - |
 | 2. Mollie-SDK foundation | 0/TBD | Not started | - |
 | 3. Mollie-SDK resources + webhooks | 0/TBD | Not started | - |
 | 4. Naschool wiring — Snelstart | 0/TBD | Not started | - |
