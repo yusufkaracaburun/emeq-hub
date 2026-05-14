@@ -8,7 +8,7 @@
     "require": {
         "php": "^8.3",
         "dedoc/scramble": "^0.13.22",
-        "emeq/snelstart-api": "dev-main",
+        "emeq/snelstart-api": "dev-master",
         "laravel/framework": "^13.8",
         "laravel/horizon": "^5.46",
         "laravel/sanctum": "^4.3",
@@ -101,9 +101,19 @@
     },
     "minimum-stability": "dev",
     "prefer-stable": true,
-    "repositories": [{
-        "name": "snelstart",
-        "type": "path",
-        "url": "packages/snelstart-api"
-    }]
+    "repositories": [
+        {
+            "name": "snelstart-path",
+            "type": "path",
+            "url": "packages/snelstart-api",
+            "options": {
+                "symlink": true
+            }
+        },
+        {
+            "name": "snelstart-vcs",
+            "type": "vcs",
+            "url": "https://github.com/yusufkaracaburun/emeq-snelstart-api.git"
+        }
+    ]
 }
