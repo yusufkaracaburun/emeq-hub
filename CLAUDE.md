@@ -13,7 +13,7 @@ Een set van losse, Saloon-gebaseerde Laravel SDK-packages (`emeq/snelstart-api`,
 
 ### Constraints
 
-- **Tech stack**: PHP 8.4, Laravel 13.9, Saloon v3 (met openstaande v4-upgrade-overweging), Spatie laravel-data, Pest. Geen afwijking zonder approval.
+- **Tech stack**: PHP 8.4, Laravel 13.9, Saloon v3 (met openstaande v4-upgrade-overweging), Spatie laravel-data. Tests: PHPUnit 12 in de Hub, Pest in SDK-packages (`packages/snelstart-api/`). Geen afwijking zonder approval.
 - **Timeline**: v0.1-deadline ~4 weken vanaf 2026-05-14.
 - **Repo-grenzen**: SDK-packages krijgen géén Hub-domeinmodellen (`Connection`, `Account`, etc.) — invariant uit CLAUDE.md.
 - **Tokens encrypted at rest**: gevoelige credentials (clientkey, subscription-key, API-key) nooit raw in DB of logs. Fingerprint-only voor debugging.
@@ -24,19 +24,35 @@ Een set van losse, Saloon-gebaseerde Laravel SDK-packages (`emeq/snelstart-api`,
 <!-- GSD:stack-start source:STACK.md -->
 ## Technology Stack
 
-Technology stack not yet documented. Will populate after codebase mapping or first phase.
+Zie de Laravel Boost-guidelines onderaan dit bestand (`.ai/project rules` block) voor de canonical stack-beschrijving: PHP 8.4 / Laravel 13.9 / Postgres 16 / Redis 7 / Caddy 2 / Sanctum v4 / Horizon v5 / Spatie webhook-server+client / dedoc/scramble. SDK-laag: Saloon v3 + Spatie laravel-data.
+
+Een aparte `.planning/STACK.md` wordt aangemaakt bij `/gsd-map-codebase` of de eerste phase die diepere stack-conventies vastlegt.
 <!-- GSD:stack-end -->
 
 <!-- GSD:conventions-start source:CONVENTIONS.md -->
 ## Conventions
 
-Conventions not yet established. Will populate as patterns emerge during development.
+Authoritative regels staan in `.ai/rules/` (auto-loaded) en `.ai/guidelines/emeq-hub/` (in de Laravel Boost-block onderaan):
+
+- **Taal**: code/identifiers Engels, commits/PRs/docs/conversatie Nederlands, partner-domeintermen volgen de partner-API (`.ai/rules/global.md`).
+- **Engineering**: chirurgisch wijzigen, conflicten oppervlakken niet uitmiddelen, lezen vóór schrijven (`.ai/rules/engineering.md`).
+- **Security**: tokens encrypted at rest, fingerprint-only in logs, per-Connection webhook-secrets (`.ai/rules/global.md`).
+- **Geen verzonnen partner-features**: alles moet kloppen met `.docs/partners/<provider>/`.
+
+Een aparte `.planning/CONVENTIONS.md` volgt zodra projectspecifieke patronen stollen die niet in `.ai/rules/` thuishoren.
 <!-- GSD:conventions-end -->
 
 <!-- GSD:architecture-start source:ARCHITECTURE.md -->
 ## Architecture
 
-Architecture not yet mapped. Follow existing patterns found in the codebase.
+De canonical architectuur-beschrijving (Consumer → Account → Connection → SDK-call chain, domeinmodel-tabel, invariants) staat in de Laravel Boost-block onderaan dit bestand (`.ai/project rules`). Lees die vóór architecturele beslissingen.
+
+Snelle pointers:
+- **Planning-artefacten**: `.planning/ROADMAP.md`, `.planning/STATE.md`, `.planning/phases/<NN>-<slug>/` voor lopend fase-werk.
+- **Werkdocumentatie** (lokaal, gitignored): `.docs/decisions/` (ADRs), `.docs/partners/<provider>/` (officiële API-research), `.docs/plans/`, `.docs/errors/`, `.docs/stack/`. Lees `.docs/README.md` voor de indeling.
+- **Routes**: alleen `routes/web.php` (smoke `/`, `/up`) en `routes/console.php` zijn geland. `routes/api.php` + `routes/webhooks.php` zijn gepland.
+
+Een aparte `.planning/ARCHITECTURE.md` wordt aangemaakt door `/gsd-map-codebase` zodra meer dan de huidige skeleton-laag bestaat.
 <!-- GSD:architecture-end -->
 
 <!-- GSD:skills-start source:skills/ -->
@@ -117,9 +133,17 @@ Open `http://hub.emeq.test:8090/up` → moet `{"status":"up","database":"ok","re
 php artisan migrate
 php artisan migrate:fresh --seed
 
-# Tests
+# Tests — Hub (PHPUnit)
 
-./vendor/bin/pest --parallel
+php artisan test --compact
+php artisan test --compact --filter=ExampleTest
+
+# Tests — SDK-package (Pest, eigen vendor)
+
+cd packages/snelstart-api && ./vendor/bin/pest
+
+# Format
+
 ./vendor/bin/pint --dirty --format agent   # voor commit
 
 # Horizon
@@ -141,6 +165,11 @@ composer audit                              # zie ignored advisories in composer
 
 ```
 routes/web.php       smoke: GET /, GET /up
+routes/console.php   artisan-only commands (inspire)
+```
+
+Gepland (nog niet geland in code):
+```
 routes/api.php       /v1/* — consumer-API (Bearer Sanctum)
 routes/webhooks.php  /webhooks/{provider} — inkomend van partners (no auth, signature-verified per provider)
 ```

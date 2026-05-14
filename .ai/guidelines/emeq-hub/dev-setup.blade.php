@@ -36,8 +36,14 @@ Open `http://hub.emeq.test:8090/up` → moet `{"status":"up","database":"ok","re
 php artisan migrate
 php artisan migrate:fresh --seed
 
-# Tests
-./vendor/bin/pest --parallel
+# Tests — Hub (PHPUnit)
+php artisan test --compact
+php artisan test --compact --filter=ExampleTest
+
+# Tests — SDK-package (Pest, eigen vendor)
+cd packages/snelstart-api && ./vendor/bin/pest
+
+# Format
 ./vendor/bin/pint --dirty --format agent   # voor commit
 
 # Horizon
@@ -57,6 +63,11 @@ composer audit                              # zie ignored advisories in composer
 @verbatim
 ```
 routes/web.php       smoke: GET /, GET /up
+routes/console.php   artisan-only commands (inspire)
+```
+
+Gepland (nog niet geland in code):
+```
 routes/api.php       /v1/* — consumer-API (Bearer Sanctum)
 routes/webhooks.php  /webhooks/{provider} — inkomend van partners (no auth, signature-verified per provider)
 ```
