@@ -2,17 +2,16 @@
 gsd_state_version: 1.0
 milestone: v0.2
 milestone_name: — Mollie + Connect + Subscriptions + Hub-skeleton
-status: executing
-stopped_at: Phase 02 (out-of-tree) + Phase 03 + Phase 04 voltooid; Phase 05a ready for /gsd-plan-phase
-last_updated: "2026-05-14T20:45:00.000Z"
+status: verifying
+stopped_at: Phase 5a context gathered
+last_updated: "2026-05-14T19:02:38.389Z"
 last_activity: 2026-05-14
 progress:
   total_phases: 9
-  completed_phases: 4
+  completed_phases: 3
   total_plans: 23
-  completed_plans: 23
-  percent: 100
-  note: "Phase 2 telt als 8 completed plans — alle SDK-werk in sub-repo, geen Hub-commits per plan; Phase 5a is uit Phase-2-blocker maar valt deels onder MOLL-03 (= Phase 5a-scope, niet Phase 2)"
+  completed_plans: 15
+  percent: 65
 ---
 
 # Project State
@@ -150,7 +149,7 @@ Items acknowledged en deferred bij milestone-close 2026-05-14:
 
 ## Session Continuity
 
-Last session: 2026-05-14T17:19:24.678Z
-Stopped at: Completed 04-02-PLAN.md
-Resume file: None
+Last session: 2026-05-14T19:02:38.384Z
+Stopped at: Phase 5a context gathered
+Resume file: .planning/phases/05a-mollie-sdk-resources-webhooks-pass-through-api/05a-CONTEXT.md
 Next action: `/gsd-plan-phase 5b` voor Snelstart-pass-through API (depends on Phase 3 only) of `/gsd-plan-phase 4` voor Mollie Connect OAuth-broker
