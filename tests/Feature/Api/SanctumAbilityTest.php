@@ -2,6 +2,8 @@
 
 namespace Tests\Feature\Api;
 
+use App\Models\Account;
+use App\Models\Connection;
 use App\Models\Consumer;
 use App\Sanctum\TokenAbilities;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -40,10 +42,20 @@ class SanctumAbilityTest extends TestCase
 
     public function test_token_without_required_ability_is_rejected(): void
     {
-        // /v1/ping eist (in Phase 3) geen specifieke ability — alleen auth:sanctum.
-        // Wanneer Phase 5b een route met ->middleware('ability:snelstart:read')
-        // toevoegt, wordt deze test ingevuld met een 403-assertion op een
-        // token met andere abilities.
-        $this->markTestIncomplete('Wacht op /v1/snelstart/* met ability:snelstart:read in Phase 5b');
+        // /v1/snelstart/{path} eist `snelstart:read` (of write/*) op GET — een
+        // token met alleen `mollie:read` moet 403 insufficient_ability krijgen.
+        $consumer = Consumer::factory()->create();
+        $account = Account::factory()->for($consumer)->create(['external_id' => 'school-A']);
+        Connection::factory()->forSnelstart()->for($account)->create();
+
+        $token = $consumer
+            ->createToken('mollie-only', [TokenAbilities::MOLLIE_READ])
+            ->plainTextToken;
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->withHeader('X-Account-Id', 'school-A')
+            ->getJson('/v1/snelstart/echo/ping')
+            ->assertStatus(403)
+            ->assertJsonPath('error', 'insufficient_ability');
     }
 }

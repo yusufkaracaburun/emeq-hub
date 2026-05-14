@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\V1\AccountController;
 use App\Http\Controllers\Api\V1\ConnectionController;
 use App\Http\Controllers\Api\V1\PingController;
+use App\Http\Controllers\Api\V1\Snelstart\PassThroughController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -21,4 +22,9 @@ Route::middleware('auth:sanctum')->group(function (): void {
     Route::post('/connections', [ConnectionController::class, 'store'])->name('api.connections.store');
     Route::get('/connections/{connection}', [ConnectionController::class, 'show'])->name('api.connections.show');
     Route::delete('/connections/{connection}', [ConnectionController::class, 'destroy'])->name('api.connections.destroy');
+
+    Route::any('/snelstart/{path}', PassThroughController::class)
+        ->where('path', '.*')
+        ->middleware('resolve.snelstart.account')
+        ->name('api.snelstart.passthrough');
 });
