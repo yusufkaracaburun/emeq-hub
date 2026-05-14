@@ -2,7 +2,11 @@
 
 use App\Http\Controllers\Api\V1\AccountController;
 use App\Http\Controllers\Api\V1\ConnectionController;
+use App\Http\Controllers\Api\V1\Mollie\CustomersController;
+use App\Http\Controllers\Api\V1\Mollie\MandatesController;
+use App\Http\Controllers\Api\V1\Mollie\PaymentMethodsController;
 use App\Http\Controllers\Api\V1\Mollie\PaymentsController;
+use App\Http\Controllers\Api\V1\Mollie\RefundsController;
 use App\Http\Controllers\Api\V1\OAuth\CallbackController;
 use App\Http\Controllers\Api\V1\OAuth\InitController;
 use App\Http\Controllers\Api\V1\PingController;
@@ -40,6 +44,20 @@ Route::middleware('auth:sanctum')->group(function (): void {
         Route::post('/payments', [PaymentsController::class, 'store'])->name('api.mollie.payments.store');
         Route::get('/payments/{id}', [PaymentsController::class, 'show'])->name('api.mollie.payments.show');
         Route::delete('/payments/{id}', [PaymentsController::class, 'destroy'])->name('api.mollie.payments.destroy');
+
+        Route::get('/customers', [CustomersController::class, 'index'])->name('api.mollie.customers.index');
+        Route::get('/customers/{id}', [CustomersController::class, 'show'])->name('api.mollie.customers.show');
+        Route::post('/customers', [CustomersController::class, 'store'])->name('api.mollie.customers.store');
+
+        Route::get('/payment-methods', PaymentMethodsController::class)->name('api.mollie.payment-methods.list');
+
+        Route::post('/payments/{id}/refunds', [RefundsController::class, 'store'])->name('api.mollie.payments.refunds.store');
+        Route::get('/payments/{id}/refunds', [RefundsController::class, 'index'])->name('api.mollie.payments.refunds.index');
+        Route::get('/refunds/{id}', [RefundsController::class, 'show'])->name('api.mollie.refunds.show');
+
+        Route::get('/customers/{id}/mandates', [MandatesController::class, 'index'])->name('api.mollie.customers.mandates.index');
+        Route::get('/customers/{id}/mandates/{mandate_id}', [MandatesController::class, 'show'])->name('api.mollie.customers.mandates.show');
+        Route::delete('/customers/{id}/mandates/{mandate_id}', [MandatesController::class, 'destroy'])->name('api.mollie.customers.mandates.destroy');
     });
 });
 
