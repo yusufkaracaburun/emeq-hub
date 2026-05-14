@@ -1,18 +1,17 @@
 ---
 gsd_state_version: 1.0
 milestone: v0.2
-milestone_name: Mollie + Connect + Subscriptions + Hub-skeleton
-status: planning
-last_updated: "2026-05-14T12:00:00.000Z"
-last_activity: 2026-05-14
+milestone_name: — Mollie + Connect + Subscriptions + Hub-skeleton
+status: executing
+stopped_at: ROADMAP.md, REQUIREMENTS.md en STATE.md bijgewerkt voor Phase 5a/5b-split en HUB-05; 14/14 requirements gemapped; traceability klopt
+last_updated: "2026-05-14T13:42:08.766Z"
+last_activity: 2026-05-14 -- Phase 03 planning complete
 progress:
   total_phases: 9
   completed_phases: 0
-  total_plans: 0
+  total_plans: 13
   completed_plans: 0
   percent: 0
-current_position:
-  next_phase: 3
 ---
 
 # Project State
@@ -28,8 +27,8 @@ See: .planning/PROJECT.md (updated 2026-05-14 na v0.1 milestone-close)
 
 Phase: Not started — next phase = 3 (Hub-skeleton). Snelstart-test-tak prioriteit; Mollie-tak (Phase 2) parallel in aparte sessie.
 Plan: —
-Status: Roadmap aangepast met Phase 5a/5b-split en HUB-05; klaar voor Scramble quick-task gevolgd door `/gsd-plan-phase 3`
-Last activity: 2026-05-14 — Phase 5 gesplitst in 5a (Mollie) + 5b (Snelstart-pass-through) + HUB-05 toegevoegd aan REQUIREMENTS.md
+Status: Ready to execute
+Last activity: 2026-05-14 -- Phase 03 planning complete
 
 ## Performance Metrics
 
