@@ -112,6 +112,7 @@ Decisions zijn gelogd in PROJECT.md Key Decisions table. Decisions die uit v0.1 
 | 260514-iai | App-wide noindex/nofollow voor bots | 2026-05-14 | 0354074 | [260514-iai-app-wide-noindex-nofollow-voor-bots](./quick/260514-iai-app-wide-noindex-nofollow-voor-bots/) |
 | 260514-ndk | Sluit Phase 3 SC-3-gap: refresh_token encryption-at-rest test | 2026-05-14 | d4c31d3 | [260514-ndk-sluit-sc-3-gap-voor-phase-3-voeg-refresh](./quick/260514-ndk-sluit-sc-3-gap-voor-phase-3-voeg-refresh/) |
 | 260514-nup | Cleanup Phase 3 review-findings (BL-02 + WR-01 + WR-03) | 2026-05-14 | 1fcde28 | [260514-nup-cleanup-phase-3-review-findings-bl-02-ab](./quick/260514-nup-cleanup-phase-3-review-findings-bl-02-ab/) |
+| 260514-qxk | Fix 05b CRITICAL findings (CR-01 + CR-02 + CR-03) | 2026-05-14 | 286dd99 | [260514-qxk-fix-05b-critical-findings-body-forwardin](./quick/260514-qxk-fix-05b-critical-findings-body-forwardin/) |
 
 ### Roadmap Evolution
 
