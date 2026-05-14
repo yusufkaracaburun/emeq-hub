@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v0.2
 milestone_name: — Mollie + Connect + Subscriptions + Hub-skeleton
 status: executing
-stopped_at: Phase 4 context gathered (16 decisions, 5 areas)
-last_updated: "2026-05-14T17:02:24.329Z"
+stopped_at: Completed 04-02-PLAN.md
+last_updated: "2026-05-14T17:11:13.228Z"
 last_activity: 2026-05-14
 progress:
   total_phases: 9
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 23
-  completed_plans: 10
-  percent: 43
+  completed_plans: 12
+  percent: 52
 ---
 
 # Project State
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-05-14 na v0.1 milestone-close)
 ## Current Position
 
 Phase: 04 (mollie-connect-oauth-broker) — EXECUTING
-Plan: 2 of 5
+Plan: 3 of 5
 Status: Ready to execute
 Last activity: 2026-05-14
 
@@ -56,6 +56,7 @@ Last activity: 2026-05-14
 
 *Updated 2026-05-14 — plan 03-05 voltooid; Phase 03 volledig afgerond.*
 | Phase 04 P01 | 25 | 2 tasks | 6 files |
+| Phase 04 P02 | ~15 min | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -83,6 +84,9 @@ Decisions zijn gelogd in PROJECT.md Key Decisions table. Decisions die uit v0.1 
 - 🆕 **New 2026-05-14 (03-05):** `DatabaseSeeder` `User::factory()`-pad krijgt eigen `exists()`-guard — plan-action stond `User::factory()->create()` als-is maar dat crasht op `users.email_unique` bij 2× `db:seed` zonder `migrate:fresh`. Minimale Rule-1-fix die plan-acceptance-grep (`User::factory == 1`) én plan-success-criterion (idempotency) tegelijk respecteert
 - 🆕 **New 2026-05-14 (03-05):** `hub:consumer:create`-command gebruikt property-stijl `protected $signature`/`$description` i.p.v. de nieuwere `#[Signature]`/`#[Description]`-attributes uit Laravel 12+ `make:command`-output — matched `routes/console.php`-conventie en blijft compatibel met acceptance-grep
 - [Phase ?]: Phase 04-01: OAuthFlow-contract in Hub-laag (app/OAuth/Contracts/, D-13); FakeOAuthFlow test-fixture in app/OAuth/Testing/ runtime-namespace (D-12) — container-bindable in feature-tests
+- [Phase ?]: MollieConnectOAuthFlow + Registry zonder declare(strict_types=1) — Hub-tree-conventie wint
+- [Phase ?]: MOLLIE_CONNECT_*-env-keys in eigen .env.example-blok, gescheiden van MOLLIE_PARTNER_* (verschillende rollen)
+- [Phase ?]: OAuthFlowRegistry::for() gooit InvalidArgumentException met NL-message
 
 ### Pending Todos
 
@@ -132,7 +136,7 @@ Items acknowledged en deferred bij milestone-close 2026-05-14:
 
 ## Session Continuity
 
-Last session: 2026-05-14T17:02:19.093Z
-Stopped at: Phase 4 context gathered (16 decisions, 5 areas)
+Last session: 2026-05-14T17:11:13.224Z
+Stopped at: Completed 04-02-PLAN.md
 Resume file: None
 Next action: `/gsd-plan-phase 5b` voor Snelstart-pass-through API (depends on Phase 3 only) of `/gsd-plan-phase 4` voor Mollie Connect OAuth-broker
