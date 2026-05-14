@@ -22,7 +22,7 @@ v0.2 bouwt drie samenhangende lagen: (1) `emeq/mollie-api` SDK die `mollie/molli
 
 - [ ] **Phase 2: emeq/mollie-api foundation** — SDK skeleton + multi-tenant resolver + dual creds + Pest-suite groen
 - [x] **Phase 3: Hub-skeleton** — `consumers`/`accounts`/`connections`-tabellen + Sanctum-PAT-auth + Consumer-routing + Snelstart-credential-velden encrypted *(voltooid 2026-05-14; 5/5 plans, HUB-01 SC-1 t/m SC-5 bewezen)*
-- [ ] **Phase 4: Mollie Connect OAuth-broker** — provider-agnostisch `OAuthFlow`-contract + `MollieConnectOAuthFlow` + encrypted token-storage
+- [x] **Phase 4: Mollie Connect OAuth-broker** — provider-agnostisch `OAuthFlow`-contract + `MollieConnectOAuthFlow` + encrypted token-storage *(voltooid 2026-05-14; 5/5 plans, alle 5 SC's bewezen, BLOCKING acceptance 8/8 + 129/129 tests)*
 - [ ] **Phase 5a: Mollie SDK Resources + Webhooks + Pass-through API** — Payments/Customers/PaymentMethods/Refunds/Mandates/Subscriptions/PaymentLinks + Connect-webhook verifier + `/v1/mollie/*` audit-logged (zie ADR `mollie-passthrough-api.md`)
 - [ ] **Phase 5b: Snelstart-pass-through API** — `/v1/snelstart/{path}` pass-through via `HubSnelstartCredentialResolver` + `POST /v1/accounts` + `POST /v1/connections` provisioning-endpoints + audit-logging. Parallel met Phase 4 mogelijk.
 - [ ] **Phase 6: Cashier-Mollie integratie (use-case A)** — Emeq → Consumers billing op Emeq's eigen Mollie
@@ -98,18 +98,18 @@ v0.2 bouwt drie samenhangende lagen: (1) `emeq/mollie-api` SDK die `mollie/molli
 - Automatic refresh ruim vóór expiry (`.ai/rules/global.md`: niet wachten op 401)
 - Encrypted-at-rest; geen raw tokens in logs/exceptions — alleen fingerprints
 **Success Criteria** (what must be TRUE):
-  1. Een Account kan via `GET /v1/oauth/mollie/authorize?account=…` doorlinken naar Mollie's authorization-URL met juiste `client_id`, `state`, en `redirect_uri`
-  2. Callback op `/v1/oauth/mollie/callback?code=…&state=…` ruilt authorization-code in voor `access_token` + `refresh_token` en bewaart die encrypted op de juiste Connection
+  1. Een Consumer kan via `POST /v1/oauth/mollie/init` (Sanctum + `ability:mollie:write`, JSON body `{account_external_id}`) een pending Connection laten pre-creëren en in de JSON-respons `{connection_id, redirect_url}` de Mollie authorization-URL ontvangen met juiste `client_id`, `state`, en `redirect_uri` *(D-01 + D-08; CONTEXT overstijgt pre-discuss ROADMAP-wording `GET /authorize?…`)*
+  2. Callback op `GET /v1/oauth/mollie/callback?code=…&state=…` ruilt authorization-code in voor `access_token` + `refresh_token` en bewaart die encrypted op de juiste Connection
   3. Een Connection met `expires_at` < 5 minuten triggert automatische refresh (`refreshToken()`) en updatet `access_token`/`expires_at` zonder dat de pass-through-API een 401 ziet
   4. `OAuthFlow`-contract heeft een tweede dummy-implementatie (test-fixture, niet productie) die laat zien dat het pattern niet Mollie-specifiek is
-  5. Tampered `state`-parameter (CSRF-check) wordt afgewezen met 400
+  5. Tampered/expired/replay `state`-parameter (CSRF-check) wordt afgewezen met 400
 **Plans:** 5 plans
 
 - [x] 04-01-PLAN.md — OAuthFlow-contract + FakeOAuthFlow + migration + Connection-model edit + factory-states + OAuthFlowContractTest (SC-4 bewezen)
 - [x] 04-02-PLAN.md — MollieConnectOAuthFlow (Http::post direct) + OAuthFlowRegistry + config/services.mollie + .env.example + AppServiceProvider OAuthFlow-binding + Http::fake-test
 - [x] 04-03-PLAN.md — MollieConnectionContext (scoped) + HubMollieCredentialResolver (lazy refresh D-04/D-06) + AppServiceProvider SDK-bindings + 3 testpaden
-- [ ] 04-04-PLAN.md — InitController + CallbackController + routes/api.php + 7 feature-tests (SC-1 + SC-2 + SC-5 bewezen)
-- [ ] 04-05-PLAN.md — PruneOAuthPendingConnections command + test + BLOCKING migrate + full test-suite Phase-acceptance
+- [x] 04-04-PLAN.md — InitController + CallbackController + routes/api.php + 7 feature-tests (SC-1 + SC-2 + SC-5 bewezen)
+- [x] 04-05-PLAN.md — PruneOAuthPendingConnections command + test + BLOCKING migrate + full test-suite Phase-acceptance (8/8 groen, 129/129 tests)
 
 #### Phase 5a: Mollie SDK Resources + Webhooks + Pass-through API
 **Goal:** Een werkende end-to-end Mollie-pass-through: Consumer doet HTTP-call naar Hub, Hub resolved Connection, SDK doet Mollie-call, response stroomt terug — voor alle 6 in-scope resources, inclusief inkomende webhook-verificatie.
