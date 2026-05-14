@@ -17,14 +17,13 @@ Een set van losse, Saloon-gebaseerde Laravel SDK-packages (`emeq/snelstart-api`,
 
 <!-- Shipped and confirmed valuable. -->
 
-(None yet — ship to validate)
+- [x] **SNEL-01** — Snelstart-SDK Pest-suite groen (107 passed / 187 assertions). Gevalideerd in Phase 1 (`fase-4 crash` bleek NO REPRO op `main @ 76e0797`; rewrote SnelstartConnectorTest van 1 → 12 cases met directe `getRequestException()`-coverage).
+- [x] **SNEL-02** — Snelstart-SDK gepusht naar `github.com:yusufkaracaburun/emeq-snelstart-api` met upstream-tracking. VCS-installeerbaar zonder auth bewezen via smoke-test.
 
 ### Active
 
 <!-- v0.1 scope (~4 weken). Mapped naar GSD-fases via .planning/REQUIREMENTS.md. -->
 
-- [ ] **SNEL-01** — Snelstart-SDK fase-4 Pest-crash opgelost; tests groen lokaal
-- [ ] **SNEL-02** — Snelstart-SDK gepusht naar `github.com:yusufkaracaburun/emeq-snelstart-api`
 - [ ] **MOLL-01** — Mollie-SDK skeleton + ServiceProvider + `MollieCredentialResolver`-contract
 - [ ] **MOLL-02** — Mollie API-key auth + Saloon `MollieConnector` + error mapping
 - [ ] **MOLL-03** — Resources: Payments, Customers, PaymentMethods, Refunds
@@ -50,8 +49,7 @@ Een set van losse, Saloon-gebaseerde Laravel SDK-packages (`emeq/snelstart-api`,
   - `packages/snelstart-api/` ↔ `github.com:yusufkaracaburun/emeq-snelstart-api` (sub-repo, geregistreerd in `planning.sub_repos`)
   - `packages/mollie-api/` ↔ nieuw te maken `github.com:yusufkaracaburun/emeq-mollie-api`
   - `/Users/yusufkaracaburun/Sites/localhost/school-activities-hub/` — Naschool app, **buiten** deze workspace
-- **Snelstart-SDK staat**: fases 1-5 lokaal **gecommit** maar **niet gepusht** (`no upstream configured`). `OData/{Filter,Guid,QueryBuilder}.php` aanwezig. `Dto/` en `Resources/` leeg by design.
-- **Snelstart fase-4 Pest-crash** — root-cause onbekend; plan: `MockClient`-pipeline droppen, exceptions direct unit-testen.
+- **Snelstart-SDK staat**: gepusht naar `origin/main` @ `16c9ecc` (Phase 1 afgerond 2026-05-14), upstream-tracking actief, VCS-installeerbaar zonder auth. `OData/{Filter,Guid,QueryBuilder}.php` aanwezig. `Dto/` en `Resources/` leeg by design. SnelstartConnectorTest geheradeerd naar 12 cases / 22 datasets / 37 assertions.
 - **Naschool integratie-pattern**: Stancl-tenancy met per-tenant credentials in `Tenant->settings()` (central `tenant_admin` DB).
 - **Verplicht: feature-validatie per SDK**. Niet "code in productie", maar "één concrete Naschool-feature draait erop". Snelstart: `EnrollmentConfirmed` → verkoopfactuur. Mollie: vrijwillige-bijdrage checkout-flow.
 
