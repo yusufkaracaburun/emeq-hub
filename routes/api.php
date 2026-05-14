@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Api\V1\AccountController;
+use App\Http\Controllers\Api\V1\ConnectionController;
 use App\Http\Controllers\Api\V1\PingController;
 use Illuminate\Support\Facades\Route;
 
@@ -13,4 +15,10 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth:sanctum')->group(function (): void {
     Route::get('/ping', PingController::class)->name('api.ping');
+
+    Route::post('/accounts', [AccountController::class, 'store'])->name('api.accounts.store');
+
+    Route::post('/connections', [ConnectionController::class, 'store'])->name('api.connections.store');
+    Route::get('/connections/{connection}', [ConnectionController::class, 'show'])->name('api.connections.show');
+    Route::delete('/connections/{connection}', [ConnectionController::class, 'destroy'])->name('api.connections.destroy');
 });
