@@ -19,6 +19,7 @@ Een Hub-platform en losse, Saloon-gebaseerde Laravel SDK-packages (`emeq/snelsta
 
 - [x] **SNEL-01** — Snelstart-SDK Pest-suite groen (107 passed / 187 assertions). Gevalideerd in Phase 1 (`fase-4 crash` bleek NO REPRO op `main @ 76e0797`; rewrote SnelstartConnectorTest van 1 → 12 cases met directe `getRequestException()`-coverage).
 - [x] **SNEL-02** — Snelstart-SDK gepusht naar `github.com:yusufkaracaburun/emeq-snelstart-api` met upstream-tracking. VCS-installeerbaar zonder auth bewezen via smoke-test.
+- [x] **HUB-01** — Hub-skeleton: `consumers`/`accounts`/`connections` tabellen + Sanctum-PAT-auth (`/v1/*`) + encrypted credential-velden + multi-tenant scoping. Gevalideerd in Phase 3 (5/5 plans, 28 tests groen incl. encryption-at-rest voor alle 4 credential-velden en cross-Consumer query-isolation). Acceptance via `hub:consumer:create` + `GET /v1/ping`.
 
 ### Active
 
@@ -38,7 +39,7 @@ Carry-forward requirements (formaliseren bij `/gsd-new-milestone v0.2`):
 - **MOLL-02** — Mollie Connect OAuth-broker: client_id/client_secret config, redirect-handler, token-exchange, refresh-token-flow, `access_`-token storage encrypted
 - **MOLL-03** — `emeq/mollie-api` Resources + DTOs voor Payments, Customers, PaymentMethods, Refunds + **Mandates + Subscriptions** (nieuw vs oorspronkelijke v0.1)
 - **MOLL-04** — `MollieWebhookVerifier` voor Connect-webhooks (HMAC-signed namens platform)
-- **HUB-01** — Hub-skeleton: `consumers`, `accounts`, `connections` tabellen + Sanctum-PAT-auth voor Consumer-routes (Naschool)
+- ~~**HUB-01**~~ — *Validated 2026-05-14 in Phase 3 (zie Validated-sectie hierboven)*
 - **HUB-02** — OAuth-broker pattern (provider-agnostisch contract, eerste implementatie = Mollie Connect)
 - **HUB-03** — Pass-through REST API `/v1/mollie/*` — Bearer-token-resolutie naar `Connection.access_token` → SDK-call
 - **SUB-01** — Cashier-Mollie integratie voor use-case A (Emeq rekent aan Naschool/Planny-klanten via Emeq's eigen Mollie) — compat-check PHP 8.4 / Laravel 13 nodig
@@ -127,4 +128,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-14 — header + scope-paragraaf + Saloon-versie gesynced naar v0.2 actieve milestone (drift fix vanuit docs-sync). Open: "Active" + "Next Milestone Goals" secties beschrijven nog "voorbereid, niet gestart" terwijl v0.2 evident gestart is (REQUIREMENTS.md + ROADMAP.md gepubliceerd) — formele cleanup volgt bij `/gsd-new-milestone v0.2` of een aparte restructure.*
+*Last updated: 2026-05-14 — HUB-01 verplaatst naar Validated na Phase 3 ship (5/5 plans, 28 tests groen, SC-1 t/m SC-5 bewezen). Open: "Active" + "Next Milestone Goals" secties beschrijven nog "voorbereid, niet gestart" terwijl v0.2 evident gestart is (REQUIREMENTS.md + ROADMAP.md gepubliceerd) — formele cleanup volgt bij een aparte restructure.*

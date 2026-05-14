@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v0.2
 milestone_name: — Mollie + Connect + Subscriptions + Hub-skeleton
-status: executing
+status: Ready for Phase 4 (Mollie Connect OAuth-broker) of Phase 5b (Snelstart pass-through) — beide parallelliseerbaar
 stopped_at: "Phase 03 volledig afgerond — plan 03-05 voltooid (hub:consumer:create + DatabaseSeeder + acceptance-run); alle 5 HUB-01 SC bewezen; 27/27 tests groen + 1 geplande incomplete"
-last_updated: "2026-05-14T14:32:02.157Z"
+last_updated: "2026-05-14T15:03:26.620Z"
 last_activity: 2026-05-14
 progress:
   total_phases: 9
@@ -25,16 +25,16 @@ See: .planning/PROJECT.md (updated 2026-05-14 na v0.1 milestone-close)
 
 ## Current Position
 
-Phase: 03 (hub-skeleton) — **COMPLETE** ✅
-Plan: 5 of 5 voltooid (03-01/03-02/03-03/03-04/03-05)
+Phase: 09
+Plan: Not started
 Status: Ready for Phase 4 (Mollie Connect OAuth-broker) of Phase 5b (Snelstart pass-through) — beide parallelliseerbaar
-Last activity: 2026-05-14 — Phase 03 plan 03-05 voltooid
+Last activity: 2026-05-14
 
 ## Performance Metrics
 
 **v0.1 Velocity:**
 
-- Total plans completed: 3 (Phase 1)
+- Total plans completed: 8 (Phase 1)
 - Total execution time: ~12 uur (2026-05-14 00:42 → 12:02 CEST)
 - Sub-repo werk: snelstart-sdk submodule wiring + Pest-coverage + push
 
@@ -44,6 +44,7 @@ Last activity: 2026-05-14 — Phase 03 plan 03-05 voltooid
 |-------|-------|-------|----------|
 | 01-snelstart-sdk-finalize | 3 | ~16 min | ~5 min |
 | 03-hub-skeleton | 5/5 | ~27 min | ~5 min |
+| 03 | 5 | - | - |
 
 **Recent Trend:**
 
