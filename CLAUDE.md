@@ -50,7 +50,7 @@ De canonical architectuur-beschrijving (Consumer → Account → Connection → 
 Snelle pointers:
 - **Planning-artefacten**: `.planning/ROADMAP.md`, `.planning/STATE.md`, `.planning/phases/<NN>-<slug>/` voor lopend fase-werk.
 - **Werkdocumentatie** (lokaal, gitignored): `.docs/decisions/` (ADRs), `.docs/partners/<provider>/` (officiële API-research), `.docs/plans/`, `.docs/errors/`, `.docs/stack/`. Lees `.docs/README.md` voor de indeling.
-- **Routes**: alleen `routes/web.php` (smoke `/`, `/up`) en `routes/console.php` zijn geland. `routes/api.php` + `routes/webhooks.php` zijn gepland.
+- **Routes**: `routes/web.php` (smoke `/`, `/up`), `routes/console.php`, en `routes/api.php` (`/v1/ping` achter Sanctum + `throttle:api`) zijn geland. `routes/webhooks.php` is nog gepland.
 
 Een aparte `.planning/ARCHITECTURE.md` wordt aangemaakt door `/gsd-map-codebase` zodra meer dan de huidige skeleton-laag bestaat.
 <!-- GSD:architecture-end -->
@@ -170,11 +170,11 @@ composer audit                              # zie ignored advisories in composer
 ```
 routes/web.php       smoke: GET /, GET /up
 routes/console.php   artisan-only commands (inspire)
+routes/api.php       /v1/* — consumer-API (Bearer Sanctum + throttle:api)
 ```
 
 Gepland (nog niet geland in code):
 ```
-routes/api.php       /v1/* — consumer-API (Bearer Sanctum)
 routes/webhooks.php  /webhooks/{provider} — inkomend van partners (no auth, signature-verified per provider)
 ```
 
