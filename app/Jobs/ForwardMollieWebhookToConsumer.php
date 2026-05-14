@@ -28,13 +28,13 @@ class ForwardMollieWebhookToConsumer implements ShouldQueue
      * @param  array<string, mixed>  $payload
      */
     public function __construct(
-        public Connection $connection,
+        public Connection $mollieConnection,
         public array $payload,
     ) {}
 
     public function handle(): void
     {
-        $consumer = $this->connection->account?->consumer;
+        $consumer = $this->mollieConnection->account?->consumer;
 
         if ($consumer === null || ! $consumer->webhook_callback_url) {
             return;
