@@ -107,7 +107,7 @@ v0.2 bouwt drie samenhangende lagen: (1) `emeq/mollie-api` SDK die `mollie/molli
 
 - [x] 04-01-PLAN.md — OAuthFlow-contract + FakeOAuthFlow + migration + Connection-model edit + factory-states + OAuthFlowContractTest (SC-4 bewezen)
 - [x] 04-02-PLAN.md — MollieConnectOAuthFlow (Http::post direct) + OAuthFlowRegistry + config/services.mollie + .env.example + AppServiceProvider OAuthFlow-binding + Http::fake-test
-- [ ] 04-03-PLAN.md — MollieConnectionContext (scoped) + HubMollieCredentialResolver (lazy refresh D-04/D-06) + AppServiceProvider SDK-bindings + 3 testpaden
+- [x] 04-03-PLAN.md — MollieConnectionContext (scoped) + HubMollieCredentialResolver (lazy refresh D-04/D-06) + AppServiceProvider SDK-bindings + 3 testpaden
 - [ ] 04-04-PLAN.md — InitController + CallbackController + routes/api.php + 7 feature-tests (SC-1 + SC-2 + SC-5 bewezen)
 - [ ] 04-05-PLAN.md — PruneOAuthPendingConnections command + test + BLOCKING migrate + full test-suite Phase-acceptance
 

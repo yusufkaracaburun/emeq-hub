@@ -4,14 +4,14 @@ milestone: v0.2
 milestone_name: — Mollie + Connect + Subscriptions + Hub-skeleton
 status: executing
 stopped_at: Completed 04-02-PLAN.md
-last_updated: "2026-05-14T17:11:13.228Z"
+last_updated: "2026-05-14T17:19:24.682Z"
 last_activity: 2026-05-14
 progress:
   total_phases: 9
   completed_phases: 2
   total_plans: 23
-  completed_plans: 12
-  percent: 52
+  completed_plans: 13
+  percent: 57
 ---
 
 # Project State
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-05-14 na v0.1 milestone-close)
 ## Current Position
 
 Phase: 04 (mollie-connect-oauth-broker) — EXECUTING
-Plan: 3 of 5
+Plan: 4 of 5
 Status: Ready to execute
 Last activity: 2026-05-14
 
@@ -57,6 +57,7 @@ Last activity: 2026-05-14
 *Updated 2026-05-14 — plan 03-05 voltooid; Phase 03 volledig afgerond.*
 | Phase 04 P01 | 25 | 2 tasks | 6 files |
 | Phase 04 P02 | ~15 min | 2 tasks | 6 files |
+| Phase 04 P03 | 12min | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -87,6 +88,8 @@ Decisions zijn gelogd in PROJECT.md Key Decisions table. Decisions die uit v0.1 
 - [Phase ?]: MollieConnectOAuthFlow + Registry zonder declare(strict_types=1) — Hub-tree-conventie wint
 - [Phase ?]: MOLLIE_CONNECT_*-env-keys in eigen .env.example-blok, gescheiden van MOLLIE_PARTNER_* (verschillende rollen)
 - [Phase ?]: OAuthFlowRegistry::for() gooit InvalidArgumentException met NL-message
+- [Phase ?]: Plan 04-03: VCS-install van emeq/mollie-api met ^0.1.0-alpha.1 tag (repo default branch is feat/foundation, dev-master zou hebben gefaald)
+- [Phase ?]: Plan 04-03: scoped(MollieConnectionContext) + bind(SDK-contract -> HubMollieCredentialResolver) in AppServiceProvider — D-16 ingelost
 
 ### Pending Todos
 
@@ -136,7 +139,7 @@ Items acknowledged en deferred bij milestone-close 2026-05-14:
 
 ## Session Continuity
 
-Last session: 2026-05-14T17:11:13.224Z
+Last session: 2026-05-14T17:19:24.678Z
 Stopped at: Completed 04-02-PLAN.md
 Resume file: None
 Next action: `/gsd-plan-phase 5b` voor Snelstart-pass-through API (depends on Phase 3 only) of `/gsd-plan-phase 4` voor Mollie Connect OAuth-broker
