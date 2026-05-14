@@ -3,16 +3,16 @@ gsd_state_version: 1.0
 milestone: v0.2
 milestone_name: Mollie + Connect + Subscriptions + Hub-skeleton
 status: planning
-last_updated: "2026-05-14T11:30:00.000Z"
+last_updated: "2026-05-14T12:00:00.000Z"
 last_activity: 2026-05-14
 progress:
-  total_phases: 8
+  total_phases: 9
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
   percent: 0
 current_position:
-  next_phase: 2
+  next_phase: 3
 ---
 
 # Project State
@@ -22,14 +22,14 @@ current_position:
 See: .planning/PROJECT.md (updated 2026-05-14 na v0.1 milestone-close)
 
 **Core value:** Twee fundamenteel verschillende providers (OData/clientkey + REST/OAuth2) productie-gevalideerd via één SDK-pattern, en beide live in één concrete consumer-feature. v0.1 heeft Snelstart-deel bewezen; v0.2 zet Mollie + Connect + Subscriptions + Hub-skeleton op.
-**Current focus:** v0.2 milestone met ROADMAP gedefinieerd (Phase 2-8). Wacht op `/gsd-plan-phase 2` om eerste fase (emeq/mollie-api foundation) te plannen.
+**Current focus:** v0.2 milestone met ROADMAP gedefinieerd (Phase 2-9, Phase 5 gesplitst in 5a/5b). Snelstart-test-tak (Phase 3 → Phase 5b) krijgt prioriteit boven Mollie-tak (Phase 2 → 4 → 5a) zodat consumer-app sneller kan testen. Mollie-tak loopt parallel in eigen sessie/working-copy.
 
 ## Current Position
 
-Phase: Not started — next phase = 2 (emeq/mollie-api foundation)
+Phase: Not started — next phase = 3 (Hub-skeleton). Snelstart-test-tak prioriteit; Mollie-tak (Phase 2) parallel in aparte sessie.
 Plan: —
-Status: Roadmap gedefinieerd, klaar voor `/gsd-plan-phase 2`
-Last activity: 2026-05-14 — Phase 9 (Filament admin-UI) toegevoegd aan v0.2 ROADMAP
+Status: Roadmap aangepast met Phase 5a/5b-split en HUB-05; klaar voor Scramble quick-task gevolgd door `/gsd-plan-phase 3`
+Last activity: 2026-05-14 — Phase 5 gesplitst in 5a (Mollie) + 5b (Snelstart-pass-through) + HUB-05 toegevoegd aan REQUIREMENTS.md
 
 ## Performance Metrics
 
@@ -68,7 +68,10 @@ Decisions zijn gelogd in PROJECT.md Key Decisions table. Decisions die uit v0.1 
 
 ### Pending Todos
 
-Geen actieve todos. v0.2-roadmap gedefinieerd; klaar voor `/gsd-plan-phase 2`.
+- Scramble (`dedoc/scramble`) installeren met `/docs/api` + Sanctum-bearer-extension (quick-task) — voorbereiding op Phase 3 + 5b
+- `/gsd-plan-phase 3` runnen — Hub-skeleton (Consumer/Account/Connection + Sanctum-PAT + Snelstart-credentials encrypted)
+- `/gsd-plan-phase 5b` runnen na Phase 3 — Snelstart-pass-through API
+- Mollie-tak (Phase 2 + 4 + 5a) blijft parallel werk; aparte sessie/working-copy
 
 ### Blockers/Concerns
 
@@ -85,6 +88,7 @@ Geen actieve todos. v0.2-roadmap gedefinieerd; klaar voor `/gsd-plan-phase 2`.
 ### Roadmap Evolution
 
 - 2026-05-14 — Phase 9 (Filament admin-UI voor Emeq-medewerkers) toegevoegd aan v0.2 milestone; HUB-04 toegevoegd aan REQUIREMENTS.md. Plan-bron: `.claude/plans/ow-dit-wil-ik-immutable-snowglobe.md`. Depends on Phase 3 + Phase 4; parallel met Phase 6/7.
+- 2026-05-14 — Phase 5 gesplitst in 5a (Mollie) + 5b (Snelstart-pass-through) en HUB-05 toegevoegd aan REQUIREMENTS.md. Plan-bron: `.claude/plans/volgens-mij-is-snelstart-api-piped-parasol.md`. Reden: user wil consumer-app via `hub.emeq.nl` Snelstart-calls passen-doorzetten — was eerder niet expliciet in scope (Phase 8 deed Snelstart-direct-via-SDK in Naschool). Phase 5b depends on Phase 3 only; parallel met Phase 4 mogelijk.
 
 ## Deferred Items
 
@@ -102,7 +106,7 @@ Items acknowledged en deferred bij milestone-close 2026-05-14:
 
 ## Session Continuity
 
-Last session: 2026-05-14 — v0.2 ROADMAP gedefinieerd
-Stopped at: ROADMAP.md geschreven; 12/12 requirements gemapped; traceability bijgewerkt in REQUIREMENTS.md
-Resume file: `.planning/ROADMAP.md` (Phase 2-8) + `.claude/plans/fancy-honking-spring.md` (master-plan context)
-Next action: `/gsd-plan-phase 2` — plan emeq/mollie-api foundation
+Last session: 2026-05-14 — Phase 5 split + HUB-05 toegevoegd
+Stopped at: ROADMAP.md, REQUIREMENTS.md en STATE.md bijgewerkt voor Phase 5a/5b-split en HUB-05; 14/14 requirements gemapped; traceability klopt
+Resume file: `.planning/ROADMAP.md` (Phase 2-9 met 5a/5b) + `.claude/plans/volgens-mij-is-snelstart-api-piped-parasol.md` (Snelstart-tak plan)
+Next action: Scramble quick-task → `/gsd-plan-phase 3` — plan Hub-skeleton (Snelstart-test-tak)

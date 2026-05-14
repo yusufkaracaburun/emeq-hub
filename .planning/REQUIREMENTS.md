@@ -20,13 +20,15 @@ Requirements voor v0.2 (~8-10 weken). Elke vereiste mapt naar één roadmap-fase
 
 ### Hub-skeleton
 
-- [ ] **HUB-01**: `consumers`/`accounts`/`connections` tabellen + Sanctum-PAT auth voor Consumer-routes. `consumers` houdt SaaS-app-registraties (Naschool, Planny, derde-partijen). `accounts` houdt klanten van die SaaS-apps (school A, vereniging C) by `consumer_id + external_id`. `connections` houdt per-provider credentials per Account, encrypted-at-rest, met `expires_at` + `scopes` + `refresh_token`.
+- [ ] **HUB-01**: `consumers`/`accounts`/`connections` tabellen + Sanctum-PAT auth voor Consumer-routes. `consumers` houdt SaaS-app-registraties (Naschool, Planny, derde-partijen). `accounts` houdt klanten van die SaaS-apps (school A, vereniging C) by `consumer_id + external_id`. `connections` houdt per-provider credentials per Account, encrypted-at-rest. Provider-specifieke credentials: voor OAuth-providers (Mollie) `access_token` + `refresh_token` + `expires_at` + `scopes`; voor key-based providers (Snelstart) `client_key` + `subscription_key` + `subscription_id`. Provider-specifieke velden worden of in dedicated kolommen of in een `metadata` JSON-kolom opgeslagen — te beslissen bij Phase 3-planning.
 
 - [ ] **HUB-02**: `OAuthFlow`-contract provider-agnostisch (`getAuthorizationUrl()`, `exchangeCode()`, `refreshToken()`, `revoke()`). Eerste implementatie `MollieConnectOAuthFlow`. Pattern toekomst-bestendig voor Snelstart-OAuth, Exact-OAuth, Ibanity-OAuth in latere milestones.
 
 - [ ] **HUB-03**: Pass-through REST API `/v1/mollie/*` — Bearer Consumer-PAT-resolutie → `Account` → `Connection.access_token` → `emeq/mollie-api` SDK-call. Audit-logging van inkomende + uitgaande requests in `webhook_calls`-tabel (al gepland in PROJECT.md architectuur). `dedoc/scramble` genereert OpenAPI spec op `/docs/api`.
 
 - [ ] **HUB-04**: Filament v4 admin-paneel op `/admin` voor Emeq-medewerkers — 4 resources (Consumer CRUD + PAT issue/revoke, Connection read+revoke met fingerprint-only, Account read-only, WebhookCall viewer). Eigen panel-auth via `is_emeq_staff` boolean op `User` + `canAccessPanel()`-check. Raw tokens nooit in UI (computed `Connection::fingerprint()`-accessor). Out-of-scope: multi-rol RBAC, MFA, e-mail notificaties, audit-log (HUB-AUDIT backlog), Consumer self-service dashboard (v1.0+).
+
+- [ ] **HUB-05**: Pass-through REST API `/v1/snelstart/{path}` — Bearer Consumer-PAT-resolutie → `Account` → `Connection` (Snelstart-provider met `client_key` + `subscription_key` + `subscription_id` encrypted) → `emeq/snelstart-api` SDK-call via `RawSnelstartRequest` of OData QueryBuilder. Bind `HubSnelstartCredentialResolver` aan `Emeq\SnelstartApi\Contracts\SnelstartCredentialResolver`. Audit-logging in `webhook_calls`-tabel. Scramble pakt automatisch de routes op via Phase 5a OpenAPI-config. Parallel met Phase 4 mogelijk (Snelstart heeft géén OAuth-broker nodig — clientKey is door Snelstart uitgegeven aan eindklant). Endpoint-flow: ondersteunt GET (proxy naar OData query), POST (proxy naar create), PATCH/DELETE (proxy naar update/delete). `POST /v1/accounts` en `POST /v1/connections` zijn onderdeel van dit requirement (Consumer-provisioning-flow).
 
 ### Subscriptions
 
@@ -78,12 +80,13 @@ Expliciet uitgesloten voor v0.2. Niet re-adden zonder PROJECT.md herziening.
 |-------------|-------|--------|
 | MOLL-01 | Phase 2 | Pending |
 | MOLL-02 | Phase 4 | Pending |
-| MOLL-03 | Phase 5 | Pending |
-| MOLL-04 | Phase 5 | Pending |
+| MOLL-03 | Phase 5a | Pending |
+| MOLL-04 | Phase 5a | Pending |
 | HUB-01 | Phase 3 | Pending |
 | HUB-02 | Phase 4 | Pending |
-| HUB-03 | Phase 5 | Pending |
+| HUB-03 | Phase 5a | Pending |
 | HUB-04 | Phase 9 | Pending |
+| HUB-05 | Phase 5b | Pending |
 | SUB-01 | Phase 6 | Pending |
 | SUB-02 | Phase 7 | Pending |
 | NSCH-01 | Phase 8 | Pending |
@@ -91,10 +94,10 @@ Expliciet uitgesloten voor v0.2. Niet re-adden zonder PROJECT.md herziening.
 | NSCH-03 | Phase 8 | Pending |
 
 **Coverage:**
-- v1 requirements: 13 total
-- Mapped to phases: 13 (Phase 2-9)
+- v1 requirements: 14 total
+- Mapped to phases: 14 (Phase 2-9, Phase 5 gesplitst in 5a + 5b)
 - Unmapped: 0
 
 ---
 
-*Requirements defined: 2026-05-14. Traceability gemapped naar ROADMAP.md Phase 2-9 op dezelfde datum (Phase 9 added 2026-05-14).*
+*Requirements defined: 2026-05-14. Traceability gemapped naar ROADMAP.md Phase 2-9 op dezelfde datum (Phase 9 added 2026-05-14). HUB-05 (Snelstart-pass-through) added 2026-05-14 — Phase 5 gesplitst in 5a (Mollie) + 5b (Snelstart) zodat Snelstart-test los van Mollie-OAuth-broker geleverd kan worden.*
