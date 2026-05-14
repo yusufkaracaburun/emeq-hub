@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "fdc2d26c7e2163580e35bbb58f0ada73",
+    "content-hash": "24578eea4421252153fd2c9b40404f22",
     "packages": [
         {
             "name": "brick/math",
@@ -707,6 +707,107 @@
                 }
             ],
             "time": "2025-03-06T22:45:56+00:00"
+        },
+        {
+            "name": "emeq/mollie-api",
+            "version": "v0.1.0-alpha.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/yusufkaracaburun/emeq-mollie-api.git",
+                "reference": "1bca2ffe908a1110837d9c29fe9e46fed0563fe2"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/yusufkaracaburun/emeq-mollie-api/zipball/1bca2ffe908a1110837d9c29fe9e46fed0563fe2",
+                "reference": "1bca2ffe908a1110837d9c29fe9e46fed0563fe2",
+                "shasum": ""
+            },
+            "require": {
+                "ext-json": "*",
+                "illuminate/contracts": "^11.0||^12.0||^13.0",
+                "mollie/mollie-api-php": "^3.11",
+                "php": "^8.3",
+                "spatie/laravel-data": "^4.0",
+                "spatie/laravel-package-tools": "^1.16",
+                "symfony/uid": "^6.4||^7.0||^8.0"
+            },
+            "require-dev": {
+                "larastan/larastan": "^3.0",
+                "laravel/pint": "^1.14",
+                "nunomaduro/collision": "^8.8",
+                "orchestra/testbench": "^9.0||^10.0||^11.0",
+                "pestphp/pest": "^3.0||^4.0",
+                "pestphp/pest-plugin-arch": "^3.0||^4.0",
+                "pestphp/pest-plugin-laravel": "^3.0||^4.0",
+                "phpstan/extension-installer": "^1.4",
+                "phpstan/phpstan-deprecation-rules": "^2.0",
+                "phpstan/phpstan-phpunit": "^2.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Emeq\\MollieApi\\MollieServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Emeq\\MollieApi\\": "src/"
+                }
+            },
+            "autoload-dev": {
+                "psr-4": {
+                    "Emeq\\MollieApi\\Tests\\": "tests/"
+                }
+            },
+            "scripts": {
+                "post-autoload-dump": [
+                    "@composer run prepare"
+                ],
+                "prepare": [
+                    "@php vendor/bin/testbench package:discover --ansi"
+                ],
+                "analyse": [
+                    "vendor/bin/phpstan analyse"
+                ],
+                "test": [
+                    "vendor/bin/pest"
+                ],
+                "test-coverage": [
+                    "vendor/bin/pest --coverage"
+                ],
+                "format": [
+                    "vendor/bin/pint"
+                ]
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Yusuf Karacaburun",
+                    "email": "info@emeq.nl",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Multi-tenant Laravel SDK rond mollie/mollie-api-php — credential resolver + dual creds (API key + OAuth) + facade.",
+            "homepage": "https://github.com/yusufkaracaburun/emeq-mollie-api",
+            "keywords": [
+                "connect",
+                "emeq",
+                "laravel",
+                "mollie",
+                "mollie-api",
+                "multi-tenant",
+                "oauth",
+                "payments"
+            ],
+            "support": {
+                "source": "https://github.com/yusufkaracaburun/emeq-mollie-api/tree/v0.1.0-alpha.1",
+                "issues": "https://github.com/yusufkaracaburun/emeq-mollie-api/issues"
+            },
+            "time": "2026-05-14T14:15:42+00:00"
         },
         {
             "name": "emeq/snelstart-api",

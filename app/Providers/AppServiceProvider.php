@@ -3,11 +3,14 @@
 namespace App\Providers;
 
 use App\Models\User;
+use App\Mollie\HubMollieCredentialResolver;
+use App\Mollie\MollieConnectionContext;
 use App\OAuth\Mollie\MollieConnectOAuthFlow;
 use App\OAuth\OAuthFlowRegistry;
 use Dedoc\Scramble\Scramble;
 use Dedoc\Scramble\Support\Generator\OpenApi;
 use Dedoc\Scramble\Support\Generator\SecurityScheme;
+use Emeq\MollieApi\Contracts\MollieCredentialResolver;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Http\Request;
@@ -19,12 +22,16 @@ class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
+        $this->app->scoped(MollieConnectionContext::class);
+
         $this->app->singleton(OAuthFlowRegistry::class, function (Application $app): OAuthFlowRegistry {
             $registry = new OAuthFlowRegistry($app);
             $registry->register('mollie', MollieConnectOAuthFlow::class);
 
             return $registry;
         });
+
+        $this->app->bind(MollieCredentialResolver::class, HubMollieCredentialResolver::class);
     }
 
     public function boot(): void
