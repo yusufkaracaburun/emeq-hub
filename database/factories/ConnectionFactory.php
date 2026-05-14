@@ -53,4 +53,37 @@ class ConnectionFactory extends Factory
             'subscription_id' => null,
         ]);
     }
+
+    public function pending(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'provider' => 'mollie',
+            'status' => 'pending',
+            'oauth_state' => Str::random(48),
+            'oauth_state_expires_at' => now()->addMinutes(30),
+            'access_token' => null,
+            'refresh_token' => null,
+            'expires_at' => null,
+            'scopes' => null,
+            'client_key' => null,
+            'subscription_key' => null,
+            'subscription_id' => null,
+        ]);
+    }
+
+    public function active(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'status' => 'active',
+            'oauth_state' => null,
+            'oauth_state_expires_at' => null,
+        ]);
+    }
+
+    public function expired(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'oauth_state_expires_at' => now()->subMinute(),
+        ]);
+    }
 }

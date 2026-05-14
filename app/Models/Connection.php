@@ -22,6 +22,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'subscription_id',
     'metadata',
     'revoked_at',
+    'oauth_state',
+    'oauth_state_expires_at',
 ])]
 #[Hidden(['access_token', 'refresh_token', 'client_key', 'subscription_key'])]
 class Connection extends Model
@@ -59,6 +61,7 @@ class Connection extends Model
             'metadata' => 'array',
             'expires_at' => 'datetime',
             'revoked_at' => 'datetime',
+            'oauth_state_expires_at' => 'datetime',
         ];
     }
 }
