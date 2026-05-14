@@ -9,6 +9,8 @@ use App\Models\PassThroughCall;
 use App\Sanctum\TokenAbilities;
 use App\Support\Mollie\MollieUpstreamErrorMapper;
 use Illuminate\Http\Request;
+use Mollie\Api\Resources\BaseCollection;
+use Mollie\Api\Resources\BaseResource;
 use Symfony\Component\HttpFoundation\Response;
 use Throwable;
 
@@ -118,5 +120,65 @@ abstract class AbstractMolliePassThroughController extends Controller
             ['Content-Type' => 'application/json'],
             $extraHeaders,
         ));
+    }
+
+    /**
+     * Serializeer een Mollie BaseResource (Customer/Payment/Refund/Mandate/...)
+     * via response-body om de wire-shape verbatim te bewaren. Fallback
+     * naar JsonSerializable wanneer test-stubs geen origin-Response hebben.
+     *
+     * @return array<string, mixed>
+     */
+    protected function resourceToArray(BaseResource $resource): array
+    {
+        $response = $resource->getResponse();
+
+        if ($response !== null) {
+            try {
+                $decoded = json_decode($response->body(), true, 512, JSON_THROW_ON_ERROR);
+                if (is_array($decoded)) {
+                    return $decoded;
+                }
+            } catch (Throwable) {
+                // fallthrough naar object-cast
+            }
+        }
+
+        return json_decode((string) json_encode($resource), true) ?: [];
+    }
+
+    /**
+     * Serializeer een Mollie BaseCollection (CustomerCollection,
+     * MethodCollection, RefundCollection, MandateCollection, ...) naar een
+     * array. Bewaart Mollie's response-shape inclusief _links/_embedded
+     * wanneer beschikbaar; valt anders terug op JsonSerializable.
+     *
+     * @return array<int|string, mixed>
+     */
+    protected function collectionToArray(BaseCollection $collection): array
+    {
+        $response = $collection->getResponse();
+
+        if ($response !== null) {
+            try {
+                $decoded = json_decode($response->body(), true, 512, JSON_THROW_ON_ERROR);
+                if (is_array($decoded)) {
+                    return $decoded;
+                }
+            } catch (Throwable) {
+                // fallthrough
+            }
+        }
+
+        $items = [];
+        foreach ($collection as $item) {
+            if ($item instanceof BaseResource) {
+                $items[] = $this->resourceToArray($item);
+            } else {
+                $items[] = $item;
+            }
+        }
+
+        return $items;
     }
 }

@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\Api\V1\AccountController;
 use App\Http\Controllers\Api\V1\ConnectionController;
+use App\Http\Controllers\Api\V1\Mollie\CustomersController;
+use App\Http\Controllers\Api\V1\Mollie\PaymentMethodsController;
 use App\Http\Controllers\Api\V1\Mollie\PaymentsController;
 use App\Http\Controllers\Api\V1\OAuth\CallbackController;
 use App\Http\Controllers\Api\V1\OAuth\InitController;
@@ -40,6 +42,12 @@ Route::middleware('auth:sanctum')->group(function (): void {
         Route::post('/payments', [PaymentsController::class, 'store'])->name('api.mollie.payments.store');
         Route::get('/payments/{id}', [PaymentsController::class, 'show'])->name('api.mollie.payments.show');
         Route::delete('/payments/{id}', [PaymentsController::class, 'destroy'])->name('api.mollie.payments.destroy');
+
+        Route::get('/customers', [CustomersController::class, 'index'])->name('api.mollie.customers.index');
+        Route::get('/customers/{id}', [CustomersController::class, 'show'])->name('api.mollie.customers.show');
+        Route::post('/customers', [CustomersController::class, 'store'])->name('api.mollie.customers.store');
+
+        Route::get('/payment-methods', PaymentMethodsController::class)->name('api.mollie.payment-methods.list');
     });
 });
 
