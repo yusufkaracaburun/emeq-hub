@@ -98,6 +98,7 @@ Decisions zijn gelogd in PROJECT.md Key Decisions table. Decisions die uit v0.1 
 - Scramble (`dedoc/scramble`) `/docs/api` + Sanctum-bearer-extension is al gepubliceerd op deze branch — verifieer + commit als quick-task wanneer Phase 5a/5b begint
 - Mollie-tak (Phase 2 + 4 + 5a) parallel werk; aparte sessie/working-copy
 - **Out-of-scope cleanup (deferred-items.md):** Pint-drift op vendor-published `webhook_calls`-migrations + `routes/web.php` + `packages/**` — pakken bij Phase 5a/5b wanneer audit-logging / webhooks worden aangeraakt
+- **`akaunting/laravel-firewall` implementeren** — Hub-edge bescherming (IP-blocking, abuse-throttle, country-rules) bovenop Sanctum/throttle. Past bij publieke `/webhooks/{provider}`-routes (Phase 5a/5b) + consumer-`/v1/*`. Wegen tegen Caddy-native middleware. Zie https://github.com/akaunting/laravel-firewall.
 
 ### Blockers/Concerns
 
