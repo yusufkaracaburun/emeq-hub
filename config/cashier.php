@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Consumer;
 use Laravel\Cashier\Order\OrderNumberGenerator;
 
 return [
@@ -25,6 +26,16 @@ return [
      * @example 'nl_NL'
      */
     'locale' => null,
+
+    /*
+     * The Billable model. Phase 6 D-03: Consumer is de billable in use-case A
+     * (Emeq → Consumers via Emeq's eigen Mollie). NIET Account (D-04).
+     *
+     * Cashier-Mollie ^2.20 leest deze key niet automatisch — toegevoegd als
+     * documentatie + safety-net voor toekomstige Cashier-versies en eigen
+     * resolver-code die `config('cashier.user_model')` kan lezen.
+     */
+    'user_model' => Consumer::class,
 
     /**
      * Used for generating Order numbers, used in Orders and related Invoices.
