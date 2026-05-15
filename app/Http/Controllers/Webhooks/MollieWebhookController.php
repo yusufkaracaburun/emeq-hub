@@ -5,33 +5,39 @@ namespace App\Http\Controllers\Webhooks;
 use App\Http\Controllers\Controller;
 use App\Jobs\ForwardMollieWebhookToConsumer;
 use App\Models\Connection;
-use App\Mollie\MollieConnectionContext;
-use Emeq\MollieApi\Facades\Mollie;
+use App\Webhooks\Mollie\WebhookHandlerResult;
+use App\Webhooks\Mollie\WebhookPayloadRouter;
 use Emeq\MollieApi\Webhooks\MollieWebhookSignature;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Mollie\Api\Exceptions\InvalidSignatureException;
 use Spatie\WebhookClient\Models\WebhookCall;
-use Throwable;
 
 /**
  * Mollie Connect webhook ingress.
  *
- * Flow per 05a-CONTEXT.md D-08:
+ * Flow per 07-CONTEXT.md D-18 (refactor bovenop 05a D-08):
+ *  0. Hard-fail guard: platform-secret moet geconfigureerd zijn
  *  1. Signature-verify (X-Mollie-Signature, HMAC-SHA256, platform-secret)
  *  2. Connection-lookup (provider=mollie, niet revoked)
  *  3. Payload-id-check
- *  4. Anti-spoofing: fetch resource via deze Connection's access_token
- *  5. Inkomend audit naar Spatie's webhook_calls
- *  6. Fan-out via ForwardMollieWebhookToConsumer
- *  7. 202 Accepted
+ *  4. WebhookPayloadRouter::routeFor() — id-prefix dispatch naar
+ *     PaymentWebhookHandler / SubscriptionWebhookHandler / skip-no-op
+ *  5. Spatie webhook_calls-audit (alleen als result.shouldAudit())
+ *  6. ForwardMollieWebhookToConsumer-dispatch (alleen als result.shouldFanOut())
+ *  7. 202 Accepted (of 400 op anti-spoof-fail)
  *
- * v0.2-aanname: alle webhook-id's zijn Payment-id's (tr_*). Subscriptions/Refunds
- * triggeren ook een Payment-event waardoor de id geldig is. v0.3+ moet
- * resource-type-detectie via id-prefix toevoegen voor edge-cases (tr_/sub_/re_).
+ * D-31 invariant: default-pad (`tr_*` zonder subscriptionId) hergebruikt
+ * Phase-5a-flow exact. Bestaande `MollieWebhookSignatureTest`,
+ * `MollieWebhookAntiSpoofingTest` en `MollieWebhookFanOutTest` blijven
+ * 1:1 groen zonder fixture-aanpassingen.
  */
 class MollieWebhookController extends Controller
 {
+    public function __construct(
+        private readonly WebhookPayloadRouter $router,
+    ) {}
+
     public function __invoke(Request $request, int $connection_id): JsonResponse
     {
         // 0. Hard-fail guard: platform-secret moet geconfigureerd zijn.
@@ -80,29 +86,53 @@ class MollieWebhookController extends Controller
             return response()->json(['error' => 'missing_id'], 400);
         }
 
-        // 4. Anti-spoofing: bind context + fetch resource
-        app(MollieConnectionContext::class)->set($connection);
-        try {
-            Mollie::client()->payments->get($payload['id']);
-        } catch (Throwable $e) {
-            $this->auditFailedWebhook($request, 'spoof_check_failed: '.$e->getMessage());
+        // 4. Resource-type-routing (D-15) → Hub-state-update (D-18 stap 4)
+        $result = $this->router->routeFor($payload['id'], $payload, $connection);
 
+        // 5. Audit (D-18 stap 5)
+        if ($result->shouldAudit()) {
+            $this->auditWebhook($request, $payload, $result);
+        }
+
+        // 6. Anti-spoof-fail → 400 + geen fan-out (D-31; MollieWebhookAntiSpoofingTest contract)
+        if ($result->status === 'anti_spoof_failed') {
             return response()->json(['error' => 'resource_ownership_failed'], 400);
         }
 
-        // 5. Inkomend audit
-        WebhookCall::create([
+        // 7. Fan-out (D-18 stap 6) — blijft via dezelfde job-signature uit Phase 5a
+        if ($result->shouldFanOut()) {
+            ForwardMollieWebhookToConsumer::dispatch($connection, $payload);
+        }
+
+        // 8. 202 Accepted
+        return response()->json(['status' => 'accepted'], 202);
+    }
+
+    /**
+     * Schrijft een audit-rij voor een succesvolle/skipped webhook. Behoudt
+     * de Phase-5a-shape: `exception` is null bij `ok`, gevuld met
+     * `spoof_check_failed: ...` bij anti-spoof-fail (matched
+     * `MollieWebhookAntiSpoofingTest`), of met de skip-reason bij
+     * `mdt_*`-no-op zodat diagnose mogelijk blijft.
+     *
+     * @param  array<string, mixed>  $payload
+     */
+    private function auditWebhook(Request $request, array $payload, WebhookHandlerResult $result): void
+    {
+        $attributes = [
             'name' => 'mollie',
             'url' => $request->fullUrl(),
             'headers' => $request->headers->all(),
             'payload' => $payload,
-        ]);
+        ];
 
-        // 6. Fan-out
-        ForwardMollieWebhookToConsumer::dispatch($connection, $payload);
+        if ($result->status === 'anti_spoof_failed') {
+            $attributes['exception'] = 'spoof_check_failed: '.($result->reason ?? '');
+        } elseif ($result->status === 'skip' && $result->reason !== null) {
+            $attributes['exception'] = 'skipped: '.$result->reason;
+        }
 
-        // 7. 202 Accepted
-        return response()->json(['status' => 'accepted'], 202);
+        WebhookCall::create($attributes);
     }
 
     private function auditFailedWebhook(Request $request, string $exception): void
