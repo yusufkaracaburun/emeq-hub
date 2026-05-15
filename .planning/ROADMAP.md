@@ -1,7 +1,7 @@
 # Roadmap: Emeq integration stack
 
 **Project code:** EMEQ
-**Granularity:** ~9 phases voor v0.2 (standard band, requirements-driven; Phase 5 gesplitst in 5a + 5b)
+**Granularity:** ~10 phases voor v0.2 (standard band, requirements-driven; Phase 5 gesplitst in 5a + 5b + 5c)
 **Execution:** sequentieel met parallel-ramps — Phase 5b is parallelliseerbaar met Phase 4 (beide afhankelijk van Phase 3, niet van elkaar); Phase 6 en Phase 7 zijn parallelliseerbaar (beide afhankelijk van Phase 5a); Phase 9 is parallelliseerbaar met Phase 6/7 (afhankelijk van Phase 3 + Phase 4)
 
 ## Shipped Milestones
@@ -25,6 +25,7 @@ v0.2 bouwt drie samenhangende lagen: (1) `emeq/mollie-api` SDK die `mollie/molli
 - [x] **Phase 4: Mollie Connect OAuth-broker** — provider-agnostisch `OAuthFlow`-contract + `MollieConnectOAuthFlow` + encrypted token-storage *(voltooid 2026-05-14; 5/5 plans, alle 5 SC's bewezen, BLOCKING acceptance 8/8 + 129/129 tests)*
 - [x] **Phase 5a: Mollie SDK Resources + Webhooks + Pass-through API** — Payments/Customers/PaymentMethods/Refunds/Mandates/Subscriptions/PaymentLinks + Connect-webhook verifier + `/v1/mollie/*` audit-logged (zie ADR `mollie-passthrough-api.md`) *(voltooid 2026-05-15; 6/6 plans, 207 tests groen, 13/13 truths verified incl. gap-closure plan 05a-06 voor D-06 + D-08 stap 1; 3 human-UAT items pending in `05a-HUMAN-UAT.md`)*
 - [ ] **Phase 5b: Snelstart-pass-through API** — `/v1/snelstart/{path}` pass-through via `HubSnelstartCredentialResolver` + `POST /v1/accounts` + `POST /v1/connections` provisioning-endpoints + audit-logging. Parallel met Phase 4 mogelijk.
+- [ ] **Phase 5c: Snelstart webhook-handler** — `POST /webhooks/snelstart` HMAC-verified ingress + Connection-resolutie via `administratie_id` + audit-log (`direction=inbound`) + async fan-out naar Consumer-callback. Productie-certificeringsblocker (zie `.docs/decisions/snelstart-certificering-pad.md`).
 - [x] **Phase 6: Cashier-Mollie integratie (use-case A)** — Emeq → Consumers billing op Emeq's eigen Mollie *(voltooid 2026-05-15; 8/8 plans, SC-1+SC-2+SC-3 bewezen, SC-4 vendor-coverage; 237 tests passed + integration-suite gescheiden via `composer test:integration`)*
 - [ ] **Phase 7: Account-level subscriptions (use-case B)** — Accounts → eindgebruikers via Connect + Mandates + Subscriptions
 - [ ] **Phase 8: Naschool wiring** — composer-wiring + Snelstart Stancl-resolver + `SyncEnrollmentToSnelstartJob` + Mollie checkout-flow via Hub-Connect
@@ -170,6 +171,29 @@ v0.2 bouwt drie samenhangende lagen: (1) `emeq/mollie-api` SDK die `mollie/molli
 - [x] 05b-04-PLAN.md — Provisioning-endpoints (POST /v1/accounts, POST /v1/connections, GET/DELETE /v1/connections/{id}) + Form-Requests + Resources + feature-tests
 - [x] 05b-05-PLAN.md — ResolveSnelstartAccount middleware + PassThroughController + catch-all route + audit-write + 6 feature-tests + Scramble discovery test + SanctumAbility-completion
 
+#### Phase 5c: Snelstart webhook-handler
+**Goal:** Een werkende ingress voor Snelstart-webhooks op `POST /webhooks/snelstart` met HMAC-verificatie, Connection-resolutie via payload `administratieId`, audit in `pass_through_calls` (`direction=inbound`) en async fan-out via Horizon `webhooks`-queue + Spatie `laravel-webhook-server` naar de Consumer-callback. Productie-certificeringsblocker (Snelstart vereist webhook-URL bij certificeringsaanvraag).
+**Depends on:** Phase 5b (`connections` + `pass_through_calls`-tabel), Phase 5a-01 (`consumers.webhook_callback_url` + `consumers.webhook_callback_secret`)
+**Requirements:** HUB-06
+**Working repo:** `emeq-hub`
+**Context:**
+- Eén partner-URL `/webhooks/snelstart` voor alle administraties; per-Connection routing via payload `administratieId`-veld (camelCase OData)
+- HMAC-secret globaal per AppShortName via `SNELSTART_WEBHOOK_SECRET` env (header-naam + algorithme nog ❓ tot partner-respons; config-driven defensief)
+- Anti-correlation: inbound HMAC-secret (Snelstart→Hub) ≠ outbound HMAC-secret (Hub→Consumer via per-Consumer `webhook_callback_secret`)
+- Onbekende `administratieId` met geldige HMAC → 200 + audit-row NULL-tenant + geen fan-out (anti-retry-storm)
+- Invalid HMAC → 401 + lege body + géén audit-row (anti-amplification)
+- `pass_through_calls` krijgt `direction` enum + `event_id` unique-per-provider (idempotency) + nullable tenant-FKs
+- Async fan-out via Horizon `webhooks`-queue; Snelstart krijgt 200 in <500ms (niet wachten op Consumer-callback)
+- Volledige decisions + ❓-aannames staan in `.planning/phases/05c-snelstart-webhook-handler/05c-CONTEXT.md`
+- Plan-phase wacht op partner-respons (Gmail-draft `r-8836998535038336548` verzonden 2026-05-15; verwacht ≤2026-05-26)
+**Success Criteria** (what must be TRUE):
+  1. `POST /webhooks/snelstart` met geldige HMAC + bekende `administratieId` → 200 + audit-row `direction=inbound` + `ForwardSnelstartWebhookToConsumerJob` dispatched
+  2. Invalid HMAC → 401, lege body, géén audit-row
+  3. Onbekende `administratieId` met geldige HMAC → 200 + audit-row met `connection_id=NULL` + geen fan-out
+  4. Idempotency: zelfde `event_id` 2× → tweede call = 200 + 1 audit-dup-row + 1 job (originele) — geen dubbele forward
+  5. Cross-Consumer-isolation: een webhook voor administratie van Consumer X kan nooit fan-outten naar Consumer Y's callback
+**Plans:** TBD bij `/gsd-plan-phase 5c` (verwacht 4-5 plans: migratie + verifier-middleware + controller + fan-out-job + integration-tests)
+
 #### Phase 6: Cashier-Mollie integratie (use-case A)
 **Goal:** Emeq factureert zijn eigen Consumers (Naschool, Planny) recurring via Emeq's eigen Mollie-account met de Cashier-Mollie pattern.
 **Depends on:** Phase 5a (SDK Mandates + Subscriptions wrapping productie-klaar)
@@ -276,6 +300,7 @@ v0.2 bouwt drie samenhangende lagen: (1) `emeq/mollie-api` SDK die `mollie/molli
 | 4. Mollie Connect OAuth-broker | 0/0 (TBD) | Not started | - |
 | 5a. Mollie SDK Resources + Webhooks + Pass-through API | 0/5 | Planned | - |
 | 5b. Snelstart-pass-through API | 0/5 | Planned | - |
+| 5c. Snelstart webhook-handler | 0/0 (TBD) | Not started | - |
 | 6. Cashier-Mollie integratie | 8/8 | Done | 2026-05-15 |
 | 7. Account-level subscriptions | 0/0 (TBD) | Not started | - |
 | 8. Naschool wiring | 0/0 (TBD) | Not started | - |
@@ -293,6 +318,7 @@ v0.2 bouwt drie samenhangende lagen: (1) `emeq/mollie-api` SDK die `mollie/molli
 | HUB-02 | Phase 4 | `OAuthFlow`-contract komt logisch samen met eerste Mollie-implementatie |
 | HUB-03 | Phase 5a | Mollie-pass-through API kan pas live na SDK Resources + webhook-verifier |
 | HUB-05 | Phase 5b | Snelstart-pass-through is los van Mollie-OAuth; parallel met Phase 4 mogelijk; eerste end-to-end pass-through-test |
+| HUB-06 | Phase 5c | Snelstart webhook-ingress is productie-certificeringsblocker; los van pass-through (5b) |
 | SUB-01 | Phase 6 | Cashier-Mollie heeft SDK Mandates + Subscriptions uit Phase 5a nodig |
 | SUB-02 | Phase 7 | Account-subs hebben SDK Subscriptions + Connect-webhooks uit Phase 5a nodig |
 | NSCH-01 | Phase 8 | Naschool-consumerwerk geclusterd in één wiring-fase |
@@ -300,7 +326,7 @@ v0.2 bouwt drie samenhangende lagen: (1) `emeq/mollie-api` SDK die `mollie/molli
 | NSCH-03 | Phase 8 | End-to-end smoke vereist Hub-fasen 3 + 4 + 5a live |
 | HUB-04 | Phase 9 | Admin-paneel leunt op `Consumer`/`Account`/`Connection` modellen (Phase 3) + `OAuthFlow::revoke()` (Phase 4); parallel met Phase 6/7 |
 
-**Coverage:** 14/14 v1-requirements gemapped naar exact één fase. Geen orphans.
+**Coverage:** 15/15 v1-requirements gemapped naar exact één fase. Geen orphans.
 
 ## Backlog (v0.3+)
 

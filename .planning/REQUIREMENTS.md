@@ -30,6 +30,8 @@ Requirements voor v0.2 (~8-10 weken). Elke vereiste mapt naar één roadmap-fase
 
 - [ ] **HUB-05**: Pass-through REST API `/v1/snelstart/{path}` — Bearer Consumer-PAT-resolutie → `Account` → `Connection` (Snelstart-provider met `client_key` + `subscription_key` + `subscription_id` encrypted) → `emeq/snelstart-api` SDK-call via `RawSnelstartRequest` of OData QueryBuilder. Bind `HubSnelstartCredentialResolver` aan `Emeq\SnelstartApi\Contracts\SnelstartCredentialResolver`. Audit-logging in `webhook_calls`-tabel. Scramble pakt automatisch de routes op via Phase 5a OpenAPI-config. Parallel met Phase 4 mogelijk (Snelstart heeft géén OAuth-broker nodig — clientKey is door Snelstart uitgegeven aan eindklant). Endpoint-flow: ondersteunt GET (proxy naar OData query), POST (proxy naar create), PATCH/DELETE (proxy naar update/delete). `POST /v1/accounts` en `POST /v1/connections` zijn onderdeel van dit requirement (Consumer-provisioning-flow).
 
+- [ ] **HUB-06**: Snelstart webhook-handler op `POST /webhooks/snelstart` — publieke ingress (geen Sanctum, geen `throttle:api`), HMAC-verified met globale `SNELSTART_WEBHOOK_SECRET`. Connection-resolutie via payload `administratieId`-veld (één URL voor alle administraties). Audit-row in `pass_through_calls` met `direction=inbound`; async fan-out via Horizon-queue `webhooks` naar `consumers.webhook_callback_url` met per-Consumer HMAC-signing (Phase 5a-01 fan-out-pattern hergebruikt). Idempotency via `event_id` unique-per-provider. Onbekende `administratieId` → 200 + NULL-tenant audit (anti-retry-storm); invalid HMAC → 401 zonder audit (anti-amplification). Cross-Consumer-isolation bewezen via feature-test. Productie-certificeringsblocker (zie `.docs/decisions/snelstart-certificering-pad.md`).
+
 ### Subscriptions
 
 - [x] **SUB-01**: Cashier-Mollie integratie voor use-case A (Emeq rekent aan Consumers via Emeq's eigen Mollie-account). PHP 8.4 / Laravel 13 compatibiliteit gevalideerd of fork-and-update uitgevoerd. `Billable` trait op `Consumer`-model; subscription-plans (Naschool-license, Planny-license, etc.) gedefinieerd via Cashier's `Plan` model. Recurring billing via Mandates-flow. *Validated in Phase 6 (2026-05-15) — pad-a (out-of-the-box) gekozen met `mollie/laravel-cashier-mollie ^2.20.1`; 8/8 plans + 3/3 SC's bewezen (SC-4 vendor-coverage); `Consumer` Billable, `App\Billing\PlanResolver` + `config/billing-plans.php`, 3 billing-routes met `billing:read|write`-abilities + admin-allowlist, Cashier-webhook hard-fail-guard op `/cashier/webhook*`, integration-suite via `composer test:integration`. 237 tests passed.*
@@ -87,6 +89,7 @@ Expliciet uitgesloten voor v0.2. Niet re-adden zonder PROJECT.md herziening.
 | HUB-03 | Phase 5a | Complete |
 | HUB-04 | Phase 9 | Pending |
 | HUB-05 | Phase 5b | Pending |
+| HUB-06 | Phase 5c | Pending |
 | SUB-01 | Phase 6 | Complete |
 | SUB-02 | Phase 7 | Pending |
 | NSCH-01 | Phase 8 | Pending |
@@ -94,10 +97,10 @@ Expliciet uitgesloten voor v0.2. Niet re-adden zonder PROJECT.md herziening.
 | NSCH-03 | Phase 8 | Pending |
 
 **Coverage:**
-- v1 requirements: 14 total
-- Mapped to phases: 14 (Phase 2-9, Phase 5 gesplitst in 5a + 5b)
+- v1 requirements: 15 total
+- Mapped to phases: 15 (Phase 2-9, Phase 5 gesplitst in 5a + 5b + 5c)
 - Unmapped: 0
 
 ---
 
-*Requirements defined: 2026-05-14. Traceability gemapped naar ROADMAP.md Phase 2-9 op dezelfde datum (Phase 9 added 2026-05-14). HUB-05 (Snelstart-pass-through) added 2026-05-14 — Phase 5 gesplitst in 5a (Mollie) + 5b (Snelstart) zodat Snelstart-test los van Mollie-OAuth-broker geleverd kan worden.*
+*Requirements defined: 2026-05-14. Traceability gemapped naar ROADMAP.md Phase 2-9 op dezelfde datum (Phase 9 added 2026-05-14). HUB-05 (Snelstart-pass-through) added 2026-05-14 — Phase 5 gesplitst in 5a (Mollie) + 5b (Snelstart) zodat Snelstart-test los van Mollie-OAuth-broker geleverd kan worden. HUB-06 (Snelstart webhook-handler) added 2026-05-15 — Phase 5c toegevoegd als productie-certificeringsblocker per `.docs/decisions/snelstart-certificering-pad.md`.*
