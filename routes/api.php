@@ -1,6 +1,9 @@
 <?php
 
 use App\Http\Controllers\Api\V1\AccountController;
+use App\Http\Controllers\Api\V1\AccountSubscriptions\AccountSubscriptionController;
+use App\Http\Controllers\Api\V1\AccountSubscriptions\PauseController;
+use App\Http\Controllers\Api\V1\AccountSubscriptions\ResumeController;
 use App\Http\Controllers\Api\V1\Billing\SubscriptionController;
 use App\Http\Controllers\Api\V1\ConnectionController;
 use App\Http\Controllers\Api\V1\Mollie\CustomersController;
@@ -84,6 +87,20 @@ Route::middleware('auth:sanctum')->group(function (): void {
         Route::get('/payment-links', [PaymentLinksController::class, 'index'])->name('api.mollie.payment-links.index');
         Route::post('/payment-links', [PaymentLinksController::class, 'store'])->name('api.mollie.payment-links.store');
         Route::get('/payment-links/{id}', [PaymentLinksController::class, 'show'])->name('api.mollie.payment-links.show');
+    });
+
+    Route::prefix('account-subscriptions')->group(function (): void {
+        Route::middleware('ability:mollie:write,*')->group(function (): void {
+            Route::post('/', [AccountSubscriptionController::class, 'store'])->name('api.account-subscriptions.store');
+            Route::delete('/{id}', [AccountSubscriptionController::class, 'destroy'])->name('api.account-subscriptions.destroy');
+            Route::post('/{id}/pause', PauseController::class)->name('api.account-subscriptions.pause');
+            Route::post('/{id}/resume', ResumeController::class)->name('api.account-subscriptions.resume');
+        });
+
+        Route::middleware('ability:mollie:read,mollie:write,*')->group(function (): void {
+            Route::get('/', [AccountSubscriptionController::class, 'index'])->name('api.account-subscriptions.index');
+            Route::get('/{id}', [AccountSubscriptionController::class, 'show'])->name('api.account-subscriptions.show');
+        });
     });
 });
 
