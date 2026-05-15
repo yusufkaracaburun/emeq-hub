@@ -129,13 +129,14 @@ v0.2 bouwt drie samenhangende lagen: (1) `emeq/mollie-api` SDK die `mollie/molli
   3. Een inkomende Mollie Connect-webhook met geldige `Mollie-Signature` wordt geaccepteerd en gerouteerd; tampered signature retourneert 400 en wordt niet doorgegeven aan Consumer-callback
   4. Elke pass-through-call schrijft één regel in `webhook_calls` met Consumer-ID, Account-ID, Connection-ID-fingerprint, request-summary en response-status
   5. Twee identieke `POST /v1/mollie/payments` met dezelfde idempotency-key retourneren één Mollie-payment-ID (geen duplicate)
-**Plans:** 5 plans
+**Plans:** 6 plans (incl. 1 gap-closure)
 
 - [x] 05a-01-PLAN.md — Cross-cutting infra: AbstractMolliePassThroughController + ResolveMollieAccount-middleware + MollieUpstreamErrorMapper + MollieHeaderForwarder + Consumer.webhook_callback_* migration
 - [x] 05a-02-PLAN.md — Webhook ingress + fan-out: MollieWebhookController + ForwardMollieWebhookToConsumer-job + routes/webhooks.php + Spatie laravel-webhook-server install
 - [x] 05a-03-PLAN.md — Payments resource (create+get+cancel) + config/mollie.php idempotency-binding + ConsumerIdempotencyKeyGenerator + 4 feature-tests (incl. SC-1 + SC-5)
 - [x] 05a-04-PLAN.md — Customers + PaymentMethods + Refunds + Mandates resources (4 controllers, 10 routes, 4 tests)
 - [x] 05a-05-PLAN.md — Subscriptions + PaymentLinks resources + Scramble route-discovery + SanctumAbility-mollie-completion + BLOCKING phase-acceptance 8/8
+- [ ] 05a-06-PLAN.md — Gap-closure: hoist Idempotency-Key-forward to AbstractMolliePassThroughController (D-06 / CR-01) + webhook-secret hard-fail guard (D-08 stap 1 / CR-02) + 6 nieuwe tests
 
 #### Phase 5b: Snelstart-pass-through API
 **Goal:** Een werkende end-to-end Snelstart-pass-through: Consumer doet HTTP-call naar `/v1/snelstart/{path}` met Bearer-PAT + Account-ID, Hub resolved Connection naar Snelstart-credentials (`client_key` + `subscription_key` + `subscription_id`), SDK doet OData/REST-call namens die Account, response stroomt terug.
