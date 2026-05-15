@@ -64,7 +64,17 @@ class PaymentWebhookHandler
             return WebhookHandlerResult::ok();
         }
 
-        $this->manager->recordPaymentEvent($sub, $payment->toArray());
+        // Mollie\Api\Resources\Payment heeft geen toArray() — gebruik object→array
+        // cast op de dynamic-properties container. Filter NUL-prefixed (protected)
+        // sleutels zoals " * connector" en " * origin" weg zodat de manager alleen
+        // payment-data ziet (status, details, subscriptionId, ...).
+        $paymentArray = array_filter(
+            (array) $payment,
+            fn (string|int $key): bool => is_string($key) && ! str_contains($key, "\0"),
+            ARRAY_FILTER_USE_KEY,
+        );
+
+        $this->manager->recordPaymentEvent($sub, $paymentArray);
 
         return WebhookHandlerResult::ok($sub->id);
     }
