@@ -10,7 +10,6 @@ use Emeq\MollieApi\Exceptions\MollieExceptionMapper;
 use Emeq\MollieApi\Facades\Mollie;
 use Illuminate\Http\Request;
 use Mollie\Api\Exceptions\ApiException as MollieApiException;
-use Mollie\Api\MollieApiClient;
 use Mollie\Api\Resources\Payment;
 use Symfony\Component\HttpFoundation\Response;
 use Throwable;
@@ -26,10 +25,7 @@ use Throwable;
  * vult de Hub automatisch url('/webhooks/mollie/{connection_id}') in zodat
  * Mollie naar onze ingress-controller post (Plan 05a-02).
  *
- * Idempotency-Key forward (D-06, pre-flight V1): MollieApiClient
- * ::setIdempotencyKey() is een one-shot runtime-setter die supersedes de
- * default UuidV7-generator voor één request en automatisch reset daarna.
- * Bij geen Consumer-header gebruikt de SDK de config-generator (Task 1).
+ * Idempotency-Key forward via AbstractMolliePassThroughController::buildClient (D-06).
  */
 class PaymentsController extends AbstractMolliePassThroughController
 {
@@ -80,24 +76,6 @@ class PaymentsController extends AbstractMolliePassThroughController
 
             return $this->paymentToArray($payment);
         });
-    }
-
-    /**
-     * Bouwt een MollieApiClient voor de huidige request. Forward't de
-     * Consumer's Idempotency-Key-header naar Mollie via de runtime-setter
-     * (verifieerd in 05a-03-PREFLIGHT.md V1). De default UuidV7-generator
-     * blijft de fallback zonder Consumer-header.
-     */
-    protected function buildClient(Request $request): MollieApiClient
-    {
-        $client = Mollie::client();
-
-        $consumerKey = $request->header('Idempotency-Key');
-        if (is_string($consumerKey) && $consumerKey !== '') {
-            $client->setIdempotencyKey($consumerKey);
-        }
-
-        return $client;
     }
 
     /**

@@ -46,7 +46,7 @@ class PaymentLinksController extends AbstractMolliePassThroughController
         return $this->handle($request, '/v2/payment-links', function (Request $r) {
             /** @var CreatePaymentLinkRequest $r */
             try {
-                $link = Mollie::client()->paymentLinks->create($r->validated());
+                $link = $this->buildClient($r)->paymentLinks->create($r->validated());
             } catch (MollieApiException $e) {
                 throw MollieExceptionMapper::map($e);
             }

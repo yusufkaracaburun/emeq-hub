@@ -62,7 +62,7 @@ class CustomersController extends AbstractMolliePassThroughController
         return $this->handle($request, '/v2/customers', function (Request $r) {
             /** @var CreateCustomerRequest $r */
             try {
-                $customer = Mollie::client()->customers->create($r->validated());
+                $customer = $this->buildClient($r)->customers->create($r->validated());
             } catch (MollieApiException $e) {
                 throw MollieExceptionMapper::map($e);
             }
