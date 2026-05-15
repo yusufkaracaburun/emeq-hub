@@ -136,6 +136,7 @@ Decisions zijn gelogd in PROJECT.md Key Decisions table. Decisions die uit v0.1 
 | 260514-qxk | Fix 05b CRITICAL findings (CR-01 + CR-02 + CR-03) | 2026-05-14 | 286dd99 | [260514-qxk-fix-05b-critical-findings-body-forwardin](./quick/260514-qxk-fix-05b-critical-findings-body-forwardin/) |
 | 260514-tny | Import Mollie API docs (11 references + indexed README) als Phase 5a precondition — `.docs/` gitignored, plan-deviated van 4 commits naar SUMMARY-only | 2026-05-14 | (n/a — `.docs/` gitignored) | [260514-tny-import-mollie-api-docs-into-docs-partner](./quick/260514-tny-import-mollie-api-docs-into-docs-partner/) |
 | 260515-c52 | Snelstart certificeringspad productie-route (Blade-voorbeeldpagina + ADR + 8 partner-vragen via Gmail) + Phase 5c CONTEXT.md prep met 5 ❓-aannames | 2026-05-15 | fcf64b7 (Blade; ADR + rate-limits in `.docs/` gitignored) | [260515-c52-snelstart-certificeringspad-productie-ro](./quick/260515-c52-snelstart-certificeringspad-productie-ro/) |
+| 260515-vsy | Sync 05a-VERIFICATION.md frontmatter met HUMAN-UAT-resultaat (status → passed_with_deferred; #1 pass + #2/#3 blocked op Phase 8); audit-uat 5 → 0 open items | 2026-05-15 | 23c865b | (inline /gsd-fast — geen quick-dir) |
 
 ### Roadmap Evolution
 
