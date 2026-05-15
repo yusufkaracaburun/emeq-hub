@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v0.2
 milestone_name: — Mollie + Connect + Subscriptions + Hub-skeleton
-status: executing
-stopped_at: Phase 6 ACCEPTED — Cashier-Mollie use-case A live; SUB-01 = Complete. Phase 7 (Account-level subscriptions / use-case B) ontblokt. Aanbeveling: `/clear` + verse sessie voor Phase 7.
-last_updated: "2026-05-15T11:30:00.000Z"
+status: completed
+stopped_at: Phase 7 context gathered (auto-mode, no clarifying questions)
+last_updated: "2026-05-15T09:39:29.731Z"
 last_activity: 2026-05-15
 progress:
   total_phases: 9
-  completed_phases: 5
-  total_plans: 29
-  completed_plans: 28
-  percent: 97
+  completed_phases: 6
+  total_plans: 37
+  completed_plans: 37
+  percent: 100
 ---
 
 # Project State
@@ -167,7 +167,7 @@ Items acknowledged en deferred bij milestone-close 2026-05-14:
 
 ## Session Continuity
 
-Last session: 2026-05-15T11:30:00.000Z (Phase 6 acceptance-gate run)
-Stopped at: Phase 6 ACCEPTED — 8/8 D-18 items + 3/3 SC's bewezen; SUB-01 = Complete; tracking artifacts up-to-date.
-Resume file: .planning/phases/06-cashier-mollie-integratie-use-case-a/06-08-ACCEPTANCE.md
+Last session: 2026-05-15T09:39:29.727Z
+Stopped at: Phase 7 context gathered (auto-mode, no clarifying questions)
+Resume file: .planning/phases/07-account-level-subscriptions-use-case-b/07-CONTEXT.md
 Next action: `/clear` → `/gsd-discuss-phase 7` in verse sessie op `feat/v02-mollie-subscriptions` — subscription-state-machine (revoked-mandate → paused, failed-retry, customer-deleted edges) verdient verse context.
