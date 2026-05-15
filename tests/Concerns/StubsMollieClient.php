@@ -125,7 +125,7 @@ trait StubsMollieClient
 
         $extras = [];
         if (isset($resolvers['customers'])) {
-            $extras['customers'] = $this->makeCustomersStub($resolvers['customers'], $captured);
+            $extras['customers'] = $this->makeCustomersStub($resolvers['customers'], $captured, $clientRef);
         }
         if (isset($resolvers['methods'])) {
             $extras['methods'] = $this->makeMethodsStub($resolvers['methods'], $captured);
@@ -208,18 +208,20 @@ trait StubsMollieClient
      * @param  callable(string, mixed): (Customer|Throwable)  $resolver
      * @param  array<string, array<int, mixed>>  $captured
      */
-    private function makeCustomersStub(callable $resolver, array &$captured): object
+    private function makeCustomersStub(callable $resolver, array &$captured, ?StubMollieClient &$clientRef): object
     {
-        return new class($resolver, $captured)
+        return new class($resolver, $captured, $clientRef)
         {
             public function __construct(
                 private $resolver,
                 private array &$captured,
+                private ?StubMollieClient &$mollieClient,
             ) {}
 
             public function create(array $payload): Customer
             {
                 $this->captured['customer_create'][] = $payload;
+                $this->captured['idempotency_keys'][] = $this->mollieClient?->getIdempotencyKey();
                 $result = ($this->resolver)('create', $payload);
                 if ($result instanceof Throwable) {
                     throw $result;
