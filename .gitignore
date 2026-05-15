@@ -14,6 +14,7 @@
 /api.json
 /auth.json
 /node_modules
+.playwright-cli/
 /public/build
 /public/fonts-manifest.dev.json
 /public/hot
