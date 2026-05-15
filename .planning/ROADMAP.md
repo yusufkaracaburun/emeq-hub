@@ -190,7 +190,7 @@ v0.2 bouwt drie samenhangende lagen: (1) `emeq/mollie-api` SDK die `mollie/molli
 - [x] 06-01-PLAN.md — Cashier-Mollie compat-ADR (pad-a gekozen: `mollie/laravel-cashier-mollie ^2.20`)
 - [x] 06-02-PLAN.md — Install Cashier-Mollie + publish migrations & configs + env-skeleton
 - [x] 06-03-PLAN.md — Billable trait op Consumer + owner_type-align migration + factory-state
-- [ ] 06-04-PLAN.md — PlanResolver + config/billing-plans.php + UnknownPlanException
+- [x] 06-04-PLAN.md — PlanResolver + config/billing-plans.php + UnknownPlanException
 - [ ] 06-05-PLAN.md — Sanctum billing-abilities + Consumer-read + Admin create/cancel routes + middleware
 - [ ] 06-06-PLAN.md — Cashier-webhook hard-fail-guard + Cashier::ignoreRoutes + 3 routes onder /cashier/webhook*
 - [ ] 06-07-PLAN.md — Integration-suite gescheiden via phpunit.integration.xml + 3 happy-path-tests
