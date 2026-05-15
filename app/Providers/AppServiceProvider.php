@@ -17,6 +17,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
+use Laravel\Cashier\Cashier;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -32,6 +33,11 @@ class AppServiceProvider extends ServiceProvider
         });
 
         $this->app->bind(MollieCredentialResolver::class, HubMollieCredentialResolver::class);
+
+        // D-10: Cashier's default-routes (webhooks/mollie*) uitzetten zodat wij ze
+        // zelf onder /cashier/webhook* registreren achter RequireCashierWebhookSecret.
+        // Moet in register() staan — CashierServiceProvider::boot() leest deze flag.
+        Cashier::ignoreRoutes();
     }
 
     public function boot(): void
