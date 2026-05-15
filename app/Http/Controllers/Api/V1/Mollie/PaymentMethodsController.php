@@ -19,7 +19,7 @@ use Symfony\Component\HttpFoundation\Response;
  * locale, sequenceType. We geven de hele query-string door zodat de
  * Hub geen Mollie-filter-shape hoeft te dupliceren.
  */
-#[Group(name: 'Mollie', description: 'Mollie API-calls naar het Mollie-account van de gekoppelde Account.', weight: 50)]
+#[Group(name: 'Mollie · Payment Methods', description: 'Mollie PaymentMethods API (list).', weight: 54)]
 class PaymentMethodsController extends AbstractMolliePassThroughController
 {
     public function __invoke(Request $request): Response

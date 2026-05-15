@@ -25,7 +25,7 @@ use Symfony\Component\HttpFoundation\Response;
  * `$mandates` (i.p.v. `$customerMandates`). Methode-namen createForId/
  * getForId/pageForId/cancelForId blijven plan-conform.
  */
-#[Group(name: 'Mollie', description: 'Mollie API-calls naar het Mollie-account van de gekoppelde Account.', weight: 50)]
+#[Group(name: 'Mollie · Subscriptions', description: 'Mollie Subscriptions API (nested onder customer; list/get/create/cancel).', weight: 56)]
 class SubscriptionsController extends AbstractMolliePassThroughController
 {
     public function index(Request $request, string $customer_id): Response

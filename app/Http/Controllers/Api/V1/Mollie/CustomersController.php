@@ -19,7 +19,7 @@ use Symfony\Component\HttpFoundation\Response;
  * Beslissingen 05a-CONTEXT.md / 05a-04-PLAN.md: D-01 (per-resource),
  * D-04 (typed SDK-calls), D-13 (Mollie-error-mapping), D-14 (ability-gates).
  */
-#[Group(name: 'Mollie', description: 'Mollie API-calls naar het Mollie-account van de gekoppelde Account.', weight: 50)]
+#[Group(name: 'Mollie · Customers', description: 'Mollie Customers API (list/get/create).', weight: 50)]
 class CustomersController extends AbstractMolliePassThroughController
 {
     public function index(Request $request): Response

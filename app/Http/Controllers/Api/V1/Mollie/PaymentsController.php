@@ -28,7 +28,7 @@ use Throwable;
  *
  * Idempotency-Key forward via AbstractMolliePassThroughController::buildClient (D-06).
  */
-#[Group(name: 'Mollie', description: 'Mollie API-calls naar het Mollie-account van de gekoppelde Account.', weight: 50)]
+#[Group(name: 'Mollie · Payments', description: 'Mollie Payments API (create/get/cancel).', weight: 52)]
 class PaymentsController extends AbstractMolliePassThroughController
 {
     public function store(CreatePaymentRequest $request): Response
