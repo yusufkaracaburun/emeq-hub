@@ -32,7 +32,7 @@ Requirements voor v0.2 (~8-10 weken). Elke vereiste mapt naar één roadmap-fase
 
 ### Subscriptions
 
-- [ ] **SUB-01**: Cashier-Mollie integratie voor use-case A (Emeq rekent aan Consumers via Emeq's eigen Mollie-account). PHP 8.4 / Laravel 13 compatibiliteit gevalideerd of fork-and-update uitgevoerd. `Billable` trait op `Consumer`-model; subscription-plans (Naschool-license, Planny-license, etc.) gedefinieerd via Cashier's `Plan` model. Recurring billing via Mandates-flow.
+- [x] **SUB-01**: Cashier-Mollie integratie voor use-case A (Emeq rekent aan Consumers via Emeq's eigen Mollie-account). PHP 8.4 / Laravel 13 compatibiliteit gevalideerd of fork-and-update uitgevoerd. `Billable` trait op `Consumer`-model; subscription-plans (Naschool-license, Planny-license, etc.) gedefinieerd via Cashier's `Plan` model. Recurring billing via Mandates-flow. *Validated in Phase 6 (2026-05-15) — pad-a (out-of-the-box) gekozen met `mollie/laravel-cashier-mollie ^2.20.1`; 8/8 plans + 3/3 SC's bewezen (SC-4 vendor-coverage); `Consumer` Billable, `App\Billing\PlanResolver` + `config/billing-plans.php`, 3 billing-routes met `billing:read|write`-abilities + admin-allowlist, Cashier-webhook hard-fail-guard op `/cashier/webhook*`, integration-suite via `composer test:integration`. 237 tests passed.*
 
 - [ ] **SUB-02**: Account-level subscriptions via Connect voor use-case B (Accounts rekenen aan eindgebruikers via hun eigen Mollie via Connect). Eigen `AccountSubscription`-model + service-laag boven Mollie's Subscriptions + Mandates API. Multi-tenant: subscription-state per `Account`-Connection, niet single-tenant zoals Cashier. Tests dekken create/cancel/webhook-update happy paths + edge cases (revoked mandate, failed retry).
 
@@ -87,7 +87,7 @@ Expliciet uitgesloten voor v0.2. Niet re-adden zonder PROJECT.md herziening.
 | HUB-03 | Phase 5a | Complete |
 | HUB-04 | Phase 9 | Pending |
 | HUB-05 | Phase 5b | Pending |
-| SUB-01 | Phase 6 | In Progress (06-01 done — compat-check landed) |
+| SUB-01 | Phase 6 | Complete |
 | SUB-02 | Phase 7 | Pending |
 | NSCH-01 | Phase 8 | Pending |
 | NSCH-02 | Phase 8 | Pending |

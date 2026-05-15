@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v0.2
 milestone_name: — Mollie + Connect + Subscriptions + Hub-skeleton
 status: executing
-stopped_at: Phase 5a unblocked — `.docs/partners/mollie/` ingericht (11 refs + indexed README via quick `260514-tny`). Klaar voor `/gsd-plan-phase 5a`.
-last_updated: "2026-05-15T06:37:56.701Z"
+stopped_at: Phase 6 ACCEPTED — Cashier-Mollie use-case A live; SUB-01 = Complete. Phase 7 (Account-level subscriptions / use-case B) ontblokt. Aanbeveling: `/clear` + verse sessie voor Phase 7.
+last_updated: "2026-05-15T11:30:00.000Z"
 last_activity: 2026-05-15
 progress:
   total_phases: 9
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 29
-  completed_plans: 21
-  percent: 72
+  completed_plans: 28
+  percent: 97
 ---
 
 # Project State
@@ -21,13 +21,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-05-14 na v0.1 milestone-close)
 
 **Core value:** Twee fundamenteel verschillende providers (OData/clientkey + REST/OAuth2) productie-gevalideerd via één SDK-pattern, en beide live in één concrete consumer-feature. v0.1 heeft Snelstart-deel bewezen; v0.2 zet Mollie + Connect + Subscriptions + Hub-skeleton op.
-**Current focus:** Phase 05a — mollie-sdk-resources-webhooks-pass-through-api
+**Current focus:** Phase 06 ACCEPTED — klaar voor Phase 7 (Account-level subscriptions / use-case B) in verse sessie
 
 ## Current Position
 
-Phase: 05b
+Phase: 7
 Plan: Not started
-Status: Executing Phase 05a
+Status: Phase 6 complete (8/8 plans, SC-1+SC-2+SC-3 bewezen, SC-4 vendor-coverage); klaar voor Phase 7 discussie
 Last activity: 2026-05-15
 
 ## Performance Metrics
@@ -46,6 +46,8 @@ Last activity: 2026-05-15
 | 03-hub-skeleton | 5/5 | ~27 min | ~5 min |
 | 03 | 5 | - | - |
 | 05a | 6 | - | - |
+| 05b | 5 | - | - |
+| 06 | 8 | - | - |
 
 **Recent Trend:**
 
@@ -93,10 +95,23 @@ Decisions zijn gelogd in PROJECT.md Key Decisions table. Decisions die uit v0.1 
 - [Phase ?]: OAuthFlowRegistry::for() gooit InvalidArgumentException met NL-message
 - [Phase ?]: Plan 04-03: VCS-install van emeq/mollie-api met ^0.1.0-alpha.1 tag (repo default branch is feat/foundation, dev-master zou hebben gefaald)
 - [Phase ?]: Plan 04-03: scoped(MollieConnectionContext) + bind(SDK-contract -> HubMollieCredentialResolver) in AppServiceProvider — D-16 ingelost
+- 🆕 **New 2026-05-15 (06-01)**: Cashier-Mollie pad-a gekozen — `mollie/laravel-cashier-mollie ^2.20.1` werkt out-of-the-box op PHP 8.4 / Laravel 13; geen fork of eigen subscription-laag nodig voor use-case A
+- 🆕 **New 2026-05-15 (06-02)**: Cashier-Mollie v2.x publiceerd 9 migrations (NIET 10 — geen `subscription_items`; gebruikt `orders` + `order_items` pattern). Schema-velden `status` / `mollie_subscription_id` / `mollie_mandate_id` op `subscriptions`-table bestaan ook niet — Cashier derived deze via `active()` / `cancelled()` / `onTrial()` / `onGracePeriod()` / `ended()` accessors
+- 🆕 **New 2026-05-15 (06-03)**: `Billable` trait op `Consumer` (NIET op `Account`). Account-level subscriptions (use-case B / Phase 7) krijgen een eigen `AccountSubscription`-model — Cashier is single-tenant en past niet bij multi-tenant Connect-flow
+- 🆕 **New 2026-05-15 (06-04)**: Plan-storage config-driven via `config/billing-plans.php` (NIET via Cashier's Plan-model). `App\Billing\PlanResolver::find(string): array` retourneert plan-config + gooit `UnknownPlanException` op missing keys
+- 🆕 **New 2026-05-15 (06-05)**: 3 billing-routes met dual-ability-pattern (`ability:billing:read,billing:write,*`) — consumer-read voor eigen subscription, admin-create/cancel achter `EnsureEmeqAdminToken`-middleware met env-driven allowlist
+- 🆕 **New 2026-05-15 (06-06)**: Cashier-webhook landt op `/cashier/webhook*` (3 routes; default + aftercare + first-payment) met stap-0 hard-fail-guard `RequireCashierWebhookSecret` (zelfde pattern als Phase 5a D-08 stap 1 voor Mollie-Connect-webhook). `Cashier::ignoreRoutes()` in `AppServiceProvider` voorkomt auto-registratie van Cashier-routes; eigen bindings via routes/webhooks.php
+- 🆕 **New 2026-05-15 (06-07)**: Integration-tests gescheiden via `phpunit.integration.xml` + `@group integration` + `IntegrationTestCase`. Default suite (`php artisan test`) sluit integration-group uit; `composer test:integration` runt apart. Tests skippen graceful zonder `CASHIER_MOLLIE_KEY` in `.env`
 
 ### Pending Todos
 
 - ✅ Phase 03 hub-skeleton voltooid (alle 5 plans + HUB-01 SC-1 t/m SC-5 bewezen)
+- ✅ Phase 06 Cashier-Mollie integratie voltooid (8/8 plans, SUB-01 = Complete, 237 tests + integration-suite gescheiden, ACCEPTED 2026-05-15)
+- `/gsd-discuss-phase 7` runnen in **verse sessie** — Account-level subscriptions (use-case B) via Connect + Mandates + Subscriptions; depends on Phase 5a; parallelliseerbaar met Phase 9
+- **Baseline Pint-drift cleanup (deferred)**: pre-Phase-6 scaffold-drift in `database/migrations/2026_05_13_*` + `routes/web.php` (uit `0196e01`) + gitignored `packages/**` — pakken bij toekomstige scaffold-touchup of dedicated quick-task `pint-baseline-cleanup`
+- **Worktree-bootstrap-pattern (recurring)**: Claude Code's `isolation="worktree"` mist `.env` + `vendor/` → executor moet `cp ../../.env .env` + `ln -sf ../../vendor vendor` doen vóór tests. Voorgesteld backlog-item: `.claude/hooks/worktree-bootstrap.sh` voor automatische bootstrap
+- **Composer autoload cache na worktree-merge**: handmatige `composer dump-autoload` was elke wave nodig om vendor/composer/autoload_classmap.php te refreshen. Voorgesteld: `.claude/hooks/post-merge.sh` automatisering
+- **`/docs-sync`** runnen vóór Phase 7 start — Phase 6 hooks signaleerden documentation-drift na elke plan (config/services.php, routes/webhooks.php, namespace-additions) die niet in plan-scope opgepakt zijn
 - `/gsd-plan-phase 5b` runnen — Snelstart-pass-through API (depends on Phase 3 only, parallelliseerbaar met Phase 4)
 - Scramble (`dedoc/scramble`) `/docs/api` + Sanctum-bearer-extension is al gepubliceerd op deze branch — verifieer + commit als quick-task wanneer Phase 5a/5b begint
 - Mollie-tak (Phase 2 + 4 + 5a) parallel werk; aparte sessie/working-copy
@@ -133,6 +148,7 @@ Decisions zijn gelogd in PROJECT.md Key Decisions table. Decisions die uit v0.1 
 - 2026-05-14 — Plan 04-04 voltooid: `InitController` (POST `/v1/oauth/mollie/init`, Sanctum + `ability:mollie:write`, JSON-respons met `connection_id` + `redirect_url`, pre-created pending Connection met 48-char `oauth_state` + 30min TTL) + `CallbackController` (GET `/v1/oauth/mollie/callback`, publiek, state-verify, ruilt code in via `OAuthFlowRegistry`) + 7 feature-testpaden (3 InitTest happy/no-ability/cross-Consumer + 4 CallbackTest happy/tampered/expired/replay). Auto-deviation: Sanctum-middleware-aliassen `ability`/`abilities` toegevoegd aan `bootstrap/app.php` — canonical Sanctum-v4 setup die ontbrak. ROADMAP SC-1 + SC-2 + SC-5 bewezen. Volledige suite 127 passed / 1 incomplete / 0 failed.
 - 2026-05-14 — Quick task 260514-qxk: Phase 5b CRITICAL-fixes (CR-01 415-guard non-JSON POST/PATCH + CR-02 `query_keys`-kolom replacement voor query-string PII-lekkage + CR-03 NULL fingerprint voor lege body). 4 commits in 2 RED/GREEN-cycli; migration `2026_05_15_000002_add_query_keys_to_pass_through_calls_table.php` + controller-hardening + 3 nieuwe tests + 1 update. 28/28 Snelstart-suite groen; 120/120 full suite. Phase 5b nu merge-ready voor zover CRITICAL-findings betreft (7 WR + 4 INFO blijven open).
 - 2026-05-14 — Plan 04-05 voltooid + **Phase 04 volledig afgerond**: `PruneOAuthPendingConnections` artisan-command (`oauth:prune-pending` met `--dry-run`, D-09 handmatige cleanup, géén cron per D-04) + 2 tests (prunes-expired + dry-run-no-delete). BLOCKING phase-acceptance 8/8 groen: migrate, schema-check, route:list, container-bindings (`HubMollieCredentialResolver` + `MollieConnectOAuthFlow`), command-registratie, full suite 129/129, pint clean. ROADMAP-vs-CONTEXT delta SC-1: ROADMAP zegt `GET /v1/oauth/mollie/authorize?account=…`; implementatie volgt CONTEXT D-01/D-08 `POST /v1/oauth/mollie/init` met JSON-return — opgelost in commit `5208492` (ROADMAP SC-1 herschreven naar D-01/D-08-wording + Phase 4 hoofdcheckbox `[x]`). Alle 5 SC's (SC-1..SC-5) gedekt door 26 dedicated tests.
+- 2026-05-15 — **Phase 06 voltooid**: 8/8 plans, SC-1 (compat-ADR pad-a) + SC-2 (integration-test in `tests/Integration/Billing/CashierMollieSubscriptionFlowTest`) + SC-3 (cred-isolation runtime-bewezen: `EmeqMollie` + `Mollie` + `Cashier` classes coexist; `CASHIER_MOLLIE_KEY` los van Connection.access_token uit Phase 4) bewezen. SC-4 (failed-payment retry) als vendor-coverage gemarkeerd. Tracking: `06-08-ACCEPTANCE.md` met 8/8 D-18 items + 18 confirmed decisions; ROADMAP Phase 6 `[x]` 8/8 plans + 2026-05-15; REQUIREMENTS SUB-01 = Complete. Standard suite 237 passed; integration-suite 4 skipped graceful zonder CASHIER_MOLLIE_KEY; Phase 5a regressie clean (49 Mollie-routes + 19 webhooks). Pint-fix in `routes/api.php` als Phase-6-attributable acceptance-finalisatie. Phase 7 (use-case B / Account-level subscriptions) ontblokt; Phase 9 (Filament admin-UI) ook ontblokt en parallel mogelijk.
 - 2026-05-14 — **Phase 02 audit-correctie**: ROADMAP-status was `[ ]` maar de 8 Phase-2 plans in `.planning/phases/02-emeq-mollie-api-foundation/` waren al volledig geshipped in de SDK-sub-repo (`emeq/mollie-api v0.1.0-alpha.1`). `git log --grep="02-"` toont alleen het plan-creatie-commit; geen execution-commits omdat `packages/` gitignored is in Hub. Gap was administratief, niet technisch. Bonus boven plan-scope: exception-mapper + idempotency-generator + webhook-signature-helper. Daarmee is Phase 5a NIET geblokkeerd op Phase 2 — MOLL-03 (Resources) valt in Phase 5a's eigen scope, niet Phase 2.
 
 ## Deferred Items
@@ -151,7 +167,7 @@ Items acknowledged en deferred bij milestone-close 2026-05-14:
 
 ## Session Continuity
 
-Last session: 2026-05-14T19:02:38.384Z (resumed: 2026-05-14)
-Stopped at: Phase 5a unblocked — `.docs/partners/mollie/` ingericht (11 refs + indexed README via quick `260514-tny`). Klaar voor `/gsd-plan-phase 5a`.
-Resume file: .planning/phases/05a-mollie-sdk-resources-webhooks-pass-through-api/05a-CONTEXT.md
-Next action: `/clear` → `/gsd-plan-phase 5a` (Mollie SDK Resources + Webhooks + pass-through API).
+Last session: 2026-05-15T11:30:00.000Z (Phase 6 acceptance-gate run)
+Stopped at: Phase 6 ACCEPTED — 8/8 D-18 items + 3/3 SC's bewezen; SUB-01 = Complete; tracking artifacts up-to-date.
+Resume file: .planning/phases/06-cashier-mollie-integratie-use-case-a/06-08-ACCEPTANCE.md
+Next action: `/clear` → `/gsd-discuss-phase 7` in verse sessie op `feat/v02-mollie-subscriptions` — subscription-state-machine (revoked-mandate → paused, failed-retry, customer-deleted edges) verdient verse context.

@@ -25,7 +25,7 @@ v0.2 bouwt drie samenhangende lagen: (1) `emeq/mollie-api` SDK die `mollie/molli
 - [x] **Phase 4: Mollie Connect OAuth-broker** — provider-agnostisch `OAuthFlow`-contract + `MollieConnectOAuthFlow` + encrypted token-storage *(voltooid 2026-05-14; 5/5 plans, alle 5 SC's bewezen, BLOCKING acceptance 8/8 + 129/129 tests)*
 - [x] **Phase 5a: Mollie SDK Resources + Webhooks + Pass-through API** — Payments/Customers/PaymentMethods/Refunds/Mandates/Subscriptions/PaymentLinks + Connect-webhook verifier + `/v1/mollie/*` audit-logged (zie ADR `mollie-passthrough-api.md`) *(voltooid 2026-05-15; 6/6 plans, 207 tests groen, 13/13 truths verified incl. gap-closure plan 05a-06 voor D-06 + D-08 stap 1; 3 human-UAT items pending in `05a-HUMAN-UAT.md`)*
 - [ ] **Phase 5b: Snelstart-pass-through API** — `/v1/snelstart/{path}` pass-through via `HubSnelstartCredentialResolver` + `POST /v1/accounts` + `POST /v1/connections` provisioning-endpoints + audit-logging. Parallel met Phase 4 mogelijk.
-- [ ] **Phase 6: Cashier-Mollie integratie (use-case A)** — Emeq → Consumers billing op Emeq's eigen Mollie
+- [x] **Phase 6: Cashier-Mollie integratie (use-case A)** — Emeq → Consumers billing op Emeq's eigen Mollie *(voltooid 2026-05-15; 8/8 plans, SC-1+SC-2+SC-3 bewezen, SC-4 vendor-coverage; 237 tests passed + integration-suite gescheiden via `composer test:integration`)*
 - [ ] **Phase 7: Account-level subscriptions (use-case B)** — Accounts → eindgebruikers via Connect + Mandates + Subscriptions
 - [ ] **Phase 8: Naschool wiring** — composer-wiring + Snelstart Stancl-resolver + `SyncEnrollmentToSnelstartJob` + Mollie checkout-flow via Hub-Connect
 - [ ] **Phase 9: Filament admin-UI voor Emeq-medewerkers** — `/admin`-panel met Consumer-CRUD, Connection read+revoke, Account read-only, WebhookCall viewer
@@ -186,7 +186,7 @@ v0.2 bouwt drie samenhangende lagen: (1) `emeq/mollie-api` SDK die `mollie/molli
   2. Een test-Consumer kan een subscription starten op een test-plan en een eerste Mandate + Payment is zichtbaar in Emeq's eigen Mollie test-dashboard
   3. Cashier-billing en Connect-pass-through (Phase 5a) draaien naast elkaar in dezelfde request-cycle zonder credential-cross-contamination tussen Emeq's eigen Mollie-key en Account-Connection-tokens
   4. Een failed-payment (test-mode forced fail) triggert Cashier's retry-flow zonder dat de subscription direct gecancelled wordt
-**Plans:** 8 plans (1/8 executed)
+**Plans:** 8 plans (8/8 executed)
 - [x] 06-01-PLAN.md — Cashier-Mollie compat-ADR (pad-a gekozen: `mollie/laravel-cashier-mollie ^2.20`)
 - [x] 06-02-PLAN.md — Install Cashier-Mollie + publish migrations & configs + env-skeleton
 - [x] 06-03-PLAN.md — Billable trait op Consumer + owner_type-align migration + factory-state
@@ -194,7 +194,7 @@ v0.2 bouwt drie samenhangende lagen: (1) `emeq/mollie-api` SDK die `mollie/molli
 - [x] 06-05-PLAN.md — Sanctum billing-abilities + Consumer-read + Admin create/cancel routes + middleware
 - [x] 06-06-PLAN.md — Cashier-webhook hard-fail-guard + Cashier::ignoreRoutes + 3 routes onder /cashier/webhook*
 - [x] 06-07-PLAN.md — Integration-suite gescheiden via phpunit.integration.xml + 3 happy-path-tests
-- [ ] 06-08-PLAN.md — BLOCKING phase-acceptance + ROADMAP/REQUIREMENTS/STATE updates
+- [x] 06-08-PLAN.md — BLOCKING phase-acceptance + ROADMAP/REQUIREMENTS/STATE updates (8/8 D-18 items + 3/3 SC's bewezen; ACCEPTED 2026-05-15)
 
 #### Phase 7: Account-level subscriptions (use-case B)
 **Goal:** Accounts factureren hun eindgebruikers via hun eigen Mollie-account (via Connect) met een multi-tenant subscription-laag bovenop Mollie's Subscriptions + Mandates API.
@@ -276,7 +276,7 @@ v0.2 bouwt drie samenhangende lagen: (1) `emeq/mollie-api` SDK die `mollie/molli
 | 4. Mollie Connect OAuth-broker | 0/0 (TBD) | Not started | - |
 | 5a. Mollie SDK Resources + Webhooks + Pass-through API | 0/5 | Planned | - |
 | 5b. Snelstart-pass-through API | 0/5 | Planned | - |
-| 6. Cashier-Mollie integratie | 1/8 | In Progress | - |
+| 6. Cashier-Mollie integratie | 8/8 | Done | 2026-05-15 |
 | 7. Account-level subscriptions | 0/0 (TBD) | Not started | - |
 | 8. Naschool wiring | 0/0 (TBD) | Not started | - |
 | 9. Filament admin-UI voor Emeq-medewerkers | 0/0 (TBD) | Not started | - |
