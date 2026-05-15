@@ -39,8 +39,8 @@
 
     <h2>Voorwaarden</h2>
     <ul>
-        <li><a href="https://emeq.nl/privacy">Privacybeleid</a></li>
-        <li><a href="https://emeq.nl/voorwaarden">Gebruiksvoorwaarden</a></li>
+        <li><a href="https://emeq.nl/privacy-policy/">Privacybeleid</a></li>
+        <li><a href="https://emeq.nl/algemene-voorwaarden/">Gebruiksvoorwaarden</a></li>
     </ul>
 
     <hr>
