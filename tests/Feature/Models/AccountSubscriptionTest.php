@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Models;
 
+use App\Billing\Account\SubscriptionStatus;
 use App\Models\Account;
 use App\Models\AccountSubscription;
 use App\Models\Connection;
@@ -21,7 +22,7 @@ class AccountSubscriptionTest extends TestCase
 
         $sub = AccountSubscription::factory()->forConnection($connection)->pending()->create();
 
-        $this->assertSame('pending', $sub->status);
+        $this->assertSame(SubscriptionStatus::Pending, $sub->status);
         $this->assertNull($sub->mollie_subscription_id);
         $this->assertSame('EUR', $sub->amount_currency);
         $this->assertSame('10.00', $sub->amount_value);
@@ -42,7 +43,7 @@ class AccountSubscriptionTest extends TestCase
 
         $this->assertInstanceOf(Collection::class, $subs);
         $this->assertCount(1, $subs);
-        $this->assertSame('pending', $subs->first()->status);
+        $this->assertSame(SubscriptionStatus::Pending, $subs->first()->status);
     }
 
     public function test_connection_can_access_subscriptions_via_relation(): void
