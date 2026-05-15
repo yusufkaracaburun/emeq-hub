@@ -2,15 +2,16 @@
 phase: 07-account-level-subscriptions-use-case-b
 plan: 08
 closed_at: 2026-05-15
-status: PENDING
+accepted_at: 2026-05-15
+status: ACCEPTED
 branch: feat/v02-account-subscriptions
-executor: 07-08 (autonomous=false; human-bevestiging vereist via checkpoint)
+executor: 07-08 (autonomous=false; human-bevestiging via checkpoint geleverd 2026-05-15)
 ---
 
 # Phase 7 — Account-level subscriptions (use-case B) — BLOCKING phase-acceptance
 
 **Datum:** 2026-05-15
-**Status:** PENDING (gaat naar ACCEPTED na checkpoint-approval)
+**Status:** ACCEPTED (human-verify-checkpoint geapproved 2026-05-15)
 **Executor:** Plan 07-08 (autonomous=false)
 **Branch:** `feat/v02-account-subscriptions`
 

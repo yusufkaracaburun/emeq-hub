@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: v0.2
 milestone_name: — Mollie + Connect + Subscriptions + Hub-skeleton
-status: executing
-stopped_at: Phase 7 close PENDING — 07-08 acceptance + ADR geland, wacht op human-verify checkpoint (Scramble UI + acceptance-review)
-last_updated: "2026-05-15T20:22:08+02:00"
-last_activity: 2026-05-15 -- Phase 07 plan 08 (acceptance + ADR + planning-sync) executed; checkpoint pending
+status: ready
+stopped_at: Phase 7 ACCEPTED 2026-05-15 — SUB-02 Complete, Phase 8 (Naschool wiring) ontblokt
+last_updated: "2026-05-15T21:00:00+02:00"
+last_activity: 2026-05-15 -- Phase 07 ACCEPTED via human-verify checkpoint; Scramble /v1-endpoints in 15 per-resource groepen geherindeeld + SCRAMBLE-NESTED-GROUPS als backlog-debt vastgelegd
 progress:
   total_phases: 10
   completed_phases: 6
@@ -25,10 +25,10 @@ See: .planning/PROJECT.md (updated 2026-05-14 na v0.1 milestone-close)
 
 ## Current Position
 
-Phase: 07 (account-level-subscriptions-use-case-b) — PENDING CHECKPOINT
-Plan: 8 of 8
-Status: 07-08 acceptance + ADR + planning-sync committed; wacht op human-verify checkpoint (Scramble UI + acceptance-review). Na "approved" → SUB-02 Complete + Phase 8 ontblokt.
-Last activity: 2026-05-15 -- Phase 07 plan 08 executed; acceptance-file 11/11 (10× ✅ + 1× ⏭️ Pad B), ADR `.docs/decisions/account-subscriptions.md` geland
+Phase: — (Phase 7 ACCEPTED; Phase 8 next, niet gestart)
+Plan: —
+Status: Idle — Phase 7 fully closed (8/8 plans, SUB-02 Complete, ADR geland, 11/11 D-32 evidence). Next: Phase 8 (Naschool wiring) of parallel Phase 9 (Filament admin-UI).
+Last activity: 2026-05-15 -- Phase 07 ACCEPTED via human-verify checkpoint; bonus tijdens checkpoint-review: 15-groepen Scramble-indeling + SCRAMBLE-NESTED-GROUPS backlog
 
 ## Performance Metrics
 

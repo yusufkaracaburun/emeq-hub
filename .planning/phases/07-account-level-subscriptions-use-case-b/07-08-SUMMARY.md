@@ -2,7 +2,7 @@
 phase: 07-account-level-subscriptions-use-case-b
 plan: 08
 subsystem: planning
-tags: [phase-acceptance, adr, account-subscriptions, planning-sync, sub-02, d-32, scope-niveau, integration-test-keuze, pending-checkpoint]
+tags: [phase-acceptance, adr, account-subscriptions, planning-sync, sub-02, d-32, scope-niveau, integration-test-keuze, accepted, scramble-grouping]
 
 # Dependency graph
 requires:
@@ -48,7 +48,7 @@ patterns-established:
   - "Pattern 2 — MEDIUM-decision-tracking via expliciete §-sectie in ADR (i.p.v. losse decision-bullet in STATE). Voor toekomstige phases die meerdere MEDIUM-decisions hebben blijft de ADR de single-source-of-truth; STATE bevat alleen one-liner-pointer."
   - "Pattern 3 — Pad-A/Pad-B-keuze met re-run-triggers expliciet vermeld in beide locaties (ACCEPTANCE.md + ADR). Voorkomt dat ⏭️ skips eeuwig vergeten worden."
 
-requirements-completed: [SUB-02]  # pending checkpoint-approval; technisch klaar
+requirements-completed: [SUB-02]  # ACCEPTED 2026-05-15 via human-verify checkpoint
 
 # Metrics
 metrics:
@@ -64,9 +64,9 @@ One-liner: 11/11 D-32 acceptance-criteria (10× ✅ + 1× ⏭️ Pad B), ADR `ac
 
 ## Status
 
-**PENDING checkpoint-approval (human-verify).**
+**ACCEPTED 2026-05-15 via human-verify checkpoint.**
 
-De geautomatiseerde acceptance-stap is klaar; de checkpoint-stap (Scramble UI-browser-check + acceptance-file review) blijft open per plan-frontmatter `autonomous: false`. Per task-scope-directive uit de executor-prompt is de `checkpoint:human-verify`-task NIET door deze executor uitgevoerd — de orchestrator handelt die inline af na merge.
+Geautomatiseerde acceptance + human-verify gate beide doorlopen. Bonus tijdens checkpoint-review: Scramble `/v1`-endpoints opgesplitst in 15 logische groepen met per-resource Mollie-prefix (`Mollie · Customers` t/m `Mollie · Subscriptions`), scaling-grens vastgelegd als `SCRAMBLE-NESTED-GROUPS` in ROADMAP-backlog (Redoc-switch + `x-tagGroups`-middleware nodig bij 5+ providers).
 
 ## Wat dit plan oplevert
 
