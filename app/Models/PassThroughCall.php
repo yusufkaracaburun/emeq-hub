@@ -4,11 +4,13 @@ namespace App\Models;
 
 use Database\Factories\PassThroughCallFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 #[Fillable([
+    'direction',
     'consumer_id',
     'account_id',
     'connection_id',
@@ -19,6 +21,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'status',
     'duration_ms',
     'request_fingerprint',
+    'event_id',
     'response_size_bytes',
     'upstream_error',
     'created_at',
@@ -29,6 +32,16 @@ class PassThroughCall extends Model
     use HasFactory;
 
     public $timestamps = false;
+
+    public function scopeInbound(Builder $query): Builder
+    {
+        return $query->where('direction', 'inbound');
+    }
+
+    public function scopeOutbound(Builder $query): Builder
+    {
+        return $query->where('direction', 'outbound');
+    }
 
     public function consumer(): BelongsTo
     {
