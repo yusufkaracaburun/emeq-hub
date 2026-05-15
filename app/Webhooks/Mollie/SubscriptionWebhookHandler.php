@@ -22,7 +22,7 @@ use App\Mollie\MollieConnectionContext;
  *  3. Delegeer naar `AccountSubscriptionManager::syncFromMollie()` die zelf
  *     de Mollie-GET doet + state-machine bijwerkt (D-17: 404 → Unknown).
  */
-final class SubscriptionWebhookHandler
+class SubscriptionWebhookHandler
 {
     public function __construct(
         private readonly MollieConnectionContext $context,

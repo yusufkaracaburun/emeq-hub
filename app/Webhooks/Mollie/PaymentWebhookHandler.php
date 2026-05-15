@@ -29,7 +29,7 @@ use Throwable;
  *     `ok()` zodat de bestaande Phase-5a-flow (audit + fan-out) ongewijzigd
  *     doorloopt.
  */
-final class PaymentWebhookHandler
+class PaymentWebhookHandler
 {
     public function __construct(
         private readonly MollieConnectionContext $context,

@@ -27,7 +27,7 @@ use Mollie\Api\Resources\Subscription as MollieSubscription;
  *  - syncFromMollie() vangt NotFoundException → state Unknown (D-17).
  *  - recordPaymentEvent() met mandate_invalid → Active → Paused (D-16, SC-2).
  */
-final class AccountSubscriptionManager
+class AccountSubscriptionManager
 {
     public function __construct(
         private readonly MollieConnectionContext $context,
