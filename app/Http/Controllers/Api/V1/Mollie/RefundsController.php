@@ -26,7 +26,7 @@ use Symfony\Component\HttpFoundation\Response;
  * `?paymentId=tr_xxx` query-parameter. Audit-path blijft het
  * Mollie-REST-endpoint-template `/v2/refunds/{id}`.
  */
-#[Group(name: 'Mollie pass-through', description: 'Forward calls naar het Mollie-account van de gekoppelde Account.', weight: 50)]
+#[Group(name: 'Mollie', description: 'Mollie API-calls naar het Mollie-account van de gekoppelde Account.', weight: 50)]
 class RefundsController extends AbstractMolliePassThroughController
 {
     public function store(CreateRefundRequest $request, string $payment_id): Response

@@ -21,7 +21,7 @@ use Symfony\Component\HttpFoundation\Response;
  * Vendor: `MollieApiClient::$paymentLinks` exposes
  * `PaymentLinkEndpointCollection` met create/get/page-methods.
  */
-#[Group(name: 'Mollie pass-through', description: 'Forward calls naar het Mollie-account van de gekoppelde Account.', weight: 50)]
+#[Group(name: 'Mollie', description: 'Mollie API-calls naar het Mollie-account van de gekoppelde Account.', weight: 50)]
 class PaymentLinksController extends AbstractMolliePassThroughController
 {
     public function index(Request $request): Response

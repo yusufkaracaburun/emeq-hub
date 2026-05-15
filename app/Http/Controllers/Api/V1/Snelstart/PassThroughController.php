@@ -17,7 +17,7 @@ use Saloon\Enums\Method;
 use Symfony\Component\HttpFoundation\Response;
 use Throwable;
 
-#[Group(name: 'Snelstart pass-through', description: 'Forward OData calls naar Snelstart met de clientKey + subscriptionKey van de gekoppelde Account.', weight: 60)]
+#[Group(name: 'Snelstart', description: 'Snelstart OData-calls met de clientKey + subscriptionKey van de gekoppelde Account.', weight: 60)]
 class PassThroughController extends Controller
 {
     private const ALLOWED_METHODS = ['GET', 'POST', 'PATCH', 'DELETE'];

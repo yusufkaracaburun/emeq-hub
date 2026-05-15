@@ -23,7 +23,7 @@ use Symfony\Component\HttpFoundation\Response;
  * suggereerde). Methodes pageForId / getForId / revokeForId blijven
  * hetzelfde.
  */
-#[Group(name: 'Mollie pass-through', description: 'Forward calls naar het Mollie-account van de gekoppelde Account.', weight: 50)]
+#[Group(name: 'Mollie', description: 'Mollie API-calls naar het Mollie-account van de gekoppelde Account.', weight: 50)]
 class MandatesController extends AbstractMolliePassThroughController
 {
     public function index(Request $request, string $customer_id): Response
