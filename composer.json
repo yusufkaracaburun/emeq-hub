@@ -10,6 +10,7 @@
         "dedoc/scramble": "^0.13.22",
         "emeq/mollie-api": "^0.1.0-alpha.1",
         "emeq/snelstart-api": "dev-master",
+        "filament/filament": "^4.0",
         "laravel/framework": "^13.8",
         "laravel/horizon": "^5.46",
         "laravel/nightwatch": "^1.26",
@@ -19,6 +20,7 @@
         "mollie/mollie-api-php": "^3.11",
         "predis/predis": "^3.4",
         "sentry/sentry-laravel": "^4.25",
+        "spatie/laravel-permission": "^6.0",
         "spatie/laravel-webhook-client": "^3.6",
         "spatie/laravel-webhook-server": "^3.10"
     },
@@ -67,7 +69,8 @@
         ],
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
-            "@php artisan package:discover --ansi"
+            "@php artisan package:discover --ansi",
+            "@php artisan filament:upgrade"
         ],
         "post-update-cmd": [
             "@php artisan vendor:publish --tag=laravel-assets --ansi --force",
@@ -100,7 +103,11 @@
         },
         "audit": {
             "abandoned": "report",
-            "ignore": ["PKSA-xnj5-w74d-6wmz", "PKSA-5szq-gvrg-ttfq", "PKSA-rnpm-45mg-w6ht"]
+            "ignore": [
+                "PKSA-xnj5-w74d-6wmz",
+                "PKSA-5szq-gvrg-ttfq",
+                "PKSA-rnpm-45mg-w6ht"
+            ]
         }
     },
     "minimum-stability": "dev",
