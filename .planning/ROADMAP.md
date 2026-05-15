@@ -193,7 +193,7 @@ v0.2 bouwt drie samenhangende lagen: (1) `emeq/mollie-api` SDK die `mollie/molli
 - [x] 06-04-PLAN.md — PlanResolver + config/billing-plans.php + UnknownPlanException
 - [x] 06-05-PLAN.md — Sanctum billing-abilities + Consumer-read + Admin create/cancel routes + middleware
 - [x] 06-06-PLAN.md — Cashier-webhook hard-fail-guard + Cashier::ignoreRoutes + 3 routes onder /cashier/webhook*
-- [ ] 06-07-PLAN.md — Integration-suite gescheiden via phpunit.integration.xml + 3 happy-path-tests
+- [x] 06-07-PLAN.md — Integration-suite gescheiden via phpunit.integration.xml + 3 happy-path-tests
 - [ ] 06-08-PLAN.md — BLOCKING phase-acceptance + ROADMAP/REQUIREMENTS/STATE updates
 
 #### Phase 7: Account-level subscriptions (use-case B)
