@@ -15,6 +15,7 @@
         "laravel/nightwatch": "^1.26",
         "laravel/sanctum": "^4.3",
         "laravel/tinker": "^3.0",
+        "mollie/laravel-cashier-mollie": "^2.20",
         "mollie/mollie-api-php": "^3.11",
         "predis/predis": "^3.4",
         "spatie/laravel-webhook-client": "^3.6",
