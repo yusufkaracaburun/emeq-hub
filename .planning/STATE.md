@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v0.2
 milestone_name: — Mollie + Connect + Subscriptions + Hub-skeleton
-status: completed
-stopped_at: Phase 7 context gathered (auto-mode, no clarifying questions)
-last_updated: "2026-05-15T09:39:29.731Z"
+status: executing
+stopped_at: Phase 5c CONTEXT geland (wacht op Snelstart-partner-respons ≤2026-05-26) + Phase 7 CONTEXT geland (auto-mode, no clarifying questions); beide klaar voor `/gsd-plan-phase`.
+last_updated: "2026-05-15T13:00:00.000Z"
 last_activity: 2026-05-15
 progress:
   total_phases: 10
   completed_phases: 6
   total_plans: 37
   completed_plans: 37
-  percent: 100
+  percent: 60
 ---
 
 # Project State
@@ -21,13 +21,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-05-14 na v0.1 milestone-close)
 
 **Core value:** Twee fundamenteel verschillende providers (OData/clientkey + REST/OAuth2) productie-gevalideerd via één SDK-pattern, en beide live in één concrete consumer-feature. v0.1 heeft Snelstart-deel bewezen; v0.2 zet Mollie + Connect + Subscriptions + Hub-skeleton op.
-**Current focus:** Phase 06 ACCEPTED — klaar voor Phase 7 (Account-level subscriptions / use-case B) in verse sessie
+**Current focus:** Twee tracks open — Phase 5c (Snelstart webhook-handler, productie-cert-blocker) wacht op partner-respons; Phase 7 (Account-level subscriptions / use-case B) CONTEXT klaar, plan-phase next.
 
 ## Current Position
 
-Phase: 7
+Phase: 5c + 7 (parallel)
 Plan: Not started
-Status: Phase 6 complete (8/8 plans, SC-1+SC-2+SC-3 bewezen, SC-4 vendor-coverage); klaar voor Phase 7 discussie
+Status: Phase 6 ACCEPTED (8/8 plans, SC-1+SC-2+SC-3 bewezen, SC-4 vendor-coverage); Phase 5c CONTEXT.md geland met 5 ❓-aannames (wacht op `partner@snelstart.nl` op Gmail-draft `r-8836998535038336548`, ≤2026-05-26); Phase 7 CONTEXT.md geland via `/gsd-discuss-phase 7 --auto`, klaar voor `/gsd-plan-phase 7`.
 Last activity: 2026-05-15
 
 ## Performance Metrics
