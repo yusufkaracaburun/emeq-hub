@@ -213,7 +213,7 @@ Geen live-edit-symlink meer. Voor snelle iteratie in de SDK: werk daar gewoon ze
 
 `emeq/hub` — multi-tenant integration platform. Eén centrale Laravel-app die OAuth-koppelingen, webhook-routing en een uniforme REST-API exposeert naar boekhoud-/betaal-partner-API's:
 
-- **Snelstart** (boekhouden, NL) — via eigen SDK `emeq/snelstart-api` (VCS-repo, zie packages-conventie)
+- **Snelstart** (boekhouden, NL) — via lokale SDK `emeq/snelstart-api` in `packages/`
 - **Mollie** (betalingen, NL/EU) — via officiële `mollie/mollie-api-php`
 - **Moneybird** (boekhouden, NL) — gepland, via toekomstige `emeq/moneybird-api` SDK
 - **Ibanity** (PSD2/banking) — gepland
@@ -379,6 +379,13 @@ This project has domain-specific skills available in `**/skills/**`. You MUST ac
 # Deployment
 
 - Laravel can be deployed using [Laravel Cloud](https://cloud.laravel.com/), which is the fastest way to deploy and scale production Laravel applications.
+
+=== tests rules ===
+
+# Test Enforcement
+
+- Every change must be programmatically tested. Write a new test or update an existing test, then run the affected tests to make sure they pass.
+- Run the minimum number of tests needed to ensure code quality and speed. Use `php artisan test --compact` with a specific filename or filter.
 
 === laravel/core rules ===
 
