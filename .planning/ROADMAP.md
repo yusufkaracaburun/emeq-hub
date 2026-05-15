@@ -188,7 +188,7 @@ v0.2 bouwt drie samenhangende lagen: (1) `emeq/mollie-api` SDK die `mollie/molli
   4. Een failed-payment (test-mode forced fail) triggert Cashier's retry-flow zonder dat de subscription direct gecancelled wordt
 **Plans:** 8 plans (1/8 executed)
 - [x] 06-01-PLAN.md — Cashier-Mollie compat-ADR (pad-a gekozen: `mollie/laravel-cashier-mollie ^2.20`)
-- [ ] 06-02-PLAN.md — Install Cashier-Mollie + publish migrations & configs + env-skeleton
+- [x] 06-02-PLAN.md — Install Cashier-Mollie + publish migrations & configs + env-skeleton
 - [ ] 06-03-PLAN.md — Billable trait op Consumer + owner_type-align migration + factory-state
 - [ ] 06-04-PLAN.md — PlanResolver + config/billing-plans.php + UnknownPlanException
 - [ ] 06-05-PLAN.md — Sanctum billing-abilities + Consumer-read + Admin create/cancel routes + middleware
