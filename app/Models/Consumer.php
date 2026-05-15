@@ -7,13 +7,14 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Laravel\Cashier\Billable;
 use Laravel\Sanctum\HasApiTokens;
 
 #[Fillable(['name', 'slug', 'webhook_callback_url', 'webhook_callback_secret'])]
 class Consumer extends Authenticatable
 {
     /** @use HasFactory<ConsumerFactory> */
-    use HasApiTokens, HasFactory;
+    use Billable, HasApiTokens, HasFactory;
 
     /**
      * @return array<string, string>
