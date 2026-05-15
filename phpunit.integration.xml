@@ -5,17 +5,14 @@
          colors="true"
 >
     <testsuites>
-        <testsuite name="Unit">
-            <directory>tests/Unit</directory>
-        </testsuite>
-        <testsuite name="Feature">
-            <directory>tests/Feature</directory>
+        <testsuite name="Integration">
+            <directory>tests/Integration</directory>
         </testsuite>
     </testsuites>
     <groups>
-        <exclude>
+        <include>
             <group>integration</group>
-        </exclude>
+        </include>
     </groups>
     <source>
         <include>
@@ -37,5 +34,8 @@
         <env name="PULSE_ENABLED" value="false"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
         <env name="NIGHTWATCH_ENABLED" value="false"/>
+        <!-- CASHIER_MOLLIE_KEY + MOLLIE_KEY + CASHIER_WEBHOOK_SECRET worden uit
+             .env gelezen. IntegrationTestCase::setUp() skipt bij missing of
+             non-test-prefixed key. -->
     </php>
 </phpunit>
