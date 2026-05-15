@@ -4,14 +4,14 @@ milestone: v0.2
 milestone_name: — Mollie + Connect + Subscriptions + Hub-skeleton
 status: executing
 stopped_at: Phase 5a unblocked — `.docs/partners/mollie/` ingericht (11 refs + indexed README via quick `260514-tny`). Klaar voor `/gsd-plan-phase 5a`.
-last_updated: "2026-05-15T06:09:05.739Z"
-last_activity: 2026-05-15 -- Phase 05a execution started
+last_updated: "2026-05-15T06:37:56.701Z"
+last_activity: 2026-05-15
 progress:
   total_phases: 9
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 29
-  completed_plans: 20
-  percent: 69
+  completed_plans: 21
+  percent: 72
 ---
 
 # Project State
@@ -25,16 +25,16 @@ See: .planning/PROJECT.md (updated 2026-05-14 na v0.1 milestone-close)
 
 ## Current Position
 
-Phase: 05a (mollie-sdk-resources-webhooks-pass-through-api) — EXECUTING
-Plan: 1 of 6
+Phase: 05b
+Plan: Not started
 Status: Executing Phase 05a
-Last activity: 2026-05-15 -- Phase 05a execution started
+Last activity: 2026-05-15
 
 ## Performance Metrics
 
 **v0.1 Velocity:**
 
-- Total plans completed: 8 (Phase 1)
+- Total plans completed: 14 (Phase 1)
 - Total execution time: ~12 uur (2026-05-14 00:42 → 12:02 CEST)
 - Sub-repo werk: snelstart-sdk submodule wiring + Pest-coverage + push
 
@@ -45,6 +45,7 @@ Last activity: 2026-05-15 -- Phase 05a execution started
 | 01-snelstart-sdk-finalize | 3 | ~16 min | ~5 min |
 | 03-hub-skeleton | 5/5 | ~27 min | ~5 min |
 | 03 | 5 | - | - |
+| 05a | 6 | - | - |
 
 **Recent Trend:**
 
