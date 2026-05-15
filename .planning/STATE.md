@@ -4,8 +4,8 @@ milestone: v0.2
 milestone_name: — Mollie + Connect + Subscriptions + Hub-skeleton
 status: executing
 stopped_at: Phase 7 context gathered (auto-mode, no clarifying questions)
-last_updated: "2026-05-15T14:24:41.792Z"
-last_activity: 2026-05-15 -- Phase 07 planning complete
+last_updated: "2026-05-15T15:26:02.130Z"
+last_activity: 2026-05-15 -- Phase 05c execution started
 progress:
   total_phases: 10
   completed_phases: 5
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-05-14 na v0.1 milestone-close)
 
 **Core value:** Twee fundamenteel verschillende providers (OData/clientkey + REST/OAuth2) productie-gevalideerd via één SDK-pattern, en beide live in één concrete consumer-feature. v0.1 heeft Snelstart-deel bewezen; v0.2 zet Mollie + Connect + Subscriptions + Hub-skeleton op.
-**Current focus:** Twee tracks open — Phase 5c (Snelstart webhook-handler, productie-cert-blocker) wacht op partner-respons; Phase 7 (Account-level subscriptions / use-case B) CONTEXT klaar, plan-phase next.
+**Current focus:** Phase 05c — snelstart-webhook-handler
 
 ## Current Position
 
-Phase: 5c + 7 (parallel)
-Plan: 5c → 5 plans planned (PLAN-checker PASSED); 7 → not started
-Status: Ready to execute
-Last activity: 2026-05-15 -- Phase 07 planning complete
+Phase: 05c (snelstart-webhook-handler) — EXECUTING
+Plan: 1 of 5
+Status: Executing Phase 05c
+Last activity: 2026-05-15 -- Phase 05c execution started
 
 ## Performance Metrics
 
