@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\EnsureEmeqAdminToken;
 use App\Http\Middleware\ResolveMollieAccount;
 use App\Http\Middleware\ResolveSnelstartAccount;
 use App\Http\Middleware\SetNoIndexHeaders;
@@ -28,6 +29,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'resolve.snelstart.account' => ResolveSnelstartAccount::class,
             'resolve.mollie.account' => ResolveMollieAccount::class,
+            'emeq.admin' => EnsureEmeqAdminToken::class,
             'abilities' => CheckAbilities::class,
             'ability' => CheckForAnyAbility::class,
         ]);
