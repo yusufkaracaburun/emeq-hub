@@ -186,7 +186,15 @@ v0.2 bouwt drie samenhangende lagen: (1) `emeq/mollie-api` SDK die `mollie/molli
   2. Een test-Consumer kan een subscription starten op een test-plan en een eerste Mandate + Payment is zichtbaar in Emeq's eigen Mollie test-dashboard
   3. Cashier-billing en Connect-pass-through (Phase 5a) draaien naast elkaar in dezelfde request-cycle zonder credential-cross-contamination tussen Emeq's eigen Mollie-key en Account-Connection-tokens
   4. Een failed-payment (test-mode forced fail) triggert Cashier's retry-flow zonder dat de subscription direct gecancelled wordt
-**Plans:** TBD
+**Plans:** 8 plans (1/8 executed)
+- [x] 06-01-PLAN.md — Cashier-Mollie compat-ADR (pad-a gekozen: `mollie/laravel-cashier-mollie ^2.20`)
+- [ ] 06-02-PLAN.md — Install Cashier-Mollie + publish migrations & configs + env-skeleton
+- [ ] 06-03-PLAN.md — Billable trait op Consumer + owner_type-align migration + factory-state
+- [ ] 06-04-PLAN.md — PlanResolver + config/billing-plans.php + UnknownPlanException
+- [ ] 06-05-PLAN.md — Sanctum billing-abilities + Consumer-read + Admin create/cancel routes + middleware
+- [ ] 06-06-PLAN.md — Cashier-webhook hard-fail-guard + Cashier::ignoreRoutes + 3 routes onder /cashier/webhook*
+- [ ] 06-07-PLAN.md — Integration-suite gescheiden via phpunit.integration.xml + 3 happy-path-tests
+- [ ] 06-08-PLAN.md — BLOCKING phase-acceptance + ROADMAP/REQUIREMENTS/STATE updates
 
 #### Phase 7: Account-level subscriptions (use-case B)
 **Goal:** Accounts factureren hun eindgebruikers via hun eigen Mollie-account (via Connect) met een multi-tenant subscription-laag bovenop Mollie's Subscriptions + Mandates API.
@@ -268,7 +276,7 @@ v0.2 bouwt drie samenhangende lagen: (1) `emeq/mollie-api` SDK die `mollie/molli
 | 4. Mollie Connect OAuth-broker | 0/0 (TBD) | Not started | - |
 | 5a. Mollie SDK Resources + Webhooks + Pass-through API | 0/5 | Planned | - |
 | 5b. Snelstart-pass-through API | 0/5 | Planned | - |
-| 6. Cashier-Mollie integratie | 0/0 (TBD) | Not started | - |
+| 6. Cashier-Mollie integratie | 1/8 | In Progress | - |
 | 7. Account-level subscriptions | 0/0 (TBD) | Not started | - |
 | 8. Naschool wiring | 0/0 (TBD) | Not started | - |
 | 9. Filament admin-UI voor Emeq-medewerkers | 0/0 (TBD) | Not started | - |
