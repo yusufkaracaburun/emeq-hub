@@ -22,6 +22,7 @@ class PassThroughCallFactory extends Factory
         $account = Account::factory()->for($consumer);
 
         return [
+            'direction' => 'outbound',
             'consumer_id' => $consumer,
             'account_id' => $account,
             'connection_id' => Connection::factory()->forSnelstart()->for($account),
@@ -31,9 +32,21 @@ class PassThroughCallFactory extends Factory
             'status' => 200,
             'duration_ms' => fake()->numberBetween(20, 400),
             'request_fingerprint' => null,
+            'event_id' => null,
             'response_size_bytes' => fake()->numberBetween(20, 5000),
             'upstream_error' => null,
             'created_at' => now(),
         ];
+    }
+
+    public function inbound(): static
+    {
+        return $this->state(fn (): array => [
+            'direction' => 'inbound',
+            'method' => 'POST',
+            'path' => '/webhooks/snelstart',
+            'event_id' => 'evt-'.fake()->uuid(),
+            'request_fingerprint' => substr(hash('sha256', fake()->uuid()), 0, 12),
+        ]);
     }
 }

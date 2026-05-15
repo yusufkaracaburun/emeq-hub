@@ -33,6 +33,7 @@ class ConnectionFactory extends Factory
             'client_key' => 'CK-'.Str::random(40),
             'subscription_key' => 'SK-'.Str::random(40),
             'subscription_id' => (string) Str::uuid(),
+            'administratie_id' => (string) Str::uuid(),
             'access_token' => null,
             'refresh_token' => null,
             'expires_at' => null,
