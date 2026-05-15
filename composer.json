@@ -18,6 +18,7 @@
         "mollie/laravel-cashier-mollie": "^2.20",
         "mollie/mollie-api-php": "^3.11",
         "predis/predis": "^3.4",
+        "sentry/sentry-laravel": "^4.25",
         "spatie/laravel-webhook-client": "^3.6",
         "spatie/laravel-webhook-server": "^3.10"
     },
