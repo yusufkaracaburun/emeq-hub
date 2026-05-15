@@ -30,7 +30,12 @@ Voordat we het certificeringsformulier op snelstart.nl/api invullen, hebben we e
 
 3. **Tenant-routing via één partner-URL.** Wij geven bij certificering één publieke URL door (`https://hub.emeq.nl/webhooks/snelstart`). Begrijpen wij goed dat *alle* Snelstart-administraties die via onze AppShortName gekoppeld zijn webhooks naar diezelfde URL sturen, en dat wij de juiste administratie afleiden uit de payload (vermoedelijk `administratieId` of vergelijkbaar)? Zo ja: welk veld in de payload is canonical voor die routing?
 
-4. **Retry-policy.** Bij een niet-2xx-respons van onze kant: hoeveel retries doet Snelstart, met welke backoff, en wat is de eindstaat als alle retries falen (queue / DLQ / handmatige replay vanuit het portaal)?
+4. **Retry-policy.** Bij een niet-2xx-respons van onze webhook-handler (5xx, timeout, of connection-error):
+   a. **Hoeveel retries** doet Snelstart voordat het event als definitief gefaald wordt bestempeld?
+   b. **Welk backoff-schema** — fixed interval (om de N min, N keer), exponential (1 → 2 → 4 → 8 min …), of iets anders?
+   c. **Eindstaat na alle retries gefaald** — is het event verloren, komt het in een Snelstart-side DLQ die wij via het developer-portaal handmatig kunnen replayen, of moeten wij de gemiste state zelf ophalen via OData (`?modifiedSince=…`)?
+
+   We willen dit weten om te bepalen of we (i) eigen idempotency-tracking moeten bouwen voor herhaalde event-IDs binnen één retry-window, (ii) onze monitoring-SLA op webhook-5xx moeten kalibreren op de retry-curve, en (iii) een handmatige replay-knop nodig hebben in onze admin-UI.
 
 5. **Event-typen voor v1.** Welke webhook-event-typen zijn er beschikbaar in de productie-tier — en welke (zo niet alle) raden jullie aan voor een eerste integratie die zich richt op Relaties + Verkoopfacturen?
 
