@@ -24,4 +24,9 @@ class Account extends Model
     {
         return $this->hasMany(Connection::class);
     }
+
+    public function accountSubscriptions(): HasMany
+    {
+        return $this->hasMany(AccountSubscription::class);
+    }
 }
