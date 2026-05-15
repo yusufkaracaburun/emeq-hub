@@ -1,7 +1,9 @@
 ---
 phase: 05a-mollie-sdk-resources-webhooks-pass-through-api
 verified: 2026-05-15T09:00:00Z
-status: human_needed
+human_uat_closed: 2026-05-15T15:05:00Z
+human_uat_result: .planning/phases/05a-mollie-sdk-resources-webhooks-pass-through-api/05a-HUMAN-UAT.md
+status: passed_with_deferred
 score: 13/13 must-haves verified
 overrides_applied: 0
 re_verification:
@@ -12,15 +14,26 @@ re_verification:
     - "MOLL-04 SC-3 / D-08 stap 1 / T-05a-06: Hard fail bij ontbrekende platform-webhook-secret (truth #13)"
   gaps_remaining: []
   regressions: []
-deferred: []
+deferred:
+  - "05a-HUMAN-UAT test 2 (real Mollie testmode webhook hit) — blocked op Phase 8 NSCH-03 (vereist Mollie testmode + Connect-koppeling + publieke tunnel)"
+  - "05a-HUMAN-UAT test 3 (end-to-end POST → checkout → webhook → fan-out) — blocked op Phase 8 NSCH-03 (vereist Naschool-Consumer + test-school-Account)"
 human_verification:
   - test: "Browser-render /docs/api Scramble UI"
+    result: pass
+    validated_by: playwright-cli (headless chromium)
+    validated_at: 2026-05-15T14:52Z
     expected: "Alle 22 Mollie-routes + 3 OAuth-routes + 3 webhook-routes verschijnen met working 'Try it out'-buttons. Payments + Customers + PaymentLinks tonen edit-baar request-body schema."
     why_human: "Scramble UI render kan niet headless gevalideerd worden zonder echte browser; OpenAPI-paths zijn wel programmatisch bevestigd (ScrambleRouteDiscoveryTest 11/11 groen) maar UI-rendering + Try-it-out-functionaliteit zelf zijn visueel-interactief."
   - test: "Real Mollie testmode webhook hit naar /webhooks/mollie/{connection_id}"
+    result: blocked
+    blocked_by: phase-8-nsch-03
+    reason: "Vereist Mollie testmode-account + Connect-koppeling + publiek bereikbare tunnel — infra landt in Phase 8 NSCH-03."
     expected: "Mollie's next-gen subscription-webhook (X-Mollie-Signature, JSON body) verifieert correct, antifoofing-fetch slaagt, fan-out POST verschijnt op een test-Consumer-callback (bv. https://webhook.site). Audit-rij in webhook_calls heeft geen exception."
     why_human: "Vereist een live Mollie testmode account + Connect-koppeling + publiek bereikbare ngrok-/Caddy-tunnel. SDK-pad is via MollieWebhookSignature-helper getest met stubs maar de eind-tot-eind validatie tegen Mollie's eigen signer is niet geautomatiseerd."
   - test: "Concrete POST /v1/mollie/payments → ouder doorloopt Mollie test-mode → webhook ontvangen"
+    result: blocked
+    blocked_by: phase-8-nsch-03
+    reason: "End-to-end NSCH-03 (Phase 8) levert de Naschool-Consumer + test-school-Account die nodig zijn voor deze flow."
     expected: "Naschool-scenario (NSCH-03 dependency): Consumer-PAT met mollie:write + Account-id van een test-school stuurt POST payment → ontvangt _links.checkout.href → ouder doorloopt Mollie test-modus → Mollie post webhook naar Hub → fan-out naar Naschool-callback succesvol."
     why_human: "End-to-end smoke met echte Mollie test-omgeving is buiten scope van Phase 5a (valt onder Phase 8 NSCH-03) maar bewijst SC-1 + SC-3 + SC-4 hard."
 ---
