@@ -235,7 +235,15 @@ v0.2 bouwt drie samenhangende lagen: (1) `emeq/mollie-api` SDK die `mollie/molli
   2. Een Mollie Connect webhook over een mandate-revoke transitioneert de `AccountSubscription` naar `paused` zonder dat Hub direct cancellt
   3. Twee Accounts met elk een eigen `AccountSubscription` op dezelfde test-eindgebruiker (verschillende email) hebben volledig gescheiden state — geen cross-Account-data in queries vanuit Account A
   4. Tests dekken create/cancel/webhook-update happy paths + ≥3 edge cases (revoked mandate, failed retry, deleted customer)
-**Plans:** TBD
+**Plans:** 8 plans
+- [ ] 07-01-PLAN.md — Migration + AccountSubscription-model + factory + Account/Connection hasMany-relaties
+- [ ] 07-02-PLAN.md — SubscriptionStatus-enum + StateTransitions-helper + InvalidStateTransitionException
+- [ ] 07-03-PLAN.md — AccountSubscriptionManager service (create/cancel/pause/resume/syncFromMollie/recordPaymentEvent) + Idempotency-Key forward + status-cast op model
+- [ ] 07-04-PLAN.md — CreateAccountSubscriptionRequest + Resource + 3 controllers + 6 routes onder /v1/account-subscriptions + cross-Consumer-scope + ability-gating
+- [ ] 07-05-PLAN.md — WebhookPayloadRouter + SubscriptionWebhookHandler + PaymentWebhookHandler + MollieWebhookController refactor (D-15/D-18) zonder Phase-5a-regressie (D-31)
+- [ ] 07-06-PLAN.md — Feature-test-suite (Create/Cancel/PauseResume/List/WebhookFlow/Coexistence) — SC-1+SC-2+SC-3+SC-4 happy + ≥3 edge cases
+- [ ] 07-07-PLAN.md — Integration-test @group integration + AccountSubscriptionIntegrationTestCase + .env.example MOLLIE_CONNECT_TEST_ACCESS_TOKEN — SC-4 vendor-coverage
+- [ ] 07-08-PLAN.md — BLOCKING phase-acceptance D-32 10/10 + ADR account-subscriptions + ROADMAP/REQUIREMENTS/STATE sync
 
 #### Phase 8: Naschool wiring (Snelstart + Mollie-via-Hub)
 **Goal:** Naschool als eerste concrete Consumer: Snelstart-verkoopfactuur op `EnrollmentConfirmed` + vrijwillige-bijdrage-checkout via Hub-Connect op school A's eigen Mollie-account, end-to-end smoke-getest.
@@ -302,7 +310,7 @@ v0.2 bouwt drie samenhangende lagen: (1) `emeq/mollie-api` SDK die `mollie/molli
 | 5b. Snelstart-pass-through API | 0/5 | Planned | - |
 | 5c. Snelstart webhook-handler | 0/0 (TBD) | Not started | - |
 | 6. Cashier-Mollie integratie | 8/8 | Done | 2026-05-15 |
-| 7. Account-level subscriptions | 0/0 (TBD) | Not started | - |
+| 7. Account-level subscriptions | 0/8 | Planned | - |
 | 8. Naschool wiring | 0/0 (TBD) | Not started | - |
 | 9. Filament admin-UI voor Emeq-medewerkers | 0/0 (TBD) | Not started | - |
 
