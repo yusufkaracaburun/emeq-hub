@@ -171,6 +171,59 @@ class MollieWebhookSignatureTest extends TestCase
         $this->assertSame('missing_payload_id', $row->exception);
     }
 
+    public function test_null_platform_secret_returns_500_and_does_not_dispatch(): void
+    {
+        Bus::fake();
+        config(['services.mollie.webhook_secret' => null]);
+
+        $connection = $this->makeMollieConnection();
+        $payload = json_encode(['id' => 'tr_test123']);
+        // Signature is irrelevant — guard moet faillen vóór verify
+        $signature = MollieWebhookSignature::sign($payload, 'any-value');
+
+        $response = $this->call(
+            'POST',
+            "/webhooks/mollie/{$connection->id}",
+            [], [], [],
+            ['HTTP_X_MOLLIE_SIGNATURE' => $signature, 'CONTENT_TYPE' => 'application/json'],
+            $payload,
+        );
+
+        $response->assertStatus(500);
+        $response->assertJsonPath('error', 'webhook_misconfigured');
+        Bus::assertNotDispatched(ForwardMollieWebhookToConsumer::class);
+
+        $row = WebhookCall::query()->latest('id')->first();
+        $this->assertNotNull($row);
+        $this->assertSame('webhook_secret_not_configured', $row->exception);
+    }
+
+    public function test_empty_string_platform_secret_returns_500_and_does_not_dispatch(): void
+    {
+        Bus::fake();
+        config(['services.mollie.webhook_secret' => '']);
+
+        $connection = $this->makeMollieConnection();
+        $payload = json_encode(['id' => 'tr_test123']);
+        $signature = MollieWebhookSignature::sign($payload, '');
+
+        $response = $this->call(
+            'POST',
+            "/webhooks/mollie/{$connection->id}",
+            [], [], [],
+            ['HTTP_X_MOLLIE_SIGNATURE' => $signature, 'CONTENT_TYPE' => 'application/json'],
+            $payload,
+        );
+
+        $response->assertStatus(500);
+        $response->assertJsonPath('error', 'webhook_misconfigured');
+        Bus::assertNotDispatched(ForwardMollieWebhookToConsumer::class);
+
+        $row = WebhookCall::query()->latest('id')->first();
+        $this->assertNotNull($row);
+        $this->assertSame('webhook_secret_not_configured', $row->exception);
+    }
+
     private function makeMollieConnection(): Connection
     {
         $consumer = Consumer::factory()->create();
