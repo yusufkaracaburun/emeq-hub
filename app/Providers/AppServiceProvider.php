@@ -52,6 +52,8 @@ class AppServiceProvider extends ServiceProvider
             return hash_equals($token, (string) request()->query('token', ''));
         });
 
+        Gate::define('manage-staff', fn (User $user): bool => $user->hasRole('super-admin'));
+
         RateLimiter::for('api', function (Request $request): Limit {
             $consumerId = $request->user()?->getKey();
 
