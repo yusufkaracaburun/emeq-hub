@@ -87,7 +87,7 @@ Expliciet uitgesloten voor v0.2. Niet re-adden zonder PROJECT.md herziening.
 | HUB-03 | Phase 5a | Complete |
 | HUB-04 | Phase 9 | Pending |
 | HUB-05 | Phase 5b | Pending |
-| SUB-01 | Phase 6 | Pending |
+| SUB-01 | Phase 6 | In Progress (06-01 done — compat-check landed) |
 | SUB-02 | Phase 7 | Pending |
 | NSCH-01 | Phase 8 | Pending |
 | NSCH-02 | Phase 8 | Pending |
