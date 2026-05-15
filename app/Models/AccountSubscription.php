@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Billing\Account\SubscriptionStatus;
 use Database\Factories\AccountSubscriptionFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -50,8 +51,10 @@ class AccountSubscription extends Model
     protected function casts(): array
     {
         return [
+            'status' => SubscriptionStatus::class,
             'metadata' => 'array',
             'times' => 'integer',
+            'amount_value' => 'string',
             'start_date' => 'date',
             'starts_at' => 'datetime',
             'paused_at' => 'datetime',
