@@ -1,0 +1,189 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Http\Controllers\Api\V1\AccountSubscriptions;
+
+use App\Billing\Account\AccountSubscriptionManager;
+use App\Billing\Account\Dto\CreateAccountSubscriptionDto;
+use App\Billing\Account\Exceptions\InvalidStateTransitionException;
+use App\Http\Controllers\Api\V1\AccountSubscriptions\Concerns\HandlesAccountSubscriptionRequests;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\V1\AccountSubscriptions\CreateAccountSubscriptionRequest;
+use App\Http\Resources\Api\V1\AccountSubscriptionResource;
+use App\Models\Account;
+use App\Models\Connection;
+use App\Models\Consumer;
+use DateTimeImmutable;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Http\Response as HttpResponse;
+use Mollie\Api\Exceptions\ApiException as MollieApiException;
+use Symfony\Component\HttpFoundation\Response;
+use Throwable;
+
+class AccountSubscriptionController extends Controller
+{
+    use HandlesAccountSubscriptionRequests;
+
+    public function __construct(
+        private readonly AccountSubscriptionManager $manager,
+    ) {}
+
+    /**
+     * Maakt een nieuwe AccountSubscription + Mollie-subscription via de
+     * manager. Idempotency-Key header wordt forwarded naar Mollie (D-14).
+     *
+     * @header Idempotency-Key string optional UUID v7 voor retry-safe Mollie-create (forward naar Mollie-SDK setIdempotencyKey)
+     */
+    public function store(CreateAccountSubscriptionRequest $request): JsonResponse|AccountSubscriptionResource
+    {
+        /** @var Consumer $consumer */
+        $consumer = $request->user();
+        $validated = $request->validated();
+
+        try {
+            /** @var Account $account */
+            $account = $consumer->accounts()
+                ->where('external_id', $validated['account_external_id'])
+                ->firstOrFail();
+        } catch (ModelNotFoundException) {
+            return $this->notFound('account_not_found', 'Account niet gevonden voor deze Consumer.');
+        }
+
+        /** @var Connection|null $connection */
+        $connection = $account->connections()
+            ->where('provider', 'mollie')
+            ->whereNull('revoked_at')
+            ->first();
+
+        if ($connection === null) {
+            return response()->json([
+                'error' => 'no_active_mollie_connection',
+                'message' => 'Geen actieve Mollie-Connection gevonden voor dit Account.',
+            ], Response::HTTP_CONFLICT);
+        }
+
+        $startDate = isset($validated['start_date']) && $validated['start_date'] !== null
+            ? new DateTimeImmutable($validated['start_date'])
+            : null;
+
+        $dto = new CreateAccountSubscriptionDto(
+            mollieCustomerId: $validated['mollie_customer_id'],
+            mollieMandateId: $validated['mollie_mandate_id'] ?? null,
+            amountCurrency: $validated['amount']['currency'],
+            amountValue: $validated['amount']['value'],
+            interval: $validated['interval'],
+            description: $validated['description'],
+            times: $validated['times'] ?? null,
+            startDate: $startDate,
+            metadata: $validated['metadata'] ?? null,
+        );
+
+        $idempotencyKey = $request->header('Idempotency-Key');
+
+        try {
+            $sub = $this->manager->create(
+                $account,
+                $connection,
+                $dto,
+                is_string($idempotencyKey) && $idempotencyKey !== '' ? $idempotencyKey : null,
+            );
+        } catch (MollieApiException $e) {
+            $this->auditCall($request, Response::HTTP_BAD_GATEWAY, '/v1/account-subscriptions', $account->id, $connection->id);
+
+            return $this->mollieError($e);
+        } catch (Throwable $e) {
+            $this->auditCall($request, Response::HTTP_BAD_GATEWAY, '/v1/account-subscriptions', $account->id, $connection->id);
+
+            return $this->mollieError($e);
+        }
+
+        $this->auditCall($request, Response::HTTP_CREATED, '/v1/account-subscriptions', $account->id, $connection->id);
+
+        return (new AccountSubscriptionResource($sub))
+            ->response()
+            ->setStatusCode(Response::HTTP_CREATED);
+    }
+
+    /**
+     * Lijst van AccountSubscriptions voor een Account binnen deze Consumer.
+     * Vereist query-param `account_external_id`. Vreemde-Consumer-account →
+     * lege list (info-disclosure-protectie per T-07-04-01).
+     */
+    public function index(Request $request): JsonResponse|JsonResource
+    {
+        /** @var Consumer $consumer */
+        $consumer = $request->user();
+
+        $externalId = (string) $request->query('account_external_id', '');
+        if ($externalId === '') {
+            return response()->json([
+                'error' => 'account_external_id_required',
+                'message' => 'Query-parameter account_external_id is verplicht.',
+            ], Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
+
+        /** @var Account|null $account */
+        $account = $consumer->accounts()
+            ->where('external_id', $externalId)
+            ->first();
+
+        if ($account === null) {
+            // Lege list — voorkomt info-disclosure of het account bij een
+            // andere Consumer bestaat.
+            return AccountSubscriptionResource::collection(collect());
+        }
+
+        $subs = $account->accountSubscriptions()->latest()->get();
+
+        $this->auditCall($request, Response::HTTP_OK, '/v1/account-subscriptions', $account->id);
+
+        return AccountSubscriptionResource::collection($subs);
+    }
+
+    public function show(Request $request, int $id): JsonResponse|AccountSubscriptionResource
+    {
+        $sub = $this->findOwnedSubscription($request, $id);
+
+        if ($sub === null) {
+            return $this->notFound('account_subscription_not_found', 'Subscription niet gevonden.');
+        }
+
+        if ($request->query('resync') === '1') {
+            try {
+                $this->manager->syncFromMollie($sub);
+                $sub->refresh();
+            } catch (MollieApiException $e) {
+                return $this->mollieError($e);
+            }
+        }
+
+        $this->auditCall($request, Response::HTTP_OK, '/v1/account-subscriptions/{id}', $sub->account_id, $sub->connection_id);
+
+        return new AccountSubscriptionResource($sub);
+    }
+
+    public function destroy(Request $request, int $id): JsonResponse|HttpResponse
+    {
+        $sub = $this->findOwnedSubscription($request, $id);
+
+        if ($sub === null) {
+            return $this->notFound('account_subscription_not_found', 'Subscription niet gevonden.');
+        }
+
+        try {
+            $this->manager->cancel($sub);
+        } catch (InvalidStateTransitionException $e) {
+            return $this->stateConflict($e);
+        } catch (MollieApiException $e) {
+            return $this->mollieError($e);
+        }
+
+        $this->auditCall($request, Response::HTTP_NO_CONTENT, '/v1/account-subscriptions/{id}', $sub->account_id, $sub->connection_id);
+
+        return response()->noContent();
+    }
+}
