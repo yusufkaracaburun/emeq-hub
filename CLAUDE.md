@@ -50,9 +50,9 @@ De canonical architectuur-beschrijving (Consumer → Account → Connection → 
 Snelle pointers:
 - **Planning-artefacten**: `.planning/ROADMAP.md`, `.planning/STATE.md`, `.planning/phases/<NN>-<slug>/` voor lopend fase-werk.
 - **Werkdocumentatie** (lokaal, gitignored): `.docs/decisions/` (ADRs), `.docs/partners/<provider>/` (officiële API-research), `.docs/plans/`, `.docs/errors/`, `.docs/stack/`. Lees `.docs/README.md` voor de indeling.
-- **Routes**: `routes/web.php` (smoke `/`, `/up`), `routes/console.php`, en `routes/api.php` (`/v1/ping` achter Sanctum + `throttle:api`) zijn geland. `routes/webhooks.php` is nog gepland.
+- **Routes**: `routes/web.php` (smoke `/`, `/up`), `routes/console.php`, `routes/api.php` (`/v1/*` consumer-API achter Sanctum + `throttle:api`) en `routes/webhooks.php` (`/webhooks/{provider}/{...}` + Cashier-webhooks, publiek signature-verified) zijn geland.
 
-Een aparte `.planning/ARCHITECTURE.md` wordt aangemaakt door `/gsd-map-codebase` zodra meer dan de huidige skeleton-laag bestaat.
+Een aparte `.planning/ARCHITECTURE.md` wordt aangemaakt door `/gsd-map-codebase` zodra de huidige domeinlaag (OAuth-flow-registry, Mollie + Snelstart pass-through, Cashier-Mollie subscriptions) een vaste vorm krijgt.
 <!-- GSD:architecture-end -->
 
 <!-- GSD:skills-start source:skills/ -->
@@ -171,11 +171,7 @@ composer audit                              # zie ignored advisories in composer
 routes/web.php       smoke: GET /, GET /up
 routes/console.php   artisan-only commands (inspire)
 routes/api.php       /v1/* — consumer-API (Bearer Sanctum + throttle:api)
-```
-
-Gepland (nog niet geland in code):
-```
-routes/webhooks.php  /webhooks/{provider} — inkomend van partners (no auth, signature-verified per provider)
+routes/webhooks.php  /webhooks/{provider}/{...} + /cashier/webhook* — publiek, signature-verified
 ```
 
 === .ai/git-policy rules ===
@@ -195,6 +191,7 @@ routes/webhooks.php  /webhooks/{provider} — inkomend van partners (no auth, si
 **`packages/` is gitignored** en is een **lees-clone** voor referentie/grep. SDK-packages hebben elk een eigen GitHub-repo:
 
 - `packages/snelstart-api/` ← `github.com:yusufkaracaburun/emeq-snelstart-api`
+- `packages/mollie-api/` ← `github.com:yusufkaracaburun/emeq-mollie-api`
 
 Composer require't de SDKs via een **VCS repository** in `composer.json` — niet meer via een path-symlink. Reden: `packages/` bestaat niet op Laravel Cloud, dus een path-dist in `composer.lock` breekt de deploy.
 
@@ -213,13 +210,13 @@ Geen live-edit-symlink meer. Voor snelle iteratie in de SDK: werk daar gewoon ze
 
 `emeq/hub` — multi-tenant integration platform. Eén centrale Laravel-app die OAuth-koppelingen, webhook-routing en een uniforme REST-API exposeert naar boekhoud-/betaal-partner-API's:
 
-- **Snelstart** (boekhouden, NL) — via lokale SDK `emeq/snelstart-api` in `packages/`
-- **Mollie** (betalingen, NL/EU) — via officiële `mollie/mollie-api-php`
+- **Snelstart** (boekhouden, NL) — via eigen SDK `emeq/snelstart-api` (VCS-repo, zie packages-conventie)
+- **Mollie** (betalingen, NL/EU) — via eigen SDK `emeq/mollie-api` (VCS-repo) bovenop officiële `mollie/mollie-api-php` + `mollie/laravel-cashier-mollie` voor Subscriptions
 - **Moneybird** (boekhouden, NL) — gepland, via toekomstige `emeq/moneybird-api` SDK
 - **Ibanity** (PSD2/banking) — gepland
 - **Exact Online** (boekhouden, NL/BE) — gepland
 
-**Doelgroep v0.1**: Emeq's eigen 3 SaaS-apps die nu allemaal hun eigen Mollie/Ibanity-integratie hebben. v1.0+: commercieel beschikbaar voor andere dev-shops.
+**Doelgroep v0.2**: Emeq's eigen SaaS-apps die nu ad-hoc partner-integraties hebben (Snelstart-pattern in v0.1 gevalideerd, Mollie + Connect + Subscriptions + Hub-skeleton in v0.2). v1.0+: commercieel beschikbaar voor andere NL dev-shops.
 
 ## Stack
 
@@ -250,7 +247,8 @@ Lokaal: `php artisan serve --port=8001` op host, `docker compose up -d` voor db+
                               │  - personal_access_tokens│
                               │  - accounts              │
                               │  - connections           │
-                              │  - webhook_calls (in+out)│
+                              │  - pass_through_calls    │
+                              │  - webhook_calls (Spatie)│
                               └──────────────────────────┘
 ```
 
@@ -262,7 +260,8 @@ Lokaal: `php artisan serve --port=8001` op host, `docker compose up -d` voor db+
 | **PersonalAccessToken** | Sanctum-token waarmee Consumer authentiseert |
 | **Account** | Eindgebruiker bij een Consumer (= klant van die SaaS-app) — opgeslagen by `consumer_id + external_id` |
 | **Connection** | Eén OAuth-koppeling tussen één Account en één Provider (Mollie/Snelstart/…). Encrypted tokens + expires_at + scopes |
-| **WebhookCall** | Audit-log: inkomend van partner ↔ outgoing naar consumer-callback |
+| **PassThroughCall** | Audit-log voor Hub-pass-through-calls (Consumer → Hub → Partner → Consumer). Eén rij per request, immutable. Zie `.docs/decisions/pass-through-calls-table.md`. |
+| **WebhookCall** (Spatie) | Fan-out-audit voor inkomende partner-webhooks en uitgaande consumer-callbacks via `spatie/laravel-webhook-client` + `…-server`. |
 
 ## Architectuur-invariants — niet zonder approval doorbreken
 

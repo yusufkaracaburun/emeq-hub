@@ -18,7 +18,7 @@
 - Voor nieuwe code: lees eerst exports, directe callers en gedeelde utilities die je raakt.
 - "Lijkt orthogonaal" is een rode vlag — als je niet weet waarom code zo opgebouwd is, vraag.
 - Partner-API werk: lees de officiële partner-docs **vóór** je een endpoint of payload-shape verzint. Snelstart's foutcodes, Mollie's Connect-flows, etc. hebben subtiele afwijkingen van wat in OSS-SDKs zit.
-- SDK-werk: lees de SDK in `packages/<naam>/src/` (symlinked path-package) — de versie daar is wat draait, niet wat Packagist toont.
+- SDK-werk: de SDK draait via Composer-VCS (zie packages-conventie). Lees `vendor/emeq/<naam>/` voor de versie die nu draait, of clone als referentie naar `packages/<naam>/`. Edits gebeuren in de eigen SDK-repo en landen in de Hub via `composer update emeq/<naam>`.
 
 ## Wat NIET hier hoort
 

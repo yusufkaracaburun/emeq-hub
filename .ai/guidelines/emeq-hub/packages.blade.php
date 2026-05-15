@@ -3,6 +3,7 @@
 **`packages/` is gitignored** en is een **lees-clone** voor referentie/grep. SDK-packages hebben elk een eigen GitHub-repo:
 
 - `packages/snelstart-api/` ← `github.com:yusufkaracaburun/emeq-snelstart-api`
+- `packages/mollie-api/` ← `github.com:yusufkaracaburun/emeq-mollie-api`
 
 Composer require't de SDKs via een **VCS repository** in `composer.json` — niet meer via een path-symlink. Reden: `packages/` bestaat niet op Laravel Cloud, dus een path-dist in `composer.lock` breekt de deploy.
 

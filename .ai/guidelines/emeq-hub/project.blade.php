@@ -2,13 +2,13 @@
 
 `emeq/hub` — multi-tenant integration platform. Eén centrale Laravel-app die OAuth-koppelingen, webhook-routing en een uniforme REST-API exposeert naar boekhoud-/betaal-partner-API's:
 
-- **Snelstart** (boekhouden, NL) — via lokale SDK `emeq/snelstart-api` in `packages/`
-- **Mollie** (betalingen, NL/EU) — via officiële `mollie/mollie-api-php`
+- **Snelstart** (boekhouden, NL) — via eigen SDK `emeq/snelstart-api` (VCS-repo, zie packages-conventie)
+- **Mollie** (betalingen, NL/EU) — via eigen SDK `emeq/mollie-api` (VCS-repo) bovenop officiële `mollie/mollie-api-php` + `mollie/laravel-cashier-mollie` voor Subscriptions
 - **Moneybird** (boekhouden, NL) — gepland, via toekomstige `emeq/moneybird-api` SDK
 - **Ibanity** (PSD2/banking) — gepland
 - **Exact Online** (boekhouden, NL/BE) — gepland
 
-**Doelgroep v0.1**: Emeq's eigen 3 SaaS-apps die nu allemaal hun eigen Mollie/Ibanity-integratie hebben. v1.0+: commercieel beschikbaar voor andere dev-shops.
+**Doelgroep v0.2**: Emeq's eigen SaaS-apps die nu ad-hoc partner-integraties hebben (Snelstart-pattern in v0.1 gevalideerd, Mollie + Connect + Subscriptions + Hub-skeleton in v0.2). v1.0+: commercieel beschikbaar voor andere NL dev-shops.
 
 ## Stack
 
@@ -39,7 +39,8 @@ Lokaal: `php artisan serve --port=8001` op host, `docker compose up -d` voor db+
                               │  - personal_access_tokens│
                               │  - accounts              │
                               │  - connections           │
-                              │  - webhook_calls (in+out)│
+                              │  - pass_through_calls    │
+                              │  - webhook_calls (Spatie)│
                               └──────────────────────────┘
 ```
 
@@ -51,7 +52,8 @@ Lokaal: `php artisan serve --port=8001` op host, `docker compose up -d` voor db+
 | **PersonalAccessToken** | Sanctum-token waarmee Consumer authentiseert |
 | **Account** | Eindgebruiker bij een Consumer (= klant van die SaaS-app) — opgeslagen by `consumer_id + external_id` |
 | **Connection** | Eén OAuth-koppeling tussen één Account en één Provider (Mollie/Snelstart/…). Encrypted tokens + expires_at + scopes |
-| **WebhookCall** | Audit-log: inkomend van partner ↔ outgoing naar consumer-callback |
+| **PassThroughCall** | Audit-log voor Hub-pass-through-calls (Consumer → Hub → Partner → Consumer). Eén rij per request, immutable. Zie `.docs/decisions/pass-through-calls-table.md`. |
+| **WebhookCall** (Spatie) | Fan-out-audit voor inkomende partner-webhooks en uitgaande consumer-callbacks via `spatie/laravel-webhook-client` + `…-server`. |
 
 ## Architectuur-invariants — niet zonder approval doorbreken
 

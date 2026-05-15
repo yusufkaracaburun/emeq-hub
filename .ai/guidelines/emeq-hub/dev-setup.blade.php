@@ -68,10 +68,6 @@ composer audit                              # zie ignored advisories in composer
 routes/web.php       smoke: GET /, GET /up
 routes/console.php   artisan-only commands (inspire)
 routes/api.php       /v1/* — consumer-API (Bearer Sanctum + throttle:api)
-```
-
-Gepland (nog niet geland in code):
-```
-routes/webhooks.php  /webhooks/{provider} — inkomend van partners (no auth, signature-verified per provider)
+routes/webhooks.php  /webhooks/{provider}/{...} + /cashier/webhook* — publiek, signature-verified
 ```
 @endverbatim
