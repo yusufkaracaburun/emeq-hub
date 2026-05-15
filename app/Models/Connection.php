@@ -20,6 +20,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'client_key',
     'subscription_key',
     'subscription_id',
+    'administratie_id',
     'metadata',
     'revoked_at',
     'oauth_state',
