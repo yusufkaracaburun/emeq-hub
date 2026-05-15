@@ -5,9 +5,15 @@ namespace App\Filament\Resources\Connections;
 use App\Filament\Resources\Connections\Pages\ListConnections;
 use App\Filament\Resources\Connections\Pages\ViewConnection;
 use App\Models\Connection;
+use App\OAuth\OAuthFlowRegistry;
+use App\Support\ProviderCredentialDescriptor;
 use BackedEnum;
+use Filament\Actions\Action;
 use Filament\Actions\ViewAction;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
@@ -25,14 +31,55 @@ class ConnectionResource extends Resource
     public static function form(Schema $schema): Schema
     {
         // Read-only resource: form() bestaat om Filament's contract te honoreren
-        // maar exposeert niets — alle weergave loopt via infolist() (zie Task 2).
+        // maar exposeert niets — alle weergave loopt via infolist().
         return $schema->components([]);
     }
 
     public static function infolist(Schema $schema): Schema
     {
-        // Per-provider conditional sections worden gevuld in Task 2.
-        return $schema->components([]);
+        return $schema->components([
+            Section::make('Mollie OAuth')
+                ->visible(fn (?Connection $record): bool => $record?->provider === 'mollie')
+                ->columns(2)
+                ->schema([
+                    TextEntry::make('provider')->badge()->color('success'),
+                    TextEntry::make('account.external_id')->label('Account'),
+                    TextEntry::make('fingerprint')
+                        ->label('Fingerprint (sha256[:12])')
+                        ->state(fn (Connection $record): ?string => $record->fingerprint())
+                        ->copyable()
+                        ->placeholder('—'),
+                    TextEntry::make('status')->badge(),
+                    TextEntry::make('expires_at')->dateTime()->placeholder('—'),
+                    TextEntry::make('scopes')
+                        ->listWithLineBreaks()
+                        ->placeholder('—'),
+                    TextEntry::make('revoked_at')->dateTime()->placeholder('—'),
+                    TextEntry::make('created_at')->dateTime(),
+                ]),
+
+            Section::make('Snelstart credentials')
+                ->visible(fn (?Connection $record): bool => $record?->provider === 'snelstart')
+                ->columns(2)
+                ->schema([
+                    TextEntry::make('provider')->badge()->color('info'),
+                    TextEntry::make('account.external_id')->label('Account'),
+                    TextEntry::make('fingerprint')
+                        ->label('Fingerprint (sha256[:12])')
+                        ->state(fn (Connection $record): ?string => $record->fingerprint())
+                        ->copyable()
+                        ->placeholder('—'),
+                    TextEntry::make('status')->badge(),
+                    TextEntry::make('subscription_id')
+                        ->label('Subscription ID')
+                        ->placeholder('—'),
+                    TextEntry::make('administratie_id')
+                        ->label('Administratie ID')
+                        ->placeholder('—'),
+                    TextEntry::make('revoked_at')->dateTime()->placeholder('—'),
+                    TextEntry::make('created_at')->dateTime(),
+                ]),
+        ]);
     }
 
     public static function table(Table $table): Table
@@ -86,6 +133,36 @@ class ConnectionResource extends Resource
             ])
             ->recordActions([
                 ViewAction::make(),
+                Action::make('revoke')
+                    ->label('Revoke')
+                    ->icon(Heroicon::OutlinedNoSymbol)
+                    ->color('danger')
+                    ->requiresConfirmation()
+                    ->modalHeading('Connection intrekken bij provider')
+                    ->modalDescription('Dit roept de upstream OAuth-revoke aan en zet revoked_at lokaal. Niet ongedaan te maken.')
+                    ->visible(function (Connection $record): bool {
+                        if ($record->revoked_at !== null) {
+                            return false;
+                        }
+
+                        try {
+                            $descriptor = ProviderCredentialDescriptor::for($record->provider);
+                        } catch (\InvalidArgumentException) {
+                            return false;
+                        }
+
+                        return $descriptor->oauthFlowKey !== null;
+                    })
+                    ->action(function (Connection $record): void {
+                        app(OAuthFlowRegistry::class)
+                            ->for($record->provider)
+                            ->revoke($record);
+
+                        Notification::make()
+                            ->title('Connection ingetrokken')
+                            ->success()
+                            ->send();
+                    }),
             ])
             ->toolbarActions([]);
     }
