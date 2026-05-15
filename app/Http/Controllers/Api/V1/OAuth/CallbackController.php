@@ -5,9 +5,11 @@ namespace App\Http\Controllers\Api\V1\OAuth;
 use App\Http\Controllers\Controller;
 use App\Models\Connection;
 use App\OAuth\OAuthFlowRegistry;
+use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
+#[Group(name: 'OAuth Connect', description: 'OAuth-broker — init de authorize-flow en handle de callback van de partner.', weight: 40)]
 class CallbackController extends Controller
 {
     public function __construct(private readonly OAuthFlowRegistry $registry) {}

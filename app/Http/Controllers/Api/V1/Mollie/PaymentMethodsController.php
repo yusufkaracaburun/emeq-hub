@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1\Mollie;
 
+use Dedoc\Scramble\Attributes\Group;
 use Emeq\MollieApi\Exceptions\MollieExceptionMapper;
 use Emeq\MollieApi\Facades\Mollie;
 use Illuminate\Http\Request;
@@ -18,6 +19,7 @@ use Symfony\Component\HttpFoundation\Response;
  * locale, sequenceType. We geven de hele query-string door zodat de
  * Hub geen Mollie-filter-shape hoeft te dupliceren.
  */
+#[Group(name: 'Mollie pass-through', description: 'Forward calls naar het Mollie-account van de gekoppelde Account.', weight: 50)]
 class PaymentMethodsController extends AbstractMolliePassThroughController
 {
     public function __invoke(Request $request): Response

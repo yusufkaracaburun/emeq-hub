@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api\V1\Billing;
 
 use App\Http\Controllers\Controller;
+use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Laravel\Cashier\Subscription;
@@ -18,6 +19,7 @@ use Laravel\Cashier\Subscription;
  * Status wordt afgeleid uit de Subscription-state-methodes
  * (`active()` / `cancelled()` / `ended()` / `onTrial()` / `onGracePeriod()`).
  */
+#[Group(name: 'Billing (Cashier)', description: 'Consumer-billing via Cashier-Mollie (use-case A — Emeq factureert Consumers via Emeq\'s eigen Mollie-account).', weight: 80)]
 final class SubscriptionController extends Controller
 {
     public function show(Request $request): JsonResponse

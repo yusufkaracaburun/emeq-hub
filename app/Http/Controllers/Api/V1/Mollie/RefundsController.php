@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api\V1\Mollie;
 
 use App\Http\Requests\Api\V1\Mollie\CreateRefundRequest;
+use Dedoc\Scramble\Attributes\Group;
 use Emeq\MollieApi\Exceptions\MollieExceptionMapper;
 use Emeq\MollieApi\Facades\Mollie;
 use Illuminate\Http\Request;
@@ -25,6 +26,7 @@ use Symfony\Component\HttpFoundation\Response;
  * `?paymentId=tr_xxx` query-parameter. Audit-path blijft het
  * Mollie-REST-endpoint-template `/v2/refunds/{id}`.
  */
+#[Group(name: 'Mollie pass-through', description: 'Forward calls naar het Mollie-account van de gekoppelde Account.', weight: 50)]
 class RefundsController extends AbstractMolliePassThroughController
 {
     public function store(CreateRefundRequest $request, string $payment_id): Response

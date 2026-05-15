@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Api\V1\Mollie;
 
 use App\Http\Requests\Api\V1\Mollie\CreatePaymentRequest;
 use App\Models\Connection;
+use Dedoc\Scramble\Attributes\Group;
 use Emeq\MollieApi\Exceptions\MollieExceptionMapper;
 use Emeq\MollieApi\Facades\Mollie;
 use Illuminate\Http\Request;
@@ -27,6 +28,7 @@ use Throwable;
  *
  * Idempotency-Key forward via AbstractMolliePassThroughController::buildClient (D-06).
  */
+#[Group(name: 'Mollie pass-through', description: 'Forward calls naar het Mollie-account van de gekoppelde Account.', weight: 50)]
 class PaymentsController extends AbstractMolliePassThroughController
 {
     public function store(CreatePaymentRequest $request): Response

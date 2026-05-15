@@ -8,6 +8,7 @@ use App\Http\Resources\Api\V1\ConnectionResource;
 use App\Models\Account;
 use App\Models\Connection;
 use App\Sanctum\TokenAbilities;
+use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\JsonResponse;
@@ -15,6 +16,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response as HttpResponse;
 use Symfony\Component\HttpFoundation\Response;
 
+#[Group(name: 'Connections', description: 'OAuth-koppelingen tussen Account en provider (Mollie/Snelstart).', weight: 30)]
 class ConnectionController extends Controller
 {
     public function store(StoreConnectionRequest $request): JsonResponse|ConnectionResource

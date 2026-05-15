@@ -6,11 +6,13 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\StoreAccountRequest;
 use App\Http\Resources\Api\V1\AccountResource;
 use App\Sanctum\TokenAbilities;
+use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
+#[Group(name: 'Accounts', description: 'Eindgebruiker-tenants per Consumer (external_id-aliasing).', weight: 20)]
 class AccountController extends Controller
 {
     public function store(StoreAccountRequest $request): JsonResponse|AccountResource

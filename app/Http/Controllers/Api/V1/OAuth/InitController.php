@@ -6,9 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Models\Connection;
 use App\Models\Consumer;
 use App\OAuth\OAuthFlowRegistry;
+use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
+#[Group(name: 'OAuth Connect', description: 'OAuth-broker — init de authorize-flow en handle de callback van de partner.', weight: 40)]
 class InitController extends Controller
 {
     public function __construct(private readonly OAuthFlowRegistry $registry) {}

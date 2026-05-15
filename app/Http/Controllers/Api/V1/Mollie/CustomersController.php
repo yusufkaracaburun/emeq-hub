@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api\V1\Mollie;
 
 use App\Http\Requests\Api\V1\Mollie\CreateCustomerRequest;
+use Dedoc\Scramble\Attributes\Group;
 use Emeq\MollieApi\Exceptions\MollieExceptionMapper;
 use Emeq\MollieApi\Facades\Mollie;
 use Illuminate\Http\Request;
@@ -18,6 +19,7 @@ use Symfony\Component\HttpFoundation\Response;
  * Beslissingen 05a-CONTEXT.md / 05a-04-PLAN.md: D-01 (per-resource),
  * D-04 (typed SDK-calls), D-13 (Mollie-error-mapping), D-14 (ability-gates).
  */
+#[Group(name: 'Mollie pass-through', description: 'Forward calls naar het Mollie-account van de gekoppelde Account.', weight: 50)]
 class CustomersController extends AbstractMolliePassThroughController
 {
     public function index(Request $request): Response

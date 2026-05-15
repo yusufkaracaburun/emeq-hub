@@ -15,6 +15,7 @@ use App\Models\Account;
 use App\Models\Connection;
 use App\Models\Consumer;
 use DateTimeImmutable;
+use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -24,6 +25,7 @@ use Mollie\Api\Exceptions\ApiException as MollieApiException;
 use Symfony\Component\HttpFoundation\Response;
 use Throwable;
 
+#[Group(name: 'Account Subscriptions', description: 'Multi-tenant subscription-state per Account+Connection (use-case B — Accounts factureren hun eigen eindgebruikers via Connect).', weight: 70)]
 class AccountSubscriptionController extends Controller
 {
     use HandlesAccountSubscriptionRequests;

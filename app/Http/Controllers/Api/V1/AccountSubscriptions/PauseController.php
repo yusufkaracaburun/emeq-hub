@@ -9,6 +9,7 @@ use App\Billing\Account\Exceptions\InvalidStateTransitionException;
 use App\Http\Controllers\Api\V1\AccountSubscriptions\Concerns\HandlesAccountSubscriptionRequests;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Api\V1\AccountSubscriptionResource;
+use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -16,6 +17,7 @@ use Symfony\Component\HttpFoundation\Response;
 /**
  * Hub-only state-flip: Active → Paused. Geen Mollie-call (D-08).
  */
+#[Group(name: 'Account Subscriptions', description: 'Multi-tenant subscription-state per Account+Connection (use-case B — Accounts factureren hun eigen eindgebruikers via Connect).', weight: 70)]
 class PauseController extends Controller
 {
     use HandlesAccountSubscriptionRequests;

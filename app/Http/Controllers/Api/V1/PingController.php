@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Models\Consumer;
+use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Http\Request;
 
+#[Group(name: 'System', description: 'Smoke- en auth-check endpoints.', weight: 5)]
 class PingController extends Controller
 {
     /**

@@ -9,6 +9,7 @@ use App\Models\PassThroughCall;
 use App\Sanctum\TokenAbilities;
 use App\Support\Snelstart\HeaderForwarder;
 use App\Support\Snelstart\UpstreamErrorMapper;
+use Dedoc\Scramble\Attributes\Group;
 use Emeq\SnelstartApi\Http\Request\RawSnelstartRequest;
 use Emeq\SnelstartApi\Snelstart;
 use Illuminate\Http\Request;
@@ -16,6 +17,7 @@ use Saloon\Enums\Method;
 use Symfony\Component\HttpFoundation\Response;
 use Throwable;
 
+#[Group(name: 'Snelstart pass-through', description: 'Forward OData calls naar Snelstart met de clientKey + subscriptionKey van de gekoppelde Account.', weight: 60)]
 class PassThroughController extends Controller
 {
     private const ALLOWED_METHODS = ['GET', 'POST', 'PATCH', 'DELETE'];

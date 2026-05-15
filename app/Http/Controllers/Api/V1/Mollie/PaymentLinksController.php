@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api\V1\Mollie;
 
 use App\Http\Requests\Api\V1\Mollie\CreatePaymentLinkRequest;
+use Dedoc\Scramble\Attributes\Group;
 use Emeq\MollieApi\Exceptions\MollieExceptionMapper;
 use Emeq\MollieApi\Facades\Mollie;
 use Illuminate\Http\Request;
@@ -20,6 +21,7 @@ use Symfony\Component\HttpFoundation\Response;
  * Vendor: `MollieApiClient::$paymentLinks` exposes
  * `PaymentLinkEndpointCollection` met create/get/page-methods.
  */
+#[Group(name: 'Mollie pass-through', description: 'Forward calls naar het Mollie-account van de gekoppelde Account.', weight: 50)]
 class PaymentLinksController extends AbstractMolliePassThroughController
 {
     public function index(Request $request): Response

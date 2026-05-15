@@ -8,6 +8,7 @@ use App\Billing\PlanResolver;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Billing\CreateSubscriptionRequest;
 use App\Models\Consumer;
+use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Laravel\Cashier\Subscription;
@@ -20,6 +21,7 @@ use Throwable;
  * controller resolved Consumer, valideert plan-slug via PlanResolver,
  * en wrap't de redirect-flow (first_payment) in een JSON-response.
  */
+#[Group(name: 'Admin — Billing', description: 'Emeq-staff endpoints om Consumer-subscriptions te beheren (`admin`-ability vereist).', weight: 90)]
 final class SubscriptionController extends Controller
 {
     public function __construct(private readonly PlanResolver $planResolver) {}
