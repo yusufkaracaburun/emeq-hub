@@ -353,10 +353,10 @@ v0.2 bouwt drie samenhangende lagen: (1) `emeq/mollie-api` SDK die `mollie/molli
 - Audit-log via `spatie/laravel-activitylog` (geparkeerd als `HUB-AUDIT` backlog-item)
 - Tailwind-thema-customizing — default Filament-look is goed genoeg voor intern gebruik
 
-**Plans:** 11 plans
+**Plans:** 2/11 plans executed
 
-- [ ] 09-01-PLAN.md — webhook_calls audit-kolommen-migratie (D-02)
-- [ ] 09-02-PLAN.md — Filament v4 + Spatie laravel-permission install + AdminPanelProvider
+- [x] 09-01-PLAN.md — webhook_calls audit-kolommen-migratie (D-02)
+- [x] 09-02-PLAN.md — Filament v4 + Spatie laravel-permission install + AdminPanelProvider
 - [ ] 09-03-PLAN.md — User-model (HasRoles + FilamentUser + canAccessPanel) + EmeqStaffSeeder
 - [ ] 09-04-PLAN.md — ProviderCredentialDescriptor + Connection::fingerprint() refactor (D-04)
 - [ ] 09-05-PLAN.md — ConsumerResource CRUD + Issue-PAT-action (D-03 presets)
@@ -382,7 +382,7 @@ v0.2 bouwt drie samenhangende lagen: (1) `emeq/mollie-api` SDK die `mollie/molli
 | 6. Cashier-Mollie integratie | 8/8 | Done | 2026-05-15 |
 | 7. Account-level subscriptions | 8/8 | Done | 2026-05-15 |
 | 8. Naschool wiring | 0/0 (TBD) | Not started | - |
-| 9. Filament admin-UI voor Emeq-medewerkers | 0/11 | Planned | - |
+| 9. Filament admin-UI voor Emeq-medewerkers | 2/11 | In Progress|  |
 
 ### Coverage
 

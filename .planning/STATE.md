@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v0.2
 milestone_name: — Mollie + Connect + Subscriptions + Hub-skeleton
-status: ready
-stopped_at: Phase 7 ACCEPTED 2026-05-15 — SUB-02 Complete, Phase 8 (Naschool wiring) ontblokt
-last_updated: "2026-05-15T21:00:00+02:00"
-last_activity: 2026-05-15 -- Phase 07 ACCEPTED via human-verify checkpoint; Scramble /v1-endpoints in 15 per-resource groepen geherindeeld + SCRAMBLE-NESTED-GROUPS als backlog-debt vastgelegd
+status: executing
+stopped_at: Phase 7 close PENDING — 07-08 acceptance + ADR + planning-sync committed on worktree-branch; awaits human-verify checkpoint (Scramble UI + acceptance-review)
+last_updated: "2026-05-15T21:46:14.931Z"
+last_activity: 2026-05-15 -- Phase 09 execution started
 progress:
   total_phases: 10
   completed_phases: 6
-  total_plans: 51
-  completed_plans: 41
+  total_plans: 62
+  completed_plans: 46
   percent: 60
 ---
 
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-05-14 na v0.1 milestone-close)
 
 **Core value:** Twee fundamenteel verschillende providers (OData/clientkey + REST/OAuth2) productie-gevalideerd via één SDK-pattern, en beide live in één concrete consumer-feature. v0.1 heeft Snelstart-deel bewezen; v0.2 zet Mollie + Connect + Subscriptions + Hub-skeleton op.
-**Current focus:** Phase 08 — Naschool wiring (next after Phase 7 acceptance)
+**Current focus:** Phase 09 — filament-admin-ui-voor-emeq-medewerkers
 
 ## Current Position
 
-Phase: — (Phase 7 ACCEPTED; Phase 8 next, niet gestart)
-Plan: —
-Status: Idle — Phase 7 fully closed (8/8 plans, SUB-02 Complete, ADR geland, 11/11 D-32 evidence). Next: Phase 8 (Naschool wiring) of parallel Phase 9 (Filament admin-UI).
-Last activity: 2026-05-15 -- Phase 07 ACCEPTED via human-verify checkpoint; bonus tijdens checkpoint-review: 15-groepen Scramble-indeling + SCRAMBLE-NESTED-GROUPS backlog
+Phase: 09 (filament-admin-ui-voor-emeq-medewerkers) — EXECUTING
+Plan: 1 of 11
+Status: Executing Phase 09
+Last activity: 2026-05-15 -- Phase 09 execution started
 
 ## Performance Metrics
 
