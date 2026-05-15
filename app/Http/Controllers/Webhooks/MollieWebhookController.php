@@ -34,12 +34,20 @@ class MollieWebhookController extends Controller
 {
     public function __invoke(Request $request, int $connection_id): JsonResponse
     {
+        // 0. Hard-fail guard: platform-secret moet geconfigureerd zijn.
+        // Anders accepteert MollieWebhookSignature::verify elke HMAC die met
+        // '' berekend is — open ingress bij vergeten env-var (D-08 stap 1,
+        // verificatie-gap CR-02 / threat T-05a-06).
+        $secret = config('services.mollie.webhook_secret');
+        if (! is_string($secret) || $secret === '') {
+            $this->auditFailedWebhook($request, 'webhook_secret_not_configured');
+
+            return response()->json(['error' => 'webhook_misconfigured'], 500);
+        }
+
         // 1. Signature-verify
         try {
-            $valid = MollieWebhookSignature::verify(
-                $request,
-                (string) config('services.mollie.webhook_secret'),
-            );
+            $valid = MollieWebhookSignature::verify($request, $secret);
         } catch (InvalidSignatureException $e) {
             $this->auditFailedWebhook($request, "invalid_signature: {$e->getMessage()}");
 
