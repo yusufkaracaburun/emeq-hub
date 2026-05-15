@@ -6,6 +6,7 @@ use Database\Factories\ConsumerFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Laravel\Cashier\Billable;
 use Laravel\Sanctum\HasApiTokens;
@@ -29,5 +30,10 @@ class Consumer extends Authenticatable
     public function accounts(): HasMany
     {
         return $this->hasMany(Account::class);
+    }
+
+    public function connections(): HasManyThrough
+    {
+        return $this->hasManyThrough(Connection::class, Account::class);
     }
 }
