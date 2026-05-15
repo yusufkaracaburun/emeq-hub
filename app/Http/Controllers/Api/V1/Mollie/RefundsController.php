@@ -32,7 +32,7 @@ class RefundsController extends AbstractMolliePassThroughController
         return $this->handle($request, '/v2/payments/{id}/refunds', function (Request $r) use ($payment_id) {
             /** @var CreateRefundRequest $r */
             try {
-                $refund = Mollie::client()->paymentRefunds->createForId($payment_id, $r->validated());
+                $refund = $this->buildClient($r)->paymentRefunds->createForId($payment_id, $r->validated());
             } catch (MollieApiException $e) {
                 throw MollieExceptionMapper::map($e);
             }

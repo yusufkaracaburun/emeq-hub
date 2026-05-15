@@ -8,7 +8,9 @@ use App\Models\Connection;
 use App\Models\PassThroughCall;
 use App\Sanctum\TokenAbilities;
 use App\Support\Mollie\MollieUpstreamErrorMapper;
+use Emeq\MollieApi\Facades\Mollie;
 use Illuminate\Http\Request;
+use Mollie\Api\MollieApiClient;
 use Mollie\Api\Resources\BaseCollection;
 use Mollie\Api\Resources\BaseResource;
 use Symfony\Component\HttpFoundation\Response;
@@ -180,5 +182,26 @@ abstract class AbstractMolliePassThroughController extends Controller
         }
 
         return $items;
+    }
+
+    /**
+     * Bouwt een MollieApiClient voor de huidige request. Forward't de
+     * Consumer's Idempotency-Key-header naar Mollie via de runtime-setter
+     * (MollieApiClient::setIdempotencyKey()). De default UuidV7-generator
+     * blijft de fallback zonder Consumer-header.
+     *
+     * Gedeeld pad voor alle 5 write-endpoints (D-06 / 05a-06-PLAN). PaymentsController
+     * gebruikte 'm eerst als eigen method; gehoisd hierheen na verificatie-gap CR-01.
+     */
+    protected function buildClient(Request $request): MollieApiClient
+    {
+        $client = Mollie::client();
+
+        $consumerKey = $request->header('Idempotency-Key');
+        if (is_string($consumerKey) && $consumerKey !== '') {
+            $client->setIdempotencyKey($consumerKey);
+        }
+
+        return $client;
     }
 }

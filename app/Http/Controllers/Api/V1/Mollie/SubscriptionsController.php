@@ -51,7 +51,7 @@ class SubscriptionsController extends AbstractMolliePassThroughController
         return $this->handle($request, '/v2/customers/{id}/subscriptions', function (Request $r) use ($customer_id) {
             /** @var CreateSubscriptionRequest $r */
             try {
-                $subscription = Mollie::client()->subscriptions->createForId($customer_id, $r->validated());
+                $subscription = $this->buildClient($r)->subscriptions->createForId($customer_id, $r->validated());
             } catch (MollieApiException $e) {
                 throw MollieExceptionMapper::map($e);
             }
