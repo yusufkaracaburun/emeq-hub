@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\V1\AccountController;
+use App\Http\Controllers\Api\V1\Billing\SubscriptionController;
 use App\Http\Controllers\Api\V1\ConnectionController;
 use App\Http\Controllers\Api\V1\Mollie\CustomersController;
 use App\Http\Controllers\Api\V1\Mollie\MandatesController;
@@ -43,16 +44,16 @@ Route::middleware('auth:sanctum')->group(function (): void {
         ->name('api.snelstart.passthrough');
 
     Route::middleware('ability:billing:read,billing:write,*')->group(function (): void {
-        Route::get('/billing/subscription', [\App\Http\Controllers\Api\V1\Billing\SubscriptionController::class, 'show'])
+        Route::get('/billing/subscription', [SubscriptionController::class, 'show'])
             ->name('api.billing.subscription.show');
     });
 
     Route::prefix('admin/billing')
         ->middleware(['ability:billing:write,*', 'emeq.admin'])
         ->group(function (): void {
-            Route::post('/subscriptions', [\App\Http\Controllers\Api\V1\Admin\Billing\SubscriptionController::class, 'store'])
+            Route::post('/subscriptions', [App\Http\Controllers\Api\V1\Admin\Billing\SubscriptionController::class, 'store'])
                 ->name('api.admin.billing.subscriptions.store');
-            Route::delete('/subscriptions/{id}', [\App\Http\Controllers\Api\V1\Admin\Billing\SubscriptionController::class, 'destroy'])
+            Route::delete('/subscriptions/{id}', [App\Http\Controllers\Api\V1\Admin\Billing\SubscriptionController::class, 'destroy'])
                 ->name('api.admin.billing.subscriptions.destroy');
         });
 
