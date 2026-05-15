@@ -5,17 +5,25 @@ use Laravel\Cashier\Order\OrderNumberGenerator;
 
 return [
 
+    /*
+     * Phase 6 D-10: Cashier's default webhook-paden zijn `webhooks/mollie*` —
+     * overschreven naar `cashier/webhook*` zodat ze niet botsen met Phase 5a's
+     * `/webhooks/mollie/{connection_id}` Connect-route en altijd achter onze
+     * RequireCashierWebhookSecret-guard hangen (route-binding in routes/webhooks.php).
+     * Cashier's `Cashier::webhookUrl()`-helper leest deze keys bij subscription-create.
+     */
+
     /**
      * The default webhook url is called by Mollie on payment status updates. You can use either a relative or
      * absolute url.
      */
-    'webhook_url' => 'webhooks/mollie',
+    'webhook_url' => 'cashier/webhook',
 
     /**
      * The default aftercare webhook url is called by Mollie on refunds and chargebacks. You can use either a relative or
      * absolute url.
      */
-    'aftercare_webhook_url' => 'webhooks/mollie/aftercare',
+    'aftercare_webhook_url' => 'cashier/webhook/aftercare',
 
     /**
      * The default locale passed to Mollie for configuring the checkout screen. Set to null to let Mollie handle it for
@@ -63,9 +71,9 @@ return [
 
         /**
          * The first payment webhook url is called by Mollie on first payment status updates. Can be overridden per
-         * Plan. You can use either a relative or absolute url.
+         * Plan. You can use either a relative or absolute url. Zie D-10 boven.
          */
-        'webhook_url' => 'webhooks/mollie/first-payment',
+        'webhook_url' => 'cashier/webhook/first-payment',
 
         /**
          * Array of allowed Mollie payment methods for the first payment. Make sure the methods are

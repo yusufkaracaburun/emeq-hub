@@ -1,0 +1,77 @@
+<?php
+
+namespace Tests\Feature\Webhooks;
+
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Spatie\WebhookClient\Models\WebhookCall;
+use Tests\TestCase;
+
+class CashierWebhookSecretGuardTest extends TestCase
+{
+    use RefreshDatabase;
+
+    public function test_empty_secret_returns_500_and_writes_audit_row(): void
+    {
+        config(['services.cashier.webhook_secret' => '']);
+
+        $response = $this->postJson('/cashier/webhook', ['id' => 'tr_test_xyz']);
+
+        $response->assertStatus(500);
+        $response->assertJsonPath('error', 'webhook_misconfigured');
+
+        $row = WebhookCall::query()->latest('id')->first();
+        $this->assertNotNull($row);
+        $this->assertSame('cashier', $row->name);
+        $this->assertSame('webhook_secret_not_configured', $row->exception);
+    }
+
+    public function test_null_secret_returns_500_and_writes_audit_row(): void
+    {
+        config(['services.cashier.webhook_secret' => null]);
+
+        $response = $this->postJson('/cashier/webhook', ['id' => 'tr_test_xyz']);
+
+        $response->assertStatus(500);
+        $response->assertJsonPath('error', 'webhook_misconfigured');
+
+        $row = WebhookCall::query()->latest('id')->first();
+        $this->assertNotNull($row);
+        $this->assertSame('cashier', $row->name);
+        $this->assertSame('webhook_secret_not_configured', $row->exception);
+    }
+
+    public function test_set_secret_passes_guard_and_does_not_write_misconfigured_audit(): void
+    {
+        // De guard schrijft alleen een audit-rij bij hard-fail (empty/null secret).
+        // Bij gezette secret moet de request DE GUARD PASSEREN. Wat Cashier's eigen
+        // WebhookController daarna doet (Mollie API call → kan 500'en zonder echte
+        // test-mode key) is voor plan 06-07 (integration tests met echte key).
+        // Wat WIJ hier asserteren: guard heeft geen audit-rij geschreven en de
+        // request bereikte de downstream-handler (= URL was niet 404).
+        config(['services.cashier.webhook_secret' => 'whsec_cashier_test_abc']);
+
+        $this->postJson('/cashier/webhook', ['id' => 'tr_test_xyz']);
+
+        // Audit-rij voor webhook_misconfigured mag NIET bestaan.
+        $misconfigured = WebhookCall::query()
+            ->where('name', 'cashier')
+            ->get()
+            ->first(fn ($row) => $row->exception === 'webhook_secret_not_configured');
+
+        $this->assertNull(
+            $misconfigured,
+            'Guard mag GEEN webhook_secret_not_configured-audit schrijven wanneer secret gezet is.',
+        );
+    }
+
+    public function test_audit_row_uses_name_cashier_not_mollie(): void
+    {
+        config(['services.cashier.webhook_secret' => '']);
+
+        $this->postJson('/cashier/webhook', ['id' => 'tr_test']);
+
+        $latest = WebhookCall::query()->latest('id')->first();
+        $this->assertNotNull($latest);
+        $this->assertSame('cashier', $latest->name);
+    }
+}
