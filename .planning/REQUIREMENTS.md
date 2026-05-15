@@ -36,7 +36,7 @@ Requirements voor v0.2 (~8-10 weken). Elke vereiste mapt naar één roadmap-fase
 
 - [x] **SUB-01**: Cashier-Mollie integratie voor use-case A (Emeq rekent aan Consumers via Emeq's eigen Mollie-account). PHP 8.4 / Laravel 13 compatibiliteit gevalideerd of fork-and-update uitgevoerd. `Billable` trait op `Consumer`-model; subscription-plans (Naschool-license, Planny-license, etc.) gedefinieerd via Cashier's `Plan` model. Recurring billing via Mandates-flow. *Validated in Phase 6 (2026-05-15) — pad-a (out-of-the-box) gekozen met `mollie/laravel-cashier-mollie ^2.20.1`; 8/8 plans + 3/3 SC's bewezen (SC-4 vendor-coverage); `Consumer` Billable, `App\Billing\PlanResolver` + `config/billing-plans.php`, 3 billing-routes met `billing:read|write`-abilities + admin-allowlist, Cashier-webhook hard-fail-guard op `/cashier/webhook*`, integration-suite via `composer test:integration`. 237 tests passed.*
 
-- [ ] **SUB-02**: Account-level subscriptions via Connect voor use-case B (Accounts rekenen aan eindgebruikers via hun eigen Mollie via Connect). Eigen `AccountSubscription`-model + service-laag boven Mollie's Subscriptions + Mandates API. Multi-tenant: subscription-state per `Account`-Connection, niet single-tenant zoals Cashier. Tests dekken create/cancel/webhook-update happy paths + edge cases (revoked mandate, failed retry).
+- [x] **SUB-02**: Account-level subscriptions via Connect voor use-case B (Accounts rekenen aan eindgebruikers via hun eigen Mollie via Connect). Eigen `AccountSubscription`-model + service-laag boven Mollie's Subscriptions + Mandates API. Multi-tenant: subscription-state per `Account`-Connection, niet single-tenant zoals Cashier. Tests dekken create/cancel/webhook-update happy paths + edge cases (revoked mandate, failed retry). *Validated in Phase 7 (2026-05-15) — multi-tenant `AccountSubscription`-model + 6 `/v1/account-subscriptions/*`-routes + state-machine met 6 states (`pending`/`active`/`paused`/`canceled`/`completed`/`unknown`) + `WebhookPayloadRouter`-dispatch (D-15) zonder Phase-5a-regressie (D-31). 8/8 plans, 337 tests / 1100 assertions groen, SC-1+SC-2+SC-3 bewezen, SC-4 vendor-coverage; integration-test skipt graceful zonder Connect-token (Pad B per ADR `account-subscriptions.md`).*
 
 ### Naschool wiring
 
@@ -91,7 +91,7 @@ Expliciet uitgesloten voor v0.2. Niet re-adden zonder PROJECT.md herziening.
 | HUB-05 | Phase 5b | Pending |
 | HUB-06 | Phase 5c | Pending |
 | SUB-01 | Phase 6 | Complete |
-| SUB-02 | Phase 7 | Pending |
+| SUB-02 | Phase 7 | Complete |
 | NSCH-01 | Phase 8 | Pending |
 | NSCH-02 | Phase 8 | Pending |
 | NSCH-03 | Phase 8 | Pending |

@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v0.2
 milestone_name: — Mollie + Connect + Subscriptions + Hub-skeleton
 status: executing
-stopped_at: Phase 7 context gathered (auto-mode, no clarifying questions)
-last_updated: "2026-05-15T16:15:44.172Z"
-last_activity: 2026-05-15 -- Phase 07 execution started
+stopped_at: Phase 7 close PENDING — 07-08 acceptance + ADR geland, wacht op human-verify checkpoint (Scramble UI + acceptance-review)
+last_updated: "2026-05-15T20:22:08+02:00"
+last_activity: 2026-05-15 -- Phase 07 plan 08 (acceptance + ADR + planning-sync) executed; checkpoint pending
 progress:
   total_phases: 10
-  completed_phases: 5
+  completed_phases: 6
   total_plans: 51
-  completed_plans: 40
-  percent: 50
+  completed_plans: 41
+  percent: 60
 ---
 
 # Project State
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-05-14 na v0.1 milestone-close)
 
 **Core value:** Twee fundamenteel verschillende providers (OData/clientkey + REST/OAuth2) productie-gevalideerd via één SDK-pattern, en beide live in één concrete consumer-feature. v0.1 heeft Snelstart-deel bewezen; v0.2 zet Mollie + Connect + Subscriptions + Hub-skeleton op.
-**Current focus:** Phase 07 — account-level-subscriptions-use-case-b
+**Current focus:** Phase 08 — Naschool wiring (next after Phase 7 acceptance)
 
 ## Current Position
 
-Phase: 07 (account-level-subscriptions-use-case-b) — EXECUTING
-Plan: 1 of 8
-Status: Executing Phase 07
-Last activity: 2026-05-15 -- Phase 07 execution started
+Phase: 07 (account-level-subscriptions-use-case-b) — PENDING CHECKPOINT
+Plan: 8 of 8
+Status: 07-08 acceptance + ADR + planning-sync committed; wacht op human-verify checkpoint (Scramble UI + acceptance-review). Na "approved" → SUB-02 Complete + Phase 8 ontblokt.
+Last activity: 2026-05-15 -- Phase 07 plan 08 executed; acceptance-file 11/11 (10× ✅ + 1× ⏭️ Pad B), ADR `.docs/decisions/account-subscriptions.md` geland
 
 ## Performance Metrics
 
@@ -48,6 +48,7 @@ Last activity: 2026-05-15 -- Phase 07 execution started
 | 05a | 6 | - | - |
 | 05b | 5 | - | - |
 | 06 | 8 | - | - |
+| 07 | 8 | ~execution-wave-based (5 waves) | n/a (parallel-execution per wave) |
 
 **Recent Trend:**
 
@@ -102,12 +103,20 @@ Decisions zijn gelogd in PROJECT.md Key Decisions table. Decisions die uit v0.1 
 - 🆕 **New 2026-05-15 (06-05)**: 3 billing-routes met dual-ability-pattern (`ability:billing:read,billing:write,*`) — consumer-read voor eigen subscription, admin-create/cancel achter `EnsureEmeqAdminToken`-middleware met env-driven allowlist
 - 🆕 **New 2026-05-15 (06-06)**: Cashier-webhook landt op `/cashier/webhook*` (3 routes; default + aftercare + first-payment) met stap-0 hard-fail-guard `RequireCashierWebhookSecret` (zelfde pattern als Phase 5a D-08 stap 1 voor Mollie-Connect-webhook). `Cashier::ignoreRoutes()` in `AppServiceProvider` voorkomt auto-registratie van Cashier-routes; eigen bindings via routes/webhooks.php
 - 🆕 **New 2026-05-15 (06-07)**: Integration-tests gescheiden via `phpunit.integration.xml` + `@group integration` + `IntegrationTestCase`. Default suite (`php artisan test`) sluit integration-group uit; `composer test:integration` runt apart. Tests skippen graceful zonder `CASHIER_MOLLIE_KEY` in `.env`
+- 🆕 **New 2026-05-15 (07-02)**: Self-transitions in `StateTransitions::assertTransition()` zijn idempotent — geen exception. Reden: webhook-replay-safety (Mollie-resync mag dezelfde status opnieuw zetten zonder te crashen). Niet in CONTEXT D-04 expliciet; toegevoegd tijdens exhaustive-matrix-test-design
+- 🆕 **New 2026-05-15 (07-03)**: `AccountSubscriptionManager` doet `Mollie::client()` per call (geen cached client-instance) — `HubMollieCredentialResolver` leest `MollieConnectionContext` bij elke `client()`-call → per-tenant fresh credentials zonder leak-risk. `amount_value` cast naar `'string'` defensief (Mollie-decimal-shape behouden)
+- 🆕 **New 2026-05-15 (07-04)**: Lege list (HTTP 200 `data: []`) op `GET /v1/account-subscriptions?account_external_id=<vreemde Consumer>` i.p.v. 404 — info-disclosure-pattern uit Phase 5a. `HandlesAccountSubscriptionRequests`-trait dedupliceert `findOwnedSubscription`/`notFound`/`stateConflict`/`mollieError`/`auditCall` over de 3 controllers
+- 🆕 **New 2026-05-15 (07-04, MEDIUM #3)**: Scope-niveau van mutate-endpoints (`pause`/`resume`/`destroy`) = **per-Consumer**, niet per-Account. Cross-Consumer = 404, same-Consumer-other-Account = 200. Vastgelegd in ADR `.docs/decisions/account-subscriptions.md` §Scope-niveau. Rationale: Sanctum PAT-scope is per-Consumer; per-Account-scope zou Sanctum-misbruik of UX-regressie vereisen
+- 🆕 **New 2026-05-15 (07-05)**: `final`-keyword verwijderd op `AccountSubscriptionManager` + `PaymentWebhookHandler` + `SubscriptionWebhookHandler` voor Mockery-spies in unit-tests (Rule 3 deviation). `WebhookHandlerResult` als value-object met `shouldAudit()` + `shouldFanOut()` introspectie — `MollieWebhookController` blijft single-source-of-truth voor 5a-flow-volgorde (D-18)
+- 🆕 **New 2026-05-15 (07-07)**: Aparte `AccountSubscriptionIntegrationTestCase` i.p.v. Phase 6's `IntegrationTestCase` hergebruiken (vermijdt `config('mollie.key')` cross-contamination tussen Cashier en Connect-OAuth). `Connection.expires_at = now()->addYear()` op test-Connection — voorkomt accidentele refresh-trigger tijdens slow-network test-runs
+- 🆕 **New 2026-05-15 (07-08, MEDIUM #4)**: Integration-test-execution-keuze ⏭️ Pad B (default): "Geen Connect-token beschikbaar in CI/UAT — integration-test gedrukt naar manueel zodra token beschikbaar is. SC-1 vendor-coverage uitgesteld naar v0.2.1." Re-run-triggers: (1) Connect-test-token verkregen, (2) v0.2.1-release-window, (3) Naschool-go-live UAT
 
 ### Pending Todos
 
 - ✅ Phase 03 hub-skeleton voltooid (alle 5 plans + HUB-01 SC-1 t/m SC-5 bewezen)
 - ✅ Phase 06 Cashier-Mollie integratie voltooid (8/8 plans, SUB-01 = Complete, 237 tests + integration-suite gescheiden, ACCEPTED 2026-05-15)
-- `/gsd-discuss-phase 7` runnen in **verse sessie** — Account-level subscriptions (use-case B) via Connect + Mandates + Subscriptions; depends on Phase 5a; parallelliseerbaar met Phase 9
+- ⏳ **Phase 07 PENDING-checkpoint (07-08 geland 2026-05-15)** — 8/8 plans + 11/11 D-32 (10× ✅ + 1× ⏭️ Pad B integration-test), ADR `.docs/decisions/account-subscriptions.md`, 337 tests / 1100 assertions groen. Wacht op human-verify (Scramble UI + acceptance-review). Na "approved" → SUB-02 Complete + Phase 8 ontblokt
+- `/gsd-discuss-phase 8` runnen na checkpoint-approval — Naschool wiring (Snelstart Stancl-resolver + EnrollmentConfirmed-job + Mollie-via-Hub checkout); depends on Phase 5a (al klaar) + Phase 4 (al klaar)
 - **Baseline Pint-drift cleanup (deferred)**: pre-Phase-6 scaffold-drift in `database/migrations/2026_05_13_*` + `routes/web.php` (uit `0196e01`) + gitignored `packages/**` — pakken bij toekomstige scaffold-touchup of dedicated quick-task `pint-baseline-cleanup`
 - **Worktree-bootstrap-pattern (recurring)**: Claude Code's `isolation="worktree"` mist `.env` + `vendor/` → executor moet `cp ../../.env .env` + `ln -sf ../../vendor vendor` doen vóór tests. Voorgesteld backlog-item: `.claude/hooks/worktree-bootstrap.sh` voor automatische bootstrap
 - **Composer autoload cache na worktree-merge**: handmatige `composer dump-autoload` was elke wave nodig om vendor/composer/autoload_classmap.php te refreshen. Voorgesteld: `.claude/hooks/post-merge.sh` automatisering
@@ -152,6 +161,7 @@ Decisions zijn gelogd in PROJECT.md Key Decisions table. Decisions die uit v0.1 
 - 2026-05-14 — Plan 04-05 voltooid + **Phase 04 volledig afgerond**: `PruneOAuthPendingConnections` artisan-command (`oauth:prune-pending` met `--dry-run`, D-09 handmatige cleanup, géén cron per D-04) + 2 tests (prunes-expired + dry-run-no-delete). BLOCKING phase-acceptance 8/8 groen: migrate, schema-check, route:list, container-bindings (`HubMollieCredentialResolver` + `MollieConnectOAuthFlow`), command-registratie, full suite 129/129, pint clean. ROADMAP-vs-CONTEXT delta SC-1: ROADMAP zegt `GET /v1/oauth/mollie/authorize?account=…`; implementatie volgt CONTEXT D-01/D-08 `POST /v1/oauth/mollie/init` met JSON-return — opgelost in commit `5208492` (ROADMAP SC-1 herschreven naar D-01/D-08-wording + Phase 4 hoofdcheckbox `[x]`). Alle 5 SC's (SC-1..SC-5) gedekt door 26 dedicated tests.
 - 2026-05-15 — **Phase 06 voltooid**: 8/8 plans, SC-1 (compat-ADR pad-a) + SC-2 (integration-test in `tests/Integration/Billing/CashierMollieSubscriptionFlowTest`) + SC-3 (cred-isolation runtime-bewezen: `EmeqMollie` + `Mollie` + `Cashier` classes coexist; `CASHIER_MOLLIE_KEY` los van Connection.access_token uit Phase 4) bewezen. SC-4 (failed-payment retry) als vendor-coverage gemarkeerd. Tracking: `06-08-ACCEPTANCE.md` met 8/8 D-18 items + 18 confirmed decisions; ROADMAP Phase 6 `[x]` 8/8 plans + 2026-05-15; REQUIREMENTS SUB-01 = Complete. Standard suite 237 passed; integration-suite 4 skipped graceful zonder CASHIER_MOLLIE_KEY; Phase 5a regressie clean (49 Mollie-routes + 19 webhooks). Pint-fix in `routes/api.php` als Phase-6-attributable acceptance-finalisatie. Phase 7 (use-case B / Account-level subscriptions) ontblokt; Phase 9 (Filament admin-UI) ook ontblokt en parallel mogelijk.
 - 2026-05-15 — **Phase 5c toegevoegd**: HUB-06 (Snelstart webhook-handler) toegevoegd aan REQUIREMENTS.md + ROADMAP.md (Phase 5c entry + Details + Progress + Coverage). Productie-certificeringsblocker — Snelstart vereist publieke webhook-URL bij certificeringsaanvraag. Plan-bron: quick-task 260515-c52 (Snelstart certificeringspad). CONTEXT.md `78b5cf7` met 5 ❓-aannames (HMAC-header + algo, secret-lifecycle, routing-veld, retry-policy, event-typen); plan-phase wacht op antwoord van `partner@snelstart.nl` op Gmail-draft `r-8836998535038336548` (verwacht ≤2026-05-26). `total_phases` 9→10.
+- 2026-05-15 — **Phase 07 plan 08 executed (PENDING checkpoint-approval)**: 11/11 D-32 acceptance-criteria (10× ✅ + 1× ⏭️ Pad B integration-test-keuze wegens ontbrekende `MOLLIE_CONNECT_TEST_ACCESS_TOKEN`), ADR `.docs/decisions/account-subscriptions.md` met §Scope-niveau (MEDIUM #3 — per-Consumer mutate-scope) + §Integration-test-keuze (MEDIUM #4 — Pad B-rationale + re-run-triggers), ROADMAP Phase 7 `[x]` + Progress 8/8 + 2026-05-15, REQUIREMENTS SUB-02 `[x]` Complete. 337 tests / 1100 assertions groen; integration-test skipt graceful; Phase 5a regressie clean (`MollieWebhookIngressTest` + `MollieWebhookAntiSpoofingTest` 2/2). Wacht op "approved" om Phase 8 te ontblokken.
 - 2026-05-14 — **Phase 02 audit-correctie**: ROADMAP-status was `[ ]` maar de 8 Phase-2 plans in `.planning/phases/02-emeq-mollie-api-foundation/` waren al volledig geshipped in de SDK-sub-repo (`emeq/mollie-api v0.1.0-alpha.1`). `git log --grep="02-"` toont alleen het plan-creatie-commit; geen execution-commits omdat `packages/` gitignored is in Hub. Gap was administratief, niet technisch. Bonus boven plan-scope: exception-mapper + idempotency-generator + webhook-signature-helper. Daarmee is Phase 5a NIET geblokkeerd op Phase 2 — MOLL-03 (Resources) valt in Phase 5a's eigen scope, niet Phase 2.
 
 ## Deferred Items
@@ -170,7 +180,7 @@ Items acknowledged en deferred bij milestone-close 2026-05-14:
 
 ## Session Continuity
 
-Last session: 2026-05-15T09:39:29.727Z
-Stopped at: Phase 7 context gathered (auto-mode, no clarifying questions)
-Resume file: .planning/phases/07-account-level-subscriptions-use-case-b/07-CONTEXT.md
-Next action: `/clear` → `/gsd-discuss-phase 7` in verse sessie op `feat/v02-mollie-subscriptions` — subscription-state-machine (revoked-mandate → paused, failed-retry, customer-deleted edges) verdient verse context.
+Last session: 2026-05-15T20:22+02:00
+Stopped at: Phase 7 close PENDING — 07-08 acceptance + ADR + planning-sync committed on worktree-branch; awaits human-verify checkpoint (Scramble UI + acceptance-review)
+Resume file: .planning/phases/07-account-level-subscriptions-use-case-b/07-08-ACCEPTANCE.md
+Next action: Human-verify checkpoint (Scramble UI render + acceptance-file review) → reply "approved" → orchestrator merges worktree-branch + promotes SUB-02 to Complete + unblocks Phase 8.

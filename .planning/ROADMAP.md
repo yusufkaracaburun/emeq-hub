@@ -27,7 +27,7 @@ v0.2 bouwt drie samenhangende lagen: (1) `emeq/mollie-api` SDK die `mollie/molli
 - [ ] **Phase 5b: Snelstart-pass-through API** — `/v1/snelstart/{path}` pass-through via `HubSnelstartCredentialResolver` + `POST /v1/accounts` + `POST /v1/connections` provisioning-endpoints + audit-logging. Parallel met Phase 4 mogelijk.
 - [ ] **Phase 5c: Snelstart webhook-handler** — `POST /webhooks/snelstart` HMAC-verified ingress + Connection-resolutie via `administratie_id` + audit-log (`direction=inbound`) + async fan-out naar Consumer-callback. Productie-certificeringsblocker (zie `.docs/decisions/snelstart-certificering-pad.md`).
 - [x] **Phase 6: Cashier-Mollie integratie (use-case A)** — Emeq → Consumers billing op Emeq's eigen Mollie *(voltooid 2026-05-15; 8/8 plans, SC-1+SC-2+SC-3 bewezen, SC-4 vendor-coverage; 237 tests passed + integration-suite gescheiden via `composer test:integration`)*
-- [ ] **Phase 7: Account-level subscriptions (use-case B)** — Accounts → eindgebruikers via Connect + Mandates + Subscriptions
+- [x] **Phase 7: Account-level subscriptions (use-case B)** — Accounts → eindgebruikers via Connect + Mandates + Subscriptions *(voltooid 2026-05-15; 8/8 plans, SC-1+SC-2+SC-3 bewezen, SC-4 vendor-coverage via unit + feature stubs + skipt-graceful integration-test, 337 tests groen, ADR `account-subscriptions.md`)*
 - [ ] **Phase 8: Naschool wiring** — composer-wiring + Snelstart Stancl-resolver + `SyncEnrollmentToSnelstartJob` + Mollie checkout-flow via Hub-Connect
 - [ ] **Phase 9: Filament admin-UI voor Emeq-medewerkers** — `/admin`-panel met Consumer-CRUD, Connection read+revoke, Account read-only, WebhookCall viewer
 
@@ -279,7 +279,7 @@ v0.2 bouwt drie samenhangende lagen: (1) `emeq/mollie-api` SDK die `mollie/molli
   3. Twee Accounts met elk een eigen `AccountSubscription` op dezelfde test-eindgebruiker (verschillende email) hebben volledig gescheiden state — geen cross-Account-data in queries vanuit Account A
   4. Tests dekken create/cancel/webhook-update happy paths + ≥3 edge cases (revoked mandate, failed retry, deleted customer)
 
-**Plans:** 7/8 plans executed
+**Plans:** 8/8 plans executed
 
 - [x] 07-01-PLAN.md — Migration + AccountSubscription-model + factory + Account/Connection hasMany-relaties
 - [x] 07-02-PLAN.md — SubscriptionStatus-enum + StateTransitions-helper + InvalidStateTransitionException
@@ -288,7 +288,7 @@ v0.2 bouwt drie samenhangende lagen: (1) `emeq/mollie-api` SDK die `mollie/molli
 - [x] 07-05-PLAN.md — WebhookPayloadRouter + SubscriptionWebhookHandler + PaymentWebhookHandler + MollieWebhookController refactor (D-15/D-18) zonder Phase-5a-regressie (D-31)
 - [x] 07-06-PLAN.md — Feature-test-suite (Create/Cancel/PauseResume/List/WebhookFlow/Coexistence) — SC-1+SC-2+SC-3+SC-4 happy + ≥3 edge cases
 - [x] 07-07-PLAN.md — Integration-test @group integration + AccountSubscriptionIntegrationTestCase + .env.example MOLLIE_CONNECT_TEST_ACCESS_TOKEN — SC-4 vendor-coverage
-- [ ] 07-08-PLAN.md — BLOCKING phase-acceptance D-32 10/10 + ADR account-subscriptions + ROADMAP/REQUIREMENTS/STATE sync
+- [x] 07-08-PLAN.md — BLOCKING phase-acceptance D-32 11/11 + ADR account-subscriptions + ROADMAP/REQUIREMENTS/STATE sync (PENDING checkpoint-approval 2026-05-15)
 
 #### Phase 8: Naschool wiring (Snelstart + Mollie-via-Hub)
 
@@ -367,7 +367,7 @@ v0.2 bouwt drie samenhangende lagen: (1) `emeq/mollie-api` SDK die `mollie/molli
 | 5b. Snelstart-pass-through API | 0/5 | Planned | - |
 | 5c. Snelstart webhook-handler | 1/5 | In Progress|  |
 | 6. Cashier-Mollie integratie | 8/8 | Done | 2026-05-15 |
-| 7. Account-level subscriptions | 7/8 | In Progress|  |
+| 7. Account-level subscriptions | 8/8 | Done | 2026-05-15 |
 | 8. Naschool wiring | 0/0 (TBD) | Not started | - |
 | 9. Filament admin-UI voor Emeq-medewerkers | 0/0 (TBD) | Not started | - |
 
