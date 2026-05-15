@@ -4,13 +4,17 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\AccountSubscriptions;
 
+use App\Billing\Account\AccountSubscriptionManager;
+use App\Billing\Account\Exceptions\InvalidStateTransitionException;
 use App\Billing\Account\SubscriptionStatus;
 use App\Filament\Resources\AccountSubscriptions\Pages\ListAccountSubscriptions;
 use App\Filament\Resources\AccountSubscriptions\Pages\ViewAccountSubscription;
 use App\Models\AccountSubscription;
 use BackedEnum;
+use Filament\Actions\Action;
 use Filament\Actions\ViewAction;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -18,6 +22,7 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Throwable;
 
 /**
  * Plan 09-08 — Read-only Filament-Resource voor AccountSubscription met
@@ -131,8 +136,127 @@ class AccountSubscriptionResource extends Resource
             ])
             ->recordActions([
                 ViewAction::make(),
+                self::pauseAction(),
+                self::resumeAction(),
+                self::cancelAction(),
             ])
             ->toolbarActions([]);
+    }
+
+    /**
+     * Pause-action — alleen zichtbaar op Active. Delegates naar
+     * AccountSubscriptionManager::pause (Phase 7-03 single-entry-point).
+     * NOOIT direct $sub->update(['status' => ...]) (T-07-03-03 invariant).
+     */
+    private static function pauseAction(): Action
+    {
+        return Action::make('pause')
+            ->label('Pauzeren')
+            ->icon(Heroicon::Pause)
+            ->color('warning')
+            ->visible(fn (AccountSubscription $record): bool => $record->status === SubscriptionStatus::Active)
+            ->requiresConfirmation()
+            ->modalHeading('Subscription pauzeren')
+            ->modalDescription('Dit zet de Hub-state op Paused. Mollie-side wordt niet aangeroepen (Phase 7-03 D-04 invariant).')
+            ->action(function (AccountSubscription $record): void {
+                try {
+                    app(AccountSubscriptionManager::class)->pause($record, 'admin_panel_action');
+                    Notification::make()
+                        ->title('Subscription gepauzeerd')
+                        ->success()
+                        ->send();
+                } catch (InvalidStateTransitionException $e) {
+                    Notification::make()
+                        ->title('Ongeldige state-transitie')
+                        ->body($e->getMessage())
+                        ->danger()
+                        ->send();
+                } catch (Throwable $e) {
+                    Notification::make()
+                        ->title('Pause-actie mislukt')
+                        ->body($e->getMessage())
+                        ->danger()
+                        ->send();
+                }
+            });
+    }
+
+    /**
+     * Resume-action — alleen zichtbaar op Paused. Delegates naar
+     * AccountSubscriptionManager::resume.
+     */
+    private static function resumeAction(): Action
+    {
+        return Action::make('resume')
+            ->label('Hervatten')
+            ->icon(Heroicon::Play)
+            ->color('success')
+            ->visible(fn (AccountSubscription $record): bool => $record->status === SubscriptionStatus::Paused)
+            ->requiresConfirmation()
+            ->modalHeading('Subscription hervatten')
+            ->action(function (AccountSubscription $record): void {
+                try {
+                    app(AccountSubscriptionManager::class)->resume($record);
+                    Notification::make()
+                        ->title('Subscription hervat')
+                        ->success()
+                        ->send();
+                } catch (InvalidStateTransitionException $e) {
+                    Notification::make()
+                        ->title('Ongeldige state-transitie')
+                        ->body($e->getMessage())
+                        ->danger()
+                        ->send();
+                } catch (Throwable $e) {
+                    Notification::make()
+                        ->title('Resume-actie mislukt')
+                        ->body($e->getMessage())
+                        ->danger()
+                        ->send();
+                }
+            });
+    }
+
+    /**
+     * Cancel-action — zichtbaar op Active OF Paused. Delegates naar
+     * AccountSubscriptionManager::cancel (roept ook Mollie SDK aan als
+     * mollie_subscription_id niet null is).
+     */
+    private static function cancelAction(): Action
+    {
+        return Action::make('cancel')
+            ->label('Annuleren')
+            ->icon(Heroicon::XCircle)
+            ->color('danger')
+            ->visible(fn (AccountSubscription $record): bool => in_array(
+                $record->status,
+                [SubscriptionStatus::Active, SubscriptionStatus::Paused],
+                strict: true,
+            ))
+            ->requiresConfirmation()
+            ->modalHeading('Subscription annuleren')
+            ->modalDescription('Dit roept Mollie cancelForId aan (indien mollie_subscription_id gevuld) en zet de Hub-state op Canceled. Niet terug te draaien.')
+            ->action(function (AccountSubscription $record): void {
+                try {
+                    app(AccountSubscriptionManager::class)->cancel($record);
+                    Notification::make()
+                        ->title('Subscription geannuleerd')
+                        ->success()
+                        ->send();
+                } catch (InvalidStateTransitionException $e) {
+                    Notification::make()
+                        ->title('Ongeldige state-transitie')
+                        ->body($e->getMessage())
+                        ->danger()
+                        ->send();
+                } catch (Throwable $e) {
+                    Notification::make()
+                        ->title('Cancel-actie mislukt')
+                        ->body($e->getMessage())
+                        ->danger()
+                        ->send();
+                }
+            });
     }
 
     public static function getPages(): array
