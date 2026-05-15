@@ -42,6 +42,20 @@ Route::middleware('auth:sanctum')->group(function (): void {
         ->middleware('resolve.snelstart.account')
         ->name('api.snelstart.passthrough');
 
+    Route::middleware('ability:billing:read,billing:write,*')->group(function (): void {
+        Route::get('/billing/subscription', [\App\Http\Controllers\Api\V1\Billing\SubscriptionController::class, 'show'])
+            ->name('api.billing.subscription.show');
+    });
+
+    Route::prefix('admin/billing')
+        ->middleware(['ability:billing:write,*', 'emeq.admin'])
+        ->group(function (): void {
+            Route::post('/subscriptions', [\App\Http\Controllers\Api\V1\Admin\Billing\SubscriptionController::class, 'store'])
+                ->name('api.admin.billing.subscriptions.store');
+            Route::delete('/subscriptions/{id}', [\App\Http\Controllers\Api\V1\Admin\Billing\SubscriptionController::class, 'destroy'])
+                ->name('api.admin.billing.subscriptions.destroy');
+        });
+
     Route::prefix('mollie')->middleware('resolve.mollie.account')->group(function (): void {
         Route::post('/payments', [PaymentsController::class, 'store'])->name('api.mollie.payments.store');
         Route::get('/payments/{id}', [PaymentsController::class, 'show'])->name('api.mollie.payments.show');

@@ -14,6 +14,10 @@ final class TokenAbilities
 
     public const CONSUMER_MANAGE_ACCOUNTS = 'consumer:manage-accounts';
 
+    public const BILLING_READ = 'billing:read';
+
+    public const BILLING_WRITE = 'billing:write';
+
     public const ADMIN = '*';
 
     /**
@@ -27,6 +31,8 @@ final class TokenAbilities
             self::MOLLIE_READ,
             self::MOLLIE_WRITE,
             self::CONSUMER_MANAGE_ACCOUNTS,
+            self::BILLING_READ,
+            self::BILLING_WRITE,
             self::ADMIN,
         ];
     }
