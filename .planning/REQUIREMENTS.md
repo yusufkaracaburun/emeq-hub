@@ -10,9 +10,9 @@ Requirements voor v0.2 (~8-10 weken). Elke vereiste mapt naar één roadmap-fase
 
 ### Mollie SDK
 
-- [ ] **MOLL-01**: `emeq/mollie-api` skeleton + ServiceProvider + `MollieCredentialResolver`-contract + dual-credential Data-classes (`MollieApiKeyCredentials` met `test_|live_`-prefix-validatie + `MollieOAuthCredentials` met `access_`-prefix-validatie). Wraping van `mollie/mollie-api-php` ^3.11 (BSD-2-Clause). Facade-alias = `EmeqMollie`. ≥10 Pest-tests groen op auth + multi-tenant resolver + error-mapping.
+- [x] **MOLL-01**: `emeq/mollie-api` skeleton + ServiceProvider + `MollieCredentialResolver`-contract + dual-credential Data-classes (`MollieApiKeyCredentials` met `test_|live_`-prefix-validatie + `MollieOAuthCredentials` met `access_`-prefix-validatie). Wraping van `mollie/mollie-api-php` ^3.11 (BSD-2-Clause). Facade-alias = `EmeqMollie`. ≥10 Pest-tests groen op auth + multi-tenant resolver + error-mapping. *Validated in Phase 2 (2026-05-14) — SDK gepubliceerd als `emeq/mollie-api v0.1.0-alpha.1`, 8/8 plans DONE, Hub-side composer-binding actief.*
 
-- [x] **MOLL-02**: Mollie Connect OAuth-broker — `client_id`/`client_secret` config (Emeq als Mollie Partner) + redirect-handler endpoint + authorization-code → token-exchange + refresh-token-flow met automatische renewal vóór expiry. Access-tokens + refresh-tokens encrypted-at-rest opgeslagen via Eloquent `encrypted` cast. Geen raw tokens in logs/exceptions — alleen fingerprints.
+- [x] **MOLL-02**: Mollie Connect OAuth-broker — `client_id`/`client_secret` config (Emeq als Mollie Partner) + redirect-handler endpoint + authorization-code → token-exchange + refresh-token-flow met automatische renewal vóór expiry. Access-tokens + refresh-tokens encrypted-at-rest opgeslagen via Eloquent `encrypted` cast. Geen raw tokens in logs/exceptions — alleen fingerprints. *Validated in Phase 4 (2026-05-14) — provider-agnostisch `OAuthFlow`-contract + `MollieConnectOAuthFlow`, 5/5 plans, 129/129 tests, BLOCKING acceptance 8/8.*
 
 - [x] **MOLL-03**: `emeq/mollie-api` Resources + DTOs voor Payments (create/read/cancel), Customers (read/create), PaymentMethods (list), Refunds (create/read), Mandates (list/get/revoke), Subscriptions (create/read/cancel). Idempotency-Key auto-injectie op writes via Mollie's `IdempotencyKeyGeneratorContract`. *Validated in Phase 5a (2026-05-15) — 7 resources + 22 routes + Idempotency-Key forward via gedeelde `AbstractMolliePassThroughController::buildClient` op alle 5 write-endpoints.*
 
@@ -78,8 +78,8 @@ Expliciet uitgesloten voor v0.2. Niet re-adden zonder PROJECT.md herziening.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| MOLL-01 | Phase 2 | Pending |
-| MOLL-02 | Phase 4 | In Progress (04-01 done) |
+| MOLL-01 | Phase 2 | Complete |
+| MOLL-02 | Phase 4 | Complete |
 | MOLL-03 | Phase 5a | Complete |
 | MOLL-04 | Phase 5a | Complete |
 | HUB-01 | Phase 3 | Complete |
@@ -87,7 +87,7 @@ Expliciet uitgesloten voor v0.2. Niet re-adden zonder PROJECT.md herziening.
 | HUB-03 | Phase 5a | Complete |
 | HUB-04 | Phase 9 | Pending |
 | HUB-05 | Phase 5b | Pending |
-| SUB-01 | Phase 6 | Pending |
+| SUB-01 | Phase 6 | In Progress (06-01 done — compat-check landed) |
 | SUB-02 | Phase 7 | Pending |
 | NSCH-01 | Phase 8 | Pending |
 | NSCH-02 | Phase 8 | Pending |
