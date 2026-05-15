@@ -1,18 +1,14 @@
 ---
-status: testing
+status: partial
 phase: 05a-mollie-sdk-resources-webhooks-pass-through-api
 source: [05a-VERIFICATION.md]
 started: 2026-05-15T09:15:00Z
-updated: 2026-05-15T10:00:00Z
+updated: 2026-05-15T15:05:00Z
 ---
 
 ## Current Test
 
-number: 2
-name: Real Mollie testmode webhook hit naar /webhooks/mollie/{connection_id}
-expected: |
-  Mollie's next-gen subscription-webhook (X-Mollie-Signature, JSON body) verifieert correct, anti-spoofing-fetch slaagt, fan-out POST verschijnt op een test-Consumer-callback (bv. https://webhook.site). Audit-rij in `webhook_calls` heeft geen exception.
-awaiting: user response
+[testing paused — 2 items blocked op Phase 8 NSCH-03 (Mollie testmode + tunnel)]
 
 ## Tests
 
@@ -39,20 +35,24 @@ artifacts:
 ### 2. Real Mollie testmode webhook hit naar /webhooks/mollie/{connection_id}
 expected: Mollie's next-gen subscription-webhook (X-Mollie-Signature, JSON body) verifieert correct, anti-spoofing-fetch slaagt, fan-out POST verschijnt op een test-Consumer-callback (bv. https://webhook.site). Audit-rij in `webhook_calls` heeft geen exception.
 why_human: Vereist een live Mollie testmode account + Connect-koppeling + publiek bereikbare ngrok-/Caddy-tunnel. SDK-pad is via MollieWebhookSignature-helper getest met stubs maar de eind-tot-eind validatie tegen Mollie's eigen signer is niet geautomatiseerd.
-result: [pending]
+result: blocked
+blocked_by: prior-phase
+reason: Vereist Mollie testmode + Connect-koppeling + publieke tunnel — opgepakt in Phase 8 NSCH-03 (end-to-end Naschool-flow). MollieWebhookSignature-helper is unit-getest met stubs; live-signer-validatie wacht op tunnel-setup.
 
 ### 3. Concrete POST /v1/mollie/payments → ouder doorloopt Mollie test-mode → webhook ontvangen
 expected: Naschool-scenario (NSCH-03 dependency): Consumer-PAT met `mollie:write` + Account-id van een test-school stuurt POST payment → ontvangt `_links.checkout.href` → ouder doorloopt Mollie test-modus → Mollie post webhook naar Hub → fan-out naar Naschool-callback succesvol.
 why_human: End-to-end smoke met echte Mollie test-omgeving is buiten scope van Phase 5a (valt onder Phase 8 NSCH-03) maar bewijst SC-1 + SC-3 + SC-4 hard.
-result: [pending]
+result: blocked
+blocked_by: prior-phase
+reason: End-to-end NSCH-03 (Phase 8) levert de Naschool-Consumer + test-school-Account die nodig zijn voor deze flow. Phase 05a-functionaliteit (route + Form-Request + PassThrough + webhook-receiver) is unit/feature-getest; integratie-bewijs volgt in Phase 8.
 
 ## Summary
 
 total: 3
 passed: 1
 issues: 0
-pending: 2
+pending: 0
 skipped: 0
-blocked: 0
+blocked: 2
 
 ## Gaps
