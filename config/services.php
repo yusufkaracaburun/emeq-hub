@@ -55,4 +55,10 @@ return [
         'webhook_secret' => env('MOLLIE_WEBHOOK_SECRET'),
     ],
 
+    'cashier' => [
+        // Plan 06-06 leest dit voor de stap-0 hard-fail Cashier-webhook-guard.
+        // Empty/null → 500 + audit-row (analoog aan Phase 5a D-08 stap 1).
+        'webhook_secret' => env('CASHIER_WEBHOOK_SECRET'),
+    ],
+
 ];
