@@ -4,13 +4,13 @@ milestone: v0.2
 milestone_name: — Mollie + Connect + Subscriptions + Hub-skeleton
 status: executing
 stopped_at: Phase 7 close PENDING — 07-08 acceptance + ADR + planning-sync committed on worktree-branch; awaits human-verify checkpoint (Scramble UI + acceptance-review)
-last_updated: "2026-05-15T21:46:14.931Z"
+last_updated: "2026-05-15T22:26:29.329Z"
 last_activity: 2026-05-15 -- Phase 09 execution started
 progress:
   total_phases: 10
   completed_phases: 6
   total_plans: 62
-  completed_plans: 46
+  completed_plans: 48
   percent: 60
 ---
 
