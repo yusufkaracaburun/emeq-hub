@@ -14,9 +14,9 @@ Requirements voor v0.2 (~8-10 weken). Elke vereiste mapt naar één roadmap-fase
 
 - [x] **MOLL-02**: Mollie Connect OAuth-broker — `client_id`/`client_secret` config (Emeq als Mollie Partner) + redirect-handler endpoint + authorization-code → token-exchange + refresh-token-flow met automatische renewal vóór expiry. Access-tokens + refresh-tokens encrypted-at-rest opgeslagen via Eloquent `encrypted` cast. Geen raw tokens in logs/exceptions — alleen fingerprints.
 
-- [ ] **MOLL-03**: `emeq/mollie-api` Resources + DTOs voor Payments (create/read/cancel), Customers (read/create), PaymentMethods (list), Refunds (create/read), Mandates (list/get/revoke), Subscriptions (create/read/cancel). Idempotency-Key auto-injectie op writes via Mollie's `IdempotencyKeyGeneratorContract`.
+- [x] **MOLL-03**: `emeq/mollie-api` Resources + DTOs voor Payments (create/read/cancel), Customers (read/create), PaymentMethods (list), Refunds (create/read), Mandates (list/get/revoke), Subscriptions (create/read/cancel). Idempotency-Key auto-injectie op writes via Mollie's `IdempotencyKeyGeneratorContract`. *Validated in Phase 5a (2026-05-15) — 7 resources + 22 routes + Idempotency-Key forward via gedeelde `AbstractMolliePassThroughController::buildClient` op alle 5 write-endpoints.*
 
-- [ ] **MOLL-04**: `MollieWebhookVerifier` voor Connect-webhooks — HMAC-SHA256 signature-verificatie (`Mollie-Signature` header) namens platform-secret. Happy + tampered signature paths gedekt door tests. Queueable optie voor langlopende webhook-handlers via `spatie/laravel-webhook-client`.
+- [x] **MOLL-04**: `MollieWebhookVerifier` voor Connect-webhooks — HMAC-SHA256 signature-verificatie (`Mollie-Signature` header) namens platform-secret. Happy + tampered signature paths gedekt door tests. Queueable optie voor langlopende webhook-handlers via `spatie/laravel-webhook-client`. *Validated in Phase 5a (2026-05-15) — signature-verify + anti-spoofing-fetch + fan-out via `spatie/laravel-webhook-server` + stap-0 hard-fail guard bij empty `MOLLIE_WEBHOOK_SECRET`.*
 
 ### Hub-skeleton
 
@@ -24,7 +24,7 @@ Requirements voor v0.2 (~8-10 weken). Elke vereiste mapt naar één roadmap-fase
 
 - [ ] **HUB-02**: `OAuthFlow`-contract provider-agnostisch (`getAuthorizationUrl()`, `exchangeCode()`, `refreshToken()`, `revoke()`). Eerste implementatie `MollieConnectOAuthFlow`. Pattern toekomst-bestendig voor Snelstart-OAuth, Exact-OAuth, Ibanity-OAuth in latere milestones.
 
-- [ ] **HUB-03**: Pass-through REST API `/v1/mollie/*` — Bearer Consumer-PAT-resolutie → `Account` → `Connection.access_token` → `emeq/mollie-api` SDK-call. Audit-logging van inkomende + uitgaande requests in `webhook_calls`-tabel (al gepland in PROJECT.md architectuur). `dedoc/scramble` genereert OpenAPI spec op `/docs/api`.
+- [x] **HUB-03**: Pass-through REST API `/v1/mollie/*` — Bearer Consumer-PAT-resolutie → `Account` → `Connection.access_token` → `emeq/mollie-api` SDK-call. Audit-logging van inkomende + uitgaande requests in `webhook_calls`-tabel (al gepland in PROJECT.md architectuur). `dedoc/scramble` genereert OpenAPI spec op `/docs/api`. *Validated in Phase 5a (2026-05-15) — multi-tenant Bearer→Consumer→Account→Connection resolution + audit-log in `pass_through_calls` + error-mapping (401→502 cloaked, 422→422, 404→404, 429→429+RetryAfter, 5xx→502, timeout→504) + Scramble OpenAPI op `/docs/api`.*
 
 - [ ] **HUB-04**: Filament v4 admin-paneel op `/admin` voor Emeq-medewerkers — 4 resources (Consumer CRUD + PAT issue/revoke, Connection read+revoke met fingerprint-only, Account read-only, WebhookCall viewer). Eigen panel-auth via `is_emeq_staff` boolean op `User` + `canAccessPanel()`-check. Raw tokens nooit in UI (computed `Connection::fingerprint()`-accessor). Out-of-scope: multi-rol RBAC, MFA, e-mail notificaties, audit-log (HUB-AUDIT backlog), Consumer self-service dashboard (v1.0+).
 
@@ -80,11 +80,11 @@ Expliciet uitgesloten voor v0.2. Niet re-adden zonder PROJECT.md herziening.
 |-------------|-------|--------|
 | MOLL-01 | Phase 2 | Pending |
 | MOLL-02 | Phase 4 | In Progress (04-01 done) |
-| MOLL-03 | Phase 5a | Pending |
-| MOLL-04 | Phase 5a | Pending |
+| MOLL-03 | Phase 5a | Complete |
+| MOLL-04 | Phase 5a | Complete |
 | HUB-01 | Phase 3 | Complete |
 | HUB-02 | Phase 4 | In Progress (04-01 done) |
-| HUB-03 | Phase 5a | Pending |
+| HUB-03 | Phase 5a | Complete |
 | HUB-04 | Phase 9 | Pending |
 | HUB-05 | Phase 5b | Pending |
 | SUB-01 | Phase 6 | Pending |

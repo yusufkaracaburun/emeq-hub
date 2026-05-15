@@ -20,6 +20,9 @@ Een Hub-platform en losse, Saloon-gebaseerde Laravel SDK-packages (`emeq/snelsta
 - [x] **SNEL-01** — Snelstart-SDK Pest-suite groen (107 passed / 187 assertions). Gevalideerd in Phase 1 (`fase-4 crash` bleek NO REPRO op `main @ 76e0797`; rewrote SnelstartConnectorTest van 1 → 12 cases met directe `getRequestException()`-coverage).
 - [x] **SNEL-02** — Snelstart-SDK gepusht naar `github.com:yusufkaracaburun/emeq-snelstart-api` met upstream-tracking. VCS-installeerbaar zonder auth bewezen via smoke-test.
 - [x] **HUB-01** — Hub-skeleton: `consumers`/`accounts`/`connections` tabellen + Sanctum-PAT-auth (`/v1/*`) + encrypted credential-velden + multi-tenant scoping. Gevalideerd in Phase 3 (5/5 plans, 28 tests groen incl. encryption-at-rest voor alle 4 credential-velden en cross-Consumer query-isolation). Acceptance via `hub:consumer:create` + `GET /v1/ping`.
+- [x] **MOLL-03** — `emeq/mollie-api` Resources + Idempotency-Key forward op alle 5 write-endpoints. Gevalideerd in Phase 5a (6/6 plans, 207 tests groen, 13/13 truths verified). Gehoiste `AbstractMolliePassThroughController::buildClient` zorgt voor verbatim Consumer-header forward naar Mollie SDK; 7 resources (Payments / Customers / PaymentMethods / Refunds / Mandates / Subscriptions / PaymentLinks) + 22 routes onder `/v1/mollie/*`.
+- [x] **MOLL-04** — `MollieWebhookVerifier` Connect-webhooks. Gevalideerd in Phase 5a — signature-verify via SDK helper + anti-spoofing-fetch + fan-out via `spatie/laravel-webhook-server` naar Consumer-callback + stap-0 hard-fail guard bij empty/null `MOLLIE_WEBHOOK_SECRET` (D-08 stap 1, T-05a-06).
+- [x] **HUB-03** — Pass-through REST API `/v1/mollie/*`. Gevalideerd in Phase 5a — multi-tenant Bearer→Consumer→Account→Connection-resolutie + `PassThroughCall` audit-log + error-mapping (401→502 cloaked, 422→422, 404→404, 429→429+RetryAfter, 5xx→502, timeout→504) + Scramble OpenAPI op `/docs/api`. Cross-Consumer-access geeft 404 (geen leakage).
 
 ### Active
 
@@ -37,11 +40,11 @@ Carry-forward requirements (formaliseren bij `/gsd-new-milestone v0.2`):
 
 - **MOLL-01** — `emeq/mollie-api` skeleton wrappend `mollie/mollie-api-php` — multi-tenant `MollieCredentialResolver`-pattern, dual creds (API-key + OAuth)
 - **MOLL-02** — Mollie Connect OAuth-broker: client_id/client_secret config, redirect-handler, token-exchange, refresh-token-flow, `access_`-token storage encrypted
-- **MOLL-03** — `emeq/mollie-api` Resources + DTOs voor Payments, Customers, PaymentMethods, Refunds + **Mandates + Subscriptions** (nieuw vs oorspronkelijke v0.1)
-- **MOLL-04** — `MollieWebhookVerifier` voor Connect-webhooks (HMAC-signed namens platform)
+- ~~**MOLL-03**~~ — *Validated 2026-05-15 in Phase 5a (zie Validated-sectie hierboven)*
+- ~~**MOLL-04**~~ — *Validated 2026-05-15 in Phase 5a (zie Validated-sectie hierboven)*
 - ~~**HUB-01**~~ — *Validated 2026-05-14 in Phase 3 (zie Validated-sectie hierboven)*
 - **HUB-02** — OAuth-broker pattern (provider-agnostisch contract, eerste implementatie = Mollie Connect)
-- **HUB-03** — Pass-through REST API `/v1/mollie/*` — Bearer-token-resolutie naar `Connection.access_token` → SDK-call
+- ~~**HUB-03**~~ — *Validated 2026-05-15 in Phase 5a (zie Validated-sectie hierboven)*
 - **SUB-01** — Cashier-Mollie integratie voor use-case A (Emeq rekent aan Naschool/Planny-klanten via Emeq's eigen Mollie) — compat-check PHP 8.4 / Laravel 13 nodig
 - **SUB-02** — Account-level subscriptions via Connect voor use-case B (klanten rekenen aan hun eindgebruikers) — eigen subscription-laag boven Mollie's Subscriptions + Mandates API
 - **NSCH-01** — Naschool wiring: Stancl-tenancy resolver voor Snelstart (uit oorspronkelijke v0.1, ongewijzigd)
@@ -57,10 +60,11 @@ Carry-forward requirements (formaliseren bij `/gsd-new-milestone v0.2`):
 - **Snelstart Saloon v3 → v4** — 3 ignored security advisories oplossen; v0.3-werk.
 - **Commerciële Hub-features** (billing, public docs-site, self-service onboarding) — pas in latere milestone na v0.2.
 
-## Current State (per 2026-05-14, na v0.1 ship + v0.2 kickoff)
+## Current State (per 2026-05-15, na Phase 5a ship)
 
 - **Shipped:** v0.1 — `emeq/snelstart-api` SDK live op `github.com:yusufkaracaburun/emeq-snelstart-api` (`main` @ `16c9ecc`), Pest-suite groen (107/187), VCS-installeerbaar zonder auth.
-- **Active milestone:** v0.2 — Mollie + Connect + Subscriptions + Hub-skeleton (~8-10 weken). Gestart 2026-05-14.
+- **Active milestone:** v0.2 — Mollie + Connect + Subscriptions + Hub-skeleton. Phases 2 t/m 5a complete (4/9 phases done, 21/29 plans done = 72%).
+- **Recent ship:** Phase 5a — Mollie pass-through API + Connect-webhook ingress (6/6 plans, 207 tests, 13/13 truths verified). MOLL-03 + MOLL-04 + HUB-03 nu Validated. Open: 3 human-UAT items (Scramble UI render, live Mollie testmode webhook, NSCH-03 e2e) — afgevangen in `05a-HUMAN-UAT.md` voor toekomstige `/gsd-verify-work`.
 - **Architectuur-vision** (geverifieerd 2026-05-14): Emeq = Mollie Connect Partner. Consumers (Naschool, Planny, derde-partij SaaS) routeren door Hub. Accounts (klanten van die SaaS-apps) koppelen eigen partner-credentials via OAuth (Mollie Connect, Snelstart oAuth, etc.). Subscriptions: zowel Emeq→Consumers (Cashier-Mollie pattern) als Accounts→eindgebruikers (Connect + eigen subscription-laag).
 
 ## Current Milestone: v0.2 Mollie + Connect + Subscriptions + Hub-skeleton
@@ -128,4 +132,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-14 — HUB-01 verplaatst naar Validated na Phase 3 ship (5/5 plans, 28 tests groen, SC-1 t/m SC-5 bewezen). Open: "Active" + "Next Milestone Goals" secties beschrijven nog "voorbereid, niet gestart" terwijl v0.2 evident gestart is (REQUIREMENTS.md + ROADMAP.md gepubliceerd) — formele cleanup volgt bij een aparte restructure.*
+*Last updated: 2026-05-15 — MOLL-03 + MOLL-04 + HUB-03 verplaatst naar Validated na Phase 5a ship (6/6 plans, 207 tests groen, 13/13 truths verified incl. gap-closure plan 05a-06). 3 human-UAT items pending in `.planning/phases/05a-mollie-sdk-resources-webhooks-pass-through-api/05a-HUMAN-UAT.md`. Open: "Active" + "Next Milestone Goals" secties beschrijven nog "voorbereid, niet gestart" terwijl v0.2 evident gestart is — formele cleanup volgt bij een aparte restructure.*
