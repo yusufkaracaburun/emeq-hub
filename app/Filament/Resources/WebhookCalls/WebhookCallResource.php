@@ -8,12 +8,13 @@ use App\Filament\Resources\WebhookCalls\Pages\ListWebhookCalls;
 use App\Filament\Resources\WebhookCalls\Pages\ViewWebhookCall;
 use App\Filament\Resources\WebhookCalls\Schemas\WebhookCallInfolist;
 use App\Filament\Resources\WebhookCalls\Tables\WebhookCallsTable;
+use App\Models\WebhookCall;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
-use Spatie\WebhookClient\Models\WebhookCall;
+use Illuminate\Database\Eloquent\Builder;
 
 /**
  * Plan 09-07 — read-only viewer voor Spatie webhook_calls + 09-01 audit-kolommen.
@@ -34,6 +35,21 @@ class WebhookCallResource extends Resource
     protected static string|\UnitEnum|null $navigationGroup = 'Integraties';
 
     protected static ?int $navigationSort = 2;
+
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->can('view-webhooks') ?? false;
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return static::canAccess();
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()->with('consumer');
+    }
 
     public static function infolist(Schema $schema): Schema
     {
