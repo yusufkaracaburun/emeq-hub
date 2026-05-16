@@ -29,7 +29,7 @@ v0.2 bouwt drie samenhangende lagen: (1) `emeq/mollie-api` SDK die `mollie/molli
 - [x] **Phase 6: Cashier-Mollie integratie (use-case A)** — Emeq → Consumers billing op Emeq's eigen Mollie *(voltooid 2026-05-15; 8/8 plans, SC-1+SC-2+SC-3 bewezen, SC-4 vendor-coverage; 237 tests passed + integration-suite gescheiden via `composer test:integration`)*
 - [x] **Phase 7: Account-level subscriptions (use-case B)** — Accounts → eindgebruikers via Connect + Mandates + Subscriptions *(voltooid 2026-05-15; 8/8 plans, SC-1+SC-2+SC-3 bewezen, SC-4 vendor-coverage via unit + feature stubs + skipt-graceful integration-test, 337 tests groen, ADR `account-subscriptions.md`)*
 - [ ] **Phase 8: Naschool wiring** — composer-wiring + Snelstart Stancl-resolver + `SyncEnrollmentToSnelstartJob` + Mollie checkout-flow via Hub-Connect
-- [ ] **Phase 9: Filament admin-UI voor Emeq-medewerkers** — `/admin`-panel met Consumer-CRUD, Connection read+revoke, Account read-only, WebhookCall viewer
+- [x] **Phase 9: Filament admin-UI voor Emeq-medewerkers** — `/admin`-panel met 7 resources (Consumer CRUD + Connection read+revoke + Account read + WebhookCall viewer + AccountSubscription read+state-flip + Cashier-Subscription read + User super-admin-gated) *(voltooid 2026-05-16; 11/11 plans, HUB-04 SC-1..SC-10 bewezen via 52 nieuwe tests in `tests/Feature/Admin/` + 1 audit-migratie, ADR `filament-admin-panel.md`, 389 tests / 1343 assertions groen)*
 
 ### Phase Details
 
@@ -317,7 +317,7 @@ v0.2 bouwt drie samenhangende lagen: (1) `emeq/mollie-api` SDK die `mollie/molli
 
 #### Phase 9: Filament admin-UI voor Emeq-medewerkers
 
-**Goal:** Een intern Filament v4 admin-paneel op `/admin` waarmee Emeq-medewerkers Consumers, Connections, Accounts en WebhookCalls kunnen beheren zonder tinker — met de Hub-invariant dat raw tokens nooit in de UI verschijnen.
+**Goal:** Een intern Filament v4 admin-paneel op `/admin` waarmee Emeq-medewerkers 7 resources (Consumers + Connections + Accounts + WebhookCalls + AccountSubscriptions + Cashier-Subscriptions + Users) kunnen beheren zonder tinker — met de Hub-invariant dat raw tokens nooit in de UI verschijnen.
 **Depends on:** Phase 3 (Hub-skeleton — `Consumer`/`Account`/`Connection` modellen + Sanctum-PAT), Phase 4 (`OAuthFlow`-contract voor upstream revoke). Parallelliseerbaar met Phase 6/7. Blokkeert Phase 8 niet.
 **Requirements:** HUB-04
 **Working repo:** `emeq-hub` (deze repo)
@@ -353,7 +353,7 @@ v0.2 bouwt drie samenhangende lagen: (1) `emeq/mollie-api` SDK die `mollie/molli
 - Audit-log via `spatie/laravel-activitylog` (geparkeerd als `HUB-AUDIT` backlog-item)
 - Tailwind-thema-customizing — default Filament-look is goed genoeg voor intern gebruik
 
-**Plans:** 10/11 plans executed
+**Plans:** 11/11 plans executed
 
 - [x] 09-01-PLAN.md — webhook_calls audit-kolommen-migratie (D-02)
 - [x] 09-02-PLAN.md — Filament v4 + Spatie laravel-permission install + AdminPanelProvider
@@ -365,7 +365,7 @@ v0.2 bouwt drie samenhangende lagen: (1) `emeq/mollie-api` SDK die `mollie/molli
 - [x] 09-08-PLAN.md — AccountSubscriptionResource read + Pause/Resume/Cancel (manager-only)
 - [x] 09-09-PLAN.md — Cashier\\SubscriptionResource read-only met derived-status
 - [x] 09-10-PLAN.md — UserResource super-admin-gated + manage-staff gate (D-05)
-- [ ] 09-11-PLAN.md — Phase-acceptance + ADR + ROADMAP/REQUIREMENTS/STATE sync
+- [x] 09-11-PLAN.md — Phase-acceptance + ADR + ROADMAP/REQUIREMENTS/STATE sync
 
 **UI hint:** yes
 
@@ -382,7 +382,7 @@ v0.2 bouwt drie samenhangende lagen: (1) `emeq/mollie-api` SDK die `mollie/molli
 | 6. Cashier-Mollie integratie | 8/8 | Done | 2026-05-15 |
 | 7. Account-level subscriptions | 8/8 | Done | 2026-05-15 |
 | 8. Naschool wiring | 0/0 (TBD) | Not started | - |
-| 9. Filament admin-UI voor Emeq-medewerkers | 10/11 | In Progress|  |
+| 9. Filament admin-UI voor Emeq-medewerkers | 11/11 | Done | 2026-05-16 |
 
 ### Coverage
 
