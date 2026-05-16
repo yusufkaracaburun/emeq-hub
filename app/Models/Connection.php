@@ -10,7 +10,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use InvalidArgumentException;
 
 #[Fillable([
     'account_id',
@@ -47,9 +46,9 @@ class Connection extends Model
 
     public function fingerprint(): ?string
     {
-        try {
-            $descriptor = ProviderCredentialDescriptor::for($this->provider);
-        } catch (InvalidArgumentException) {
+        $descriptor = ProviderCredentialDescriptor::tryFor($this->provider);
+
+        if ($descriptor === null) {
             return null;
         }
 
