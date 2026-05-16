@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v0.2
 milestone_name: — Mollie + Connect + Subscriptions + Hub-skeleton
-status: executing
-stopped_at: Phase 7 close PENDING — 07-08 acceptance + ADR + planning-sync committed on worktree-branch; awaits human-verify checkpoint (Scramble UI + acceptance-review)
-last_updated: "2026-05-15T22:26:29.329Z"
-last_activity: 2026-05-15 -- Phase 09 execution started
+status: ready
+stopped_at: Phase 9 close PENDING — 09-11 acceptance + ADR geschreven op worktree-branch; awaits human-verify checkpoint (visuele review /admin op localhost)
+last_updated: "2026-05-16T02:30:00+02:00"
+last_activity: 2026-05-16 -- Phase 09 execution complete (11/11 plans); 09-11-ACCEPTANCE.md + ADR filament-admin-panel.md geschreven; awaits human-verify
 progress:
   total_phases: 10
-  completed_phases: 6
+  completed_phases: 7
   total_plans: 62
-  completed_plans: 48
-  percent: 60
+  completed_plans: 52
+  percent: 84
 ---
 
 # Project State
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-05-14 na v0.1 milestone-close)
 
 **Core value:** Twee fundamenteel verschillende providers (OData/clientkey + REST/OAuth2) productie-gevalideerd via één SDK-pattern, en beide live in één concrete consumer-feature. v0.1 heeft Snelstart-deel bewezen; v0.2 zet Mollie + Connect + Subscriptions + Hub-skeleton op.
-**Current focus:** Phase 09 — filament-admin-ui-voor-emeq-medewerkers
+**Current focus:** — (Phase 9 ACCEPTANCE PENDING-CHECKPOINT; Phase 8 + Phase 5b + Phase 5c blijven open na approval)
 
 ## Current Position
 
-Phase: 09 (filament-admin-ui-voor-emeq-medewerkers) — EXECUTING
-Plan: 1 of 11
-Status: Executing Phase 09
-Last activity: 2026-05-15 -- Phase 09 execution started
+Phase: — (Phase 9 ACCEPTANCE PENDING-CHECKPOINT — 11/11 plans + 09-11-ACCEPTANCE.md geschreven; awaits human-verify)
+Plan: 11 of 11 (09-11 acceptance + ADR + planning-sync uitgevoerd, commit volgt na "approved")
+Status: Awaiting human-verify checkpoint (visuele review /admin op localhost)
+Last activity: 2026-05-16 -- Phase 09 execution complete (11/11 plans); 09-11-ACCEPTANCE.md + ADR filament-admin-panel.md geschreven
 
 ## Performance Metrics
 
@@ -110,13 +110,21 @@ Decisions zijn gelogd in PROJECT.md Key Decisions table. Decisions die uit v0.1 
 - 🆕 **New 2026-05-15 (07-05)**: `final`-keyword verwijderd op `AccountSubscriptionManager` + `PaymentWebhookHandler` + `SubscriptionWebhookHandler` voor Mockery-spies in unit-tests (Rule 3 deviation). `WebhookHandlerResult` als value-object met `shouldAudit()` + `shouldFanOut()` introspectie — `MollieWebhookController` blijft single-source-of-truth voor 5a-flow-volgorde (D-18)
 - 🆕 **New 2026-05-15 (07-07)**: Aparte `AccountSubscriptionIntegrationTestCase` i.p.v. Phase 6's `IntegrationTestCase` hergebruiken (vermijdt `config('mollie.key')` cross-contamination tussen Cashier en Connect-OAuth). `Connection.expires_at = now()->addYear()` op test-Connection — voorkomt accidentele refresh-trigger tijdens slow-network test-runs
 - 🆕 **New 2026-05-15 (07-08, MEDIUM #4)**: Integration-test-execution-keuze ⏭️ Pad B (default): "Geen Connect-token beschikbaar in CI/UAT — integration-test gedrukt naar manueel zodra token beschikbaar is. SC-1 vendor-coverage uitgesteld naar v0.2.1." Re-run-triggers: (1) Connect-test-token verkregen, (2) v0.2.1-release-window, (3) Naschool-go-live UAT
+- 🆕 **New 2026-05-16 (09-01)**: `webhook_calls` krijgt 4 audit-kolommen (`direction` enum / `provider` string / `consumer_id` nullable-FK / `status` enum) — additive forward-only migratie; defaults (`incoming`/`processed`) maken bestaande Spatie-rijen valide. Phase 5c (Snelstart webhook-handler in progress) vult automatisch in. FK-constraint driver-conditional (Postgres-only — SQLite-`ALTER-TABLE-ADD-FK` `__temp__`-rebuild wist nieuwe kolommen).
+- 🆕 **New 2026-05-16 (09-02)**: Filament v4.11.3 + Spatie laravel-permission 6.25.0 geïnstalleerd; `AdminPanelProvider` op `/admin` met `web`-guard + `discoverResources`. Filament-published assets (~4MB CSS/JS/fonts) gitignored — regenerate via `composer post-update-cmd`.
+- 🆕 **New 2026-05-16 (09-03)**: RBAC via Spatie 2-rol-model (`super-admin` + `staff`) met 6 permissions; **`is_emeq_staff` boolean reversed (D-05) — komt nooit in een migratie**. User-model krijgt `HasRoles` + `implements FilamentUser` + `canAccessPanel(Panel)`. `EmeqStaffSeeder` env-driven idempotent (geen `app()->isProduction()`-guard — env-vars zijn de production-safe-knop).
+- 🆕 **New 2026-05-16 (09-04)**: `ProviderCredentialDescriptor`-laag — `config/hub-providers.php` + `App\Support\ProviderCredentialDescriptor` (final readonly value-object). `Connection::fingerprint()` descriptor-aware refactor met **gedragsbehoud** (`ConnectionEncryptionTest` blijft groen zonder testfile-wijziging). Invariant: nieuwe provider = config-row + factory-update + Section, GEEN nieuwe Filament Resource-class.
+- 🆕 **New 2026-05-16 (09-05..09-10)**: 7 Filament Resources gelanced (Consumer CRUD + Issue-PAT met 5 presets + Custom-mode / Connection read+revoke met no-secret-leak / Account read / WebhookCall viewer / AccountSubscription read+state-flip via manager-delegation / Cashier Subscription read+derived-status / User super-admin-gated via `manage-staff`-gate). 52 nieuwe feature-tests onder `tests/Feature/Admin/` (15 test-classes). Filament v4 nested namespace `App\Filament\Resources\<Plural>\<Resource>` is de gegenereerde shape; plan-paths uit v3-flat-stijl zijn opgeheven.
+- 🆕 **New 2026-05-16 (09-11)**: Phase 9 ACCEPTANCE-document met evidence voor alle 10 SC's geschreven; ADR `.docs/decisions/filament-admin-panel.md` (gitignored — lokaal aanwezig, niet in git) met 5 D-decisions + 9 out-of-scope items + verification-path. ROADMAP/REQUIREMENTS/STATE gesynced; commit volgt na human-verify "approved".
 
 ### Pending Todos
 
 - ✅ Phase 03 hub-skeleton voltooid (alle 5 plans + HUB-01 SC-1 t/m SC-5 bewezen)
 - ✅ Phase 06 Cashier-Mollie integratie voltooid (8/8 plans, SUB-01 = Complete, 237 tests + integration-suite gescheiden, ACCEPTED 2026-05-15)
-- ⏳ **Phase 07 PENDING-checkpoint (07-08 geland 2026-05-15)** — 8/8 plans + 11/11 D-32 (10× ✅ + 1× ⏭️ Pad B integration-test), ADR `.docs/decisions/account-subscriptions.md`, 337 tests / 1100 assertions groen. Wacht op human-verify (Scramble UI + acceptance-review). Na "approved" → SUB-02 Complete + Phase 8 ontblokt
-- `/gsd-discuss-phase 8` runnen na checkpoint-approval — Naschool wiring (Snelstart Stancl-resolver + EnrollmentConfirmed-job + Mollie-via-Hub checkout); depends on Phase 5a (al klaar) + Phase 4 (al klaar)
+- ✅ **Phase 07 ACCEPTED 2026-05-15** — SUB-02 Complete; 8/8 plans + 11/11 D-32 + 337 tests bewezen
+- ⏳ **Phase 09 PENDING-checkpoint (09-11 geland 2026-05-16)** — 11/11 plans, 09-11-ACCEPTANCE.md met 10/10 SC-evidence + ADR `.docs/decisions/filament-admin-panel.md` (gitignored), ROADMAP/REQUIREMENTS/STATE gesynced (not yet committed). 389 tests / 1343 assertions groen / 1 pre-existing incomplete. Wacht op human-verify (visuele review /admin op localhost — login + 7 resources + Issue-PAT + Revoke + Pause/Resume + UserResource staff-403). Na "approved" → HUB-04 Complete + commit `docs(phase-09): accepteer Phase 9 …` met 4 planning-files (NIET `.docs/decisions/filament-admin-panel.md`)
+- 🆕 **Suggested next**: `/docs-sync` skill activeren vóór de Phase-9-commit-merge — Phase 9 raakte `app/Models/User.php` (HasRoles + FilamentUser), `app/Models/Connection.php` (descriptor-aware fingerprint), `app/Providers/AppServiceProvider.php` (manage-staff gate), nieuwe `config/hub-providers.php`, nieuwe `database/migrations/2026_05_19_*`, en alle `app/Filament/Resources/*` — documentatie-drift mogelijk in `.docs/` (CLAUDE.md / README / memory-files)
+- `/gsd-discuss-phase 8` runnen na Phase-9-checkpoint-approval — Naschool wiring (Snelstart Stancl-resolver + EnrollmentConfirmed-job + Mollie-via-Hub checkout); depends on Phase 5a (al klaar) + Phase 4 (al klaar). Verse sessie + `/clear` aanbevolen — Phase 8 raakt `school-activities-hub/backend/`
 - **Baseline Pint-drift cleanup (deferred)**: pre-Phase-6 scaffold-drift in `database/migrations/2026_05_13_*` + `routes/web.php` (uit `0196e01`) + gitignored `packages/**` — pakken bij toekomstige scaffold-touchup of dedicated quick-task `pint-baseline-cleanup`
 - **Worktree-bootstrap-pattern (recurring)**: Claude Code's `isolation="worktree"` mist `.env` + `vendor/` → executor moet `cp ../../.env .env` + `ln -sf ../../vendor vendor` doen vóór tests. Voorgesteld backlog-item: `.claude/hooks/worktree-bootstrap.sh` voor automatische bootstrap
 - **Composer autoload cache na worktree-merge**: handmatige `composer dump-autoload` was elke wave nodig om vendor/composer/autoload_classmap.php te refreshen. Voorgesteld: `.claude/hooks/post-merge.sh` automatisering
@@ -149,6 +157,7 @@ Decisions zijn gelogd in PROJECT.md Key Decisions table. Decisions die uit v0.1 
 
 ### Roadmap Evolution
 
+- 2026-05-16 — **Phase 09 plan 11 executed (PENDING checkpoint-approval)**: 11/11 plans afgerond met 10/10 SC-evidence in `09-11-ACCEPTANCE.md` (alle 10 success-criteria uit `09-CONTEXT.md` regels 234-246 bewezen via 52 nieuwe `tests/Feature/Admin/*`-tests + 1 audit-migratie + CLI-route-list). ADR `.docs/decisions/filament-admin-panel.md` (gitignored) met 5 D-decisions (D-01 7 resources + PassThroughCall out-of-scope / D-02 webhook_calls audit-kolommen / D-03 PAT presets+custom / D-04 ProviderCredentialDescriptor / D-05 Spatie RBAC + drop `is_emeq_staff`) + 9 out-of-scope items + verification-path. ROADMAP Phase 9 `[x]` + Progress 11/11 + 2026-05-16 + Goal "7 resources" (was "4 resources"); REQUIREMENTS HUB-04 `[x]` + Complete + uitgebreide validation-note; STATE counters bijgewerkt (completed_phases 6→7, total_plans 51→62, completed_plans 48→52, percent 60→84). 389 tests / 1343 assertions / 0 failed / 1 pre-existing incomplete (Phase 3-03 SanctumAbilityTest placeholder voor Phase 5b). Wacht op "approved" → planning-sync-commit + Phase 8 ontblokt naast Phase 5b/5c.
 - 2026-05-14 — Phase 9 (Filament admin-UI voor Emeq-medewerkers) toegevoegd aan v0.2 milestone; HUB-04 toegevoegd aan REQUIREMENTS.md. Plan-bron: `.claude/plans/ow-dit-wil-ik-immutable-snowglobe.md`. Depends on Phase 3 + Phase 4; parallel met Phase 6/7.
 - 2026-05-14 — Phase 5 gesplitst in 5a (Mollie) + 5b (Snelstart-pass-through) en HUB-05 toegevoegd aan REQUIREMENTS.md. Plan-bron: `.claude/plans/volgens-mij-is-snelstart-api-piped-parasol.md`. Reden: user wil consumer-app via `hub.emeq.nl` Snelstart-calls passen-doorzetten — was eerder niet expliciet in scope (Phase 8 deed Snelstart-direct-via-SDK in Naschool). Phase 5b depends on Phase 3 only; parallel met Phase 4 mogelijk.
 - 2026-05-14 — Plan 03-01 voltooid: `consumers`/`accounts`/`connections` migrations + `Consumer`/`Account`/`Connection` Eloquent-models + factories. Fundatie voor HUB-01 staat; HUB-01 blijft Pending tot Phase 3 in z'n geheel geland is (Sanctum + ping + tests).
@@ -180,7 +189,7 @@ Items acknowledged en deferred bij milestone-close 2026-05-14:
 
 ## Session Continuity
 
-Last session: 2026-05-15T20:22+02:00
-Stopped at: Phase 7 close PENDING — 07-08 acceptance + ADR + planning-sync committed on worktree-branch; awaits human-verify checkpoint (Scramble UI + acceptance-review)
-Resume file: .planning/phases/07-account-level-subscriptions-use-case-b/07-08-ACCEPTANCE.md
-Next action: Human-verify checkpoint (Scramble UI render + acceptance-file review) → reply "approved" → orchestrator merges worktree-branch + promotes SUB-02 to Complete + unblocks Phase 8.
+Last session: 2026-05-16T02:30+02:00
+Stopped at: Phase 9 close PENDING — 09-11 acceptance + ADR geschreven op worktree-branch; planning-sync edits niet gecommit (wachten op "approved"); awaits human-verify checkpoint (visuele review /admin op localhost)
+Resume file: .planning/phases/09-filament-admin-ui-voor-emeq-medewerkers/09-11-ACCEPTANCE.md
+Next action: Human-verify checkpoint (`http://hub.emeq.test:8090/admin/login` + 7 resources + Issue-PAT happy-path + Connection-fingerprints + AccountSubscription Pause/Resume + UserResource staff-403) → reply "approved" → continuation-agent commit `docs(phase-09): accepteer Phase 9 — HUB-04 Complete, Filament admin-paneel live op /admin` met 4 planning-files (09-11-ACCEPTANCE.md + ROADMAP.md + REQUIREMENTS.md + STATE.md; NIET `.docs/decisions/filament-admin-panel.md` — gitignored).
