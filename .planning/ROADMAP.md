@@ -24,7 +24,7 @@ v0.2 bouwt drie samenhangende lagen: (1) `emeq/mollie-api` SDK die `mollie/molli
 - [x] **Phase 3: Hub-skeleton** — `consumers`/`accounts`/`connections`-tabellen + Sanctum-PAT-auth + Consumer-routing + Snelstart-credential-velden encrypted *(voltooid 2026-05-14; 5/5 plans, HUB-01 SC-1 t/m SC-5 bewezen)*
 - [x] **Phase 4: Mollie Connect OAuth-broker** — provider-agnostisch `OAuthFlow`-contract + `MollieConnectOAuthFlow` + encrypted token-storage *(voltooid 2026-05-14; 5/5 plans, alle 5 SC's bewezen, BLOCKING acceptance 8/8 + 129/129 tests)*
 - [x] **Phase 5a: Mollie SDK Resources + Webhooks + Pass-through API** — Payments/Customers/PaymentMethods/Refunds/Mandates/Subscriptions/PaymentLinks + Connect-webhook verifier + `/v1/mollie/*` audit-logged (zie ADR `mollie-passthrough-api.md`) *(voltooid 2026-05-15; 6/6 plans, 207 tests groen, 13/13 truths verified incl. gap-closure plan 05a-06 voor D-06 + D-08 stap 1; 3 human-UAT items pending in `05a-HUMAN-UAT.md`)*
-- [ ] **Phase 5b: Snelstart-pass-through API** — `/v1/snelstart/{path}` pass-through via `HubSnelstartCredentialResolver` + `POST /v1/accounts` + `POST /v1/connections` provisioning-endpoints + audit-logging. Parallel met Phase 4 mogelijk.
+- [x] **Phase 5b: Snelstart-pass-through API** — `/v1/snelstart/{path}` pass-through via `HubSnelstartCredentialResolver` + `POST /v1/accounts` + `POST /v1/connections` provisioning-endpoints + audit-logging. Parallel met Phase 4 mogelijk. (completed 2026-05-16)
 - [ ] **Phase 5c: Snelstart webhook-handler** — `POST /webhooks/snelstart` HMAC-verified ingress + Connection-resolutie via `administratie_id` + audit-log (`direction=inbound`) + async fan-out naar Consumer-callback. Productie-certificeringsblocker (zie `.docs/decisions/snelstart-certificering-pad.md`).
 - [x] **Phase 6: Cashier-Mollie integratie (use-case A)** — Emeq → Consumers billing op Emeq's eigen Mollie *(voltooid 2026-05-15; 8/8 plans, SC-1+SC-2+SC-3 bewezen, SC-4 vendor-coverage; 237 tests passed + integration-suite gescheiden via `composer test:integration`)*
 - [x] **Phase 7: Account-level subscriptions (use-case B)** — Accounts → eindgebruikers via Connect + Mandates + Subscriptions *(voltooid 2026-05-15; 8/8 plans, SC-1+SC-2+SC-3 bewezen, SC-4 vendor-coverage via unit + feature stubs + skipt-graceful integration-test, 337 tests groen, ADR `account-subscriptions.md`)*
@@ -191,7 +191,7 @@ v0.2 bouwt drie samenhangende lagen: (1) `emeq/mollie-api` SDK die `mollie/molli
   7. Elke pass-through-call landt één regel in `webhook_calls` met Consumer-ID, Account-ID, Connection-fingerprint, request-summary; raw `client_key`/`subscription_key` komen nergens in de log voor
   8. `/docs/api` toont alle `/v1/accounts`, `/v1/connections` en `/v1/snelstart/*`-routes met "Try it out"-knop die werkt met een geplakte Bearer-PAT
 
-**Plans:** 5 plans
+**Plans:** 5/5 plans complete
 
 - [x] 05b-01-PLAN.md — pass_through_calls migratie + PassThroughCall-model + factory + ADR (deviatie van `webhook_calls`)
 - [x] 05b-02-PLAN.md — HubSnelstartCredentialResolver service + contract-conformance + decryption tests
@@ -377,7 +377,7 @@ v0.2 bouwt drie samenhangende lagen: (1) `emeq/mollie-api` SDK die `mollie/molli
 | 3. Hub-skeleton | 3/5 | In Progress|  |
 | 4. Mollie Connect OAuth-broker | 0/0 (TBD) | Not started | - |
 | 5a. Mollie SDK Resources + Webhooks + Pass-through API | 0/5 | Planned | - |
-| 5b. Snelstart-pass-through API | 0/5 | Planned | - |
+| 5b. Snelstart-pass-through API | 5/5 | Complete    | 2026-05-16 |
 | 5c. Snelstart webhook-handler | 1/5 | In Progress|  |
 | 6. Cashier-Mollie integratie | 8/8 | Done | 2026-05-15 |
 | 7. Account-level subscriptions | 8/8 | Done | 2026-05-15 |

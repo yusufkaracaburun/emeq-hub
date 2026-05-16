@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v0.2
 milestone_name: — Mollie + Connect + Subscriptions + Hub-skeleton
-status: verifying
-stopped_at: Phase 9 close PENDING — 09-11 acceptance + ADR geschreven op worktree-branch; planning-sync edits niet gecommit (wachten op "approved"); awaits human-verify checkpoint (visuele review /admin op localhost)
-last_updated: "2026-05-16T12:49:13.317Z"
+status: idle
+stopped_at: "Phase 5b GESLOTEN (commits 8b58bb4 + 607fbf9 + c194e94 + 417e20f + adad1a4 op feat/v02-account-subscriptions); HUB-05 = Complete, UAT 9/9 + SECURITY 24/24 + 391 tests groen, /admin/quick-login regressie gefixed in DatabaseSeeder. Open arcs: Phase 5c (Snelstart webhook-handler — BLOCKED op partner@snelstart.nl antwoord, 4 PLAN-stubs zonder SUMMARY), Phase 8 (Naschool wiring, unblocked)."
+last_updated: "2026-05-16T14:25:00.000Z"
 last_activity: 2026-05-16
 progress:
   total_phases: 10
-  completed_phases: 7
-  total_plans: 62
+  completed_phases: 8
+  total_plans: 61
   completed_plans: 57
-  percent: 70
+  percent: 80
 ---
 
 # Project State
@@ -21,20 +21,20 @@ progress:
 See: .planning/PROJECT.md (updated 2026-05-14 na v0.1 milestone-close)
 
 **Core value:** Twee fundamenteel verschillende providers (OData/clientkey + REST/OAuth2) productie-gevalideerd via één SDK-pattern, en beide live in één concrete consumer-feature. v0.1 heeft Snelstart-deel bewezen; v0.2 zet Mollie + Connect + Subscriptions + Hub-skeleton op.
-**Current focus:** — (Phase 9 ACCEPTANCE PENDING-CHECKPOINT; Phase 8 + Phase 5b + Phase 5c blijven open na approval)
+**Current focus:** Phase 5c (Snelstart webhook-handler) BLOCKED op partner@snelstart.nl antwoord; Phase 8 (Naschool wiring) is alternatief en unblocked.
 
 ## Current Position
 
-Phase: 09
+Phase: 05c
 Plan: Not started
-Status: Awaiting human-verify checkpoint (visuele review /admin op localhost)
+Status: BLOCKED — wacht op Snelstart partner-response (Gmail draft r-8836998535038336548, verwacht ≤ 2026-05-26). Alternatief unblocked pad: Phase 8 (Naschool wiring) — depends-on Phases 5b+5a+6+7 die alle Complete zijn.
 Last activity: 2026-05-16
 
 ## Performance Metrics
 
 **v0.1 Velocity:**
 
-- Total plans completed: 25 (Phase 1)
+- Total plans completed: 30 (Phase 1)
 - Total execution time: ~12 uur (2026-05-14 00:42 → 12:02 CEST)
 - Sub-repo werk: snelstart-sdk submodule wiring + Pest-coverage + push
 
@@ -164,6 +164,7 @@ Decisions zijn gelogd in PROJECT.md Key Decisions table. Decisions die uit v0.1 
 | 260514-tny | Import Mollie API docs (11 references + indexed README) als Phase 5a precondition — `.docs/` gitignored, plan-deviated van 4 commits naar SUMMARY-only | 2026-05-14 | (n/a — `.docs/` gitignored) | [260514-tny-import-mollie-api-docs-into-docs-partner](./quick/260514-tny-import-mollie-api-docs-into-docs-partner/) |
 | 260515-c52 | Snelstart certificeringspad productie-route (Blade-voorbeeldpagina + ADR + 8 partner-vragen via Gmail) + Phase 5c CONTEXT.md prep met 5 ❓-aannames | 2026-05-15 | fcf64b7 (Blade; ADR + rate-limits in `.docs/` gitignored) | [260515-c52-snelstart-certificeringspad-productie-ro](./quick/260515-c52-snelstart-certificeringspad-productie-ro/) |
 | 260515-vsy | Sync 05a-VERIFICATION.md frontmatter met HUMAN-UAT-resultaat (status → passed_with_deferred; #1 pass + #2/#3 blocked op Phase 8); audit-uat 5 → 0 open items | 2026-05-15 | 23c865b | (inline /gsd-fast — geen quick-dir) |
+| 260516-dev | bin/dev bootstrap-script (up/down/reset/smoke/test/status) + .dev/ gitignore — dispatcht docker compose (db/redis/caddy) + php artisan serve + horizon op host, --reset doet migrate:fresh --seed (alleen local/testing) | 2026-05-16 | 8b58bb4 | (inline /gsd-fast — geen quick-dir) |
 
 ### Roadmap Evolution
 
@@ -199,7 +200,12 @@ Items acknowledged en deferred bij milestone-close 2026-05-14:
 
 ## Session Continuity
 
-Last session: 2026-05-16T02:30+02:00
-Stopped at: Phase 9 close PENDING — 09-11 acceptance + ADR geschreven op worktree-branch; planning-sync edits niet gecommit (wachten op "approved"); awaits human-verify checkpoint (visuele review /admin op localhost)
-Resume file: .planning/phases/09-filament-admin-ui-voor-emeq-medewerkers/09-11-ACCEPTANCE.md
-Next action: Human-verify checkpoint (`http://hub.emeq.test:8090/admin/login` + 7 resources + Issue-PAT happy-path + Connection-fingerprints + AccountSubscription Pause/Resume + UserResource staff-403) → reply "approved" → continuation-agent commit `docs(phase-09): accepteer Phase 9 — HUB-04 Complete, Filament admin-paneel live op /admin` met 4 planning-files (09-11-ACCEPTANCE.md + ROADMAP.md + REQUIREMENTS.md + STATE.md; NIET `.docs/decisions/filament-admin-panel.md` — gitignored).
+Last session: 2026-05-16 — resumed via /gsd-resume-work
+Stopped at: Phase 9 GESLOTEN. Open arcs: Phase 5b (Snelstart pass-through, depends-on alleen Phase 3 ✓), Phase 5c (Snelstart webhook-handler — BLOCKED op partner@snelstart.nl antwoord, 4 PLAN-stubs zonder SUMMARY in `.planning/phases/05c-*/`), Phase 8 (Naschool wiring, nu unblocked).
+Resume file: n/a
+Next action options:
+
+  1. `/docs-sync` — Phase 9 raakte User/Connection/AppServiceProvider models en routes; doc-drift check vóór Phase 8 start (recommended eerst)
+  2. `/gsd-plan-phase 5b` — Snelstart-pass-through API, parallel-pad zonder partner-dep
+  3. `/gsd-discuss-phase 8` — Naschool wiring (Snelstart Stancl + EnrollmentConfirmed + Mollie-checkout); verse sessie + /clear aanbevolen
+  4. v0.2.1 polish — CR-02 + WR-01..6 deferred Phase-9 findings (tracking-todos in STATE)
