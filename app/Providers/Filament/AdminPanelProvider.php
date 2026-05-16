@@ -26,6 +26,9 @@ class AdminPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
+        // IN-03: ->default() markeert dit paneel als Filament's default-panel. Side-effect:
+        // Filament::auth() (zonder panel-id) pakt deze guard. Voor toekomstige consumer-portal-
+        // panels (v1.0+) moet ->default() expliciet naar het nieuwe paneel verhuizen.
         $panel = $panel
             ->default()
             ->id('admin')
