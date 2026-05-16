@@ -28,6 +28,10 @@ class ConnectionResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedLink;
 
+    protected static string|\UnitEnum|null $navigationGroup = 'Integraties';
+
+    protected static ?int $navigationSort = 1;
+
     public static function form(Schema $schema): Schema
     {
         // Read-only resource: form() bestaat om Filament's contract te honoreren

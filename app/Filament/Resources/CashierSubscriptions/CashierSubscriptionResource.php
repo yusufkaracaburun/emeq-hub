@@ -25,6 +25,10 @@ class CashierSubscriptionResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Cashier subscriptions';
 
+    protected static string|\UnitEnum|null $navigationGroup = 'Abonnementen';
+
+    protected static ?int $navigationSort = 1;
+
     public static function infolist(Schema $schema): Schema
     {
         return CashierSubscriptionInfolist::configure($schema);

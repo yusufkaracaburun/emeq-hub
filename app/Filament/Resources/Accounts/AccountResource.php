@@ -23,6 +23,10 @@ use Filament\Tables\Table;
  */
 class AccountResource extends Resource
 {
+    protected static string|\UnitEnum|null $navigationGroup = 'Tenants';
+
+    protected static ?int $navigationSort = 2;
+
     protected static ?string $model = Account::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUsers;

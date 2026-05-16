@@ -40,6 +40,10 @@ class AccountSubscriptionResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'description';
 
+    protected static string|\UnitEnum|null $navigationGroup = 'Abonnementen';
+
+    protected static ?int $navigationSort = 2;
+
     public static function form(Schema $schema): Schema
     {
         // Read-only Resource — geen Create/Edit pages. Schema blijft leeg.

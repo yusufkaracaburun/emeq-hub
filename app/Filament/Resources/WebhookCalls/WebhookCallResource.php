@@ -31,6 +31,10 @@ class WebhookCallResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Webhook calls';
 
+    protected static string|\UnitEnum|null $navigationGroup = 'Integraties';
+
+    protected static ?int $navigationSort = 2;
+
     public static function infolist(Schema $schema): Schema
     {
         return WebhookCallInfolist::configure($schema);

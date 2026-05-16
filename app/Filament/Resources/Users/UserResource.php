@@ -33,6 +33,10 @@ class UserResource extends Resource
 
     protected static ?string $navigationLabel = 'Users';
 
+    protected static string|\UnitEnum|null $navigationGroup = 'Beheer';
+
+    protected static ?int $navigationSort = 1;
+
     public static function canAccess(): bool
     {
         return Gate::allows('manage-staff');
