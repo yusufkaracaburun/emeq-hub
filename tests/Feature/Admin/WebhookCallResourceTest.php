@@ -134,16 +134,26 @@ class WebhookCallResourceTest extends TestCase
     {
         $this->actAsStaff();
 
+        // Spatie's saveException() schrijft exception als JSON-encoded array
+        // (`code` / `message` / `trace`) — match dat patroon zodat de array-cast
+        // op de Spatie-parent class correct decodet.
+        $exceptionPayload = [
+            'code' => 0,
+            'message' => 'Stack trace line 1',
+            'trace' => "Stack trace line 1\nStack trace line 2",
+        ];
+
         $id = $this->insertWebhookCall([
-            'exception' => "Stack trace line 1\nStack trace line 2",
+            'exception' => json_encode($exceptionPayload),
         ]);
 
         $response = $this->get("/admin/webhook-calls/{$id}");
 
         $response->assertOk();
         $response->assertSee('Stack trace line 1');
-        // Double-encoded JSON form (with escaped quotes + escaped \n) must NOT appear.
-        $response->assertDontSee('"Stack trace line 1\\nStack trace line 2"', false);
+        // Het oude dubbel-encoded patroon (Filament rendert `json_encode($array)`
+        // output → escaped quotes en `\n` letterlijk) mag niet meer voorkomen.
+        $response->assertDontSee('Stack trace line 1\\nStack trace line 2', false);
     }
 
     public function test_view_page_shows_consumer_slug_via_relation(): void
