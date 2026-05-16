@@ -1,0 +1,168 @@
+#!/usr/bin/env bash
+# Usage: bin/dev {up|down|reset|smoke|test|status} [flags]
+#
+# Local-dev helper voor emeq-hub.
+#   up [--reset]   docker compose up -d (db/redis/caddy) + php artisan serve + horizon op host
+#   down           stop background app + horizon, dan docker compose down
+#   reset          php artisan migrate:fresh --seed (alleen in local/testing)
+#   smoke          curl /up en verifieer {"status":"up","database":"ok","redis":"ok"}
+#   test [args]    php artisan test --compact [args]
+#   status         laat zien wat draait (compose + host-procs)
+
+set -euo pipefail
+
+cd "$(git rev-parse --show-toplevel)"
+
+DEV_DIR=".dev"
+SERVE_PID="$DEV_DIR/serve.pid"
+HORIZON_PID="$DEV_DIR/horizon.pid"
+SERVE_LOG="$DEV_DIR/serve.log"
+HORIZON_LOG="$DEV_DIR/horizon.log"
+SERVE_PORT="${SERVE_PORT:-8001}"
+SMOKE_URL="${SMOKE_URL:-http://hub.emeq.test:8090/up}"
+
+mkdir -p "$DEV_DIR"
+
+log()  { printf "\n\033[1;36m==>\033[0m %s\n" "$*"; }
+warn() { printf "\n\033[1;33m!!\033[0m  %s\n" "$*" >&2; }
+die()  { printf "\n\033[1;31mxx\033[0m  %s\n" "$*" >&2; exit 1; }
+
+pid_alive() {
+    local file="$1"
+    [[ -f "$file" ]] || return 1
+    local pid
+    pid="$(cat "$file" 2>/dev/null || true)"
+    [[ -n "$pid" ]] && kill -0 "$pid" 2>/dev/null
+}
+
+env_value() {
+    local key="$1"
+    [[ -f .env ]] || { echo ""; return; }
+    grep -E "^${key}=" .env | tail -1 | cut -d= -f2- | tr -d '"' | tr -d "'"
+}
+
+guard_local_env() {
+    local env
+    env="$(env_value APP_ENV)"
+    [[ "$env" == "local" || "$env" == "testing" ]] || die "APP_ENV=$env — reset is alleen toegestaan in local/testing"
+}
+
+start_bg() {
+    local name="$1" pid_file="$2" log_file="$3"
+    shift 3
+    if pid_alive "$pid_file"; then
+        warn "$name draait al (pid $(cat "$pid_file"))"
+        return 0
+    fi
+    log "start $name → $log_file"
+    : > "$log_file"
+    "$@" >>"$log_file" 2>&1 &
+    echo $! > "$pid_file"
+    sleep 1
+    pid_alive "$pid_file" || die "$name crashte direct na start — zie $log_file"
+}
+
+stop_bg() {
+    local name="$1" pid_file="$2"
+    if ! pid_alive "$pid_file"; then
+        rm -f "$pid_file"
+        return 0
+    fi
+    local pid
+    pid="$(cat "$pid_file")"
+    log "stop $name (pid $pid)"
+    kill "$pid" 2>/dev/null || true
+    for _ in 1 2 3 4 5; do
+        kill -0 "$pid" 2>/dev/null || break
+        sleep 1
+    done
+    kill -0 "$pid" 2>/dev/null && kill -9 "$pid" 2>/dev/null || true
+    rm -f "$pid_file"
+}
+
+cmd_up() {
+    local reset=false
+    for arg in "$@"; do
+        case "$arg" in
+            --reset) reset=true ;;
+            *) die "unknown flag: $arg" ;;
+        esac
+    done
+
+    log "docker compose up -d (db, redis, caddy)"
+    docker compose up -d
+
+    if $reset; then
+        cmd_reset
+    fi
+
+    start_bg "php artisan serve" "$SERVE_PID" "$SERVE_LOG" \
+        php artisan serve --port="$SERVE_PORT"
+    start_bg "php artisan horizon" "$HORIZON_PID" "$HORIZON_LOG" \
+        php artisan horizon
+
+    log "klaar — try: bin/dev smoke"
+}
+
+cmd_down() {
+    stop_bg "php artisan serve"   "$SERVE_PID"
+    stop_bg "php artisan horizon" "$HORIZON_PID"
+
+    log "docker compose down"
+    docker compose down
+}
+
+cmd_reset() {
+    guard_local_env
+    log "php artisan migrate:fresh --seed"
+    php artisan migrate:fresh --seed --no-interaction
+}
+
+cmd_smoke() {
+    log "GET $SMOKE_URL"
+    local body
+    body="$(curl -fsS --max-time 5 "$SMOKE_URL")" \
+        || die "smoke faalde — server of caddy down? (zie bin/dev status)"
+    echo "$body"
+    grep -q '"status":"up"'        <<<"$body" || die "status != up"
+    grep -q '"database":"ok"'      <<<"$body" || die "database != ok"
+    grep -q '"redis":"ok"'         <<<"$body" || die "redis != ok"
+    log "smoke ok"
+}
+
+cmd_test() {
+    php artisan test --compact "$@"
+}
+
+cmd_status() {
+    log "docker compose ps"
+    docker compose ps
+    log "host-procs"
+    for entry in "serve:$SERVE_PID" "horizon:$HORIZON_PID"; do
+        local name="${entry%%:*}" file="${entry##*:}"
+        if pid_alive "$file"; then
+            echo "  $name: pid $(cat "$file") (running)"
+        else
+            echo "  $name: down"
+        fi
+    done
+}
+
+main() {
+    local cmd="${1:-}"
+    shift || true
+    case "$cmd" in
+        up)     cmd_up "$@" ;;
+        down)   cmd_down ;;
+        reset)  cmd_reset ;;
+        smoke)  cmd_smoke ;;
+        test)   cmd_test "$@" ;;
+        status) cmd_status ;;
+        ""|-h|--help|help)
+            sed -n '2,11p' "$0" | sed 's/^# \{0,1\}//'
+            ;;
+        *) die "onbekend commando: $cmd (zie bin/dev help)" ;;
+    esac
+}
+
+main "$@"
