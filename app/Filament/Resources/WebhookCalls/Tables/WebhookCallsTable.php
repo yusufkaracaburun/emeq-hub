@@ -39,11 +39,9 @@ class WebhookCallsTable
                         default => 'gray',
                     })
                     ->sortable(),
-                TextColumn::make('consumer_id')
+                TextColumn::make('consumer.slug')
                     ->label('Consumer')
-                    ->state(fn ($record): string => $record->consumer_id
-                        ? (Consumer::find($record->consumer_id)?->slug ?? '—')
-                        : '—'),
+                    ->placeholder('—'),
                 TextColumn::make('name')
                     ->label('Name')
                     ->searchable()

@@ -112,4 +112,62 @@ class WebhookCallResourceTest extends TestCase
         $response->assertOk();
         $response->assertSee('ord_TEST_123');
     }
+
+    public function test_list_shows_consumer_slug_via_relation(): void
+    {
+        $this->actAsStaff();
+        $consumer = Consumer::factory()->create(['slug' => 'test-slug-xyz']);
+
+        $this->insertWebhookCall([
+            'direction' => 'incoming',
+            'provider' => 'mollie',
+            'consumer_id' => $consumer->id,
+            'status' => 'processed',
+        ]);
+
+        Livewire::test(ListWebhookCalls::class)
+            ->assertCanSeeTableRecords(WebhookCall::all())
+            ->assertSee('test-slug-xyz');
+    }
+
+    public function test_view_page_renders_exception_as_plain_text_not_json_encoded(): void
+    {
+        $this->actAsStaff();
+
+        // Spatie's saveException() schrijft exception als JSON-encoded array
+        // (`code` / `message` / `trace`) — match dat patroon zodat de array-cast
+        // op de Spatie-parent class correct decodet.
+        $exceptionPayload = [
+            'code' => 0,
+            'message' => 'Stack trace line 1',
+            'trace' => "Stack trace line 1\nStack trace line 2",
+        ];
+
+        $id = $this->insertWebhookCall([
+            'exception' => json_encode($exceptionPayload),
+        ]);
+
+        $response = $this->get("/admin/webhook-calls/{$id}");
+
+        $response->assertOk();
+        $response->assertSee('Stack trace line 1');
+        // Het oude dubbel-encoded patroon (Filament rendert `json_encode($array)`
+        // output → escaped quotes en `\n` letterlijk) mag niet meer voorkomen.
+        $response->assertDontSee('Stack trace line 1\\nStack trace line 2', false);
+    }
+
+    public function test_view_page_shows_consumer_slug_via_relation(): void
+    {
+        $this->actAsStaff();
+        $consumer = Consumer::factory()->create(['slug' => 'test-slug-xyz']);
+
+        $id = $this->insertWebhookCall([
+            'consumer_id' => $consumer->id,
+        ]);
+
+        $response = $this->get("/admin/webhook-calls/{$id}");
+
+        $response->assertOk();
+        $response->assertSee('test-slug-xyz');
+    }
 }
