@@ -14,6 +14,7 @@
         "laravel/framework": "^13.8",
         "laravel/horizon": "^5.46",
         "laravel/nightwatch": "^1.26",
+        "laravel/pennant": "^1.23",
         "laravel/sanctum": "^4.3",
         "laravel/tinker": "^3.0",
         "mollie/laravel-cashier-mollie": "^2.20",
