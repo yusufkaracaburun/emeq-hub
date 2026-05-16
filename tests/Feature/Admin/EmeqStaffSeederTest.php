@@ -17,7 +17,7 @@ use Tests\TestCase;
  * Bewijst:
  *  - Zonder beide env-vars: no-op (geen rollen, geen users)
  *  - Met beide env-vars: 2 rollen + 6 permissions + bootstrap super-admin User
- *  - 2× draaien met zelfde env: idempotent (geen duplicates)
+ *  - 2× draaien met zelfde env: throws RuntimeException (D-7 / WR-04 — bootstrap, niet sync)
  */
 class EmeqStaffSeederTest extends TestCase
 {
@@ -63,16 +63,22 @@ class EmeqStaffSeederTest extends TestCase
         $this->assertFalse($staff->hasPermissionTo('manage-staff'));
     }
 
-    public function test_seeder_is_idempotent_when_run_twice(): void
+    /**
+     * D-7 (WR-04): seeder is bootstrap-only — 2× draaien op een gebootstrapt
+     * env gooit RuntimeException. Operator moet password-resets via tinker doen.
+     */
+    public function test_seeder_throws_runtime_exception_when_user_already_exists(): void
     {
         putenv('EMEQ_STAFF_SEED_EMAIL=admin@emeq.test');
         putenv('EMEQ_STAFF_SEED_PASSWORD=test-secret');
 
         $this->seed(EmeqStaffSeeder::class);
-        $this->seed(EmeqStaffSeeder::class);
 
-        $this->assertSame(2, Role::count());
-        $this->assertSame(6, Permission::count());
         $this->assertSame(1, User::count());
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('bestaat al');
+
+        $this->seed(EmeqStaffSeeder::class);
     }
 }

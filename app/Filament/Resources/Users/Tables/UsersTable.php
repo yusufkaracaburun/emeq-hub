@@ -13,6 +13,7 @@ use Filament\Forms\Components\Select;
 use Filament\Notifications\Notification;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Spatie\Permission\Exceptions\RoleDoesNotExist;
 
 /*
  * Plan 09-10: UserResource table.
@@ -59,10 +60,43 @@ class UsersTable
                                 'super-admin' => 'Super admin',
                                 'staff' => 'Staff',
                             ])
+                            ->in(['super-admin', 'staff'])
                             ->required(),
                     ])
                     ->action(function (User $record, array $data): void {
-                        $record->syncRoles([$data['role']]);
+                        if ($record->id === auth()->id() && $data['role'] !== 'super-admin') {
+                            Notification::make()
+                                ->title('Je kunt jezelf niet downgraden')
+                                ->danger()
+                                ->send();
+
+                            return;
+                        }
+
+                        if (
+                            $record->hasRole('super-admin')
+                            && $data['role'] !== 'super-admin'
+                            && User::role('super-admin')->where('id', '!=', $record->id)->count() === 0
+                        ) {
+                            Notification::make()
+                                ->title('Kan laatste super-admin niet downgraden')
+                                ->danger()
+                                ->send();
+
+                            return;
+                        }
+
+                        try {
+                            $record->syncRoles([$data['role']]);
+                        } catch (RoleDoesNotExist) {
+                            Notification::make()
+                                ->title('Onbekende rol')
+                                ->body('De geselecteerde rol bestaat niet.')
+                                ->danger()
+                                ->send();
+
+                            return;
+                        }
 
                         Notification::make()
                             ->title('Rol toegewezen')

@@ -186,9 +186,10 @@ class AccountSubscriptionResource extends Resource
                         ->danger()
                         ->send();
                 } catch (Throwable $e) {
+                    report($e);
                     Notification::make()
                         ->title('Pause-actie mislukt')
-                        ->body($e->getMessage())
+                        ->body('Zie logs voor details — fingerprint: '.substr(hash('sha256', $e->getMessage()), 0, 12))
                         ->danger()
                         ->send();
                 }
@@ -222,9 +223,10 @@ class AccountSubscriptionResource extends Resource
                         ->danger()
                         ->send();
                 } catch (Throwable $e) {
+                    report($e);
                     Notification::make()
                         ->title('Resume-actie mislukt')
-                        ->body($e->getMessage())
+                        ->body('Zie logs voor details — fingerprint: '.substr(hash('sha256', $e->getMessage()), 0, 12))
                         ->danger()
                         ->send();
                 }
@@ -264,9 +266,10 @@ class AccountSubscriptionResource extends Resource
                         ->danger()
                         ->send();
                 } catch (Throwable $e) {
+                    report($e);
                     Notification::make()
                         ->title('Cancel-actie mislukt')
-                        ->body($e->getMessage())
+                        ->body('Zie logs voor details — fingerprint: '.substr(hash('sha256', $e->getMessage()), 0, 12))
                         ->danger()
                         ->send();
                 }

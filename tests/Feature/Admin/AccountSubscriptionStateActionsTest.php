@@ -13,6 +13,7 @@ use App\Models\AccountSubscription;
 use App\Models\Connection;
 use App\Models\Consumer;
 use App\Models\User;
+use Filament\Notifications\Notification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Spatie\Permission\Models\Permission;
@@ -133,6 +134,83 @@ class AccountSubscriptionStateActionsTest extends TestCase
         $component->assertTableActionVisible('cancel', $paused);
         $component->assertTableActionHidden('cancel', $canceled);
         $component->assertTableActionHidden('cancel', $pending);
+    }
+
+    /**
+     * D-10 (IN-02): cancelAction's Throwable-catch toont generieke notification
+     * met sha256-fingerprint i.p.v. raw $e->getMessage(). Bewijst dat
+     * exception-message-leak via Filament Notification dicht is.
+     */
+    public function test_cancel_action_shows_generic_notification_with_fingerprint_on_throwable(): void
+    {
+        $this->actingAsStaff();
+        [, , $connection] = $this->setupTenancy('school-cancel-leak');
+
+        $active = AccountSubscription::factory()->forConnection($connection)->active()->create();
+
+        $managerMock = $this->createMock(AccountSubscriptionManager::class);
+        $managerMock->method('cancel')
+            ->willThrowException(new \RuntimeException('mollie-test-error-cancel'));
+        $this->app->instance(AccountSubscriptionManager::class, $managerMock);
+
+        Livewire::test(ListAccountSubscriptions::class)
+            ->callTableAction('cancel', $active)
+            ->assertNotified(
+                Notification::make()
+                    ->title('Cancel-actie mislukt')
+                    ->body('Zie logs voor details — fingerprint: '.substr(hash('sha256', 'mollie-test-error-cancel'), 0, 12))
+                    ->danger()
+            );
+    }
+
+    /**
+     * D-10 (IN-02) — pauseAction symmetrisch met cancelAction.
+     */
+    public function test_pause_action_shows_generic_notification_with_fingerprint_on_throwable(): void
+    {
+        $this->actingAsStaff();
+        [, , $connection] = $this->setupTenancy('school-pause-leak');
+
+        $active = AccountSubscription::factory()->forConnection($connection)->active()->create();
+
+        $managerMock = $this->createMock(AccountSubscriptionManager::class);
+        $managerMock->method('pause')
+            ->willThrowException(new \RuntimeException('mollie-test-error-pause'));
+        $this->app->instance(AccountSubscriptionManager::class, $managerMock);
+
+        Livewire::test(ListAccountSubscriptions::class)
+            ->callTableAction('pause', $active)
+            ->assertNotified(
+                Notification::make()
+                    ->title('Pause-actie mislukt')
+                    ->body('Zie logs voor details — fingerprint: '.substr(hash('sha256', 'mollie-test-error-pause'), 0, 12))
+                    ->danger()
+            );
+    }
+
+    /**
+     * D-10 (IN-02) — resumeAction symmetrisch met cancelAction.
+     */
+    public function test_resume_action_shows_generic_notification_with_fingerprint_on_throwable(): void
+    {
+        $this->actingAsStaff();
+        [, , $connection] = $this->setupTenancy('school-resume-leak');
+
+        $paused = AccountSubscription::factory()->forConnection($connection)->paused()->create();
+
+        $managerMock = $this->createMock(AccountSubscriptionManager::class);
+        $managerMock->method('resume')
+            ->willThrowException(new \RuntimeException('mollie-test-error-resume'));
+        $this->app->instance(AccountSubscriptionManager::class, $managerMock);
+
+        Livewire::test(ListAccountSubscriptions::class)
+            ->callTableAction('resume', $paused)
+            ->assertNotified(
+                Notification::make()
+                    ->title('Resume-actie mislukt')
+                    ->body('Zie logs voor details — fingerprint: '.substr(hash('sha256', 'mollie-test-error-resume'), 0, 12))
+                    ->danger()
+            );
     }
 
     /**
