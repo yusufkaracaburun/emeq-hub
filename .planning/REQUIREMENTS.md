@@ -22,7 +22,7 @@ Requirements voor v0.2 (~8-10 weken). Elke vereiste mapt naar één roadmap-fase
 
 - [x] **HUB-01**: `consumers`/`accounts`/`connections` tabellen + Sanctum-PAT auth voor Consumer-routes. `consumers` houdt SaaS-app-registraties (Naschool, Planny, derde-partijen). `accounts` houdt klanten van die SaaS-apps (school A, vereniging C) by `consumer_id + external_id`. `connections` houdt per-provider credentials per Account, encrypted-at-rest. Provider-specifieke credentials: voor OAuth-providers (Mollie) `access_token` + `refresh_token` + `expires_at` + `scopes`; voor key-based providers (Snelstart) `client_key` + `subscription_key` + `subscription_id`. Provider-specifieke velden worden of in dedicated kolommen of in een `metadata` JSON-kolom opgeslagen — te beslissen bij Phase 3-planning.
 
-- [ ] **HUB-02**: `OAuthFlow`-contract provider-agnostisch (`getAuthorizationUrl()`, `exchangeCode()`, `refreshToken()`, `revoke()`). Eerste implementatie `MollieConnectOAuthFlow`. Pattern toekomst-bestendig voor Snelstart-OAuth, Exact-OAuth, Ibanity-OAuth in latere milestones.
+- [x] **HUB-02**: `OAuthFlow`-contract provider-agnostisch (`getAuthorizationUrl()`, `exchangeCode()`, `refreshToken()`, `revoke()`). Eerste implementatie `MollieConnectOAuthFlow`. Pattern toekomst-bestendig voor Snelstart-OAuth, Exact-OAuth, Ibanity-OAuth in latere milestones. *Validated in Phase 4 (2026-05-14) — 5/5 plans, 129/129 tests groen, BLOCKING acceptance 8/8; `FakeOAuthFlow` bewijst dat het pattern niet Mollie-specifiek is (SC-4).*
 
 - [x] **HUB-03**: Pass-through REST API `/v1/mollie/*` — Bearer Consumer-PAT-resolutie → `Account` → `Connection.access_token` → `emeq/mollie-api` SDK-call. Audit-logging van inkomende + uitgaande requests in `webhook_calls`-tabel (al gepland in PROJECT.md architectuur). `dedoc/scramble` genereert OpenAPI spec op `/docs/api`. *Validated in Phase 5a (2026-05-15) — multi-tenant Bearer→Consumer→Account→Connection resolution + audit-log in `pass_through_calls` + error-mapping (401→502 cloaked, 422→422, 404→404, 429→429+RetryAfter, 5xx→502, timeout→504) + Scramble OpenAPI op `/docs/api`.*
 
@@ -88,7 +88,7 @@ Expliciet uitgesloten voor v0.2. Niet re-adden zonder PROJECT.md herziening.
 | MOLL-03 | Phase 5a | Complete |
 | MOLL-04 | Phase 5a | Complete |
 | HUB-01 | Phase 3 | Complete |
-| HUB-02 | Phase 4 | In Progress (04-01 done) |
+| HUB-02 | Phase 4 | Complete |
 | HUB-03 | Phase 5a | Complete |
 | HUB-04 | Phase 9 | Complete |
 | HUB-05 | Phase 5b | Complete |
