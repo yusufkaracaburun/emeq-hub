@@ -60,6 +60,22 @@ final class ProviderCredentialDescriptor
     }
 
     /**
+     * Expressievere variant van `for()` voor callsites die bij een onbekende
+     * provider gewoon `null` willen ipv een exception (Connection::fingerprint).
+     *
+     * Per D-11 vangt deze helper specifiek `InvalidArgumentException` — geen
+     * `Throwable` — zodat échte bugs in `for()` blijven doorgooien.
+     */
+    public static function tryFor(string $provider): ?self
+    {
+        try {
+            return self::for($provider);
+        } catch (InvalidArgumentException) {
+            return null;
+        }
+    }
+
+    /**
      * @return list<self>
      */
     public static function all(): array

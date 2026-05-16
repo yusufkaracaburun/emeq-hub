@@ -38,6 +38,20 @@ class ProviderDescriptorTest extends TestCase
         ProviderCredentialDescriptor::for('unknown-provider');
     }
 
+    public function test_try_for_returns_descriptor_for_known_provider(): void
+    {
+        $descriptor = ProviderCredentialDescriptor::tryFor('mollie');
+
+        $this->assertInstanceOf(ProviderCredentialDescriptor::class, $descriptor);
+        $this->assertSame('mollie', $descriptor->key);
+        $this->assertSame('mollie', $descriptor->oauthFlowKey);
+    }
+
+    public function test_try_for_returns_null_for_unknown_provider(): void
+    {
+        $this->assertNull(ProviderCredentialDescriptor::tryFor('non-existent-provider-xyz'));
+    }
+
     public function test_adding_theoretical_provider_appears_in_all(): void
     {
         // D-04 success-criterium 10: een nieuwe provider toevoegen vereist
