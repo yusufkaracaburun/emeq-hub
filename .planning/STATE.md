@@ -4,8 +4,8 @@ milestone: v0.2
 milestone_name: — Mollie + Connect + Subscriptions + Hub-skeleton
 status: executing
 stopped_at: Phase 8 context gathered — 7 D-decisions, Hub-side scope (Filament onboard-wizard + StartOAuthFlowAction + partner-pages + Resource-hints); Naschool-internals out of scope (eigen repo)
-last_updated: "2026-05-16T20:03:07.795Z"
-last_activity: 2026-05-16 -- Phase 10 execution started
+last_updated: "2026-05-16T21:49:24.283Z"
+last_activity: 2026-05-16
 progress:
   total_phases: 10
   completed_phases: 7
@@ -25,16 +25,16 @@ See: .planning/PROJECT.md (updated 2026-05-14 na v0.1 milestone-close)
 
 ## Current Position
 
-Phase: 10 (phase-9-polish-deferred-review-findings) — EXECUTING
-Plan: 1 of 6
+Phase: 10
+Plan: Not started
 Status: Executing Phase 10
-Last activity: 2026-05-16 -- Phase 10 execution started
+Last activity: 2026-05-16
 
 ## Performance Metrics
 
 **v0.1 Velocity:**
 
-- Total plans completed: 30 (Phase 1)
+- Total plans completed: 36 (Phase 1)
 - Total execution time: ~12 uur (2026-05-14 00:42 → 12:02 CEST)
 - Sub-repo werk: snelstart-sdk submodule wiring + Pest-coverage + push
 
@@ -50,6 +50,7 @@ Last activity: 2026-05-16 -- Phase 10 execution started
 | 06 | 8 | - | - |
 | 07 | 8 | ~execution-wave-based (5 waves) | n/a (parallel-execution per wave) |
 | 09 | 11 | - | - |
+| 10 | 6 | - | - |
 
 **Recent Trend:**
 

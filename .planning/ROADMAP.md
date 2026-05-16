@@ -384,7 +384,7 @@ v0.2 bouwt drie samenhangende lagen: (1) `emeq/mollie-api` SDK die `mollie/molli
 | 7. Account-level subscriptions | 8/8 | Done | 2026-05-15 |
 | 8. Naschool wiring | 0/0 (TBD) | Not started | - |
 | 9. Filament admin-UI voor Emeq-medewerkers | 11/11 | Complete    | 2026-05-16 |
-| 10. Phase 9 polish — deferred review-findings | 6/6 | Complete   | 2026-05-16 |
+| 10. Phase 9 polish — deferred review-findings | 6/6 | Complete    | 2026-05-16 |
 
 ### Coverage
 
