@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v0.2
 milestone_name: — Mollie + Connect + Subscriptions + Hub-skeleton
-status: idle
-stopped_at: "Phase 5b GESLOTEN (commits 8b58bb4 + 607fbf9 + c194e94 + 417e20f + adad1a4 op feat/v02-account-subscriptions); HUB-05 = Complete, UAT 9/9 + SECURITY 24/24 + 391 tests groen, /admin/quick-login regressie gefixed in DatabaseSeeder. Open arcs: Phase 5c (Snelstart webhook-handler — BLOCKED op partner@snelstart.nl antwoord, 4 PLAN-stubs zonder SUMMARY), Phase 8 (Naschool wiring, unblocked)."
-last_updated: "2026-05-16T14:25:00.000Z"
+status: completed
+stopped_at: Phase 8 context gathered — 7 D-decisions, Hub-side scope (Filament onboard-wizard + StartOAuthFlowAction + partner-pages + Resource-hints); Naschool-internals out of scope (eigen repo)
+last_updated: "2026-05-16T14:57:43.980Z"
 last_activity: 2026-05-16
 progress:
   total_phases: 10
-  completed_phases: 8
-  total_plans: 61
+  completed_phases: 7
+  total_plans: 62
   completed_plans: 57
-  percent: 80
+  percent: 70
 ---
 
 # Project State
@@ -200,9 +200,9 @@ Items acknowledged en deferred bij milestone-close 2026-05-14:
 
 ## Session Continuity
 
-Last session: 2026-05-16 — resumed via /gsd-resume-work
-Stopped at: Phase 9 GESLOTEN. Open arcs: Phase 5b (Snelstart pass-through, depends-on alleen Phase 3 ✓), Phase 5c (Snelstart webhook-handler — BLOCKED op partner@snelstart.nl antwoord, 4 PLAN-stubs zonder SUMMARY in `.planning/phases/05c-*/`), Phase 8 (Naschool wiring, nu unblocked).
-Resume file: n/a
+Last session: 2026-05-16T14:57:43.975Z
+Stopped at: Phase 8 context gathered — 7 D-decisions, Hub-side scope (Filament onboard-wizard + StartOAuthFlowAction + partner-pages + Resource-hints); Naschool-internals out of scope (eigen repo)
+Resume file: .planning/phases/08-naschool-wiring-snelstart-mollie-via-hub/08-CONTEXT.md
 Next action options:
 
   1. `/docs-sync` — Phase 9 raakte User/Connection/AppServiceProvider models en routes; doc-drift check vóór Phase 8 start (recommended eerst)
