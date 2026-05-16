@@ -106,7 +106,9 @@ class ConsumerTokenActionTest extends TestCase
 
     /**
      * D-9 (WR-06): action-callback flasht plain token via Cache::put() naar
-     * `pat-flash:{livewire-id}` key (60s TTL). De blade-view pull't 'm one-shot.
+     * `pat-flash:{livewire-id}` key (60s TTL). De blade-view pull't 'm one-shot
+     * tijdens de Livewire-render, dus we sniffen op een Cache::spy() i.p.v.
+     * achteraf naar de key te kijken (die is dan al gepull'd).
      */
     public function test_issue_pat_action_writes_plain_token_to_cache_flash(): void
     {
@@ -118,23 +120,24 @@ class ConsumerTokenActionTest extends TestCase
 
         $this->actingAs($admin);
 
-        $component = Livewire::test(ListConsumers::class)
+        Cache::spy();
+
+        Livewire::test(ListConsumers::class)
             ->callTableAction(ConsumerResource::ISSUE_PAT_ACTION, $consumer, [
                 'name' => 'Cache PAT',
                 'preset' => 'mollie-read',
             ])
             ->assertHasNoTableActionErrors();
 
-        $livewireId = $component->instance()->getId();
+        $token = $consumer->fresh()->tokens()->first();
+        $this->assertNotNull($token);
 
-        $this->assertTrue(Cache::has("pat-flash:{$livewireId}"));
-        $this->assertTrue(Cache::has("pat-flash-name:{$livewireId}"));
-        $this->assertSame('Cache PAT', Cache::get("pat-flash-name:{$livewireId}"));
-
-        // Pull is destructief — na lezen is de cache leeg.
-        $token = Cache::pull("pat-flash:{$livewireId}");
-        $this->assertIsString($token);
-        $this->assertNotSame('', $token);
-        $this->assertFalse(Cache::has("pat-flash:{$livewireId}"));
+        // Verifieer dat de action twee Cache::put-calls deed met de pat-flash-keys.
+        Cache::shouldHaveReceived('put')
+            ->withArgs(fn (string $key, mixed $value): bool => str_starts_with($key, 'pat-flash:') && is_string($value) && $value !== '')
+            ->once();
+        Cache::shouldHaveReceived('put')
+            ->withArgs(fn (string $key, mixed $value): bool => str_starts_with($key, 'pat-flash-name:') && $value === 'Cache PAT')
+            ->once();
     }
 }

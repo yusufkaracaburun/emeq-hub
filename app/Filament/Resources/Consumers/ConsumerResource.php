@@ -22,6 +22,7 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\Cache;
 
 class ConsumerResource extends Resource
 {
@@ -189,17 +190,15 @@ class ConsumerResource extends Resource
 
                 $result = $record->createToken($data['name'], $abilities);
 
-                // ListConsumers Livewire-property: rendert plain-token alert boven de tabel
-                // (custom view in resources/views/filament/resources/consumers/pages/list-consumers.blade.php).
-                if (property_exists($livewire, 'lastIssuedPat')) {
-                    $livewire->lastIssuedPat = [
-                        'token' => $result->plainTextToken,
-                        'name' => $data['name'],
-                    ];
-                }
+                // D-9 (WR-06): plain token gaat via server-side Cache flash naar de blade-view.
+                // De blade Cache::pull't beide keys one-shot bij de eerstvolgende render —
+                // het token verschijnt nooit in Livewire's wire:snapshot of in Alpine x-data.
+                $livewireId = $livewire->getId();
+                Cache::put("pat-flash:{$livewireId}", $result->plainTextToken, now()->addSeconds(60));
+                Cache::put("pat-flash-name:{$livewireId}", $data['name'], now()->addSeconds(60));
 
                 Notification::make()
-                    ->title('PAT uitgegeven — bekijk hierboven om te kopiëren')
+                    ->title('PAT uitgegeven — token verschijnt eenmalig bovenaan de listing')
                     ->success()
                     ->send();
             });
