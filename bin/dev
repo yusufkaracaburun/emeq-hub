@@ -19,7 +19,7 @@ HORIZON_PID="$DEV_DIR/horizon.pid"
 SERVE_LOG="$DEV_DIR/serve.log"
 HORIZON_LOG="$DEV_DIR/horizon.log"
 SERVE_PORT="${SERVE_PORT:-8001}"
-SMOKE_URL="${SMOKE_URL:-http://hub.emeq.test:8090/up}"
+SMOKE_URL="${SMOKE_URL:-http://localhost:8090/up}"
 
 mkdir -p "$DEV_DIR"
 
@@ -80,6 +80,13 @@ stop_bg() {
     rm -f "$pid_file"
 }
 
+port_in_use() {
+    local port="$1" owner
+    owner="$(lsof -nP -iTCP:"$port" -sTCP:LISTEN 2>/dev/null | awk 'NR==2 {print $2}')" || true
+    [[ -n "$owner" ]] && echo "$owner"
+    return 0
+}
+
 cmd_up() {
     local reset=false
     for arg in "$@"; do
@@ -94,6 +101,14 @@ cmd_up() {
 
     if $reset; then
         cmd_reset
+    fi
+
+    if ! pid_alive "$SERVE_PID"; then
+        local orphan
+        orphan="$(port_in_use "$SERVE_PORT")"
+        if [[ -n "$orphan" ]]; then
+            die "port $SERVE_PORT bezet door pid $orphan — niet door bin/dev gespawned. Kill handmatig: kill $orphan"
+        fi
     fi
 
     start_bg "php artisan serve" "$SERVE_PID" "$SERVE_LOG" \
@@ -118,15 +133,23 @@ cmd_reset() {
     php artisan migrate:fresh --seed --no-interaction
 }
 
+smoke_get() {
+    local url="$1"
+    curl -fsS --connect-timeout 3 --max-time 5 "$url"
+}
+
 cmd_smoke() {
     log "GET $SMOKE_URL"
-    local body
-    body="$(curl -fsS --max-time 5 "$SMOKE_URL")" \
-        || die "smoke faalde — server of caddy down? (zie bin/dev status)"
+    local body fallback="http://127.0.0.1:8001/up"
+    if ! body="$(smoke_get "$SMOKE_URL" 2>/dev/null)"; then
+        warn "$SMOKE_URL faalde (DNS of caddy) — fallback naar direct artisan-serve $fallback"
+        body="$(smoke_get "$fallback")" \
+            || die "smoke faalde — server/caddy down (zie bin/dev status)"
+    fi
     echo "$body"
-    grep -q '"status":"up"'        <<<"$body" || die "status != up"
-    grep -q '"database":"ok"'      <<<"$body" || die "database != ok"
-    grep -q '"redis":"ok"'         <<<"$body" || die "redis != ok"
+    grep -q '"status":"up"'   <<<"$body" || die "status != up"
+    grep -q '"database":"ok"' <<<"$body" || die "database != ok"
+    grep -q '"redis":"ok"'    <<<"$body" || die "redis != ok"
     log "smoke ok"
 }
 
