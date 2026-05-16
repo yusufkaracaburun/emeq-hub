@@ -22,6 +22,11 @@ use Tests\TestCase;
  *  - Staff-User ziet audit-rijen die via 09-01 audit-kolommen geschreven zijn
  *  - Direction-filter narrowt naar incoming
  *  - View-page op `/admin/webhook-calls/{id}` rendert payload-JSON met de key uit het record
+ *
+ * HUB-04 SC-7 closure (v0.2):
+ *  Plan 10-06 (D-3) sluit SC-7 als **permission-gated**, NIET als consumer-scoped.
+ *  Staff zonder `view-webhooks` krijgt 403; staff mét de permission ziet ALLE
+ *  consumer-webhooks. Per-Consumer staff-binding is v1.0+ scope.
  */
 class WebhookCallResourceTest extends TestCase
 {
@@ -169,5 +174,55 @@ class WebhookCallResourceTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('test-slug-xyz');
+    }
+
+    /**
+     * HUB-04 SC-7 closure — deel 1 (D-3 v0.2-keuze):
+     * Staff zonder `view-webhooks` permission krijgt 403 op /admin/webhook-calls.
+     * Permission-gating is de v0.2-invulling van "cross-Consumer-isolation" zoals
+     * gedocumenteerd in 10-CONTEXT.md D-3.
+     */
+    public function test_staff_without_view_webhooks_permission_cannot_access_webhooks_resource(): void
+    {
+        $this->seedRoles();
+        $user = User::factory()->create();
+        $user->assignRole('staff');
+        // Bewust GEEN givePermissionTo('view-webhooks').
+        $this->actingAs($user);
+
+        $this->get('/admin/webhook-calls')->assertForbidden();
+    }
+
+    /**
+     * HUB-04 SC-7 closure — deel 2 (D-3 v0.2-keuze):
+     * Staff MET `view-webhooks` permission ziet ALLE consumer-webhooks. Dit is
+     * een bewuste v0.2-keuze: cross-Consumer-zichtbaarheid voor staff is acceptabel
+     * zolang permission-gating de access-control is. Een latere fase (v1.0+,
+     * externe staff per Consumer) introduceert staff↔consumer-binding waarna
+     * cross-Consumer-isolation een filter-niveau op de query wordt.
+     *
+     * @see .planning/phases/10-phase-9-polish-deferred-review-findings/10-CONTEXT.md D-3
+     */
+    public function test_cross_consumer_isolation_staff_with_view_webhooks_permission_sees_all_webhooks_per_v02_decision_d3(): void
+    {
+        $this->actAsStaff();
+
+        $consumerA = Consumer::factory()->create(['slug' => 'consumer-a']);
+        $consumerB = Consumer::factory()->create(['slug' => 'consumer-b']);
+
+        $this->insertWebhookCall([
+            'consumer_id' => $consumerA->id,
+            'provider' => 'mollie',
+        ]);
+        $this->insertWebhookCall([
+            'consumer_id' => $consumerB->id,
+            'provider' => 'snelstart',
+        ]);
+
+        // Staff mét view-webhooks ziet beide consumer-webhooks — bewuste v0.2-keuze.
+        Livewire::test(ListWebhookCalls::class)
+            ->assertCountTableRecords(2)
+            ->assertSee('consumer-a')
+            ->assertSee('consumer-b');
     }
 }
