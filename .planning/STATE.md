@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-05-14 na v0.1 milestone-close)
 Phase: 05c
 Plan: Not started
 Status: BLOCKED — wacht op Snelstart partner-response (Gmail draft r-8836998535038336548, verwacht ≤ 2026-05-26). Alternatief unblocked pad: Phase 8 (Naschool wiring) — depends-on Phases 5b+5a+6+7 die alle Complete zijn.
-Last activity: 2026-05-16
+Last activity: 2026-05-16 - Completed quick task 260516-qau: docs-sync drift fix (ADR Pennant kill-switch + README strategy/-rij)
 
 ## Performance Metrics
 
@@ -165,6 +165,7 @@ Decisions zijn gelogd in PROJECT.md Key Decisions table. Decisions die uit v0.1 
 | 260515-c52 | Snelstart certificeringspad productie-route (Blade-voorbeeldpagina + ADR + 8 partner-vragen via Gmail) + Phase 5c CONTEXT.md prep met 5 ❓-aannames | 2026-05-15 | fcf64b7 (Blade; ADR + rate-limits in `.docs/` gitignored) | [260515-c52-snelstart-certificeringspad-productie-ro](./quick/260515-c52-snelstart-certificeringspad-productie-ro/) |
 | 260515-vsy | Sync 05a-VERIFICATION.md frontmatter met HUMAN-UAT-resultaat (status → passed_with_deferred; #1 pass + #2/#3 blocked op Phase 8); audit-uat 5 → 0 open items | 2026-05-15 | 23c865b | (inline /gsd-fast — geen quick-dir) |
 | 260516-dev | bin/dev bootstrap-script (up/down/reset/smoke/test/status) + .dev/ gitignore — dispatcht docker compose (db/redis/caddy) + php artisan serve + horizon op host, --reset doet migrate:fresh --seed (alleen local/testing) | 2026-05-16 | 8b58bb4 | (inline /gsd-fast — geen quick-dir) |
+| 260516-qau | docs-sync drift fix — ADR `feature-flags-pennant-kill-switch.md` (Pennant + scope-design + 3 integratie-punten) + `.docs/README.md` indeling-tabel rij voor `strategy/`. Beide artifacts `.docs/` (gitignored), alleen PLAN.md + SUMMARY.md committed | 2026-05-16 | 71b7ac6 (PLAN.md; ADR + README in `.docs/` gitignored) | [260516-qau-docs-sync-drift-fix-adr-pennant-kill-swi](./quick/260516-qau-docs-sync-drift-fix-adr-pennant-kill-swi/) |
 
 ### Roadmap Evolution
 
