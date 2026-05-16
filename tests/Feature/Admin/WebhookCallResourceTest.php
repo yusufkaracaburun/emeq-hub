@@ -112,4 +112,52 @@ class WebhookCallResourceTest extends TestCase
         $response->assertOk();
         $response->assertSee('ord_TEST_123');
     }
+
+    public function test_list_shows_consumer_slug_via_relation(): void
+    {
+        $this->actAsStaff();
+        $consumer = Consumer::factory()->create(['slug' => 'test-slug-xyz']);
+
+        $this->insertWebhookCall([
+            'direction' => 'incoming',
+            'provider' => 'mollie',
+            'consumer_id' => $consumer->id,
+            'status' => 'processed',
+        ]);
+
+        Livewire::test(ListWebhookCalls::class)
+            ->assertCanSeeTableRecords(WebhookCall::all())
+            ->assertSee('test-slug-xyz');
+    }
+
+    public function test_view_page_renders_exception_as_plain_text_not_json_encoded(): void
+    {
+        $this->actAsStaff();
+
+        $id = $this->insertWebhookCall([
+            'exception' => "Stack trace line 1\nStack trace line 2",
+        ]);
+
+        $response = $this->get("/admin/webhook-calls/{$id}");
+
+        $response->assertOk();
+        $response->assertSee('Stack trace line 1');
+        // Double-encoded JSON form (with escaped quotes + escaped \n) must NOT appear.
+        $response->assertDontSee('"Stack trace line 1\\nStack trace line 2"', false);
+    }
+
+    public function test_view_page_shows_consumer_slug_via_relation(): void
+    {
+        $this->actAsStaff();
+        $consumer = Consumer::factory()->create(['slug' => 'test-slug-xyz']);
+
+        $id = $this->insertWebhookCall([
+            'consumer_id' => $consumer->id,
+        ]);
+
+        $response = $this->get("/admin/webhook-calls/{$id}");
+
+        $response->assertOk();
+        $response->assertSee('test-slug-xyz');
+    }
 }
