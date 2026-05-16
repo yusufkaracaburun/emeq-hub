@@ -50,9 +50,11 @@ De canonical architectuur-beschrijving (Consumer → Account → Connection → 
 Snelle pointers:
 - **Planning-artefacten**: `.planning/ROADMAP.md`, `.planning/STATE.md`, `.planning/phases/<NN>-<slug>/` voor lopend fase-werk.
 - **Werkdocumentatie** (lokaal, gitignored): `.docs/decisions/` (ADRs), `.docs/partners/<provider>/` (officiële API-research), `.docs/plans/`, `.docs/errors/`, `.docs/stack/`. Lees `.docs/README.md` voor de indeling.
-- **Routes**: `routes/web.php` (smoke `/`, `/up`), `routes/console.php`, `routes/api.php` (`/v1/*` consumer-API achter Sanctum + `throttle:api`) en `routes/webhooks.php` (`/webhooks/{provider}/{...}` + Cashier-webhooks, publiek signature-verified) zijn geland.
+- **Routes**: `routes/web.php` (smoke `/`, `/up`; in `local`/`testing`-env ook `/admin/quick-login/{role?}` + `/dev/partners[/{provider}]`), `routes/console.php`, `routes/api.php` (`/v1/*` consumer-API achter Sanctum + `throttle:api`) en `routes/webhooks.php` (`/webhooks/{provider}/{...}` + Cashier-webhooks, publiek signature-verified) zijn geland.
+- **Admin-paneel**: Filament v4 op `/admin` (Phase 9, HUB-04). `User` implementeert `FilamentUser` + `HasRoles` (Spatie); admin-access via Spatie-rollen `super-admin`/`staff` (zie `EmeqStaffSeeder`). Resource-management voor `manage-staff` ge-gate via gate in `AppServiceProvider::boot()`. 7 Resources gegroepeerd in 4 navigation-groups (Tenants / Integraties / Abonnementen / Beheer).
+- **Provider-credential-laag** (D-04): `config/hub-providers.php` + `App\Support\ProviderCredentialDescriptor` is de single source of truth voor per-provider credential-metadata. `Connection::fingerprint()` + Filament-views + `ConnectionStatsWidget` consumen via descriptor. Nieuwe provider = config-row + factory-state + infolist Section, geen nieuwe Resource-class. Zie `.docs/decisions/provider-credential-descriptor.md`.
 
-Een aparte `.planning/ARCHITECTURE.md` wordt aangemaakt door `/gsd-map-codebase` zodra de huidige domeinlaag (OAuth-flow-registry, Mollie + Snelstart pass-through, Cashier-Mollie subscriptions) een vaste vorm krijgt.
+Een aparte `.planning/ARCHITECTURE.md` wordt aangemaakt door `/gsd-map-codebase` zodra de huidige domeinlaag (OAuth-flow-registry, Mollie + Snelstart pass-through, Cashier-Mollie subscriptions, Filament admin-paneel + provider-descriptor) een vaste vorm krijgt.
 <!-- GSD:architecture-end -->
 
 <!-- GSD:skills-start source:skills/ -->
