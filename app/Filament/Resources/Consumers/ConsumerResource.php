@@ -25,6 +25,10 @@ use Filament\Tables\Table;
 
 class ConsumerResource extends Resource
 {
+    protected static string|\UnitEnum|null $navigationGroup = 'Tenants';
+
+    protected static ?int $navigationSort = 1;
+
     public const ISSUE_PAT_ACTION = 'issuePat';
 
     /**
@@ -142,7 +146,7 @@ class ConsumerResource extends Resource
 
     /**
      * Issue-PAT table-action (D-03): modal met preset-radio + custom-mode-CheckboxList.
-     * Submit → $consumer->createToken() + plain-token éénmalig via Notification.
+     * Submit → $consumer->createToken() + chain naar viewPatToken-action voor copy-paste UX.
      */
     private static function issuePatAction(): Action
     {
@@ -168,18 +172,25 @@ class ConsumerResource extends Resource
                     ->required()
                     ->visible(fn (Get $get): bool => $get('preset') === 'custom'),
             ])
-            ->action(function (Consumer $record, array $data): void {
+            ->action(function (Consumer $record, array $data, $livewire): void {
                 $abilities = $data['preset'] === 'custom'
                     ? array_values($data['abilities'] ?? [])
                     : self::PAT_PRESETS[$data['preset']]['abilities'];
 
                 $result = $record->createToken($data['name'], $abilities);
 
+                // ListConsumers Livewire-property: rendert plain-token alert boven de tabel
+                // (custom view in resources/views/filament/resources/consumers/pages/list-consumers.blade.php).
+                if (property_exists($livewire, 'lastIssuedPat')) {
+                    $livewire->lastIssuedPat = [
+                        'token' => $result->plainTextToken,
+                        'name' => $data['name'],
+                    ];
+                }
+
                 Notification::make()
-                    ->title('PAT uitgegeven')
-                    ->body('Plain token (eenmalig zichtbaar): '.$result->plainTextToken)
+                    ->title('PAT uitgegeven — bekijk hierboven om te kopiëren')
                     ->success()
-                    ->persistent()
                     ->send();
             });
     }
