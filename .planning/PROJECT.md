@@ -26,30 +26,26 @@ Een Hub-platform en losse, Saloon-gebaseerde Laravel SDK-packages (`emeq/snelsta
 
 ### Active
 
-<!-- Geen actieve milestone — v0.1 SHIPPED 2026-05-14. v0.2 voorbereid in `.claude/plans/fancy-honking-spring.md`; nog niet formeel gestart. Start via `/gsd-new-milestone v0.2`. -->
+<!-- v0.2 milestone actief sinds 2026-05-14. 9/11 phases shipped, 2 phases open. Authoritative status: `.planning/REQUIREMENTS.md` + `.planning/ROADMAP.md`. -->
 
-*(Geen requirements actief — wachtend op `/gsd-new-milestone v0.2`.)*
+Open v0.2-requirements:
 
-### Next Milestone Goals (v0.2 — voorbereid, niet gestart)
+- **HUB-06** — Snelstart webhook-handler op `POST /webhooks/snelstart` (HMAC-verified ingress + audit-log + async fan-out). Phase 5c, **BLOCKED** op partner@snelstart.nl certificeringsantwoord (Gmail draft `r-8836998535038336548`, verwacht ≤ 2026-05-26). Zie `.docs/decisions/snelstart-certificering-pad.md`.
+- **NSCH-01** — Naschool wiring: Stancl-tenancy resolver voor Snelstart + composer-VCS-entries voor `emeq/snelstart-api` + `emeq/mollie-api`. Phase 8, unblocked alternatief pad terwijl HUB-06 op partner wacht.
+- **NSCH-02** — Naschool `EnrollmentConfirmed` → Snelstart-verkoopfactuur via `SyncEnrollmentToSnelstartJob`. Phase 8.
+- **NSCH-03** — Naschool vrijwillige-bijdrage-flow via Mollie Connect (= via Hub-Connect, op school's eigen Mollie). Phase 8, e2e-bewijs smoke-test.
 
-> v0.2 Working title: **"Mollie + Connect + Subscriptions + Hub-skeleton"**
-> Realistische timeline: ~8-10 weken vanaf milestone-start
-> Volledig plan: [`.claude/plans/fancy-honking-spring.md`](../.claude/plans/fancy-honking-spring.md)
+Open human-UAT: 3 items in `.planning/phases/05a-mollie-sdk-resources-webhooks-pass-through-api/05a-HUMAN-UAT.md` (Scramble UI render, live Mollie testmode webhook, NSCH-03 e2e — laatste hangt aan NSCH-03 hierboven).
 
-Carry-forward requirements (formaliseren bij `/gsd-new-milestone v0.2`):
+### Next Milestone Backlog (v0.3+, niet gestart)
 
-- **MOLL-01** — `emeq/mollie-api` skeleton wrappend `mollie/mollie-api-php` — multi-tenant `MollieCredentialResolver`-pattern, dual creds (API-key + OAuth)
-- **MOLL-02** — Mollie Connect OAuth-broker: client_id/client_secret config, redirect-handler, token-exchange, refresh-token-flow, `access_`-token storage encrypted
-- ~~**MOLL-03**~~ — *Validated 2026-05-15 in Phase 5a (zie Validated-sectie hierboven)*
-- ~~**MOLL-04**~~ — *Validated 2026-05-15 in Phase 5a (zie Validated-sectie hierboven)*
-- ~~**HUB-01**~~ — *Validated 2026-05-14 in Phase 3 (zie Validated-sectie hierboven)*
-- **HUB-02** — OAuth-broker pattern (provider-agnostisch contract, eerste implementatie = Mollie Connect)
-- ~~**HUB-03**~~ — *Validated 2026-05-15 in Phase 5a (zie Validated-sectie hierboven)*
-- **SUB-01** — Cashier-Mollie integratie voor use-case A (Emeq rekent aan Naschool/Planny-klanten via Emeq's eigen Mollie) — compat-check PHP 8.4 / Laravel 13 nodig
-- **SUB-02** — Account-level subscriptions via Connect voor use-case B (klanten rekenen aan hun eindgebruikers) — eigen subscription-laag boven Mollie's Subscriptions + Mandates API
-- **NSCH-01** — Naschool wiring: Stancl-tenancy resolver voor Snelstart (uit oorspronkelijke v0.1, ongewijzigd)
-- **NSCH-02** — Naschool's `EnrollmentConfirmed` → Snelstart-verkoopfactuur (uit oorspronkelijke v0.1, ongewijzigd)
-- **NSCH-03** — Naschool's vrijwillige-bijdrage-flow via Mollie Connect (= via Hub, met klant-school's eigen Mollie-account)
+> v0.3 scope nog niet gepland — formaliseren bij `/gsd-new-milestone v0.3` na v0.2 close. Bron-van-waarheid voor de tracked-deferred items: `.planning/REQUIREMENTS.md` § Future Requirements.
+
+Carry-forward kandidaten (uit REQUIREMENTS.md):
+
+- **SNEL-V4** — Snelstart-SDK Saloon v3 → v4 (3 ignored security advisories)
+- **PROV-MONEYBIRD / PROV-EXACT / PROV-IBANITY / PROV-STRIPE** — extra provider-SDKs
+- **HUB-BILLING / HUB-DOCS / HUB-ONBOARDING** — commerciële Hub-features voor derde-partij Consumers
 
 ### Out of Scope
 
@@ -60,11 +56,11 @@ Carry-forward requirements (formaliseren bij `/gsd-new-milestone v0.2`):
 - **Snelstart Saloon v3 → v4** — 3 ignored security advisories oplossen; v0.3-werk.
 - **Commerciële Hub-features** (billing, public docs-site, self-service onboarding) — pas in latere milestone na v0.2.
 
-## Current State (per 2026-05-15, na Phase 5a ship)
+## Current State (per 2026-05-16, na Phase 10 ship)
 
 - **Shipped:** v0.1 — `emeq/snelstart-api` SDK live op `github.com:yusufkaracaburun/emeq-snelstart-api` (`main` @ `16c9ecc`), Pest-suite groen (107/187), VCS-installeerbaar zonder auth.
-- **Active milestone:** v0.2 — Mollie + Connect + Subscriptions + Hub-skeleton. Phases 2 t/m 5a complete (4/9 phases done, 21/29 plans done = 72%).
-- **Recent ship:** Phase 5a — Mollie pass-through API + Connect-webhook ingress (6/6 plans, 207 tests, 13/13 truths verified). MOLL-03 + MOLL-04 + HUB-03 nu Validated. Open: 3 human-UAT items (Scramble UI render, live Mollie testmode webhook, NSCH-03 e2e) — afgevangen in `05a-HUMAN-UAT.md` voor toekomstige `/gsd-verify-work`.
+- **Active milestone:** v0.2 — Mollie + Connect + Subscriptions + Hub-skeleton. Phases 2 / 3 / 4 / 5a / 5b / 6 / 7 / 9 / 10 complete (9/11 phases done). Open: Phase 5c (BLOCKED, partner-response) + Phase 8 (Naschool wiring, unblocked).
+- **Recent ship:** Phase 10 — Phase 9 polish (11 deferred review-findings closed: CR-02 permission-enforcement + Hub-eigen `App\Models\WebhookCall` + cross-Consumer-isolation test bewijs voor HUB-04 SC-7 + WR-01..06 + IN-01..04). 6/6 plans, 437 tests / 1479 assertions / 1 pre-existing incomplete. Verifier 13/13 truths passed.
 - **Architectuur-vision** (geverifieerd 2026-05-14): Emeq = Mollie Connect Partner. Consumers (Naschool, Planny, derde-partij SaaS) routeren door Hub. Accounts (klanten van die SaaS-apps) koppelen eigen partner-credentials via OAuth (Mollie Connect, Snelstart oAuth, etc.). Subscriptions: zowel Emeq→Consumers (Cashier-Mollie pattern) als Accounts→eindgebruikers (Connect + eigen subscription-laag).
 
 ## Current Milestone: v0.2 Mollie + Connect + Subscriptions + Hub-skeleton
@@ -132,4 +128,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-15 — MOLL-03 + MOLL-04 + HUB-03 verplaatst naar Validated na Phase 5a ship (6/6 plans, 207 tests groen, 13/13 truths verified incl. gap-closure plan 05a-06). 3 human-UAT items pending in `.planning/phases/05a-mollie-sdk-resources-webhooks-pass-through-api/05a-HUMAN-UAT.md`. Open: "Active" + "Next Milestone Goals" secties beschrijven nog "voorbereid, niet gestart" terwijl v0.2 evident gestart is — formele cleanup volgt bij een aparte restructure.*
+*Last updated: 2026-05-16 — "Active" + "Next Milestone Goals" stale-cluster opgeruimd na Phase 10 ship. Active sectie lijst nu alleen openstaande v0.2-requirements (HUB-06 BLOCKED, NSCH-01..03 in Phase 8); voormalige "Next Milestone Goals (v0.2 — voorbereid, niet gestart)" vervangen door "Next Milestone Backlog (v0.3+)". Current State bijgewerkt naar Phase 10. Validated-sectie nog niet uitgebreid met de in-tussen-gevalideerde requirements (MOLL-01 / MOLL-02 / HUB-02 / HUB-04 / HUB-05 / SUB-01 / SUB-02) — REQUIREMENTS.md is bron-van-waarheid; volgt bij `/gsd-complete-milestone v0.2`.*
