@@ -20,7 +20,11 @@ Route::get('/up', function () {
     ]);
 });
 
-if (! app()->isProduction()) {
+// Dev-only routes — STRICT guard. `! app()->isProduction()` is te breed: laat
+// `/admin/quick-login` open op preview/staging-deploys (Laravel Cloud, etc.).
+// Whitelist alleen `local` + `testing`; preview/staging/UAT moeten echte login
+// gebruiken (zie REVIEW.md CR-01).
+if (app()->environment('local', 'testing')) {
     Route::get('/admin/quick-login/{role?}', function (string $role = 'super-admin') {
         abort_unless(in_array($role, ['super-admin', 'staff'], true), 404);
 
