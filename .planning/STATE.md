@@ -122,7 +122,16 @@ Decisions zijn gelogd in PROJECT.md Key Decisions table. Decisions die uit v0.1 
 - ✅ Phase 03 hub-skeleton voltooid (alle 5 plans + HUB-01 SC-1 t/m SC-5 bewezen)
 - ✅ Phase 06 Cashier-Mollie integratie voltooid (8/8 plans, SUB-01 = Complete, 237 tests + integration-suite gescheiden, ACCEPTED 2026-05-15)
 - ✅ **Phase 07 ACCEPTED 2026-05-15** — SUB-02 Complete; 8/8 plans + 11/11 D-32 + 337 tests bewezen
-- ⏳ **Phase 09 PENDING-checkpoint (09-11 geland 2026-05-16)** — 11/11 plans, 09-11-ACCEPTANCE.md met 10/10 SC-evidence + ADR `.docs/decisions/filament-admin-panel.md` (gitignored), ROADMAP/REQUIREMENTS/STATE gesynced (not yet committed). 389 tests / 1343 assertions groen / 1 pre-existing incomplete. Wacht op human-verify (visuele review /admin op localhost — login + 7 resources + Issue-PAT + Revoke + Pause/Resume + UserResource staff-403). Na "approved" → HUB-04 Complete + commit `docs(phase-09): accepteer Phase 9 …` met 4 planning-files (NIET `.docs/decisions/filament-admin-panel.md`)
+- ✅ **Phase 09 ACCEPTED 2026-05-16** — HUB-04 Complete; 11/11 plans + 391 tests / 1353 assertions groen; visuele review 6/6 checks groen + CR-01 fix met regressie-test
+- 🛡 **Phase 09 — deferred code-review findings (REVIEW.md → tracking-todos voor v0.2.1)**:
+  - **CR-02**: Spatie permissies (`view-consumers`, `manage-consumers`, etc.) geseed maar door géén enkele resource ge-enforced via `canAccess()`. D-05 is alleen actief op `manage-staff`-gate (UserResource). Action: voeg `canAccess()` toe aan 6 resources + tenant-scope-test voor SC-7
+  - **WR-01**: UserResource laat laatste super-admin zichzelf naar staff downgraden → admin-paneel onbereikbaar. Action: guard in UserResource of pre-save-hook
+  - **WR-02**: WebhookCallInfolist doet `json_encode()` op een text-kolom → dubbel-encoded exception-display
+  - **WR-03**: assignRole Select-options niet server-side gevalideerd met `->in()` → mogelijk 500 bij geknoeide form-state
+  - **WR-04**: EmeqStaffSeeder updatet password niet bij bestaande user (silent operatie-fout)
+  - **WR-05**: UserForm password-veld combineert `dehydrateStateUsing` + `dehydrated(filled)` zonder edit-zonder-password-regressie-test
+  - **WR-06**: Plain PAT-token zit in `wire:snapshot` + Alpine `x-data` (twee keer in HTTP-response tot dismiss)
+  - **IN-01..04**: N+1 op Consumer-lookup per WebhookCall-rij; exception-message-leak in cancelAction; AdminPanelProvider::default() footgun; ProviderCredentialDescriptor::tryFor() utility
 - 🆕 **Suggested next**: `/docs-sync` skill activeren vóór de Phase-9-commit-merge — Phase 9 raakte `app/Models/User.php` (HasRoles + FilamentUser), `app/Models/Connection.php` (descriptor-aware fingerprint), `app/Providers/AppServiceProvider.php` (manage-staff gate), nieuwe `config/hub-providers.php`, nieuwe `database/migrations/2026_05_19_*`, en alle `app/Filament/Resources/*` — documentatie-drift mogelijk in `.docs/` (CLAUDE.md / README / memory-files)
 - `/gsd-discuss-phase 8` runnen na Phase-9-checkpoint-approval — Naschool wiring (Snelstart Stancl-resolver + EnrollmentConfirmed-job + Mollie-via-Hub checkout); depends on Phase 5a (al klaar) + Phase 4 (al klaar). Verse sessie + `/clear` aanbevolen — Phase 8 raakt `school-activities-hub/backend/`
 - **Baseline Pint-drift cleanup (deferred)**: pre-Phase-6 scaffold-drift in `database/migrations/2026_05_13_*` + `routes/web.php` (uit `0196e01`) + gitignored `packages/**` — pakken bij toekomstige scaffold-touchup of dedicated quick-task `pint-baseline-cleanup`
