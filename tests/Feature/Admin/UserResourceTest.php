@@ -251,4 +251,32 @@ class UserResourceTest extends TestCase
         $this->assertTrue($admin2->hasRole('staff'));
         $this->assertTrue($admin1->fresh()->hasRole('super-admin'));
     }
+
+    /**
+     * D-8 (WR-05): edit-user zonder password-veld in te vullen bewaart de bestaande hash.
+     * Bewijst dat UserForm's dehydrateStateUsing(Hash::make) + dehydrated(filled)
+     * pattern correct werkt — lege input wordt niet ge-dehydrated, dus geen overwrite.
+     */
+    public function test_edit_user_without_password_keeps_existing_hash(): void
+    {
+        $this->actingAsSuperAdmin();
+
+        $target = User::factory()->create([
+            'password' => Hash::make('original-pass'),
+        ]);
+
+        Livewire::test(EditUser::class, ['record' => $target->getRouteKey()])
+            ->fillForm([
+                'name' => 'Updated Name',
+                'email' => $target->email,
+                'password' => '',
+            ])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        $target->refresh();
+
+        $this->assertTrue(Hash::check('original-pass', $target->password));
+        $this->assertSame('Updated Name', $target->name);
+    }
 }
