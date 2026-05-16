@@ -30,7 +30,7 @@ v0.2 bouwt drie samenhangende lagen: (1) `emeq/mollie-api` SDK die `mollie/molli
 - [x] **Phase 7: Account-level subscriptions (use-case B)** — Accounts → eindgebruikers via Connect + Mandates + Subscriptions *(voltooid 2026-05-15; 8/8 plans, SC-1+SC-2+SC-3 bewezen, SC-4 vendor-coverage via unit + feature stubs + skipt-graceful integration-test, 337 tests groen, ADR `account-subscriptions.md`)*
 - [ ] **Phase 8: Naschool wiring** — composer-wiring + Snelstart Stancl-resolver + `SyncEnrollmentToSnelstartJob` + Mollie checkout-flow via Hub-Connect
 - [x] **Phase 9: Filament admin-UI voor Emeq-medewerkers** — `/admin`-panel met 7 resources (Consumer CRUD + Connection read+revoke + Account read + WebhookCall viewer + AccountSubscription read+state-flip + Cashier-Subscription read + User super-admin-gated) *(voltooid 2026-05-16; 11/11 plans, HUB-04 SC-1..SC-10 bewezen via 52 nieuwe tests in `tests/Feature/Admin/` + 1 audit-migratie, ADR `filament-admin-panel.md`, 389 tests / 1343 assertions groen)*
-- [ ] **Phase 10: Phase 9 polish — deferred review-findings** — 11 bevindingen uit `09-REVIEW.md` afsluiten: CR-02 permission-enforcement op 6 resources + Hub `WebhookCall`-model met `consumer()` belongs-to + cross-Consumer-isolation-test (SC-7 bewijs); WR-01..06 (last-super-admin guards, exception-veld, role-validatie, seeder password-reset, password-edit-regressie, PAT-token uit Livewire-state); IN-01..04 (N+1, exception-leak, AdminPanelProvider-comment, descriptor `tryFor()`).
+- [x] **Phase 10: Phase 9 polish — deferred review-findings** — 11 bevindingen uit `09-REVIEW.md` afsluiten: CR-02 permission-enforcement op 6 resources + Hub `WebhookCall`-model met `consumer()` belongs-to + cross-Consumer-isolation-test (SC-7 bewijs); WR-01..06 (last-super-admin guards, exception-veld, role-validatie, seeder password-reset, password-edit-regressie, PAT-token uit Livewire-state); IN-01..04 (N+1, exception-leak, AdminPanelProvider-comment, descriptor `tryFor()`). (completed 2026-05-16)
 
 ### Phase Details
 
@@ -384,7 +384,7 @@ v0.2 bouwt drie samenhangende lagen: (1) `emeq/mollie-api` SDK die `mollie/molli
 | 7. Account-level subscriptions | 8/8 | Done | 2026-05-15 |
 | 8. Naschool wiring | 0/0 (TBD) | Not started | - |
 | 9. Filament admin-UI voor Emeq-medewerkers | 11/11 | Complete    | 2026-05-16 |
-| 10. Phase 9 polish — deferred review-findings | 5/6 | In Progress|  |
+| 10. Phase 9 polish — deferred review-findings | 6/6 | Complete   | 2026-05-16 |
 
 ### Coverage
 
@@ -449,14 +449,14 @@ Verzamelpunt voor ideeën die nog geen milestone hebben. Bij milestone-kickoff w
   11. `ProviderCredentialDescriptor::tryFor()` bestaat; `Connection::fingerprint()` gebruikt het in plaats van inline try/catch.
   12. Volledige test-suite groen (`php artisan test --compact`) — minimaal 389 + nieuwe-tests passing.
 
-**Plans:** 5/6 plans executed
+**Plans:** 6/6 plans complete
 
 - [x] 10-01-PLAN.md — Hub-eigen `App\Models\WebhookCall` + `consumer()` belongs-to + `config/webhook-client.php` model-binding (wave 1)
 - [x] 10-02-PLAN.md — `ProviderCredentialDescriptor::tryFor()` helper + `Connection::fingerprint()` refactor (IN-04 / D-11) (wave 1)
 - [x] 10-03-PLAN.md — `canAccess()` + `shouldRegisterNavigation()` op 6 niet-User-Resources (CR-02 hoofd-fix / D-1) (wave 2)
 - [x] 10-04-PLAN.md — `WebhookCallsTable` + `WebhookCallInfolist` consumer-relatie + exception unwrap (WR-02 + IN-01 / D-5) (wave 2)
 - [x] 10-05-PLAN.md — User-guards (last-super-admin) + Select `->in()` + Seeder hard-fail + cancelAction fingerprint + AdminPanelProvider comment (WR-01/03/04 + IN-02/03 / D-4/6/7/10) (wave 3)
-- [ ] 10-06-PLAN.md — PAT Cache-flash (WR-06 / D-9) + edit-zonder-password regression (WR-05 / D-8) + HUB-04 SC-7 closure (D-3) (wave 4)
+- [x] 10-06-PLAN.md — PAT Cache-flash (WR-06 / D-9) + edit-zonder-password regression (WR-05 / D-8) + HUB-04 SC-7 closure (D-3) (wave 4)
 
 ---
 
