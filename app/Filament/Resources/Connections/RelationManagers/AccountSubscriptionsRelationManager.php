@@ -1,0 +1,64 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Filament\Resources\Connections\RelationManagers;
+
+use App\Billing\Account\SubscriptionStatus;
+use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Table;
+
+/**
+ * Toont AccountSubscriptions die via deze (Mollie) Connection draaien.
+ * Snelstart-Connections hebben geen subscriptions; de RelationManager rendert
+ * dan een lege state — geen zichtbare side-effects voor andere providers.
+ */
+final class AccountSubscriptionsRelationManager extends RelationManager
+{
+    protected static string $relationship = 'accountSubscriptions';
+
+    protected static ?string $title = 'Subscriptions';
+
+    public function table(Table $table): Table
+    {
+        return $table
+            ->recordTitleAttribute('mollie_subscription_id')
+            ->columns([
+                TextColumn::make('mollie_subscription_id')
+                    ->label('Mollie ID')
+                    ->fontFamily('mono')
+                    ->copyable()
+                    ->placeholder('—'),
+                TextColumn::make('account.external_id')
+                    ->label('Account')
+                    ->searchable(),
+                TextColumn::make('status')
+                    ->label('Status')
+                    ->badge()
+                    ->color(fn (SubscriptionStatus $state): string => match ($state) {
+                        SubscriptionStatus::Active => 'success',
+                        SubscriptionStatus::Pending => 'warning',
+                        SubscriptionStatus::Paused => 'info',
+                        SubscriptionStatus::Canceled, SubscriptionStatus::Completed => 'gray',
+                        SubscriptionStatus::Unknown => 'danger',
+                    })
+                    ->formatStateUsing(fn (SubscriptionStatus $state): string => $state->value),
+                TextColumn::make('amount_value')
+                    ->label('Bedrag')
+                    ->formatStateUsing(fn ($state, $record) => $state ? "{$record->amount_currency} {$state}" : '—'),
+                TextColumn::make('created_at')
+                    ->label('Aangemaakt')
+                    ->dateTime('d-m-Y H:i')
+                    ->sortable(),
+            ])
+            ->filters([
+                SelectFilter::make('status')
+                    ->options(collect(SubscriptionStatus::cases())
+                        ->mapWithKeys(fn (SubscriptionStatus $s): array => [$s->value => ucfirst($s->value)])
+                        ->all()),
+            ])
+            ->defaultSort('created_at', 'desc');
+    }
+}

@@ -43,7 +43,10 @@ class AccountResource extends Resource
 
     public static function getRelations(): array
     {
-        return [];
+        return [
+            RelationManagers\ConnectionsRelationManager::class,
+            RelationManagers\AccountSubscriptionsRelationManager::class,
+        ];
     }
 
     public static function getPages(): array
