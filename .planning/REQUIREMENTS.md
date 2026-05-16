@@ -51,15 +51,18 @@ Requirements voor v0.2 (~8-10 weken). Elke vereiste mapt naar één roadmap-fase
 Deferred to v0.3+. Tracked, niet in v0.2 roadmap.
 
 ### Snelstart Saloon v4
+
 - **SNEL-V4**: Upgrade Saloon v3 → v4 (3 ignored security advisories oplossen, o.a. SSRF via endpoint-override)
 
 ### Andere providers (volgende milestones)
+
 - **PROV-MONEYBIRD**: `emeq/moneybird-api` SDK
 - **PROV-EXACT**: `emeq/exact-api` SDK + OAuth-flow
 - **PROV-IBANITY**: `emeq/ibanity-api` SDK (PSD2 met eIDAS/QSEAL certificaten)
 - **PROV-STRIPE**: `emeq/stripe-api` SDK (positie-3-uitbreiding)
 
 ### Hub commerciële features
+
 - **HUB-BILLING**: Cashier-Mollie publieke billing-flow voor derde-partij Consumers (self-service Mollie-subscription voor Hub-toegang)
 - **HUB-DOCS**: Public docs-site (Scramble + landing-page) op `docs.hub.emeq.nl`
 - **HUB-ONBOARDING**: Self-service Consumer-onboarding-flow (registratie → PAT-uitgifte → eerste Connection)
@@ -97,6 +100,7 @@ Expliciet uitgesloten voor v0.2. Niet re-adden zonder PROJECT.md herziening.
 | NSCH-03 | Phase 8 | Pending |
 
 **Coverage:**
+
 - v1 requirements: 15 total
 - Mapped to phases: 15 (Phase 2-9, Phase 5 gesplitst in 5a + 5b + 5c)
 - Unmapped: 0

@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v0.2
 milestone_name: — Mollie + Connect + Subscriptions + Hub-skeleton
-status: ready
-stopped_at: Phase 9 close PENDING — 09-11 acceptance + ADR geschreven op worktree-branch; awaits human-verify checkpoint (visuele review /admin op localhost)
-last_updated: "2026-05-16T02:30:00+02:00"
-last_activity: 2026-05-16 -- Phase 09 execution complete (11/11 plans); 09-11-ACCEPTANCE.md + ADR filament-admin-panel.md geschreven; awaits human-verify
+status: verifying
+stopped_at: Phase 9 close PENDING — 09-11 acceptance + ADR geschreven op worktree-branch; planning-sync edits niet gecommit (wachten op "approved"); awaits human-verify checkpoint (visuele review /admin op localhost)
+last_updated: "2026-05-16T12:49:13.317Z"
+last_activity: 2026-05-16
 progress:
   total_phases: 10
   completed_phases: 7
   total_plans: 62
-  completed_plans: 52
-  percent: 84
+  completed_plans: 57
+  percent: 70
 ---
 
 # Project State
@@ -25,16 +25,16 @@ See: .planning/PROJECT.md (updated 2026-05-14 na v0.1 milestone-close)
 
 ## Current Position
 
-Phase: — (Phase 9 ACCEPTANCE PENDING-CHECKPOINT — 11/11 plans + 09-11-ACCEPTANCE.md geschreven; awaits human-verify)
-Plan: 11 of 11 (09-11 acceptance + ADR + planning-sync uitgevoerd, commit volgt na "approved")
+Phase: 09
+Plan: Not started
 Status: Awaiting human-verify checkpoint (visuele review /admin op localhost)
-Last activity: 2026-05-16 -- Phase 09 execution complete (11/11 plans); 09-11-ACCEPTANCE.md + ADR filament-admin-panel.md geschreven
+Last activity: 2026-05-16
 
 ## Performance Metrics
 
 **v0.1 Velocity:**
 
-- Total plans completed: 14 (Phase 1)
+- Total plans completed: 25 (Phase 1)
 - Total execution time: ~12 uur (2026-05-14 00:42 → 12:02 CEST)
 - Sub-repo werk: snelstart-sdk submodule wiring + Pest-coverage + push
 
@@ -49,6 +49,7 @@ Last activity: 2026-05-16 -- Phase 09 execution complete (11/11 plans); 09-11-AC
 | 05b | 5 | - | - |
 | 06 | 8 | - | - |
 | 07 | 8 | ~execution-wave-based (5 waves) | n/a (parallel-execution per wave) |
+| 09 | 11 | - | - |
 
 **Recent Trend:**
 
