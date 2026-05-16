@@ -3,8 +3,10 @@
 namespace App\OAuth;
 
 use App\OAuth\Contracts\OAuthFlow;
+use App\OAuth\Exceptions\ProviderDisabledException;
 use Illuminate\Contracts\Container\Container;
 use InvalidArgumentException;
+use Laravel\Pennant\Feature;
 
 final class OAuthFlowRegistry
 {
@@ -27,6 +29,10 @@ final class OAuthFlowRegistry
             throw new InvalidArgumentException(
                 "Geen OAuthFlow geregistreerd voor provider '{$provider}'."
             );
+        }
+
+        if (! Feature::active("provider-{$provider}-enabled")) {
+            throw new ProviderDisabledException($provider);
         }
 
         return $this->container->make($this->providers[$provider]);

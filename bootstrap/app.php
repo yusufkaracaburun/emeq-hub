@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\EnsureEmeqAdminToken;
+use App\Http\Middleware\EnsureProviderEnabled;
 use App\Http\Middleware\RequireCashierWebhookSecret;
 use App\Http\Middleware\ResolveMollieAccount;
 use App\Http\Middleware\ResolveSnelstartAccount;
@@ -33,6 +34,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'resolve.mollie.account' => ResolveMollieAccount::class,
             'emeq.admin' => EnsureEmeqAdminToken::class,
             'cashier.webhook.secret' => RequireCashierWebhookSecret::class,
+            'feature.provider' => EnsureProviderEnabled::class,
             'abilities' => CheckAbilities::class,
             'ability' => CheckForAnyAbility::class,
         ]);

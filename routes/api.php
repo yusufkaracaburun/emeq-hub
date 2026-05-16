@@ -36,14 +36,14 @@ Route::middleware('auth:sanctum')->group(function (): void {
     Route::get('/connections/{connection}', [ConnectionController::class, 'show'])->name('api.connections.show');
     Route::delete('/connections/{connection}', [ConnectionController::class, 'destroy'])->name('api.connections.destroy');
 
-    Route::middleware('ability:mollie:write')->group(function (): void {
+    Route::middleware(['ability:mollie:write', 'feature.provider:mollie'])->group(function (): void {
         Route::post('/oauth/mollie/init', InitController::class)
             ->name('api.oauth.mollie.init');
     });
 
     Route::any('/snelstart/{path}', PassThroughController::class)
         ->where('path', '.*')
-        ->middleware('resolve.snelstart.account')
+        ->middleware(['feature.provider:snelstart', 'resolve.snelstart.account'])
         ->name('api.snelstart.passthrough');
 
     Route::middleware('ability:billing:read,billing:write,*')->group(function (): void {
@@ -60,7 +60,7 @@ Route::middleware('auth:sanctum')->group(function (): void {
                 ->name('api.admin.billing.subscriptions.destroy');
         });
 
-    Route::prefix('mollie')->middleware('resolve.mollie.account')->group(function (): void {
+    Route::prefix('mollie')->middleware(['feature.provider:mollie', 'resolve.mollie.account'])->group(function (): void {
         Route::post('/payments', [PaymentsController::class, 'store'])->name('api.mollie.payments.store');
         Route::get('/payments/{id}', [PaymentsController::class, 'show'])->name('api.mollie.payments.show');
         Route::delete('/payments/{id}', [PaymentsController::class, 'destroy'])->name('api.mollie.payments.destroy');
