@@ -10,6 +10,7 @@ use App\Models\Consumer;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
+use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
@@ -29,6 +30,7 @@ class AccountResourceTest extends TestCase
     {
         Role::firstOrCreate(['name' => 'super-admin']);
         Role::firstOrCreate(['name' => 'staff']);
+        Permission::firstOrCreate(['name' => 'manage-consumers']);
     }
 
     private function actAsStaff(): User
@@ -36,6 +38,7 @@ class AccountResourceTest extends TestCase
         $this->seedRoles();
         $user = User::factory()->create();
         $user->assignRole('staff');
+        $user->givePermissionTo('manage-consumers');
         $this->actingAs($user);
 
         return $user;

@@ -15,6 +15,7 @@ use App\Models\Consumer;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
+use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
@@ -32,8 +33,11 @@ class RelationManagersRenderTest extends TestCase
     {
         Role::firstOrCreate(['name' => 'super-admin']);
         Role::firstOrCreate(['name' => 'staff']);
+        Permission::firstOrCreate(['name' => 'manage-consumers']);
+        Permission::firstOrCreate(['name' => 'manage-connections']);
         $user = User::factory()->create();
         $user->assignRole('staff');
+        $user->givePermissionTo(['manage-consumers', 'manage-connections']);
 
         return $user;
     }

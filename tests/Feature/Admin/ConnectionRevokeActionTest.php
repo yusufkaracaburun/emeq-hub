@@ -13,6 +13,7 @@ use App\OAuth\Mollie\MollieConnectOAuthFlow;
 use App\OAuth\Testing\FakeOAuthFlow;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
+use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
@@ -33,6 +34,7 @@ class ConnectionRevokeActionTest extends TestCase
     {
         Role::firstOrCreate(['name' => 'super-admin']);
         Role::firstOrCreate(['name' => 'staff']);
+        Permission::firstOrCreate(['name' => 'manage-connections']);
     }
 
     private function makeStaffUser(): User
@@ -40,6 +42,7 @@ class ConnectionRevokeActionTest extends TestCase
         $this->seedRoles();
         $user = User::factory()->create();
         $user->assignRole('staff');
+        $user->givePermissionTo('manage-connections');
 
         return $user;
     }

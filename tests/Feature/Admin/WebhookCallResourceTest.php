@@ -10,6 +10,7 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
+use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Spatie\WebhookClient\Models\WebhookCall;
 use Tests\TestCase;
@@ -30,6 +31,7 @@ class WebhookCallResourceTest extends TestCase
     {
         Role::firstOrCreate(['name' => 'super-admin']);
         Role::firstOrCreate(['name' => 'staff']);
+        Permission::firstOrCreate(['name' => 'view-webhooks']);
     }
 
     private function actAsStaff(): User
@@ -37,6 +39,7 @@ class WebhookCallResourceTest extends TestCase
         $this->seedRoles();
         $user = User::factory()->create();
         $user->assignRole('staff');
+        $user->givePermissionTo('view-webhooks');
         $this->actingAs($user);
 
         return $user;

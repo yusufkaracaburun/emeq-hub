@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Sanctum\TokenAbilities;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
+use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
@@ -20,6 +21,7 @@ class ConsumerTokenActionTest extends TestCase
     {
         Role::firstOrCreate(['name' => 'super-admin']);
         Role::firstOrCreate(['name' => 'staff']);
+        Permission::firstOrCreate(['name' => 'manage-consumers']);
     }
 
     public function test_staff_user_can_issue_pat_with_mollie_read_preset(): void
@@ -27,6 +29,7 @@ class ConsumerTokenActionTest extends TestCase
         $this->seedRoles();
         $admin = User::factory()->create();
         $admin->assignRole('staff');
+        $admin->givePermissionTo('manage-consumers');
         $consumer = Consumer::factory()->create();
 
         $this->actingAs($admin);
@@ -49,6 +52,7 @@ class ConsumerTokenActionTest extends TestCase
         $this->seedRoles();
         $admin = User::factory()->create();
         $admin->assignRole('staff');
+        $admin->givePermissionTo('manage-consumers');
         $consumer = Consumer::factory()->create();
 
         $this->actingAs($admin);

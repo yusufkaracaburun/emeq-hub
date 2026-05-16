@@ -83,6 +83,16 @@ class ConsumerResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBuildingOffice;
 
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->can('manage-consumers') ?? false;
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return static::canAccess();
+    }
+
     public static function form(Schema $schema): Schema
     {
         return $schema

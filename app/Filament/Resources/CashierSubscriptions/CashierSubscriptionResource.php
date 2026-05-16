@@ -29,6 +29,16 @@ class CashierSubscriptionResource extends Resource
 
     protected static ?int $navigationSort = 1;
 
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->can('view-billing') ?? false;
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return static::canAccess();
+    }
+
     public static function infolist(Schema $schema): Schema
     {
         return CashierSubscriptionInfolist::configure($schema);

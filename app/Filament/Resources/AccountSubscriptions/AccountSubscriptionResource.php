@@ -44,6 +44,16 @@ class AccountSubscriptionResource extends Resource
 
     protected static ?int $navigationSort = 2;
 
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->can('view-account-subscriptions') ?? false;
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return static::canAccess();
+    }
+
     public static function form(Schema $schema): Schema
     {
         // Read-only Resource — geen Create/Edit pages. Schema blijft leeg.
