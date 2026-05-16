@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: v0.2
 milestone_name: — Mollie + Connect + Subscriptions + Hub-skeleton
-status: completed
+status: executing
 stopped_at: Phase 8 context gathered — 7 D-decisions, Hub-side scope (Filament onboard-wizard + StartOAuthFlowAction + partner-pages + Resource-hints); Naschool-internals out of scope (eigen repo)
-last_updated: "2026-05-16T14:57:43.980Z"
-last_activity: 2026-05-16
+last_updated: "2026-05-16T20:03:07.795Z"
+last_activity: 2026-05-16 -- Phase 10 execution started
 progress:
   total_phases: 10
   completed_phases: 7
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-05-14 na v0.1 milestone-close)
 
 **Core value:** Twee fundamenteel verschillende providers (OData/clientkey + REST/OAuth2) productie-gevalideerd via één SDK-pattern, en beide live in één concrete consumer-feature. v0.1 heeft Snelstart-deel bewezen; v0.2 zet Mollie + Connect + Subscriptions + Hub-skeleton op.
-**Current focus:** Phase 5c (Snelstart webhook-handler) BLOCKED op partner@snelstart.nl antwoord; Phase 8 (Naschool wiring) is alternatief en unblocked.
+**Current focus:** Phase 10 — phase-9-polish-deferred-review-findings
 
 ## Current Position
 
-Phase: 05c
-Plan: Not started
-Status: BLOCKED — wacht op Snelstart partner-response (Gmail draft r-8836998535038336548, verwacht ≤ 2026-05-26). Alternatief unblocked pad: Phase 8 (Naschool wiring) — depends-on Phases 5b+5a+6+7 die alle Complete zijn.
-Last activity: 2026-05-16 - Completed quick task 260516-qau: docs-sync drift fix (ADR Pennant kill-switch + README strategy/-rij)
+Phase: 10 (phase-9-polish-deferred-review-findings) — EXECUTING
+Plan: 1 of 6
+Status: Executing Phase 10
+Last activity: 2026-05-16 -- Phase 10 execution started
 
 ## Performance Metrics
 
