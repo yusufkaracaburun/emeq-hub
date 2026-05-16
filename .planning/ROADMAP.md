@@ -384,6 +384,7 @@ v0.2 bouwt drie samenhangende lagen: (1) `emeq/mollie-api` SDK die `mollie/molli
 | 7. Account-level subscriptions | 8/8 | Done | 2026-05-15 |
 | 8. Naschool wiring | 0/0 (TBD) | Not started | - |
 | 9. Filament admin-UI voor Emeq-medewerkers | 11/11 | Complete    | 2026-05-16 |
+| 10. Phase 9 polish — deferred review-findings | 0/6 | Planned | - |
 
 ### Coverage
 
@@ -448,7 +449,14 @@ Verzamelpunt voor ideeën die nog geen milestone hebben. Bij milestone-kickoff w
   11. `ProviderCredentialDescriptor::tryFor()` bestaat; `Connection::fingerprint()` gebruikt het in plaats van inline try/catch.
   12. Volledige test-suite groen (`php artisan test --compact`) — minimaal 389 + nieuwe-tests passing.
 
-**Plans:** TBD (run `/gsd:plan-phase 10` to break down)
+**Plans:** 6 plans
+
+- [ ] 10-01-PLAN.md — Hub-eigen `App\Models\WebhookCall` + `consumer()` belongs-to + `config/webhook-client.php` model-binding (wave 1)
+- [ ] 10-02-PLAN.md — `ProviderCredentialDescriptor::tryFor()` helper + `Connection::fingerprint()` refactor (IN-04 / D-11) (wave 1)
+- [ ] 10-03-PLAN.md — `canAccess()` + `shouldRegisterNavigation()` op 6 niet-User-Resources (CR-02 hoofd-fix / D-1) (wave 2)
+- [ ] 10-04-PLAN.md — `WebhookCallsTable` + `WebhookCallInfolist` consumer-relatie + exception unwrap (WR-02 + IN-01 / D-5) (wave 2)
+- [ ] 10-05-PLAN.md — User-guards (last-super-admin) + Select `->in()` + Seeder hard-fail + cancelAction fingerprint + AdminPanelProvider comment (WR-01/03/04 + IN-02/03 / D-4/6/7/10) (wave 3)
+- [ ] 10-06-PLAN.md — PAT Cache-flash (WR-06 / D-9) + edit-zonder-password regression (WR-05 / D-8) + HUB-04 SC-7 closure (D-3) (wave 4)
 
 ---
 
