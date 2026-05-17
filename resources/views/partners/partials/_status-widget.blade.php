@@ -23,7 +23,9 @@
                         ],
                         'revoked' => [
                             'icon' => 'x-circle',
-                            'text' => 'revoked at '.optional($entry['connection']?->revoked_at)->format('Y-m-d H:i'),
+                            // WR-07: `?->` op de Carbon-cast doet hier wat optional()->format
+                            // niet doet (clean null-pass-through zonder reflection-overhead).
+                            'text' => 'revoked at '.($entry['connection']?->revoked_at?->format('Y-m-d H:i') ?? 'unknown'),
                             'classes' => 'text-rose-600 bg-rose-50',
                         ],
                         default => [
@@ -32,7 +34,7 @@
                             'classes' => 'text-gray-500 bg-gray-50',
                         ],
                     };
-                    $expiresAt = optional($entry['connection']?->expires_at)->format('Y-m-d H:i');
+                    $expiresAt = $entry['connection']?->expires_at?->format('Y-m-d H:i');
                 @endphp
                 <li class="flex items-center gap-2 px-3 py-2 rounded {{ $statusConfig['classes'] }}"
                     data-status="{{ $entry['status'] }}"

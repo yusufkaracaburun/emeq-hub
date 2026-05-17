@@ -7,6 +7,7 @@ namespace Tests\Feature\Dev;
 use App\Models\Account;
 use App\Models\Connection;
 use App\Models\Consumer;
+use App\OAuth\Contracts\OAuthFlow;
 use App\OAuth\Mollie\MollieConnectOAuthFlow;
 use App\OAuth\Testing\FakeOAuthFlow;
 use App\Services\PartnerStatus;
@@ -99,12 +100,34 @@ class PartnerPagesTest extends TestCase
         $queries = DB::getQueryLog();
         DB::disableQueryLog();
 
-        $this->assertLessThanOrEqual(
+        // WR-03: exact-count tripwire i.p.v. lessThanOrEqual — een 3e query (bv. nieuw
+        // eager-load voor `consumer`) moet zichtbaar zijn als regressie en
+        // bewust naar boven worden bijgesteld.
+        $this->assertSame(
             2,
             count($queries),
-            'PartnerStatus::forProvider() moet één eager-load doen (max 2 queries: Account + connections).'
+            'PartnerStatus::forProvider() moet exact 2 queries doen (Account + eager connections).'
         );
         $this->assertCount(5, $result);
+    }
+
+    public function test_partner_status_totals_for_provider_keeps_query_count_in_check(): void
+    {
+        $consumer = Consumer::factory()->create();
+        for ($i = 0; $i < 3; $i++) {
+            $account = Account::factory()->for($consumer)->create();
+            Connection::factory()->for($account)->forMollie()->active()->create();
+        }
+
+        DB::enableQueryLog();
+        $totals = app(PartnerStatus::class)->totalsForProvider('mollie');
+        DB::disableQueryLog();
+        $queries = DB::getQueryLog();
+
+        // totalsForProvider() roept forProvider() één keer aan → max 2 queries.
+        // Een refactor die forProvider() tweemaal zou aanroepen verdubbelt dit.
+        $this->assertSame(2, count($queries), 'totalsForProvider() moet ook exact 2 queries doen');
+        $this->assertSame(['connected' => 3, 'total' => 3], $totals);
     }
 
     // ---------- Task 1: _domeinmodel.blade.php partial ----------
@@ -269,6 +292,54 @@ class PartnerPagesTest extends TestCase
         $response = $this->get('/dev/partners/mollie/start-oauth');
 
         $response->assertNotFound();
+    }
+
+    /**
+     * CR-04 regression — een fout in getAuthorizationUrl() mag geen orphan
+     * pending-Connection achterlaten. Voorheen schreef de route de
+     * Connection vóór de partner-call, dus elke retry stapelde rijen op
+     * (30-min oauth_state TTL).
+     */
+    public function test_mollie_dev_oauth_route_does_not_create_orphan_connection_when_authorize_url_throws(): void
+    {
+        $this->app->bind(MollieConnectOAuthFlow::class, function () {
+            return new class implements OAuthFlow
+            {
+                public function getAuthorizationUrl(Account $account, array $scopes, string $state): string
+                {
+                    throw new \RuntimeException('Mollie down.');
+                }
+
+                public function exchangeCode(Connection $connection, string $code): Connection
+                {
+                    return $connection;
+                }
+
+                public function refreshToken(Connection $connection): Connection
+                {
+                    return $connection;
+                }
+
+                public function revoke(Connection $connection): void {}
+            };
+        });
+
+        $consumer = Consumer::factory()->create(['slug' => 'naschool']);
+        Account::factory()->for($consumer)->create();
+
+        $this->assertSame(0, Connection::query()->count());
+
+        $response = $this->get('/dev/partners/mollie/start-oauth');
+
+        // 503-fail (not 500/302) — abort message toont alleen bij APP_DEBUG=true,
+        // maar status-code is altijd geset.
+        $response->assertStatus(503);
+
+        // Cruciaal: geen orphan pending-row, ook niet na retry.
+        $this->assertSame(0, Connection::query()->count(), 'Geen orphan Connection na failed authorize-URL');
+
+        $this->get('/dev/partners/mollie/start-oauth')->assertStatus(503);
+        $this->assertSame(0, Connection::query()->count(), 'Retry mag ook geen rij achterlaten');
     }
 
     public function test_mollie_page_includes_status_widget_with_connected_account(): void
