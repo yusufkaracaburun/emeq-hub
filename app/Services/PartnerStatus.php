@@ -27,11 +27,17 @@ use Illuminate\Support\Collection;
 final class PartnerStatus
 {
     /**
+     * @param  string|null  $consumerSlug  scope op één Consumer (bv. 'naschool') —
+     *                                     default null = alle Accounts (dev-pagina toont alleen demo-data, dus de
+     *                                     global-aggregation is in praktijk gelijk). WR-04: optionele scope-arg
+     *                                     zodat de "1/2 Accounts gekoppeld"-totalen niet misleiden zodra een tweede
+     *                                     demo-Consumer wordt geseed.
      * @return Collection<int, array{account: Account, connection: ?Connection, status: string}>
      */
-    public function forProvider(string $provider): Collection
+    public function forProvider(string $provider, ?string $consumerSlug = null): Collection
     {
         return Account::query()
+            ->when($consumerSlug, fn ($q) => $q->whereHas('consumer', fn ($qq) => $qq->where('slug', $consumerSlug)))
             ->with(['connections' => fn ($q) => $q->where('provider', $provider)])
             ->get()
             ->map(fn (Account $account): array => [
@@ -46,9 +52,9 @@ final class PartnerStatus
      *
      * @return array{connected: int, total: int}
      */
-    public function totalsForProvider(string $provider): array
+    public function totalsForProvider(string $provider, ?string $consumerSlug = null): array
     {
-        $entries = $this->forProvider($provider);
+        $entries = $this->forProvider($provider, $consumerSlug);
 
         return [
             'connected' => $entries->where('status', 'connected')->count(),
