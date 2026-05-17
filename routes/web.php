@@ -1,10 +1,13 @@
 <?php
 
+use App\Models\Account;
 use App\Models\User;
+use App\OAuth\OAuthFlowRegistry;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Str;
 
 Route::get('/', fn () => response()->json([
     'name' => config('app.name'),
@@ -51,6 +54,30 @@ if (app()->environment('local', 'testing')) {
         $view = "partners.{$provider}.example";
         abort_unless(view()->exists($view), 404, "Geen voorbeeldpagina voor `{$provider}` — maak `resources/views/{$view}.blade.php`.");
 
-        return response()->view($view);
+        return response()->view($view, ['provider' => $provider]);
     })->name('dev.partners.preview');
+
+    // Plan 08-05 — Dev-only Mollie OAuth-init trigger (D-06 §3, UI-SPEC §S3 regel 191).
+    // Hergebruikt Phase-4 InitController-pattern: 48-char state + 30-min TTL pending
+    // Connection + Mollie authorize-redirect. Pre-selected demo-Account = eerste
+    // Account van de Naschool-Consumer (geseed via DatabaseSeeder).
+    Route::get('/dev/partners/mollie/start-oauth', function () {
+        $account = Account::query()
+            ->whereHas('consumer', fn ($q) => $q->where('slug', 'naschool'))
+            ->first();
+        abort_unless($account !== null, 404, 'Geen demo-Account — draai EmeqStaffSeeder + Naschool-seed eerst.');
+
+        $state = Str::random(48);
+        $account->connections()->create([
+            'provider' => 'mollie',
+            'status' => 'pending',
+            'oauth_state' => $state,
+            'oauth_state_expires_at' => now()->addMinutes(30),
+        ]);
+
+        $scopes = config('services.mollie.connect.scopes');
+        $url = app(OAuthFlowRegistry::class)->for('mollie')->getAuthorizationUrl($account, $scopes, $state);
+
+        return redirect()->away($url);
+    })->name('dev.partners.mollie.start-oauth');
 }
