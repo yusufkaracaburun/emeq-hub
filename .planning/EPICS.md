@@ -6,11 +6,11 @@
 
 | Epic | Milestone | Status | Next | Detail |
 |---|---|---|---|---|
-| **Hub** (Epic 1) | v0.2 — Mollie + Connect + Subscriptions + Hub-skeleton | in-progress (9/11 phases) | Phase 5c-04 ForwardSnelstartWebhookToConsumerJob | [`.planning/ROADMAP.md`](./ROADMAP.md) |
+| **Hub** (Epic 1) | v0.2 — Mollie + Connect + Subscriptions + Hub-skeleton | in-progress (10/11 phases) | Phase 5c verifier-pass + merge | [`.planning/ROADMAP.md`](./ROADMAP.md) |
 | **Mollie SDK** (Epic 2) | `v0.1.0-alpha.2` (published 2026-05-17) | done → v1.0 next | `/gsd-new-milestone v1.0` in SDK-repo na 5c | [`packages/mollie-api/`](../packages/mollie-api/) |
 | **Snelstart SDK** (Epic 2) | `v0.1.0` (published 2026-05-17) | done → v1.0 next | `/gsd-new-milestone v1.0` in SDK-repo na 5c | [`packages/snelstart-api/`](../packages/snelstart-api/) |
 
-_Last sync: 2026-05-17_
+_Last sync: 2026-05-17 (Phase 5c ACCEPTED — plan 05 completed)_
 
 ## Cross-epic dependencies
 

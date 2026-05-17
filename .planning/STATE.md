@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v0.2
 milestone_name: — Mollie + Connect + Subscriptions + Hub-skeleton
 status: executing
-stopped_at: Phase 8 SHIPPED — 5/5 plans + 11/11 critical+warning review-fixes + ADR `.docs/decisions/phase-8-consumer-onboarding.md` + error-entry `.docs/errors/flash-key-cache-spy-trap.md`; 13/13 Hub-side must-haves verified; 507/507 tests groen; branch `chore/v021-phase9-polish` heeft 34 Phase-8-commits + 2 fix-commit-groepen + 1 backlog-capture; branch-naam dekt scope niet meer (rename voor PR aangeraden)
-last_updated: "2026-05-17T21:30:00.000Z"
-last_activity: 2026-05-17 -- Phase 05c plan 03 (SnelstartWebhookController + route + 7 PHPUnit tests) completed
+stopped_at: Phase 5c ACCEPTED — 5/5 plans + HUB-06 SC-1..SC-5 bewezen via 5 end-to-end-tests + per-scenario coverage in 02/03/04; ADR `snelstart-webhook-ingress.md` (gitignored Hub-internal artifact) + `05c-ACCEPTANCE.md` geland. 523/524 tests passed + 1 pre-existing failure (UserResource, Phase 9/10 owner, out-of-scope) + 1 pre-existing incomplete. Volgende stap: `/gsd-verify-work 5c` voor verifier-pass.
+last_updated: "2026-05-17T22:30:00.000Z"
+last_activity: 2026-05-17 -- Phase 05c plan 05 (SnelstartWebhookEndToEndTest + ADR + ACCEPTANCE + tracking sync) — HUB-06 Complete; Phase 5c ACCEPTED
 progress:
   total_phases: 10
-  completed_phases: 8
+  completed_phases: 9
   total_plans: 67
-  completed_plans: 65
-  percent: 85
+  completed_plans: 66
+  percent: 86
 ---
 
 # Project State
@@ -25,10 +25,10 @@ See: .planning/PROJECT.md (updated 2026-05-14 na v0.1 milestone-close)
 
 ## Current Position
 
-Phase: 05c (snelstart-webhook-handler) — EXECUTING
-Plan: 4 of 5 (plans 01/02/03/04 done; plan 05 integration-tests remaining)
-Status: Executing Phase 05c
-Last activity: 2026-05-17 -- Phase 05c plan 03 (SnelstartWebhookController + route + 7 PHPUnit tests) completed
+Phase: 05c (snelstart-webhook-handler) — ACCEPTED 2026-05-17
+Plan: 5 of 5 (alle 5 plans done; HUB-06 Complete)
+Status: Phase 5c afgerond; volgende stap = `/gsd-verify-work 5c` voor verifier-pass
+Last activity: 2026-05-17 -- Phase 05c plan 05 (SnelstartWebhookEndToEndTest + ADR + ACCEPTANCE + tracking sync) completed — Phase 5c ACCEPTED
 
 ## Performance Metrics
 
@@ -186,6 +186,7 @@ Decisions zijn gelogd in PROJECT.md Key Decisions table. Decisions die uit v0.1 
 
 ### Roadmap Evolution
 
+- 2026-05-17 — **Phase 5c plan 05 executed + Phase 5c ACCEPTED**: `tests/Feature/SnelstartWebhookEndToEndTest.php` (5 SC-scenarios, RefreshDatabase, geen middleware-mocks — volle stack route → SDK-middleware → controller → forward-job) eerste-run-groen (5/5 / 35 assertions / ~1s) bewijst dat plans 02/03/04 samen sluitend zijn — geen integration-gap gevonden. ADR `.docs/decisions/snelstart-webhook-ingress.md` (gitignored, Hub-internal artifact) landt 4 secties (Status/Keuze/Context/Consequenties) met expliciete anti-correlation/anti-amplification/anti-retry-storm invariants + duplicate-event NULL-event_id rationale + 4/5 🔒 + #4 retry-policy nog defensief. Tracking-updates: REQUIREMENTS HUB-06 `[ ]` → `[x]` met evidence-pointer naar `05c-ACCEPTANCE.md` + mapping `Pending` → `Complete`; ROADMAP Phase 5c hoofdcheckbox `[x]` met completion-suffix + Plans 4/5 → 5/5 + coverage-table-row `5/5 Complete 2026-05-17`; ACCEPTANCE-document met 5 SC-rows + 6/6 prereq-checks + plan-commit-tabel + 4 🔒 + 1 ❓-#4 disclaimer. Full Hub-suite: 524 tests / 523 passed / 1801 assertions / 1 pre-existing failure (UserResource — Phase 9/10 owner, out-of-scope) / 1 pre-existing incomplete (Phase 3-03 placeholder). HUB-06 SC-1..SC-5 alle bewezen via per-scenario coverage in 02/03/04 + E2E samenhangend in 05. Phase 5c ACCEPTED — volgende stap = `/gsd-verify-work 5c` voor verifier-pass dat eventuele claim-vs-evidence-drift afsluit, daarna phase-merge of `/gsd-ship`.
 - 2026-05-17 — **Phase 5c plan 03 executed**: `App\Http\Controllers\Webhooks\SnelstartWebhookController` (final, single-action invokable) + `POST /webhooks/snelstart` route (middleware `['api', 'verify.snelstart.signature']`, `withoutMiddleware(['throttle:api'])`, naam `webhooks.snelstart`) + 7 PHPUnit feature-tests committed als RED `207ed1b` + GREEN `f999b4e`. Vier paden afgehandeld: (1) malformed payload → 400 + audit `upstream_error='malformed_payload'`, (2) duplicate event_id → 200 + dup-audit met `event_id=NULL` (om unique-index uit plan 05c-01 niet te crashen) + `upstream_error='duplicate_event'`, geen extra dispatch, (3) unknown administratie incl. revoked → 200 + NULL-tenant audit + `upstream_error='unknown_administratie_id'`, geen dispatch, (4) happy → 200 + audit-row met volledige FK-keten + `ForwardSnelstartWebhookToConsumerJob::dispatch`. Anti-retry-storm via 200 op valid HMAC (CONTEXT decision); anti-amplification via SDK-middleware die géén audit schrijft op 401. Twee deviations: Rule 3 — stub-controller meegenomen in RED-commit omdat `RouteAction::makeInvokable()` eager class-resolve doet (Task 1 verify zou anders falen tot Task 2 land); Rule 1-preventief — dup-audit-rij heeft `event_id=NULL` om `(provider, event_id)` unique-index niet te triggeren (plan-tekst sprak alleen over "tweede rij" zonder NULL-detail). HUB-06 SC-1/SC-3/SC-4/SC-5 gedekt door scenario's 1/2/3/7 (SC-5 gedeeltelijk; E2E in plan 05c-05). SC-2 (invalid HMAC) door scenario 5 + SDK Pest-tests. Full Hub-testsuite: 518/519 passed + 1 pre-existing failure (`UserResourceTest::test_super_admin_can_create_user_via_resource` — out-of-scope) + 1 pre-existing incomplete; baseline 511/512 → 518/519 (+7 nieuwe tests, zelfde failure-baseline). Mollie-webhook regressie 13/13 groen. Plan 05 (integration-tests) ontblokt — controller + job + middleware staan; E2E voegt webhook-server fan-out-leg + cross-Consumer-isolation-E2E toe.
 - 2026-05-17 — **Phase 5c plan 04 executed**: `App\Jobs\Webhooks\ForwardSnelstartWebhookToConsumerJob` (final, ShouldQueue, `onQueue('webhooks')`-in-constructor) + 5 PHPUnit feature-tests (RED `be50c94` + GREEN `d18b414`) + `config/horizon.php` `supervisor-webhooks` (queue=['webhooks'], timeout=30, production maxProcesses=5, local maxProcesses=1) committed als `4ba10d8`. Anti-correlation getest: outbound HMAC gebruikt `consumer.webhook_callback_secret`, NIET `config('snelstart.webhook.secret')` (T-05c-09 spoofing-mitigation expliciet bewezen via Signature-header-reproductie met beide kandidaten). Silent skip op missing `webhook_callback_url`. Twee deviations: Rule 1 — Bus::assertDispatchedOn() bestaat niet op Laravel 13 BusFake (test-API-correctie naar closure die `$job->queue` checkt); Rule 2 — anti-correlation-test asserteert expliciet partner-secret-NON-gebruik bovenop consumer-secret-gebruik (sterker bewijs dan Mollie-tegenhanger). Full Hub-testsuite: 511/512 passed + 1 pre-existing failure (`UserResourceTest::test_super_admin_can_create_user_via_resource` — out-of-scope per plan) + 1 pre-existing incomplete. Plan 03 (route + controller) ontblokt: `ForwardSnelstartWebhookToConsumerJob::dispatch($connection, $payload, $eventId)` is direct aanroepbaar uit de SnelstartWebhookController zodra die landt; queue-routing zit in de constructor.
 - 2026-05-17 — **Phase 5c plan 02 executed + SDK-refactor**: HMAC-verifier + middleware in eerste pass Hub-side geland (`App\Webhooks\SnelstartSignatureVerifier` + `App\Http\Middleware\VerifySnelstartSignature` + `services.snelstart.webhook_*` + alias in `bootstrap/app.php`), daarna in dezelfde sessie verplaatst naar `emeq/snelstart-api` SDK als onderdeel van de epic-2-redistributability-refactor (ADR `sdk-redistributability-boundary.md`). Eindstaat: `Emeq\SnelstartApi\Webhooks\SnelstartWebhookSignature` + `Emeq\SnelstartApi\Http\Middleware\VerifySnelstartSignature` (auto-aliased via `packageBooted()`) + `config('snelstart.webhook.*')` in SDK; Hub-side `services.snelstart.*`-block, middleware-class, alias-registratie verwijderd. Mollie analoog: `config/mollie.php` `webhook.secret` block (was `services.mollie.webhook_secret`), Hub-controller + 6 testfiles geswitched. Partner-docs verplaatst van `.docs/partners/{snelstart,mollie}/` naar `packages/{snelstart-api,mollie-api}/docs/partners/`; `.docs/decisions/snelstart-certificering-pad.md` verhuisd naar `packages/snelstart-api/docs/decisions/`. SDK-releases: emeq/snelstart-api `v0.1.0` (e9076d4), emeq/mollie-api `v0.1.0-alpha.2` (5315efe). Hub composer.lock gepind. Hub-tests: 506/507 groen (1 pre-existing UserResource failure). Plan 03 (route + controller) ontblokt — SDK-alias direct toepasbaar.
