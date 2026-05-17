@@ -32,8 +32,6 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'resolve.snelstart.account' => ResolveSnelstartAccount::class,
             'resolve.mollie.account' => ResolveMollieAccount::class,
-            // 'verify.snelstart.signature' wordt door emeq/snelstart-api SDK
-            // geregistreerd via SnelstartServiceProvider::packageBooted().
             'emeq.admin' => EnsureEmeqAdminToken::class,
             'cashier.webhook.secret' => RequireCashierWebhookSecret::class,
             'feature.provider' => EnsureProviderEnabled::class,

@@ -6,12 +6,6 @@ namespace App\Http\Requests\Api\V1\Mollie;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-/**
- * Edge-validatie voor POST /v1/mollie/payments/{id}/refunds. Vangt
- * grove payload-fouten af vóór Mollie-roundtrip.
- *
- * Regels uit .docs/partners/mollie/refunds-api.md.
- */
 class CreateRefundRequest extends FormRequest
 {
     public function authorize(): bool

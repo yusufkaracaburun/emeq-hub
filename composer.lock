@@ -1282,16 +1282,16 @@
         },
         {
             "name": "emeq/mollie-api",
-            "version": "v0.1.0-alpha.1",
+            "version": "v0.1.0-alpha.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/yusufkaracaburun/emeq-mollie-api.git",
-                "reference": "1bca2ffe908a1110837d9c29fe9e46fed0563fe2"
+                "reference": "5315efea146e9bcab0a213d30388174a1b2037b7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/yusufkaracaburun/emeq-mollie-api/zipball/1bca2ffe908a1110837d9c29fe9e46fed0563fe2",
-                "reference": "1bca2ffe908a1110837d9c29fe9e46fed0563fe2",
+                "url": "https://api.github.com/repos/yusufkaracaburun/emeq-mollie-api/zipball/5315efea146e9bcab0a213d30388174a1b2037b7",
+                "reference": "5315efea146e9bcab0a213d30388174a1b2037b7",
                 "shasum": ""
             },
             "require": {
@@ -1376,10 +1376,10 @@
                 "payments"
             ],
             "support": {
-                "source": "https://github.com/yusufkaracaburun/emeq-mollie-api/tree/v0.1.0-alpha.1",
+                "source": "https://github.com/yusufkaracaburun/emeq-mollie-api/tree/v0.1.0-alpha.2",
                 "issues": "https://github.com/yusufkaracaburun/emeq-mollie-api/issues"
             },
-            "time": "2026-05-14T14:15:42+00:00"
+            "time": "2026-05-17T20:05:30+00:00"
         },
         {
             "name": "emeq/snelstart-api",
@@ -1387,12 +1387,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/yusufkaracaburun/emeq-snelstart-api.git",
-                "reference": "f403fc681b29d6cc90f5cd635600774b517bbf9d"
+                "reference": "e9076d40a226a1587b123bfa808897d813321ed1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/yusufkaracaburun/emeq-snelstart-api/zipball/f403fc681b29d6cc90f5cd635600774b517bbf9d",
-                "reference": "f403fc681b29d6cc90f5cd635600774b517bbf9d",
+                "url": "https://api.github.com/repos/yusufkaracaburun/emeq-snelstart-api/zipball/e9076d40a226a1587b123bfa808897d813321ed1",
+                "reference": "e9076d40a226a1587b123bfa808897d813321ed1",
                 "shasum": ""
             },
             "require": {
@@ -1485,7 +1485,7 @@
                 "source": "https://github.com/yusufkaracaburun/emeq-snelstart-api/tree/master",
                 "issues": "https://github.com/yusufkaracaburun/emeq-snelstart-api/issues"
             },
-            "time": "2026-05-17T19:54:54+00:00"
+            "time": "2026-05-17T20:06:03+00:00"
         },
         {
             "name": "filament/actions",

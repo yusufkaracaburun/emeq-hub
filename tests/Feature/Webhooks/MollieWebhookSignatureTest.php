@@ -26,7 +26,7 @@ class MollieWebhookSignatureTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        config(['services.mollie.webhook_secret' => $this->secret]);
+        config(['mollie.webhook.secret' => $this->secret]);
     }
 
     public function test_valid_signature_returns_202_and_writes_inbound_audit_row(): void
@@ -174,7 +174,7 @@ class MollieWebhookSignatureTest extends TestCase
     public function test_null_platform_secret_returns_500_and_does_not_dispatch(): void
     {
         Bus::fake();
-        config(['services.mollie.webhook_secret' => null]);
+        config(['mollie.webhook.secret' => null]);
 
         $connection = $this->makeMollieConnection();
         $payload = json_encode(['id' => 'tr_test123']);
@@ -201,7 +201,7 @@ class MollieWebhookSignatureTest extends TestCase
     public function test_empty_string_platform_secret_returns_500_and_does_not_dispatch(): void
     {
         Bus::fake();
-        config(['services.mollie.webhook_secret' => '']);
+        config(['mollie.webhook.secret' => '']);
 
         $connection = $this->makeMollieConnection();
         $payload = json_encode(['id' => 'tr_test123']);

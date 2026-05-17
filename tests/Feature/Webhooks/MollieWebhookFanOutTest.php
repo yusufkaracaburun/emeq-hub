@@ -26,7 +26,7 @@ class MollieWebhookFanOutTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        config(['services.mollie.webhook_secret' => $this->secret]);
+        config(['mollie.webhook.secret' => $this->secret]);
     }
 
     public function test_valid_webhook_dispatches_forward_job_with_connection_and_payload(): void

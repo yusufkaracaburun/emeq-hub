@@ -6,15 +6,6 @@ namespace App\Http\Requests\Api\V1\Mollie;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-/**
- * Edge-validatie voor POST /v1/mollie/customers — vangt grove
- * payload-fouten af vóór Mollie-roundtrip (lager Mollie-quota-burn).
- * Mollie's customer-create heeft géén required velden, dus rules
- * zijn allemaal nullable + type-checks.
- *
- * Regels uit .docs/partners/mollie/customers-api.md (Mollie's
- * Create Customer endpoint).
- */
 class CreateCustomerRequest extends FormRequest
 {
     public function authorize(): bool

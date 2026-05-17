@@ -25,7 +25,7 @@ class MollieWebhookAntiSpoofingTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        config(['services.mollie.webhook_secret' => $this->secret]);
+        config(['mollie.webhook.secret' => $this->secret]);
     }
 
     public function test_webhook_for_id_that_returns_404_from_mollie_returns_400_resource_ownership_failed(): void

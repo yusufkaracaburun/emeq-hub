@@ -44,7 +44,7 @@ class MollieWebhookController extends Controller
         // Anders accepteert MollieWebhookSignature::verify elke HMAC die met
         // '' berekend is — open ingress bij vergeten env-var (D-08 stap 1,
         // verificatie-gap CR-02 / threat T-05a-06).
-        $secret = config('services.mollie.webhook_secret');
+        $secret = config('mollie.webhook.secret');
         if (! is_string($secret) || $secret === '') {
             $this->auditFailedWebhook($request, 'webhook_secret_not_configured');
 

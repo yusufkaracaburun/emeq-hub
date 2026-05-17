@@ -16,7 +16,7 @@ class CashierWebhookRoutingTest extends TestCase
     public function test_phase_5a_mollie_webhook_route_still_uses_mollie_webhook_secret_guard(): void
     {
         config([
-            'services.mollie.webhook_secret' => '',
+            'mollie.webhook.secret' => '',
             'services.cashier.webhook_secret' => 'whsec_cashier_set_xyz',
         ]);
 

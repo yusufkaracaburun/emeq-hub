@@ -40,7 +40,7 @@ class AccountSubscriptionWebhookFlowTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        config(['services.mollie.webhook_secret' => $this->secret]);
+        config(['mollie.webhook.secret' => $this->secret]);
     }
 
     public function test_payment_failed_with_mandate_invalid_transitions_subscription_to_paused(): void

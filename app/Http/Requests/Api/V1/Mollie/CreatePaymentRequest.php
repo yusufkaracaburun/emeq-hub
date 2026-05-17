@@ -6,13 +6,6 @@ namespace App\Http\Requests\Api\V1\Mollie;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-/**
- * Edge-validatie voor POST /v1/mollie/payments — vangt overduidelijke
- * payload-fouten af vóór Mollie-roundtrip (lager Mollie-quota-burn).
- * Mollie zelf doet de echte business-validatie.
- *
- * Regels uit .docs/partners/mollie/payments-api.md.
- */
 class CreatePaymentRequest extends FormRequest
 {
     public function authorize(): bool

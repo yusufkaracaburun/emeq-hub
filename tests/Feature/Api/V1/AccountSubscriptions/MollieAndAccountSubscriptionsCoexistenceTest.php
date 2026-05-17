@@ -33,7 +33,7 @@ class MollieAndAccountSubscriptionsCoexistenceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        config(['services.mollie.webhook_secret' => $this->webhookSecret]);
+        config(['mollie.webhook.secret' => $this->webhookSecret]);
     }
 
     public function test_phase_5a_passthrough_subscription_create_still_works_after_phase_7_refactor(): void
