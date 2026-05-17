@@ -1,0 +1,125 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Tests\Feature;
+
+use App\Jobs\Webhooks\ForwardSnelstartWebhookToConsumerJob;
+use App\Models\Account;
+use App\Models\Connection;
+use App\Models\Consumer;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Bus;
+use Spatie\WebhookServer\CallWebhookJob;
+use Tests\TestCase;
+
+class ForwardSnelstartWebhookToConsumerJobTest extends TestCase
+{
+    use RefreshDatabase;
+
+    public function test_job_dispatches_to_webhooks_queue(): void
+    {
+        Bus::fake([ForwardSnelstartWebhookToConsumerJob::class]);
+
+        $consumer = Consumer::factory()->withWebhookCallback()->create();
+        $account = Account::factory()->for($consumer)->create();
+        $connection = Connection::factory()->forSnelstart()->active()->for($account)->create();
+
+        ForwardSnelstartWebhookToConsumerJob::dispatch(
+            $connection,
+            ['administratieId' => $connection->administratie_id, 'type' => 'Relatie.Created'],
+            'evt-queue-1',
+        );
+
+        Bus::assertDispatchedOn('webhooks', ForwardSnelstartWebhookToConsumerJob::class);
+    }
+
+    public function test_handle_skips_silently_without_callback_url(): void
+    {
+        Bus::fake([CallWebhookJob::class]);
+
+        $consumer = Consumer::factory()->create();
+        $account = Account::factory()->for($consumer)->create();
+        $connection = Connection::factory()->forSnelstart()->active()->for($account)->create();
+
+        (new ForwardSnelstartWebhookToConsumerJob(
+            $connection,
+            ['administratieId' => $connection->administratie_id],
+            'evt-no-callback',
+        ))->handle();
+
+        Bus::assertNotDispatched(CallWebhookJob::class);
+    }
+
+    public function test_handle_dispatches_spatie_webhook_with_consumer_secret(): void
+    {
+        Bus::fake([CallWebhookJob::class]);
+
+        $consumer = Consumer::factory()->withWebhookCallback(
+            url: 'https://consumer.test/snelstart',
+            secret: 'consumer-secret-abc',
+        )->create();
+        $account = Account::factory()->for($consumer)->create();
+        $connection = Connection::factory()->forSnelstart()->active()->for($account)->create();
+
+        $payload = ['administratieId' => $connection->administratie_id, 'type' => 'Verkoopfactuur.Created'];
+
+        (new ForwardSnelstartWebhookToConsumerJob($connection, $payload, 'evt-with-secret'))->handle();
+
+        Bus::assertDispatched(CallWebhookJob::class, function (CallWebhookJob $job) use ($payload): bool {
+            $signatureHeader = config('webhook-server.signature_header_name', 'Signature');
+            $expectedSignature = hash_hmac('sha256', json_encode($payload), 'consumer-secret-abc');
+
+            return $job->webhookUrl === 'https://consumer.test/snelstart'
+                && $job->payload === $payload
+                && ($job->headers[$signatureHeader] ?? null) === $expectedSignature;
+        });
+    }
+
+    public function test_handle_includes_event_id_header(): void
+    {
+        Bus::fake([CallWebhookJob::class]);
+
+        $consumer = Consumer::factory()->withWebhookCallback()->create();
+        $account = Account::factory()->for($consumer)->create();
+        $connection = Connection::factory()->forSnelstart()->active()->for($account)->create();
+
+        (new ForwardSnelstartWebhookToConsumerJob(
+            $connection,
+            ['administratieId' => $connection->administratie_id],
+            'evt-001',
+        ))->handle();
+
+        Bus::assertDispatched(CallWebhookJob::class, function (CallWebhookJob $job): bool {
+            return ($job->headers['X-Emeq-Event-Id'] ?? null) === 'evt-001';
+        });
+    }
+
+    public function test_handle_uses_consumer_callback_secret_not_partner_secret(): void
+    {
+        Bus::fake([CallWebhookJob::class]);
+
+        config(['snelstart.webhook.secret' => 'partner-only']);
+
+        $consumer = Consumer::factory()->withWebhookCallback(
+            url: 'https://consumer.test/snelstart',
+            secret: 'consumer-only',
+        )->create();
+        $account = Account::factory()->for($consumer)->create();
+        $connection = Connection::factory()->forSnelstart()->active()->for($account)->create();
+
+        $payload = ['administratieId' => $connection->administratie_id];
+
+        (new ForwardSnelstartWebhookToConsumerJob($connection, $payload, 'evt-anti-corr'))->handle();
+
+        Bus::assertDispatched(CallWebhookJob::class, function (CallWebhookJob $job) use ($payload): bool {
+            $signatureHeader = config('webhook-server.signature_header_name', 'Signature');
+            $signature = $job->headers[$signatureHeader] ?? null;
+
+            $expectedConsumer = hash_hmac('sha256', json_encode($payload), 'consumer-only');
+            $unexpectedPartner = hash_hmac('sha256', json_encode($payload), 'partner-only');
+
+            return $signature === $expectedConsumer && $signature !== $unexpectedPartner;
+        });
+    }
+}
