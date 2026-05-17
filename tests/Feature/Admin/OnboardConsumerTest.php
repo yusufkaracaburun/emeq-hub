@@ -8,7 +8,6 @@ use App\Filament\Pages\OnboardConsumer;
 use App\Filament\Resources\Consumers\ConsumerResource;
 use App\Filament\Resources\Consumers\Pages\ListConsumers;
 use App\Models\Consumer;
-use App\Models\PersonalAccessToken;
 use App\Models\User;
 use App\Sanctum\TokenAbilities;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -229,9 +228,11 @@ class OnboardConsumerTest extends TestCase
             ])
             ->call('submit');
 
-        // Submit-handler MOET een Cache::put doen met de pat-flash-key.
+        // Submit-handler MOET een Cache::put doen met de user-scoped pat-flash-key
+        // (CR-01 fix: writer = OnboardConsumer, reader = ListConsumers — twee
+        // verschillende Livewire-componenten, dus Livewire-id-scope kan niet matchen).
         Cache::shouldHaveReceived('put')
-            ->withArgs(fn (string $key, mixed $value): bool => str_starts_with($key, 'pat-flash:') && is_string($value) && $value !== '')
+            ->withArgs(fn (string $key, mixed $value): bool => str_starts_with($key, 'pat-flash:user:') && is_string($value) && $value !== '')
             ->once();
 
         // De wizard-pagina mag het plain-token NIET in z'n Livewire-snapshot bewaren —
@@ -239,7 +240,7 @@ class OnboardConsumerTest extends TestCase
         // Hier checken we expliciet dat de OnboardConsumer Page-instance geen
         // `lastIssuedToken`-property of vergelijkbare state-leak houdt.
         $this->assertFalse(
-            property_exists(\App\Filament\Pages\OnboardConsumer::class, 'lastIssuedToken'),
+            property_exists(OnboardConsumer::class, 'lastIssuedToken'),
             'OnboardConsumer mag plain-token niet als public property opslaan (wire:snapshot leak).'
         );
     }
@@ -274,9 +275,11 @@ class OnboardConsumerTest extends TestCase
             ])
             ->call('submit');
 
-        // Submit-handler MOET ook een webhook-secret-flash zetten wanneer secret meegegeven is.
+        // Submit-handler MOET ook een user-scoped webhook-secret-flash zetten
+        // wanneer een secret meegegeven is (CR-02 fix: voorheen Livewire-id-scoped
+        // = nooit gelezen).
         Cache::shouldHaveReceived('put')
-            ->withArgs(fn (string $key, mixed $value): bool => str_starts_with($key, 'webhook-secret-flash:') && $value === 'staff-supplied-secret-XYZ')
+            ->withArgs(fn (string $key, mixed $value): bool => str_starts_with($key, 'webhook-secret-flash:user:') && $value === 'staff-supplied-secret-XYZ')
             ->once();
 
         // Consumer-rij in DB heeft secret encrypted opgeslagen — raw DB-value ≠ plain
@@ -284,5 +287,93 @@ class OnboardConsumerTest extends TestCase
         $this->assertNotNull($consumer);
         $rawDbValue = \DB::table('consumers')->where('id', $consumer->id)->value('webhook_callback_secret');
         $this->assertNotSame('staff-supplied-secret-XYZ', $rawDbValue, 'Raw DB-value moet encrypted zijn');
+    }
+
+    // ============================================================
+    // CR-01 + WR-02 regression: end-to-end PAT visibility op redirect target
+    // ============================================================
+
+    /**
+     * Bewijs dat de plain PAT die de wizard schrijft daadwerkelijk gerenderd wordt
+     * op de ListConsumers-pagina. Voorheen schreef OnboardConsumer naar
+     * `pat-flash:{wizard-livewire-id}` en las ListConsumers `pat-flash:{list-livewire-id}` —
+     * twee verschillende componenten, dus nooit een hit. CR-01 fix harmoniseert
+     * op `pat-flash:user:{auth-id}`.
+     */
+    public function test_plain_token_is_rendered_on_list_consumers_after_wizard_submit(): void
+    {
+        $this->actAsStaffWithPermission();
+
+        // Run de wizard — schrijft het plain token in de cache met de user-scoped key.
+        Livewire::test(OnboardConsumer::class)
+            ->fillForm([
+                'name' => 'Naschool Flash',
+                'slug' => 'naschool-flash',
+                'external_id' => 'school-flash',
+                'display_name' => 'School Flash',
+                'connection' => [
+                    'provider' => 'snelstart',
+                    'client_key' => 'k',
+                    'subscription_key' => 's',
+                    'subscription_id' => 'id',
+                ],
+                'pat' => [
+                    'preset' => 'admin',
+                    'token_name' => 'flash-token',
+                ],
+            ])
+            ->call('submit');
+
+        // Het plain token is niet via de wizard-response op te halen — we lezen het
+        // via de zelfde Cache-key die de blade ook leest (zonder Cache::pull() te
+        // triggeren) en asserten dat ListConsumers het renderd in de HTML.
+        $plainToken = Cache::get('pat-flash:user:'.auth()->id());
+        $this->assertNotNull($plainToken, 'Wizard moet plain token in user-scoped cache zetten');
+        $this->assertIsString($plainToken);
+        $this->assertNotSame('', $plainToken);
+
+        // De ListConsumers-render moet het plain token in de HTML body bevatten.
+        // Een mismatch tussen write-key en read-key (regressie van CR-01) faalt hier.
+        $response = $this->get(ConsumerResource::getUrl());
+        $response->assertOk();
+        $response->assertSee($plainToken, escape: false);
+        $response->assertSee('flash-token');
+    }
+
+    /**
+     * CR-02 regression — auto-generated webhook-secret moet zichtbaar zijn op
+     * de ListConsumers-redirect-target. Voorheen schreef de wizard naar een
+     * `webhook-secret-flash:{livewire-id}` key die nergens gelezen werd.
+     */
+    public function test_plain_webhook_secret_is_rendered_on_list_consumers_after_wizard_submit(): void
+    {
+        $this->actAsStaffWithPermission();
+
+        Livewire::test(OnboardConsumer::class)
+            ->fillForm([
+                'name' => 'Naschool Secret',
+                'slug' => 'naschool-secret',
+                'webhook_callback_secret' => 'plain-secret-ABC',
+                'external_id' => 'school-secret',
+                'display_name' => 'School Secret',
+                'connection' => [
+                    'provider' => 'snelstart',
+                    'client_key' => 'k',
+                    'subscription_key' => 's',
+                    'subscription_id' => 'id',
+                ],
+                'pat' => [
+                    'preset' => 'mollie-read',
+                    'token_name' => 'secret-token',
+                ],
+            ])
+            ->call('submit');
+
+        $cachedSecret = Cache::get('webhook-secret-flash:user:'.auth()->id());
+        $this->assertSame('plain-secret-ABC', $cachedSecret, 'Webhook secret moet user-scoped staan');
+
+        $response = $this->get(ConsumerResource::getUrl());
+        $response->assertOk();
+        $response->assertSee('plain-secret-ABC', escape: false);
     }
 }
