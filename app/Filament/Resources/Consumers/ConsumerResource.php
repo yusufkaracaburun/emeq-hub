@@ -5,6 +5,8 @@ namespace App\Filament\Resources\Consumers;
 use App\Filament\Resources\Consumers\Pages\CreateConsumer;
 use App\Filament\Resources\Consumers\Pages\EditConsumer;
 use App\Filament\Resources\Consumers\Pages\ListConsumers;
+use App\Filament\Resources\Consumers\Pages\ViewConsumer;
+use App\Filament\Resources\Consumers\Schemas\ConsumerInfolist;
 use App\Models\Consumer;
 use App\Sanctum\TokenAbilities;
 use BackedEnum;
@@ -12,6 +14,7 @@ use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\TextInput;
@@ -22,6 +25,7 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\Cache;
 
 class ConsumerResource extends Resource
 {
@@ -83,6 +87,16 @@ class ConsumerResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBuildingOffice;
 
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->can('manage-consumers') ?? false;
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return static::canAccess();
+    }
+
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -95,6 +109,11 @@ class ConsumerResource extends Resource
                     ->maxLength(255)
                     ->unique(ignoreRecord: true),
             ]);
+    }
+
+    public static function infolist(Schema $schema): Schema
+    {
+        return ConsumerInfolist::configure($schema);
     }
 
     public static function table(Table $table): Table
@@ -118,6 +137,7 @@ class ConsumerResource extends Resource
                 //
             ])
             ->recordActions([
+                ViewAction::make(),
                 EditAction::make(),
                 self::issuePatAction(),
             ])
@@ -140,6 +160,7 @@ class ConsumerResource extends Resource
         return [
             'index' => ListConsumers::route('/'),
             'create' => CreateConsumer::route('/create'),
+            'view' => ViewConsumer::route('/{record}'),
             'edit' => EditConsumer::route('/{record}/edit'),
         ];
     }
@@ -179,17 +200,15 @@ class ConsumerResource extends Resource
 
                 $result = $record->createToken($data['name'], $abilities);
 
-                // ListConsumers Livewire-property: rendert plain-token alert boven de tabel
-                // (custom view in resources/views/filament/resources/consumers/pages/list-consumers.blade.php).
-                if (property_exists($livewire, 'lastIssuedPat')) {
-                    $livewire->lastIssuedPat = [
-                        'token' => $result->plainTextToken,
-                        'name' => $data['name'],
-                    ];
-                }
+                // D-9 (WR-06): plain token gaat via server-side Cache flash naar de blade-view.
+                // De blade Cache::pull't beide keys one-shot bij de eerstvolgende render —
+                // het token verschijnt nooit in Livewire's wire:snapshot of in Alpine x-data.
+                $livewireId = $livewire->getId();
+                Cache::put("pat-flash:{$livewireId}", $result->plainTextToken, now()->addSeconds(60));
+                Cache::put("pat-flash-name:{$livewireId}", $data['name'], now()->addSeconds(60));
 
                 Notification::make()
-                    ->title('PAT uitgegeven — bekijk hierboven om te kopiëren')
+                    ->title('PAT uitgegeven — token verschijnt eenmalig bovenaan de listing')
                     ->success()
                     ->send();
             });

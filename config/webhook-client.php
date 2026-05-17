@@ -1,6 +1,6 @@
 <?php
 
-use Spatie\WebhookClient\Models\WebhookCall;
+use App\Models\WebhookCall;
 use Spatie\WebhookClient\SignatureValidator\DefaultSignatureValidator;
 use Spatie\WebhookClient\WebhookProfile\ProcessEverythingWebhookProfile;
 use Spatie\WebhookClient\WebhookResponse\DefaultRespondsTo;

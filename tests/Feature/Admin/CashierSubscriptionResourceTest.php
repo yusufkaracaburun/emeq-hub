@@ -10,6 +10,7 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Cashier\Subscription;
 use Livewire\Livewire;
+use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
@@ -32,6 +33,7 @@ class CashierSubscriptionResourceTest extends TestCase
     {
         Role::firstOrCreate(['name' => 'super-admin']);
         Role::firstOrCreate(['name' => 'staff']);
+        Permission::firstOrCreate(['name' => 'view-billing']);
     }
 
     private function actingAsStaff(): User
@@ -39,6 +41,7 @@ class CashierSubscriptionResourceTest extends TestCase
         $this->seedRoles();
         $user = User::factory()->create();
         $user->assignRole('staff');
+        $user->givePermissionTo('view-billing');
         $this->actingAs($user);
 
         return $user;

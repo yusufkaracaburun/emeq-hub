@@ -9,9 +9,14 @@ use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
 /*
- * D-05: RBAC-bootstrap via Spatie laravel-permission. Idempotent
- * env-driven seeder die 2 rollen + 6 permissions + 1 bootstrap
- * super-admin User aanmaakt. Zonder beide env-vars: no-op (production-safe).
+ * D-05 + D-7 (WR-04): RBAC-bootstrap via Spatie laravel-permission.
+ * Env-driven seeder die 2 rollen + 6 permissions + 1 bootstrap super-admin
+ * User aanmaakt. Zonder beide env-vars: no-op (production-safe).
+ *
+ * Bootstrap-only — voor password-resets gebruik `php artisan tinker`.
+ * 2× runnen op een gebootstrapt env gooit RuntimeException (D-7 / WR-04 —
+ * "bootstrap, niet sync"). Roles + Permissions blijven idempotent via
+ * firstOrCreate; alleen de User-creatie is hard-fail.
  *
  * Run: EMEQ_STAFF_SEED_EMAIL=… EMEQ_STAFF_SEED_PASSWORD=… \
  *      php artisan db:seed --class=EmeqStaffSeeder
@@ -57,10 +62,20 @@ class EmeqStaffSeeder extends Seeder
         $managePerm = Permission::firstOrCreate(['name' => self::SUPER_ADMIN_ONLY_PERMISSION]);
         $superAdmin->givePermissionTo($managePerm);
 
-        $user = User::firstOrCreate(
-            ['email' => $email],
-            ['name' => 'Emeq Super Admin', 'password' => Hash::make($password)],
-        );
+        $existing = User::where('email', $email)->first();
+
+        if ($existing !== null) {
+            throw new \RuntimeException(
+                "User {$email} bestaat al — reset wachtwoord via `php artisan tinker`, niet via seeder. ".
+                'EmeqStaffSeeder is bootstrap-only (D-7 / WR-04).'
+            );
+        }
+
+        $user = User::create([
+            'email' => $email,
+            'name' => 'Emeq Super Admin',
+            'password' => Hash::make($password),
+        ]);
         $user->assignRole($superAdmin);
     }
 }

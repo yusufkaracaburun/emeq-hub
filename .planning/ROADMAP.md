@@ -28,8 +28,9 @@ v0.2 bouwt drie samenhangende lagen: (1) `emeq/mollie-api` SDK die `mollie/molli
 - [ ] **Phase 5c: Snelstart webhook-handler** — `POST /webhooks/snelstart` HMAC-verified ingress + Connection-resolutie via `administratie_id` + audit-log (`direction=inbound`) + async fan-out naar Consumer-callback. Productie-certificeringsblocker (zie `.docs/decisions/snelstart-certificering-pad.md`).
 - [x] **Phase 6: Cashier-Mollie integratie (use-case A)** — Emeq → Consumers billing op Emeq's eigen Mollie *(voltooid 2026-05-15; 8/8 plans, SC-1+SC-2+SC-3 bewezen, SC-4 vendor-coverage; 237 tests passed + integration-suite gescheiden via `composer test:integration`)*
 - [x] **Phase 7: Account-level subscriptions (use-case B)** — Accounts → eindgebruikers via Connect + Mandates + Subscriptions *(voltooid 2026-05-15; 8/8 plans, SC-1+SC-2+SC-3 bewezen, SC-4 vendor-coverage via unit + feature stubs + skipt-graceful integration-test, 337 tests groen, ADR `account-subscriptions.md`)*
-- [ ] **Phase 8: Naschool wiring** — composer-wiring + Snelstart Stancl-resolver + `SyncEnrollmentToSnelstartJob` + Mollie checkout-flow via Hub-Connect
+- [x] **Phase 8: Naschool wiring** — composer-wiring + Snelstart Stancl-resolver + `SyncEnrollmentToSnelstartJob` + Mollie checkout-flow via Hub-Connect (completed 2026-05-17)
 - [x] **Phase 9: Filament admin-UI voor Emeq-medewerkers** — `/admin`-panel met 7 resources (Consumer CRUD + Connection read+revoke + Account read + WebhookCall viewer + AccountSubscription read+state-flip + Cashier-Subscription read + User super-admin-gated) *(voltooid 2026-05-16; 11/11 plans, HUB-04 SC-1..SC-10 bewezen via 52 nieuwe tests in `tests/Feature/Admin/` + 1 audit-migratie, ADR `filament-admin-panel.md`, 389 tests / 1343 assertions groen)*
+- [x] **Phase 10: Phase 9 polish — deferred review-findings** — 11 bevindingen uit `09-REVIEW.md` afsluiten: CR-02 permission-enforcement op 6 resources + Hub `WebhookCall`-model met `consumer()` belongs-to + cross-Consumer-isolation-test (SC-7 bewijs); WR-01..06 (last-super-admin guards, exception-veld, role-validatie, seeder password-reset, password-edit-regressie, PAT-token uit Livewire-state); IN-01..04 (N+1, exception-leak, AdminPanelProvider-comment, descriptor `tryFor()`). (completed 2026-05-16)
 
 ### Phase Details
 
@@ -312,7 +313,14 @@ v0.2 bouwt drie samenhangende lagen: (1) `emeq/mollie-api` SDK die `mollie/molli
   4. Na webhook-bevestiging van Mollie → Hub → Naschool-callback is de enrollment-status in Naschool geüpdatet naar `paid` zonder handmatige interventie
   5. End-to-end smoke (handmatig doorlopen) is gedocumenteerd in `.docs/` of vergelijkbaar locatie in Naschool-repo
 
-**Plans:** TBD
+**Plans:** 5/5 plans complete
+
+- [x] 08-01-PLAN.md — ConsumerOnboarding service (atomic DB::transaction multi-model create) + HubConsumerCreate artisan-command refactor naar service-delegate (Wave 1)
+- [x] 08-02-PLAN.md — Filament OnboardConsumer Page met 4-staps Wizard (Consumer → Account → Connection → PAT) + ListConsumers header-action + RBAC + no-secret-leak tests (Wave 2)
+- [x] 08-03-PLAN.md — Shared StartOAuthFlowAction (forAccount + forConnection, descriptor-driven) + mount op ConnectionResource + AccountResource (Wave 1)
+- [x] 08-04-PLAN.md — ConsumerInfolist hint-Section + ViewConsumer-page + AccountInfolist hint-extension + Tenants-navgroup-tooltip (Wave 1)
+- [x] 08-05-PLAN.md — PartnerStatus service + domeinmodel/status-widget Blade-partials + /dev/partners pages (index + mollie + snelstart) uitbreiden (Wave 2)
+
 **UI hint:** yes
 
 #### Phase 9: Filament admin-UI voor Emeq-medewerkers
@@ -381,8 +389,9 @@ v0.2 bouwt drie samenhangende lagen: (1) `emeq/mollie-api` SDK die `mollie/molli
 | 5c. Snelstart webhook-handler | 1/5 | In Progress|  |
 | 6. Cashier-Mollie integratie | 8/8 | Done | 2026-05-15 |
 | 7. Account-level subscriptions | 8/8 | Done | 2026-05-15 |
-| 8. Naschool wiring | 0/0 (TBD) | Not started | - |
+| 8. Naschool wiring | 5/5 | Complete    | 2026-05-17 |
 | 9. Filament admin-UI voor Emeq-medewerkers | 11/11 | Complete    | 2026-05-16 |
+| 10. Phase 9 polish — deferred review-findings | 6/6 | Complete    | 2026-05-16 |
 
 ### Coverage
 
@@ -411,7 +420,8 @@ v0.2 bouwt drie samenhangende lagen: (1) `emeq/mollie-api` SDK die `mollie/molli
 Verzamelpunt voor ideeën die nog geen milestone hebben. Bij milestone-kickoff worden relevante items uit deze sectie naar de active milestone gepromoveerd.
 
 - Snelstart Saloon v3 → v4 upgrade (3 ignored security advisories oplossen, o.a. SSRF via endpoint-override)
-- Andere providers wanneer Mollie+Snelstart in productie gevalideerd: `emeq/moneybird-api`, `emeq/exact-api`, `emeq/ibanity-api`, `emeq/stripe-api`
+- Andere providers wanneer Mollie+Snelstart in productie gevalideerd: `emeq/moneybird-api`, `emeq/exact-api`, `emeq/ibanity-api`, `emeq/stripe-api`, `emeq/bizcuit-api`
+- **`emeq/bizcuit-api`**: Bizcuit SDK (NL boekhouden/banking) — OpenAPI docs op https://app.bizcuit.nl/openapi/documentation/getting-started.html. Volgt SDK-pattern uit `packages/`-conventie (eigen VCS-repo, dunne Saloon-laag of officiële-SDK-wrap analoog aan Mollie-pad). Trigger: zodra een host-app Bizcuit-integratie nodig heeft. User-captured 2026-05-17.
 - OAuth Connect-implementaties voor providers die in v0.2 alleen contract-level zijn gedekt (Snelstart-OAuth, Exact-OAuth, Ibanity-OAuth)
 - DTO-codegen vanuit OpenAPI specs voor providers die typed-response consumers nodig hebben
 - Hub commerciële features: public billing-flow voor derde-partij Consumers (`HUB-BILLING`), public docs-site `docs.hub.emeq.nl` (`HUB-DOCS`), self-service onboarding (`HUB-ONBOARDING`)
@@ -419,6 +429,43 @@ Verzamelpunt voor ideeën die nog geen milestone hebben. Bij milestone-kickoff w
 - **`MOLL-CONNECT-RES`**: Mollie Connect partner-resources via pass-through (Onboarding-status, Organizations, Profiles, Permissions, ClientLinks) — pad onbekend in v0.2, maar **blokkerend voor host-app productie-go-live** wanneer een Connect-merchant via de Hub moet onboarden. Volgt hetzelfde pass-through-pattern als Phase 5a (zie ADR `mollie-passthrough-api.md`). Promote naar active milestone zodra een host-app dit nodig heeft.
 - **`SCRAMBLE-NESTED-GROUPS`**: Echte hiërarchische groepering in `/docs/api`. v0.2 gebruikt platte per-resource groepen met `Mollie · {Resource}`-prefix omdat Scramble v0.13 + Stoplight Elements 8.4 geen native nesting hebben (Elements honoreert `x-tagGroups` niet). Werkt nu voor 2 SDK's, maar bij 5+ providers wordt de sidebar lang en onoverzichtelijk. Pad: (1) tags blijven per-resource via `#[Group]`; (2) custom middleware op `docs/api.json` injecteert `x-tagGroups` post-serialisatie; (3) `docs.blade.php` overgezet van Stoplight Elements naar Redoc (honoreert `x-tagGroups` native). Trigger: zodra Moneybird/Exact/Ibanity erbij komen of de Mollie-resource-lijst groeit voorbij ~10 endpoints per resource.
 - **`BRAIN-AUDIT-CI`**: `laramint/laravel-brain` promoveren tot dev-dep en `bin/audit-pennant-gates.php` activeren als blokkerende CI-check. Vandaag (2 providers) zit het audit-script al in de repo en runt standalone tegen Brain's JSON-output — Brain zelf nog niet geïnstalleerd; install-recept staat in `.docs/stack/architecture-audit.md`. Spike-validatie op 2026-05-17 toonde 21/21 SDK-routes met correcte `feature.provider:{provider}` gate. Trigger: (1) 3e SDK toegevoegd (Moneybird/Ibanity/Exact) — dan worden audit-checks non-optional, OF (2) 2e dev op de repo — dan wordt graph-onboarding waardevol, OF (3) v1.0+ commercieel — derde-partij dev-shops hebben graph + AI-context-export nodig. Bij promotion: `composer require --dev laramint/laravel-brain`, `php artisan brain:scan` in `composer install` post-hook, audit-script in CI met exit-code-gate, manifest-pad in `storage/app/laravel-brain/` gitignoren. **Niet** `brain:generate-rules --target=claude` runnen — `CLAUDE.md` is authored guidance, geen scan-output; gebruik `--target=agents` voor een aanvullende `AGENTS.md`.
+
+#### Phase 10: Phase 9 polish — deferred review-findings
+
+**Goal:** Sluit 11 deferred bevindingen uit `09-REVIEW.md` af (1 BLOCKER-class CR-02, 6 warnings, 4 info) zodat Phase 9 daadwerkelijk ship-quality is en HUB-04 SC-7 cross-Consumer-isolatie test-bewezen wordt.
+**Depends on:** Phase 9
+**Requirements:** HUB-04 SC-7 (cross-Consumer-isolation in WebhookCallResource)
+**Working repo:** `emeq-hub` (Filament-resources + Hub-eigen `App\Models\WebhookCall` + tests + seeders)
+**Context:**
+
+- Volledige scope: alle items uit `.planning/phases/09-filament-admin-ui-voor-emeq-medewerkers/09-REVIEW.md` behalve CR-01 (al gefixt in commit `7f86c6d`).
+- **CR-02 (BLOCKER-class)**: 6 resources missen `canAccess()` ondanks dat `EmeqStaffSeeder` permissions provisioneert (`view-webhooks`, `view-account-subscriptions`, `view-billing`, `manage-consumers`, `manage-connections`). D-05 permission-model is dead code totdat dit landt. SC-7 cross-Consumer-isolatie nooit getest in `WebhookCallResource`.
+- **WR-01..06**: last-super-admin downgrade-/delete-guard, `WebhookCallInfolist` exception dubbel-encoded, `assignRole` server-side `->in()`-validatie, `EmeqStaffSeeder` silent-password-non-reset, `UserForm` edit-zonder-password regressie-test, plain PAT-token in Livewire `wire:snapshot`.
+- **IN-01..04**: N+1 op `Consumer::find()` per webhook-rij (lost samen met CR-02 op via Hub-eigen `WebhookCall extends Spatie's class`), `AccountSubscriptionResource::cancelAction` exception-message-leak, `AdminPanelProvider::default()`-footgun-comment, `ProviderCredentialDescriptor::tryFor()`-helper.
+
+**Success Criteria** (what must be TRUE):
+
+  1. Alle 6 in-scope Filament-resources (`Consumer`/`Connection`/`Account`/`WebhookCall`/`AccountSubscription`/`CashierSubscription`) hebben `canAccess()` die de bijbehorende Spatie-permission consulteert; navigatie-items verschijnen niet zonder permission.
+  2. Hub-eigen `App\Models\WebhookCall extends Spatie\WebhookClient\Models\WebhookCall` met `consumer()` belongs-to bestaat; `WebhookCallResource` eager-loadt via `->modifyQueryUsing(fn ($q) => $q->with('consumer'))`; geen `Consumer::find()` meer in tabel of infolist.
+  3. `WebhookCallResourceTest::test_cross_consumer_isolation_*` bewijst dat een staff-user met alleen `view-webhooks`-permission geen webhooks van andere Consumers ziet (HUB-04 SC-7 closure).
+  4. `UsersTable` `assignRole`-action + `EditUser` `DeleteAction` blokkeren (a) self-downgrade door current super-admin en (b) downgrade/delete van de laatste super-admin; 2 nieuwe regression-tests bewijzen beide paden.
+  5. `WebhookCallInfolist` rendert `exception`-veld niet meer via `json_encode()` (zichtbaar als multiline plain text).
+  6. `assignRole`-Select heeft `->in(['super-admin','staff'])` + try/catch met user-friendly notification op `RoleDoesNotExist`.
+  7. `EmeqStaffSeeder` reset password van bestaande user (of hard-failed met expliciete error) — `EmeqStaffSeederTest` dekt het pad.
+  8. `UserResourceTest::test_edit_user_without_password_keeps_existing_hash` is groen.
+  9. Plain PAT-token zit niet meer in `wire:snapshot`/Alpine `x-data`; gebruikt `Cache::pull()` one-shot pattern.
+  10. `AccountSubscriptionResource::cancelAction` heeft try/catch dat `report($e)` doet en generieke notification toont met sha256-fingerprint.
+  11. `ProviderCredentialDescriptor::tryFor()` bestaat; `Connection::fingerprint()` gebruikt het in plaats van inline try/catch.
+  12. Volledige test-suite groen (`php artisan test --compact`) — minimaal 389 + nieuwe-tests passing.
+
+**Plans:** 6/6 plans complete
+
+- [x] 10-01-PLAN.md — Hub-eigen `App\Models\WebhookCall` + `consumer()` belongs-to + `config/webhook-client.php` model-binding (wave 1)
+- [x] 10-02-PLAN.md — `ProviderCredentialDescriptor::tryFor()` helper + `Connection::fingerprint()` refactor (IN-04 / D-11) (wave 1)
+- [x] 10-03-PLAN.md — `canAccess()` + `shouldRegisterNavigation()` op 6 niet-User-Resources (CR-02 hoofd-fix / D-1) (wave 2)
+- [x] 10-04-PLAN.md — `WebhookCallsTable` + `WebhookCallInfolist` consumer-relatie + exception unwrap (WR-02 + IN-01 / D-5) (wave 2)
+- [x] 10-05-PLAN.md — User-guards (last-super-admin) + Select `->in()` + Seeder hard-fail + cancelAction fingerprint + AdminPanelProvider comment (WR-01/03/04 + IN-02/03 / D-4/6/7/10) (wave 3)
+- [x] 10-06-PLAN.md — PAT Cache-flash (WR-06 / D-9) + edit-zonder-password regression (WR-05 / D-8) + HUB-04 SC-7 closure (D-3) (wave 4)
 
 ---
 

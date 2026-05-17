@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Connections;
 
+use App\Filament\Actions\StartOAuthFlowAction;
 use App\Filament\Resources\Connections\Pages\ListConnections;
 use App\Filament\Resources\Connections\Pages\ViewConnection;
 use App\Models\Connection;
@@ -31,6 +32,16 @@ class ConnectionResource extends Resource
     protected static string|\UnitEnum|null $navigationGroup = 'Integraties';
 
     protected static ?int $navigationSort = 1;
+
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->can('manage-connections') ?? false;
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return static::canAccess();
+    }
 
     public static function form(Schema $schema): Schema
     {
@@ -137,6 +148,7 @@ class ConnectionResource extends Resource
             ])
             ->recordActions([
                 ViewAction::make(),
+                StartOAuthFlowAction::forConnection(),
                 Action::make('revoke')
                     ->label('Revoke')
                     ->icon(Heroicon::OutlinedNoSymbol)

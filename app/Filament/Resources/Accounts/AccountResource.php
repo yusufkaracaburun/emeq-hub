@@ -31,6 +31,16 @@ class AccountResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUsers;
 
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->can('manage-consumers') ?? false;
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return static::canAccess();
+    }
+
     public static function infolist(Schema $schema): Schema
     {
         return AccountInfolist::configure($schema);

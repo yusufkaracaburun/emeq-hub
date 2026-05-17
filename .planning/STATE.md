@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v0.2
 milestone_name: — Mollie + Connect + Subscriptions + Hub-skeleton
-status: completed
-stopped_at: Phase 8 context gathered — 7 D-decisions, Hub-side scope (Filament onboard-wizard + StartOAuthFlowAction + partner-pages + Resource-hints); Naschool-internals out of scope (eigen repo)
-last_updated: "2026-05-16T14:57:43.980Z"
-last_activity: 2026-05-16
+status: idle
+stopped_at: Phase 8 SHIPPED — 5/5 plans + 11/11 critical+warning review-fixes + docs-sync (ADR phase-8 + errors flash-key-trap); 13/13 Hub-side must-haves verified; 507/507 tests groen; 5 HUMAN-UAT items pending (cross-repo, out_of_scope_per_D-03). Next blockers: Phase 5c partner-respons (Snelstart) of v0.2.1 polish.
+last_updated: "2026-05-17T19:55:00.000Z"
+last_activity: 2026-05-17
 progress:
   total_phases: 10
-  completed_phases: 7
-  total_plans: 62
-  completed_plans: 57
-  percent: 70
+  completed_phases: 8
+  total_plans: 67
+  completed_plans: 62
+  percent: 80
 ---
 
 # Project State
@@ -21,20 +21,20 @@ progress:
 See: .planning/PROJECT.md (updated 2026-05-14 na v0.1 milestone-close)
 
 **Core value:** Twee fundamenteel verschillende providers (OData/clientkey + REST/OAuth2) productie-gevalideerd via één SDK-pattern, en beide live in één concrete consumer-feature. v0.1 heeft Snelstart-deel bewezen; v0.2 zet Mollie + Connect + Subscriptions + Hub-skeleton op.
-**Current focus:** Phase 5c (Snelstart webhook-handler) BLOCKED op partner@snelstart.nl antwoord; Phase 8 (Naschool wiring) is alternatief en unblocked.
+**Current focus:** Phase 8 shipped (Hub-side substrate compleet). Open paden: (a) `/gsd-ship 8` PR-flow op feature-branch, (b) v0.2.1 polish, (c) wachten op Snelstart partner-respons voor Phase 5c.
 
 ## Current Position
 
-Phase: 05c
-Plan: Not started
-Status: BLOCKED — wacht op Snelstart partner-response (Gmail draft r-8836998535038336548, verwacht ≤ 2026-05-26). Alternatief unblocked pad: Phase 8 (Naschool wiring) — depends-on Phases 5b+5a+6+7 die alle Complete zijn.
-Last activity: 2026-05-16 - Completed quick task 260516-qau: docs-sync drift fix (ADR Pennant kill-switch + README strategy/-rij)
+Phase: 8 (shipped) — next incomplete = Phase 5c (blocked op Snelstart partner-respons sinds 2026-05-15)
+Plan: n/a — between phases
+Status: Phase 8 verified + code-reviewed + docs-synced; awaiting ship or v0.2.1 polish-decision
+Last activity: 2026-05-17
 
 ## Performance Metrics
 
 **v0.1 Velocity:**
 
-- Total plans completed: 30 (Phase 1)
+- Total plans completed: 41 (Phase 1)
 - Total execution time: ~12 uur (2026-05-14 00:42 → 12:02 CEST)
 - Sub-repo werk: snelstart-sdk submodule wiring + Pest-coverage + push
 
@@ -50,6 +50,8 @@ Last activity: 2026-05-16 - Completed quick task 260516-qau: docs-sync drift fix
 | 06 | 8 | - | - |
 | 07 | 8 | ~execution-wave-based (5 waves) | n/a (parallel-execution per wave) |
 | 09 | 11 | - | - |
+| 10 | 6 | - | - |
+| 8 | 5 | - | - |
 
 **Recent Trend:**
 
@@ -65,6 +67,11 @@ Last activity: 2026-05-16 - Completed quick task 260516-qau: docs-sync drift fix
 | Phase 04 P03 | 12min | 2 tasks | 6 files |
 | Phase 04 P04 | ~12 min | 2 tasks | 6 files |
 | Phase 04 P05 | ~10 min | 2 tasks | 2 files + acceptance |
+| Phase 08 P08-01 | 12 | 2 tasks | 4 files |
+| Phase 8 P3 | 18 | 2 tasks | 4 files |
+| Phase 8 P08-04 | 10 | 2 tasks | 7 files |
+| Phase 8 P08-02 | 14 | 2 tasks | 4 files |
+| Phase 08 P08-05 | 14 | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -117,6 +124,16 @@ Decisions zijn gelogd in PROJECT.md Key Decisions table. Decisions die uit v0.1 
 - 🆕 **New 2026-05-16 (09-04)**: `ProviderCredentialDescriptor`-laag — `config/hub-providers.php` + `App\Support\ProviderCredentialDescriptor` (final readonly value-object). `Connection::fingerprint()` descriptor-aware refactor met **gedragsbehoud** (`ConnectionEncryptionTest` blijft groen zonder testfile-wijziging). Invariant: nieuwe provider = config-row + factory-update + Section, GEEN nieuwe Filament Resource-class.
 - 🆕 **New 2026-05-16 (09-05..09-10)**: 7 Filament Resources gelanced (Consumer CRUD + Issue-PAT met 5 presets + Custom-mode / Connection read+revoke met no-secret-leak / Account read / WebhookCall viewer / AccountSubscription read+state-flip via manager-delegation / Cashier Subscription read+derived-status / User super-admin-gated via `manage-staff`-gate). 52 nieuwe feature-tests onder `tests/Feature/Admin/` (15 test-classes). Filament v4 nested namespace `App\Filament\Resources\<Plural>\<Resource>` is de gegenereerde shape; plan-paths uit v3-flat-stijl zijn opgeheven.
 - 🆕 **New 2026-05-16 (09-11)**: Phase 9 ACCEPTANCE-document met evidence voor alle 10 SC's geschreven; ADR `.docs/decisions/filament-admin-panel.md` (gitignored — lokaal aanwezig, niet in git) met 5 D-decisions + 9 out-of-scope items + verification-path. ROADMAP/REQUIREMENTS/STATE gesynced; commit volgt na human-verify "approved".
+- [Phase ?]: Plan 08-01: ConsumerOnboarding service met DB::transaction (eerste in app/) + delegate-refactor van hub:consumer:create zonder CLI-breaking change; 14/14 tests groen incl. rollback-bewijs via test-only __force_failure-marker
+- [Phase ?]: Plan 08-03: StartOAuthFlowAction met public static dispatch() voor directe testability — Tests 8+9 omzeilen Livewire-mount-stack zonder de mount-laag te missen (Tests 10-14 dekken Livewire::test op ListConnections + ListAccounts); 14/14 tests groen incl. Phase-9 revoke-action regressie-bewijs
+- [Phase ?]: 🆕 **New 2026-05-17 (08-04)**: Filament v4.11 NavigationGroup heeft géén native ->description()-slot; Tenants-navgroup-tooltip via extraSidebarAttributes(['title' => …]) — geverifieerd via tinker pre-flight check (extra-sidebar-attrs pad). Bij ->navigationGroups([…]) MOETEN álle 4 nav-groups (Tenants/Integraties/Abonnementen/Beheer) expliciet worden gedeclareerd voor render-order.
+- [Phase ?]: 🆕 **New 2026-05-17 (08-04)**: Collapsed-state-assertie voor Filament Sections checkt 'isCollapsed:  true' (dubbele spatie) via assertSeeInOrder met x-data marker vóór heading; oppervlakte-marker fi-collapsed gaf false-positive uit default-collapsed sidebar-groups.
+- [Phase ?]: Plan 08-02: OnboardConsumer Filament-Page met 4-staps Wizard (Consumer/Account/Connection/PAT), Cache-flash op ListConsumers-redirect ipv eigen blade (consistent met Phase-9 Issue-PAT), Mollie-branch maakt pending stub binnen wizard en OAuth gebeurt later via StartOAuthFlowAction (UX-split per D-04); 9/9 tests groen, 118/118 admin-suite zero regressies
+- [Phase ?]: 08-02 deviation: ProviderCredentialDescriptor heeft geen label-property (alleen key); volgde 08-03-precedent ucfirst(descriptor->key); no-secret-leak via Cache::spy + property_exists ipv assertDontSee — functioneel sterker bewijs en consistent met Phase-9 ConsumerTokenActionTest-pattern
+- [Phase ?]: Plan 08-05: Heroicons via blade-ui-kit/blade-heroicons (vendor 2.7.0) + x-dynamic-component dispatch — provider-agnostisch zonder match-arm in partial
+- [Phase ?]: Plan 08-05: data-status + data-icon HTML-attrs op status-widget li voor semantische test-introspectie + a11y, omdat Heroicon-SVG geen text 'check-circle' bevat (alleen path-data) — fragile SVG-pad-match vermeden
+- [Phase ?]: Plan 08-05: Container::getInstance() snapshot/restore-pattern in createFreshApp()-helper voorkomt RefreshDatabase-teardown-crash bij env-gating-route-tests (re-require van routes/web.php muteert globale facade-resolved container)
+- [Phase ?]: Plan 08-05: Mollie-CTA op /dev/partners/mollie triggert daadwerkelijk Phase-4 OAuth-init via nieuwe dev.partners.mollie.start-oauth-route op de Naschool-demo-Account — geen anchor-only stub (UI-SPEC §S3 regel 191 + CONTEXT D-06 §3)
 
 ### Pending Todos
 
@@ -169,6 +186,8 @@ Decisions zijn gelogd in PROJECT.md Key Decisions table. Decisions die uit v0.1 
 
 ### Roadmap Evolution
 
+- 2026-05-17 — **Phase 5b verifier-close**: `05b-VERIFICATION.md` geschreven door gsd-verifier — status `passed`, score `8/8 must-haves verified`. Sluit verification-debt-row uit `v0.2-MILESTONE-AUDIT.md` (2026-05-17) op Phase 5b; `verification_artifacts` 5/11 → 6/11. Bewijs: HUB-05 SC-1..SC-8 alle VERIFIED via 86 Phase-5b-scoped tests (15 testfiles) + UAT 9/9 live (`05b-UAT.md`) + SECURITY 24/24 (`05b-SECURITY.md`); CR-01 (415-guard) + CR-02 (PII-safe `query_keys`) + CR-03 (NULL fingerprint empty body) code-resident + getest. Stale prompt-claim over `SanctumAbilityTest`-incomplete opgehelderd (5 tests volledig geïmplementeerd; werkelijke +1 incomplete = `MollieConnectOAuthFlowTest:47` Phase-4 placeholder). Geen deferred items, geen v0.2.1-opruiming nodig vanuit 5b. Sync-edits: `v0.2-MILESTONE-AUDIT.md` (HUB-05 row → ✅ satisfied; Phase Coverage 5b → ✅ passed; tech_debt 5b row resolved-markeer; totalen 11→12 ✅ + 4→3 ⚠️), `REQUIREMENTS.md` (HUB-05 evidence-pointer toegevoegd in body-blok), deze STATE.md-entry.
+- 2026-05-16 — **Phase 10 toegevoegd**: "Phase 9 polish — deferred review-findings" toegevoegd aan v0.2 milestone (depends on Phase 9). Volledige scope: 11 deferred bevindingen uit `09-REVIEW.md` (CR-02 BLOCKER-class + WR-01..06 + IN-01..04). `total_phases` 10→11. Branch: `chore/v021-phase9-polish`. Plan-bron: `09-REVIEW.md` + STATE Pending-Todos (post-merge-master-cleanup).
 - 2026-05-16 — **Phase 09 plan 11 executed (PENDING checkpoint-approval)**: 11/11 plans afgerond met 10/10 SC-evidence in `09-11-ACCEPTANCE.md` (alle 10 success-criteria uit `09-CONTEXT.md` regels 234-246 bewezen via 52 nieuwe `tests/Feature/Admin/*`-tests + 1 audit-migratie + CLI-route-list). ADR `.docs/decisions/filament-admin-panel.md` (gitignored) met 5 D-decisions (D-01 7 resources + PassThroughCall out-of-scope / D-02 webhook_calls audit-kolommen / D-03 PAT presets+custom / D-04 ProviderCredentialDescriptor / D-05 Spatie RBAC + drop `is_emeq_staff`) + 9 out-of-scope items + verification-path. ROADMAP Phase 9 `[x]` + Progress 11/11 + 2026-05-16 + Goal "7 resources" (was "4 resources"); REQUIREMENTS HUB-04 `[x]` + Complete + uitgebreide validation-note; STATE counters bijgewerkt (completed_phases 6→7, total_plans 51→62, completed_plans 48→52, percent 60→84). 389 tests / 1343 assertions / 0 failed / 1 pre-existing incomplete (Phase 3-03 SanctumAbilityTest placeholder voor Phase 5b). Wacht op "approved" → planning-sync-commit + Phase 8 ontblokt naast Phase 5b/5c.
 - 2026-05-14 — Phase 9 (Filament admin-UI voor Emeq-medewerkers) toegevoegd aan v0.2 milestone; HUB-04 toegevoegd aan REQUIREMENTS.md. Plan-bron: `.claude/plans/ow-dit-wil-ik-immutable-snowglobe.md`. Depends on Phase 3 + Phase 4; parallel met Phase 6/7.
 - 2026-05-14 — Phase 5 gesplitst in 5a (Mollie) + 5b (Snelstart-pass-through) en HUB-05 toegevoegd aan REQUIREMENTS.md. Plan-bron: `.claude/plans/volgens-mij-is-snelstart-api-piped-parasol.md`. Reden: user wil consumer-app via `hub.emeq.nl` Snelstart-calls passen-doorzetten — was eerder niet expliciet in scope (Phase 8 deed Snelstart-direct-via-SDK in Naschool). Phase 5b depends on Phase 3 only; parallel met Phase 4 mogelijk.
@@ -201,12 +220,13 @@ Items acknowledged en deferred bij milestone-close 2026-05-14:
 
 ## Session Continuity
 
-Last session: 2026-05-16T14:57:43.975Z
-Stopped at: Phase 8 context gathered — 7 D-decisions, Hub-side scope (Filament onboard-wizard + StartOAuthFlowAction + partner-pages + Resource-hints); Naschool-internals out of scope (eigen repo)
-Resume file: .planning/phases/08-naschool-wiring-snelstart-mollie-via-hub/08-CONTEXT.md
+Last session: 2026-05-17T19:55:00.000Z (resume invoked after Phase 8 ship + docs-sync)
+Stopped at: Phase 8 SHIPPED — 5/5 plans + 11/11 critical+warning review-fixes + ADR `.docs/decisions/phase-8-consumer-onboarding.md` + error-entry `.docs/errors/flash-key-cache-spy-trap.md`; 13/13 Hub-side must-haves verified; 507/507 tests groen; branch `chore/v021-phase9-polish` heeft 34 Phase-8-commits + 2 fix-commit-groepen + 1 backlog-capture; branch-naam dekt scope niet meer (rename voor PR aangeraden)
+Resume file: None
 Next action options:
 
-  1. `/docs-sync` — Phase 9 raakte User/Connection/AppServiceProvider models en routes; doc-drift check vóór Phase 8 start (recommended eerst)
-  2. `/gsd-plan-phase 5b` — Snelstart-pass-through API, parallel-pad zonder partner-dep
-  3. `/gsd-discuss-phase 8` — Naschool wiring (Snelstart Stancl + EnrollmentConfirmed + Mollie-checkout); verse sessie + /clear aanbevolen
-  4. v0.2.1 polish — CR-02 + WR-01..6 deferred Phase-9 findings (tracking-todos in STATE)
+  1. `/gsd-ship 8` — PR-flow op feature-branch (vereist branch-rename eerst: `git branch -m chore/v021-phase9-polish feat/v021-phase8-naschool-hub-substrate`)
+  2. `/gsd-verify-work 8` — Naschool-repo HUMAN-UAT-items afvinken (5 cross-repo items in `08-HUMAN-UAT.md`)
+  3. Phase 5c partner-respons checken — `partner@snelstart.nl` (Gmail draft `r-8836998535038336548` sinds 2026-05-15); 4 ❓-aannames in `05c-CONTEXT.md` wachten op antwoord
+  4. v0.2.1 polish — CR-02 + WR-01..6 deferred Phase-9 findings (Phase 10, gemarkeerd `[x]` in ROADMAP — eventuele deferred-residue uitzoeken)
+  5. Backlog/v0.3 planning — `emeq/bizcuit-api`, `MOLL-CONNECT-RES`, `SCRAMBLE-NESTED-GROUPS` triagen voor volgend milestone

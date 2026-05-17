@@ -44,6 +44,16 @@ class AccountSubscriptionResource extends Resource
 
     protected static ?int $navigationSort = 2;
 
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->can('view-account-subscriptions') ?? false;
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return static::canAccess();
+    }
+
     public static function form(Schema $schema): Schema
     {
         // Read-only Resource — geen Create/Edit pages. Schema blijft leeg.
@@ -176,9 +186,10 @@ class AccountSubscriptionResource extends Resource
                         ->danger()
                         ->send();
                 } catch (Throwable $e) {
+                    report($e);
                     Notification::make()
                         ->title('Pause-actie mislukt')
-                        ->body($e->getMessage())
+                        ->body('Zie logs voor details — fingerprint: '.substr(hash('sha256', $e->getMessage()), 0, 12))
                         ->danger()
                         ->send();
                 }
@@ -212,9 +223,10 @@ class AccountSubscriptionResource extends Resource
                         ->danger()
                         ->send();
                 } catch (Throwable $e) {
+                    report($e);
                     Notification::make()
                         ->title('Resume-actie mislukt')
-                        ->body($e->getMessage())
+                        ->body('Zie logs voor details — fingerprint: '.substr(hash('sha256', $e->getMessage()), 0, 12))
                         ->danger()
                         ->send();
                 }
@@ -254,9 +266,10 @@ class AccountSubscriptionResource extends Resource
                         ->danger()
                         ->send();
                 } catch (Throwable $e) {
+                    report($e);
                     Notification::make()
                         ->title('Cancel-actie mislukt')
-                        ->body($e->getMessage())
+                        ->body('Zie logs voor details — fingerprint: '.substr(hash('sha256', $e->getMessage()), 0, 12))
                         ->danger()
                         ->send();
                 }
