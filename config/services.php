@@ -35,13 +35,9 @@ return [
         ],
     ],
 
-    'snelstart' => [
-        'webhook_secret' => env('SNELSTART_WEBHOOK_SECRET'),
-        'webhook_secret_next' => env('SNELSTART_WEBHOOK_SECRET_NEXT'),
-        'webhook_signature_header' => env('SNELSTART_WEBHOOK_SIGNATURE_HEADER', 'X-SnelStart-Signature'),
-        'webhook_signature_algo' => env('SNELSTART_WEBHOOK_SIGNATURE_ALGO', 'sha256'),
-        'webhook_event_id_key' => env('SNELSTART_WEBHOOK_EVENT_ID_KEY', 'eventId'),
-    ],
+    // Snelstart-webhook-config is door emeq/snelstart-api SDK geleverd onder
+    // `config('snelstart.webhook.*')`. SDK leest de SNELSTART_WEBHOOK_* env-
+    // vars direct; geen Hub-side duplicatie.
 
     'mollie' => [
         'connect' => [

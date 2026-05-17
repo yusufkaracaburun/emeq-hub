@@ -6,7 +6,6 @@ use App\Http\Middleware\RequireCashierWebhookSecret;
 use App\Http\Middleware\ResolveMollieAccount;
 use App\Http\Middleware\ResolveSnelstartAccount;
 use App\Http\Middleware\SetNoIndexHeaders;
-use App\Http\Middleware\VerifySnelstartSignature;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -33,7 +32,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'resolve.snelstart.account' => ResolveSnelstartAccount::class,
             'resolve.mollie.account' => ResolveMollieAccount::class,
-            'verify.snelstart.signature' => VerifySnelstartSignature::class,
+            // 'verify.snelstart.signature' wordt door emeq/snelstart-api SDK
+            // geregistreerd via SnelstartServiceProvider::packageBooted().
             'emeq.admin' => EnsureEmeqAdminToken::class,
             'cashier.webhook.secret' => RequireCashierWebhookSecret::class,
             'feature.provider' => EnsureProviderEnabled::class,

@@ -1387,12 +1387,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/yusufkaracaburun/emeq-snelstart-api.git",
-                "reference": "e71a9bfc210e771ffc2bc533ca363087c6f60350"
+                "reference": "f403fc681b29d6cc90f5cd635600774b517bbf9d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/yusufkaracaburun/emeq-snelstart-api/zipball/e71a9bfc210e771ffc2bc533ca363087c6f60350",
-                "reference": "e71a9bfc210e771ffc2bc533ca363087c6f60350",
+                "url": "https://api.github.com/repos/yusufkaracaburun/emeq-snelstart-api/zipball/f403fc681b29d6cc90f5cd635600774b517bbf9d",
+                "reference": "f403fc681b29d6cc90f5cd635600774b517bbf9d",
                 "shasum": ""
             },
             "require": {
@@ -1485,7 +1485,7 @@
                 "source": "https://github.com/yusufkaracaburun/emeq-snelstart-api/tree/master",
                 "issues": "https://github.com/yusufkaracaburun/emeq-snelstart-api/issues"
             },
-            "time": "2026-05-17T19:44:34+00:00"
+            "time": "2026-05-17T19:54:54+00:00"
         },
         {
             "name": "filament/actions",
