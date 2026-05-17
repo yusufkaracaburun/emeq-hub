@@ -175,18 +175,14 @@ class StartOAuthFlowActionTest extends TestCase
     }
 
     // ============================================================
-    // Test 8: action submit creates pending Connection
+    // Test 8: action dispatch creates pending Connection
     // ============================================================
 
-    public function test_account_action_submit_creates_pending_connection(): void
+    public function test_dispatch_creates_pending_connection_for_account(): void
     {
-        $this->actingAs($this->staffUserWithPermission());
-
         $account = $this->makeAccount();
 
-        $action = StartOAuthFlowAction::forAccount();
-        $action->record($account);
-        $action->callAction(['provider' => 'mollie']);
+        StartOAuthFlowAction::dispatch($account, 'mollie');
 
         $this->assertDatabaseHas('connections', [
             'account_id' => $account->id,
@@ -208,25 +204,21 @@ class StartOAuthFlowActionTest extends TestCase
     }
 
     // ============================================================
-    // Test 9: action returns redirect with authorize URL + state
+    // Test 9: dispatch returns redirect with authorize URL + state
     // ============================================================
 
-    public function test_account_action_returns_redirect_to_authorize_url_with_state(): void
+    public function test_dispatch_returns_redirect_to_authorize_url_with_state(): void
     {
-        $this->actingAs($this->staffUserWithPermission());
-
         $account = $this->makeAccount();
 
-        $action = StartOAuthFlowAction::forAccount();
-        $action->record($account);
-        $action->callAction(['provider' => 'mollie']);
+        $response = StartOAuthFlowAction::dispatch($account, 'mollie');
 
-        // FakeOAuthFlow retourneert 'https://fake.oauth.local/authorize?state=<state>'
-        // — bewijst dat dispatch() de Registry's OAuthFlow aanroept met state-param.
         $connection = Connection::where('account_id', $account->id)->first();
         $this->assertNotNull($connection);
 
+        // FakeOAuthFlow retourneert 'https://fake.oauth.local/authorize?state=<state>'
+        // — bewijst dat dispatch() de Registry's OAuthFlow aanroept met state-param.
         $expectedUrl = 'https://fake.oauth.local/authorize?state='.$connection->oauth_state;
-        $this->assertSame($expectedUrl, redirect()->getIntendedUrl() ?? session('url.intended') ?? null);
+        $this->assertSame($expectedUrl, $response->getTargetUrl());
     }
 }
