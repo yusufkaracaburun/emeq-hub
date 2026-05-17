@@ -6,6 +6,7 @@ namespace App\Filament\Actions;
 
 use App\Models\Account;
 use App\Models\Connection;
+use App\OAuth\Exceptions\ProviderDisabledException;
 use App\OAuth\OAuthFlowRegistry;
 use App\Support\ProviderCredentialDescriptor;
 use Filament\Actions\Action;
@@ -15,6 +16,7 @@ use Filament\Support\Icons\Heroicon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
+use Laravel\Pennant\Feature;
 
 /**
  * Plan 08-03 — Shared Filament Action voor OAuth-init.
@@ -34,6 +36,11 @@ class StartOAuthFlowAction
     /**
      * Whitelist providers met OAuth-flow (descriptor-driven).
      *
+     * Filtert tevens uit op Pennant feature-flag — een provider die via de
+     * documented kill-switch (CLAUDE.md "Feature-flags / kill-switch") is
+     * uitgeschakeld verschijnt niet in de dropdown, zodat staff zich niet
+     * door een 503-notification heen worstelt (CR-03).
+     *
      * @return array<string, string> key => label
      */
     public static function oauthCapableProviders(): array
@@ -42,6 +49,9 @@ class StartOAuthFlowAction
 
         foreach (ProviderCredentialDescriptor::all() as $descriptor) {
             if ($descriptor->oauthFlowKey === null) {
+                continue;
+            }
+            if (! Feature::active("provider-{$descriptor->key}-enabled")) {
                 continue;
             }
             $providers[$descriptor->key] = ucfirst($descriptor->key);
@@ -101,7 +111,7 @@ class StartOAuthFlowAction
     {
         try {
             $flow = app(OAuthFlowRegistry::class)->for($provider);
-        } catch (InvalidArgumentException) {
+        } catch (InvalidArgumentException $e) {
             Notification::make()
                 ->title('Geen OAuth-flow beschikbaar')
                 ->body("Provider {$provider} heeft geen OAuth-koppeling. Gebruik de Snelstart-credential-flow via de onboard-wizard of POST /v1/connections.")
@@ -109,9 +119,39 @@ class StartOAuthFlowAction
                 ->send();
 
             return back();
+        } catch (ProviderDisabledException $e) {
+            // CR-03: Pennant kill-switch — provider tijdelijk uitgeschakeld.
+            // `oauthCapableProviders()` filtert hierop, dus de dropdown zou de
+            // optie niet moeten tonen; deze catch dekt de race tussen flag-toggle
+            // en form-submit (én de forConnection()-CTA die de dropdown overslaat).
+            Notification::make()
+                ->title("Provider {$provider} is tijdelijk uitgeschakeld")
+                ->body($e->getMessage())
+                ->warning()
+                ->send();
+
+            return back();
         }
 
         $state = Str::random(48);
+        $scopes = config("services.{$provider}.connect.scopes");
+
+        // CR-04-equivalent: bouw de authorize-URL VÓÓR we de pending Connection
+        // wegschrijven. Een runtime-fout in getAuthorizationUrl() (network, config
+        // missing, etc.) liet voorheen een orphan pending-row achter op elke retry.
+        try {
+            $url = $flow->getAuthorizationUrl($account, $scopes, $state);
+        } catch (\Throwable $e) {
+            report($e);
+
+            Notification::make()
+                ->title("OAuth-flow voor {$provider} faalde")
+                ->body('Authorize-URL kon niet worden opgebouwd — bekijk Horizon-logs.')
+                ->danger()
+                ->send();
+
+            return back();
+        }
 
         if ($existing !== null) {
             $existing->update([
@@ -126,9 +166,6 @@ class StartOAuthFlowAction
                 'oauth_state_expires_at' => now()->addMinutes(30),
             ]);
         }
-
-        $scopes = config("services.{$provider}.connect.scopes");
-        $url = $flow->getAuthorizationUrl($account, $scopes, $state);
 
         return redirect()->away($url);
     }

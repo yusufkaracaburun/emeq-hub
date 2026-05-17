@@ -11,9 +11,12 @@ use App\Models\Account;
 use App\Models\Connection;
 use App\Models\Consumer;
 use App\Models\User;
+use App\OAuth\Contracts\OAuthFlow;
 use App\OAuth\Mollie\MollieConnectOAuthFlow;
 use App\OAuth\Testing\FakeOAuthFlow;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Date;
+use Laravel\Pennant\Feature;
 use Livewire\Livewire;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
@@ -185,6 +188,11 @@ class StartOAuthFlowActionTest extends TestCase
 
     public function test_dispatch_creates_pending_connection_for_account(): void
     {
+        // WR-01: freeze de klok om de ~30-min-TTL-assertion deterministisch te maken.
+        // De vorige between()-vorm woog twee losse now()-calls (~ms-drift) tegen elkaar
+        // af en kon op trage CI runners flaken.
+        Date::setTestNow('2026-05-17 12:00:00');
+
         $account = $this->makeAccount();
 
         StartOAuthFlowAction::dispatch($account, 'mollie');
@@ -199,12 +207,10 @@ class StartOAuthFlowActionTest extends TestCase
         $this->assertNotNull($connection);
         $this->assertSame(48, strlen((string) $connection->oauth_state));
         $this->assertNotNull($connection->oauth_state_expires_at);
-        $this->assertTrue(
-            $connection->oauth_state_expires_at->between(
-                now()->addMinutes(29),
-                now()->addMinutes(31),
-            ),
-            'oauth_state_expires_at moet ~30 min in toekomst liggen',
+        $this->assertSame(
+            now()->addMinutes(30)->format('Y-m-d H:i:s'),
+            $connection->oauth_state_expires_at->format('Y-m-d H:i:s'),
+            'oauth_state_expires_at moet exact 30 min in toekomst liggen',
         );
     }
 
@@ -295,5 +301,80 @@ class StartOAuthFlowActionTest extends TestCase
 
         Livewire::test(ListAccounts::class)
             ->assertTableActionHidden('startOAuthFlow', $account);
+    }
+
+    // ============================================================
+    // CR-03 regression: dispatch() degradeert netjes als Pennant flag inactive is
+    // ============================================================
+
+    public function test_dispatch_returns_back_with_notification_when_provider_disabled(): void
+    {
+        $account = $this->makeAccount();
+
+        // Pennant kill-switch op Mollie zetten — `OAuthFlowRegistry::for('mollie')`
+        // gooit nu een ProviderDisabledException. Voorheen catchte dispatch() alleen
+        // InvalidArgumentException → 500.
+        Feature::define('provider-mollie-enabled', fn () => false);
+
+        $response = StartOAuthFlowAction::dispatch($account, 'mollie');
+
+        // Geen orphan pending row mag worden aangemaakt
+        $this->assertSame(0, Connection::query()->count(), 'Disabled provider mag geen Connection inserten');
+
+        // back()-redirect i.p.v. 500
+        $this->assertSame(302, $response->getStatusCode());
+    }
+
+    public function test_oauth_capable_providers_excludes_disabled_providers(): void
+    {
+        // Met Mollie disabled mag het uit de dropdown verdwijnen (geen race tussen
+        // form-show en form-submit).
+        Feature::define('provider-mollie-enabled', fn () => false);
+
+        $providers = StartOAuthFlowAction::oauthCapableProviders();
+
+        $this->assertArrayNotHasKey('mollie', $providers);
+    }
+
+    // ============================================================
+    // CR-04-equivalent regression: orphan pending Connection bij
+    // getAuthorizationUrl() failure mag niet voorkomen.
+    // ============================================================
+
+    public function test_dispatch_does_not_create_orphan_connection_when_authorize_url_throws(): void
+    {
+        $account = $this->makeAccount();
+
+        // Bind een OAuth-flow die in getAuthorizationUrl() throw't — bewijst dat
+        // dispatch() de Connection NIET wegschrijft als de authorize-URL faalt.
+        $this->app->bind(MollieConnectOAuthFlow::class, function () {
+            return new class implements OAuthFlow
+            {
+                public function getAuthorizationUrl(Account $account, array $scopes, string $state): string
+                {
+                    throw new \RuntimeException('Network down.');
+                }
+
+                public function exchangeCode(Connection $connection, string $code): Connection
+                {
+                    return $connection;
+                }
+
+                public function refreshToken(Connection $connection): Connection
+                {
+                    return $connection;
+                }
+
+                public function revoke(Connection $connection): void {}
+            };
+        });
+
+        $response = StartOAuthFlowAction::dispatch($account, 'mollie');
+
+        // Geen orphan pending row — dat was de bug pre-fix.
+        $this->assertSame(0, Connection::query()->count(), 'Geen orphan pending row als authorize-URL faalt');
+
+        // En een back()-redirect i.p.v. 500.
+        $this->assertSame(302, $response->getStatusCode());
     }
 }
