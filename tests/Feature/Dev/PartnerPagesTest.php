@@ -7,9 +7,15 @@ namespace Tests\Feature\Dev;
 use App\Models\Account;
 use App\Models\Connection;
 use App\Models\Consumer;
+use App\OAuth\Mollie\MollieConnectOAuthFlow;
+use App\OAuth\Testing\FakeOAuthFlow;
 use App\Services\PartnerStatus;
+use Illuminate\Container\Container;
+use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Routing\RouteCollection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Route;
 use Tests\TestCase;
 
 /**
@@ -172,5 +178,193 @@ class PartnerPagesTest extends TestCase
 
         $this->assertStringContainsString('Geen demo-Accounts', $html);
         $this->assertStringContainsString('php artisan db:seed', $html);
+    }
+
+    // ---------- Task 2: env-gating + blade-views + dev OAuth-init route ----------
+
+    public function test_index_page_renders_with_domeinmodel_blok(): void
+    {
+        $this->get('/dev/partners')
+            ->assertOk()
+            ->assertSee('Partner previews')
+            ->assertSee('Hoe de Hub-tenancy in elkaar zit');
+    }
+
+    public function test_index_page_shows_per_provider_status_totaal(): void
+    {
+        $consumer = Consumer::factory()->create();
+        $a1 = Account::factory()->for($consumer)->create();
+        Connection::factory()->for($a1)->forMollie()->active()->create();
+        Account::factory()->for($consumer)->create(); // 1 zonder Mollie
+
+        $this->get('/dev/partners')
+            ->assertOk()
+            ->assertSee('Mollie: 1/2 Accounts gekoppeld');
+    }
+
+    public function test_mollie_page_renders_koppel_stappen_and_cta(): void
+    {
+        $this->get('/dev/partners/mollie')
+            ->assertOk()
+            ->assertSee('Koppelen via OAuth Connect')
+            ->assertSee('Zorg dat school A een Mollie test-account heeft')
+            ->assertSee("Klik op 'Start OAuth-flow' hieronder")
+            ->assertSee('Na goedkeuring landt de access_token encrypted')
+            ->assertSee('Start OAuth-flow')
+            ->assertSee('bg-amber-500', escape: false)
+            ->assertSee('/dev/partners/mollie/start-oauth', escape: false);
+    }
+
+    public function test_mollie_dev_oauth_route_redirects_to_mollie_authorize_url(): void
+    {
+        // Bind FakeOAuthFlow zodat we Mollie-call kunnen onderscheppen voor deterministische URL.
+        $this->app->bind(MollieConnectOAuthFlow::class, FakeOAuthFlow::class);
+
+        $consumer = Consumer::factory()->create(['slug' => 'naschool']);
+        Account::factory()->for($consumer)->create([
+            'external_id' => 'school1',
+            'display_name' => 'School 1',
+        ]);
+
+        $response = $this->get('/dev/partners/mollie/start-oauth');
+
+        $response->assertStatus(302);
+        $this->assertStringStartsWith('https://fake.oauth.local/authorize', $response->headers->get('Location'));
+        $this->assertStringContainsString('state=', $response->headers->get('Location'));
+    }
+
+    public function test_mollie_dev_oauth_route_creates_pending_connection(): void
+    {
+        $this->app->bind(MollieConnectOAuthFlow::class, FakeOAuthFlow::class);
+
+        $consumer = Consumer::factory()->create(['slug' => 'naschool']);
+        $account = Account::factory()->for($consumer)->create([
+            'external_id' => 'school1',
+        ]);
+
+        $this->assertSame(0, Connection::query()->count());
+
+        $this->get('/dev/partners/mollie/start-oauth')->assertStatus(302);
+
+        $connection = Connection::query()->where('account_id', $account->id)->first();
+        $this->assertNotNull($connection);
+        $this->assertSame('mollie', $connection->provider);
+        $this->assertSame('pending', $connection->status);
+        $this->assertNotNull($connection->oauth_state);
+        $this->assertSame(48, strlen($connection->oauth_state));
+        $this->assertNotNull($connection->oauth_state_expires_at);
+        $this->assertTrue($connection->oauth_state_expires_at->isFuture());
+        $this->assertTrue($connection->oauth_state_expires_at->diffInMinutes(now()) <= 30);
+    }
+
+    public function test_mollie_dev_oauth_route_returns_404_without_demo_account(): void
+    {
+        // Geen Naschool-seed → 404.
+        $response = $this->get('/dev/partners/mollie/start-oauth');
+
+        $response->assertNotFound();
+        $this->assertStringContainsString('demo-Account', $response->getContent() ?: '');
+    }
+
+    public function test_mollie_page_includes_status_widget_with_connected_account(): void
+    {
+        $consumer = Consumer::factory()->create();
+        $account = Account::factory()->for($consumer)->create(['display_name' => 'Test School A']);
+        Connection::factory()->for($account)->forMollie()->active()->create();
+
+        $this->get('/dev/partners/mollie')
+            ->assertOk()
+            ->assertSee('Live koppel-status (dev-omgeving)')
+            ->assertSee('Test School A')
+            ->assertSee('text-emerald-600', escape: false);
+    }
+
+    public function test_snelstart_page_renders_koppel_stappen_and_curl(): void
+    {
+        $this->get('/dev/partners/snelstart')
+            ->assertOk()
+            ->assertSee('Koppelen via credential-form')
+            ->assertSee('Vraag bij SnelStart de drie credentials op')
+            ->assertSee('POST naar', escape: false)
+            ->assertSee('De Hub encrypt de credentials at rest')
+            ->assertSee('curl -X POST', escape: false)
+            ->assertSee('/v1/connections', escape: false)
+            ->assertSee('"provider":"snelstart"', escape: false);
+    }
+
+    public function test_snelstart_page_does_not_leak_plain_client_key(): void
+    {
+        $consumer = Consumer::factory()->create();
+        $account = Account::factory()->for($consumer)->create();
+        Connection::factory()->for($account)->forSnelstart()->create([
+            'client_key' => 'SECRETKEY_PLAIN_DO_NOT_LEAK',
+        ]);
+
+        $this->get('/dev/partners/snelstart')
+            ->assertOk()
+            ->assertDontSee('SECRETKEY_PLAIN_DO_NOT_LEAK');
+    }
+
+    public function test_domeinmodel_blok_appears_on_both_provider_pages(): void
+    {
+        $this->get('/dev/partners/mollie')
+            ->assertOk()
+            ->assertSee('Hoe de Hub-tenancy in elkaar zit');
+
+        $this->get('/dev/partners/snelstart')
+            ->assertOk()
+            ->assertSee('Hoe de Hub-tenancy in elkaar zit');
+    }
+
+    /**
+     * LAST in the file on purpose — createFreshApp() mutates the global container
+     * which terminates RefreshDatabase's transaction. Keep all DB-touching tests
+     * above this one.
+     */
+    public function test_dev_partner_routes_404_in_non_local_envs(): void
+    {
+        foreach (['staging', 'preview', 'uat', 'production'] as $env) {
+            $app = $this->createFreshApp($env);
+
+            $this->assertNull(
+                $app['router']->getRoutes()->getByName('dev.partners.index'),
+                "/dev/partners moet 404 zijn in env={$env}."
+            );
+            $this->assertNull(
+                $app['router']->getRoutes()->getByName('dev.partners.preview'),
+                "/dev/partners/{provider} moet 404 zijn in env={$env}."
+            );
+            $this->assertNull(
+                $app['router']->getRoutes()->getByName('dev.partners.mollie.start-oauth'),
+                "/dev/partners/mollie/start-oauth moet 404 zijn in env={$env}."
+            );
+        }
+    }
+
+    /**
+     * Bouwt een geïsoleerde Application-instance voor env-gating-inspectie.
+     *
+     * `routes/web.php` registreert nieuwe Routes op de globale facade-resolved router.
+     * Daarom snapshotten we de Container::getInstance() vóór en restoren we 'm na,
+     * zodat RefreshDatabase's teardown niet stuk gaat (config-facade onreachable).
+     */
+    private function createFreshApp(string $env): Application
+    {
+        $originalContainer = Container::getInstance();
+
+        try {
+            $app = require __DIR__.'/../../../bootstrap/app.php';
+            $app['env'] = $env;
+            $app->detectEnvironment(fn () => $env);
+
+            Route::clearResolvedInstances();
+            $router = $app->make('router');
+            $router->setRoutes(new RouteCollection);
+            require __DIR__.'/../../../routes/web.php';
+
+            return $app;
+        } finally {
+            Container::setInstance($originalContainer);
+        }
     }
 }
