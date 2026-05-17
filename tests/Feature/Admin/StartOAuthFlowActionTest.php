@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Tests\Feature\Admin;
 
 use App\Filament\Actions\StartOAuthFlowAction;
+use App\Filament\Resources\Accounts\Pages\ListAccounts;
+use App\Filament\Resources\Connections\Pages\ListConnections;
 use App\Models\Account;
 use App\Models\Connection;
 use App\Models\Consumer;
@@ -12,6 +14,7 @@ use App\Models\User;
 use App\OAuth\Mollie\MollieConnectOAuthFlow;
 use App\OAuth\Testing\FakeOAuthFlow;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Livewire\Livewire;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
@@ -47,6 +50,8 @@ class StartOAuthFlowActionTest extends TestCase
     {
         Role::firstOrCreate(['name' => 'staff']);
         Permission::firstOrCreate(['name' => 'manage-connections']);
+        // manage-consumers nodig voor AccountResource::canAccess() in mount-tests
+        Permission::firstOrCreate(['name' => 'manage-consumers']);
     }
 
     private function staffUserWithPermission(): User
@@ -220,5 +225,75 @@ class StartOAuthFlowActionTest extends TestCase
         // — bewijst dat dispatch() de Registry's OAuthFlow aanroept met state-param.
         $expectedUrl = 'https://fake.oauth.local/authorize?state='.$connection->oauth_state;
         $this->assertSame($expectedUrl, $response->getTargetUrl());
+    }
+
+    // ============================================================
+    // Task 2 mount-tests — wiring op ConnectionResource + AccountResource
+    // ============================================================
+
+    public function test_connection_resource_mounts_start_oauth_flow_action_on_pending_mollie(): void
+    {
+        $staff = $this->staffUserWithPermission();
+        $this->actingAs($staff);
+
+        $account = $this->makeAccount();
+        $pending = Connection::factory()->pending()->for($account)->create();
+
+        Livewire::test(ListConnections::class)
+            ->assertTableActionVisible('startOAuthFlow', $pending);
+    }
+
+    public function test_connection_resource_start_oauth_flow_hidden_when_access_token_present(): void
+    {
+        $staff = $this->staffUserWithPermission();
+        $this->actingAs($staff);
+
+        $account = $this->makeAccount();
+        $active = Connection::factory()->forMollie()->for($account)->create();
+
+        Livewire::test(ListConnections::class)
+            ->assertTableActionHidden('startOAuthFlow', $active);
+    }
+
+    public function test_connection_resource_revoke_action_remains_intact_after_mount(): void
+    {
+        $staff = $this->staffUserWithPermission();
+        $this->actingAs($staff);
+
+        $account = $this->makeAccount();
+        $mollie = Connection::factory()->forMollie()->for($account)->create();
+
+        // Bestaande Phase-9 revoke-action moet zichtbaar blijven naast nieuwe
+        // startOAuthFlow-action — regressie-bewijs voor 09-06 wiring.
+        Livewire::test(ListConnections::class)
+            ->assertTableActionVisible('revoke', $mollie);
+    }
+
+    public function test_account_resource_mounts_start_oauth_flow_action_for_staff(): void
+    {
+        $staff = $this->staffUserWithPermission();
+        // AccountResource::canAccess() vereist manage-consumers
+        $staff->givePermissionTo('manage-consumers');
+        $this->actingAs($staff);
+
+        $account = $this->makeAccount();
+
+        Livewire::test(ListAccounts::class)
+            ->assertTableActionVisible('startOAuthFlow', $account);
+    }
+
+    public function test_account_resource_start_oauth_flow_hidden_without_manage_connections(): void
+    {
+        $this->seedRolesAndPermissions();
+        $user = User::factory()->create();
+        $user->assignRole('staff');
+        // Geef manage-consumers (voor AccountResource::canAccess) maar GEEN manage-connections
+        $user->givePermissionTo('manage-consumers');
+        $this->actingAs($user);
+
+        $account = $this->makeAccount();
+
+        Livewire::test(ListAccounts::class)
+            ->assertTableActionHidden('startOAuthFlow', $account);
     }
 }
