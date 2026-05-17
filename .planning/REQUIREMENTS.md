@@ -44,7 +44,7 @@ Requirements voor v0.2 (~8-10 weken). Elke vereiste mapt naar één roadmap-fase
 
 - [ ] **NSCH-02**: `SyncEnrollmentToSnelstartJob` als event-handler op `EnrollmentConfirmed`. Maakt verkoopfactuur aan in Snelstart's test-omgeving. Smoke-test groen op `php artisan migrate:fresh --seed` (school1 demo-seed) — factuur zichtbaar in Snelstart-UI of via API-GET.
 
-- [ ] **NSCH-03**: Mollie checkout-flow op één activiteit met vrijwillige bijdrage **via Hub-Connect**. Naschool POSTs naar Hub `/v1/mollie/payments` met Consumer-PAT + Account-id (school A) → Hub haalt Connection.access_token van school A → Mollie checkout aangemaakt op school A's eigen Mollie-account → checkout-URL terug naar Naschool → ouder doorloopt Mollie test-mode → webhook signature-verified door Hub → Hub doet pass-through fan-out naar Naschool's callback-URL → Naschool update enrollment-status. End-to-end smoke handmatig doorlopen.
+- [ ] **NSCH-03**: Mollie checkout-flow op één activiteit met vrijwillige bijdrage **via Hub-Connect**. Naschool POSTs naar Hub `/v1/mollie/payments` met Consumer-PAT + Account-id (school A) → Hub haalt Connection.access_token van school A → Mollie checkout aangemaakt op school A's eigen Mollie-account → checkout-URL terug naar Naschool → ouder doorloopt Mollie test-mode → webhook signature-verified door Hub → Hub doet pass-through fan-out naar Naschool's callback-URL → Naschool update enrollment-status. End-to-end smoke handmatig doorlopen. Hub-side admin-trigger (`StartOAuthFlowAction` op AccountResource + ConnectionResource voor pending Mollie) bewezen in Phase 8 plan 08-03 (14/14 tests, 2026-05-17); resterende Hub-side wiring (partner-pages + Filament onboard-wizard) in PLAN 08-02/04/05; Mollie-checkout-uitvoering + e2e-smoke vereist Naschool-repo werk + UAT.
 
 ## Future Requirements
 
@@ -97,7 +97,7 @@ Expliciet uitgesloten voor v0.2. Niet re-adden zonder PROJECT.md herziening.
 | SUB-02 | Phase 7 | Complete |
 | NSCH-01 | Phase 8 | In Progress (Hub-substrate landed 08-01; Naschool-repo werk pending) |
 | NSCH-02 | Phase 8 | Pending |
-| NSCH-03 | Phase 8 | Pending |
+| NSCH-03 | Phase 8 | In Progress (Hub-admin-trigger landed 08-03; partner-pages + onboard-wizard pending; e2e UAT in Naschool-repo) |
 
 **Coverage:**
 
