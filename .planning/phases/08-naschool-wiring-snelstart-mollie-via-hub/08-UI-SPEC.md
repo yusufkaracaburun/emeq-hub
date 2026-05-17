@@ -1,10 +1,11 @@
 ---
 phase: 8
 slug: naschool-wiring-snelstart-mollie-via-hub
-status: draft
+status: approved
 shadcn_initialized: false
 preset: none
 created: 2026-05-17
+reviewed_at: 2026-05-17
 ---
 
 # Phase 8 — UI Design Contract
