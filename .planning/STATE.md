@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v0.2
 milestone_name: — Mollie + Connect + Subscriptions + Hub-skeleton
-status: executing
-stopped_at: Phase 8 plan 02 complete — OnboardConsumer Filament-page (4-staps Wizard) live op /admin/onboard-consumer met Cache-flash naar ListConsumers; 9/9 tests groen, 118/118 admin-suite zero regressies. Last open plan in fase 8 = 08-05 (partner-pages).
-last_updated: "2026-05-17T14:59:20.627Z"
+status: verifying
+stopped_at: Phase 8 context gathered — 7 D-decisions, Hub-side scope (Filament onboard-wizard + StartOAuthFlowAction + partner-pages + Resource-hints); Naschool-internals out of scope (eigen repo)
+last_updated: "2026-05-17T15:20:32.805Z"
 last_activity: 2026-05-17
 progress:
   total_phases: 10
-  completed_phases: 7
+  completed_phases: 8
   total_plans: 67
-  completed_plans: 61
-  percent: 70
+  completed_plans: 62
+  percent: 80
 ---
 
 # Project State
@@ -27,7 +27,7 @@ See: .planning/PROJECT.md (updated 2026-05-14 na v0.1 milestone-close)
 
 Phase: 8 (Naschool wiring (Snelstart + Mollie-via-Hub)) — EXECUTING
 Plan: 5 of 5
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-05-17
 
 ## Performance Metrics
@@ -70,6 +70,7 @@ Last activity: 2026-05-17
 | Phase 8 P3 | 18 | 2 tasks | 4 files |
 | Phase 8 P08-04 | 10 | 2 tasks | 7 files |
 | Phase 8 P08-02 | 14 | 2 tasks | 4 files |
+| Phase 08 P08-05 | 14 | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -128,6 +129,10 @@ Decisions zijn gelogd in PROJECT.md Key Decisions table. Decisions die uit v0.1 
 - [Phase ?]: 🆕 **New 2026-05-17 (08-04)**: Collapsed-state-assertie voor Filament Sections checkt 'isCollapsed:  true' (dubbele spatie) via assertSeeInOrder met x-data marker vóór heading; oppervlakte-marker fi-collapsed gaf false-positive uit default-collapsed sidebar-groups.
 - [Phase ?]: Plan 08-02: OnboardConsumer Filament-Page met 4-staps Wizard (Consumer/Account/Connection/PAT), Cache-flash op ListConsumers-redirect ipv eigen blade (consistent met Phase-9 Issue-PAT), Mollie-branch maakt pending stub binnen wizard en OAuth gebeurt later via StartOAuthFlowAction (UX-split per D-04); 9/9 tests groen, 118/118 admin-suite zero regressies
 - [Phase ?]: 08-02 deviation: ProviderCredentialDescriptor heeft geen label-property (alleen key); volgde 08-03-precedent ucfirst(descriptor->key); no-secret-leak via Cache::spy + property_exists ipv assertDontSee — functioneel sterker bewijs en consistent met Phase-9 ConsumerTokenActionTest-pattern
+- [Phase ?]: Plan 08-05: Heroicons via blade-ui-kit/blade-heroicons (vendor 2.7.0) + x-dynamic-component dispatch — provider-agnostisch zonder match-arm in partial
+- [Phase ?]: Plan 08-05: data-status + data-icon HTML-attrs op status-widget li voor semantische test-introspectie + a11y, omdat Heroicon-SVG geen text 'check-circle' bevat (alleen path-data) — fragile SVG-pad-match vermeden
+- [Phase ?]: Plan 08-05: Container::getInstance() snapshot/restore-pattern in createFreshApp()-helper voorkomt RefreshDatabase-teardown-crash bij env-gating-route-tests (re-require van routes/web.php muteert globale facade-resolved container)
+- [Phase ?]: Plan 08-05: Mollie-CTA op /dev/partners/mollie triggert daadwerkelijk Phase-4 OAuth-init via nieuwe dev.partners.mollie.start-oauth-route op de Naschool-demo-Account — geen anchor-only stub (UI-SPEC §S3 regel 191 + CONTEXT D-06 §3)
 
 ### Pending Todos
 
@@ -214,7 +219,7 @@ Items acknowledged en deferred bij milestone-close 2026-05-14:
 
 ## Session Continuity
 
-Last session: 2026-05-17T14:58:42.308Z
+Last session: 2026-05-17T15:20:10.099Z
 Stopped at: Phase 8 context gathered — 7 D-decisions, Hub-side scope (Filament onboard-wizard + StartOAuthFlowAction + partner-pages + Resource-hints); Naschool-internals out of scope (eigen repo)
 Resume file: None
 Next action options:

@@ -28,7 +28,7 @@ v0.2 bouwt drie samenhangende lagen: (1) `emeq/mollie-api` SDK die `mollie/molli
 - [ ] **Phase 5c: Snelstart webhook-handler** — `POST /webhooks/snelstart` HMAC-verified ingress + Connection-resolutie via `administratie_id` + audit-log (`direction=inbound`) + async fan-out naar Consumer-callback. Productie-certificeringsblocker (zie `.docs/decisions/snelstart-certificering-pad.md`).
 - [x] **Phase 6: Cashier-Mollie integratie (use-case A)** — Emeq → Consumers billing op Emeq's eigen Mollie *(voltooid 2026-05-15; 8/8 plans, SC-1+SC-2+SC-3 bewezen, SC-4 vendor-coverage; 237 tests passed + integration-suite gescheiden via `composer test:integration`)*
 - [x] **Phase 7: Account-level subscriptions (use-case B)** — Accounts → eindgebruikers via Connect + Mandates + Subscriptions *(voltooid 2026-05-15; 8/8 plans, SC-1+SC-2+SC-3 bewezen, SC-4 vendor-coverage via unit + feature stubs + skipt-graceful integration-test, 337 tests groen, ADR `account-subscriptions.md`)*
-- [ ] **Phase 8: Naschool wiring** — composer-wiring + Snelstart Stancl-resolver + `SyncEnrollmentToSnelstartJob` + Mollie checkout-flow via Hub-Connect
+- [x] **Phase 8: Naschool wiring** — composer-wiring + Snelstart Stancl-resolver + `SyncEnrollmentToSnelstartJob` + Mollie checkout-flow via Hub-Connect (completed 2026-05-17)
 - [x] **Phase 9: Filament admin-UI voor Emeq-medewerkers** — `/admin`-panel met 7 resources (Consumer CRUD + Connection read+revoke + Account read + WebhookCall viewer + AccountSubscription read+state-flip + Cashier-Subscription read + User super-admin-gated) *(voltooid 2026-05-16; 11/11 plans, HUB-04 SC-1..SC-10 bewezen via 52 nieuwe tests in `tests/Feature/Admin/` + 1 audit-migratie, ADR `filament-admin-panel.md`, 389 tests / 1343 assertions groen)*
 - [x] **Phase 10: Phase 9 polish — deferred review-findings** — 11 bevindingen uit `09-REVIEW.md` afsluiten: CR-02 permission-enforcement op 6 resources + Hub `WebhookCall`-model met `consumer()` belongs-to + cross-Consumer-isolation-test (SC-7 bewijs); WR-01..06 (last-super-admin guards, exception-veld, role-validatie, seeder password-reset, password-edit-regressie, PAT-token uit Livewire-state); IN-01..04 (N+1, exception-leak, AdminPanelProvider-comment, descriptor `tryFor()`). (completed 2026-05-16)
 
@@ -313,13 +313,13 @@ v0.2 bouwt drie samenhangende lagen: (1) `emeq/mollie-api` SDK die `mollie/molli
   4. Na webhook-bevestiging van Mollie → Hub → Naschool-callback is de enrollment-status in Naschool geüpdatet naar `paid` zonder handmatige interventie
   5. End-to-end smoke (handmatig doorlopen) is gedocumenteerd in `.docs/` of vergelijkbaar locatie in Naschool-repo
 
-**Plans:** 4/5 plans executed
+**Plans:** 5/5 plans complete
 
 - [x] 08-01-PLAN.md — ConsumerOnboarding service (atomic DB::transaction multi-model create) + HubConsumerCreate artisan-command refactor naar service-delegate (Wave 1)
 - [x] 08-02-PLAN.md — Filament OnboardConsumer Page met 4-staps Wizard (Consumer → Account → Connection → PAT) + ListConsumers header-action + RBAC + no-secret-leak tests (Wave 2)
 - [x] 08-03-PLAN.md — Shared StartOAuthFlowAction (forAccount + forConnection, descriptor-driven) + mount op ConnectionResource + AccountResource (Wave 1)
 - [x] 08-04-PLAN.md — ConsumerInfolist hint-Section + ViewConsumer-page + AccountInfolist hint-extension + Tenants-navgroup-tooltip (Wave 1)
-- [ ] 08-05-PLAN.md — PartnerStatus service + domeinmodel/status-widget Blade-partials + /dev/partners pages (index + mollie + snelstart) uitbreiden (Wave 2)
+- [x] 08-05-PLAN.md — PartnerStatus service + domeinmodel/status-widget Blade-partials + /dev/partners pages (index + mollie + snelstart) uitbreiden (Wave 2)
 
 **UI hint:** yes
 
@@ -389,7 +389,7 @@ v0.2 bouwt drie samenhangende lagen: (1) `emeq/mollie-api` SDK die `mollie/molli
 | 5c. Snelstart webhook-handler | 1/5 | In Progress|  |
 | 6. Cashier-Mollie integratie | 8/8 | Done | 2026-05-15 |
 | 7. Account-level subscriptions | 8/8 | Done | 2026-05-15 |
-| 8. Naschool wiring | 4/5 | In Progress|  |
+| 8. Naschool wiring | 5/5 | Complete   | 2026-05-17 |
 | 9. Filament admin-UI voor Emeq-medewerkers | 11/11 | Complete    | 2026-05-16 |
 | 10. Phase 9 polish — deferred review-findings | 6/6 | Complete    | 2026-05-16 |
 
