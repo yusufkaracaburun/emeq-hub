@@ -313,7 +313,14 @@ v0.2 bouwt drie samenhangende lagen: (1) `emeq/mollie-api` SDK die `mollie/molli
   4. Na webhook-bevestiging van Mollie → Hub → Naschool-callback is de enrollment-status in Naschool geüpdatet naar `paid` zonder handmatige interventie
   5. End-to-end smoke (handmatig doorlopen) is gedocumenteerd in `.docs/` of vergelijkbaar locatie in Naschool-repo
 
-**Plans:** TBD
+**Plans:** 5 plans
+
+- [ ] 08-01-PLAN.md — ConsumerOnboarding service (atomic DB::transaction multi-model create) + HubConsumerCreate artisan-command refactor naar service-delegate (Wave 1)
+- [ ] 08-02-PLAN.md — Filament OnboardConsumer Page met 4-staps Wizard (Consumer → Account → Connection → PAT) + ListConsumers header-action + RBAC + no-secret-leak tests (Wave 2)
+- [ ] 08-03-PLAN.md — Shared StartOAuthFlowAction (forAccount + forConnection, descriptor-driven) + mount op ConnectionResource + AccountResource (Wave 1)
+- [ ] 08-04-PLAN.md — ConsumerInfolist hint-Section + ViewConsumer-page + AccountInfolist hint-extension + Tenants-navgroup-tooltip (Wave 1)
+- [ ] 08-05-PLAN.md — PartnerStatus service + domeinmodel/status-widget Blade-partials + /dev/partners pages (index + mollie + snelstart) uitbreiden (Wave 2)
+
 **UI hint:** yes
 
 #### Phase 9: Filament admin-UI voor Emeq-medewerkers
@@ -382,7 +389,7 @@ v0.2 bouwt drie samenhangende lagen: (1) `emeq/mollie-api` SDK die `mollie/molli
 | 5c. Snelstart webhook-handler | 1/5 | In Progress|  |
 | 6. Cashier-Mollie integratie | 8/8 | Done | 2026-05-15 |
 | 7. Account-level subscriptions | 8/8 | Done | 2026-05-15 |
-| 8. Naschool wiring | 0/0 (TBD) | Not started | - |
+| 8. Naschool wiring | 0/5 | Planned | - |
 | 9. Filament admin-UI voor Emeq-medewerkers | 11/11 | Complete    | 2026-05-16 |
 | 10. Phase 9 polish — deferred review-findings | 6/6 | Complete    | 2026-05-16 |
 
