@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v0.2
 milestone_name: — Mollie + Connect + Subscriptions + Hub-skeleton
-status: idle
-stopped_at: Phase 8 SHIPPED — 5/5 plans + 11/11 critical+warning review-fixes + docs-sync (ADR phase-8 + errors flash-key-trap); 13/13 Hub-side must-haves verified; 507/507 tests groen; 5 HUMAN-UAT items pending (cross-repo, out_of_scope_per_D-03). Next blockers: Phase 5c partner-respons (Snelstart) of v0.2.1 polish.
-last_updated: "2026-05-17T20:30:00.000Z"
-last_activity: 2026-05-17
+status: executing
+stopped_at: Phase 8 SHIPPED — 5/5 plans + 11/11 critical+warning review-fixes + ADR `.docs/decisions/phase-8-consumer-onboarding.md` + error-entry `.docs/errors/flash-key-cache-spy-trap.md`; 13/13 Hub-side must-haves verified; 507/507 tests groen; branch `chore/v021-phase9-polish` heeft 34 Phase-8-commits + 2 fix-commit-groepen + 1 backlog-capture; branch-naam dekt scope niet meer (rename voor PR aangeraden)
+last_updated: "2026-05-17T19:27:57.811Z"
+last_activity: 2026-05-17 -- Phase 05c plan 02 (HMAC-verifier + middleware) completed
 progress:
   total_phases: 10
   completed_phases: 8
   total_plans: 67
-  completed_plans: 62
-  percent: 80
+  completed_plans: 63
+  percent: 82
 ---
 
 # Project State
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-05-14 na v0.1 milestone-close)
 
 **Core value:** Twee fundamenteel verschillende providers (OData/clientkey + REST/OAuth2) productie-gevalideerd via één SDK-pattern, en beide live in één concrete consumer-feature. v0.1 heeft Snelstart-deel bewezen; v0.2 zet Mollie + Connect + Subscriptions + Hub-skeleton op.
-**Current focus:** Phase 8 shipped (Hub-side substrate compleet). Open paden: (a) `/gsd-ship 8` PR-flow op feature-branch, (b) v0.2.1 polish, (c) wachten op Snelstart partner-respons voor Phase 5c.
+**Current focus:** Phase 05c — snelstart-webhook-handler
 
 ## Current Position
 
-Phase: 8 (shipped) — next incomplete = Phase 5c (blocked op Snelstart partner-respons sinds 2026-05-15)
-Plan: n/a — between phases
-Status: Phase 8 verified + code-reviewed + docs-synced; awaiting ship or v0.2.1 polish-decision
-Last activity: 2026-05-17
+Phase: 05c (snelstart-webhook-handler) — EXECUTING
+Plan: 2 of 5
+Status: Executing Phase 05c
+Last activity: 2026-05-17 -- Phase 05c plan 02 (HMAC-verifier + middleware) completed
 
 ## Performance Metrics
 
@@ -186,6 +186,7 @@ Decisions zijn gelogd in PROJECT.md Key Decisions table. Decisions die uit v0.1 
 
 ### Roadmap Evolution
 
+- 2026-05-17 — **Phase 5c plan 02 executed**: HMAC-verifier + middleware geland. `App\Webhooks\SnelstartSignatureVerifier` (pure-PHP, timing-safe `hash_equals`, rotation-window via `string|array $secrets`); `App\Http\Middleware\VerifySnelstartSignature` met hardfail-500-audit + invalid-401-no-audit + valid-next gedrag, alias `verify.snelstart.signature` in `bootstrap/app.php`; 5 nieuwe `services.snelstart.webhook_*`-config-keys met defaults `X-SnelStart-Signature` + `sha256` + `eventId`. 14 nieuwe tests / 33 assertions (7 verifier + 7 middleware). 5 commits (1 config-feat + 2 RED + 2 GREEN). Volledige suite 520/521 passed (1 pre-existing failure in `UserResourceTest::test_super_admin_can_create_user_via_resource` — Phase 9/10 territory, out-of-scope). 2 Rule-2-deviations (extra test-coverage voor null-sanitization + middleware-algo-doorgift). Plan 03 (route + controller) ontblokt — middleware-alias ready voor `POST /webhooks/snelstart`.
 - 2026-05-17 — **Phase 5c CONTEXT sync (partner-respons)**: Snelstart-respons binnen via Gmail-thread (origineel draft `r-8836998535038336548` van 2026-05-15). 4/5 ❓-aannames in `05c-CONTEXT.md` → 🔒 locked: #1 HMAC-header `X-SnelStart-Signature` + `HMAC-SHA256` hex (confirmed), #2 secret-lifecycle (Claude-pick — partner liet keuze open; matched subscription-key pattern), #3 tenant-routing `administratieId` UUID-string (confirmed UUID; veldnaam blijft OData-conventie), #5 event-typen `Relatie.*` + `Verkoopfactuur.*` minimaal (confirmed). Vraag #4 (retry-policy) blijft ❓ BLOCKED — partner heeft niet geantwoord; aanname blijft defensief (5× exp backoff). Plan-phase nu twee paden: (a) plannen mét defensieve #4 + OData-safety-net als optionele plan-taak, óf (b) follow-up-mail voor scherp retry-policy-antwoord. History van originele aannames bewaard in CONTEXT per regel-239-instructie.
 - 2026-05-17 — **Phase 5b verifier-close**: `05b-VERIFICATION.md` geschreven door gsd-verifier — status `passed`, score `8/8 must-haves verified`. Sluit verification-debt-row uit `v0.2-MILESTONE-AUDIT.md` (2026-05-17) op Phase 5b; `verification_artifacts` 5/11 → 6/11. Bewijs: HUB-05 SC-1..SC-8 alle VERIFIED via 86 Phase-5b-scoped tests (15 testfiles) + UAT 9/9 live (`05b-UAT.md`) + SECURITY 24/24 (`05b-SECURITY.md`); CR-01 (415-guard) + CR-02 (PII-safe `query_keys`) + CR-03 (NULL fingerprint empty body) code-resident + getest. Stale prompt-claim over `SanctumAbilityTest`-incomplete opgehelderd (5 tests volledig geïmplementeerd; werkelijke +1 incomplete = `MollieConnectOAuthFlowTest:47` Phase-4 placeholder). Geen deferred items, geen v0.2.1-opruiming nodig vanuit 5b. Sync-edits: `v0.2-MILESTONE-AUDIT.md` (HUB-05 row → ✅ satisfied; Phase Coverage 5b → ✅ passed; tech_debt 5b row resolved-markeer; totalen 11→12 ✅ + 4→3 ⚠️), `REQUIREMENTS.md` (HUB-05 evidence-pointer toegevoegd in body-blok), deze STATE.md-entry.
 - 2026-05-16 — **Phase 10 toegevoegd**: "Phase 9 polish — deferred review-findings" toegevoegd aan v0.2 milestone (depends on Phase 9). Volledige scope: 11 deferred bevindingen uit `09-REVIEW.md` (CR-02 BLOCKER-class + WR-01..06 + IN-01..04). `total_phases` 10→11. Branch: `chore/v021-phase9-polish`. Plan-bron: `09-REVIEW.md` + STATE Pending-Todos (post-merge-master-cleanup).

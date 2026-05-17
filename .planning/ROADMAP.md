@@ -226,7 +226,13 @@ v0.2 bouwt drie samenhangende lagen: (1) `emeq/mollie-api` SDK die `mollie/molli
   4. Idempotency: zelfde `event_id` 2× → tweede call = 200 + 1 audit-dup-row + 1 job (originele) — geen dubbele forward
   5. Cross-Consumer-isolation: een webhook voor administratie van Consumer X kan nooit fan-outten naar Consumer Y's callback
 
-**Plans:** 1/5 plans executed
+**Plans:** 2/5 plans executed
+
+- [x] 05c-01-PLAN.md — Schema-fundatie: pass_through_calls inbound-kolommen + connections.administratie_id + model/factory-updates
+- [x] 05c-02-PLAN.md — HMAC-verifier (App\Webhooks\SnelstartSignatureVerifier) + middleware (VerifySnelstartSignature) + alias-registratie + 5 services.snelstart.webhook_*-config-keys
+- [ ] 05c-03-PLAN.md — Route + SnelstartWebhookController + tenant-resolve + audit-write
+- [ ] 05c-04-PLAN.md — ForwardSnelstartWebhookToConsumerJob + Spatie webhook-server fan-out
+- [ ] 05c-05-PLAN.md — Integration-tests (valid + invalid + unknown-administratie + idempotency + cross-Consumer-isolation)
 
 #### Phase 6: Cashier-Mollie integratie (use-case A)
 
@@ -386,7 +392,7 @@ v0.2 bouwt drie samenhangende lagen: (1) `emeq/mollie-api` SDK die `mollie/molli
 | 4. Mollie Connect OAuth-broker | 0/0 (TBD) | Not started | - |
 | 5a. Mollie SDK Resources + Webhooks + Pass-through API | 0/5 | Planned | - |
 | 5b. Snelstart-pass-through API | 5/5 | Complete    | 2026-05-16 |
-| 5c. Snelstart webhook-handler | 1/5 | In Progress|  |
+| 5c. Snelstart webhook-handler | 2/5 | In Progress|  |
 | 6. Cashier-Mollie integratie | 8/8 | Done | 2026-05-15 |
 | 7. Account-level subscriptions | 8/8 | Done | 2026-05-15 |
 | 8. Naschool wiring | 5/5 | Complete    | 2026-05-17 |
