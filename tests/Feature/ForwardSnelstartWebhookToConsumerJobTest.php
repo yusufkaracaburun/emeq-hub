@@ -31,7 +31,10 @@ class ForwardSnelstartWebhookToConsumerJobTest extends TestCase
             'evt-queue-1',
         );
 
-        Bus::assertDispatchedOn('webhooks', ForwardSnelstartWebhookToConsumerJob::class);
+        Bus::assertDispatched(
+            ForwardSnelstartWebhookToConsumerJob::class,
+            fn (ForwardSnelstartWebhookToConsumerJob $job): bool => $job->queue === 'webhooks',
+        );
     }
 
     public function test_handle_skips_silently_without_callback_url(): void
