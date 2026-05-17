@@ -4,13 +4,13 @@ milestone: v0.2
 milestone_name: — Mollie + Connect + Subscriptions + Hub-skeleton
 status: executing
 stopped_at: Phase 8 context gathered — 7 D-decisions, Hub-side scope (Filament onboard-wizard + StartOAuthFlowAction + partner-pages + Resource-hints); Naschool-internals out of scope (eigen repo)
-last_updated: "2026-05-17T10:56:18.102Z"
+last_updated: "2026-05-17T14:46:41.428Z"
 last_activity: 2026-05-17
 progress:
   total_phases: 10
   completed_phases: 7
   total_plans: 67
-  completed_plans: 59
+  completed_plans: 60
   percent: 70
 ---
 
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-05-14 na v0.1 milestone-close)
 ## Current Position
 
 Phase: 8 (Naschool wiring (Snelstart + Mollie-via-Hub)) — EXECUTING
-Plan: 3 of 5
+Plan: 4 of 5
 Status: Ready to execute
 Last activity: 2026-05-17
 
@@ -68,6 +68,7 @@ Last activity: 2026-05-17
 | Phase 04 P05 | ~10 min | 2 tasks | 2 files + acceptance |
 | Phase 08 P08-01 | 12 | 2 tasks | 4 files |
 | Phase 8 P3 | 18 | 2 tasks | 4 files |
+| Phase 8 P08-04 | 10 | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -122,6 +123,8 @@ Decisions zijn gelogd in PROJECT.md Key Decisions table. Decisions die uit v0.1 
 - 🆕 **New 2026-05-16 (09-11)**: Phase 9 ACCEPTANCE-document met evidence voor alle 10 SC's geschreven; ADR `.docs/decisions/filament-admin-panel.md` (gitignored — lokaal aanwezig, niet in git) met 5 D-decisions + 9 out-of-scope items + verification-path. ROADMAP/REQUIREMENTS/STATE gesynced; commit volgt na human-verify "approved".
 - [Phase ?]: Plan 08-01: ConsumerOnboarding service met DB::transaction (eerste in app/) + delegate-refactor van hub:consumer:create zonder CLI-breaking change; 14/14 tests groen incl. rollback-bewijs via test-only __force_failure-marker
 - [Phase ?]: Plan 08-03: StartOAuthFlowAction met public static dispatch() voor directe testability — Tests 8+9 omzeilen Livewire-mount-stack zonder de mount-laag te missen (Tests 10-14 dekken Livewire::test op ListConnections + ListAccounts); 14/14 tests groen incl. Phase-9 revoke-action regressie-bewijs
+- [Phase ?]: 🆕 **New 2026-05-17 (08-04)**: Filament v4.11 NavigationGroup heeft géén native ->description()-slot; Tenants-navgroup-tooltip via extraSidebarAttributes(['title' => …]) — geverifieerd via tinker pre-flight check (extra-sidebar-attrs pad). Bij ->navigationGroups([…]) MOETEN álle 4 nav-groups (Tenants/Integraties/Abonnementen/Beheer) expliciet worden gedeclareerd voor render-order.
+- [Phase ?]: 🆕 **New 2026-05-17 (08-04)**: Collapsed-state-assertie voor Filament Sections checkt 'isCollapsed:  true' (dubbele spatie) via assertSeeInOrder met x-data marker vóór heading; oppervlakte-marker fi-collapsed gaf false-positive uit default-collapsed sidebar-groups.
 
 ### Pending Todos
 
@@ -208,7 +211,7 @@ Items acknowledged en deferred bij milestone-close 2026-05-14:
 
 ## Session Continuity
 
-Last session: 2026-05-17T10:55:42.507Z
+Last session: 2026-05-17T14:46:31.197Z
 Stopped at: Phase 8 context gathered — 7 D-decisions, Hub-side scope (Filament onboard-wizard + StartOAuthFlowAction + partner-pages + Resource-hints); Naschool-internals out of scope (eigen repo)
 Resume file: None
 Next action options:

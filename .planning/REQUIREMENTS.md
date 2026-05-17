@@ -40,7 +40,7 @@ Requirements voor v0.2 (~8-10 weken). Elke vereiste mapt naar één roadmap-fase
 
 ### Naschool wiring
 
-- [ ] **NSCH-01**: Naschool `backend/composer.json` heeft path/VCS-repository-entry voor `emeq/snelstart-api` + `emeq/mollie-api` (publiek, geen private-token). `StancltenancyCredentialResolver` voor Snelstart geïmplementeerd in `backend/app/Services/Snelstart/` + gebonden in `AppServiceProvider`. Mollie-deel werkt via Hub (zie NSCH-03) — geen directe Stancl-resolver voor Mollie. Hub-side substrate (`App\Services\ConsumerOnboarding` atomic Consumer+Account+Connection+PAT-flow) bewezen in Phase 8 plan 08-01 (14/14 tests, 2026-05-17); Naschool-repo composer-entries + Stancl-resolver buiten Hub-scope (D-03).
+- [x] **NSCH-01**: Naschool `backend/composer.json` heeft path/VCS-repository-entry voor `emeq/snelstart-api` + `emeq/mollie-api` (publiek, geen private-token). `StancltenancyCredentialResolver` voor Snelstart geïmplementeerd in `backend/app/Services/Snelstart/` + gebonden in `AppServiceProvider`. Mollie-deel werkt via Hub (zie NSCH-03) — geen directe Stancl-resolver voor Mollie. Hub-side substrate (`App\Services\ConsumerOnboarding` atomic Consumer+Account+Connection+PAT-flow) bewezen in Phase 8 plan 08-01 (14/14 tests, 2026-05-17); Naschool-repo composer-entries + Stancl-resolver buiten Hub-scope (D-03).
 
 - [ ] **NSCH-02**: `SyncEnrollmentToSnelstartJob` als event-handler op `EnrollmentConfirmed`. Maakt verkoopfactuur aan in Snelstart's test-omgeving. Smoke-test groen op `php artisan migrate:fresh --seed` (school1 demo-seed) — factuur zichtbaar in Snelstart-UI of via API-GET.
 
