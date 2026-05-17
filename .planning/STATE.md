@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v0.2
 milestone_name: — Mollie + Connect + Subscriptions + Hub-skeleton
-status: verifying
-stopped_at: Phase 8 context gathered — 7 D-decisions, Hub-side scope (Filament onboard-wizard + StartOAuthFlowAction + partner-pages + Resource-hints); Naschool-internals out of scope (eigen repo)
-last_updated: "2026-05-17T17:36:26.801Z"
+status: idle
+stopped_at: Phase 8 SHIPPED — 5/5 plans + 11/11 critical+warning review-fixes + docs-sync (ADR phase-8 + errors flash-key-trap); 13/13 Hub-side must-haves verified; 507/507 tests groen; 5 HUMAN-UAT items pending (cross-repo, out_of_scope_per_D-03). Next blockers: Phase 5c partner-respons (Snelstart) of v0.2.1 polish.
+last_updated: "2026-05-17T19:55:00.000Z"
 last_activity: 2026-05-17
 progress:
   total_phases: 10
@@ -21,13 +21,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-05-14 na v0.1 milestone-close)
 
 **Core value:** Twee fundamenteel verschillende providers (OData/clientkey + REST/OAuth2) productie-gevalideerd via één SDK-pattern, en beide live in één concrete consumer-feature. v0.1 heeft Snelstart-deel bewezen; v0.2 zet Mollie + Connect + Subscriptions + Hub-skeleton op.
-**Current focus:** Phase 8 — Naschool wiring (Snelstart + Mollie-via-Hub)
+**Current focus:** Phase 8 shipped (Hub-side substrate compleet). Open paden: (a) `/gsd-ship 8` PR-flow op feature-branch, (b) v0.2.1 polish, (c) wachten op Snelstart partner-respons voor Phase 5c.
 
 ## Current Position
 
-Phase: 09
-Plan: Not started
-Status: Phase complete — ready for verification
+Phase: 8 (shipped) — next incomplete = Phase 5c (blocked op Snelstart partner-respons sinds 2026-05-15)
+Plan: n/a — between phases
+Status: Phase 8 verified + code-reviewed + docs-synced; awaiting ship or v0.2.1 polish-decision
 Last activity: 2026-05-17
 
 ## Performance Metrics
@@ -220,12 +220,13 @@ Items acknowledged en deferred bij milestone-close 2026-05-14:
 
 ## Session Continuity
 
-Last session: 2026-05-17T15:20:10.099Z
-Stopped at: Phase 8 context gathered — 7 D-decisions, Hub-side scope (Filament onboard-wizard + StartOAuthFlowAction + partner-pages + Resource-hints); Naschool-internals out of scope (eigen repo)
+Last session: 2026-05-17T19:55:00.000Z (resume invoked after Phase 8 ship + docs-sync)
+Stopped at: Phase 8 SHIPPED — 5/5 plans + 11/11 critical+warning review-fixes + ADR `.docs/decisions/phase-8-consumer-onboarding.md` + error-entry `.docs/errors/flash-key-cache-spy-trap.md`; 13/13 Hub-side must-haves verified; 507/507 tests groen; branch `chore/v021-phase9-polish` heeft 34 Phase-8-commits + 2 fix-commit-groepen + 1 backlog-capture; branch-naam dekt scope niet meer (rename voor PR aangeraden)
 Resume file: None
 Next action options:
 
-  1. `/docs-sync` — Phase 9 raakte User/Connection/AppServiceProvider models en routes; doc-drift check vóór Phase 8 start (recommended eerst)
-  2. `/gsd-plan-phase 5b` — Snelstart-pass-through API, parallel-pad zonder partner-dep
-  3. `/gsd-discuss-phase 8` — Naschool wiring (Snelstart Stancl + EnrollmentConfirmed + Mollie-checkout); verse sessie + /clear aanbevolen
-  4. v0.2.1 polish — CR-02 + WR-01..6 deferred Phase-9 findings (tracking-todos in STATE)
+  1. `/gsd-ship 8` — PR-flow op feature-branch (vereist branch-rename eerst: `git branch -m chore/v021-phase9-polish feat/v021-phase8-naschool-hub-substrate`)
+  2. `/gsd-verify-work 8` — Naschool-repo HUMAN-UAT-items afvinken (5 cross-repo items in `08-HUMAN-UAT.md`)
+  3. Phase 5c partner-respons checken — `partner@snelstart.nl` (Gmail draft `r-8836998535038336548` sinds 2026-05-15); 4 ❓-aannames in `05c-CONTEXT.md` wachten op antwoord
+  4. v0.2.1 polish — CR-02 + WR-01..6 deferred Phase-9 findings (Phase 10, gemarkeerd `[x]` in ROADMAP — eventuele deferred-residue uitzoeken)
+  5. Backlog/v0.3 planning — `emeq/bizcuit-api`, `MOLL-CONNECT-RES`, `SCRAMBLE-NESTED-GROUPS` triagen voor volgend milestone
