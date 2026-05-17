@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Webhooks\MollieWebhookController;
+use App\Http\Controllers\Webhooks\SnelstartWebhookController;
 use Illuminate\Support\Facades\Route;
 use Laravel\Cashier\Http\Controllers\AftercareWebhookController;
 use Laravel\Cashier\Http\Controllers\FirstPaymentWebhookController;
@@ -17,6 +18,20 @@ use Laravel\Cashier\Http\Controllers\WebhookController as CashierWebhookControll
 Route::post('/webhooks/mollie/{connection_id}', MollieWebhookController::class)
     ->where('connection_id', '[0-9]+')
     ->name('webhooks.mollie');
+
+/*
+ * Snelstart webhook-ingress (HUB-06). Eén publieke URL voor alle administraties.
+ * Per-Connection routing gebeurt in de controller op payload `administratieId`.
+ * Signature-middleware (SDK-side, auto-aliased) is de enige gatekeeper.
+ *
+ * `throttle:api` (geprepend door bootstrap/app.php's api-group) wordt expliciet
+ * gestript — Snelstart kan bursten en throttling betekent gemiste events.
+ * Mollie- en Cashier-routes blijven onaangetast.
+ */
+Route::post('/webhooks/snelstart', SnelstartWebhookController::class)
+    ->middleware(['verify.snelstart.signature'])
+    ->withoutMiddleware(['throttle:api'])
+    ->name('webhooks.snelstart');
 
 /*
  * Cashier-Mollie webhook-ingress (D-10/D-11). Separaat van Phase 5a's
