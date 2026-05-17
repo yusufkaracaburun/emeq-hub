@@ -10,6 +10,8 @@ use App\Filament\Resources\Consumers\Pages\ListConsumers;
 use App\Models\Consumer;
 use App\Models\User;
 use App\Sanctum\TokenAbilities;
+use App\Services\ConsumerOnboarding;
+use Filament\Notifications\Notification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
 use Livewire\Livewire;
@@ -375,5 +377,85 @@ class OnboardConsumerTest extends TestCase
         $response = $this->get(ConsumerResource::getUrl());
         $response->assertOk();
         $response->assertSee('plain-secret-ABC', escape: false);
+    }
+
+    // ============================================================
+    // WR-05: domein-validatie-fout uit ConsumerOnboarding bubbel't door
+    // naar de staff i.p.v. silent te worden ingeslikt.
+    // ============================================================
+
+    public function test_invalid_argument_from_service_surfaces_actionable_message(): void
+    {
+        $this->actAsStaffWithPermission();
+
+        // Bind een fake ConsumerOnboarding die InvalidArgumentException gooit.
+        // Filament's CheckboxList::options()-whitelist filtert onbekende abilities
+        // al weg, dus deze test verifieert specifiek de WR-05 defense-in-depth
+        // catch-branch in Page::submit() — niet de service-laag-validatie.
+        $this->app->bind(ConsumerOnboarding::class, function () {
+            return new class
+            {
+                public function onboard(array $data): array
+                {
+                    throw new \InvalidArgumentException('Onbekende abilities: snelstart:demolish-universe');
+                }
+            };
+        });
+
+        Livewire::test(OnboardConsumer::class)
+            ->fillForm([
+                'name' => 'Naschool Bad',
+                'slug' => 'naschool-bad',
+                'external_id' => 'school-bad',
+                'display_name' => 'School Bad',
+                'connection' => [
+                    'provider' => 'snelstart',
+                    'client_key' => 'k',
+                    'subscription_key' => 's',
+                    'subscription_id' => 'id',
+                ],
+                'pat' => [
+                    'preset' => 'admin',
+                    'token_name' => 'bad-token',
+                ],
+            ])
+            ->call('submit');
+
+        // Catch-branch dispatcht een actionable Notification met de exception-message
+        // i.p.v. report() + generic "Er ging iets mis". assertNotified() doet
+        // een strict-equal compare over alle Notification-properties; we matchen
+        // op title + body + status zodat regressie naar de generieke pad faalt.
+        Notification::assertNotified(
+            Notification::make()
+                ->title('Validatie mislukt')
+                ->body('Onbekende abilities: snelstart:demolish-universe')
+                ->danger()
+        );
+    }
+
+    // ============================================================
+    // WR-06: server-side guard als buildConnectionPayload() null retourneert.
+    //
+    // Filament's Radio::required()-validatie weert dit pad af in de normale
+    // wizard-flow. De source-guard is defense-in-depth voor edge-cases:
+    // Filament-v4 wizard step-skipping bugs, Action::execute() buiten de
+    // form-flow, of een toekomstige schema-wijziging die provider optioneel
+    // maakt. Daarom geen end-to-end test (Filament zou hem blocken vóór de
+    // guard) maar wel een direct-invariant test op de helper-methode-output.
+    // ============================================================
+
+    public function test_build_connection_payload_returns_null_for_missing_provider(): void
+    {
+        // Reflection-test op de private helper die submit() gebruikt. Bewijst
+        // dat de guard-conditie (`null === buildConnectionPayload(...)`) ooit
+        // triggert bij empty input — de submit-side van die guard zit één
+        // method-boundary verder maar is via inspection direct controleerbaar
+        // in OnboardConsumer::submit().
+        $reflection = new \ReflectionClass(OnboardConsumer::class);
+        $method = $reflection->getMethod('buildConnectionPayload');
+        $method->setAccessible(true);
+
+        $this->assertNull($method->invoke(null, []));
+        $this->assertNull($method->invoke(null, ['provider' => null]));
     }
 }
