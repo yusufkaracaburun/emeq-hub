@@ -2,9 +2,12 @@
 
 namespace App\Filament\Resources\Consumers\Pages;
 
+use App\Filament\Pages\OnboardConsumer;
 use App\Filament\Resources\Consumers\ConsumerResource;
+use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
+use Filament\Support\Icons\Heroicon;
 
 class ListConsumers extends ListRecords
 {
@@ -21,6 +24,14 @@ class ListConsumers extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
+            // Plan 08-02: launch-pad voor de Filament OnboardConsumer-wizard. Visible-gate
+            // hergebruikt OnboardConsumer::canAccess() (manage-consumers) — staff zonder
+            // permission ziet de actie niet en kan de Page-route niet bereiken (D-04 RBAC).
+            Action::make('onboard')
+                ->label('Onboarden')
+                ->icon(Heroicon::OutlinedSparkles)
+                ->url(OnboardConsumer::getUrl())
+                ->visible(fn (): bool => OnboardConsumer::canAccess()),
             CreateAction::make(),
         ];
     }
