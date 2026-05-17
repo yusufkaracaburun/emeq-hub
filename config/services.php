@@ -35,6 +35,14 @@ return [
         ],
     ],
 
+    'snelstart' => [
+        'webhook_secret' => env('SNELSTART_WEBHOOK_SECRET'),
+        'webhook_secret_next' => env('SNELSTART_WEBHOOK_SECRET_NEXT'),
+        'webhook_signature_header' => env('SNELSTART_WEBHOOK_SIGNATURE_HEADER', 'X-SnelStart-Signature'),
+        'webhook_signature_algo' => env('SNELSTART_WEBHOOK_SIGNATURE_ALGO', 'sha256'),
+        'webhook_event_id_key' => env('SNELSTART_WEBHOOK_EVENT_ID_KEY', 'eventId'),
+    ],
+
     'mollie' => [
         'connect' => [
             'client_id' => env('MOLLIE_CONNECT_CLIENT_ID'),
