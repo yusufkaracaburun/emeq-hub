@@ -58,8 +58,13 @@ class ConsumerInfolistHintTest extends TestCase
         $response = $this->get("/admin/consumers/{$consumer->id}");
 
         $response->assertOk();
-        // Filament v4 renderd `fi-collapsed` class als de section default-collapsed is.
-        $response->assertSee('fi-collapsed');
+        // Filament v4 emit `isCollapsed: true` in het Alpine x-data van een ->collapsed() Section.
+        // We assert dat dit voorkomt NA de canonical hint-heading (geen false-positive uit
+        // sidebar-groups die ook isCollapsed-state hebben).
+        $response->assertSeeInOrder([
+            'Wat is een Consumer?',
+            'isCollapsed: true',
+        ]);
     }
 
     public function test_infolist_renders_consumer_basic_fields(): void
