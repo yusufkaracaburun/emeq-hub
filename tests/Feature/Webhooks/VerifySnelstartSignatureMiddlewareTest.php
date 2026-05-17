@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Tests\Feature\Webhooks;
 
 use App\Models\PassThroughCall;
-use App\Webhooks\SnelstartSignatureVerifier;
+use Emeq\SnelstartApi\Webhooks\SnelstartWebhookSignature;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Route;
 use Tests\TestCase;
@@ -48,7 +48,7 @@ final class VerifySnelstartSignatureMiddlewareTest extends TestCase
     public function test_valid_signature_passes_through(): void
     {
         $body = '{"event":"Relatie.Created","administratieId":"00000000-0000-0000-0000-000000000001"}';
-        $signature = SnelstartSignatureVerifier::sign($body, self::PRIMARY_SECRET);
+        $signature = SnelstartWebhookSignature::sign($body, self::PRIMARY_SECRET);
 
         $response = $this->call(
             method: 'POST',
@@ -65,7 +65,7 @@ final class VerifySnelstartSignatureMiddlewareTest extends TestCase
     public function test_invalid_signature_returns_401_empty_body(): void
     {
         $body = '{"event":"Relatie.Created"}';
-        $wrongSignature = SnelstartSignatureVerifier::sign($body, 'wrong-secret');
+        $wrongSignature = SnelstartWebhookSignature::sign($body, 'wrong-secret');
 
         $response = $this->call(
             method: 'POST',
@@ -135,7 +135,7 @@ final class VerifySnelstartSignatureMiddlewareTest extends TestCase
 
         $body = '{"event":"Verkoopfactuur.Created"}';
         // Signeer met de SECONDARY-secret — die zou Snelstart sturen tijdens de rotation-window.
-        $signature = SnelstartSignatureVerifier::sign($body, self::SECONDARY_SECRET);
+        $signature = SnelstartWebhookSignature::sign($body, self::SECONDARY_SECRET);
 
         $response = $this->call(
             method: 'POST',
@@ -152,7 +152,7 @@ final class VerifySnelstartSignatureMiddlewareTest extends TestCase
         config(['services.snelstart.webhook_signature_header' => 'X-Custom-Sig']);
 
         $body = '{"event":"Relatie.Created"}';
-        $signature = SnelstartSignatureVerifier::sign($body, self::PRIMARY_SECRET);
+        $signature = SnelstartWebhookSignature::sign($body, self::PRIMARY_SECRET);
 
         // Default-header (X-SnelStart-Signature) MOET genegeerd worden — alleen X-Custom-Sig telt.
         $blockedResponse = $this->call(
@@ -180,7 +180,7 @@ final class VerifySnelstartSignatureMiddlewareTest extends TestCase
         config(['services.snelstart.webhook_signature_algo' => 'sha512']);
 
         $body = '{"event":"Relatie.Created"}';
-        $signature = SnelstartSignatureVerifier::sign($body, self::PRIMARY_SECRET, 'sha512');
+        $signature = SnelstartWebhookSignature::sign($body, self::PRIMARY_SECRET, 'sha512');
 
         $response = $this->call(
             method: 'POST',

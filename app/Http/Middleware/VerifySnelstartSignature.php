@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Http\Middleware;
 
 use App\Models\PassThroughCall;
-use App\Webhooks\SnelstartSignatureVerifier;
 use Closure;
+use Emeq\SnelstartApi\Webhooks\SnelstartWebhookSignature;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -54,7 +54,7 @@ final class VerifySnelstartSignature
         $rawBody = $request->getContent();
         $headerValue = $request->header($headerName);
 
-        $valid = SnelstartSignatureVerifier::verify($rawBody, $headerValue, $secrets, $algo);
+        $valid = SnelstartWebhookSignature::verify($rawBody, $headerValue, $secrets, $algo);
 
         if (! $valid) {
             // Anti-amplification: geen audit-rij op invalid-pad (CONTEXT decision + T-05c-05).
