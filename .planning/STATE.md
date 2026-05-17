@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v0.2
 milestone_name: — Mollie + Connect + Subscriptions + Hub-skeleton
 status: executing
-stopped_at: Phase 5b verifier-close shipped — 05b-VERIFICATION.md passed 8/8 must-haves; v0.2-MILESTONE-AUDIT verification-debt op 5b dichtgezet (6/11). Wacht op vervolgkeuze (a) v0.2.1 polish, (b) Phase 8 ramp, of (c) wachten op Phase 5c partner-respons.
-last_updated: "2026-05-17T11:00:00.000Z"
+stopped_at: Phase 8 context gathered — 7 D-decisions, Hub-side scope (Filament onboard-wizard + StartOAuthFlowAction + partner-pages + Resource-hints); Naschool-internals out of scope (eigen repo)
+last_updated: "2026-05-17T10:44:09.304Z"
 last_activity: 2026-05-17
 progress:
   total_phases: 10
   completed_phases: 7
-  total_plans: 62
-  completed_plans: 57
+  total_plans: 67
+  completed_plans: 58
   percent: 70
 ---
 
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-05-14 na v0.1 milestone-close)
 
 **Core value:** Twee fundamenteel verschillende providers (OData/clientkey + REST/OAuth2) productie-gevalideerd via één SDK-pattern, en beide live in één concrete consumer-feature. v0.1 heeft Snelstart-deel bewezen; v0.2 zet Mollie + Connect + Subscriptions + Hub-skeleton op.
-**Current focus:** Phase 10 — phase-9-polish-deferred-review-findings
+**Current focus:** Phase 8 — Naschool wiring (Snelstart + Mollie-via-Hub)
 
 ## Current Position
 
-Phase: 10
-Plan: Not started
-Status: Executing Phase 10
-Last activity: 2026-05-16
+Phase: 8 (Naschool wiring (Snelstart + Mollie-via-Hub)) — EXECUTING
+Plan: 2 of 5
+Status: Ready to execute
+Last activity: 2026-05-17
 
 ## Performance Metrics
 
@@ -66,6 +66,7 @@ Last activity: 2026-05-16
 | Phase 04 P03 | 12min | 2 tasks | 6 files |
 | Phase 04 P04 | ~12 min | 2 tasks | 6 files |
 | Phase 04 P05 | ~10 min | 2 tasks | 2 files + acceptance |
+| Phase 08 P08-01 | 12 | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -118,6 +119,7 @@ Decisions zijn gelogd in PROJECT.md Key Decisions table. Decisions die uit v0.1 
 - 🆕 **New 2026-05-16 (09-04)**: `ProviderCredentialDescriptor`-laag — `config/hub-providers.php` + `App\Support\ProviderCredentialDescriptor` (final readonly value-object). `Connection::fingerprint()` descriptor-aware refactor met **gedragsbehoud** (`ConnectionEncryptionTest` blijft groen zonder testfile-wijziging). Invariant: nieuwe provider = config-row + factory-update + Section, GEEN nieuwe Filament Resource-class.
 - 🆕 **New 2026-05-16 (09-05..09-10)**: 7 Filament Resources gelanced (Consumer CRUD + Issue-PAT met 5 presets + Custom-mode / Connection read+revoke met no-secret-leak / Account read / WebhookCall viewer / AccountSubscription read+state-flip via manager-delegation / Cashier Subscription read+derived-status / User super-admin-gated via `manage-staff`-gate). 52 nieuwe feature-tests onder `tests/Feature/Admin/` (15 test-classes). Filament v4 nested namespace `App\Filament\Resources\<Plural>\<Resource>` is de gegenereerde shape; plan-paths uit v3-flat-stijl zijn opgeheven.
 - 🆕 **New 2026-05-16 (09-11)**: Phase 9 ACCEPTANCE-document met evidence voor alle 10 SC's geschreven; ADR `.docs/decisions/filament-admin-panel.md` (gitignored — lokaal aanwezig, niet in git) met 5 D-decisions + 9 out-of-scope items + verification-path. ROADMAP/REQUIREMENTS/STATE gesynced; commit volgt na human-verify "approved".
+- [Phase ?]: Plan 08-01: ConsumerOnboarding service met DB::transaction (eerste in app/) + delegate-refactor van hub:consumer:create zonder CLI-breaking change; 14/14 tests groen incl. rollback-bewijs via test-only __force_failure-marker
 
 ### Pending Todos
 
@@ -204,9 +206,9 @@ Items acknowledged en deferred bij milestone-close 2026-05-14:
 
 ## Session Continuity
 
-Last session: 2026-05-16T14:57:43.975Z
+Last session: 2026-05-17T10:44:04.335Z
 Stopped at: Phase 8 context gathered — 7 D-decisions, Hub-side scope (Filament onboard-wizard + StartOAuthFlowAction + partner-pages + Resource-hints); Naschool-internals out of scope (eigen repo)
-Resume file: .planning/phases/08-naschool-wiring-snelstart-mollie-via-hub/08-CONTEXT.md
+Resume file: None
 Next action options:
 
   1. `/docs-sync` — Phase 9 raakte User/Connection/AppServiceProvider models en routes; doc-drift check vóór Phase 8 start (recommended eerst)
