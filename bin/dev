@@ -1,13 +1,14 @@
 #!/usr/bin/env bash
-# Usage: bin/dev {up|down|reset|smoke|test|status} [flags]
+# Usage: bin/dev {up|down|reset|seed-demo|smoke|test|status} [flags]
 #
 # Local-dev helper voor emeq-hub.
-#   up [--reset]   docker compose up -d (db/redis/caddy) + php artisan serve + horizon op host
-#   down           stop background app + horizon, dan docker compose down
-#   reset          php artisan migrate:fresh --seed (alleen in local/testing)
-#   smoke          curl /up en verifieer {"status":"up","database":"ok","redis":"ok"}
-#   test [args]    php artisan test --compact [args]
-#   status         laat zien wat draait (compose + host-procs)
+#   up [--reset] [--seed-demo]   docker compose up -d (db/redis/caddy) + php artisan serve + horizon op host
+#   down                         stop background app + horizon, dan docker compose down
+#   reset [--demo]               php artisan migrate:fresh --seed; --demo voegt DemoSeeder toe (alleen in local/testing)
+#   seed-demo                    php artisan db:seed --class=DemoSeeder (alleen in local/testing)
+#   smoke                        curl /up en verifieer {"status":"up","database":"ok","redis":"ok"}
+#   test [args]                  php artisan test --compact [args]
+#   status                       laat zien wat draait (compose + host-procs)
 
 set -euo pipefail
 
@@ -88,10 +89,11 @@ port_in_use() {
 }
 
 cmd_up() {
-    local reset=false
+    local reset=false seed_demo=false
     for arg in "$@"; do
         case "$arg" in
-            --reset) reset=true ;;
+            --reset)     reset=true ;;
+            --seed-demo) seed_demo=true ;;
             *) die "unknown flag: $arg" ;;
         esac
     done
@@ -101,6 +103,10 @@ cmd_up() {
 
     if $reset; then
         cmd_reset
+    fi
+
+    if $seed_demo; then
+        cmd_seed_demo
     fi
 
     if ! pid_alive "$SERVE_PID"; then
@@ -128,9 +134,27 @@ cmd_down() {
 }
 
 cmd_reset() {
+    local with_demo=false
+    for arg in "$@"; do
+        case "$arg" in
+            --demo) with_demo=true ;;
+            *) die "unknown flag: $arg" ;;
+        esac
+    done
+
     guard_local_env
     log "php artisan migrate:fresh --seed"
     php artisan migrate:fresh --seed --no-interaction
+
+    if $with_demo; then
+        cmd_seed_demo
+    fi
+}
+
+cmd_seed_demo() {
+    guard_local_env
+    log "php artisan db:seed --class=DemoSeeder"
+    php artisan db:seed --class=DemoSeeder --no-interaction
 }
 
 smoke_get() {
@@ -175,14 +199,15 @@ main() {
     local cmd="${1:-}"
     shift || true
     case "$cmd" in
-        up)     cmd_up "$@" ;;
-        down)   cmd_down ;;
-        reset)  cmd_reset ;;
-        smoke)  cmd_smoke ;;
-        test)   cmd_test "$@" ;;
-        status) cmd_status ;;
+        up)         cmd_up "$@" ;;
+        down)       cmd_down ;;
+        reset)      cmd_reset "$@" ;;
+        seed-demo)  cmd_seed_demo ;;
+        smoke)      cmd_smoke ;;
+        test)       cmd_test "$@" ;;
+        status)     cmd_status ;;
         ""|-h|--help|help)
-            sed -n '2,11p' "$0" | sed 's/^# \{0,1\}//'
+            sed -n '2,13p' "$0" | sed 's/^# \{0,1\}//'
             ;;
         *) die "onbekend commando: $cmd (zie bin/dev help)" ;;
     esac
