@@ -188,7 +188,7 @@ $consumer->webhook_callback_secret; // string|null (encrypted cast)
     2. `test_handle_skips_silently_without_callback_url` — Consumer zonder `webhook_callback_url`; `Bus::fake([CallWebhookJob::class]);` roep `(new ForwardSnelstartWebhookToConsumerJob(...))->handle()` direct aan (NIET via Bus dispatch); `Bus::assertNotDispatched(CallWebhookJob::class)`
     3. `test_handle_dispatches_spatie_webhook_with_consumer_secret` — Consumer met url+secret; `Bus::fake([CallWebhookJob::class]);` `(new Job(...))->handle();` `Bus::assertDispatched(CallWebhookJob::class, function (CallWebhookJob $job) use ($consumer): bool { return $job->webhookUrl === $consumer->webhook_callback_url && $job->payload === $expectedPayload && $job->secret === $consumer->webhook_callback_secret; })`
     4. `test_handle_includes_event_id_header` — zelfde fake; assert `$job->headers['X-Emeq-Event-Id'] === 'evt-001'` in de callback
-    5. `test_handle_uses_consumer_callback_secret_not_partner_secret` — `config(['services.snelstart.webhook_secret' => 'partner-only'])`; consumer-secret 'consumer-only'; assert `$job->secret === 'consumer-only'` én `$job->secret !== 'partner-only'` (anti-correlation invariant — twee asserts in één callback)
+    5. `test_handle_uses_consumer_callback_secret_not_partner_secret` — `config(['snelstart.webhook.secret' => 'partner-only'])`; consumer-secret 'consumer-only'; assert `$job->secret === 'consumer-only'` én `$job->secret !== 'partner-only'` (anti-correlation invariant — twee asserts in één callback)
 
     Alle scenarios gebruiken Spatie's `CallWebhookJob` public properties (`webhookUrl`, `payload`, `headers`, `secret`). Geen reflectie op private state.
 

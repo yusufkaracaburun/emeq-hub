@@ -25,7 +25,7 @@ v0.2 bouwt drie samenhangende lagen: (1) `emeq/mollie-api` SDK die `mollie/molli
 - [x] **Phase 4: Mollie Connect OAuth-broker** — provider-agnostisch `OAuthFlow`-contract + `MollieConnectOAuthFlow` + encrypted token-storage *(voltooid 2026-05-14; 5/5 plans, alle 5 SC's bewezen, BLOCKING acceptance 8/8 + 129/129 tests)*
 - [x] **Phase 5a: Mollie SDK Resources + Webhooks + Pass-through API** — Payments/Customers/PaymentMethods/Refunds/Mandates/Subscriptions/PaymentLinks + Connect-webhook verifier + `/v1/mollie/*` audit-logged (zie ADR `mollie-passthrough-api.md`) *(voltooid 2026-05-15; 6/6 plans, 207 tests groen, 13/13 truths verified incl. gap-closure plan 05a-06 voor D-06 + D-08 stap 1; 3 human-UAT items pending in `05a-HUMAN-UAT.md`)*
 - [x] **Phase 5b: Snelstart-pass-through API** — `/v1/snelstart/{path}` pass-through via `HubSnelstartCredentialResolver` + `POST /v1/accounts` + `POST /v1/connections` provisioning-endpoints + audit-logging. Parallel met Phase 4 mogelijk. (completed 2026-05-16)
-- [ ] **Phase 5c: Snelstart webhook-handler** — `POST /webhooks/snelstart` HMAC-verified ingress + Connection-resolutie via `administratie_id` + audit-log (`direction=inbound`) + async fan-out naar Consumer-callback. Productie-certificeringsblocker (zie `.docs/decisions/snelstart-certificering-pad.md`).
+- [ ] **Phase 5c: Snelstart webhook-handler** — `POST /webhooks/snelstart` HMAC-verified ingress + Connection-resolutie via `administratie_id` + audit-log (`direction=inbound`) + async fan-out naar Consumer-callback. Productie-certificeringsblocker (zie `packages/snelstart-api/docs/decisions/snelstart-certificering-pad.md`).
 - [x] **Phase 6: Cashier-Mollie integratie (use-case A)** — Emeq → Consumers billing op Emeq's eigen Mollie *(voltooid 2026-05-15; 8/8 plans, SC-1+SC-2+SC-3 bewezen, SC-4 vendor-coverage; 237 tests passed + integration-suite gescheiden via `composer test:integration`)*
 - [x] **Phase 7: Account-level subscriptions (use-case B)** — Accounts → eindgebruikers via Connect + Mandates + Subscriptions *(voltooid 2026-05-15; 8/8 plans, SC-1+SC-2+SC-3 bewezen, SC-4 vendor-coverage via unit + feature stubs + skipt-graceful integration-test, 337 tests groen, ADR `account-subscriptions.md`)*
 - [x] **Phase 8: Naschool wiring** — composer-wiring + Snelstart Stancl-resolver + `SyncEnrollmentToSnelstartJob` + Mollie checkout-flow via Hub-Connect (completed 2026-05-17)
@@ -46,7 +46,7 @@ v0.2 bouwt drie samenhangende lagen: (1) `emeq/mollie-api` SDK die `mollie/molli
 - Multi-tenant via runtime `setApiKey()` / `setAccessToken()`-swap door `MollieCredentialResolver`-contract
 - Facade-alias = `EmeqMollie` (niet `Mollie` — collision met `laravel-mollie` dat Cashier-Mollie meeneemt in Phase 6)
 - Dual creds van dag 1: `MollieApiKeyCredentials` (`test_|live_`-prefix-validatie) + `MollieOAuthCredentials` (`access_`-prefix-validatie)
-- Bij start: `.docs/partners/mollie/` aanmaken met links naar officiële Mollie-docs (huidige dir bestaat nog niet — zie PROJECT.md "geen verzonnen partner-features")
+- Bij start: `packages/mollie-api/docs/partners/` aanmaken met links naar officiële Mollie-docs (huidige dir bestaat nog niet — zie PROJECT.md "geen verzonnen partner-features")
 
 **Success Criteria** (what must be TRUE):
 
@@ -143,7 +143,7 @@ v0.2 bouwt drie samenhangende lagen: (1) `emeq/mollie-api` SDK die `mollie/molli
 - MOLL-04: `MollieWebhookVerifier` met HMAC-SHA256 (`Mollie-Signature` header) namens platform-secret; Connect-flow betekent platform-signed (niet per-Connection-signed)
 - HUB-03: pass-through `/v1/mollie/*` met Bearer Consumer-PAT → Account → Connection.access_token → SDK-call; audit in `webhook_calls`-tabel (inkomend Consumer-request + uitgaand Mollie-call); fan-out via `spatie/laravel-webhook-client` queueable
 - `dedoc/scramble` genereert OpenAPI op `/docs/api` (Scramble-installatie is een Phase-3-voorbereiding of quick-task)
-- Mollie-docs in `.docs/partners/mollie/` moeten gelinkt staan voor elk endpoint dat geïmplementeerd wordt (geen verzonnen velden)
+- Mollie-docs in `packages/mollie-api/docs/partners/` moeten gelinkt staan voor elk endpoint dat geïmplementeerd wordt (geen verzonnen velden)
 
 **Success Criteria** (what must be TRUE):
 
@@ -178,7 +178,7 @@ v0.2 bouwt drie samenhangende lagen: (1) `emeq/mollie-api` SDK die `mollie/molli
   - `GET/DELETE /v1/connections/{id}` — Consumer kan eigen Connections lezen en revoken
 - PAT-abilities: `snelstart:read` (alleen GET-pass-through) en `snelstart:write` (alle methoden + Account/Connection-provisioning)
 - Account-resolving: `X-Account-Id`-header (Account.external_id) op pass-through-calls; cross-Consumer-leakage → 404 (niet 403 — voorkomt info-disclosure)
-- Snelstart-docs in `.docs/partners/snelstart/` moeten gelinkt staan voor de endpoints die in test-scope vallen (PROJECT.md "geen verzonnen partner-features")
+- Snelstart-docs in `packages/snelstart-api/docs/partners/snelstart/` moeten gelinkt staan voor de endpoints die in test-scope vallen (PROJECT.md "geen verzonnen partner-features")
 - `dedoc/scramble` (Phase-3-voorbereiding) pakt de routes automatisch op zodat ze in `/docs/api` met "Try it out"-knop verschijnen
 
 **Success Criteria** (what must be TRUE):
@@ -229,7 +229,7 @@ v0.2 bouwt drie samenhangende lagen: (1) `emeq/mollie-api` SDK die `mollie/molli
 **Plans:** 2/5 plans executed
 
 - [x] 05c-01-PLAN.md — Schema-fundatie: pass_through_calls inbound-kolommen + connections.administratie_id + model/factory-updates
-- [x] 05c-02-PLAN.md — HMAC-verifier (App\Webhooks\SnelstartSignatureVerifier) + middleware (VerifySnelstartSignature) + alias-registratie + 5 services.snelstart.webhook_*-config-keys
+- [x] 05c-02-PLAN.md — HMAC-verifier + middleware verplaatst naar `emeq/snelstart-api` SDK (`Emeq\SnelstartApi\Webhooks\SnelstartWebhookSignature` + `Emeq\SnelstartApi\Http\Middleware\VerifySnelstartSignature` auto-aliased via `packageBooted`); 5 config-keys onder `snelstart.webhook.*` SDK-config. Hub-side `services.snelstart.*`-block en alias-registratie verwijderd. Zie SUMMARY-addendum + ADR `sdk-redistributability-boundary.md`.
 - [ ] 05c-03-PLAN.md — Route + SnelstartWebhookController + tenant-resolve + audit-write
 - [ ] 05c-04-PLAN.md — ForwardSnelstartWebhookToConsumerJob + Spatie webhook-server fan-out
 - [ ] 05c-05-PLAN.md — Integration-tests (valid + invalid + unknown-administratie + idempotency + cross-Consumer-isolation)

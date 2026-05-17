@@ -98,7 +98,7 @@ Output: 1 end-to-end-test-class, 1 ADR, 3 planning-document-updates, 1 ACCEPTANC
     use App\Models\Connection;
     use App\Models\Consumer;
     use App\Models\PassThroughCall;
-    use App\Webhooks\SnelstartSignatureVerifier;
+    use Emeq\SnelstartApi\Webhooks\SnelstartWebhookSignature;
     use Illuminate\Foundation\Testing\RefreshDatabase;
     use Illuminate\Support\Facades\Bus;
     use Tests\TestCase;
@@ -115,9 +115,9 @@ Output: 1 end-to-end-test-class, 1 ADR, 3 planning-document-updates, 1 ACCEPTANC
         {
             parent::setUp();
             config([
-                'services.snelstart.webhook_secret' => 'test-secret',
-                'services.snelstart.webhook_signature_header' => 'X-SnelStart-Signature',
-                'services.snelstart.webhook_signature_algo' => 'sha256',
+                'snelstart.webhook.secret' => 'test-secret',
+                'snelstart.webhook.signature_header' => 'X-SnelStart-Signature',
+                'snelstart.webhook.signature_algo' => 'sha256',
             ]);
         }
 
@@ -247,7 +247,7 @@ Output: 1 end-to-end-test-class, 1 ADR, 3 planning-document-updates, 1 ACCEPTANC
     ```markdown
     **Plans:** 5 plans
     - [ ] 05c-01-PLAN.md — pass_through_calls migration extension + administratie_id index + model/factory updates
-    - [ ] 05c-02-PLAN.md — SnelstartSignatureVerifier + VerifySnelstartSignature middleware + services.snelstart.webhook_* config
+    - [ ] 05c-02-PLAN.md — SnelstartWebhookSignature + VerifySnelstartSignature middleware (beide SDK-side in `emeq/snelstart-api`) + `snelstart.webhook.*` SDK-config
     - [ ] 05c-03-PLAN.md — SnelstartWebhookController + route + controller-feature-tests (SC-1..SC-4+SC-5)
     - [ ] 05c-04-PLAN.md — ForwardSnelstartWebhookToConsumerJob + Horizon webhooks-supervisor
     - [ ] 05c-05-PLAN.md — End-to-end integration-test alle 5 SC's + ADR + ACCEPTANCE-gate + tracking-updates

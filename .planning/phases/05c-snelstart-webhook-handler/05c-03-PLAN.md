@@ -9,8 +9,8 @@ files_modified:
   - app/Http/Controllers/Webhooks/SnelstartWebhookController.php
   - tests/Feature/SnelstartWebhookControllerTest.php
 
-# Note: config/services.php (webhook_event_id_key) is OWNED by plan 05c-02 Task 1 —
-# alle services.snelstart.webhook_*-keys staan daar. Deze plan voegt geen config-keys toe.
+# Note: alle snelstart.webhook.*-keys staan SDK-side in `packages/snelstart-api/config/snelstart.php`
+# (post-execute SDK-refactor van plan 02). Deze plan voegt geen config-keys toe.
 autonomous: true
 requirements: [HUB-06]
 tags:
@@ -142,7 +142,7 @@ From plan 05c-01 (Wave 1):
   <behavior>
     - `__invoke(Request $request)` doet 6 stappen in deze volgorde:
       1. Parse JSON-body → array. Geen array of geen `administratieId`-veld → 400 + audit-row met `upstream_error='malformed_payload'` (consumer/account/connection NULL)
-      2. Lees `event_id` (Snelstart-veld ❓; aanname `eventId` — config-driven via `services.snelstart.webhook_event_id_key` default `eventId`). Null mag, idempotency-check skipt dan.
+      2. Lees `event_id` (Snelstart-veld ❓; aanname `eventId` — config-driven via `snelstart.webhook.event_id_key` default `eventId`). Null mag, idempotency-check skipt dan.
       3. Idempotency-check: als event_id != null en `PassThroughCall::where('provider','snelstart')->where('event_id', $eventId)->exists()` → 200 + extra audit-row met `upstream_error='duplicate_event'`; géén nieuwe job-dispatch
       4. Connection-resolutie: `Connection::where('provider','snelstart')->where('administratie_id', $payload['administratieId'])->first()`. Niet gevonden → 200 + audit-row met `consumer_id/account_id/connection_id = NULL`, `upstream_error='unknown_administratie_id'`; géén job-dispatch
       5. Audit-row write — direction=inbound, event_id, request_fingerprint = sha256(rawBody)[0..12], path=`/webhooks/snelstart`, status=200, juiste FK-keten
@@ -198,7 +198,7 @@ From plan 05c-01 (Wave 1):
                 return response()->json(['error' => 'malformed_payload'], 400);
             }
 
-            $eventIdKey = (string) config('services.snelstart.webhook_event_id_key', 'eventId');
+            $eventIdKey = (string) config('snelstart.webhook.event_id_key', 'eventId');
             $eventId = isset($payload[$eventIdKey]) && is_string($payload[$eventIdKey])
                 ? $payload[$eventIdKey]
                 : null;
@@ -295,7 +295,7 @@ From plan 05c-01 (Wave 1):
     }
     ```
 
-    **Note** — `services.snelstart.webhook_event_id_key` is geland in plan 05c-02 Task 1 (alle webhook-config-keys staan daar samen). Deze controller leest 'm alleen, voegt geen nieuwe key toe. Default `'eventId'` werkt zonder env override.
+    **Note** — `snelstart.webhook.event_id_key` is geland in plan 05c-02 Task 1 (alle webhook-config-keys staan daar samen). Deze controller leest 'm alleen, voegt geen nieuwe key toe. Default `'eventId'` werkt zonder env override.
 
     **2. Test `tests/Feature/SnelstartWebhookControllerTest.php`** met `RefreshDatabase`. Helper-methode in test-class genereert geldige signature met `SnelstartSignatureVerifier::sign()` zodat de middleware passeert:
 

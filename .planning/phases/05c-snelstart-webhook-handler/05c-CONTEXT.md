@@ -244,3 +244,26 @@ Optioneel: counter in Redis voor `snelstart_invalid_signature_count` om alerting
    - **(b) Follow-up verzenden** naar `partner@snelstart.nl` met scherpere vraag (retry-aantal + backoff-curve + DLQ ja/nee) en wachten. Geen rework-risico, maar partner-respons-cyclus stagneert plan-phase.
 
 Migratie-veldnamen (administratieId UUID) en HMAC-protocol (X-SnelStart-Signature + HMAC-SHA256) zijn geconfirmeerd; rework-risico op die fronten is weg.
+
+---
+
+## Addendum — SDK-redistributability-shift (2026-05-17)
+
+**Wat is veranderd na plan-phase:** tijdens execute-phase van plan 05c-02 is besloten dat de HMAC-verifier + middleware + webhook-config in de `emeq/snelstart-api` SDK horen, niet Hub-side. Reden: pattern-consistentie met Mollie (waar de signature-class al in `emeq/mollie-api` zit) + redistributability voor non-Hub-consumers. Zie ADR `.docs/decisions/sdk-redistributability-boundary.md`.
+
+**Wat dit betekent voor plans 03/04/05:**
+
+| Was (zoals in deze CONTEXT.md hierboven geschreven) | Is (eindstaat na plan 02 SDK-refactor) |
+|---|---|
+| `App\Webhooks\SnelstartSignatureVerifier` (Hub-class) | `Emeq\SnelstartApi\Webhooks\SnelstartWebhookSignature` (SDK-class, vendor) |
+| `App\Http\Middleware\VerifySnelstartSignature` (Hub-middleware) | `Emeq\SnelstartApi\Http\Middleware\VerifySnelstartSignature` (SDK-middleware) |
+| Alias `verify.snelstart.signature` in `bootstrap/app.php` | Auto-geregistreerd door `SnelstartServiceProvider::packageBooted()` — Hub bootstrap raakt 'm niet meer aan |
+| `config('services.snelstart.webhook_*')` keys (Hub `config/services.php`) | `config('snelstart.webhook.*')` keys (SDK `config/snelstart.php`) |
+| `services.snelstart.webhook_secret` / `_secret_next` / `_signature_header` / `_signature_algo` / `_event_id_key` | `snelstart.webhook.secret` / `secret_next` / `signature_header` / `signature_algo` / `event_id_key` |
+
+**Plan 03 (route + controller):** geen architecturele impact — controller leest `config('snelstart.webhook.event_id_key', 'eventId')` i.p.v. de oude key. Route-middleware-alias `verify.snelstart.signature` blijft hetzelfde (SDK-side nu).
+
+**Plan 04 (forward-job):** geen architecturele impact — job hangt op `consumers.webhook_callback_*` (Hub-state), niet op de partner-secret. Een test die explicitly de anti-correlation invariant test, leest `config('snelstart.webhook.secret', 'partner-only')`.
+
+**Plan 05 (E2E + ADR + tracking):** E2E-test gebruikt `Emeq\SnelstartApi\Webhooks\SnelstartWebhookSignature::sign()` om de inbound payload te tekenen (vendor-import). Config-setup via `config(['snelstart.webhook.secret' => ...])`. ADR `snelstart-webhook-ingress.md` blijft Hub-side ADR (`.docs/decisions/`) — het beschrijft de Hub-ingress-architectuur die rond de SDK heen gebouwd is.
+

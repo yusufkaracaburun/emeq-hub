@@ -30,7 +30,7 @@ Een Hub-platform en losse, Saloon-gebaseerde Laravel SDK-packages (`emeq/snelsta
 
 Open v0.2-requirements:
 
-- **HUB-06** — Snelstart webhook-handler op `POST /webhooks/snelstart` (HMAC-verified ingress + audit-log + async fan-out). Phase 5c, **BLOCKED** op partner@snelstart.nl certificeringsantwoord (Gmail draft `r-8836998535038336548`, verwacht ≤ 2026-05-26). Zie `.docs/decisions/snelstart-certificering-pad.md`.
+- **HUB-06** — Snelstart webhook-handler op `POST /webhooks/snelstart` (HMAC-verified ingress + audit-log + async fan-out). Phase 5c, **BLOCKED** op partner@snelstart.nl certificeringsantwoord (Gmail draft `r-8836998535038336548`, verwacht ≤ 2026-05-26). Zie `packages/snelstart-api/docs/decisions/snelstart-certificering-pad.md`.
 - **NSCH-01** — Naschool wiring: Stancl-tenancy resolver voor Snelstart + composer-VCS-entries voor `emeq/snelstart-api` + `emeq/mollie-api`. Phase 8, unblocked alternatief pad terwijl HUB-06 op partner wacht.
 - **NSCH-02** — Naschool `EnrollmentConfirmed` → Snelstart-verkoopfactuur via `SyncEnrollmentToSnelstartJob`. Phase 8.
 - **NSCH-03** — Naschool vrijwillige-bijdrage-flow via Mollie Connect (= via Hub-Connect, op school's eigen Mollie). Phase 8, e2e-bewijs smoke-test.
