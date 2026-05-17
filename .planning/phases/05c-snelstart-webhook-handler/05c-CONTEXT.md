@@ -1,7 +1,7 @@
 # Phase 5c: Snelstart webhook-handler — Context
 
 **Gathered:** 2026-05-15
-**Status:** Tentative — aannames gemarkeerd ❓ wachten op antwoord van `partner@snelstart.nl` (Gmail-draft `r-8836998535038336548` verzonden 2026-05-15)
+**Status:** Partial — partner-respons 2026-05-17 sluit 4/5 aannames (🔒 #1 / #2 / #3 / #5); vraag #4 (retry-policy) blijft ❓ blocked op follow-up
 **Requirement:** HUB-06 (toe te voegen aan REQUIREMENTS.md bij plan-phase)
 **Depends on:** Phase 5b (Snelstart-pass-through API — `connections` + `pass_through_calls`-tabel), Phase 5a-01 (`consumers.webhook_callback_url` + `consumers.webhook_callback_secret` reeds aanwezig per migratie `2026_05_16_000001`)
 
@@ -10,8 +10,8 @@
 
 Snelstart stuurt webhooks naar één publieke partner-URL `https://hub.emeq.nl/webhooks/snelstart` (bij certificering doorgegeven; geen Sanctum-auth). De Hub:
 
-1. Verifieert HMAC met globale `SNELSTART_WEBHOOK_SECRET` env var ❓ (header-naam + algorithme te valideren — Snelstart-vraag #1)
-2. Parsed payload en leest tenant-routing-veld ❓ (`administratieId` aanname — vraag #3)
+1. Verifieert HMAC met globale `SNELSTART_WEBHOOK_SECRET` env var (🔒 #1 confirmed 2026-05-17 — header + algoritme bevestigd)
+2. Parsed payload en leest tenant-routing-veld `administratieId` (🔒 #3 confirmed 2026-05-17 — UUID-string)
 3. Resolved `Connection` waar `connections.administratie_id == payload.administratieId`
 4. Schrijft audit-row in `pass_through_calls` met `direction = inbound`
 5. Enqueuet outbound fan-out-job richting `consumers.webhook_callback_url` met HMAC-signing via `consumers.webhook_callback_secret` (per-Consumer, hergebruik Phase 5a-01-pattern)
@@ -32,7 +32,7 @@ Snelstart stuurt webhooks naar één publieke partner-URL `https://hub.emeq.nl/w
 ### 🔒 Locked uit ADR `snelstart-certificering-pad.md`
 
 - **Eén partner-URL** `https://hub.emeq.nl/webhooks/snelstart` — niet één URL per Connection. Bij certificering registreren we deze ene URL voor onze AppShortName.
-- **HMAC-secret = globaal partner-secret** via `SNELSTART_WEBHOOK_SECRET` env var in Laravel Cloud. Roteerbaar via Snelstart developer-portal ❓ (lifecycle te valideren — vraag #2).
+- **HMAC-secret = globaal partner-secret** via `SNELSTART_WEBHOOK_SECRET` env var in Laravel Cloud. Roteerbaar via Snelstart developer-portal (🔒 #2 locked 2026-05-17 — Claude-pick, partner liet keuze open; rotation-pattern matched subscription-keys uit `subscription.md`).
 - **Per-Connection routing via payload-veld**, niet via URL-padparameter — Snelstart stuurt alle administraties naar dezelfde URL.
 - **Anti-correlation**: inbound HMAC-secret (Snelstart→Hub) ≠ outbound HMAC-secret (Hub→Consumer). Per-Consumer `webhook_callback_secret` blijft afgeschermd van de partner-secret.
 
@@ -42,9 +42,9 @@ Snelstart stuurt webhooks naar één publieke partner-URL `https://hub.emeq.nl/w
 - **Webhook-secret encrypted at rest**: bestaande `consumers.webhook_callback_secret` is `text` met `encrypted` cast (Phase 5a-01-pattern). Geen nieuwe kolom nodig voor outbound.
 - **Cross-Consumer-isolation**: een webhook voor administratie A van Consumer X mag nooit fan-outten naar Consumer Y's callback. Resolutie via `connections.administratie_id` → `connections.account_id` → `accounts.consumer_id`-chain.
 
-### ❓ Aanname (vraag #1) — HMAC-header-naam + algorithme
+### 🔒 Locked (vraag #1, confirmed 2026-05-17) — HMAC-header-naam + algorithme
 
-**Aanname:** Header = `X-SnelStart-Signature`, algorithme = `HMAC-SHA256` over raw request body, hex-encoded.
+**Confirmed:** Header = `X-SnelStart-Signature`, algorithme = `HMAC-SHA256` over raw request body, hex-encoded. Bron: partner-respons 2026-05-17 (Gmail-thread van `r-8836998535038336548`).
 
 **Implementatie-defensief:** config-driven via `config/services.php`:
 ```php
@@ -57,17 +57,17 @@ Snelstart stuurt webhooks naar één publieke partner-URL `https://hub.emeq.nl/w
 
 **Fix-bij-respons:** wijzig env vars + `services.php`-defaults zonder code-deploy.
 
-### ❓ Aanname (vraag #2) — Webhook-secret-lifecycle
+### 🔒 Locked (vraag #2, Claude-pick 2026-05-17 — partner liet keuze open) — Webhook-secret-lifecycle
 
-**Aanname:** Eén partner-secret per AppShortName. Roteerbaar via Snelstart developer-portal-UI met overlap-window (primary/secondary, analoog aan subscription-keys uit `subscription.md`).
+**Locked:** Eén partner-secret per AppShortName. Roteerbaar via Snelstart developer-portal-UI met overlap-window (primary/secondary, analoog aan subscription-keys uit `subscription.md`).
 
 **Defensief:** support voor twee secrets via `SNELSTART_WEBHOOK_SECRET` + `SNELSTART_WEBHOOK_SECRET_NEXT`. Verifier accepteert match op één van beide tijdens rotatie. Default: alleen primary.
 
-**Fix-bij-respons:** als Snelstart per-URL-secrets blijkt te doen, verplaatsen we naar een `partner_webhook_secrets`-tabel.
+**Rationale Claude-pick:** partner heeft geen expliciete opinion gegeven; secret-lifecycle pattern uit Snelstart's eigen subscription-key-model (gedocumenteerd in `subscription.md`) is de minst-verrassende default voor Emeq-dev's die de bestaande partner-conventies kennen. Geen rework-risico: code blijft hetzelfde als Snelstart later een per-URL-secret-tabel introduceert (config-driven secret-resolver, niet per-Connection-secret).
 
-### ❓ Aanname (vraag #3) — Tenant-routing veld
+### 🔒 Locked (vraag #3, confirmed 2026-05-17) — Tenant-routing veld
 
-**Aanname:** Payload bevat `administratieId` (camelCase, UUID-string per Snelstart OData-conventie zoals in `apis-7c385276.md`).
+**Confirmed:** Payload bevat `administratieId` als **UUID-string** (camelCase per Snelstart OData-conventie zoals in `apis-7c385276.md`). Partner-respons 2026-05-17 bevestigde het UUID-type expliciet; veldnaam `administratieId` blijft afgeleid uit OData-conventie en is niet apart bevestigd in de respons — match met partner-docs maakt rework-risico nihil.
 
 **Nieuwe kolom op `connections`:**
 ```php
@@ -83,7 +83,9 @@ Schema::table('connections', function (Blueprint $table): void {
 
 **Fix-bij-respons:** als veldnaam anders is (bv. `relatieId` of nested `payload.administratie.id`) verander de migration-naam + de parser. Eenmalige refactor.
 
-### ❓ Aanname (vraag #4) — Retry-policy
+### ❓ Aanname (vraag #4) — Retry-policy — **BLOCKED 2026-05-17**
+
+**Status:** partner heeft niet geantwoord op deze vraag in de respons van 2026-05-17. Aanname blijft defensief; follow-up nodig vóór `/gsd-plan-phase 5c` mits dit als acceptable risk geclassificeerd wordt (zie "Volgende stap" onderaan).
 
 **Aanname (defensief):** Snelstart doet 5× exponential backoff (Azure APIM-default), eindstaat = verloren. Geen DLQ aan Snelstart-zijde.
 
@@ -96,11 +98,11 @@ Schema::table('connections', function (Blueprint $table): void {
 - Als Snelstart een DLQ + portaal-replay heeft: skip OData-safety-net, voeg admin-UI replay-trigger toe in Phase 9.
 - Als retries veel agressiever zijn (bv. 1× single-shot): bouw OData-polling als hard requirement, niet optioneel.
 
-### ❓ Aanname (vraag #5) — Event-typen voor v1
+### 🔒 Locked (vraag #5, confirmed 2026-05-17) — Event-typen voor v1
 
-**Aanname:** Snelstart biedt minimaal `Relatie.*` en `Verkoopfactuur.*` event-typen. MVP filtert niet — we forwarden alles wat binnenkomt naar de consumer en laten de consumer per type beslissen.
+**Confirmed:** Snelstart biedt minimaal `Relatie.*` en `Verkoopfactuur.*` event-typen. MVP filtert niet — we forwarden alles wat binnenkomt naar de consumer en laten de consumer per type beslissen.
 
-**Fix-bij-respons:** als er een opt-in event-type-registratie bij Snelstart bestaat, configureer welke types we willen ontvangen via een nieuw `consumers.snelstart_webhook_events` JSON-array (later).
+**Fix-bij-respons (alleen als opt-in-registratie later opduikt):** configureer welke types we willen ontvangen via een nieuw `consumers.snelstart_webhook_events` JSON-array (later).
 
 ### 🔒 Locked — Onbekende `administratieId`
 
@@ -235,8 +237,10 @@ Optioneel: counter in Redis voor `snelstart_invalid_signature_count` om alerting
 
 ## Volgende stap
 
-1. **Wacht op antwoord** van `partner@snelstart.nl` (3-10 werkdagen vanaf 2026-05-15).
-2. **Update CONTEXT.md** — vervang ❓ → 🔒 met de werkelijke antwoorden, bewaar history van wat we hadden geassumeerd.
-3. **`/gsd-plan-phase 5c`** met de geüpdate CONTEXT als input.
+1. **Partner-respons binnen 2026-05-17:** 4/5 aannames bevestigd (🔒 #1 / #2 / #3 / #5). Vraag #4 (retry-policy) is niet beantwoord — blijft ❓ blocked.
+2. **CONTEXT.md gesynced** op 2026-05-17 — ❓ → 🔒 voor #1 / #2 / #3 / #5, history van originele aannames bewaard.
+3. **Twee paden voor `/gsd-plan-phase 5c`:**
+   - **(a) Plannen mét defensieve #4-aanname:** acceptabel als (i) de OData-safety-net-job als optionele extra plan-taak in scope blijft en (ii) idempotency via `event_id`-unique-index hard wordt afgedwongen. Code blijft correct ongeacht werkelijke retry-policy; alleen de safety-net-job is potentieel overbodig of juist verplicht achteraf.
+   - **(b) Follow-up verzenden** naar `partner@snelstart.nl` met scherpere vraag (retry-aantal + backoff-curve + DLQ ja/nee) en wachten. Geen rework-risico, maar partner-respons-cyclus stagneert plan-phase.
 
-Tot het Snelstart-antwoord binnen is: **niet executen**. Migratie-veldnamen + retry-strategie kunnen anders zijn dan aangenomen; vooruit-bouwen op aannames betekent rework risico.
+Migratie-veldnamen (administratieId UUID) en HMAC-protocol (X-SnelStart-Signature + HMAC-SHA256) zijn geconfirmeerd; rework-risico op die fronten is weg.
