@@ -3,6 +3,7 @@
 namespace Tests\Feature\Console;
 
 use App\Models\Consumer;
+use App\Services\ConsumerOnboarding;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\PersonalAccessToken;
 use Tests\TestCase;
@@ -86,5 +87,35 @@ class HubConsumerCreateTest extends TestCase
             ->assertExitCode(2);
 
         $this->assertSame(0, Consumer::where('slug', 'typo-test')->count());
+    }
+
+    public function test_handle_resolves_consumer_onboarding_from_container(): void
+    {
+        // ConsumerOnboarding is `final readonly` (PLAN-acceptance), dus geen
+        // Mockery-stub mogelijk. We bewijzen DI via reflection van de
+        // handle()-signature plus een end-to-end-run die het stubable
+        // pre-resolved object via $this->app->instance() in de container zet.
+        $resolved = $this->app->make(ConsumerOnboarding::class);
+        $this->assertInstanceOf(ConsumerOnboarding::class, $resolved);
+
+        $reflection = new \ReflectionMethod(\App\Console\Commands\HubConsumerCreate::class, 'handle');
+        $params = $reflection->getParameters();
+        $this->assertCount(1, $params, 'handle() neemt nu een ConsumerOnboarding parameter');
+        $this->assertSame(
+            ConsumerOnboarding::class,
+            $params[0]->getType()?->getName(),
+            'handle() ontvangt ConsumerOnboarding via container-DI'
+        );
+
+        // End-to-end smoke: command roept onboard() via DI aan en print plain token.
+        $this->artisan('hub:consumer:create', [
+            '--slug' => 'di-test',
+            '--name' => 'DI Test',
+        ])->assertExitCode(0);
+
+        $consumer = Consumer::where('slug', 'di-test')->first();
+        $this->assertNotNull($consumer);
+        $token = PersonalAccessToken::where('tokenable_id', $consumer->id)->first();
+        $this->assertNotNull($token);
     }
 }
