@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v0.2
 milestone_name: — Mollie + Connect + Subscriptions + Hub-skeleton
 status: executing
-stopped_at: Phase 8 context gathered — 7 D-decisions, Hub-side scope (Filament onboard-wizard + StartOAuthFlowAction + partner-pages + Resource-hints); Naschool-internals out of scope (eigen repo)
-last_updated: "2026-05-16T21:49:24.283Z"
-last_activity: 2026-05-16
+stopped_at: Phase 5b verifier-close shipped — 05b-VERIFICATION.md passed 8/8 must-haves; v0.2-MILESTONE-AUDIT verification-debt op 5b dichtgezet (6/11). Wacht op vervolgkeuze (a) v0.2.1 polish, (b) Phase 8 ramp, of (c) wachten op Phase 5c partner-respons.
+last_updated: "2026-05-17T11:00:00.000Z"
+last_activity: 2026-05-17
 progress:
   total_phases: 10
   completed_phases: 7
@@ -170,6 +170,7 @@ Decisions zijn gelogd in PROJECT.md Key Decisions table. Decisions die uit v0.1 
 
 ### Roadmap Evolution
 
+- 2026-05-17 — **Phase 5b verifier-close**: `05b-VERIFICATION.md` geschreven door gsd-verifier — status `passed`, score `8/8 must-haves verified`. Sluit verification-debt-row uit `v0.2-MILESTONE-AUDIT.md` (2026-05-17) op Phase 5b; `verification_artifacts` 5/11 → 6/11. Bewijs: HUB-05 SC-1..SC-8 alle VERIFIED via 86 Phase-5b-scoped tests (15 testfiles) + UAT 9/9 live (`05b-UAT.md`) + SECURITY 24/24 (`05b-SECURITY.md`); CR-01 (415-guard) + CR-02 (PII-safe `query_keys`) + CR-03 (NULL fingerprint empty body) code-resident + getest. Stale prompt-claim over `SanctumAbilityTest`-incomplete opgehelderd (5 tests volledig geïmplementeerd; werkelijke +1 incomplete = `MollieConnectOAuthFlowTest:47` Phase-4 placeholder). Geen deferred items, geen v0.2.1-opruiming nodig vanuit 5b. Sync-edits: `v0.2-MILESTONE-AUDIT.md` (HUB-05 row → ✅ satisfied; Phase Coverage 5b → ✅ passed; tech_debt 5b row resolved-markeer; totalen 11→12 ✅ + 4→3 ⚠️), `REQUIREMENTS.md` (HUB-05 evidence-pointer toegevoegd in body-blok), deze STATE.md-entry.
 - 2026-05-16 — **Phase 10 toegevoegd**: "Phase 9 polish — deferred review-findings" toegevoegd aan v0.2 milestone (depends on Phase 9). Volledige scope: 11 deferred bevindingen uit `09-REVIEW.md` (CR-02 BLOCKER-class + WR-01..06 + IN-01..04). `total_phases` 10→11. Branch: `chore/v021-phase9-polish`. Plan-bron: `09-REVIEW.md` + STATE Pending-Todos (post-merge-master-cleanup).
 - 2026-05-16 — **Phase 09 plan 11 executed (PENDING checkpoint-approval)**: 11/11 plans afgerond met 10/10 SC-evidence in `09-11-ACCEPTANCE.md` (alle 10 success-criteria uit `09-CONTEXT.md` regels 234-246 bewezen via 52 nieuwe `tests/Feature/Admin/*`-tests + 1 audit-migratie + CLI-route-list). ADR `.docs/decisions/filament-admin-panel.md` (gitignored) met 5 D-decisions (D-01 7 resources + PassThroughCall out-of-scope / D-02 webhook_calls audit-kolommen / D-03 PAT presets+custom / D-04 ProviderCredentialDescriptor / D-05 Spatie RBAC + drop `is_emeq_staff`) + 9 out-of-scope items + verification-path. ROADMAP Phase 9 `[x]` + Progress 11/11 + 2026-05-16 + Goal "7 resources" (was "4 resources"); REQUIREMENTS HUB-04 `[x]` + Complete + uitgebreide validation-note; STATE counters bijgewerkt (completed_phases 6→7, total_plans 51→62, completed_plans 48→52, percent 60→84). 389 tests / 1343 assertions / 0 failed / 1 pre-existing incomplete (Phase 3-03 SanctumAbilityTest placeholder voor Phase 5b). Wacht op "approved" → planning-sync-commit + Phase 8 ontblokt naast Phase 5b/5c.
 - 2026-05-14 — Phase 9 (Filament admin-UI voor Emeq-medewerkers) toegevoegd aan v0.2 milestone; HUB-04 toegevoegd aan REQUIREMENTS.md. Plan-bron: `.claude/plans/ow-dit-wil-ik-immutable-snowglobe.md`. Depends on Phase 3 + Phase 4; parallel met Phase 6/7.
