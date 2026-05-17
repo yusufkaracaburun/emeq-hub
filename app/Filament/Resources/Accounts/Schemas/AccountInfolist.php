@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Resources\Accounts\Schemas;
 
 use Filament\Infolists\Components\TextEntry;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
 class AccountInfolist
@@ -13,6 +14,10 @@ class AccountInfolist
     {
         return $schema
             ->components([
+                Section::make('Wat is een Account?')
+                    ->description('Een klant van een Consumer (bv. school A bij Naschool). Niet de individuele eindgebruiker/ouder.')
+                    ->collapsed()
+                    ->schema([]),
                 TextEntry::make('id')
                     ->label('ID'),
                 TextEntry::make('consumer.slug')

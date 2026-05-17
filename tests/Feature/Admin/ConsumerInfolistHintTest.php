@@ -58,12 +58,17 @@ class ConsumerInfolistHintTest extends TestCase
         $response = $this->get("/admin/consumers/{$consumer->id}");
 
         $response->assertOk();
-        // Filament v4 emit `isCollapsed: true` in het Alpine x-data van een ->collapsed() Section.
-        // We assert dat dit voorkomt NA de canonical hint-heading (geen false-positive uit
-        // sidebar-groups die ook isCollapsed-state hebben).
+        // Filament v4 emit `isCollapsed:  true` (let op: dubbele spatie via @js-helper) in het
+        // Alpine x-data van een ->collapsed() Section. `x-data` zit op de outer <section>,
+        // vóór de heading-tekst in de DOM. Volgorde-assertie scope-t aan de hint-Section.
+        $html = $response->getContent();
+        $this->assertNotFalse(
+            strpos((string) $html, 'isCollapsed:  true'),
+            'Verwacht `isCollapsed:  true` in x-data van de hint-Section (Section is niet default-collapsed).'
+        );
         $response->assertSeeInOrder([
+            'isCollapsed:  true',
             'Wat is een Consumer?',
-            'isCollapsed: true',
         ]);
     }
 

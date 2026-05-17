@@ -7,6 +7,7 @@ use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
+use Filament\Navigation\NavigationGroup;
 use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
@@ -42,6 +43,19 @@ class AdminPanelProvider extends PanelProvider
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
             ->pages([
                 Dashboard::class,
+            ])
+            // Plan 08-04 (D-07): canonical Tenants-tooltip via extraSidebarAttributes — pinned
+            // op de NavigationGroup-API door `vendor/filament/filament/src/Navigation/NavigationGroup.php`
+            // (geen native ->description()-slot in v4.11). De andere 3 navgroups MOETEN expliciet
+            // worden gedeclareerd zodat Filament hun rendering-volgorde respecteert.
+            ->navigationGroups([
+                NavigationGroup::make('Tenants')
+                    ->extraSidebarAttributes([
+                        'title' => 'SaaS-apps (Consumer) → hun klanten (Account) → partner-koppelingen (Connection)',
+                    ]),
+                NavigationGroup::make('Integraties'),
+                NavigationGroup::make('Abonnementen'),
+                NavigationGroup::make('Beheer'),
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([

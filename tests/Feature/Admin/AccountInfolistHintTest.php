@@ -61,11 +61,17 @@ class AccountInfolistHintTest extends TestCase
         $response = $this->get("/admin/accounts/{$account->id}");
 
         $response->assertOk();
-        // Filament v4 emit `isCollapsed: true` in het Alpine x-data van een ->collapsed() Section.
-        // Volgorde-assertie scope-t naar de hint-Section (geen false-positive uit sidebar-groups).
+        // Filament v4 emit `isCollapsed:  true` (let op: dubbele spatie via @js-helper) in het
+        // Alpine x-data van een ->collapsed() Section. `x-data` zit op de outer <section>,
+        // vóór de heading-tekst in de DOM. Volgorde-assertie scope-t aan de hint-Section.
+        $html = $response->getContent();
+        $this->assertNotFalse(
+            strpos((string) $html, 'isCollapsed:  true'),
+            'Verwacht `isCollapsed:  true` in x-data van de hint-Section (Section is niet default-collapsed).'
+        );
         $response->assertSeeInOrder([
+            'isCollapsed:  true',
             'Wat is een Account?',
-            'isCollapsed: true',
         ]);
     }
 
