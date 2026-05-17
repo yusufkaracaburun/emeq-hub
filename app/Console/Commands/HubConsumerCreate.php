@@ -2,8 +2,8 @@
 
 namespace App\Console\Commands;
 
-use App\Models\Consumer;
 use App\Sanctum\TokenAbilities;
+use App\Services\ConsumerOnboarding;
 use Illuminate\Console\Command;
 use Illuminate\Database\QueryException;
 
@@ -17,7 +17,7 @@ class HubConsumerCreate extends Command
 
     protected $description = 'Maak een Consumer + Personal Access Token aan vanaf de CLI';
 
-    public function handle(): int
+    public function handle(ConsumerOnboarding $onboarding): int
     {
         $slug = (string) $this->option('slug');
         $name = (string) $this->option('name');
@@ -38,21 +38,27 @@ class HubConsumerCreate extends Command
             return self::INVALID;
         }
 
+        $tokenName = (string) $this->option('token-name');
+
         try {
-            $consumer = Consumer::create(['slug' => $slug, 'name' => $name]);
+            $result = $onboarding->onboard([
+                'name' => $name,
+                'slug' => $slug,
+                'token_name' => $tokenName,
+                'abilities' => $abilities,
+            ]);
         } catch (QueryException $e) {
             $this->error("Aanmaken Consumer mislukt: {$e->getMessage()}");
 
             return self::FAILURE;
         }
 
-        $tokenName = (string) $this->option('token-name');
-        $token = $consumer->createToken($tokenName, $abilities);
+        $consumer = $result['consumer'];
 
         $this->info("Consumer aangemaakt: id={$consumer->id}, slug={$consumer->slug}");
         $this->info("Token name: {$tokenName}");
         $this->info('Abilities: '.implode(', ', $abilities));
-        $this->warn("Plain-text token (toon eenmalig): {$token->plainTextToken}");
+        $this->warn("Plain-text token (toon eenmalig): {$result['plain_token']}");
 
         return self::SUCCESS;
     }
