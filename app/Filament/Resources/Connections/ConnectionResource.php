@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Connections;
 
+use App\Filament\Actions\StartOAuthFlowAction;
 use App\Filament\Resources\Connections\Pages\ListConnections;
 use App\Filament\Resources\Connections\Pages\ViewConnection;
 use App\Models\Connection;
@@ -147,6 +148,7 @@ class ConnectionResource extends Resource
             ])
             ->recordActions([
                 ViewAction::make(),
+                StartOAuthFlowAction::forConnection(),
                 Action::make('revoke')
                     ->label('Revoke')
                     ->icon(Heroicon::OutlinedNoSymbol)

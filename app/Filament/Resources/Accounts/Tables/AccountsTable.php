@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Accounts\Tables;
 
+use App\Filament\Actions\StartOAuthFlowAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
@@ -43,6 +44,7 @@ class AccountsTable
             ])
             ->recordActions([
                 ViewAction::make(),
+                StartOAuthFlowAction::forAccount(),
             ]);
     }
 }
