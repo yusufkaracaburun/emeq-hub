@@ -420,7 +420,8 @@ v0.2 bouwt drie samenhangende lagen: (1) `emeq/mollie-api` SDK die `mollie/molli
 Verzamelpunt voor ideeën die nog geen milestone hebben. Bij milestone-kickoff worden relevante items uit deze sectie naar de active milestone gepromoveerd.
 
 - Snelstart Saloon v3 → v4 upgrade (3 ignored security advisories oplossen, o.a. SSRF via endpoint-override)
-- Andere providers wanneer Mollie+Snelstart in productie gevalideerd: `emeq/moneybird-api`, `emeq/exact-api`, `emeq/ibanity-api`, `emeq/stripe-api`
+- Andere providers wanneer Mollie+Snelstart in productie gevalideerd: `emeq/moneybird-api`, `emeq/exact-api`, `emeq/ibanity-api`, `emeq/stripe-api`, `emeq/bizcuit-api`
+- **`emeq/bizcuit-api`**: Bizcuit SDK (NL boekhouden/banking) — OpenAPI docs op https://app.bizcuit.nl/openapi/documentation/getting-started.html. Volgt SDK-pattern uit `packages/`-conventie (eigen VCS-repo, dunne Saloon-laag of officiële-SDK-wrap analoog aan Mollie-pad). Trigger: zodra een host-app Bizcuit-integratie nodig heeft. User-captured 2026-05-17.
 - OAuth Connect-implementaties voor providers die in v0.2 alleen contract-level zijn gedekt (Snelstart-OAuth, Exact-OAuth, Ibanity-OAuth)
 - DTO-codegen vanuit OpenAPI specs voor providers die typed-response consumers nodig hebben
 - Hub commerciële features: public billing-flow voor derde-partij Consumers (`HUB-BILLING`), public docs-site `docs.hub.emeq.nl` (`HUB-DOCS`), self-service onboarding (`HUB-ONBOARDING`)
