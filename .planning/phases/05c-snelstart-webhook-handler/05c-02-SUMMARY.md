@@ -12,8 +12,8 @@ requires:
     provides: PassThroughCall-model + scopes
 provides:
   - services.snelstart.webhook_* config-block (5 keys: secret, secret_next, signature_header, signature_algo, event_id_key)
-  - App\Webhooks\SnelstartSignatureVerifier (timing-safe verify + sign, rotation-window)
-  - App\Http\Middleware\VerifySnelstartSignature (hardfail-500 + audit; 401 zonder audit; valid → next)
+  - Emeq\SnelstartApi\Webhooks\SnelstartWebhookSignature (SDK-side timing-safe verify + sign, rotation-window) — post-execution refactor, zie addendum
+  - App\Http\Middleware\VerifySnelstartSignature (hardfail-500 + audit; 401 zonder audit; valid → next; consumeert SDK-class)
   - 'verify.snelstart.signature'-alias geregistreerd in bootstrap/app.php
 affects: [05c-03-route-and-controller]
 
@@ -29,14 +29,18 @@ tech-stack:
 
 key-files:
   created:
-    - app/Webhooks/SnelstartSignatureVerifier.php
+    - packages/snelstart-api/src/Webhooks/SnelstartWebhookSignature.php  # SDK — post-execution refactor
+    - packages/snelstart-api/tests/Unit/Webhooks/SnelstartWebhookSignatureTest.php  # SDK Pest — post-execution refactor
     - app/Http/Middleware/VerifySnelstartSignature.php
-    - tests/Feature/SnelstartSignatureVerifierTest.php
     - tests/Feature/Webhooks/VerifySnelstartSignatureMiddlewareTest.php
   modified:
     - config/services.php
     - .env.example
     - bootstrap/app.php
+    - composer.lock  # gepind op emeq/snelstart-api e71a9bf
+  removed:
+    - app/Webhooks/SnelstartSignatureVerifier.php  # vervangen door SDK-class
+    - tests/Feature/SnelstartSignatureVerifierTest.php  # coverage verhuist naar SDK Pest-tests
 
 key-decisions:
   - "5e config-key 'webhook_event_id_key' (default 'eventId') landt nu al — wordt pas door plan 03 (controller) gelezen. Reden: alle config-defaults in één commit zodat partner-respons-tweaks niet over twee plans gespreid liggen"
@@ -199,5 +203,40 @@ Verifying claims before returning to orchestrator.
 ## Self-Check: PASSED
 
 ---
+
+## Addendum — verifier → SDK refactor (post-execution, 2026-05-17)
+
+**Trigger:** user-feedback tijdens execute-phase: *"waarom maak je deze dingen niet in snelstart-api package?"*
+
+**Bevinding:** Plan prescribeerde `App\Webhooks\SnelstartSignatureVerifier`, maar het is pure partner-protocol-laag zonder Hub-state — exact het pattern dat Mollie al volgt met `Emeq\MollieApi\Webhooks\MollieWebhookSignature` in `packages/mollie-api/src/Webhooks/`. Plan-author had dit in CONTEXT erkend (*"verifier-pattern uit Mollie-SDK is een copy-target maar Snelstart-SDK heeft 'm nog niet"*) maar de uitvoer is alsnog in de Hub geland. Inconsistentie.
+
+**Actie genomen (commit `3640fa0` Hub + `e71a9bf` SDK):**
+
+- **SDK-side** (`emeq/snelstart-api` master, gepushed):
+  - Nieuw: `src/Webhooks/SnelstartWebhookSignature.php` — final, strict types, namespace `Emeq\SnelstartApi\Webhooks`. Same shape als de oude verifier (raw body + headerValue + secret(s) + algo).
+  - Nieuw: `tests/Unit/Webhooks/SnelstartWebhookSignatureTest.php` — 8 Pest tests / 13 assertions (roundtrip, mismatch, null/empty header, rotation-window beide volgordes, lege array, custom algo, null/empty entries sanitization, sign-output-shape).
+- **Hub-side** (deze branch, commit `3640fa0`):
+  - `app/Webhooks/SnelstartSignatureVerifier.php` → **verwijderd**
+  - `tests/Feature/SnelstartSignatureVerifierTest.php` → **verwijderd** (coverage zit nu in SDK Pest)
+  - `app/Http/Middleware/VerifySnelstartSignature.php` → import switch naar `Emeq\SnelstartApi\Webhooks\SnelstartWebhookSignature`
+  - `tests/Feature/Webhooks/VerifySnelstartSignatureMiddlewareTest.php` → import + static-call rename
+  - `composer.lock` → gepind op `emeq/snelstart-api e71a9bf`
+
+**Verificatie post-refactor:**
+
+- SDK Pest: 8/8 groen via `cd packages/snelstart-api && ./vendor/bin/pest tests/Unit/Webhooks/`
+- Hub middleware-tests: 7/7 groen via `php artisan test --compact --filter='VerifySnelstartSignature'` (21 assertions, ongewijzigd)
+
+**Architecturele winst:**
+
+- Pattern-consistentie met Mollie: pure protocol-laag in SDK, framework-glue (middleware + config + audit) in Hub
+- Verifier-class herbruikbaar door andere apps die `emeq/snelstart-api` consumeren zonder de Hub
+- CONTEXT.md `<canonical_refs>` "verifier-pattern uit Mollie-SDK is een copy-target maar Snelstart-SDK heeft 'm nog niet" is nu obsolete — de SDK heeft 'm.
+
+**Trade-off geaccepteerd:**
+
+- Twee repos in sync houden (SDK + Hub). Workflow: edit in `packages/snelstart-api/`, push, `composer update emeq/snelstart-api` in Hub, commit `composer.lock`. Standard SDK-workflow per `.ai/packages` rule.
+
+---
 *Phase: 05c-snelstart-webhook-handler*
-*Completed: 2026-05-17*
+*Completed: 2026-05-17 (with post-execution SDK-refactor)*
