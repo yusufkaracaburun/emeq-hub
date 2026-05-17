@@ -389,7 +389,7 @@ v0.2 bouwt drie samenhangende lagen: (1) `emeq/mollie-api` SDK die `mollie/molli
 | 5c. Snelstart webhook-handler | 1/5 | In Progress|  |
 | 6. Cashier-Mollie integratie | 8/8 | Done | 2026-05-15 |
 | 7. Account-level subscriptions | 8/8 | Done | 2026-05-15 |
-| 8. Naschool wiring | 5/5 | Complete   | 2026-05-17 |
+| 8. Naschool wiring | 5/5 | Complete    | 2026-05-17 |
 | 9. Filament admin-UI voor Emeq-medewerkers | 11/11 | Complete    | 2026-05-16 |
 | 10. Phase 9 polish — deferred review-findings | 6/6 | Complete    | 2026-05-16 |
 
