@@ -5,17 +5,17 @@ declare(strict_types=1);
 namespace App\Filament\Resources\Users\Schemas;
 
 use App\Models\User;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Hash;
 
 /*
- * Plan 09-10: UserResource form. Twee velden:
+ * Plan 09-10: UserResource form. Velden:
  *  - email (unique, ignoreRecord op edit)
  *  - password (alleen verplicht op create; bij edit alleen rehashen als ingevuld)
- *
- * Password-veld gebruikt dehydrateStateUsing(Hash::make) + dehydrated(filled)
- * zodat bij edit de bestaande hash bewaard blijft als veld leeg is.
+ *  - roles (Spatie, multi-select; alleen op create — edit gaat via assignRole-action
+ *    in UsersTable die de last-super-admin- en self-downgrade-guards toepast)
  */
 class UserForm
 {
@@ -39,6 +39,13 @@ class UserForm
                     ->maxLength(255)
                     ->dehydrateStateUsing(fn ($state) => Hash::make((string) $state))
                     ->dehydrated(fn ($state) => filled($state))
+                    ->required(fn (string $operation): bool => $operation === 'create'),
+
+                Select::make('roles')
+                    ->label('Rol')
+                    ->relationship('roles', 'name')
+                    ->options(['super-admin' => 'Super admin', 'staff' => 'Staff'])
+                    ->visible(fn (string $operation): bool => $operation === 'create')
                     ->required(fn (string $operation): bool => $operation === 'create'),
             ]);
     }

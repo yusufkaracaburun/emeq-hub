@@ -112,6 +112,15 @@ class ConnectionResource extends Resource
                     ->label('Account')
                     ->searchable()
                     ->sortable(),
+                TextColumn::make('status')
+                    ->badge()
+                    ->colors([
+                        'success' => 'active',
+                        'warning' => 'pending',
+                        'danger' => 'revoked',
+                    ])
+                    ->state(fn (Connection $record): string => $record->revoked_at ? 'revoked' : $record->status)
+                    ->sortable(),
                 TextColumn::make('fingerprint')
                     ->label('Fingerprint')
                     ->state(fn (Connection $record): ?string => $record->fingerprint())
@@ -131,6 +140,11 @@ class ConnectionResource extends Resource
                     ->options([
                         'mollie' => 'Mollie',
                         'snelstart' => 'Snelstart',
+                    ]),
+                SelectFilter::make('status')
+                    ->options([
+                        'active' => 'Active',
+                        'pending' => 'Pending',
                     ]),
                 SelectFilter::make('consumer')
                     ->relationship('account.consumer', 'slug')

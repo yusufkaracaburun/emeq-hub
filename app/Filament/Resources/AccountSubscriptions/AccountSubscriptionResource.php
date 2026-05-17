@@ -82,7 +82,7 @@ class AccountSubscriptionResource extends Resource
                 ->schema([
                     TextEntry::make('mollie_customer_id')->label('Customer ID')->copyable(),
                     TextEntry::make('mollie_subscription_id')->label('Subscription ID')->copyable(),
-                    TextEntry::make('mollie_mandate_id')->label('Mandate ID')->copyable(),
+                    TextEntry::make('mollie_mandate_id')->label('Mandate ID')->copyable()->placeholder('—'),
                 ]),
 
             Section::make('Status timestamps')

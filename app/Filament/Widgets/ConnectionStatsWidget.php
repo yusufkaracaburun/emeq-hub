@@ -27,12 +27,19 @@ class ConnectionStatsWidget extends StatsOverviewWidget
 
         foreach (ProviderCredentialDescriptor::all() as $descriptor) {
             $base = Connection::query()->where('provider', $descriptor->key);
-            $active = (clone $base)->whereNull('revoked_at')->count();
+            $active = (clone $base)->where('status', 'active')->whereNull('revoked_at')->count();
+            $pending = (clone $base)->where('status', 'pending')->count();
             $revoked = (clone $base)->whereNotNull('revoked_at')->count();
-            $total = $active + $revoked;
+            $total = $active + $pending + $revoked;
+
+            $parts = [$active.' actief'];
+            if ($pending > 0) {
+                $parts[] = $pending.' pending';
+            }
+            $parts[] = $revoked.' revoked';
 
             $stats[] = Stat::make(ucfirst($descriptor->key), (string) $total)
-                ->description($active.' actief · '.$revoked.' revoked')
+                ->description(implode(' · ', $parts))
                 ->descriptionIcon($revoked > 0 ? 'heroicon-o-exclamation-triangle' : 'heroicon-o-check-circle')
                 ->color($revoked > 0 ? 'warning' : 'success');
         }

@@ -108,6 +108,18 @@ class ConsumerResource extends Resource
                     ->required()
                     ->maxLength(255)
                     ->unique(ignoreRecord: true),
+                TextInput::make('webhook_callback_url')
+                    ->label('Webhook callback-URL')
+                    ->url()
+                    ->maxLength(255)
+                    ->helperText('Endpoint waar de Hub partner-events naartoe POSTed. Leeg = geen fan-out.'),
+                TextInput::make('webhook_callback_secret')
+                    ->label('Webhook callback-secret')
+                    ->password()
+                    ->revealable()
+                    ->maxLength(255)
+                    ->dehydrated(fn ($state) => filled($state))
+                    ->helperText('Encrypted at rest. Laat leeg om bestaande secret te behouden.'),
             ]);
     }
 
