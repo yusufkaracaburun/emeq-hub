@@ -4,14 +4,14 @@ milestone: v0.2
 milestone_name: — Mollie + Connect + Subscriptions + Hub-skeleton
 status: executing
 stopped_at: Phase 8 SHIPPED — 5/5 plans + 11/11 critical+warning review-fixes + ADR `.docs/decisions/phase-8-consumer-onboarding.md` + error-entry `.docs/errors/flash-key-cache-spy-trap.md`; 13/13 Hub-side must-haves verified; 507/507 tests groen; branch `chore/v021-phase9-polish` heeft 34 Phase-8-commits + 2 fix-commit-groepen + 1 backlog-capture; branch-naam dekt scope niet meer (rename voor PR aangeraden)
-last_updated: "2026-05-17T19:27:57.811Z"
-last_activity: 2026-05-17 -- Phase 05c plan 02 (HMAC-verifier + middleware) completed
+last_updated: "2026-05-17T20:50:00.000Z"
+last_activity: 2026-05-17 -- Phase 05c plan 04 (ForwardSnelstartWebhookToConsumerJob + Horizon supervisor-webhooks) completed
 progress:
   total_phases: 10
   completed_phases: 8
   total_plans: 67
-  completed_plans: 63
-  percent: 82
+  completed_plans: 64
+  percent: 84
 ---
 
 # Project State
@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-05-14 na v0.1 milestone-close)
 ## Current Position
 
 Phase: 05c (snelstart-webhook-handler) — EXECUTING
-Plan: 2 of 5
+Plan: 3 of 5 (plan 04 wave-2 executed; plan 03 wave-1 still open)
 Status: Executing Phase 05c
-Last activity: 2026-05-17 -- Phase 05c plan 02 (HMAC-verifier + middleware) completed
+Last activity: 2026-05-17 -- Phase 05c plan 04 (ForwardSnelstartWebhookToConsumerJob + Horizon supervisor-webhooks) completed
 
 ## Performance Metrics
 
@@ -186,6 +186,7 @@ Decisions zijn gelogd in PROJECT.md Key Decisions table. Decisions die uit v0.1 
 
 ### Roadmap Evolution
 
+- 2026-05-17 — **Phase 5c plan 04 executed**: `App\Jobs\Webhooks\ForwardSnelstartWebhookToConsumerJob` (final, ShouldQueue, `onQueue('webhooks')`-in-constructor) + 5 PHPUnit feature-tests (RED `be50c94` + GREEN `d18b414`) + `config/horizon.php` `supervisor-webhooks` (queue=['webhooks'], timeout=30, production maxProcesses=5, local maxProcesses=1) committed als `4ba10d8`. Anti-correlation getest: outbound HMAC gebruikt `consumer.webhook_callback_secret`, NIET `config('snelstart.webhook.secret')` (T-05c-09 spoofing-mitigation expliciet bewezen via Signature-header-reproductie met beide kandidaten). Silent skip op missing `webhook_callback_url`. Twee deviations: Rule 1 — Bus::assertDispatchedOn() bestaat niet op Laravel 13 BusFake (test-API-correctie naar closure die `$job->queue` checkt); Rule 2 — anti-correlation-test asserteert expliciet partner-secret-NON-gebruik bovenop consumer-secret-gebruik (sterker bewijs dan Mollie-tegenhanger). Full Hub-testsuite: 511/512 passed + 1 pre-existing failure (`UserResourceTest::test_super_admin_can_create_user_via_resource` — out-of-scope per plan) + 1 pre-existing incomplete. Plan 03 (route + controller) ontblokt: `ForwardSnelstartWebhookToConsumerJob::dispatch($connection, $payload, $eventId)` is direct aanroepbaar uit de SnelstartWebhookController zodra die landt; queue-routing zit in de constructor.
 - 2026-05-17 — **Phase 5c plan 02 executed + SDK-refactor**: HMAC-verifier + middleware in eerste pass Hub-side geland (`App\Webhooks\SnelstartSignatureVerifier` + `App\Http\Middleware\VerifySnelstartSignature` + `services.snelstart.webhook_*` + alias in `bootstrap/app.php`), daarna in dezelfde sessie verplaatst naar `emeq/snelstart-api` SDK als onderdeel van de epic-2-redistributability-refactor (ADR `sdk-redistributability-boundary.md`). Eindstaat: `Emeq\SnelstartApi\Webhooks\SnelstartWebhookSignature` + `Emeq\SnelstartApi\Http\Middleware\VerifySnelstartSignature` (auto-aliased via `packageBooted()`) + `config('snelstart.webhook.*')` in SDK; Hub-side `services.snelstart.*`-block, middleware-class, alias-registratie verwijderd. Mollie analoog: `config/mollie.php` `webhook.secret` block (was `services.mollie.webhook_secret`), Hub-controller + 6 testfiles geswitched. Partner-docs verplaatst van `.docs/partners/{snelstart,mollie}/` naar `packages/{snelstart-api,mollie-api}/docs/partners/`; `.docs/decisions/snelstart-certificering-pad.md` verhuisd naar `packages/snelstart-api/docs/decisions/`. SDK-releases: emeq/snelstart-api `v0.1.0` (e9076d4), emeq/mollie-api `v0.1.0-alpha.2` (5315efe). Hub composer.lock gepind. Hub-tests: 506/507 groen (1 pre-existing UserResource failure). Plan 03 (route + controller) ontblokt — SDK-alias direct toepasbaar.
 - 2026-05-17 — **Phase 5c CONTEXT sync (partner-respons)**: Snelstart-respons binnen via Gmail-thread (origineel draft `r-8836998535038336548` van 2026-05-15). 4/5 ❓-aannames in `05c-CONTEXT.md` → 🔒 locked: #1 HMAC-header `X-SnelStart-Signature` + `HMAC-SHA256` hex (confirmed), #2 secret-lifecycle (Claude-pick — partner liet keuze open; matched subscription-key pattern), #3 tenant-routing `administratieId` UUID-string (confirmed UUID; veldnaam blijft OData-conventie), #5 event-typen `Relatie.*` + `Verkoopfactuur.*` minimaal (confirmed). Vraag #4 (retry-policy) blijft ❓ BLOCKED — partner heeft niet geantwoord; aanname blijft defensief (5× exp backoff). Plan-phase nu twee paden: (a) plannen mét defensieve #4 + OData-safety-net als optionele plan-taak, óf (b) follow-up-mail voor scherp retry-policy-antwoord. History van originele aannames bewaard in CONTEXT per regel-239-instructie.
 - 2026-05-17 — **Phase 5b verifier-close**: `05b-VERIFICATION.md` geschreven door gsd-verifier — status `passed`, score `8/8 must-haves verified`. Sluit verification-debt-row uit `v0.2-MILESTONE-AUDIT.md` (2026-05-17) op Phase 5b; `verification_artifacts` 5/11 → 6/11. Bewijs: HUB-05 SC-1..SC-8 alle VERIFIED via 86 Phase-5b-scoped tests (15 testfiles) + UAT 9/9 live (`05b-UAT.md`) + SECURITY 24/24 (`05b-SECURITY.md`); CR-01 (415-guard) + CR-02 (PII-safe `query_keys`) + CR-03 (NULL fingerprint empty body) code-resident + getest. Stale prompt-claim over `SanctumAbilityTest`-incomplete opgehelderd (5 tests volledig geïmplementeerd; werkelijke +1 incomplete = `MollieConnectOAuthFlowTest:47` Phase-4 placeholder). Geen deferred items, geen v0.2.1-opruiming nodig vanuit 5b. Sync-edits: `v0.2-MILESTONE-AUDIT.md` (HUB-05 row → ✅ satisfied; Phase Coverage 5b → ✅ passed; tech_debt 5b row resolved-markeer; totalen 11→12 ✅ + 4→3 ⚠️), `REQUIREMENTS.md` (HUB-05 evidence-pointer toegevoegd in body-blok), deze STATE.md-entry.
