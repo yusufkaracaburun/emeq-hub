@@ -5,6 +5,8 @@ namespace App\Filament\Resources\Consumers;
 use App\Filament\Resources\Consumers\Pages\CreateConsumer;
 use App\Filament\Resources\Consumers\Pages\EditConsumer;
 use App\Filament\Resources\Consumers\Pages\ListConsumers;
+use App\Filament\Resources\Consumers\Pages\ViewConsumer;
+use App\Filament\Resources\Consumers\Schemas\ConsumerInfolist;
 use App\Models\Consumer;
 use App\Sanctum\TokenAbilities;
 use BackedEnum;
@@ -12,6 +14,7 @@ use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\TextInput;
@@ -108,6 +111,11 @@ class ConsumerResource extends Resource
             ]);
     }
 
+    public static function infolist(Schema $schema): Schema
+    {
+        return ConsumerInfolist::configure($schema);
+    }
+
     public static function table(Table $table): Table
     {
         return $table
@@ -129,6 +137,7 @@ class ConsumerResource extends Resource
                 //
             ])
             ->recordActions([
+                ViewAction::make(),
                 EditAction::make(),
                 self::issuePatAction(),
             ])
@@ -151,6 +160,7 @@ class ConsumerResource extends Resource
         return [
             'index' => ListConsumers::route('/'),
             'create' => CreateConsumer::route('/create'),
+            'view' => ViewConsumer::route('/{record}'),
             'edit' => EditConsumer::route('/{record}/edit'),
         ];
     }
