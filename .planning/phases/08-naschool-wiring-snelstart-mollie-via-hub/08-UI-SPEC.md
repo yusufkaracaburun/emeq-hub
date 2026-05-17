@@ -78,6 +78,14 @@ Instrument Sans op 4 rollen. Geen extra font-families. Body line-height 1.5; hea
 
 Filament's eigen tokens nemen voorrang binnen `.fi-*`-scopes; specificeer alleen typografie waar custom Blade rendert.
 
+## Typography Exceptions
+
+**Approved deviation from "max 2 weights"-criterium:** deze UI-SPEC gebruikt een 3-step weight-ladder (400/500/600 = regular/medium/semibold).
+
+**Rationale:** Filament v4 en Tailwind v4 leveren beide standaard de 3-step ladder. Collapsen naar 2 weights forceert override van vendor-tokens en creëert visuele inconsistentie tussen onze nieuwe oppervlakken (onboard-wizard, Filament-actions, partner-pages) en de rest van het Filament-admin-paneel (Resources, infolists, tables, notifications) dat al weight-500 voor labels en weight-600 voor headings gebruikt. De inconsistentie-kosten zijn hoger dan de winst van 2-weight-strictheid.
+
+**Scope van de exception:** alleen Body/Label/Heading/Display rollen in deze UI-SPEC. Nieuwe weights (300, 700, 800) blijven verboden. Toekomstige UI-SPECs erven deze exception alleen als ze dezelfde Filament + Tailwind stack hanteren.
+
 ---
 
 ## Color
@@ -310,7 +318,7 @@ Geen third-party UI-registries geconsumeerd. Alle componenten komen uit Filament
 - [ ] Dimension 1 Copywriting: PASS (Nederlands; canonical D-06/D-07 strings letterlijk overgenomen; geen AI-clichés)
 - [ ] Dimension 2 Visuals: PASS (Filament v4 surfaces + Tailwind v4 Blade; geen mengelmoes)
 - [ ] Dimension 3 Color: PASS (60/30/10 + accent-Amber-reserved-for-6-elementen + semantische status-palette + destructive-rose)
-- [ ] Dimension 4 Typography: PASS (4 rollen, 1 family, line-heights gespec'd)
+- [ ] Dimension 4 Typography: 3 weights documented exception, see §Typography Exceptions (4 rollen, 1 family, line-heights gespec'd; 400/500/600 ladder bewust gekozen om Filament + Tailwind vendor-tokens te volgen)
 - [ ] Dimension 5 Spacing: PASS (Tailwind 4-pt scale, 7 tokens, geen exceptions)
 - [ ] Dimension 6 Registry Safety: PASS (n/a — geen registries)
 
