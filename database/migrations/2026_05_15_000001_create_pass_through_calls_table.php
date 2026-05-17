@@ -11,20 +11,28 @@ return new class extends Migration
     {
         Schema::create('pass_through_calls', function (Blueprint $table): void {
             $table->id();
-            $table->foreignId('consumer_id')->constrained('consumers')->cascadeOnDelete();
-            $table->foreignId('account_id')->constrained('accounts')->cascadeOnDelete();
+            $table->string('direction', 10)->default('outbound');
+            // FKs nullable: inbound webhooks met onbekende administratieId mogen tóch een audit-rij krijgen.
+            $table->foreignId('consumer_id')->nullable()->constrained('consumers')->cascadeOnDelete();
+            $table->foreignId('account_id')->nullable()->constrained('accounts')->cascadeOnDelete();
             $table->foreignId('connection_id')->nullable()->constrained('connections')->nullOnDelete();
             $table->string('provider');
             $table->string('method', 10);
             $table->text('path');
+            $table->string('query_keys')->nullable();
             $table->smallInteger('status');
             $table->integer('duration_ms');
             $table->string('request_fingerprint', 12)->nullable();
+            $table->string('event_id')->nullable();
             $table->integer('response_size_bytes')->nullable();
             $table->string('upstream_error')->nullable();
             $table->timestamp('created_at')->useCurrent();
+
             $table->index(['consumer_id', 'created_at']);
             $table->index(['account_id', 'created_at']);
+            $table->index(['direction', 'created_at']);
+            // Postgres + SQLite staan meerdere NULLs toe in unique index → outbound (event_id=NULL) blokkeert niet.
+            $table->unique(['provider', 'event_id'], 'pass_through_calls_provider_event_unique');
         });
 
         DB::statement(
