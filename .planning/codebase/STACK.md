@@ -147,8 +147,8 @@ SDK's installeren als reguliere composer-dependencies via dist-zips uit de GitHu
 
 ## Audit & Stability
 
-- `composer.json` audit: `ignore: ["PKSA-xnj5-w74d-6wmz", "PKSA-5szq-gvrg-ttfq", "PKSA-rnpm-45mg-w6ht"]` (geïgnoreerde abandoned-advisories).
-- `minimum-stability: dev` + `prefer-stable: true` om `emeq/snelstart-api: dev-master` toe te staan zonder volledige dev-resolutie.
+- `composer.json` audit: alleen `"abandoned": "report"` (drie Saloon v3-advisories opgelost in Phase 11 — Saloon `^4.0` in SDK, `composer audit` exit 0 zonder ignores).
+- `minimum-stability: dev` + `prefer-stable: true` om `emeq/mollie-api: ^0.1.0-alpha.1` (en vergelijkbare alpha/dev-deps) toe te staan zonder volledige dev-resolutie. `emeq/snelstart-api` staat sinds Phase 11 op `^0.2.0` (stable tag).
 
 ---
 

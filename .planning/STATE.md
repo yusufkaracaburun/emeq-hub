@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v0.3
 milestone_name: milestone
 status: executing
-stopped_at: Plan 11-02 complete — Hub composer-update naar v0.2.0 + audit clean
-last_updated: "2026-05-18T08:56:49.838Z"
+stopped_at: Phase 11 complete — Saloon v4 upgrade docs-closure (3/3 plans, ADR lokaal + audit clean)
+last_updated: "2026-05-18T09:00:38.000Z"
 last_activity: 2026-05-18
 progress:
   total_phases: 5
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 3
-  completed_plans: 2
-  percent: 0
+  completed_plans: 3
+  percent: 20
 ---
 
 # Project State
@@ -26,9 +26,9 @@ See: [`.planning/PROJECT.md`](PROJECT.md) (updated 2026-05-18 — v0.3 milestone
 
 ## Current Position
 
-Phase: 11 (snelstart-sdk-saloon-v4-upgrade) — EXECUTING
-Plan: 3 of 3 (Plan 11-01 complete — SDK v0.2.0 tagged + pushed; ready voor Plan 11-02 Hub-side `composer update`)
-Status: Ready to execute
+Phase: 11 — Snelstart-SDK Saloon v4 upgrade (Complete 2026-05-18, 3/3 plans)
+Plan: — (Phase 11 closed; geen actieve plan)
+Status: Idle — ready voor volgende phase
 Last activity: 2026-05-18
 
 ## Shipped Milestones
@@ -75,6 +75,7 @@ Validated v0.2:
 - ~~Cashier-Mollie compat-risico v0.2~~ — opgelost in Phase 6 (pad-a out-of-the-box, ADR `cashier-mollie-compat.md`)
 - ~~Mollie partner-docs ontbraken~~ — opgelost via quick-task 260514-tny, verplaatst naar `packages/mollie-api/docs/partners/` op 2026-05-17 (SDK-redistributability-refactor)
 - ~~Phase 5b verification-debt~~ — closed 2026-05-17 via gsd-verifier (`05b-VERIFICATION.md`, 8/8 must-haves)
+- ~~Saloon v3 → v4 upgrade + 3 advisories (PKSA-xnj5-w74d-6wmz HIGH, PKSA-5szq-gvrg-ttfq MEDIUM, PKSA-rnpm-45mg-w6ht MEDIUM)~~ — closed 2026-05-18 via Phase 11 (3 plans, SDK getagd v0.2.0, Hub composer audit exit 0 zonder ignores). ADR (lokaal): `.docs/decisions/snelstart-sdk-saloon-v4-upgrade.md`.
 
 ## Performance Metrics
 
@@ -91,15 +92,15 @@ Validated v0.2:
 
 ## Session Continuity
 
-Last session: 2026-05-18T08:56:49.835Z
-Stopped at: Plan 11-02 complete — Hub composer-update naar v0.2.0 + audit clean
+Last session: 2026-05-18T09:00:38.000Z
+Stopped at: Phase 11 complete — Saloon v4 upgrade docs-closure (3/3 plans, ADR lokaal + audit clean)
 Resume file: None
 
 Next action options:
 
-1. `/gsd-execute-phase 11` — vervolg met Plan 11-02 (Hub-side `composer update emeq/snelstart-api` naar `^0.2.0`, vervang `dev-master`).
-2. `/gsd-plan-phase 15` — verification-debt backfill als parallel low-risk doc-track.
-3. `/gsd-plan-phase 13` — Mollie Connect partner-resources (parallelliseerbaar met Phase 11).
+1. `/gsd-execute-phase 12` — Snelstart productie-certificering (wacht op partner-respons Gmail-draft `r-8836998535038336548` ≤2026-05-26; Hub-side ingress al compleet).
+2. `/gsd-plan-phase 13` — Mollie Connect partner-resources (parallelliseerbaar met Phase 12).
+3. `/gsd-plan-phase 15` — verification-debt backfill als parallel low-risk doc-track.
 
 ## Decisions
 

@@ -170,10 +170,10 @@ Geen actieve bugs gerapporteerd. `tests/Feature/OAuth/MollieConnectOAuthFlowTest
 - Impact: Phase 6 (Cashier-flow voor Emeq→Consumers billing) breekt. Use-case B (Phase 7 Account-level subscriptions) gebruikt Cashier NIET — die heeft eigen `AccountSubscription`-model (STATE.md:100).
 - Migration plan: Fork-and-patch in eigen vendor-dir of eigen subscription-laag voor use-case A. ADR-context in `.docs/decisions/cashier-mollie-compat.md`.
 
-**`emeq/snelstart-api: dev-master`:**
-- Risk: `composer.json:12` pinst de SDK op `dev-master`. Geen versie-tag; elke push naar master in `emeq-snelstart-api` propageert bij `composer update`.
-- Impact: SDK-breaking change in master kan stilletjes in Hub landen.
-- Migration plan: Tag stable versions in de SDK-repo (`v0.1.0`) + pin op `^0.1`. Memory `feedback_avoid_concurrent_gsd_sessions.md` raakt dit indirect (race-risico).
+**~~`emeq/snelstart-api: dev-master`~~ — Resolved 2026-05-18 (Phase 11):**
+- ~~Risk: `composer.json:12` pinst de SDK op `dev-master`. Geen versie-tag; elke push naar master in `emeq-snelstart-api` propageert bij `composer update`.~~
+- ~~Impact: SDK-breaking change in master kan stilletjes in Hub landen.~~
+- Resolution: SDK getagd `v0.2.0` (annotated, tag-object `65161ed` → commit `ce7c66c`, Plan 11-01). Hub `composer.json` pint nu `^0.2.0` (Plan 11-02 commit `897c1e0`). Toekomstige master-pushes worden niet meer stilletjes opgepakt.
 
 **`emeq/mollie-api: ^0.1.0-alpha.1`:**
 - Risk: Alpha-version. SDK is in eigen sub-repo geshipped (Phase 2 voltooid 2026-05-14) maar nog niet stable-tagged.
@@ -185,10 +185,10 @@ Geen actieve bugs gerapporteerd. `tests/Feature/OAuth/MollieConnectOAuthFlowTest
 - Impact: Redis-cache / session / queue breken bij regressie.
 - Migration plan: Pin niet onder `^3`, en bij `composer audit` errors expliciet ignoren via lijst `composer.json:101-104`.
 
-**Audit-ignores in `composer.json`:**
-- Risk: `composer.json:101-104` ignoreert 3 advisories (`PKSA-xnj5-w74d-6wmz`, `PKSA-5szq-gvrg-ttfq`, `PKSA-rnpm-45mg-w6ht`). Geen rationale in-code.
-- Impact: Stille acceptatie van bekende CVE's.
-- Migration plan: Documenteer in `.docs/decisions/` of `composer.json:audit.ignore-rationale` waarom elke ignore acceptabel is. Quarterly review.
+**~~Audit-ignores in `composer.json`~~ — Resolved 2026-05-18 (Phase 11):**
+- ~~Risk: `composer.json:101-104` ignoreert 3 advisories (`PKSA-xnj5-w74d-6wmz`, `PKSA-5szq-gvrg-ttfq`, `PKSA-rnpm-45mg-w6ht`). Geen rationale in-code.~~
+- ~~Impact: Stille acceptatie van bekende CVE's.~~
+- Resolution: SDK `emeq/snelstart-api` getagd `v0.2.0` met Saloon `^4.0` (commit `ce7c66c`, Plan 11-01). Hub gepind op `^0.2.0` + alle 3 PKSA-ID's verwijderd uit `composer.json` `config.audit.ignore` (commit `897c1e0`, Plan 11-02). `composer audit --no-cache` exit 0 zonder ignores. ADR (lokaal): `.docs/decisions/snelstart-sdk-saloon-v4-upgrade.md`.
 
 ## Missing Critical Features
 
