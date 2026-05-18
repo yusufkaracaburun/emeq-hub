@@ -28,6 +28,10 @@ use Mollie\Api\MollieApiClient;
  */
 class StubMollieClient extends MollieApiClient
 {
+    public ?string $lastUsedAccessToken = null;
+
+    public ?string $lastIdempotencyKey = null;
+
     /** @var array<string, object> */
     private array $stubs;
 
@@ -41,6 +45,22 @@ class StubMollieClient extends MollieApiClient
         $this->setAccessToken('access_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx');
 
         $this->stubs = array_merge(['payments' => $paymentsStub], $extraStubs);
+    }
+
+    public function setAccessToken(string $accessToken): self
+    {
+        $this->lastUsedAccessToken = $accessToken;
+        parent::setAccessToken($accessToken);
+
+        return $this;
+    }
+
+    public function setIdempotencyKey($key): self
+    {
+        $this->lastIdempotencyKey = is_string($key) ? $key : (string) $key;
+        parent::setIdempotencyKey($key);
+
+        return $this;
     }
 
     public function __get(string $name): mixed
