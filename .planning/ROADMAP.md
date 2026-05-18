@@ -86,7 +86,7 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 13-02-PLAN.md — AbstractMollieConnectPassThroughController + 5 resource-controllers + Form Requests + 9 routes onder /v1/mollie/connect/*
+- [x] 13-02-PLAN.md — AbstractMollieConnectPassThroughController + 5 resource-controllers + Form Requests + 9 routes onder /v1/mollie/connect/*
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
@@ -132,7 +132,7 @@ Plans:
 |-------|----------------|--------|-----------|
 | 11. Snelstart-SDK Saloon v4 upgrade | 3/3 | Complete   | 2026-05-18 |
 | 12. Snelstart productie-cert closeout | 0/? | Not started | - |
-| 13. Mollie Connect partner-resources | 1/4 | In Progress|  |
+| 13. Mollie Connect partner-resources | 2/4 | In Progress|  |
 | 14. Naschool live E2E | 0/? | Not started | - |
 | 15. VERIFICATION.md backfill | 0/? | Not started | - |
 
