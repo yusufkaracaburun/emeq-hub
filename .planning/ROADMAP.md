@@ -21,7 +21,7 @@
 - [ ] **Phase 12: Snelstart productie-cert closeout** — Partner-respons verwerken, retry-policy vastleggen, production webhook-endpoint geregistreerd (deadline 2026-05-26).
 - [x] **Phase 13: Mollie Connect partner-resources** — Pass-through-routes voor Onboarding/Organizations/Profiles/Permissions/ClientLinks + partner-access-token-resolver. (completed 2026-05-18)
 - [ ] **Phase 14: Naschool live E2E** — Naschool-repo wiring (composer-VCS + Stancl-resolver + listener) + live checkout-flow door test-ouder.
-- [ ] **Phase 15: VERIFICATION.md backfill** — Goal-backward audits voor v0.2 Phases 4, 6, 7.
+- [x] **Phase 15: VERIFICATION.md backfill** — Goal-backward audits voor v0.2 Phases 4, 6, 7.
 
 ## Phase Details
 
@@ -119,12 +119,23 @@ Plans:
 **Requirements**: VERIF-01, VERIF-02, VERIF-03
 **Success Criteria** (what must be TRUE):
 
-  1. `.planning/milestones/v0.2/phases/04-mollie-connect-oauth-broker/VERIFICATION.md` bestaat, gegenereerd via `/gsd-verify-work` met de Phase-4 ACCEPTANCE-file als startbewijs, en dekt 100% van de Phase-4 success-criteria (of administreert deferred items expliciet).
-  2. `.planning/milestones/v0.2/phases/06-cashier-mollie-use-case-a/VERIFICATION.md` bestaat met dezelfde criteria voor Phase 6.
-  3. `.planning/milestones/v0.2/phases/07-account-level-subscriptions-use-case-b/VERIFICATION.md` bestaat met dezelfde criteria voor Phase 7.
+  1. `.planning/milestones/v0.2-phases/04-mollie-connect-oauth-broker/04-VERIFICATION.md` bestaat, gegenereerd via de gsd-verifier subagent met de Phase-4 SUMMARY-fallback als startbewijs (geen ACCEPTANCE.md aanwezig — Notable deviations-sectie verantwoordt fallback), en dekt 100% van de Phase-4 success-criteria (of administreert deferred items expliciet).
+  2. `.planning/milestones/v0.2-phases/06-cashier-mollie-integratie-use-case-a/06-VERIFICATION.md` bestaat met dezelfde criteria voor Phase 6.
+  3. `.planning/milestones/v0.2-phases/07-account-level-subscriptions-use-case-b/07-VERIFICATION.md` bestaat met dezelfde criteria voor Phase 7.
   4. Geen code-changes in dit phase; eventuele bevindingen worden als follow-up-TODOs in STATE.md gelogd of als quick-tasks ge-spawned, niet inline gefixed.
 
-**Plans**: TBD
+**Plans:** 4/4 plans complete
+
+Plans:
+**Wave 1**
+
+- [x] 15-01-PLAN.md — 04-VERIFICATION.md backfill (VERIF-01)
+- [x] 15-02-PLAN.md — 06-VERIFICATION.md backfill (VERIF-02)
+- [x] 15-03-PLAN.md — 07-VERIFICATION.md backfill (VERIF-03)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [x] 15-04-PLAN.md — ROADMAP path-correcties + STATE Open→Resolved Blockers
 
 ## Progress
 
@@ -134,7 +145,7 @@ Plans:
 | 12. Snelstart productie-cert closeout | 0/? | Not started | - |
 | 13. Mollie Connect partner-resources | 4/4 | Complete    | 2026-05-18 |
 | 14. Naschool live E2E | 0/? | Not started | - |
-| 15. VERIFICATION.md backfill | 0/? | Not started | - |
+| 15. VERIFICATION.md backfill | 4/4 | Complete    | 2026-05-18 |
 
 ## Phases (Shipped)
 
@@ -177,4 +188,4 @@ Verzamelpunt voor ideeën die nog geen milestone hebben. Bij milestone-kickoff w
 
 ---
 
-*Roadmap last updated: 2026-05-18 — Phase 13 planning: 4 plans gepland (13-01 t/m 13-04) in 4 waves, MOLL-05 + MOLL-06 traceable.*
+*Roadmap last updated: 2026-05-18 — Phase 15 closed: 4 plans (15-01 t/m 15-04) in 2 waves, VERIF-01/02/03 = Complete.*

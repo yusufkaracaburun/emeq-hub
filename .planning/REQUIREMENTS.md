@@ -31,9 +31,9 @@ Requirements voor v0.3. Elk mapt naar exact één phase in `ROADMAP.md`.
 
 ### Verification-debt closure
 
-- [ ] **VERIF-01**: VERIFICATION.md (goal-backward audit) gegenereerd voor v0.2 Phase 4 (Mollie Connect OAuth-broker) via `/gsd-verify-work` met ACCEPTANCE-file als startbewijs. 100% van Phase-4 success-criteria gedekt of expliciet als deferred geadministreerd.
-- [ ] **VERIF-02**: VERIFICATION.md gegenereerd voor v0.2 Phase 6 (Cashier-Mollie use-case A).
-- [ ] **VERIF-03**: VERIFICATION.md gegenereerd voor v0.2 Phase 7 (Account-level subscriptions use-case B).
+- [x] **VERIF-01**: VERIFICATION.md (goal-backward audit) gegenereerd voor v0.2 Phase 4 (Mollie Connect OAuth-broker) via gsd-verifier subagent met SUMMARY-fallback als startbewijs (Phase 4 heeft geen ACCEPTANCE.md — Notable deviations-sectie verantwoordt fallback). 100% van Phase-4 success-criteria gedekt of expliciet als deferred geadministreerd.
+- [x] **VERIF-02**: VERIFICATION.md gegenereerd voor v0.2 Phase 6 (Cashier-Mollie use-case A).
+- [x] **VERIF-03**: VERIFICATION.md gegenereerd voor v0.2 Phase 7 (Account-level subscriptions use-case B).
 
 ## Future Requirements (v0.4+)
 
@@ -88,9 +88,9 @@ Welke phase elke requirement levert.
 | NSCH-05 | Phase 14 | Pending |
 | NSCH-06 | Phase 14 | Pending |
 | NSCH-07 | Phase 14 | Pending |
-| VERIF-01 | Phase 15 | Pending |
-| VERIF-02 | Phase 15 | Pending |
-| VERIF-03 | Phase 15 | Pending |
+| VERIF-01 | Phase 15 | Complete |
+| VERIF-02 | Phase 15 | Complete |
+| VERIF-03 | Phase 15 | Complete |
 
 **Coverage:**
 
@@ -100,4 +100,4 @@ Welke phase elke requirement levert.
 
 ---
 *Requirements defined: 2026-05-18*
-*Last updated: 2026-05-18 — Traceability ingevuld door `gsd-roadmapper` (12/12 coverage over 5 phases 11-15).*
+*Last updated: 2026-05-18 — VERIF-01/02/03 closed via Phase 15 (4 plans, gsd-verifier subagent).*

@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v0.3
 milestone_name: milestone
 status: executing
-stopped_at: Phase 13 closed — resume sessie, kiezen tussen Phase 14 (Naschool E2E, cross-repo) / Phase 15 (verification-debt backfill, doc-only). Phase 12 blocked tot ≤2026-05-26.
-last_updated: "2026-05-18T18:44:30.149Z"
-last_activity: 2026-05-18 -- Phase 15 planning complete
+stopped_at: Phase 15 complete — verification-debt closure (4/4 plans, VERIFICATION 5/5 + 4/4 + 4/4)
+last_updated: "2026-05-18T19:11:00.000Z"
+last_activity: 2026-05-18 -- Phase 15 closed
 progress:
   total_phases: 5
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 11
-  completed_plans: 7
-  percent: 40
+  completed_plans: 11
+  percent: 60
 ---
 
 # Project State
@@ -22,14 +22,14 @@ See: [`.planning/PROJECT.md`](PROJECT.md) (updated 2026-05-18 — v0.3 milestone
 
 **Core value:** Twee fundamenteel verschillende providers (OData/clientkey + REST/OAuth2) productie-gevalideerd via één SDK-pattern, beide via één Hub geconsumeerd, multi-tenant + encrypted-at-rest + audit-logged + admin-managed. v0.1 + v0.2 hebben dit Hub-side bewezen; v0.3 sluit met `NSCH-LIVE-E2E` de eerste concrete consumer-feature (Naschool) end-to-end.
 
-**Current focus:** Phase 14 — Naschool live E2E (next per ROADMAP); Phase 12 blocked op partner-respons ≤2026-05-26; Phase 15 doc-track parallelliseerbaar.
+**Current focus:** Phase 14 — Naschool live E2E (next per ROADMAP); Phase 12 blocked op partner-respons ≤2026-05-26; Phase 15 doc-track closed.
 
 ## Current Position
 
 Phase: 14
 Plan: Not started
-Status: Ready to execute
-Last activity: 2026-05-18 -- Phase 15 planning complete
+Status: Phase 15 closed — kiezen tussen Phase 14 (Naschool E2E, cross-repo) en Phase 12 (Snelstart cert closeout, ≤2026-05-26 deadline)
+Last activity: 2026-05-18 -- Phase 15 closed
 
 ## Shipped Milestones
 
@@ -67,7 +67,6 @@ Validated v0.2:
 
 - **`NSCH-LIVE-E2E`** — Naschool-repo composer-VCS-entries + `StancltenancyCredentialResolver` + `EnrollmentConfirmed`-listener live wiring + e2e door test-ouder. Hub-side substrate compleet per D-03 scope-fence. Sluit ook 3 deferred Phase 5a human-UAT items af. → Phase 14.
 - **Snelstart productie-certificering** — Hub-side ingress compleet; wacht op partner-respons (Gmail draft `r-8836998535038336548` ≤2026-05-26). Vraag #4 (retry-policy) ❓ open. → Phase 12.
-- **VERIFICATION.md ontbreekt voor Phases 4, 6, 7** — claims via ACCEPTANCE-files; optioneel `/gsd-verify-work` per phase in v0.3 of accepteer als gesloten. → Phase 15.
 - **`yusufkaracaburun/emeq-mollie-api` repo description is stale** — zegt nog "Saloon v3" terwijl die keuze gereverseerd is. Bijwerken bij volgende SDK-push.
 
 ### Resolved Blockers
@@ -76,6 +75,7 @@ Validated v0.2:
 - ~~Mollie partner-docs ontbraken~~ — opgelost via quick-task 260514-tny, verplaatst naar `packages/mollie-api/docs/partners/` op 2026-05-17 (SDK-redistributability-refactor)
 - ~~Phase 5b verification-debt~~ — closed 2026-05-17 via gsd-verifier (`05b-VERIFICATION.md`, 8/8 must-haves)
 - ~~Saloon v3 → v4 upgrade + 3 advisories (PKSA-xnj5-w74d-6wmz HIGH, PKSA-5szq-gvrg-ttfq MEDIUM, PKSA-rnpm-45mg-w6ht MEDIUM)~~ — closed 2026-05-18 via Phase 11 (3 plans, SDK getagd v0.2.0, Hub composer audit exit 0 zonder ignores). ADR (lokaal): `.docs/decisions/snelstart-sdk-saloon-v4-upgrade.md`.
+- ~~Phases 4/6/7 verification-debt~~ — closed 2026-05-18 via gsd-verifier (`04-VERIFICATION.md`, `06-VERIFICATION.md`, `07-VERIFICATION.md`). Commits 1834865, 35c3f45, 3c91447. Phase 15 closed.
 
 ## Performance Metrics
 
@@ -93,15 +93,14 @@ Validated v0.2:
 
 ## Session Continuity
 
-Last session: 2026-05-18T18:25:00.000Z
-Stopped at: Phase 13 closed — resume sessie, kiezen tussen Phase 14 (Naschool E2E, cross-repo) / Phase 15 (verification-debt backfill, doc-only). Phase 12 blocked tot ≤2026-05-26.
+Last session: 2026-05-18T19:11:00.000Z
+Stopped at: Phase 15 complete — verification-debt closure (4/4 plans, VERIFICATION 5/5 + 4/4 + 4/4). Phase 12 blocked tot ≤2026-05-26.
 Resume file: None
 
 Next action options:
 
-1. `/gsd-execute-phase 12` — Snelstart productie-certificering (wacht op partner-respons Gmail-draft `r-8836998535038336548` ≤2026-05-26; Hub-side ingress al compleet).
-2. `/gsd-plan-phase 13` — Mollie Connect partner-resources (parallelliseerbaar met Phase 12).
-3. `/gsd-plan-phase 15` — verification-debt backfill als parallel low-risk doc-track.
+1. `/gsd-plan-phase 14` — Naschool live E2E (cross-repo wiring + checkout-flow door test-ouder).
+2. `/gsd-execute-phase 12` — Snelstart productie-certificering (wacht op partner-respons Gmail-draft `r-8836998535038336548` ≤2026-05-26; Hub-side ingress al compleet).
 
 ## Decisions
 
