@@ -62,12 +62,10 @@ class ConnectRouteRegistrationTest extends TestCase
             }
         }
 
-        $this->assertSame(
-            count($expected),
-            count($actual),
-            'Expected '.count($expected).' Connect-routes, found '.count($actual),
-        );
-
+        // Set-based assertion — count(...)-equality blijkt brittle tegen auto-
+        // toegevoegde HEAD-verbs en Route::match-additions (WR-06). De per-tuple
+        // assertContains-loop hieronder bewaakt het echte contract: alle 9
+        // verwachte (method, uri)-paren staan in de actual-set.
         foreach ($expected as $tuple) {
             $this->assertContains(
                 $tuple,
