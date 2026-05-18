@@ -26,64 +26,87 @@
 ## Phase Details
 
 ### Phase 11: Snelstart-SDK Saloon v4 upgrade
+
 **Goal**: De Snelstart-SDK draait op Saloon v4 en de Hub heeft `composer audit` exit 0 zonder ignores.
 **Depends on**: Nothing (v0.2 shipped baseline)
 **Requirements**: SNEL-03, SNEL-04
 **Success Criteria** (what must be TRUE):
+
   1. `emeq/snelstart-api` repo getagd v0.2.0+ met Saloon v4 dependency en groene Pest-suite (≥107 passed).
   2. Hub `composer update emeq/snelstart-api` slaagt en alle bestaande Hub-tests blijven groen (geen regressie op `/v1/snelstart/*` of `/webhooks/snelstart`).
   3. `composer audit` in de Hub retourneert exit 0 zonder `audit-ignores` in `composer.json` (3 advisories incl. SSRF-via-endpoint-override opgelost).
   4. Snelstart-SDK migratie-breaking-changes (`Connector::resolveRequestUrl()`, etc.) gedocumenteerd in SDK-CHANGELOG.
+
 **Plans:** 3 plans
 
 Plans:
+**Wave 1**
+
 - [ ] 11-01-PLAN.md — SDK CHANGELOG-entry voor v0.2.0 + lokale release-commit (autonomous: false, checkpoint vóór tag/push)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
 - [ ] 11-02-PLAN.md — Hub composer.json pin ^0.2.0 + composer audit exit 0 + Hub-PHPUnit groen
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
 - [ ] 11-03-PLAN.md — ADR + .docs/README.md index-sync + .planning/codebase drift-fix + STATE.md closure
 
 ### Phase 12: Snelstart productie-cert closeout
+
 **Goal**: Snelstart partner-certificering is afgesloten en de Hub is klaar voor productie-webhook-verkeer.
 **Depends on**: Phase 11 (cert moet de actuele SDK-versie + Hub-config reflecteren)
 **Requirements**: SNEL-05
 **Success Criteria** (what must be TRUE):
+
   1. Snelstart-partner-respons (Gmail draft `r-8836998535038336548`) is verwerkt vóór 2026-05-26 en het antwoord op vraag #4 (retry-policy) staat als sectie in `.docs/partners/snelstart/CERT.md`.
   2. Vereiste cert-headers / endpoint-aanpassingen zijn geland in `config/snelstart.php` en doorgevoerd in de SDK-`Connector`-config; bestaande pass-through-tests blijven groen.
   3. Production webhook-endpoint is geregistreerd bij Snelstart en bevestigingsbewijs (mail-snippet of partner-portal-screenshot) ligt in `.docs/partners/snelstart/CERT.md`.
+
 **Plans**: TBD
 
 ### Phase 13: Mollie Connect partner-resources
+
 **Goal**: Een Connect-merchant-onboarding-flow kan via de Hub volledig worden afgehandeld zonder dat het host-app rechtstreeks met Mollie hoeft te praten.
 **Depends on**: Nothing (parallelliseerbaar met Phase 11/12)
 **Requirements**: MOLL-05, MOLL-06
 **Success Criteria** (what must be TRUE):
+
   1. `/v1/mollie/connect/{onboarding|organizations|profiles|permissions|client-links}` routes zijn live met dezelfde error-mapping en `Idempotency-Key` auto-forward als Phase 5a; integration-test bewijst happy-path + 401-error-mapping per resource.
   2. `MollieAccessTokenResolver` levert het juiste token-type per resource: partner-access-token voor Connect-resources, Connection-access-token voor merchant-resources. Een integration-test dekt beide paden expliciet.
   3. Scramble OpenAPI-output groepeert de nieuwe routes onder `Mollie · Connect` en `/docs/api` rendert ze zonder regressie op bestaande Mollie-groepen.
   4. ADR (extension van `mollie-passthrough-api.md` of nieuwe `mollie-connect-partner-resources.md`) legt de token-resolver-keuze + resource-mapping vast.
+
 **Plans**: TBD
 
 ### Phase 14: Naschool live E2E
+
 **Goal**: Een echte test-ouder maakt via de Naschool-UI een vrijwillige bijdrage en het bewijs van end-to-end-flow (Mollie checkout → webhook → enrollment-status → Snelstart-verkoopfactuur) is vastgelegd.
 **Depends on**: Phase 11 (stabiele SDK voor Naschool composer-update), Phase 12 (cert closed voor productie-Snelstart-call)
 **Requirements**: NSCH-04, NSCH-05, NSCH-06, NSCH-07
 **Success Criteria** (what must be TRUE):
+
   1. `school-activities-hub/backend/composer.json` bevat VCS-entries voor `emeq/snelstart-api` + `emeq/mollie-api` en `composer update --no-cache` slaagt fresh zonder auth.
   2. `StancltenancyCredentialResolver` in Naschool levert Snelstart-clientkey per tenant uit Stancl-tenancy-context, met test-bewijs (unit of feature-test in Naschool-repo).
   3. `EnrollmentConfirmed`-listener dispatcht `SyncEnrollmentToSnelstartJob` op de `naschool` Horizon-connection met failed-job-retention en Sentry-error-bridge actief.
   4. Test-ouder doorloopt live de vrijwillige-bijdrage checkout-flow: Mollie-payment slaagt → Mollie-webhook landt op Hub → enrollment-status update propageert naar Naschool-UI → Snelstart-verkoopfactuur verschijnt in de Snelstart-Mutaties van de juiste tenant.
   5. `NSCH-LIVE-EVIDENCE.md` bevat screenshots, een Hub `pass_through_calls`-rij-snippet en Snelstart-Mutaties-bevestiging die SC-4 staaft.
+
 **Plans**: TBD
 **UI hint**: yes
 
 ### Phase 15: VERIFICATION.md backfill
+
 **Goal**: De v0.2 verification-debt voor Phases 4, 6 en 7 is gesloten met formele goal-backward audit-artifacts.
 **Depends on**: Nothing (puur doc-werk op shipped code)
 **Requirements**: VERIF-01, VERIF-02, VERIF-03
 **Success Criteria** (what must be TRUE):
+
   1. `.planning/milestones/v0.2/phases/04-mollie-connect-oauth-broker/VERIFICATION.md` bestaat, gegenereerd via `/gsd-verify-work` met de Phase-4 ACCEPTANCE-file als startbewijs, en dekt 100% van de Phase-4 success-criteria (of administreert deferred items expliciet).
   2. `.planning/milestones/v0.2/phases/06-cashier-mollie-use-case-a/VERIFICATION.md` bestaat met dezelfde criteria voor Phase 6.
   3. `.planning/milestones/v0.2/phases/07-account-level-subscriptions-use-case-b/VERIFICATION.md` bestaat met dezelfde criteria voor Phase 7.
   4. Geen code-changes in dit phase; eventuele bevindingen worden als follow-up-TODOs in STATE.md gelogd of als quick-tasks ge-spawned, niet inline gefixed.
+
 **Plans**: TBD
 
 ## Progress
