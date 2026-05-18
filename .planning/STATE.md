@@ -6,7 +6,7 @@ status: planning
 last_updated: "2026-05-18T07:14:19.717Z"
 last_activity: 2026-05-18
 progress:
-  total_phases: 0
+  total_phases: 5
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -21,14 +21,14 @@ See: [`.planning/PROJECT.md`](PROJECT.md) (updated 2026-05-18 — v0.3 milestone
 
 **Core value:** Twee fundamenteel verschillende providers (OData/clientkey + REST/OAuth2) productie-gevalideerd via één SDK-pattern, beide via één Hub geconsumeerd, multi-tenant + encrypted-at-rest + audit-logged + admin-managed. v0.1 + v0.2 hebben dit Hub-side bewezen; v0.3 sluit met `NSCH-LIVE-E2E` de eerste concrete consumer-feature (Naschool) end-to-end.
 
-**Current focus:** v0.3 — Productie-closure. Defining requirements + roadmap (`/gsd-new-milestone v0.3` in flight).
+**Current focus:** v0.3 — Productie-closure. Roadmap gecreëerd (5 phases, 11-15, 12/12 coverage). Klaar voor `/gsd-plan-phase 11`.
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: 11 — Snelstart-SDK Saloon v4 upgrade (not started)
 Plan: —
-Status: Defining requirements
-Last activity: 2026-05-18 — Milestone v0.3 started
+Status: Roadmap created, awaiting phase planning
+Last activity: 2026-05-18 — Roadmap voor v0.3 vastgesteld via `gsd-roadmapper`
 
 ## Shipped Milestones
 
@@ -64,9 +64,9 @@ Validated v0.2:
 
 ### Open Blockers / Carry-forward naar v0.3
 
-- **`NSCH-LIVE-E2E`** — Naschool-repo composer-VCS-entries + `StancltenancyCredentialResolver` + `EnrollmentConfirmed`-listener live wiring + e2e door test-ouder. Hub-side substrate compleet per D-03 scope-fence. Sluit ook 3 deferred Phase 5a human-UAT items af.
-- **Snelstart productie-certificering** — Hub-side ingress compleet; wacht op partner-respons (Gmail draft `r-8836998535038336548` ≤2026-05-26). Vraag #4 (retry-policy) ❓ open.
-- **VERIFICATION.md ontbreekt voor Phases 4, 6, 7** — claims via ACCEPTANCE-files; optioneel `/gsd-verify-work` per phase in v0.3 of accepteer als gesloten.
+- **`NSCH-LIVE-E2E`** — Naschool-repo composer-VCS-entries + `StancltenancyCredentialResolver` + `EnrollmentConfirmed`-listener live wiring + e2e door test-ouder. Hub-side substrate compleet per D-03 scope-fence. Sluit ook 3 deferred Phase 5a human-UAT items af. → Phase 14.
+- **Snelstart productie-certificering** — Hub-side ingress compleet; wacht op partner-respons (Gmail draft `r-8836998535038336548` ≤2026-05-26). Vraag #4 (retry-policy) ❓ open. → Phase 12.
+- **VERIFICATION.md ontbreekt voor Phases 4, 6, 7** — claims via ACCEPTANCE-files; optioneel `/gsd-verify-work` per phase in v0.3 of accepteer als gesloten. → Phase 15.
 - **`yusufkaracaburun/emeq-mollie-api` repo description is stale** — zegt nog "Saloon v3" terwijl die keuze gereverseerd is. Bijwerken bij volgende SDK-push.
 
 ### Resolved Blockers
@@ -85,15 +85,16 @@ Validated v0.2:
 |-----------|--------|-------|----------------|---------|
 | v0.1 | 1 | 3 | 107 Pest (SDK) | Snelstart-SDK pattern validated |
 | v0.2 | 11 | 67 | ~498 PHPUnit (Hub) + 4 integration | 9/10 phases shipped within first 3 days; Phase 5c afgesloten met partner-blocker-resolutie |
+| v0.3 | 5 (planned) | — | — | Productie-closure: Naschool live + risk-reductie (Saloon v4, Mollie Connect resources, verification-debt) |
 
 ## Session Continuity
 
-Last session: 2026-05-18T00:00:00.000Z (v0.2 milestone-close via `/gsd-complete-milestone`)
-Stopped at: v0.2 archives written + REQUIREMENTS.md removed + ROADMAP collapsed + PROJECT.md evolved + git tag pending
+Last session: 2026-05-18 — v0.3 roadmap created via `gsd-roadmapper` (5 phases, 12/12 coverage)
+Stopped at: ROADMAP.md + REQUIREMENTS.md traceability + STATE.md updated
 Resume file: None
 
 Next action options:
 
-1. `/gsd-new-milestone v0.3` — start v0.3 planning (questioning → research → requirements → roadmap). Backlog kandidaten staan in [`ROADMAP.md`](ROADMAP.md) Backlog-sectie en [`PROJECT.md`](PROJECT.md) Next Milestone Backlog.
-2. `/gsd-cleanup` — archive overige losse artefacten uit `.planning/quick/` als historie te groot wordt.
-3. v0.2 follow-up `/gsd-verify-work` voor Phases 4, 6, 7 om verification-debt te closen vóór v0.3 start (optioneel).
+1. `/gsd-plan-phase 11` — start phase planning voor Snelstart-SDK Saloon v4 upgrade (SNEL-03 + SNEL-04). Lowest-risk, unblocks Phase 12 + 14.
+2. `/gsd-plan-phase 15` — verification-debt backfill als parallel low-risk doc-track terwijl partner-respons (Phase 12) wordt afgewacht.
+3. `/gsd-plan-phase 13` — Mollie Connect partner-resources (parallelliseerbaar met Phase 11/12).

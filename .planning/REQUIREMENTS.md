@@ -75,28 +75,28 @@ Expliciet uitgesloten van v0.3 om scope-creep te voorkomen.
 
 ## Traceability
 
-Welke phase elke requirement levert. Wordt gevuld door `gsd-roadmapper` tijdens roadmap-creatie.
+Welke phase elke requirement levert.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| NSCH-04 | TBD | Pending |
-| NSCH-05 | TBD | Pending |
-| NSCH-06 | TBD | Pending |
-| NSCH-07 | TBD | Pending |
-| SNEL-03 | TBD | Pending |
-| SNEL-04 | TBD | Pending |
-| SNEL-05 | TBD | Pending |
-| MOLL-05 | TBD | Pending |
-| MOLL-06 | TBD | Pending |
-| VERIF-01 | TBD | Pending |
-| VERIF-02 | TBD | Pending |
-| VERIF-03 | TBD | Pending |
+| SNEL-03 | Phase 11 | Pending |
+| SNEL-04 | Phase 11 | Pending |
+| SNEL-05 | Phase 12 | Pending |
+| MOLL-05 | Phase 13 | Pending |
+| MOLL-06 | Phase 13 | Pending |
+| NSCH-04 | Phase 14 | Pending |
+| NSCH-05 | Phase 14 | Pending |
+| NSCH-06 | Phase 14 | Pending |
+| NSCH-07 | Phase 14 | Pending |
+| VERIF-01 | Phase 15 | Pending |
+| VERIF-02 | Phase 15 | Pending |
+| VERIF-03 | Phase 15 | Pending |
 
 **Coverage:**
 - v1 requirements: 12 total
-- Mapped to phases: 0 (pending roadmap)
-- Unmapped: 12 ⚠️ (will be filled by roadmapper)
+- Mapped to phases: 12 ✓
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-05-18*
-*Last updated: 2026-05-18 — v0.3 milestone-kickoff via `/gsd-new-milestone v0.3`*
+*Last updated: 2026-05-18 — Traceability ingevuld door `gsd-roadmapper` (12/12 coverage over 5 phases 11-15).*
