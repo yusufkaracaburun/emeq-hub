@@ -36,6 +36,7 @@ return [
     ],
 
     'mollie' => [
+        'partner_access_token' => env('MOLLIE_PARTNER_ACCESS_TOKEN'),
         'connect' => [
             'client_id' => env('MOLLIE_CONNECT_CLIENT_ID'),
             'client_secret' => env('MOLLIE_CONNECT_CLIENT_SECRET'),

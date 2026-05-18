@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Support\Mollie;
 
+use App\Exceptions\Mollie\MissingPartnerTokenException;
 use Emeq\MollieApi\Exceptions\AuthenticationException;
 use Emeq\MollieApi\Exceptions\MollieException;
 use Emeq\MollieApi\Exceptions\NotFoundException;
@@ -27,6 +28,19 @@ final class MollieUpstreamErrorMapper
      */
     public static function mapException(Throwable $exception): array
     {
+        if ($exception instanceof MissingPartnerTokenException) {
+            return [
+                'status' => 503,
+                'body' => [
+                    'error' => 'partner_token_missing',
+                    'message' => 'Mollie partner-access-token niet geconfigureerd op Hub. Contact Emeq-staff.',
+                    'upstream_status' => 0,
+                ],
+                'headers' => [],
+                'short_code' => 'partner_token_missing',
+            ];
+        }
+
         if ($exception instanceof ValidationException) {
             $body = [
                 'error' => 'validation_failed',
