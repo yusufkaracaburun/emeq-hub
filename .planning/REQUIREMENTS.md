@@ -17,8 +17,8 @@ Requirements voor v0.3. Elk mapt naar exact één phase in `ROADMAP.md`.
 
 ### Snelstart-SDK upgrade
 
-- [ ] **SNEL-03**: `emeq/snelstart-api` upgrade Saloon v3 → v4. SDK Pest-suite blijft groen (≥107 passed); breaking changes (`Connector::resolveRequestUrl()` etc.) gemigreerd; SDK-repo getagd `v0.2.0` of hoger.
-- [ ] **SNEL-04**: 3 ignored security advisories in `composer.json` (SSRF via endpoint-override + 2 anderen) zijn opgelost en `composer audit` retourneert exit 0 zonder ignores in de Hub.
+- [x] **SNEL-03**: `emeq/snelstart-api` upgrade Saloon v3 → v4. SDK Pest-suite blijft groen (≥107 passed); breaking changes (`Connector::resolveRequestUrl()` etc.) gemigreerd; SDK-repo getagd `v0.2.0` of hoger.
+- [x] **SNEL-04**: 3 ignored security advisories in `composer.json` (SSRF via endpoint-override + 2 anderen) zijn opgelost en `composer audit` retourneert exit 0 zonder ignores in de Hub.
 
 ### Snelstart productie-cert
 
@@ -79,8 +79,8 @@ Welke phase elke requirement levert.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| SNEL-03 | Phase 11 | Pending |
-| SNEL-04 | Phase 11 | Pending |
+| SNEL-03 | Phase 11 | Complete |
+| SNEL-04 | Phase 11 | Complete |
 | SNEL-05 | Phase 12 | Pending |
 | MOLL-05 | Phase 13 | Pending |
 | MOLL-06 | Phase 13 | Pending |
@@ -93,6 +93,7 @@ Welke phase elke requirement levert.
 | VERIF-03 | Phase 15 | Pending |
 
 **Coverage:**
+
 - v1 requirements: 12 total
 - Mapped to phases: 12 ✓
 - Unmapped: 0

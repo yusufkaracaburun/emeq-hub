@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v0.3
 milestone_name: milestone
 status: executing
-stopped_at: Plan 11-01 complete — SDK v0.2.0 tagged + pushed
-last_updated: "2026-05-18T09:15:00.000Z"
-last_activity: 2026-05-18 -- Plan 11-01 complete — SDK v0.2.0 tagged + pushed to remote
+stopped_at: Plan 11-02 complete — Hub composer-update naar v0.2.0 + audit clean
+last_updated: "2026-05-18T08:56:49.838Z"
+last_activity: 2026-05-18
 progress:
   total_phases: 5
   completed_phases: 0
   total_plans: 3
-  completed_plans: 1
-  percent: 7
+  completed_plans: 2
+  percent: 0
 ---
 
 # Project State
@@ -27,9 +27,9 @@ See: [`.planning/PROJECT.md`](PROJECT.md) (updated 2026-05-18 — v0.3 milestone
 ## Current Position
 
 Phase: 11 (snelstart-sdk-saloon-v4-upgrade) — EXECUTING
-Plan: 2 of 3 (Plan 11-01 complete — SDK v0.2.0 tagged + pushed; ready voor Plan 11-02 Hub-side `composer update`)
-Status: Executing Phase 11
-Last activity: 2026-05-18 -- Plan 11-01 complete — SDK v0.2.0 tagged + pushed to remote
+Plan: 3 of 3 (Plan 11-01 complete — SDK v0.2.0 tagged + pushed; ready voor Plan 11-02 Hub-side `composer update`)
+Status: Ready to execute
+Last activity: 2026-05-18
 
 ## Shipped Milestones
 
@@ -87,11 +87,12 @@ Validated v0.2:
 | v0.1 | 1 | 3 | 107 Pest (SDK) | Snelstart-SDK pattern validated |
 | v0.2 | 11 | 67 | ~498 PHPUnit (Hub) + 4 integration | 9/10 phases shipped within first 3 days; Phase 5c afgesloten met partner-blocker-resolutie |
 | v0.3 | 5 (planned) | — | — | Productie-closure: Naschool live + risk-reductie (Saloon v4, Mollie Connect resources, verification-debt) |
+| Phase 11 P02 | 12 | 2 tasks | 3 files |
 
 ## Session Continuity
 
-Last session: 2026-05-18T09:15:00.000Z
-Stopped at: Plan 11-01 complete — SDK v0.2.0 tagged + pushed
+Last session: 2026-05-18T08:56:49.835Z
+Stopped at: Plan 11-02 complete — Hub composer-update naar v0.2.0 + audit clean
 Resume file: None
 
 Next action options:
@@ -99,3 +100,8 @@ Next action options:
 1. `/gsd-execute-phase 11` — vervolg met Plan 11-02 (Hub-side `composer update emeq/snelstart-api` naar `^0.2.0`, vervang `dev-master`).
 2. `/gsd-plan-phase 15` — verification-debt backfill als parallel low-risk doc-track.
 3. `/gsd-plan-phase 13` — Mollie Connect partner-resources (parallelliseerbaar met Phase 11).
+
+## Decisions
+
+- [Phase ?]: Plan 11-02: composer.json + composer.lock in één commit (chore(deps) 897c1e0) — atomic install-state per plan-instructie
+- [Phase ?]: Plan 11-02: pre-existing UserResource-test-failure NIET fixen — SCOPE BOUNDARY, gelogd in deferred-items.md
