@@ -1,15 +1,14 @@
-# Emeq integration stack (v0.2)
+# Emeq integration stack
 
-> **Master-plan**: [`.claude/plans/2026-05-14-emeq-integration-strategy.md`](../.claude/plans/2026-05-14-emeq-integration-strategy.md) — bron-van-waarheid voor scope, locked decisions en track-breakdown.
-> Deze PROJECT.md is de operationele synthese voor de GSD-workflow.
+> **Master-plans:** [v0.2 strategy](../.claude/plans/2026-05-14-emeq-integration-strategy.md) · [v0.2 fancy-honking-spring (kickoff)](../.claude/plans/fancy-honking-spring.md). Deze PROJECT.md is de operationele synthese voor de GSD-workflow.
 
 ## What This Is
 
-Een Hub-platform en losse, Saloon-gebaseerde Laravel SDK-packages (`emeq/snelstart-api`, `emeq/mollie-api`) voor Nederlandse boekhoud- en betaal-partner-API's. De Hub (`emeq-hub`) host multi-tenant OAuth-koppelingen, webhook-routing en een pass-through REST-API; SDKs leveren de partner-specifieke wrapping. v0.2 bouwt Mollie + Connect + Subscriptions + Hub-skeleton bovenop het in v0.1 gevalideerde Snelstart-pattern, met Naschool als eerste concrete consumer-feature. Doelgroep v0.2: Emeq's eigen SaaS-apps die nu ad-hoc partner-integraties hebben. Doelgroep v1.0+ (later): commercieel beschikbaar voor andere NL dev-shops.
+Een Hub-platform en losse Laravel SDK-packages (`emeq/snelstart-api`, `emeq/mollie-api`) voor Nederlandse boekhoud- en betaal-partner-API's. De Hub (`emeq-hub`) host multi-tenant OAuth-koppelingen, webhook-routing, pass-through REST-API's en een Filament admin-paneel; SDKs leveren partner-specifieke wrapping. Na v0.2 zijn twee fundamenteel verschillende providers (Snelstart OData/clientkey + Mollie REST/OAuth) productie-gevalideerd via één SDK-pattern, beide via dezelfde Hub geconsumeerd. Doelgroep nu: Emeq's eigen SaaS-apps die ad-hoc partner-integraties vervangen door Hub-routing. Doelgroep v1.0+ (later): commercieel beschikbaar voor andere NL dev-shops.
 
 ## Core Value
 
-**Twee fundamenteel verschillende providers (OData/clientkey + REST/OAuth2) productie-gevalideerd via één SDK-pattern, en beide live in één concrete Naschool-feature.** Dat valideert het pattern voor toekomstige SDKs en levert directe DRY-winst in Naschool.
+**Twee fundamenteel verschillende providers (OData/clientkey + REST/OAuth2) productie-gevalideerd via één SDK-pattern, beide via één Hub geconsumeerd, multi-tenant + encrypted-at-rest + audit-logged + admin-managed.** v0.1 + v0.2 hebben dit Hub-side bewezen; v0.3 sluit met `NSCH-LIVE-E2E` de eerste concrete consumer-feature (Naschool) end-to-end.
 
 ## Requirements
 
@@ -17,98 +16,92 @@ Een Hub-platform en losse, Saloon-gebaseerde Laravel SDK-packages (`emeq/snelsta
 
 <!-- Shipped and confirmed valuable. -->
 
-- [x] **SNEL-01** — Snelstart-SDK Pest-suite groen (107 passed / 187 assertions). Gevalideerd in Phase 1 (`fase-4 crash` bleek NO REPRO op `main @ 76e0797`; rewrote SnelstartConnectorTest van 1 → 12 cases met directe `getRequestException()`-coverage).
-- [x] **SNEL-02** — Snelstart-SDK gepusht naar `github.com:yusufkaracaburun/emeq-snelstart-api` met upstream-tracking. VCS-installeerbaar zonder auth bewezen via smoke-test.
-- [x] **HUB-01** — Hub-skeleton: `consumers`/`accounts`/`connections` tabellen + Sanctum-PAT-auth (`/v1/*`) + encrypted credential-velden + multi-tenant scoping. Gevalideerd in Phase 3 (5/5 plans, 28 tests groen incl. encryption-at-rest voor alle 4 credential-velden en cross-Consumer query-isolation). Acceptance via `hub:consumer:create` + `GET /v1/ping`.
-- [x] **MOLL-03** — `emeq/mollie-api` Resources + Idempotency-Key forward op alle 5 write-endpoints. Gevalideerd in Phase 5a (6/6 plans, 207 tests groen, 13/13 truths verified). Gehoiste `AbstractMolliePassThroughController::buildClient` zorgt voor verbatim Consumer-header forward naar Mollie SDK; 7 resources (Payments / Customers / PaymentMethods / Refunds / Mandates / Subscriptions / PaymentLinks) + 22 routes onder `/v1/mollie/*`.
-- [x] **MOLL-04** — `MollieWebhookVerifier` Connect-webhooks. Gevalideerd in Phase 5a — signature-verify via SDK helper + anti-spoofing-fetch + fan-out via `spatie/laravel-webhook-server` naar Consumer-callback + stap-0 hard-fail guard bij empty/null `MOLLIE_WEBHOOK_SECRET` (D-08 stap 1, T-05a-06).
-- [x] **HUB-03** — Pass-through REST API `/v1/mollie/*`. Gevalideerd in Phase 5a — multi-tenant Bearer→Consumer→Account→Connection-resolutie + `PassThroughCall` audit-log + error-mapping (401→502 cloaked, 422→422, 404→404, 429→429+RetryAfter, 5xx→502, timeout→504) + Scramble OpenAPI op `/docs/api`. Cross-Consumer-access geeft 404 (geen leakage).
+**v0.1:**
+
+- [x] **SNEL-01** — Snelstart-SDK Pest-suite groen (107 passed / 187 assertions). Validated in Phase 1.
+- [x] **SNEL-02** — Snelstart-SDK publiek op `github.com:yusufkaracaburun/emeq-snelstart-api`, VCS-installeerbaar zonder auth.
+
+**v0.2 (15/15 ge-shipped, 3 hub-side per D-03 scope-fence):**
+
+- [x] **MOLL-01** — `emeq/mollie-api` SDK skeleton + multi-tenant resolver + dual creds. Validated in Phase 2.
+- [x] **MOLL-02** — Mollie Connect OAuth-broker via provider-agnostisch `OAuthFlow`-contract + lazy-refresh. Validated in Phase 4 (129/129 tests).
+- [x] **MOLL-03** — `emeq/mollie-api` Resources (7 totaal, 22 routes) + Idempotency-Key auto-forward. Validated in Phase 5a.
+- [x] **MOLL-04** — `MollieWebhookVerifier` voor Connect-webhooks + fan-out via spatie/laravel-webhook-server + secret-hard-fail-guard. Validated in Phase 5a.
+- [x] **HUB-01** — `consumers`/`accounts`/`connections`-tabellen + Sanctum-PAT + encrypted credentials + multi-tenant scoping. Validated in Phase 3.
+- [x] **HUB-02** — Provider-agnostisch `OAuthFlow`-contract met `FakeOAuthFlow` als pattern-portability-bewijs. Validated in Phase 4.
+- [x] **HUB-03** — Pass-through REST API `/v1/mollie/*` met error-mapping + Scramble OpenAPI. Validated in Phase 5a.
+- [x] **HUB-04** — Filament v4 admin-paneel `/admin` met 7 resources + Spatie laravel-permission 2-rol-model + `ProviderCredentialDescriptor` + Pennant feature-flag kill-switch. Validated in Phase 9 + Phase 10 polish.
+- [x] **HUB-05** — Pass-through REST API `/v1/snelstart/{path}` met `HubSnelstartCredentialResolver` + eigen `pass_through_calls`-tabel. Validated in Phase 5b (8/8 verifier must-haves, 86 tests).
+- [x] **HUB-06** — Snelstart webhook-handler `POST /webhooks/snelstart` met HMAC + Connection-resolutie + async fan-out. Validated in Phase 5c (SC-1..5 via E2E-test). HMAC-verifier verplaatst naar SDK per ADR `sdk-redistributability-boundary.md`. **Productie-cert wacht op partner-respons** (Gmail draft `r-8836998535038336548` ≤2026-05-26).
+- [x] **SUB-01** — Cashier-Mollie integratie use-case A (Emeq→Consumers). Validated in Phase 6 (`mollie/laravel-cashier-mollie ^2.20.1` pad-a out-of-the-box).
+- [x] **SUB-02** — Account-level subscriptions use-case B met multi-tenant `AccountSubscription`-state-machine. Validated in Phase 7.
+- [x] **NSCH-01** — Hub-side substrate (`ConsumerOnboarding` atomic flow). Validated in Phase 8 per D-03. Naschool-repo werk → v0.3 (`NSCH-LIVE-E2E`).
+- [x] **NSCH-02** — Hub-side substrate (Snelstart job-pattern + resolver). Validated in Phase 8 per D-03. Live `EnrollmentConfirmed`-listener → v0.3.
+- [x] **NSCH-03** — Hub-side substrate (`StartOAuthFlowAction` + partner-pages + onboard-wizard). Validated in Phase 8 per D-03. Live E2E door test-ouder → v0.3.
 
 ### Active
 
-<!-- v0.2 milestone actief sinds 2026-05-14. 9/11 phases shipped, 2 phases open. Authoritative status: `.planning/REQUIREMENTS.md` + `.planning/ROADMAP.md`. -->
+<!-- Geen v0.3 milestone gestart. Start via `/gsd-new-milestone v0.3`. -->
 
-Open v0.2-requirements:
+_None — v0.3 nog niet gepland._
 
-- **HUB-06** — Snelstart webhook-handler op `POST /webhooks/snelstart` (HMAC-verified ingress + audit-log + async fan-out). Phase 5c, **BLOCKED** op partner@snelstart.nl certificeringsantwoord (Gmail draft `r-8836998535038336548`, verwacht ≤ 2026-05-26). Zie `packages/snelstart-api/docs/decisions/snelstart-certificering-pad.md`.
-- **NSCH-01** — Naschool wiring: Stancl-tenancy resolver voor Snelstart + composer-VCS-entries voor `emeq/snelstart-api` + `emeq/mollie-api`. Phase 8, unblocked alternatief pad terwijl HUB-06 op partner wacht.
-- **NSCH-02** — Naschool `EnrollmentConfirmed` → Snelstart-verkoopfactuur via `SyncEnrollmentToSnelstartJob`. Phase 8.
-- **NSCH-03** — Naschool vrijwillige-bijdrage-flow via Mollie Connect (= via Hub-Connect, op school's eigen Mollie). Phase 8, e2e-bewijs smoke-test.
+### Next Milestone Backlog (v0.3+)
 
-Open human-UAT: 3 items in `.planning/phases/05a-mollie-sdk-resources-webhooks-pass-through-api/05a-HUMAN-UAT.md` (Scramble UI render, live Mollie testmode webhook, NSCH-03 e2e — laatste hangt aan NSCH-03 hierboven).
+Carry-forward kandidaten (bron-van-waarheid: [`ROADMAP.md`](ROADMAP.md) Backlog-sectie):
 
-### Next Milestone Backlog (v0.3+, niet gestart)
-
-> v0.3 scope nog niet gepland — formaliseren bij `/gsd-new-milestone v0.3` na v0.2 close. Bron-van-waarheid voor de tracked-deferred items: `.planning/REQUIREMENTS.md` § Future Requirements.
-
-Carry-forward kandidaten (uit REQUIREMENTS.md):
-
-- **SNEL-V4** — Snelstart-SDK Saloon v3 → v4 (3 ignored security advisories)
-- **PROV-MONEYBIRD / PROV-EXACT / PROV-IBANITY / PROV-STRIPE** — extra provider-SDKs
-- **HUB-BILLING / HUB-DOCS / HUB-ONBOARDING** — commerciële Hub-features voor derde-partij Consumers
+- **NSCH-LIVE-E2E** — Naschool-repo wiring + live E2E door test-ouder (Hub-side compleet per D-03)
+- **SNEL-V4** — Snelstart-SDK Saloon v3 → v4 (3 security advisories)
+- **PROV-MONEYBIRD / PROV-EXACT / PROV-IBANITY / PROV-STRIPE / PROV-BIZCUIT** — extra provider-SDKs
+- **MOLL-CONNECT-RES** — Mollie Connect partner-resources via pass-through (blokkerend voor host-app productie-go-live met Connect-merchants)
+- **HUB-BILLING / HUB-DOCS / HUB-ONBOARDING / HUB-AUDIT** — commerciële Hub-features
+- **SCRAMBLE-NESTED-GROUPS** — Echte hiërarchische groepering in `/docs/api` (trigger: 5+ providers)
+- **BRAIN-AUDIT-CI** — Laravel-Brain in CI (trigger: 3+ SDKs of v1.0 commercieel)
 
 ### Out of Scope
 
 <!-- Permanent buiten roadmap of expliciet later. -->
 
-- **`emeq/exact-api`, `emeq/moneybird-api`, `emeq/ibanity-api`, `emeq/stripe-api`** — derde+ providers; wachten tot Mollie+Snelstart-pattern gevalideerd is in productie.
 - **DTO-codegen vanuit OpenAPI specs** — Snelstart `Dto/` en `Resources/` blijven leeg; consumers gebruiken `RawSnelstartRequest` + OData QueryBuilder. Codegen pas wanneer `emeq/hub` typed responses nodig heeft.
-- **Snelstart Saloon v3 → v4** — 3 ignored security advisories oplossen; v0.3-werk.
-- **Commerciële Hub-features** (billing, public docs-site, self-service onboarding) — pas in latere milestone na v0.2.
+- **Cashier-Mollie upstream-PR** — Als compat-issues optreden: fork-and-update of zelf bouwen; geen upstream-PR-pad.
+- **Naschool's volledige financiële module** — Alleen vrijwillige-bijdrage checkout-flow + Snelstart-verkoopfactuur-flow als POC; geen full ledger, multi-currency, of tax-rule-engine.
+- **Commerciële Hub-features in pre-v1.0** — Billing, public docs-site, self-service onboarding pas wanneer minimaal 2 derde-partij Consumers actief willen integreren.
 
-## Current State (per 2026-05-16, na Phase 10 ship)
+## Current State (per 2026-05-17 na v0.2-ship)
 
-- **Shipped:** v0.1 — `emeq/snelstart-api` SDK live op `github.com:yusufkaracaburun/emeq-snelstart-api` (`main` @ `16c9ecc`), Pest-suite groen (107/187), VCS-installeerbaar zonder auth.
-- **Active milestone:** v0.2 — Mollie + Connect + Subscriptions + Hub-skeleton. Phases 2 / 3 / 4 / 5a / 5b / 6 / 7 / 9 / 10 complete (9/11 phases done). Open: Phase 5c (BLOCKED, partner-response) + Phase 8 (Naschool wiring, unblocked).
-- **Recent ship:** Phase 10 — Phase 9 polish (11 deferred review-findings closed: CR-02 permission-enforcement + Hub-eigen `App\Models\WebhookCall` + cross-Consumer-isolation test bewijs voor HUB-04 SC-7 + WR-01..06 + IN-01..04). 6/6 plans, 437 tests / 1479 assertions / 1 pre-existing incomplete. Verifier 13/13 truths passed.
-- **Architectuur-vision** (geverifieerd 2026-05-14): Emeq = Mollie Connect Partner. Consumers (Naschool, Planny, derde-partij SaaS) routeren door Hub. Accounts (klanten van die SaaS-apps) koppelen eigen partner-credentials via OAuth (Mollie Connect, Snelstart oAuth, etc.). Subscriptions: zowel Emeq→Consumers (Cashier-Mollie pattern) als Accounts→eindgebruikers (Connect + eigen subscription-laag).
-
-## Current Milestone: v0.2 Mollie + Connect + Subscriptions + Hub-skeleton
-
-**Goal:** `emeq/mollie-api` SDK + Mollie Connect OAuth-broker + Hub-skeleton (Consumer/Account/Connection-tabellen) + Subscriptions voor beide use-cases + Naschool wiring — eindstand: Naschool's vrijwillige-bijdrage flow loopt namens School A op School A's eigen Mollie-account via Hub-Connect.
-
-**Target features:**
-- `emeq/mollie-api` foundation (wrap `mollie/mollie-api-php`, multi-tenant `MollieCredentialResolver`, dual creds API-key + OAuth)
-- Hub-skeleton: `consumers`/`accounts`/`connections` tabellen + Sanctum-PAT-auth + pass-through `/v1/mollie/*` REST API
-- Mollie Connect OAuth-broker (client_id/client_secret, redirect-handler, token-exchange, refresh-flow, encrypted token-storage)
-- `emeq/mollie-api` Resources + Webhooks (Payments, Customers, PaymentMethods, Refunds, Mandates, Subscriptions; Connect-webhook HMAC-verifier)
-- Cashier-Mollie integratie (use-case A: Emeq → Naschool/Planny billing)
-- Account-level subscriptions via Connect (use-case B: Accounts → eindgebruikers)
-- Naschool wiring (Snelstart Stancl-resolver + EnrollmentConfirmed-job + Mollie-via-Hub checkout-flow)
-
-**Phases:** 2-9 (continued numbering vanaf v0.1's Phase 1). Volledig plan in [`.claude/plans/fancy-honking-spring.md`](../.claude/plans/fancy-honking-spring.md).
-
-## Context
-
-- **Multi-repo workspace**: `.planning/` leeft in `emeq-hub` als coordinatie. Code-fases werken in 3 repos:
-  - `packages/snelstart-api/` ↔ `github.com:yusufkaracaburun/emeq-snelstart-api` (sub-repo, geregistreerd in `planning.sub_repos`) — **v0.1 shipped**
-  - `packages/mollie-api/` ↔ `github.com:yusufkaracaburun/emeq-mollie-api` (bestaat al sinds 2026-05-13, publiek, leeg — wordt actief in v0.2 Fase 1)
-  - `/Users/yusufkaracaburun/Sites/localhost/school-activities-hub/` — Naschool app, **buiten** deze workspace; wordt geraakt in v0.2 wiring-fase
-- **Snelstart-SDK staat**: gepusht naar `origin/main` @ `16c9ecc` (Phase 1 afgerond 2026-05-14), upstream-tracking actief, VCS-installeerbaar zonder auth. `OData/{Filter,Guid,QueryBuilder}.php` aanwezig. `Dto/` en `Resources/` leeg by design.
-- **Naschool integratie-pattern (v0.1-vision, herzien voor v0.2)**: Stancl-tenancy met per-tenant credentials in `Tenant->settings()` voor Snelstart. Voor Mollie schuift dit naar Hub-Connection-routing in v0.2.
-- **Verplicht: feature-validatie per SDK**. Niet "code in productie", maar "één concrete Naschool-feature draait erop".
+- **Shipped:**
+  - **v0.1 (2026-05-14)** — `emeq/snelstart-api` SDK live op `github.com:yusufkaracaburun/emeq-snelstart-api`, Pest 107/187, VCS-installeerbaar zonder auth.
+  - **v0.2 (2026-05-17)** — Mollie + Connect + Subscriptions + Hub-skeleton + Filament admin-paneel. 11 phases, 67 plans, ~498 tests, ~100k LOC over 4 dagen. Hub-side substrate voor Naschool compleet per D-03; live E2E naar v0.3.
+- **Active milestone:** geen — v0.3 nog niet gestart.
+- **Architectuur-vision** (gevalideerd v0.1 + v0.2): Emeq = Mollie Connect Partner. Consumers (Naschool, Planny, derde-partij SaaS) routeren door Hub. Accounts (klanten van die SaaS-apps) koppelen eigen partner-credentials via OAuth (Mollie Connect) of credential-form (Snelstart clientkey). Subscriptions in twee patronen: Emeq→Consumers (Cashier-Mollie) en Accounts→eindgebruikers (Connect + eigen multi-tenant subscription-laag).
 
 ## Constraints
 
-- **Tech stack**: PHP 8.4, Laravel 13.9, Saloon v4 (gebruikt in `emeq/snelstart-api`; `emeq/mollie-api` wrapt `mollie/mollie-api-php` rechtstreeks, geen Saloon-laag), Spatie laravel-data. Tests: PHPUnit 12 in de Hub, Pest in SDK-packages. Geen afwijking zonder approval.
-- **Timeline**: v0.2-indicatie ~8-10 weken vanaf milestone-kickoff.
+- **Tech stack**: PHP 8.4, Laravel 13.9, Saloon v4 (in `emeq/snelstart-api`; `emeq/mollie-api` wrapt `mollie/mollie-api-php` direct), Spatie laravel-data. Tests: PHPUnit 12 in de Hub, Pest in SDK-packages. Geen afwijking zonder approval.
 - **Repo-grenzen**: SDK-packages krijgen géén Hub-domeinmodellen (`Connection`, `Account`, etc.) — invariant uit CLAUDE.md. Hub-tabellen leven in `emeq-hub` zelf.
 - **Tokens encrypted at rest**: gevoelige credentials (clientkey, subscription-key, API-key, OAuth access/refresh tokens) nooit raw in DB of logs. Fingerprint-only voor debugging.
-- **Geen verzonnen partner-features**: code moet exact kloppen met officiële Snelstart/Mollie docs (zie `.docs/partners/<provider>/`).
-- **Git-policy**: nooit op `master` werken, nooit pushen zonder approval, geen `--no-verify`.
+- **Geen verzonnen partner-features**: code moet exact kloppen met officiële Snelstart/Mollie docs (`.docs/partners/<provider>/` of de SDK-eigen `packages/<sdk>/docs/partners/<provider>/`).
+- **Git-policy**: nooit op `master` werken voor feature-werk (milestone-archive-commits uitgezonderd), nooit pushen zonder approval, geen `--no-verify`.
 
 ## Key Decisions
 
 | Decision | Rationale | Status |
 |----------|-----------|--------|
 | SDK-first, geen Hub-platform in v0.1 | Eerst SDK-pattern valideren | ✅ Validated v0.1 (Snelstart-SDK shipped, pattern bewezen) |
-| ~~Eigen Saloon-wrapper voor Mollie ipv `mollie/mollie-api-php` als dependency~~ | ~~Consistency met snelstart-api~~ | ❌ **Reversed 2026-05-14** — `emeq/mollie-api` wrapt `mollie/mollie-api-php` direct (niet eigen Saloon, niet `laravel-mollie`). Reden: laravel-mollie issue #245/PR #246 multi-tenant afgewezen; eigen Saloon ~70% meer code dan winst |
-| `Dto/` + `Resources/` leeg laten in Snelstart-SDK | `RawSnelstartRequest` + OData QueryBuilder dekt alle 96 endpoints zonder 32 resource-classes te genereren | ✅ Validated v0.1 |
-| ~~API-key auth voor Mollie (geen OAuth2 Connect) in v0.1~~ | ~~SaaS-apps werken in eigen Mollie-account~~ | ❌ **Reversed 2026-05-14** — Mollie Connect-flow zit in v0.2 dag 1 (Emeq = Mollie Partner; Accounts koppelen eigen Mollie). API-key auth blijft als fallback voor Emeq's eigen Mollie. |
-| `.planning/` in emeq-hub committen (commit_docs: true) | Hub is canonical coordinatie-repo; planning artefacten overleven sessies en machines | ✅ Validated |
-| Sequential execution (geen parallel) | Cross-repo werk laat zich slecht parallelliseren | ✅ Validated v0.1 |
-| **Subscriptions in v0.2 — twee use-cases** (Emeq→Consumers + Accounts→eindgebruikers) | Beide patronen nodig: Emeq factuureert SaaS-licenties (Cashier-pattern), Accounts factureren ouders/leden via eigen Mollie (Connect-pattern) | New 2026-05-14 — Pending implementatie |
-| **Mollie-facade alias = `EmeqMollie`** (niet `Mollie`) | Cashier-Mollie hangt af van `laravel-mollie` die `Mollie`-alias claimt; v0.2 wil beide pakketten naast elkaar | New 2026-05-14 — Pending implementatie |
+| `Dto/` + `Resources/` leeg laten in Snelstart-SDK | `RawSnelstartRequest` + OData QueryBuilder dekt alle 96 endpoints | ✅ Validated v0.1 |
+| ~~Eigen Saloon-wrapper voor Mollie~~ | ~~Consistency met snelstart-api~~ | ❌ **Reversed 2026-05-14** — `emeq/mollie-api` wrapt `mollie/mollie-api-php` direct. Reden: laravel-mollie multi-tenant afgewezen; eigen Saloon ~70% overhead. |
+| ~~API-key auth voor Mollie~~ | ~~SaaS-apps werken in eigen Mollie-account~~ | ❌ **Reversed 2026-05-14** — Mollie Connect dag 1 (Emeq = Mollie Partner). API-key fallback blijft voor Emeq's eigen Mollie. |
+| `.planning/` in emeq-hub committen | Hub is canonical coordinatie-repo | ✅ Validated |
+| Subscriptions in twee use-cases | Cashier voor Emeq→Consumers; eigen laag voor Accounts→eindgebruikers via Connect | ✅ Validated v0.2 (Phases 6 + 7) |
+| `EmeqMollie`-facade naast `Mollie` | Cashier-Mollie hangt af van `laravel-mollie` (Mollie-alias); coexist runtime mogelijk | ✅ Validated v0.2 (Phase 2 SC#3 → bewezen in Phase 6 met Cashier naast EmeqMollie) |
+| Provider-agnostisch `OAuthFlow`-contract | Pattern toekomst-bestendig voor Snelstart-OAuth / Exact-OAuth / Ibanity-OAuth in v0.3+ | ✅ Validated v0.2 (Phase 4 SC-4 via `FakeOAuthFlow`) |
+| `pass_through_calls` als eigen tabel (afgesplitst van `webhook_calls`) | Pass-through ≠ fan-out; verschillende schema's | ✅ Validated v0.2 (Phase 5b, ADR `pass-through-calls-table.md`) |
+| Cashier-Mollie pad-a (out-of-the-box) i.p.v. fork | `mollie/laravel-cashier-mollie ^2.20.1` werkt op PHP 8.4 / Laravel 13 | ✅ Validated v0.2 (Phase 6 compat-ADR) |
+| Spatie laravel-permission ^6 met 2-rol-model | `super-admin`/`staff` + 6 permissions schaalt beter dan `is_emeq_staff` boolean | ✅ Validated v0.2 (Phase 9 D-05) |
+| `ProviderCredentialDescriptor` als single source of truth | Nieuwe provider = config-row + factory-state, geen nieuwe Resource-class | ✅ Validated v0.2 (Phase 9 D-04) |
+| Pennant feature-flag voor provider kill-switch | `feature.provider:{provider}` middleware-alias auto-gedefinieerd op `config('hub-providers')` keys | ✅ Validated v0.2 (Phase 8, ADR `feature-flags-pennant-kill-switch.md`) |
+| Hub-eigen `WebhookCall` model extending Spatie's | N+1-fix + `consumer()` belongs-to + cross-Consumer-isolation test-bewijs | ✅ Validated v0.2 (Phase 10) |
+| HMAC-verifier naar SDK (Snelstart) | SDK-redistributability boundary; consumers buiten Hub kunnen ook verifiëren | ✅ Validated v0.2 (Phase 5c, ADR `sdk-redistributability-boundary.md`) |
+| D-03 scope-fence Phase 8 | Hub-side only; Naschool-repo werk + live E2E naar v0.3 | ✅ Validated v0.2 (Phase 8 status `human_needed`) |
 
 ## Evolution
 
@@ -128,4 +121,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-16 — "Active" + "Next Milestone Goals" stale-cluster opgeruimd na Phase 10 ship. Active sectie lijst nu alleen openstaande v0.2-requirements (HUB-06 BLOCKED, NSCH-01..03 in Phase 8); voormalige "Next Milestone Goals (v0.2 — voorbereid, niet gestart)" vervangen door "Next Milestone Backlog (v0.3+)". Current State bijgewerkt naar Phase 10. Validated-sectie nog niet uitgebreid met de in-tussen-gevalideerde requirements (MOLL-01 / MOLL-02 / HUB-02 / HUB-04 / HUB-05 / SUB-01 / SUB-02) — REQUIREMENTS.md is bron-van-waarheid; volgt bij `/gsd-complete-milestone v0.2`.*
+*Last updated: 2026-05-18 — v0.2 milestone-close. Validated-sectie aangevuld met alle v0.2-requirements (MOLL-01..04, HUB-01..06, SUB-01..02, NSCH-01..03 Hub-side per D-03). Active-sectie leeg tot `/gsd-new-milestone v0.3`. Backlog overgenomen uit ROADMAP.md (single source of truth). Key Decisions uitgebreid met v0.2-keuzes (descriptor, Pennant kill-switch, Cashier pad-a, SDK-redistributability, D-03 scope-fence). Core Value herschreven om Hub-side validatie-bewijs te erkennen en NSCH-LIVE-E2E als v0.3-closure-doel te markeren.*

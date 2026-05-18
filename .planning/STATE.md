@@ -1,237 +1,100 @@
 ---
 gsd_state_version: 1.0
-milestone: v0.2
-milestone_name: — Mollie + Connect + Subscriptions + Hub-skeleton
-status: executing
-stopped_at: Phase 5c ACCEPTED — 5/5 plans + HUB-06 SC-1..SC-5 bewezen via 5 end-to-end-tests + per-scenario coverage in 02/03/04; ADR `snelstart-webhook-ingress.md` (gitignored Hub-internal artifact) + `05c-ACCEPTANCE.md` geland. 523/524 tests passed + 1 pre-existing failure (UserResource, Phase 9/10 owner, out-of-scope) + 1 pre-existing incomplete. Volgende stap: `/gsd-verify-work 5c` voor verifier-pass.
-last_updated: "2026-05-17T22:30:00.000Z"
-last_activity: 2026-05-17 -- Phase 05c plan 05 (SnelstartWebhookEndToEndTest + ADR + ACCEPTANCE + tracking sync) — HUB-06 Complete; Phase 5c ACCEPTED
+milestone: null
+milestone_name: null
+status: idle
+stopped_at: v0.2 SHIPPED 2026-05-17 — milestone-close 2026-05-18; v0.3 nog niet gepland.
+last_updated: "2026-05-18T00:00:00.000Z"
+last_activity: 2026-05-18 -- v0.2 milestone-close via /gsd-complete-milestone (archives in .planning/milestones/, ROADMAP collapsed, REQUIREMENTS gewist voor v0.3)
 progress:
-  total_phases: 10
-  completed_phases: 9
-  total_plans: 67
-  completed_plans: 66
-  percent: 86
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-05-14 na v0.1 milestone-close)
+See: [`.planning/PROJECT.md`](PROJECT.md) (updated 2026-05-18 na v0.2 milestone-close)
 
-**Core value:** Twee fundamenteel verschillende providers (OData/clientkey + REST/OAuth2) productie-gevalideerd via één SDK-pattern, en beide live in één concrete consumer-feature. v0.1 heeft Snelstart-deel bewezen; v0.2 zet Mollie + Connect + Subscriptions + Hub-skeleton op.
-**Current focus:** Phase 05c — snelstart-webhook-handler
+**Core value:** Twee fundamenteel verschillende providers (OData/clientkey + REST/OAuth2) productie-gevalideerd via één SDK-pattern, beide via één Hub geconsumeerd, multi-tenant + encrypted-at-rest + audit-logged + admin-managed. v0.1 + v0.2 hebben dit Hub-side bewezen; v0.3 sluit met `NSCH-LIVE-E2E` de eerste concrete consumer-feature (Naschool) end-to-end.
+
+**Current focus:** Idle — wacht op `/gsd-new-milestone v0.3`.
 
 ## Current Position
 
-Phase: 05c (snelstart-webhook-handler) — ACCEPTED 2026-05-17
-Plan: 5 of 5 (alle 5 plans done; HUB-06 Complete)
-Status: Phase 5c afgerond; volgende stap = `/gsd-verify-work 5c` voor verifier-pass
-Last activity: 2026-05-17 -- Phase 05c plan 05 (SnelstartWebhookEndToEndTest + ADR + ACCEPTANCE + tracking sync) completed — Phase 5c ACCEPTED
+Phase: —
+Plan: —
+Status: v0.2 SHIPPED (2026-05-17), milestone gearchiveerd in `.planning/milestones/v0.2-*` (2026-05-18). Active milestone leeg.
+Last activity: 2026-05-18 -- milestone-close v0.2
 
-## Performance Metrics
+## Shipped Milestones
 
-**v0.1 Velocity:**
-
-- Total plans completed: 41 (Phase 1)
-- Total execution time: ~12 uur (2026-05-14 00:42 → 12:02 CEST)
-- Sub-repo werk: snelstart-sdk submodule wiring + Pest-coverage + push
-
-**By Phase:**
-
-| Phase | Plans | Total | Avg/Plan |
-|-------|-------|-------|----------|
-| 01-snelstart-sdk-finalize | 3 | ~16 min | ~5 min |
-| 03-hub-skeleton | 5/5 | ~27 min | ~5 min |
-| 03 | 5 | - | - |
-| 05a | 6 | - | - |
-| 05b | 5 | - | - |
-| 06 | 8 | - | - |
-| 07 | 8 | ~execution-wave-based (5 waves) | n/a (parallel-execution per wave) |
-| 09 | 11 | - | - |
-| 10 | 6 | - | - |
-| 8 | 5 | - | - |
-
-**Recent Trend:**
-
-- Last 3 plans: 03-04 (ConnectionEncryptionTest + ConsumerAccountScopingTest, ~6 min, 2 commits, 2 nieuwe files, 11 tests groen); 03-03 (PingController + /v1/ping + PingTest + SanctumAbilityTest, ~5 min, 3 commits, 3 nieuwe + 1 modified file, 6 nieuwe tests waarvan 1 incomplete); 03-05 (hub:consumer:create + DatabaseSeeder + acceptance-run, ~7 min, 4 commits, 2 nieuwe + 2 modified files, 5 nieuwe tests groen + 1 Rule-1-deviation voor User-seeder-idempotency)
-- Trend v0.1: phase 1 sneller dan ingeschat (master-plan-aanname 30-60 min crash-fix; bleek NO CRASH REPRO)
-- Trend v0.2 (Phase 3 closed): alle 5 plans binnen ~5-7 min/plan; PATTERNS.md analog-mapping + duidelijke `<read_first>`-sectie hielden context-switches minimaal; één Rule-1-deviation (DatabaseSeeder User-pad idempotency) die het plan-success-criterion afdwong bovenop de plan-action
-
-| Phase 03 P03-05 | 7 | 4 tasks | 4 files |
-
-*Updated 2026-05-14 — plan 03-05 voltooid; Phase 03 volledig afgerond.*
-| Phase 04 P01 | 25 | 2 tasks | 6 files |
-| Phase 04 P02 | ~15 min | 2 tasks | 6 files |
-| Phase 04 P03 | 12min | 2 tasks | 6 files |
-| Phase 04 P04 | ~12 min | 2 tasks | 6 files |
-| Phase 04 P05 | ~10 min | 2 tasks | 2 files + acceptance |
-| Phase 08 P08-01 | 12 | 2 tasks | 4 files |
-| Phase 8 P3 | 18 | 2 tasks | 4 files |
-| Phase 8 P08-04 | 10 | 2 tasks | 7 files |
-| Phase 8 P08-02 | 14 | 2 tasks | 4 files |
-| Phase 08 P08-05 | 14 | 2 tasks | 8 files |
+- **v0.1 (2026-05-14)** — Snelstart-SDK finale. Archive: [`milestones/v0.1-ROADMAP.md`](milestones/v0.1-ROADMAP.md)
+- **v0.2 (2026-05-17)** — Mollie + Connect + Subscriptions + Hub-skeleton. 11 phases · 67 plans · 511 commits · ~498 tests · ~100k LOC. Archive: [`milestones/v0.2-ROADMAP.md`](milestones/v0.2-ROADMAP.md) · [`milestones/v0.2-REQUIREMENTS.md`](milestones/v0.2-REQUIREMENTS.md) · [`milestones/v0.2-MILESTONE-AUDIT.md`](milestones/v0.2-MILESTONE-AUDIT.md)
 
 ## Accumulated Context
 
-### Decisions
+### Decisions (cross-milestone summary; bron-van-waarheid: [`PROJECT.md`](PROJECT.md) Key Decisions)
 
-Decisions zijn gelogd in PROJECT.md Key Decisions table. Decisions die uit v0.1 zijn gekomen:
+Validated v0.1:
 
-- ✅ Drop Saloon `MockClient`-pipeline voor exception-mapping tests; PHPUnit-mocks op `Response` zijn cleaner (01-02)
-- ✅ VCS-distributie zonder auth voor publieke SDKs is voldoende (01-03)
-- ✅ `Dto/` + `Resources/` leeg in Snelstart — `RawSnelstartRequest` + OData QueryBuilder dekken 96 endpoints
-- ❌ **Reversed 2026-05-14:** Eigen Saloon-wrapper voor Mollie → vervangen door wrap `mollie/mollie-api-php` direct
-- ❌ **Reversed 2026-05-14:** API-key auth voor Mollie in v0.1 → Mollie Connect vanaf v0.2 dag 1
-- 🆕 **New 2026-05-14:** Subscriptions in v0.2 voor beide use-cases (Emeq→Consumers + Accounts→eindgebruikers)
-- 🆕 **New 2026-05-14:** Mollie facade-alias = `EmeqMollie` (niet `Mollie`) i.v.m. collision met laravel-mollie
-- 🆕 **New 2026-05-14 (03-01):** `connections.subscription_id` niet versleuteld — Snelstart's `subscriptionId` is een tenant-UUID, niet zelf een secret (alleen `client_key`/`subscription_key`/`access_token`/`refresh_token` krijgen `encrypted` cast)
-- 🆕 **New 2026-05-14 (03-01):** Connection-factory default = Snelstart-shape; `forSnelstart()`/`forMollie()` als state-methodes (niet aparte factories) — bewijst SC-5 uit HUB-01
-- 🆕 **New 2026-05-14 (03-02):** `App\Sanctum\TokenAbilities` als `final class` met `public const` i.p.v. `enum TokenAbility: string` — Sanctum vergelijkt ruwe strings via `tokenCan(...)`; enum-`->value`-roundtrip overbodig + matched de minimalistische repo-conventie (geen enums yet)
-- 🆕 **New 2026-05-14 (03-02):** Geen `EnsureFrontendRequestsAreStateful`-middleware — Hub is API-only Bearer-PAT, geen SPA-cookies (PATTERNS.md regel 433)
-- 🆕 **New 2026-05-14 (03-02):** `web`-guard + `users`-provider blijven naast `sanctum`/`consumers` — User-model is voor Filament admin in Phase 9, niet verwijderen
-- 🆕 **New 2026-05-14 (03-04):** Encryption-at-rest is via `DB::table()->value()` bewezen op productiestack (echte `APP_KEY`, geen MockEncrypter) — Phase 5b mag erop bouwen dat een DB-dump geen plain credentials lekt
-- 🆕 **New 2026-05-14 (03-04):** Cross-Consumer query-isolation is op Eloquent-laag bewezen voor zowel directe `Account::where('consumer_id', ...)` als de relatie-syntax `$consumer->accounts()` — Phase 5b's pass-through-API kan deze patterns zonder extra row-level filter veilig gebruiken
-- 🆕 **New 2026-05-14 (03-03):** `PingController` is single-action `__invoke` retournerend plain array (Laravel cast't naar JSON); single-action gekozen i.p.v. resourceful controller voor één smoke-route — copy-target voor Phase 5b's `Snelstart\PassthroughController`
-- 🆕 **New 2026-05-14 (03-03):** `SanctumAbilityTest::test_token_without_required_ability_is_rejected` blijft `markTestIncomplete` tot Phase 5b een route met `->middleware('ability:snelstart:read')` heeft — suite blijft groen (incomplete ≠ failed), placeholder wordt scherp ingevuld bij Phase 5b
-- 🆕 **New 2026-05-14 (03-03):** `Tests\Feature\Api` sub-namespace voor HTTP-feature-tests (eigen directory `tests/Feature/Api/`); `Tests\Feature` root blijft voor model-laag-bewijs (encryption + scoping)
-- 🆕 **New 2026-05-14 (03-05):** `DatabaseSeeder` `User::factory()`-pad krijgt eigen `exists()`-guard — plan-action stond `User::factory()->create()` als-is maar dat crasht op `users.email_unique` bij 2× `db:seed` zonder `migrate:fresh`. Minimale Rule-1-fix die plan-acceptance-grep (`User::factory == 1`) én plan-success-criterion (idempotency) tegelijk respecteert
-- 🆕 **New 2026-05-14 (03-05):** `hub:consumer:create`-command gebruikt property-stijl `protected $signature`/`$description` i.p.v. de nieuwere `#[Signature]`/`#[Description]`-attributes uit Laravel 12+ `make:command`-output — matched `routes/console.php`-conventie en blijft compatibel met acceptance-grep
-- [Phase ?]: Phase 04-01: OAuthFlow-contract in Hub-laag (app/OAuth/Contracts/, D-13); FakeOAuthFlow test-fixture in app/OAuth/Testing/ runtime-namespace (D-12) — container-bindable in feature-tests
-- [Phase ?]: MollieConnectOAuthFlow + Registry zonder declare(strict_types=1) — Hub-tree-conventie wint
-- [Phase ?]: MOLLIE_CONNECT_*-env-keys in eigen .env.example-blok, gescheiden van MOLLIE_PARTNER_* (verschillende rollen)
-- [Phase ?]: OAuthFlowRegistry::for() gooit InvalidArgumentException met NL-message
-- [Phase ?]: Plan 04-03: VCS-install van emeq/mollie-api met ^0.1.0-alpha.1 tag (repo default branch is feat/foundation, dev-master zou hebben gefaald)
-- [Phase ?]: Plan 04-03: scoped(MollieConnectionContext) + bind(SDK-contract -> HubMollieCredentialResolver) in AppServiceProvider — D-16 ingelost
-- 🆕 **New 2026-05-15 (06-01)**: Cashier-Mollie pad-a gekozen — `mollie/laravel-cashier-mollie ^2.20.1` werkt out-of-the-box op PHP 8.4 / Laravel 13; geen fork of eigen subscription-laag nodig voor use-case A
-- 🆕 **New 2026-05-15 (06-02)**: Cashier-Mollie v2.x publiceerd 9 migrations (NIET 10 — geen `subscription_items`; gebruikt `orders` + `order_items` pattern). Schema-velden `status` / `mollie_subscription_id` / `mollie_mandate_id` op `subscriptions`-table bestaan ook niet — Cashier derived deze via `active()` / `cancelled()` / `onTrial()` / `onGracePeriod()` / `ended()` accessors
-- 🆕 **New 2026-05-15 (06-03)**: `Billable` trait op `Consumer` (NIET op `Account`). Account-level subscriptions (use-case B / Phase 7) krijgen een eigen `AccountSubscription`-model — Cashier is single-tenant en past niet bij multi-tenant Connect-flow
-- 🆕 **New 2026-05-15 (06-04)**: Plan-storage config-driven via `config/billing-plans.php` (NIET via Cashier's Plan-model). `App\Billing\PlanResolver::find(string): array` retourneert plan-config + gooit `UnknownPlanException` op missing keys
-- 🆕 **New 2026-05-15 (06-05)**: 3 billing-routes met dual-ability-pattern (`ability:billing:read,billing:write,*`) — consumer-read voor eigen subscription, admin-create/cancel achter `EnsureEmeqAdminToken`-middleware met env-driven allowlist
-- 🆕 **New 2026-05-15 (06-06)**: Cashier-webhook landt op `/cashier/webhook*` (3 routes; default + aftercare + first-payment) met stap-0 hard-fail-guard `RequireCashierWebhookSecret` (zelfde pattern als Phase 5a D-08 stap 1 voor Mollie-Connect-webhook). `Cashier::ignoreRoutes()` in `AppServiceProvider` voorkomt auto-registratie van Cashier-routes; eigen bindings via routes/webhooks.php
-- 🆕 **New 2026-05-15 (06-07)**: Integration-tests gescheiden via `phpunit.integration.xml` + `@group integration` + `IntegrationTestCase`. Default suite (`php artisan test`) sluit integration-group uit; `composer test:integration` runt apart. Tests skippen graceful zonder `CASHIER_MOLLIE_KEY` in `.env`
-- 🆕 **New 2026-05-15 (07-02)**: Self-transitions in `StateTransitions::assertTransition()` zijn idempotent — geen exception. Reden: webhook-replay-safety (Mollie-resync mag dezelfde status opnieuw zetten zonder te crashen). Niet in CONTEXT D-04 expliciet; toegevoegd tijdens exhaustive-matrix-test-design
-- 🆕 **New 2026-05-15 (07-03)**: `AccountSubscriptionManager` doet `Mollie::client()` per call (geen cached client-instance) — `HubMollieCredentialResolver` leest `MollieConnectionContext` bij elke `client()`-call → per-tenant fresh credentials zonder leak-risk. `amount_value` cast naar `'string'` defensief (Mollie-decimal-shape behouden)
-- 🆕 **New 2026-05-15 (07-04)**: Lege list (HTTP 200 `data: []`) op `GET /v1/account-subscriptions?account_external_id=<vreemde Consumer>` i.p.v. 404 — info-disclosure-pattern uit Phase 5a. `HandlesAccountSubscriptionRequests`-trait dedupliceert `findOwnedSubscription`/`notFound`/`stateConflict`/`mollieError`/`auditCall` over de 3 controllers
-- 🆕 **New 2026-05-15 (07-04, MEDIUM #3)**: Scope-niveau van mutate-endpoints (`pause`/`resume`/`destroy`) = **per-Consumer**, niet per-Account. Cross-Consumer = 404, same-Consumer-other-Account = 200. Vastgelegd in ADR `.docs/decisions/account-subscriptions.md` §Scope-niveau. Rationale: Sanctum PAT-scope is per-Consumer; per-Account-scope zou Sanctum-misbruik of UX-regressie vereisen
-- 🆕 **New 2026-05-15 (07-05)**: `final`-keyword verwijderd op `AccountSubscriptionManager` + `PaymentWebhookHandler` + `SubscriptionWebhookHandler` voor Mockery-spies in unit-tests (Rule 3 deviation). `WebhookHandlerResult` als value-object met `shouldAudit()` + `shouldFanOut()` introspectie — `MollieWebhookController` blijft single-source-of-truth voor 5a-flow-volgorde (D-18)
-- 🆕 **New 2026-05-15 (07-07)**: Aparte `AccountSubscriptionIntegrationTestCase` i.p.v. Phase 6's `IntegrationTestCase` hergebruiken (vermijdt `config('mollie.key')` cross-contamination tussen Cashier en Connect-OAuth). `Connection.expires_at = now()->addYear()` op test-Connection — voorkomt accidentele refresh-trigger tijdens slow-network test-runs
-- 🆕 **New 2026-05-15 (07-08, MEDIUM #4)**: Integration-test-execution-keuze ⏭️ Pad B (default): "Geen Connect-token beschikbaar in CI/UAT — integration-test gedrukt naar manueel zodra token beschikbaar is. SC-1 vendor-coverage uitgesteld naar v0.2.1." Re-run-triggers: (1) Connect-test-token verkregen, (2) v0.2.1-release-window, (3) Naschool-go-live UAT
-- 🆕 **New 2026-05-16 (09-01)**: `webhook_calls` krijgt 4 audit-kolommen (`direction` enum / `provider` string / `consumer_id` nullable-FK / `status` enum) — additive forward-only migratie; defaults (`incoming`/`processed`) maken bestaande Spatie-rijen valide. Phase 5c (Snelstart webhook-handler in progress) vult automatisch in. FK-constraint driver-conditional (Postgres-only — SQLite-`ALTER-TABLE-ADD-FK` `__temp__`-rebuild wist nieuwe kolommen).
-- 🆕 **New 2026-05-16 (09-02)**: Filament v4.11.3 + Spatie laravel-permission 6.25.0 geïnstalleerd; `AdminPanelProvider` op `/admin` met `web`-guard + `discoverResources`. Filament-published assets (~4MB CSS/JS/fonts) gitignored — regenerate via `composer post-update-cmd`.
-- 🆕 **New 2026-05-16 (09-03)**: RBAC via Spatie 2-rol-model (`super-admin` + `staff`) met 6 permissions; **`is_emeq_staff` boolean reversed (D-05) — komt nooit in een migratie**. User-model krijgt `HasRoles` + `implements FilamentUser` + `canAccessPanel(Panel)`. `EmeqStaffSeeder` env-driven idempotent (geen `app()->isProduction()`-guard — env-vars zijn de production-safe-knop).
-- 🆕 **New 2026-05-16 (09-04)**: `ProviderCredentialDescriptor`-laag — `config/hub-providers.php` + `App\Support\ProviderCredentialDescriptor` (final readonly value-object). `Connection::fingerprint()` descriptor-aware refactor met **gedragsbehoud** (`ConnectionEncryptionTest` blijft groen zonder testfile-wijziging). Invariant: nieuwe provider = config-row + factory-update + Section, GEEN nieuwe Filament Resource-class.
-- 🆕 **New 2026-05-16 (09-05..09-10)**: 7 Filament Resources gelanced (Consumer CRUD + Issue-PAT met 5 presets + Custom-mode / Connection read+revoke met no-secret-leak / Account read / WebhookCall viewer / AccountSubscription read+state-flip via manager-delegation / Cashier Subscription read+derived-status / User super-admin-gated via `manage-staff`-gate). 52 nieuwe feature-tests onder `tests/Feature/Admin/` (15 test-classes). Filament v4 nested namespace `App\Filament\Resources\<Plural>\<Resource>` is de gegenereerde shape; plan-paths uit v3-flat-stijl zijn opgeheven.
-- 🆕 **New 2026-05-16 (09-11)**: Phase 9 ACCEPTANCE-document met evidence voor alle 10 SC's geschreven; ADR `.docs/decisions/filament-admin-panel.md` (gitignored — lokaal aanwezig, niet in git) met 5 D-decisions + 9 out-of-scope items + verification-path. ROADMAP/REQUIREMENTS/STATE gesynced; commit volgt na human-verify "approved".
-- [Phase ?]: Plan 08-01: ConsumerOnboarding service met DB::transaction (eerste in app/) + delegate-refactor van hub:consumer:create zonder CLI-breaking change; 14/14 tests groen incl. rollback-bewijs via test-only __force_failure-marker
-- [Phase ?]: Plan 08-03: StartOAuthFlowAction met public static dispatch() voor directe testability — Tests 8+9 omzeilen Livewire-mount-stack zonder de mount-laag te missen (Tests 10-14 dekken Livewire::test op ListConnections + ListAccounts); 14/14 tests groen incl. Phase-9 revoke-action regressie-bewijs
-- [Phase ?]: 🆕 **New 2026-05-17 (08-04)**: Filament v4.11 NavigationGroup heeft géén native ->description()-slot; Tenants-navgroup-tooltip via extraSidebarAttributes(['title' => …]) — geverifieerd via tinker pre-flight check (extra-sidebar-attrs pad). Bij ->navigationGroups([…]) MOETEN álle 4 nav-groups (Tenants/Integraties/Abonnementen/Beheer) expliciet worden gedeclareerd voor render-order.
-- [Phase ?]: 🆕 **New 2026-05-17 (08-04)**: Collapsed-state-assertie voor Filament Sections checkt 'isCollapsed:  true' (dubbele spatie) via assertSeeInOrder met x-data marker vóór heading; oppervlakte-marker fi-collapsed gaf false-positive uit default-collapsed sidebar-groups.
-- [Phase ?]: Plan 08-02: OnboardConsumer Filament-Page met 4-staps Wizard (Consumer/Account/Connection/PAT), Cache-flash op ListConsumers-redirect ipv eigen blade (consistent met Phase-9 Issue-PAT), Mollie-branch maakt pending stub binnen wizard en OAuth gebeurt later via StartOAuthFlowAction (UX-split per D-04); 9/9 tests groen, 118/118 admin-suite zero regressies
-- [Phase ?]: 08-02 deviation: ProviderCredentialDescriptor heeft geen label-property (alleen key); volgde 08-03-precedent ucfirst(descriptor->key); no-secret-leak via Cache::spy + property_exists ipv assertDontSee — functioneel sterker bewijs en consistent met Phase-9 ConsumerTokenActionTest-pattern
-- [Phase ?]: Plan 08-05: Heroicons via blade-ui-kit/blade-heroicons (vendor 2.7.0) + x-dynamic-component dispatch — provider-agnostisch zonder match-arm in partial
-- [Phase ?]: Plan 08-05: data-status + data-icon HTML-attrs op status-widget li voor semantische test-introspectie + a11y, omdat Heroicon-SVG geen text 'check-circle' bevat (alleen path-data) — fragile SVG-pad-match vermeden
-- [Phase ?]: Plan 08-05: Container::getInstance() snapshot/restore-pattern in createFreshApp()-helper voorkomt RefreshDatabase-teardown-crash bij env-gating-route-tests (re-require van routes/web.php muteert globale facade-resolved container)
-- [Phase ?]: Plan 08-05: Mollie-CTA op /dev/partners/mollie triggert daadwerkelijk Phase-4 OAuth-init via nieuwe dev.partners.mollie.start-oauth-route op de Naschool-demo-Account — geen anchor-only stub (UI-SPEC §S3 regel 191 + CONTEXT D-06 §3)
+- SDK-first, geen Hub-platform in v0.1
+- Drop Saloon MockClient-pipeline voor exception-mapping (directe PHPUnit-mocks)
+- VCS-distributie zonder auth volstaat voor publieke SDKs
+- Snelstart `Dto/` + `Resources/` leeg — `RawSnelstartRequest` + OData QueryBuilder dekt 96 endpoints
 
-### Pending Todos
+Validated v0.2:
 
-- ✅ Phase 03 hub-skeleton voltooid (alle 5 plans + HUB-01 SC-1 t/m SC-5 bewezen)
-- ✅ Phase 06 Cashier-Mollie integratie voltooid (8/8 plans, SUB-01 = Complete, 237 tests + integration-suite gescheiden, ACCEPTED 2026-05-15)
-- ✅ **Phase 07 ACCEPTED 2026-05-15** — SUB-02 Complete; 8/8 plans + 11/11 D-32 + 337 tests bewezen
-- ✅ **Phase 09 ACCEPTED 2026-05-16** — HUB-04 Complete; 11/11 plans + 391 tests / 1353 assertions groen; visuele review 6/6 checks groen + CR-01 fix met regressie-test
-- 🛡 **Phase 09 — deferred code-review findings (REVIEW.md → tracking-todos voor v0.2.1)**:
-  - **CR-02**: Spatie permissies (`view-consumers`, `manage-consumers`, etc.) geseed maar door géén enkele resource ge-enforced via `canAccess()`. D-05 is alleen actief op `manage-staff`-gate (UserResource). Action: voeg `canAccess()` toe aan 6 resources + tenant-scope-test voor SC-7
-  - **WR-01**: UserResource laat laatste super-admin zichzelf naar staff downgraden → admin-paneel onbereikbaar. Action: guard in UserResource of pre-save-hook
-  - **WR-02**: WebhookCallInfolist doet `json_encode()` op een text-kolom → dubbel-encoded exception-display
-  - **WR-03**: assignRole Select-options niet server-side gevalideerd met `->in()` → mogelijk 500 bij geknoeide form-state
-  - **WR-04**: EmeqStaffSeeder updatet password niet bij bestaande user (silent operatie-fout)
-  - **WR-05**: UserForm password-veld combineert `dehydrateStateUsing` + `dehydrated(filled)` zonder edit-zonder-password-regressie-test
-  - **WR-06**: Plain PAT-token zit in `wire:snapshot` + Alpine `x-data` (twee keer in HTTP-response tot dismiss)
-  - **IN-01..04**: N+1 op Consumer-lookup per WebhookCall-rij; exception-message-leak in cancelAction; AdminPanelProvider::default() footgun; ProviderCredentialDescriptor::tryFor() utility
-- 🆕 **Suggested next**: `/docs-sync` skill activeren vóór de Phase-9-commit-merge — Phase 9 raakte `app/Models/User.php` (HasRoles + FilamentUser), `app/Models/Connection.php` (descriptor-aware fingerprint), `app/Providers/AppServiceProvider.php` (manage-staff gate), nieuwe `config/hub-providers.php`, nieuwe `database/migrations/2026_05_19_*`, en alle `app/Filament/Resources/*` — documentatie-drift mogelijk in `.docs/` (CLAUDE.md / README / memory-files)
-- `/gsd-discuss-phase 8` runnen na Phase-9-checkpoint-approval — Naschool wiring (Snelstart Stancl-resolver + EnrollmentConfirmed-job + Mollie-via-Hub checkout); depends on Phase 5a (al klaar) + Phase 4 (al klaar). Verse sessie + `/clear` aanbevolen — Phase 8 raakt `school-activities-hub/backend/`
-- **Baseline Pint-drift cleanup (deferred)**: pre-Phase-6 scaffold-drift in `database/migrations/2026_05_13_*` + `routes/web.php` (uit `0196e01`) + gitignored `packages/**` — pakken bij toekomstige scaffold-touchup of dedicated quick-task `pint-baseline-cleanup`
-- **Worktree-bootstrap-pattern (recurring)**: Claude Code's `isolation="worktree"` mist `.env` + `vendor/` → executor moet `cp ../../.env .env` + `ln -sf ../../vendor vendor` doen vóór tests. Voorgesteld backlog-item: `.claude/hooks/worktree-bootstrap.sh` voor automatische bootstrap
-- **Composer autoload cache na worktree-merge**: handmatige `composer dump-autoload` was elke wave nodig om vendor/composer/autoload_classmap.php te refreshen. Voorgesteld: `.claude/hooks/post-merge.sh` automatisering
-- **`/docs-sync`** runnen vóór Phase 7 start — Phase 6 hooks signaleerden documentation-drift na elke plan (config/services.php, routes/webhooks.php, namespace-additions) die niet in plan-scope opgepakt zijn
-- `/gsd-plan-phase 5b` runnen — Snelstart-pass-through API (depends on Phase 3 only, parallelliseerbaar met Phase 4)
-- Scramble (`dedoc/scramble`) `/docs/api` + Sanctum-bearer-extension is al gepubliceerd op deze branch — verifieer + commit als quick-task wanneer Phase 5a/5b begint
-- Mollie-tak (Phase 2 + 4 + 5a) parallel werk; aparte sessie/working-copy
-- **Out-of-scope cleanup (deferred-items.md):** Pint-drift op vendor-published `webhook_calls`-migrations + `routes/web.php` + `packages/**` — pakken bij Phase 5a/5b wanneer audit-logging / webhooks worden aangeraakt
-- **`akaunting/laravel-firewall` implementeren** — Hub-edge bescherming (IP-blocking, abuse-throttle, country-rules) bovenop Sanctum/throttle. Past bij publieke `/webhooks/{provider}`-routes (Phase 5a/5b) + consumer-`/v1/*`. Wegen tegen Caddy-native middleware. Zie https://github.com/akaunting/laravel-firewall.
-- **`spatie/laravel-activitylog` implementeren** — audit-trail bovenop bestaande `pass_through_calls`. Geschikt voor Consumer/Account/Connection-mutaties (CRUD-events, OAuth-status-overgangen, token-refresh). Aanvulling op pass-through-audit; geen vervanging. Zie https://spatie.be/docs/laravel-activitylog/v5/introduction.
-- **`spatie/laravel-health` implementeren** — health-checks framework bovenop bestaande `/up`-smoke. Geschikt voor DB/Redis/Horizon/queue-depth/partner-API-reachability monitoring. Past bij ops-laag (Phase 7?) zodra meer dan basic up-check nodig is. Zie https://spatie.be/docs/laravel-health/v1/introduction.
+- `emeq/mollie-api` wrapt `mollie/mollie-api-php` direct (reversed Saloon-wrapper)
+- Mollie Connect dag 1 (reversed API-key-only)
+- Subscriptions in twee use-cases (Cashier-Mollie + eigen Connect-laag)
+- `EmeqMollie`-facade naast `Mollie` (coexist runtime bewezen in Phase 6)
+- Provider-agnostisch `OAuthFlow`-contract met `FakeOAuthFlow` pattern-portability-bewijs
+- `pass_through_calls` als eigen tabel (afgesplitst van `webhook_calls`)
+- Cashier-Mollie pad-a (`^2.20.1` out-of-the-box, geen fork)
+- Spatie laravel-permission ^6 met 2-rol-model (`super-admin`/`staff`) — drop `is_emeq_staff` boolean
+- `ProviderCredentialDescriptor` als single source of truth (`config/hub-providers.php`)
+- Pennant feature-flag voor provider kill-switch (auto-gedefinieerd op `config('hub-providers')` keys)
+- Hub-eigen `WebhookCall extends Spatie\WebhookClient\Models\WebhookCall` met `consumer()` belongs-to
+- HMAC-verifier naar SDK (SDK-redistributability boundary)
+- D-03 scope-fence Phase 8: Hub-side only; Naschool-repo werk + live E2E naar v0.3
 
-### Blockers/Concerns
+### Open Blockers / Carry-forward naar v0.3
 
-- **Cashier-Mollie compat-risico (v0.2)**: `mollie/laravel-cashier-mollie` master-branch hangt op PHP 7.2 / Laravel 6-8. Compatibiliteit met PHP 8.4 / Laravel 13 moet worden gecheckt in Phase 6 (use-case A integratie). Mogelijk fork-and-update of zelf subscription-laag bouwen. Phase 6 success criterion 1 vereist expliciete ADR met conclusie.
-- **`yusufkaracaburun/emeq-mollie-api` repo description is stale**: zegt nog "Saloon v3" terwijl die keuze is gereverseerd. Wordt bijgewerkt bij eerste push in Phase 2.
-- ~~**Mollie partner-docs ontbraken**~~: ✅ **Resolved 2026-05-14 via quick `260514-tny`** (11 references + indexed README), **verplaatst naar `packages/mollie-api/docs/partners/` op 2026-05-17** als onderdeel van SDK-redistributability-refactor (ADR `sdk-redistributability-boundary.md`).
+- **`NSCH-LIVE-E2E`** — Naschool-repo composer-VCS-entries + `StancltenancyCredentialResolver` + `EnrollmentConfirmed`-listener live wiring + e2e door test-ouder. Hub-side substrate compleet per D-03 scope-fence. Sluit ook 3 deferred Phase 5a human-UAT items af.
+- **Snelstart productie-certificering** — Hub-side ingress compleet; wacht op partner-respons (Gmail draft `r-8836998535038336548` ≤2026-05-26). Vraag #4 (retry-policy) ❓ open.
+- **VERIFICATION.md ontbreekt voor Phases 4, 6, 7** — claims via ACCEPTANCE-files; optioneel `/gsd-verify-work` per phase in v0.3 of accepteer als gesloten.
+- **`yusufkaracaburun/emeq-mollie-api` repo description is stale** — zegt nog "Saloon v3" terwijl die keuze gereverseerd is. Bijwerken bij volgende SDK-push.
 
-### Quick Tasks Completed
+### Resolved Blockers
 
-| # | Description | Date | Commit | Directory |
-|---|-------------|------|--------|-----------|
-| 260514-iai | App-wide noindex/nofollow voor bots | 2026-05-14 | 0354074 | [260514-iai-app-wide-noindex-nofollow-voor-bots](./quick/260514-iai-app-wide-noindex-nofollow-voor-bots/) |
-| 260514-ndk | Sluit Phase 3 SC-3-gap: refresh_token encryption-at-rest test | 2026-05-14 | d4c31d3 | [260514-ndk-sluit-sc-3-gap-voor-phase-3-voeg-refresh](./quick/260514-ndk-sluit-sc-3-gap-voor-phase-3-voeg-refresh/) |
-| 260514-nup | Cleanup Phase 3 review-findings (BL-02 + WR-01 + WR-03) | 2026-05-14 | 1fcde28 | [260514-nup-cleanup-phase-3-review-findings-bl-02-ab](./quick/260514-nup-cleanup-phase-3-review-findings-bl-02-ab/) |
-| 260514-qxk | Fix 05b CRITICAL findings (CR-01 + CR-02 + CR-03) | 2026-05-14 | 286dd99 | [260514-qxk-fix-05b-critical-findings-body-forwardin](./quick/260514-qxk-fix-05b-critical-findings-body-forwardin/) |
-| 260514-tny | Import Mollie API docs (11 references + indexed README) als Phase 5a precondition — `.docs/` gitignored, plan-deviated van 4 commits naar SUMMARY-only | 2026-05-14 | (n/a — `.docs/` gitignored) | [260514-tny-import-mollie-api-docs-into-docs-partner](./quick/260514-tny-import-mollie-api-docs-into-docs-partner/) |
-| 260515-c52 | Snelstart certificeringspad productie-route (Blade-voorbeeldpagina + ADR + 8 partner-vragen via Gmail) + Phase 5c CONTEXT.md prep met 5 ❓-aannames | 2026-05-15 | fcf64b7 (Blade; ADR + rate-limits in `.docs/` gitignored) | [260515-c52-snelstart-certificeringspad-productie-ro](./quick/260515-c52-snelstart-certificeringspad-productie-ro/) |
-| 260515-vsy | Sync 05a-VERIFICATION.md frontmatter met HUMAN-UAT-resultaat (status → passed_with_deferred; #1 pass + #2/#3 blocked op Phase 8); audit-uat 5 → 0 open items | 2026-05-15 | 23c865b | (inline /gsd-fast — geen quick-dir) |
-| 260516-dev | bin/dev bootstrap-script (up/down/reset/smoke/test/status) + .dev/ gitignore — dispatcht docker compose (db/redis/caddy) + php artisan serve + horizon op host, --reset doet migrate:fresh --seed (alleen local/testing) | 2026-05-16 | 8b58bb4 | (inline /gsd-fast — geen quick-dir) |
-| 260516-qau | docs-sync drift fix — ADR `feature-flags-pennant-kill-switch.md` (Pennant + scope-design + 3 integratie-punten) + `.docs/README.md` indeling-tabel rij voor `strategy/`. Beide artifacts `.docs/` (gitignored), alleen PLAN.md + SUMMARY.md committed | 2026-05-16 | 71b7ac6 (PLAN.md; ADR + README in `.docs/` gitignored) | [260516-qau-docs-sync-drift-fix-adr-pennant-kill-swi](./quick/260516-qau-docs-sync-drift-fix-adr-pennant-kill-swi/) |
+- ~~Cashier-Mollie compat-risico v0.2~~ — opgelost in Phase 6 (pad-a out-of-the-box, ADR `cashier-mollie-compat.md`)
+- ~~Mollie partner-docs ontbraken~~ — opgelost via quick-task 260514-tny, verplaatst naar `packages/mollie-api/docs/partners/` op 2026-05-17 (SDK-redistributability-refactor)
+- ~~Phase 5b verification-debt~~ — closed 2026-05-17 via gsd-verifier (`05b-VERIFICATION.md`, 8/8 must-haves)
 
-### Roadmap Evolution
+## Performance Metrics
 
-- 2026-05-17 — **Phase 5c plan 05 executed + Phase 5c ACCEPTED**: `tests/Feature/SnelstartWebhookEndToEndTest.php` (5 SC-scenarios, RefreshDatabase, geen middleware-mocks — volle stack route → SDK-middleware → controller → forward-job) eerste-run-groen (5/5 / 35 assertions / ~1s) bewijst dat plans 02/03/04 samen sluitend zijn — geen integration-gap gevonden. ADR `.docs/decisions/snelstart-webhook-ingress.md` (gitignored, Hub-internal artifact) landt 4 secties (Status/Keuze/Context/Consequenties) met expliciete anti-correlation/anti-amplification/anti-retry-storm invariants + duplicate-event NULL-event_id rationale + 4/5 🔒 + #4 retry-policy nog defensief. Tracking-updates: REQUIREMENTS HUB-06 `[ ]` → `[x]` met evidence-pointer naar `05c-ACCEPTANCE.md` + mapping `Pending` → `Complete`; ROADMAP Phase 5c hoofdcheckbox `[x]` met completion-suffix + Plans 4/5 → 5/5 + coverage-table-row `5/5 Complete 2026-05-17`; ACCEPTANCE-document met 5 SC-rows + 6/6 prereq-checks + plan-commit-tabel + 4 🔒 + 1 ❓-#4 disclaimer. Full Hub-suite: 524 tests / 523 passed / 1801 assertions / 1 pre-existing failure (UserResource — Phase 9/10 owner, out-of-scope) / 1 pre-existing incomplete (Phase 3-03 placeholder). HUB-06 SC-1..SC-5 alle bewezen via per-scenario coverage in 02/03/04 + E2E samenhangend in 05. Phase 5c ACCEPTED — volgende stap = `/gsd-verify-work 5c` voor verifier-pass dat eventuele claim-vs-evidence-drift afsluit, daarna phase-merge of `/gsd-ship`.
-- 2026-05-17 — **Phase 5c plan 03 executed**: `App\Http\Controllers\Webhooks\SnelstartWebhookController` (final, single-action invokable) + `POST /webhooks/snelstart` route (middleware `['api', 'verify.snelstart.signature']`, `withoutMiddleware(['throttle:api'])`, naam `webhooks.snelstart`) + 7 PHPUnit feature-tests committed als RED `207ed1b` + GREEN `f999b4e`. Vier paden afgehandeld: (1) malformed payload → 400 + audit `upstream_error='malformed_payload'`, (2) duplicate event_id → 200 + dup-audit met `event_id=NULL` (om unique-index uit plan 05c-01 niet te crashen) + `upstream_error='duplicate_event'`, geen extra dispatch, (3) unknown administratie incl. revoked → 200 + NULL-tenant audit + `upstream_error='unknown_administratie_id'`, geen dispatch, (4) happy → 200 + audit-row met volledige FK-keten + `ForwardSnelstartWebhookToConsumerJob::dispatch`. Anti-retry-storm via 200 op valid HMAC (CONTEXT decision); anti-amplification via SDK-middleware die géén audit schrijft op 401. Twee deviations: Rule 3 — stub-controller meegenomen in RED-commit omdat `RouteAction::makeInvokable()` eager class-resolve doet (Task 1 verify zou anders falen tot Task 2 land); Rule 1-preventief — dup-audit-rij heeft `event_id=NULL` om `(provider, event_id)` unique-index niet te triggeren (plan-tekst sprak alleen over "tweede rij" zonder NULL-detail). HUB-06 SC-1/SC-3/SC-4/SC-5 gedekt door scenario's 1/2/3/7 (SC-5 gedeeltelijk; E2E in plan 05c-05). SC-2 (invalid HMAC) door scenario 5 + SDK Pest-tests. Full Hub-testsuite: 518/519 passed + 1 pre-existing failure (`UserResourceTest::test_super_admin_can_create_user_via_resource` — out-of-scope) + 1 pre-existing incomplete; baseline 511/512 → 518/519 (+7 nieuwe tests, zelfde failure-baseline). Mollie-webhook regressie 13/13 groen. Plan 05 (integration-tests) ontblokt — controller + job + middleware staan; E2E voegt webhook-server fan-out-leg + cross-Consumer-isolation-E2E toe.
-- 2026-05-17 — **Phase 5c plan 04 executed**: `App\Jobs\Webhooks\ForwardSnelstartWebhookToConsumerJob` (final, ShouldQueue, `onQueue('webhooks')`-in-constructor) + 5 PHPUnit feature-tests (RED `be50c94` + GREEN `d18b414`) + `config/horizon.php` `supervisor-webhooks` (queue=['webhooks'], timeout=30, production maxProcesses=5, local maxProcesses=1) committed als `4ba10d8`. Anti-correlation getest: outbound HMAC gebruikt `consumer.webhook_callback_secret`, NIET `config('snelstart.webhook.secret')` (T-05c-09 spoofing-mitigation expliciet bewezen via Signature-header-reproductie met beide kandidaten). Silent skip op missing `webhook_callback_url`. Twee deviations: Rule 1 — Bus::assertDispatchedOn() bestaat niet op Laravel 13 BusFake (test-API-correctie naar closure die `$job->queue` checkt); Rule 2 — anti-correlation-test asserteert expliciet partner-secret-NON-gebruik bovenop consumer-secret-gebruik (sterker bewijs dan Mollie-tegenhanger). Full Hub-testsuite: 511/512 passed + 1 pre-existing failure (`UserResourceTest::test_super_admin_can_create_user_via_resource` — out-of-scope per plan) + 1 pre-existing incomplete. Plan 03 (route + controller) ontblokt: `ForwardSnelstartWebhookToConsumerJob::dispatch($connection, $payload, $eventId)` is direct aanroepbaar uit de SnelstartWebhookController zodra die landt; queue-routing zit in de constructor.
-- 2026-05-17 — **Phase 5c plan 02 executed + SDK-refactor**: HMAC-verifier + middleware in eerste pass Hub-side geland (`App\Webhooks\SnelstartSignatureVerifier` + `App\Http\Middleware\VerifySnelstartSignature` + `services.snelstart.webhook_*` + alias in `bootstrap/app.php`), daarna in dezelfde sessie verplaatst naar `emeq/snelstart-api` SDK als onderdeel van de epic-2-redistributability-refactor (ADR `sdk-redistributability-boundary.md`). Eindstaat: `Emeq\SnelstartApi\Webhooks\SnelstartWebhookSignature` + `Emeq\SnelstartApi\Http\Middleware\VerifySnelstartSignature` (auto-aliased via `packageBooted()`) + `config('snelstart.webhook.*')` in SDK; Hub-side `services.snelstart.*`-block, middleware-class, alias-registratie verwijderd. Mollie analoog: `config/mollie.php` `webhook.secret` block (was `services.mollie.webhook_secret`), Hub-controller + 6 testfiles geswitched. Partner-docs verplaatst van `.docs/partners/{snelstart,mollie}/` naar `packages/{snelstart-api,mollie-api}/docs/partners/`; `.docs/decisions/snelstart-certificering-pad.md` verhuisd naar `packages/snelstart-api/docs/decisions/`. SDK-releases: emeq/snelstart-api `v0.1.0` (e9076d4), emeq/mollie-api `v0.1.0-alpha.2` (5315efe). Hub composer.lock gepind. Hub-tests: 506/507 groen (1 pre-existing UserResource failure). Plan 03 (route + controller) ontblokt — SDK-alias direct toepasbaar.
-- 2026-05-17 — **Phase 5c CONTEXT sync (partner-respons)**: Snelstart-respons binnen via Gmail-thread (origineel draft `r-8836998535038336548` van 2026-05-15). 4/5 ❓-aannames in `05c-CONTEXT.md` → 🔒 locked: #1 HMAC-header `X-SnelStart-Signature` + `HMAC-SHA256` hex (confirmed), #2 secret-lifecycle (Claude-pick — partner liet keuze open; matched subscription-key pattern), #3 tenant-routing `administratieId` UUID-string (confirmed UUID; veldnaam blijft OData-conventie), #5 event-typen `Relatie.*` + `Verkoopfactuur.*` minimaal (confirmed). Vraag #4 (retry-policy) blijft ❓ BLOCKED — partner heeft niet geantwoord; aanname blijft defensief (5× exp backoff). Plan-phase nu twee paden: (a) plannen mét defensieve #4 + OData-safety-net als optionele plan-taak, óf (b) follow-up-mail voor scherp retry-policy-antwoord. History van originele aannames bewaard in CONTEXT per regel-239-instructie.
-- 2026-05-17 — **Phase 5b verifier-close**: `05b-VERIFICATION.md` geschreven door gsd-verifier — status `passed`, score `8/8 must-haves verified`. Sluit verification-debt-row uit `v0.2-MILESTONE-AUDIT.md` (2026-05-17) op Phase 5b; `verification_artifacts` 5/11 → 6/11. Bewijs: HUB-05 SC-1..SC-8 alle VERIFIED via 86 Phase-5b-scoped tests (15 testfiles) + UAT 9/9 live (`05b-UAT.md`) + SECURITY 24/24 (`05b-SECURITY.md`); CR-01 (415-guard) + CR-02 (PII-safe `query_keys`) + CR-03 (NULL fingerprint empty body) code-resident + getest. Stale prompt-claim over `SanctumAbilityTest`-incomplete opgehelderd (5 tests volledig geïmplementeerd; werkelijke +1 incomplete = `MollieConnectOAuthFlowTest:47` Phase-4 placeholder). Geen deferred items, geen v0.2.1-opruiming nodig vanuit 5b. Sync-edits: `v0.2-MILESTONE-AUDIT.md` (HUB-05 row → ✅ satisfied; Phase Coverage 5b → ✅ passed; tech_debt 5b row resolved-markeer; totalen 11→12 ✅ + 4→3 ⚠️), `REQUIREMENTS.md` (HUB-05 evidence-pointer toegevoegd in body-blok), deze STATE.md-entry.
-- 2026-05-16 — **Phase 10 toegevoegd**: "Phase 9 polish — deferred review-findings" toegevoegd aan v0.2 milestone (depends on Phase 9). Volledige scope: 11 deferred bevindingen uit `09-REVIEW.md` (CR-02 BLOCKER-class + WR-01..06 + IN-01..04). `total_phases` 10→11. Branch: `chore/v021-phase9-polish`. Plan-bron: `09-REVIEW.md` + STATE Pending-Todos (post-merge-master-cleanup).
-- 2026-05-16 — **Phase 09 plan 11 executed (PENDING checkpoint-approval)**: 11/11 plans afgerond met 10/10 SC-evidence in `09-11-ACCEPTANCE.md` (alle 10 success-criteria uit `09-CONTEXT.md` regels 234-246 bewezen via 52 nieuwe `tests/Feature/Admin/*`-tests + 1 audit-migratie + CLI-route-list). ADR `.docs/decisions/filament-admin-panel.md` (gitignored) met 5 D-decisions (D-01 7 resources + PassThroughCall out-of-scope / D-02 webhook_calls audit-kolommen / D-03 PAT presets+custom / D-04 ProviderCredentialDescriptor / D-05 Spatie RBAC + drop `is_emeq_staff`) + 9 out-of-scope items + verification-path. ROADMAP Phase 9 `[x]` + Progress 11/11 + 2026-05-16 + Goal "7 resources" (was "4 resources"); REQUIREMENTS HUB-04 `[x]` + Complete + uitgebreide validation-note; STATE counters bijgewerkt (completed_phases 6→7, total_plans 51→62, completed_plans 48→52, percent 60→84). 389 tests / 1343 assertions / 0 failed / 1 pre-existing incomplete (Phase 3-03 SanctumAbilityTest placeholder voor Phase 5b). Wacht op "approved" → planning-sync-commit + Phase 8 ontblokt naast Phase 5b/5c.
-- 2026-05-14 — Phase 9 (Filament admin-UI voor Emeq-medewerkers) toegevoegd aan v0.2 milestone; HUB-04 toegevoegd aan REQUIREMENTS.md. Plan-bron: `.claude/plans/ow-dit-wil-ik-immutable-snowglobe.md`. Depends on Phase 3 + Phase 4; parallel met Phase 6/7.
-- 2026-05-14 — Phase 5 gesplitst in 5a (Mollie) + 5b (Snelstart-pass-through) en HUB-05 toegevoegd aan REQUIREMENTS.md. Plan-bron: `.claude/plans/volgens-mij-is-snelstart-api-piped-parasol.md`. Reden: user wil consumer-app via `hub.emeq.nl` Snelstart-calls passen-doorzetten — was eerder niet expliciet in scope (Phase 8 deed Snelstart-direct-via-SDK in Naschool). Phase 5b depends on Phase 3 only; parallel met Phase 4 mogelijk.
-- 2026-05-14 — Plan 03-01 voltooid: `consumers`/`accounts`/`connections` migrations + `Consumer`/`Account`/`Connection` Eloquent-models + factories. Fundatie voor HUB-01 staat; HUB-01 blijft Pending tot Phase 3 in z'n geheel geland is (Sanctum + ping + tests).
-- 2026-05-14 — Plan 03-02 voltooid: Sanctum-guard + consumers-provider in `config/auth.php`, `apiPrefix: 'v1'` in `bootstrap/app.php`, `App\Sanctum\TokenAbilities` constants-class, `routes/api.php` skeleton. Auth-laag staat; plan 03-03 kan `/v1/ping` op deze stack landen.
-- 2026-05-14 — Plan 03-04 voltooid (Wave 2b parallel afgehandeld vóór 03-03): `ConnectionEncryptionTest` (7 tests) + `ConsumerAccountScopingTest` (4 tests). HUB-01 SC-3 (geen raw credentials in `toArray()`) volledig bewezen; SC-4 query-laag bewezen — route-laag wacht op Phase 5b's pass-through-API.
-- 2026-05-14 — Plan 03-03 voltooid: `routes/api.php` `/v1/ping` + `App\Http\Controllers\Api\V1\PingController` + `PingTest` (3 tests) + `SanctumAbilityTest` (2 passed + 1 incomplete-placeholder voor Phase 5b ability-middleware). HUB-01 SC-2 end-to-end bewezen (Bearer-PAT → Consumer-slug → 200-respond). Volledige suite 22/22 + 1 incomplete.
-- 2026-05-14 — Plan 03-05 voltooid: `hub:consumer:create`-artisan-command (4 options, SUCCESS/INVALID/FAILURE-exit-codes, plain-token via `warn()`) + `DatabaseSeeder` met production-guard + idempotente demo-Consumer (naschool) + demo-Account (school1) + `HubConsumerCreateTest` (5 tests groen). HUB-01 SC-1 bewezen via tinker-verify; end-to-end smoke (CLI-token → `/v1/ping` in-process → `{"pong":true,"consumer":"smoke-test","abilities":["snelstart:read"]}`). Volledige suite 27 passed / 1 incomplete / 0 failed. **Phase 3 volledig afgerond.**
-- 2026-05-14 — Plan 04-04 voltooid: `InitController` (POST `/v1/oauth/mollie/init`, Sanctum + `ability:mollie:write`, JSON-respons met `connection_id` + `redirect_url`, pre-created pending Connection met 48-char `oauth_state` + 30min TTL) + `CallbackController` (GET `/v1/oauth/mollie/callback`, publiek, state-verify, ruilt code in via `OAuthFlowRegistry`) + 7 feature-testpaden (3 InitTest happy/no-ability/cross-Consumer + 4 CallbackTest happy/tampered/expired/replay). Auto-deviation: Sanctum-middleware-aliassen `ability`/`abilities` toegevoegd aan `bootstrap/app.php` — canonical Sanctum-v4 setup die ontbrak. ROADMAP SC-1 + SC-2 + SC-5 bewezen. Volledige suite 127 passed / 1 incomplete / 0 failed.
-- 2026-05-14 — Quick task 260514-qxk: Phase 5b CRITICAL-fixes (CR-01 415-guard non-JSON POST/PATCH + CR-02 `query_keys`-kolom replacement voor query-string PII-lekkage + CR-03 NULL fingerprint voor lege body). 4 commits in 2 RED/GREEN-cycli; migration `2026_05_15_000002_add_query_keys_to_pass_through_calls_table.php` + controller-hardening + 3 nieuwe tests + 1 update. 28/28 Snelstart-suite groen; 120/120 full suite. Phase 5b nu merge-ready voor zover CRITICAL-findings betreft (7 WR + 4 INFO blijven open).
-- 2026-05-14 — Plan 04-05 voltooid + **Phase 04 volledig afgerond**: `PruneOAuthPendingConnections` artisan-command (`oauth:prune-pending` met `--dry-run`, D-09 handmatige cleanup, géén cron per D-04) + 2 tests (prunes-expired + dry-run-no-delete). BLOCKING phase-acceptance 8/8 groen: migrate, schema-check, route:list, container-bindings (`HubMollieCredentialResolver` + `MollieConnectOAuthFlow`), command-registratie, full suite 129/129, pint clean. ROADMAP-vs-CONTEXT delta SC-1: ROADMAP zegt `GET /v1/oauth/mollie/authorize?account=…`; implementatie volgt CONTEXT D-01/D-08 `POST /v1/oauth/mollie/init` met JSON-return — opgelost in commit `5208492` (ROADMAP SC-1 herschreven naar D-01/D-08-wording + Phase 4 hoofdcheckbox `[x]`). Alle 5 SC's (SC-1..SC-5) gedekt door 26 dedicated tests.
-- 2026-05-15 — **Phase 06 voltooid**: 8/8 plans, SC-1 (compat-ADR pad-a) + SC-2 (integration-test in `tests/Integration/Billing/CashierMollieSubscriptionFlowTest`) + SC-3 (cred-isolation runtime-bewezen: `EmeqMollie` + `Mollie` + `Cashier` classes coexist; `CASHIER_MOLLIE_KEY` los van Connection.access_token uit Phase 4) bewezen. SC-4 (failed-payment retry) als vendor-coverage gemarkeerd. Tracking: `06-08-ACCEPTANCE.md` met 8/8 D-18 items + 18 confirmed decisions; ROADMAP Phase 6 `[x]` 8/8 plans + 2026-05-15; REQUIREMENTS SUB-01 = Complete. Standard suite 237 passed; integration-suite 4 skipped graceful zonder CASHIER_MOLLIE_KEY; Phase 5a regressie clean (49 Mollie-routes + 19 webhooks). Pint-fix in `routes/api.php` als Phase-6-attributable acceptance-finalisatie. Phase 7 (use-case B / Account-level subscriptions) ontblokt; Phase 9 (Filament admin-UI) ook ontblokt en parallel mogelijk.
-- 2026-05-15 — **Phase 5c toegevoegd**: HUB-06 (Snelstart webhook-handler) toegevoegd aan REQUIREMENTS.md + ROADMAP.md (Phase 5c entry + Details + Progress + Coverage). Productie-certificeringsblocker — Snelstart vereist publieke webhook-URL bij certificeringsaanvraag. Plan-bron: quick-task 260515-c52 (Snelstart certificeringspad). CONTEXT.md `78b5cf7` met 5 ❓-aannames (HMAC-header + algo, secret-lifecycle, routing-veld, retry-policy, event-typen); plan-phase wacht op antwoord van `partner@snelstart.nl` op Gmail-draft `r-8836998535038336548` (verwacht ≤2026-05-26). `total_phases` 9→10.
-- 2026-05-15 — **Phase 07 plan 08 executed (PENDING checkpoint-approval)**: 11/11 D-32 acceptance-criteria (10× ✅ + 1× ⏭️ Pad B integration-test-keuze wegens ontbrekende `MOLLIE_CONNECT_TEST_ACCESS_TOKEN`), ADR `.docs/decisions/account-subscriptions.md` met §Scope-niveau (MEDIUM #3 — per-Consumer mutate-scope) + §Integration-test-keuze (MEDIUM #4 — Pad B-rationale + re-run-triggers), ROADMAP Phase 7 `[x]` + Progress 8/8 + 2026-05-15, REQUIREMENTS SUB-02 `[x]` Complete. 337 tests / 1100 assertions groen; integration-test skipt graceful; Phase 5a regressie clean (`MollieWebhookIngressTest` + `MollieWebhookAntiSpoofingTest` 2/2). Wacht op "approved" om Phase 8 te ontblokken.
-- 2026-05-14 — **Phase 02 audit-correctie**: ROADMAP-status was `[ ]` maar de 8 Phase-2 plans in `.planning/phases/02-emeq-mollie-api-foundation/` waren al volledig geshipped in de SDK-sub-repo (`emeq/mollie-api v0.1.0-alpha.1`). `git log --grep="02-"` toont alleen het plan-creatie-commit; geen execution-commits omdat `packages/` gitignored is in Hub. Gap was administratief, niet technisch. Bonus boven plan-scope: exception-mapper + idempotency-generator + webhook-signature-helper. Daarmee is Phase 5a NIET geblokkeerd op Phase 2 — MOLL-03 (Resources) valt in Phase 5a's eigen scope, niet Phase 2.
+**v0.1 Velocity:** 1 phase · 3 plans · ~12 uur effectieve werk (2026-05-14 00:42 → 12:02 CEST)
 
-## Deferred Items
+**v0.2 Velocity:** 11 phases · 67 plans · ~4 dagen high-velocity execution (2026-05-14 → 2026-05-17, 511 commits)
 
-Items acknowledged en deferred bij milestone-close 2026-05-14:
-
-| Category | Item | Status | Deferred At |
-|----------|------|--------|-------------|
-| requirement | MOLL-01 (Mollie-SDK skeleton) | Herzien voor v0.2 (wrap mollie-api-php) | 2026-05-14 |
-| requirement | MOLL-02 (Mollie auth + connector) | Herzien voor v0.2 (Connect OAuth-broker) | 2026-05-14 |
-| requirement | MOLL-03 (Mollie resources) | Uitgebreid voor v0.2 (+ Mandates + Subscriptions) | 2026-05-14 |
-| requirement | MOLL-04 (Mollie webhook verifier) | Herzien voor v0.2 (Connect-webhook signing) | 2026-05-14 |
-| requirement | NSCH-01 (Composer-wiring + resolvers) | Mollie-deel verandert (via Hub); Snelstart-deel ongewijzigd | 2026-05-14 |
-| requirement | NSCH-02 (SyncEnrollmentToSnelstartJob) | Ongewijzigd voor v0.2 | 2026-05-14 |
-| requirement | NSCH-03 (Mollie checkout-flow) | Herzien voor v0.2 (via Hub-Connect) | 2026-05-14 |
+| Milestone | Phases | Plans | Tests at close | Notable |
+|-----------|--------|-------|----------------|---------|
+| v0.1 | 1 | 3 | 107 Pest (SDK) | Snelstart-SDK pattern validated |
+| v0.2 | 11 | 67 | ~498 PHPUnit (Hub) + 4 integration | 9/10 phases shipped within first 3 days; Phase 5c afgesloten met partner-blocker-resolutie |
 
 ## Session Continuity
 
-Last session: 2026-05-17T19:55:00.000Z (resume invoked after Phase 8 ship + docs-sync)
-Stopped at: Phase 8 SHIPPED — 5/5 plans + 11/11 critical+warning review-fixes + ADR `.docs/decisions/phase-8-consumer-onboarding.md` + error-entry `.docs/errors/flash-key-cache-spy-trap.md`; 13/13 Hub-side must-haves verified; 507/507 tests groen; branch `chore/v021-phase9-polish` heeft 34 Phase-8-commits + 2 fix-commit-groepen + 1 backlog-capture; branch-naam dekt scope niet meer (rename voor PR aangeraden)
+Last session: 2026-05-18T00:00:00.000Z (v0.2 milestone-close via `/gsd-complete-milestone`)
+Stopped at: v0.2 archives written + REQUIREMENTS.md removed + ROADMAP collapsed + PROJECT.md evolved + git tag pending
 Resume file: None
+
 Next action options:
 
-  1. `/gsd-ship 8` — PR-flow op feature-branch (vereist branch-rename eerst: `git branch -m chore/v021-phase9-polish feat/v021-phase8-naschool-hub-substrate`)
-  2. `/gsd-verify-work 8` — Naschool-repo HUMAN-UAT-items afvinken (5 cross-repo items in `08-HUMAN-UAT.md`)
-  3. Phase 5c plan-phase — partner-respons gesynced 2026-05-17 (4/5 🔒); kies (a) `/gsd-plan-phase 5c` mét defensieve #4-aanname + optionele OData-safety-net-taak, óf (b) follow-up-mail voor scherp retry-policy-antwoord (#4) eerst
-  4. v0.2.1 polish — CR-02 + WR-01..6 deferred Phase-9 findings (Phase 10, gemarkeerd `[x]` in ROADMAP — eventuele deferred-residue uitzoeken)
-  5. Backlog/v0.3 planning — `emeq/bizcuit-api`, `MOLL-CONNECT-RES`, `SCRAMBLE-NESTED-GROUPS` triagen voor volgend milestone
+1. `/gsd-new-milestone v0.3` — start v0.3 planning (questioning → research → requirements → roadmap). Backlog kandidaten staan in [`ROADMAP.md`](ROADMAP.md) Backlog-sectie en [`PROJECT.md`](PROJECT.md) Next Milestone Backlog.
+2. `/gsd-cleanup` — archive overige losse artefacten uit `.planning/quick/` als historie te groot wordt.
+3. v0.2 follow-up `/gsd-verify-work` voor Phases 4, 6, 7 om verification-debt te closen vóór v0.3 start (optioneel).
