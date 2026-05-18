@@ -35,6 +35,14 @@ use Throwable;
  */
 abstract class AbstractMollieConnectPassThroughController extends Controller
 {
+    /**
+     * Partner-access-token geresolved per request door handle(). Gecached zodat
+     * client() én de audit-fingerprint dezelfde waarde delen — voorkomt dat
+     * env-rotatie tussen SDK-call en audit-write de fingerprint laat afwijken
+     * van de daadwerkelijk verzonden token (WR-02).
+     */
+    private ?string $resolvedPartnerToken = null;
+
     public function __construct(
         protected readonly MollieAccessTokenResolver $tokenResolver,
     ) {}
@@ -43,16 +51,25 @@ abstract class AbstractMollieConnectPassThroughController extends Controller
      * Bouwt een MollieApiClient voor de huidige request:
      *   1. Resolved via de container (app(MollieApiClient::class)) zodat tests
      *      een spy/stub kunnen injecteren via $this->app->instance(...).
-     *   2. Zet partner-access-token via MollieAccessTokenResolver::resolveFor('partner').
+     *   2. Zet de eerder door handle() geresolvede partner-access-token op de
+     *      client. handle() resolved 'm vóór de SDK-call zodat fingerprint én
+     *      upstream-call gegarandeerd dezelfde waarde gebruiken (WR-02).
      *   3. Forward't de Consumer's Idempotency-Key-header naar de SDK.
      *
-     * MissingPartnerTokenException bubble't door naar handle()'s exception-pad
-     * zodat MollieUpstreamErrorMapper het 503-pad raakt.
+     * @throws MissingPartnerTokenException wanneer handle() de token nog niet
+     *                                      heeft geresolved (bv. directe
+     *                                      client()-call buiten het handle()-
+     *                                      frame); enforce't WR-03's contract
+     *                                      type-systeem-niveau.
      */
     protected function client(Request $request): MollieApiClient
     {
+        if ($this->resolvedPartnerToken === null) {
+            throw new MissingPartnerTokenException;
+        }
+
         $client = app(MollieApiClient::class);
-        $client->setAccessToken($this->tokenResolver->resolveFor('partner'));
+        $client->setAccessToken($this->resolvedPartnerToken);
 
         $consumerKey = $request->header('Idempotency-Key');
         if (is_string($consumerKey) && $consumerKey !== '') {
@@ -121,7 +138,20 @@ abstract class AbstractMollieConnectPassThroughController extends Controller
             $body = $request->json()->all();
         }
 
-        // 3. SDK-call + exception-mapping
+        // 3. Partner-token één keer resolven — voor zowel client() als audit-
+        //    fingerprint, zodat ze gegarandeerd dezelfde waarde delen (WR-02).
+        $partnerFingerprint = null;
+        $tokenMissing = false;
+        try {
+            $this->resolvedPartnerToken = $this->tokenResolver->resolveFor('partner');
+            $partnerFingerprint = substr(hash('sha256', $this->resolvedPartnerToken), 0, 12);
+        } catch (MissingPartnerTokenException) {
+            // Partner-token niet geconfigureerd — SDK-call hieronder krijgt een
+            // 503 via MollieUpstreamErrorMapper, audit-rij krijgt NULL fingerprint.
+            $tokenMissing = true;
+        }
+
+        // 4. SDK-call + exception-mapping
         $start = microtime(true);
         $upstreamError = null;
         $responseBody = '';
@@ -129,6 +159,9 @@ abstract class AbstractMollieConnectPassThroughController extends Controller
         $extraHeaders = [];
 
         try {
+            if ($tokenMissing) {
+                throw new MissingPartnerTokenException;
+            }
             $result = $sdkCall($request);
             if (is_array($result) && isset($result['status'], $result['body']) && is_int($result['status']) && is_array($result['body'])) {
                 $status = $result['status'];
@@ -144,17 +177,8 @@ abstract class AbstractMollieConnectPassThroughController extends Controller
             $upstreamError = $mapped['short_code'];
         }
 
-        // 4. Audit-write — Connect-shape: token_type=partner, geen Account/Connection.
+        // 5. Audit-write — Connect-shape: token_type=partner, geen Account/Connection.
         $query = $request->query();
-
-        $partnerFingerprint = null;
-        try {
-            $partnerToken = $this->tokenResolver->resolveFor('partner');
-            $partnerFingerprint = substr(hash('sha256', $partnerToken), 0, 12);
-        } catch (MissingPartnerTokenException) {
-            // Partner-token niet geconfigureerd — audit-rij krijgt NULL fingerprint.
-            // De SDK-call hierboven heeft de exception al gemapt naar 503.
-        }
 
         PassThroughCall::create([
             'consumer_id' => $request->user()->getKey(),
