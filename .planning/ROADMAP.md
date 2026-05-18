@@ -77,7 +77,24 @@ Plans:
   3. Scramble OpenAPI-output groepeert de nieuwe routes onder `Mollie · Connect` en `/docs/api` rendert ze zonder regressie op bestaande Mollie-groepen.
   4. ADR (extension van `mollie-passthrough-api.md` of nieuwe `mollie-connect-partner-resources.md`) legt de token-resolver-keuze + resource-mapping vast.
 
-**Plans**: TBD
+**Plans:** 4 plans
+
+Plans:
+**Wave 1**
+
+- [ ] 13-01-PLAN.md — MollieAccessTokenResolver + MissingPartnerTokenException + pass_through_calls.token_type-migration
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [ ] 13-02-PLAN.md — AbstractMollieConnectPassThroughController + 5 resource-controllers + Form Requests + 9 routes onder /v1/mollie/connect/*
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
+- [ ] 13-03-PLAN.md — Per-resource feature-tests + TokenResolverIntegrationTest (MOLL-06 SC-2) + Scramble OpenAPI grouping-test
+
+**Wave 4** *(blocked on Wave 2 + 3 completion)*
+
+- [ ] 13-04-PLAN.md — ADR mollie-connect-partner-resources.md + STATE/ROADMAP closure
 
 ### Phase 14: Naschool live E2E
 
@@ -115,7 +132,7 @@ Plans:
 |-------|----------------|--------|-----------|
 | 11. Snelstart-SDK Saloon v4 upgrade | 3/3 | Complete   | 2026-05-18 |
 | 12. Snelstart productie-cert closeout | 0/? | Not started | - |
-| 13. Mollie Connect partner-resources | 0/? | Not started | - |
+| 13. Mollie Connect partner-resources | 0/4 | Planned | - |
 | 14. Naschool live E2E | 0/? | Not started | - |
 | 15. VERIFICATION.md backfill | 0/? | Not started | - |
 
@@ -160,4 +177,4 @@ Verzamelpunt voor ideeën die nog geen milestone hebben. Bij milestone-kickoff w
 
 ---
 
-*Roadmap last updated: 2026-05-18 — v0.3 milestone-kickoff via `/gsd-new-milestone v0.3`. v0.3 active milestone toegevoegd met 5 phases (11-15) en 12/12 requirement-coverage. v0.1 en v0.2 archived in `.planning/milestones/`.*
+*Roadmap last updated: 2026-05-18 — Phase 13 planning: 4 plans gepland (13-01 t/m 13-04) in 4 waves, MOLL-05 + MOLL-06 traceable.*
