@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Models\User;
 use App\Mollie\HubMollieCredentialResolver;
+use App\Mollie\MollieAccessTokenResolver;
 use App\Mollie\MollieConnectionContext;
 use App\OAuth\Mollie\MollieConnectOAuthFlow;
 use App\OAuth\OAuthFlowRegistry;
@@ -33,6 +34,11 @@ class AppServiceProvider extends ServiceProvider
         });
 
         $this->app->bind(MollieCredentialResolver::class, HubMollieCredentialResolver::class);
+
+        $this->app->singleton(MollieAccessTokenResolver::class, fn (Application $app): MollieAccessTokenResolver => new MollieAccessTokenResolver(
+            $app->make(MollieConnectionContext::class),
+            $app['config']->get('services.mollie.partner_access_token'),
+        ));
 
         // D-10: Cashier's default-routes (webhooks/mollie*) uitzetten zodat wij ze
         // zelf onder /cashier/webhook* registreren achter RequireCashierWebhookSecret.
