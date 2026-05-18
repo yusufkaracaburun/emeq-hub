@@ -26,8 +26,8 @@ Requirements voor v0.3. Elk mapt naar exact één phase in `ROADMAP.md`.
 
 ### Mollie Connect partner-resources
 
-- [ ] **MOLL-05**: Pass-through-routes voor Mollie Connect partner-resources beschikbaar onder `/v1/mollie/connect/*`: Onboarding-status, Organizations, Profiles, Permissions, ClientLinks. Volgt pass-through-pattern uit Phase 5a (ADR `mollie-passthrough-api.md`), incl. idempotency-forward, error-mapping en Scramble OpenAPI-groep `Mollie · Connect`.
-- [ ] **MOLL-06**: `MollieAccessTokenResolver` ondersteunt org-access-tokens vs partner-access-tokens correct — Connect-resources gebruiken het partner-token, niet het Connection-access-token. Integration-test bewijst beide paden.
+- [x] **MOLL-05**: Pass-through-routes voor Mollie Connect partner-resources beschikbaar onder `/v1/mollie/connect/*`: Onboarding-status, Organizations, Profiles, Permissions, ClientLinks. Volgt pass-through-pattern uit Phase 5a (ADR `mollie-passthrough-api.md`), incl. idempotency-forward, error-mapping en Scramble OpenAPI-groep `Mollie · Connect`.
+- [x] **MOLL-06**: `MollieAccessTokenResolver` ondersteunt org-access-tokens vs partner-access-tokens correct — Connect-resources gebruiken het partner-token, niet het Connection-access-token. Integration-test bewijst beide paden.
 
 ### Verification-debt closure
 
@@ -82,8 +82,8 @@ Welke phase elke requirement levert.
 | SNEL-03 | Phase 11 | Complete |
 | SNEL-04 | Phase 11 | Complete |
 | SNEL-05 | Phase 12 | Pending |
-| MOLL-05 | Phase 13 | Pending |
-| MOLL-06 | Phase 13 | Pending |
+| MOLL-05 | Phase 13 | Complete |
+| MOLL-06 | Phase 13 | Complete |
 | NSCH-04 | Phase 14 | Pending |
 | NSCH-05 | Phase 14 | Pending |
 | NSCH-06 | Phase 14 | Pending |
