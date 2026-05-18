@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v0.3
 milestone_name: milestone
-status: Idle — ready voor volgende phase
+status: executing
 stopped_at: Phase 11 complete — Saloon v4 upgrade docs-closure (3/3 plans, ADR lokaal + audit clean)
-last_updated: "2026-05-18T09:05:01.780Z"
-last_activity: 2026-05-18
+last_updated: "2026-05-18T11:59:18.237Z"
+last_activity: 2026-05-18 -- Phase 13 planning complete
 progress:
   total_phases: 5
   completed_phases: 1
-  total_plans: 3
+  total_plans: 7
   completed_plans: 3
   percent: 20
 ---
@@ -28,8 +28,8 @@ See: [`.planning/PROJECT.md`](PROJECT.md) (updated 2026-05-18 — v0.3 milestone
 
 Phase: 11 — Snelstart-SDK Saloon v4 upgrade (Complete 2026-05-18, 3/3 plans)
 Plan: — (Phase 11 closed; geen actieve plan)
-Status: Idle — ready voor volgende phase
-Last activity: 2026-05-18
+Status: Ready to execute
+Last activity: 2026-05-18 -- Phase 13 planning complete
 
 ## Shipped Milestones
 
