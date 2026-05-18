@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v0.3
 milestone_name: milestone
 status: executing
-stopped_at: ROADMAP.md + REQUIREMENTS.md traceability + STATE.md updated
-last_updated: "2026-05-18T08:41:17.036Z"
-last_activity: 2026-05-18 -- Phase 11 execution started
+stopped_at: Plan 11-01 complete — SDK v0.2.0 tagged + pushed
+last_updated: "2026-05-18T09:15:00.000Z"
+last_activity: 2026-05-18 -- Plan 11-01 complete — SDK v0.2.0 tagged + pushed to remote
 progress:
   total_phases: 5
   completed_phases: 0
   total_plans: 3
   completed_plans: 1
-  percent: 0
+  percent: 7
 ---
 
 # Project State
@@ -27,9 +27,9 @@ See: [`.planning/PROJECT.md`](PROJECT.md) (updated 2026-05-18 — v0.3 milestone
 ## Current Position
 
 Phase: 11 (snelstart-sdk-saloon-v4-upgrade) — EXECUTING
-Plan: 1 of 3
+Plan: 2 of 3 (Plan 11-01 complete — SDK v0.2.0 tagged + pushed; ready voor Plan 11-02 Hub-side `composer update`)
 Status: Executing Phase 11
-Last activity: 2026-05-18 -- Phase 11 execution started
+Last activity: 2026-05-18 -- Plan 11-01 complete — SDK v0.2.0 tagged + pushed to remote
 
 ## Shipped Milestones
 
@@ -90,12 +90,12 @@ Validated v0.2:
 
 ## Session Continuity
 
-Last session: 2026-05-18T08:41:17.033Z
-Stopped at: ROADMAP.md + REQUIREMENTS.md traceability + STATE.md updated
+Last session: 2026-05-18T09:15:00.000Z
+Stopped at: Plan 11-01 complete — SDK v0.2.0 tagged + pushed
 Resume file: None
 
 Next action options:
 
-1. `/gsd-plan-phase 11` — start phase planning voor Snelstart-SDK Saloon v4 upgrade (SNEL-03 + SNEL-04). Lowest-risk, unblocks Phase 12 + 14.
-2. `/gsd-plan-phase 15` — verification-debt backfill als parallel low-risk doc-track terwijl partner-respons (Phase 12) wordt afgewacht.
-3. `/gsd-plan-phase 13` — Mollie Connect partner-resources (parallelliseerbaar met Phase 11/12).
+1. `/gsd-execute-phase 11` — vervolg met Plan 11-02 (Hub-side `composer update emeq/snelstart-api` naar `^0.2.0`, vervang `dev-master`).
+2. `/gsd-plan-phase 15` — verification-debt backfill als parallel low-risk doc-track.
+3. `/gsd-plan-phase 13` — Mollie Connect partner-resources (parallelliseerbaar met Phase 11).

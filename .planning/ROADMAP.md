@@ -42,7 +42,7 @@
 Plans:
 **Wave 1**
 
-- [ ] 11-01-PLAN.md — SDK CHANGELOG-entry voor v0.2.0 + lokale release-commit (autonomous: false, checkpoint vóór tag/push)
+- [x] 11-01-PLAN.md — SDK CHANGELOG-entry voor v0.2.0 + lokale release-commit + tag `v0.2.0` gepusht naar SDK-remote (release-commit `ce7c66c`, tag-object `65161ed`)
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
@@ -113,7 +113,7 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 11. Snelstart-SDK Saloon v4 upgrade | 0/3 | Planned | - |
+| 11. Snelstart-SDK Saloon v4 upgrade | 1/3 | In progress | - |
 | 12. Snelstart productie-cert closeout | 0/? | Not started | - |
 | 13. Mollie Connect partner-resources | 0/? | Not started | - |
 | 14. Naschool live E2E | 0/? | Not started | - |
