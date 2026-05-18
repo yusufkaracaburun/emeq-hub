@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Tests\Concerns;
 
 use App\Models\Consumer;
-use App\Mollie\MollieAccessTokenResolver;
 use App\Sanctum\TokenAbilities;
 use Illuminate\Testing\TestResponse;
 use Mollie\Api\Http\Response as MollieResponse;
@@ -66,13 +65,13 @@ trait StubsMollieConnectClient
     }
 
     /**
-     * Zet de partner-access-token in config + forget de singleton-resolver
-     * zodat hij vers gebound wordt met de nieuwe config bij de volgende call.
+     * Zet de partner-access-token in config. De resolver leest config()
+     * elke resolveFor('partner')-aanroep via een Closure (CR-02-fix), dus
+     * forgetInstance is niet meer nodig.
      */
     protected function setPartnerToken(string $token = 'access_partner_xyz'): void
     {
         config(['services.mollie.partner_access_token' => $token]);
-        $this->app->forgetInstance(MollieAccessTokenResolver::class);
     }
 
     /**

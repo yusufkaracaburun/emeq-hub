@@ -85,4 +85,24 @@ class MollieAccessTokenResolverTest extends TestCase
 
         $this->assertSame($a, $b);
     }
+
+    /**
+     * CR-02 regressie: partner-token wordt elke resolveFor()-call vers gelezen
+     * uit de Closure, niet bij construct-time gefixeerd. Long-running workers
+     * (Horizon, octane) zien daardoor env-rotatie zonder container-restart.
+     */
+    public function test_partner_token_reflects_config_changes_without_rebind(): void
+    {
+        config()->set('services.mollie.partner_access_token', 'access_partner_initial');
+
+        $resolver = app(MollieAccessTokenResolver::class);
+        $this->assertSame('access_partner_initial', $resolver->resolveFor('partner'));
+
+        config()->set('services.mollie.partner_access_token', 'access_partner_rotated');
+        $this->assertSame(
+            'access_partner_rotated',
+            $resolver->resolveFor('partner'),
+            'Resolver moet de gerouleerde token teruggeven zonder container-rebind.',
+        );
+    }
 }
