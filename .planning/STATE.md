@@ -1,11 +1,10 @@
 ---
 gsd_state_version: 1.0
-milestone: null
-milestone_name: null
-status: idle
-stopped_at: v0.2 SHIPPED 2026-05-17 — milestone-close 2026-05-18; v0.3 nog niet gepland.
-last_updated: "2026-05-18T00:00:00.000Z"
-last_activity: 2026-05-18 -- v0.2 milestone-close via /gsd-complete-milestone (archives in .planning/milestones/, ROADMAP collapsed, REQUIREMENTS gewist voor v0.3)
+milestone: v0.3
+milestone_name: Productie-closure
+status: planning
+last_updated: "2026-05-18T07:14:19.717Z"
+last_activity: 2026-05-18
 progress:
   total_phases: 0
   completed_phases: 0
@@ -18,18 +17,18 @@ progress:
 
 ## Project Reference
 
-See: [`.planning/PROJECT.md`](PROJECT.md) (updated 2026-05-18 na v0.2 milestone-close)
+See: [`.planning/PROJECT.md`](PROJECT.md) (updated 2026-05-18 — v0.3 milestone-kickoff)
 
 **Core value:** Twee fundamenteel verschillende providers (OData/clientkey + REST/OAuth2) productie-gevalideerd via één SDK-pattern, beide via één Hub geconsumeerd, multi-tenant + encrypted-at-rest + audit-logged + admin-managed. v0.1 + v0.2 hebben dit Hub-side bewezen; v0.3 sluit met `NSCH-LIVE-E2E` de eerste concrete consumer-feature (Naschool) end-to-end.
 
-**Current focus:** Idle — wacht op `/gsd-new-milestone v0.3`.
+**Current focus:** v0.3 — Productie-closure. Defining requirements + roadmap (`/gsd-new-milestone v0.3` in flight).
 
 ## Current Position
 
-Phase: —
+Phase: Not started (defining requirements)
 Plan: —
-Status: v0.2 SHIPPED (2026-05-17), milestone gearchiveerd in `.planning/milestones/v0.2-*` (2026-05-18). Active milestone leeg.
-Last activity: 2026-05-18 -- milestone-close v0.2
+Status: Defining requirements
+Last activity: 2026-05-18 — Milestone v0.3 started
 
 ## Shipped Milestones
 

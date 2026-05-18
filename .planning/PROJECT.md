@@ -2,6 +2,20 @@
 
 > **Master-plans:** [v0.2 strategy](../.claude/plans/2026-05-14-emeq-integration-strategy.md) · [v0.2 fancy-honking-spring (kickoff)](../.claude/plans/fancy-honking-spring.md). Deze PROJECT.md is de operationele synthese voor de GSD-workflow.
 
+## Current Milestone: v0.3 Productie-closure
+
+**Goal:** Sluit de v0.2 carry-forward (Naschool live E2E + Snelstart productie-cert) en reduceer risico (Saloon v4 / 3 security advisories + Mollie Connect productie-blocker) voordat nieuwe providers worden toegevoegd in v0.4+.
+
+**Target features:**
+
+- Naschool-repo wiring + live E2E door test-ouder (`NSCH-LIVE-E2E`) — Hub-side substrate is compleet per D-03; v0.3 sluit het lus.
+- Snelstart-SDK Saloon v3 → v4 upgrade (`SNEL-V4`) — security advisories oplossen.
+- Snelstart productie-certificering afsluiten (`SNEL-CERT-CLOSE`) — partner-respons handelen.
+- Mollie Connect partner-resources via pass-through (`MOLL-CONNECT-RES`) — productie-blocker voor Connect-merchant onboarding.
+- VERIFICATION.md backfill voor v0.2 Phases 4/6/7 (`VERIF-01`) — verification-debt closure.
+
+**Key context:** Geen nieuwe provider-SDKs in v0.3 (Moneybird/Exact/Bizcuit/Ibanity/Stripe schuiven naar v0.4+). Geen commerciële Hub-features (HUB-BILLING/DOCS/ONBOARDING blijven backlog tot 2+ derde-partij Consumers concreet zijn). Phase-nummering continueert vanaf 11 (v0.2 eindigde op Phase 10).
+
 ## What This Is
 
 Een Hub-platform en losse Laravel SDK-packages (`emeq/snelstart-api`, `emeq/mollie-api`) voor Nederlandse boekhoud- en betaal-partner-API's. De Hub (`emeq-hub`) host multi-tenant OAuth-koppelingen, webhook-routing, pass-through REST-API's en een Filament admin-paneel; SDKs leveren partner-specifieke wrapping. Na v0.2 zijn twee fundamenteel verschillende providers (Snelstart OData/clientkey + Mollie REST/OAuth) productie-gevalideerd via één SDK-pattern, beide via dezelfde Hub geconsumeerd. Doelgroep nu: Emeq's eigen SaaS-apps die ad-hoc partner-integraties vervangen door Hub-routing. Doelgroep v1.0+ (later): commercieel beschikbaar voor andere NL dev-shops.
@@ -41,9 +55,13 @@ Een Hub-platform en losse Laravel SDK-packages (`emeq/snelstart-api`, `emeq/moll
 
 ### Active
 
-<!-- Geen v0.3 milestone gestart. Start via `/gsd-new-milestone v0.3`. -->
+**v0.3 — Productie-closure (Naschool live + risk-reductie):**
 
-_None — v0.3 nog niet gepland._
+- [ ] **NSCH-04** (`NSCH-LIVE-E2E`) — Naschool-repo composer-VCS-entries voor `emeq/snelstart-api` + `emeq/mollie-api`, `StancltenancyCredentialResolver` voor Snelstart, `EnrollmentConfirmed`-listener-wiring met `SyncEnrollmentToSnelstartJob`, live Mollie checkout-flow walkthrough door test-ouder met webhook → enrollment-status update. Sluit Hub-side substrate (D-03) + 3 deferred Phase 5a human-UAT items af.
+- [ ] **SNEL-03** (`SNEL-V4`) — Snelstart-SDK Saloon v3 → v4 upgrade. Lost 3 ignored security advisories op (o.a. SSRF via endpoint-override). Hub composer-update + regressie-suite.
+- [ ] **SNEL-04** (`SNEL-CERT-CLOSE`) — Snelstart productie-certificering afsluiten: partner-respons verwerken (Gmail draft `r-8836998535038336548`, deadline ≤2026-05-26), vraag #4 (retry-policy) beantwoorden, Hub-config voor cert-headers/endpoint indien vereist.
+- [ ] **MOLL-05** (`MOLL-CONNECT-RES`) — Mollie Connect partner-resources via pass-through-API: Onboarding-status, Organizations, Profiles, Permissions, ClientLinks. Volgt pass-through-pattern uit Phase 5a (ADR `mollie-passthrough-api.md`). Blokkerend voor host-app productie-go-live met Connect-merchant onboarding.
+- [ ] **VERIF-01** — VERIFICATION.md backfill voor v0.2 Phases 4, 6, 7. Goal-backward audits per phase via `/gsd-verify-work` met ACCEPTANCE-files als startbewijs. Sluit verification-debt zonder code-changes.
 
 ### Next Milestone Backlog (v0.3+)
 
@@ -121,4 +139,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-18 — v0.2 milestone-close. Validated-sectie aangevuld met alle v0.2-requirements (MOLL-01..04, HUB-01..06, SUB-01..02, NSCH-01..03 Hub-side per D-03). Active-sectie leeg tot `/gsd-new-milestone v0.3`. Backlog overgenomen uit ROADMAP.md (single source of truth). Key Decisions uitgebreid met v0.2-keuzes (descriptor, Pennant kill-switch, Cashier pad-a, SDK-redistributability, D-03 scope-fence). Core Value herschreven om Hub-side validatie-bewijs te erkennen en NSCH-LIVE-E2E als v0.3-closure-doel te markeren.*
+*Last updated: 2026-05-18 — v0.3 milestone-kickoff via `/gsd-new-milestone v0.3`. Scope = Productie-closure (Naschool live + risk-reductie). Current Milestone-sectie toegevoegd, Active gevuld met 5 v0.3-requirements (NSCH-04, SNEL-03, SNEL-04, MOLL-05, VERIF-01). Phase-nummering continueert vanaf 11. Geen nieuwe providers en geen commerciële Hub-features in v0.3 (verschuiven naar v0.4+).*
