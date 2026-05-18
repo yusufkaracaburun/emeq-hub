@@ -1,0 +1,243 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Http\Controllers\Api\V1\Mollie\Connect;
+
+use App\Exceptions\Mollie\MissingPartnerTokenException;
+use App\Http\Controllers\Controller;
+use App\Models\PassThroughCall;
+use App\Mollie\MollieAccessTokenResolver;
+use App\Sanctum\TokenAbilities;
+use App\Support\Mollie\MollieUpstreamErrorMapper;
+use Emeq\MollieApi\Exceptions\MollieExceptionMapper;
+use Illuminate\Http\Request;
+use Mollie\Api\Exceptions\ApiException as MollieApiException;
+use Mollie\Api\MollieApiClient;
+use Mollie\Api\Resources\BaseCollection;
+use Mollie\Api\Resources\BaseResource;
+use Symfony\Component\HttpFoundation\Response;
+use Throwable;
+
+/**
+ * Abstract base voor Mollie-Connect-pass-through-controllers — gescheiden
+ * hiërarchie van de Phase-5a merchant-base (D-03). Bouwt elke call een vers
+ * MollieApiClient-instance via de container, bindt de partner-access-token
+ * via MollieAccessTokenResolver, wikkelt élke SDK-call via
+ * dispatchMollieCall() zodat raw Mollie\Api\Exceptions\ApiException eerst
+ * door MollieExceptionMapper::map() naar de Hub-exception-tree wordt
+ * genormaliseerd voordat MollieUpstreamErrorMapper het pad kiest, en schrijft
+ * een audit-rij met token_type='partner', connection_id=NULL, account_id=NULL.
+ *
+ * Beslissingen 13-CONTEXT.md §<decisions>: D-03 (gescheiden hiërarchie),
+ * D-07 (geen resolve.mollie.account), D-11 (token_type-kolom), D-14 (mollie:*
+ * abilities), MOLL-05 SC-1 (per-resource 401-error-mapping via dispatchMollieCall).
+ */
+abstract class AbstractMollieConnectPassThroughController extends Controller
+{
+    public function __construct(
+        protected readonly MollieAccessTokenResolver $tokenResolver,
+    ) {}
+
+    /**
+     * Bouwt een MollieApiClient voor de huidige request:
+     *   1. Resolved via de container (app(MollieApiClient::class)) zodat tests
+     *      een spy/stub kunnen injecteren via $this->app->instance(...).
+     *   2. Zet partner-access-token via MollieAccessTokenResolver::resolveFor('partner').
+     *   3. Forward't de Consumer's Idempotency-Key-header naar de SDK.
+     *
+     * MissingPartnerTokenException bubble't door naar handle()'s exception-pad
+     * zodat MollieUpstreamErrorMapper het 503-pad raakt.
+     */
+    protected function client(Request $request): MollieApiClient
+    {
+        $client = app(MollieApiClient::class);
+        $client->setAccessToken($this->tokenResolver->resolveFor('partner'));
+
+        $consumerKey = $request->header('Idempotency-Key');
+        if (is_string($consumerKey) && $consumerKey !== '') {
+            $client->setIdempotencyKey($consumerKey);
+        }
+
+        return $client;
+    }
+
+    /**
+     * Centrale exception-wrapper rond élke Mollie-SDK-call. Vangt raw
+     * \Mollie\Api\Exceptions\ApiException, mapt 'm via MollieExceptionMapper::map()
+     * naar de Hub-exception-tree (AuthenticationException, ValidationException,
+     * etc.) en gooit door. Reden: MollieUpstreamErrorMapper matcht uitsluitend
+     * op de Hub-exception-typen — raw ApiException valt anders door naar de
+     * catch-all mollie_unknown (502) i.p.v. de juiste 401→502 mollie_auth_failed-
+     * branch (MOLL-05 SC-1).
+     */
+    protected function dispatchMollieCall(callable $fn): mixed
+    {
+        try {
+            return $fn();
+        } catch (MollieApiException $e) {
+            throw MollieExceptionMapper::map($e);
+        }
+    }
+
+    /**
+     * Voer een Connect-SDK-call uit binnen het pass-through-frame.
+     *
+     * @param  string  $endpoint  Endpoint-template zonder query-string, bv.
+     *                            '/v2/onboarding/me' of '/v2/profiles/{id}'.
+     * @param  callable(Request): array<string,mixed>  $sdkCall  Levert de
+     *                                                           Mollie-resource-array terug. Mag
+     *                                                           {status, body} returnen voor non-default status.
+     */
+    protected function handle(Request $request, string $endpoint, callable $sdkCall): Response
+    {
+        $method = strtoupper($request->method());
+
+        // 1. Ability-guard (D-14 — hergebruikt Phase-5a abilities)
+        $required = $method === 'GET'
+            ? [TokenAbilities::MOLLIE_READ, TokenAbilities::MOLLIE_WRITE, TokenAbilities::ADMIN]
+            : [TokenAbilities::MOLLIE_WRITE, TokenAbilities::ADMIN];
+
+        $token = $request->user()?->currentAccessToken();
+        $hasAbility = $token !== null && collect($required)->contains(fn (string $ability) => $token->can($ability));
+
+        if (! $hasAbility) {
+            return response()->json([
+                'error' => 'insufficient_ability',
+                'message' => 'Token mist vereiste ability voor deze methode.',
+            ], Response::HTTP_FORBIDDEN);
+        }
+
+        // 2. 415-guard voor write-methods
+        $body = null;
+        if (in_array($method, ['POST', 'PATCH'], true)) {
+            $contentType = strtolower((string) $request->header('Content-Type', ''));
+            if (! str_starts_with($contentType, 'application/json')) {
+                return response()->json([
+                    'error' => 'unsupported_content_type',
+                    'message' => 'Pass-through accepteert alleen application/json voor POST/PATCH.',
+                ], Response::HTTP_UNSUPPORTED_MEDIA_TYPE);
+            }
+            $body = $request->json()->all();
+        }
+
+        // 3. SDK-call + exception-mapping
+        $start = microtime(true);
+        $upstreamError = null;
+        $responseBody = '';
+        $status = $method === 'POST' ? 201 : 200;
+        $extraHeaders = [];
+
+        try {
+            $result = $sdkCall($request);
+            if (is_array($result) && isset($result['status'], $result['body']) && is_int($result['status']) && is_array($result['body'])) {
+                $status = $result['status'];
+                $responseBody = json_encode($result['body'], JSON_THROW_ON_ERROR);
+            } else {
+                $responseBody = json_encode($result, JSON_THROW_ON_ERROR);
+            }
+        } catch (Throwable $e) {
+            $mapped = MollieUpstreamErrorMapper::mapException($e);
+            $status = $mapped['status'];
+            $responseBody = json_encode($mapped['body'], JSON_THROW_ON_ERROR);
+            $extraHeaders = $mapped['headers'];
+            $upstreamError = $mapped['short_code'];
+        }
+
+        // 4. Audit-write — Connect-shape: token_type=partner, geen Account/Connection.
+        $query = $request->query();
+
+        $partnerFingerprint = null;
+        try {
+            $partnerToken = $this->tokenResolver->resolveFor('partner');
+            $partnerFingerprint = substr(hash('sha256', $partnerToken), 0, 12);
+        } catch (MissingPartnerTokenException) {
+            // Partner-token niet geconfigureerd — audit-rij krijgt NULL fingerprint.
+            // De SDK-call hierboven heeft de exception al gemapt naar 503.
+        }
+
+        PassThroughCall::create([
+            'consumer_id' => $request->user()->getKey(),
+            'account_id' => null,
+            'connection_id' => null,
+            'provider' => 'mollie',
+            'token_type' => 'partner',
+            'method' => $method,
+            'path' => $endpoint,
+            'query_keys' => $query !== [] ? implode(',', array_keys($query)) : null,
+            'status' => $status,
+            'duration_ms' => (int) round((microtime(true) - $start) * 1000),
+            'request_fingerprint' => (is_array($body) && $body !== [])
+                ? substr(hash('sha256', json_encode($body, JSON_THROW_ON_ERROR)), 0, 12)
+                : null,
+            'partner_token_fingerprint' => $partnerFingerprint,
+            'response_size_bytes' => strlen($responseBody),
+            'upstream_error' => $upstreamError,
+            'created_at' => now(),
+        ]);
+
+        return response($responseBody, $status)->withHeaders(array_merge(
+            ['Content-Type' => 'application/json'],
+            $extraHeaders,
+        ));
+    }
+
+    /**
+     * Serializeer een Mollie BaseResource via response-body (wire-shape
+     * verbatim, inclusief _links/_embedded). Fallback naar JsonSerializable
+     * voor test-stubs zonder origin-Response. Chirurgische duplicatie van de
+     * Phase-5a-base (D-03 staat dat toe boven generieke abstract-explosion).
+     *
+     * @return array<string, mixed>
+     */
+    protected function resourceToArray(BaseResource $resource): array
+    {
+        $response = $resource->getResponse();
+
+        if ($response !== null) {
+            try {
+                $decoded = json_decode($response->body(), true, 512, JSON_THROW_ON_ERROR);
+                if (is_array($decoded)) {
+                    return $decoded;
+                }
+            } catch (Throwable) {
+                // fallthrough
+            }
+        }
+
+        return json_decode((string) json_encode($resource), true) ?: [];
+    }
+
+    /**
+     * Serializeer een Mollie BaseCollection (ProfileCollection,
+     * PermissionCollection, ...) via response-body.
+     *
+     * @return array<int|string, mixed>
+     */
+    protected function collectionToArray(BaseCollection $collection): array
+    {
+        $response = $collection->getResponse();
+
+        if ($response !== null) {
+            try {
+                $decoded = json_decode($response->body(), true, 512, JSON_THROW_ON_ERROR);
+                if (is_array($decoded)) {
+                    return $decoded;
+                }
+            } catch (Throwable) {
+                // fallthrough
+            }
+        }
+
+        $items = [];
+        foreach ($collection as $item) {
+            if ($item instanceof BaseResource) {
+                $items[] = $this->resourceToArray($item);
+            } else {
+                $items[] = $item;
+            }
+        }
+
+        return $items;
+    }
+}
