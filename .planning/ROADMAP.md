@@ -94,7 +94,7 @@ Plans:
 
 **Wave 4** *(blocked on Wave 2 + 3 completion)*
 
-- [ ] 13-04-PLAN.md — ADR mollie-connect-partner-resources.md + STATE/ROADMAP closure
+- [x] 13-04-PLAN.md — ADR mollie-connect-partner-resources.md + STATE/ROADMAP closure
 
 ### Phase 14: Naschool live E2E
 
@@ -132,7 +132,7 @@ Plans:
 |-------|----------------|--------|-----------|
 | 11. Snelstart-SDK Saloon v4 upgrade | 3/3 | Complete   | 2026-05-18 |
 | 12. Snelstart productie-cert closeout | 0/? | Not started | - |
-| 13. Mollie Connect partner-resources | 3/4 | In Progress|  |
+| 13. Mollie Connect partner-resources | 4/4 | Complete   | 2026-05-18 |
 | 14. Naschool live E2E | 0/? | Not started | - |
 | 15. VERIFICATION.md backfill | 0/? | Not started | - |
 
