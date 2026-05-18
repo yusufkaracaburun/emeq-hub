@@ -19,7 +19,7 @@
 
 - [ ] **Phase 11: Snelstart-SDK Saloon v4 upgrade** — Saloon v3 → v4 in `emeq/snelstart-api`, Hub composer-update, 3 security advisories opgelost.
 - [ ] **Phase 12: Snelstart productie-cert closeout** — Partner-respons verwerken, retry-policy vastleggen, production webhook-endpoint geregistreerd (deadline 2026-05-26).
-- [ ] **Phase 13: Mollie Connect partner-resources** — Pass-through-routes voor Onboarding/Organizations/Profiles/Permissions/ClientLinks + partner-access-token-resolver.
+- [x] **Phase 13: Mollie Connect partner-resources** — Pass-through-routes voor Onboarding/Organizations/Profiles/Permissions/ClientLinks + partner-access-token-resolver. (completed 2026-05-18)
 - [ ] **Phase 14: Naschool live E2E** — Naschool-repo wiring (composer-VCS + Stancl-resolver + listener) + live checkout-flow door test-ouder.
 - [ ] **Phase 15: VERIFICATION.md backfill** — Goal-backward audits voor v0.2 Phases 4, 6, 7.
 
@@ -77,7 +77,7 @@ Plans:
   3. Scramble OpenAPI-output groepeert de nieuwe routes onder `Mollie · Connect` en `/docs/api` rendert ze zonder regressie op bestaande Mollie-groepen.
   4. ADR (extension van `mollie-passthrough-api.md` of nieuwe `mollie-connect-partner-resources.md`) legt de token-resolver-keuze + resource-mapping vast.
 
-**Plans:** 4 plans
+**Plans:** 4/4 plans complete
 
 Plans:
 **Wave 1**
@@ -132,7 +132,7 @@ Plans:
 |-------|----------------|--------|-----------|
 | 11. Snelstart-SDK Saloon v4 upgrade | 3/3 | Complete   | 2026-05-18 |
 | 12. Snelstart productie-cert closeout | 0/? | Not started | - |
-| 13. Mollie Connect partner-resources | 4/4 | Complete   | 2026-05-18 |
+| 13. Mollie Connect partner-resources | 4/4 | Complete    | 2026-05-18 |
 | 14. Naschool live E2E | 0/? | Not started | - |
 | 15. VERIFICATION.md backfill | 0/? | Not started | - |
 

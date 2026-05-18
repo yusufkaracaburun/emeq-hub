@@ -4,14 +4,14 @@ milestone: v0.3
 milestone_name: milestone
 status: executing
 stopped_at: Phase 11 complete — Saloon v4 upgrade docs-closure (3/3 plans, ADR lokaal + audit clean)
-last_updated: "2026-05-18T12:31:32.484Z"
-last_activity: 2026-05-18 -- Phase 13 execution started
+last_updated: "2026-05-18T14:14:30.585Z"
+last_activity: 2026-05-18
 progress:
   total_phases: 5
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 7
-  completed_plans: 3
-  percent: 20
+  completed_plans: 7
+  percent: 40
 ---
 
 # Project State
@@ -26,10 +26,10 @@ See: [`.planning/PROJECT.md`](PROJECT.md) (updated 2026-05-18 — v0.3 milestone
 
 ## Current Position
 
-Phase: 13 (mollie-connect-partner-resources) — EXECUTING
-Plan: 1 of 4
+Phase: 14
+Plan: Not started
 Status: Executing Phase 13
-Last activity: 2026-05-18 -- Phase 13 execution started
+Last activity: 2026-05-18
 
 ## Shipped Milestones
 
