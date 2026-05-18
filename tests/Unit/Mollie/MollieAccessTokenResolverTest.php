@@ -71,7 +71,9 @@ class MollieAccessTokenResolverTest extends TestCase
         );
 
         $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('snelstart');
+        // Assert op volledige canonical message — niet alleen de input-substring,
+        // anders zou een typo in het format ('snelstart' is óók de input) onopgemerkt blijven (WR-04).
+        $this->expectExceptionMessage('Unknown token type: snelstart');
 
         $resolver->resolveFor('snelstart');
     }
