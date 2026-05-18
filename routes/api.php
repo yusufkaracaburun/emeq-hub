@@ -6,6 +6,11 @@ use App\Http\Controllers\Api\V1\AccountSubscriptions\PauseController;
 use App\Http\Controllers\Api\V1\AccountSubscriptions\ResumeController;
 use App\Http\Controllers\Api\V1\Billing\SubscriptionController;
 use App\Http\Controllers\Api\V1\ConnectionController;
+use App\Http\Controllers\Api\V1\Mollie\Connect\ClientLinksController as ConnectClientLinksController;
+use App\Http\Controllers\Api\V1\Mollie\Connect\OnboardingController as ConnectOnboardingController;
+use App\Http\Controllers\Api\V1\Mollie\Connect\OrganizationsController as ConnectOrganizationsController;
+use App\Http\Controllers\Api\V1\Mollie\Connect\PermissionsController as ConnectPermissionsController;
+use App\Http\Controllers\Api\V1\Mollie\Connect\ProfilesController as ConnectProfilesController;
 use App\Http\Controllers\Api\V1\Mollie\CustomersController;
 use App\Http\Controllers\Api\V1\Mollie\MandatesController;
 use App\Http\Controllers\Api\V1\Mollie\PaymentLinksController;
@@ -88,6 +93,37 @@ Route::middleware('auth:sanctum')->group(function (): void {
         Route::post('/payment-links', [PaymentLinksController::class, 'store'])->name('api.mollie.payment-links.store');
         Route::get('/payment-links/{id}', [PaymentLinksController::class, 'show'])->name('api.mollie.payment-links.show');
     });
+
+    // Mollie Connect partner-resources (Phase 13). Géén resolve.mollie.account
+    // (D-07): partner-access-token via MollieAccessTokenResolver in de Connect-
+    // controllers; geen Account/Connection-context op deze routes.
+    Route::prefix('mollie/connect')
+        ->middleware(['feature.provider:mollie'])
+        ->name('api.mollie.connect.')
+        ->group(function (): void {
+            Route::get('/onboarding/me', [ConnectOnboardingController::class, 'me'])
+                ->name('onboarding.me');
+
+            Route::get('/organizations/me', [ConnectOrganizationsController::class, 'me'])
+                ->name('organizations.me');
+            Route::get('/organizations/{id}', [ConnectOrganizationsController::class, 'show'])
+                ->name('organizations.show');
+
+            Route::get('/profiles', [ConnectProfilesController::class, 'index'])
+                ->name('profiles.index');
+            Route::post('/profiles', [ConnectProfilesController::class, 'store'])
+                ->name('profiles.store');
+            Route::get('/profiles/{id}', [ConnectProfilesController::class, 'show'])
+                ->name('profiles.show');
+
+            Route::get('/permissions', [ConnectPermissionsController::class, 'index'])
+                ->name('permissions.index');
+            Route::get('/permissions/{id}', [ConnectPermissionsController::class, 'show'])
+                ->name('permissions.show');
+
+            Route::post('/client-links', [ConnectClientLinksController::class, 'store'])
+                ->name('client-links.store');
+        });
 
     Route::prefix('account-subscriptions')->group(function (): void {
         Route::middleware('ability:mollie:write,*')->group(function (): void {
