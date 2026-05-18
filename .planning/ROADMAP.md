@@ -34,7 +34,12 @@
   2. Hub `composer update emeq/snelstart-api` slaagt en alle bestaande Hub-tests blijven groen (geen regressie op `/v1/snelstart/*` of `/webhooks/snelstart`).
   3. `composer audit` in de Hub retourneert exit 0 zonder `audit-ignores` in `composer.json` (3 advisories incl. SSRF-via-endpoint-override opgelost).
   4. Snelstart-SDK migratie-breaking-changes (`Connector::resolveRequestUrl()`, etc.) gedocumenteerd in SDK-CHANGELOG.
-**Plans**: TBD
+**Plans:** 3 plans
+
+Plans:
+- [ ] 11-01-PLAN.md — SDK CHANGELOG-entry voor v0.2.0 + lokale release-commit (autonomous: false, checkpoint vóór tag/push)
+- [ ] 11-02-PLAN.md — Hub composer.json pin ^0.2.0 + composer audit exit 0 + Hub-PHPUnit groen
+- [ ] 11-03-PLAN.md — ADR + .docs/README.md index-sync + .planning/codebase drift-fix + STATE.md closure
 
 ### Phase 12: Snelstart productie-cert closeout
 **Goal**: Snelstart partner-certificering is afgesloten en de Hub is klaar voor productie-webhook-verkeer.
@@ -85,7 +90,7 @@
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 11. Snelstart-SDK Saloon v4 upgrade | 0/? | Not started | - |
+| 11. Snelstart-SDK Saloon v4 upgrade | 0/3 | Planned | - |
 | 12. Snelstart productie-cert closeout | 0/? | Not started | - |
 | 13. Mollie Connect partner-resources | 0/? | Not started | - |
 | 14. Naschool live E2E | 0/? | Not started | - |
