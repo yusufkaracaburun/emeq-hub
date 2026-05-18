@@ -52,6 +52,8 @@ Een Hub-platform en losse Laravel SDK-packages (`emeq/snelstart-api`, `emeq/moll
 - [x] **NSCH-01** — Hub-side substrate (`ConsumerOnboarding` atomic flow). Validated in Phase 8 per D-03. Naschool-repo werk → v0.3 (`NSCH-LIVE-E2E`).
 - [x] **NSCH-02** — Hub-side substrate (Snelstart job-pattern + resolver). Validated in Phase 8 per D-03. Live `EnrollmentConfirmed`-listener → v0.3.
 - [x] **NSCH-03** — Hub-side substrate (`StartOAuthFlowAction` + partner-pages + onboard-wizard). Validated in Phase 8 per D-03. Live E2E door test-ouder → v0.3.
+- [x] **MOLL-05** (`MOLL-CONNECT-RES`) — Mollie Connect partner-resources via pass-through-API: 9 routes onder `/v1/mollie/connect/*` (Onboarding, Organizations, Profiles, Permissions, ClientLinks) met partner-access-token via `MollieAccessTokenResolver`. Validated in Phase 13 (verifier 4/4, 184 tests).
+- [x] **MOLL-06** — `MollieAccessTokenResolver` met dual-path (partner-env-token voor `/v1/mollie/connect/*`, Connection-token voor merchant-routes); `TokenResolverIntegrationTest` bewijst beide paden. Validated in Phase 13.
 
 ### Active
 
@@ -60,7 +62,8 @@ Een Hub-platform en losse Laravel SDK-packages (`emeq/snelstart-api`, `emeq/moll
 - [ ] **NSCH-04** (`NSCH-LIVE-E2E`) — Naschool-repo composer-VCS-entries voor `emeq/snelstart-api` + `emeq/mollie-api`, `StancltenancyCredentialResolver` voor Snelstart, `EnrollmentConfirmed`-listener-wiring met `SyncEnrollmentToSnelstartJob`, live Mollie checkout-flow walkthrough door test-ouder met webhook → enrollment-status update. Sluit Hub-side substrate (D-03) + 3 deferred Phase 5a human-UAT items af.
 - [ ] **SNEL-03** (`SNEL-V4`) — Snelstart-SDK Saloon v3 → v4 upgrade. Lost 3 ignored security advisories op (o.a. SSRF via endpoint-override). Hub composer-update + regressie-suite.
 - [ ] **SNEL-04** (`SNEL-CERT-CLOSE`) — Snelstart productie-certificering afsluiten: partner-respons verwerken (Gmail draft `r-8836998535038336548`, deadline ≤2026-05-26), vraag #4 (retry-policy) beantwoorden, Hub-config voor cert-headers/endpoint indien vereist.
-- [ ] **MOLL-05** (`MOLL-CONNECT-RES`) — Mollie Connect partner-resources via pass-through-API: Onboarding-status, Organizations, Profiles, Permissions, ClientLinks. Volgt pass-through-pattern uit Phase 5a (ADR `mollie-passthrough-api.md`). Blokkerend voor host-app productie-go-live met Connect-merchant onboarding.
+<!-- MOLL-05 + MOLL-06 validated in Phase 13 — moved to Validated section above. -->
+
 - [ ] **VERIF-01** — VERIFICATION.md backfill voor v0.2 Phases 4, 6, 7. Goal-backward audits per phase via `/gsd-verify-work` met ACCEPTANCE-files als startbewijs. Sluit verification-debt zonder code-changes.
 
 ### Next Milestone Backlog (v0.3+)
@@ -139,4 +142,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-18 — v0.3 milestone-kickoff via `/gsd-new-milestone v0.3`. Scope = Productie-closure (Naschool live + risk-reductie). Current Milestone-sectie toegevoegd, Active gevuld met 5 v0.3-requirements (NSCH-04, SNEL-03, SNEL-04, MOLL-05, VERIF-01). Phase-nummering continueert vanaf 11. Geen nieuwe providers en geen commerciële Hub-features in v0.3 (verschuiven naar v0.4+).*
+*Last updated: 2026-05-18 — Phase 13 complete (Mollie Connect partner-resources). MOLL-05 + MOLL-06 verplaatst van Active → Validated. v0.3 staat op 2/5 phases shipped (Phase 11 Saloon v4 + Phase 13 Connect-resources); 3 phases open (12 Snelstart-cert, 14 Naschool live E2E, 15 VERIFICATION backfill).*
