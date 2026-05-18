@@ -82,7 +82,7 @@ Plans:
 Plans:
 **Wave 1**
 
-- [ ] 13-01-PLAN.md — MollieAccessTokenResolver + MissingPartnerTokenException + pass_through_calls.token_type-migration
+- [x] 13-01-PLAN.md — MollieAccessTokenResolver + MissingPartnerTokenException + pass_through_calls.token_type-migration
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
@@ -132,7 +132,7 @@ Plans:
 |-------|----------------|--------|-----------|
 | 11. Snelstart-SDK Saloon v4 upgrade | 3/3 | Complete   | 2026-05-18 |
 | 12. Snelstart productie-cert closeout | 0/? | Not started | - |
-| 13. Mollie Connect partner-resources | 0/4 | Planned | - |
+| 13. Mollie Connect partner-resources | 1/4 | In Progress|  |
 | 14. Naschool live E2E | 0/? | Not started | - |
 | 15. VERIFICATION.md backfill | 0/? | Not started | - |
 

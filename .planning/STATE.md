@@ -4,8 +4,8 @@ milestone: v0.3
 milestone_name: milestone
 status: executing
 stopped_at: Phase 11 complete — Saloon v4 upgrade docs-closure (3/3 plans, ADR lokaal + audit clean)
-last_updated: "2026-05-18T11:59:18.237Z"
-last_activity: 2026-05-18 -- Phase 13 planning complete
+last_updated: "2026-05-18T12:31:32.484Z"
+last_activity: 2026-05-18 -- Phase 13 execution started
 progress:
   total_phases: 5
   completed_phases: 1
@@ -22,14 +22,14 @@ See: [`.planning/PROJECT.md`](PROJECT.md) (updated 2026-05-18 — v0.3 milestone
 
 **Core value:** Twee fundamenteel verschillende providers (OData/clientkey + REST/OAuth2) productie-gevalideerd via één SDK-pattern, beide via één Hub geconsumeerd, multi-tenant + encrypted-at-rest + audit-logged + admin-managed. v0.1 + v0.2 hebben dit Hub-side bewezen; v0.3 sluit met `NSCH-LIVE-E2E` de eerste concrete consumer-feature (Naschool) end-to-end.
 
-**Current focus:** Phase 11 — snelstart-sdk-saloon-v4-upgrade
+**Current focus:** Phase 13 — mollie-connect-partner-resources
 
 ## Current Position
 
-Phase: 11 — Snelstart-SDK Saloon v4 upgrade (Complete 2026-05-18, 3/3 plans)
-Plan: — (Phase 11 closed; geen actieve plan)
-Status: Ready to execute
-Last activity: 2026-05-18 -- Phase 13 planning complete
+Phase: 13 (mollie-connect-partner-resources) — EXECUTING
+Plan: 1 of 4
+Status: Executing Phase 13
+Last activity: 2026-05-18 -- Phase 13 execution started
 
 ## Shipped Milestones
 
