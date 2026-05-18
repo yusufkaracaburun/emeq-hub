@@ -168,6 +168,96 @@ class ScrambleRouteDiscoveryTest extends TestCase
     }
 
     /**
+     * MOLL-05 SC-3 — alle 9 Mollie-Connect-routes (Phase 13 Plan 02) staan in
+     * de OpenAPI-spec onder de juiste paths + HTTP-methods.
+     */
+    public function test_openapi_spec_contains_all_nine_mollie_connect_routes(): void
+    {
+        $spec = $this->fetchSpec();
+        $paths = $spec['paths'] ?? [];
+
+        $this->assertArrayHasKey('/mollie/connect/onboarding/me', $paths);
+        $this->assertArrayHasKey('get', $paths['/mollie/connect/onboarding/me']);
+
+        $this->assertArrayHasKey('/mollie/connect/organizations/me', $paths);
+        $this->assertArrayHasKey('get', $paths['/mollie/connect/organizations/me']);
+
+        $this->assertArrayHasKey('/mollie/connect/organizations/{id}', $paths);
+        $this->assertArrayHasKey('get', $paths['/mollie/connect/organizations/{id}']);
+
+        $this->assertArrayHasKey('/mollie/connect/profiles', $paths);
+        $this->assertArrayHasKey('get', $paths['/mollie/connect/profiles']);
+        $this->assertArrayHasKey('post', $paths['/mollie/connect/profiles']);
+
+        $this->assertArrayHasKey('/mollie/connect/profiles/{id}', $paths);
+        $this->assertArrayHasKey('get', $paths['/mollie/connect/profiles/{id}']);
+
+        $this->assertArrayHasKey('/mollie/connect/permissions', $paths);
+        $this->assertArrayHasKey('get', $paths['/mollie/connect/permissions']);
+
+        $this->assertArrayHasKey('/mollie/connect/permissions/{id}', $paths);
+        $this->assertArrayHasKey('get', $paths['/mollie/connect/permissions/{id}']);
+
+        $this->assertArrayHasKey('/mollie/connect/client-links', $paths);
+        $this->assertArrayHasKey('post', $paths['/mollie/connect/client-links']);
+    }
+
+    /**
+     * MOLL-05 SC-3 — Connect-routes worden gegroepeerd onder de gedeelde
+     * Scramble Group 'Mollie · Connect' (D-12). Test minimaal 3 paths om
+     * bewijs te leveren zonder alle 9 te dupliceren.
+     */
+    public function test_openapi_spec_groups_connect_routes_under_mollie_connect_tag(): void
+    {
+        $spec = $this->fetchSpec();
+        $paths = $spec['paths'] ?? [];
+
+        $samples = [
+            ['/mollie/connect/onboarding/me', 'get'],
+            ['/mollie/connect/profiles', 'post'],
+            ['/mollie/connect/client-links', 'post'],
+        ];
+
+        foreach ($samples as [$path, $method]) {
+            $this->assertArrayHasKey($path, $paths, "Connect-path {$path} ontbreekt in OpenAPI-spec");
+            $this->assertArrayHasKey($method, $paths[$path], "Method {$method} ontbreekt op {$path}");
+
+            $tags = $paths[$path][$method]['tags'] ?? [];
+            $this->assertContains(
+                'Mollie · Connect',
+                $tags,
+                "Path {$path} {$method} mist tag 'Mollie · Connect' — kreeg: ".json_encode($tags),
+            );
+        }
+    }
+
+    /**
+     * Regressie-vangst: bestaande Mollie-merchant-tags blijven onveranderd
+     * (geen onbedoelde #[Group]-attribuut-edits). Zonder deze test zou een
+     * accidentele wijziging in `Mollie · Payments` of `Mollie · Customers`
+     * tag-keten ongezien blijven.
+     */
+    public function test_openapi_spec_preserves_existing_mollie_merchant_tags(): void
+    {
+        $spec = $this->fetchSpec();
+        $paths = $spec['paths'] ?? [];
+
+        $merchantSamples = [
+            ['/mollie/payments', 'post', 'Mollie · Payments'],
+            ['/mollie/customers', 'get', 'Mollie · Customers'],
+        ];
+
+        foreach ($merchantSamples as [$path, $method, $expectedTag]) {
+            $tags = $paths[$path][$method]['tags'] ?? [];
+            $this->assertContains(
+                $expectedTag,
+                $tags,
+                "Path {$path} {$method} verloor tag '{$expectedTag}' — kreeg: ".json_encode($tags),
+            );
+        }
+    }
+
+    /**
      * @return array<string, mixed>
      */
     private function fetchSpec(): array
