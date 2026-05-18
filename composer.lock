@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "63978bb5afcfeee00a2f6f1a1fa15960",
+    "content-hash": "87f83cb2e8c194a9a357a45c3437f702",
     "packages": [
         {
             "name": "blade-ui-kit/blade-heroicons",
@@ -1383,16 +1383,16 @@
         },
         {
             "name": "emeq/snelstart-api",
-            "version": "dev-master",
+            "version": "v0.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/yusufkaracaburun/emeq-snelstart-api.git",
-                "reference": "e9076d40a226a1587b123bfa808897d813321ed1"
+                "reference": "ce7c66c2179ad794a7df1cbd8ddfb2c10c4b1d45"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/yusufkaracaburun/emeq-snelstart-api/zipball/e9076d40a226a1587b123bfa808897d813321ed1",
-                "reference": "e9076d40a226a1587b123bfa808897d813321ed1",
+                "url": "https://api.github.com/repos/yusufkaracaburun/emeq-snelstart-api/zipball/ce7c66c2179ad794a7df1cbd8ddfb2c10c4b1d45",
+                "reference": "ce7c66c2179ad794a7df1cbd8ddfb2c10c4b1d45",
                 "shasum": ""
             },
             "require": {
@@ -1418,7 +1418,6 @@
                 "phpstan/phpstan-phpunit": "^2.0",
                 "symfony/yaml": "^6.0||^7.0"
             },
-            "default-branch": true,
             "type": "library",
             "extra": {
                 "laravel": {
@@ -1482,10 +1481,10 @@
                 "snelstart-api"
             ],
             "support": {
-                "source": "https://github.com/yusufkaracaburun/emeq-snelstart-api/tree/master",
+                "source": "https://github.com/yusufkaracaburun/emeq-snelstart-api/tree/v0.2.0",
                 "issues": "https://github.com/yusufkaracaburun/emeq-snelstart-api/issues"
             },
-            "time": "2026-05-17T20:06:03+00:00"
+            "time": "2026-05-18T08:40:02+00:00"
         },
         {
             "name": "filament/actions",
@@ -13629,9 +13628,7 @@
     ],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": {
-        "emeq/snelstart-api": 20
-    },
+    "stability-flags": {},
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
