@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v0.3
 milestone_name: milestone
-status: executing
+status: Idle — ready voor volgende phase
 stopped_at: Phase 11 complete — Saloon v4 upgrade docs-closure (3/3 plans, ADR lokaal + audit clean)
-last_updated: "2026-05-18T09:00:38.000Z"
+last_updated: "2026-05-18T09:05:01.780Z"
 last_activity: 2026-05-18
 progress:
   total_phases: 5
@@ -89,10 +89,11 @@ Validated v0.2:
 | v0.2 | 11 | 67 | ~498 PHPUnit (Hub) + 4 integration | 9/10 phases shipped within first 3 days; Phase 5c afgesloten met partner-blocker-resolutie |
 | v0.3 | 5 (planned) | — | — | Productie-closure: Naschool live + risk-reductie (Saloon v4, Mollie Connect resources, verification-debt) |
 | Phase 11 P02 | 12 | 2 tasks | 3 files |
+| Phase 11 P11-03 | 6m | 3 tasks | 3 files |
 
 ## Session Continuity
 
-Last session: 2026-05-18T09:00:38.000Z
+Last session: 2026-05-18T09:04:17.743Z
 Stopped at: Phase 11 complete — Saloon v4 upgrade docs-closure (3/3 plans, ADR lokaal + audit clean)
 Resume file: None
 
@@ -106,3 +107,5 @@ Next action options:
 
 - [Phase ?]: Plan 11-02: composer.json + composer.lock in één commit (chore(deps) 897c1e0) — atomic install-state per plan-instructie
 - [Phase ?]: Plan 11-02: pre-existing UserResource-test-failure NIET fixen — SCOPE BOUNDARY, gelogd in deferred-items.md
+- [Phase ?]: Plan 11-03: ADR voor Saloon v4 upgrade leeft lokaal in gitignored .docs/decisions/ (CLAUDE.md werkdocument-conventie); traceability via tracked SUMMARY + STATE.md Resolved Blockers
+- [Phase ?]: Plan 11-03: CONCERNS.md Resolved-conventie geintroduceerd (doorhaling + Resolved YYYY-MM-DD Phase N + commit-SHA's); geen bestaande conventie gevonden in CONCERNS.md voor dit plan

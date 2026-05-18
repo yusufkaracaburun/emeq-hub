@@ -50,7 +50,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 11-03-PLAN.md — ADR + .docs/README.md index-sync + .planning/codebase drift-fix + STATE.md closure
+- [x] 11-03-PLAN.md — ADR + .docs/README.md index-sync + .planning/codebase drift-fix + STATE.md closure
 
 ### Phase 12: Snelstart productie-cert closeout
 
@@ -113,7 +113,7 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 11. Snelstart-SDK Saloon v4 upgrade | 2/3 | In Progress|  |
+| 11. Snelstart-SDK Saloon v4 upgrade | 3/3 | Complete   | 2026-05-18 |
 | 12. Snelstart productie-cert closeout | 0/? | Not started | - |
 | 13. Mollie Connect partner-resources | 0/? | Not started | - |
 | 14. Naschool live E2E | 0/? | Not started | - |
