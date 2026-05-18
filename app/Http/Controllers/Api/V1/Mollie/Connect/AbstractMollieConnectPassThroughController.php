@@ -181,6 +181,9 @@ abstract class AbstractMollieConnectPassThroughController extends Controller
         $query = $request->query();
 
         PassThroughCall::create([
+            // Expliciet — matched de factory-default + voorkomt dat pre-save
+            // $model->direction-reads NULL teruggeven (WR-05).
+            'direction' => 'outbound',
             'consumer_id' => $request->user()->getKey(),
             'account_id' => null,
             'connection_id' => null,
