@@ -85,6 +85,7 @@ class ProfilesTest extends TestCase
             'name' => 'Emeq Test',
             'website' => 'https://emeq.test',
             'email' => 'info@emeq.test',
+            'phone' => '+31201234567',
         ];
 
         $response = $this->callMollieConnect($token, 'POST', '/v1/mollie/connect/profiles', $payload);
@@ -143,7 +144,7 @@ class ProfilesTest extends TestCase
         $response = $this->callMollieConnect($token, 'POST', '/v1/mollie/connect/profiles', []);
 
         $response->assertStatus(422)
-            ->assertJsonValidationErrors(['name', 'website', 'email']);
+            ->assertJsonValidationErrors(['name', 'website', 'email', 'phone']);
     }
 
     public function test_get_profiles_with_auth_failure_maps_to_502_mollie_auth_failed(): void

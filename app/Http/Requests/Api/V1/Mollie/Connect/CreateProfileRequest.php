@@ -24,10 +24,15 @@ class CreateProfileRequest extends FormRequest
             'name' => ['required', 'string', 'max:255'],
             'website' => ['required', 'url', 'max:255'],
             'email' => ['required', 'email'],
-            'phone' => ['nullable', 'string', 'max:32'],
+            // Vendor SDK Mollie\Api\Http\Requests\CreateProfileRequest::__construct
+            // typeert $phone als non-nullable string — verplicht in Form Request
+            // anders bubble't een PHP TypeError door als mollie_unknown (502).
+            'phone' => ['required', 'string', 'max:32'],
             'description' => ['nullable', 'string', 'max:500'],
             'businessCategory' => ['nullable', 'string'],
             'mode' => ['nullable', 'string', 'in:live,test'],
+            'countriesOfActivity' => ['nullable', 'array'],
+            'countriesOfActivity.*' => ['string', 'size:2'],
         ];
     }
 }
