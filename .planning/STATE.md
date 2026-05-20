@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v0.3
 milestone_name: milestone
 status: executing
-stopped_at: Phase 15 complete — verification-debt closure (4/4 plans, VERIFICATION 5/5 + 4/4 + 4/4). Phase 12 blocked tot ≤2026-05-26.
-last_updated: "2026-05-20T16:15:36.845Z"
-last_activity: 2026-05-20 -- Phase 14 planning complete
+stopped_at: Phase 14 plans 14-01/02/03 gelanded (Naschool feature-branch, 18 tests groen) + 14-04 Task 1 evidence-template klaar — wacht op live UAT (Task 2, blocking human-verify). Phase 12 blocked tot ≤2026-05-26.
+last_updated: "2026-05-20T21:50:00.000Z"
+last_activity: 2026-05-20 -- Phase 14 Wave 1-3 executed; 14-04 evidence-template klaar; live UAT pending
 progress:
   total_phases: 5
   completed_phases: 3
@@ -27,9 +27,9 @@ See: [`.planning/PROJECT.md`](PROJECT.md) (updated 2026-05-18 — v0.3 milestone
 ## Current Position
 
 Phase: 14
-Plan: Not started
-Status: Ready to execute
-Last activity: 2026-05-20 -- Phase 14 planning complete
+Plan: 14-04 Task 2 (live UAT — blocking human-verify)
+Status: Plans 14-01/02/03 gelanded op Naschool feature-branch `feat/nsch-04-emeq-hub-foundation`; 14-04 Task 1 (evidence-template) ge-bootstrapt; live UAT wacht op user-uitvoering met test-ouder
+Last activity: 2026-05-20 -- Phase 14 plans 14-01..03 executed (8 Naschool-commits + 3 SUMMARY-commits); 14-04 evidence-template gepubliceerd
 
 ## Shipped Milestones
 
