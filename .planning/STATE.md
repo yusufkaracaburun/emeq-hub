@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v0.3
 milestone_name: milestone
 status: executing
-stopped_at: Phase 15 complete — verification-debt closure (4/4 plans, VERIFICATION 5/5 + 4/4 + 4/4)
-last_updated: "2026-05-18T19:11:00.000Z"
-last_activity: 2026-05-18 -- Phase 15 closed
+stopped_at: Phase 15 complete — verification-debt closure (4/4 plans, VERIFICATION 5/5 + 4/4 + 4/4). Phase 12 blocked tot ≤2026-05-26.
+last_updated: "2026-05-20T16:15:36.845Z"
+last_activity: 2026-05-20 -- Phase 14 planning complete
 progress:
   total_phases: 5
   completed_phases: 3
-  total_plans: 11
+  total_plans: 15
   completed_plans: 11
   percent: 60
 ---
@@ -28,8 +28,8 @@ See: [`.planning/PROJECT.md`](PROJECT.md) (updated 2026-05-18 — v0.3 milestone
 
 Phase: 14
 Plan: Not started
-Status: Phase 15 closed — kiezen tussen Phase 14 (Naschool E2E, cross-repo) en Phase 12 (Snelstart cert closeout, ≤2026-05-26 deadline)
-Last activity: 2026-05-18 -- Phase 15 closed
+Status: Ready to execute
+Last activity: 2026-05-20 -- Phase 14 planning complete
 
 ## Shipped Milestones
 

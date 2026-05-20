@@ -109,7 +109,25 @@ Plans:
   4. Test-ouder doorloopt live de vrijwillige-bijdrage checkout-flow: Mollie-payment slaagt → Mollie-webhook landt op Hub → enrollment-status update propageert naar Naschool-UI → Snelstart-verkoopfactuur verschijnt in de Snelstart-Mutaties van de juiste tenant.
   5. `NSCH-LIVE-EVIDENCE.md` bevat screenshots, een Hub `pass_through_calls`-rij-snippet en Snelstart-Mutaties-bevestiging die SC-4 staaft.
 
-**Plans**: TBD
+**Plans:** 4 plans
+
+Plans:
+**Wave 1**
+
+- [ ] 14-01-PLAN.md — Naschool composer-VCS-entries voor emeq/snelstart-api + emeq/mollie-api + config/services.php emeq_hub-block + EmeqHubConfig helper + feature-test (NSCH-04)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [ ] 14-02-PLAN.md — Naschool StancltenancyCredentialResolver (per-tenant X-Account-Id) + EmeqHubClient HTTP-wrapper + 2 feature-tests (NSCH-05)
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
+- [ ] 14-03-PLAN.md — Naschool EnrollmentConfirmed event + DispatchSnelstartInvoiceSync listener + SyncEnrollmentToSnelstartJob op Horizon `naschool`-supervisor + failed-job/Sentry-bridge + 2 feature-tests (NSCH-06)
+
+**Wave 4** *(blocked on Wave 3 completion)*
+
+- [ ] 14-04-PLAN.md — NSCH-LIVE-EVIDENCE.md template + pre-flight checklist (Task 1, autonomous) + blocking checkpoint: live UAT door test-ouder + evidence-vastlegging + Phase-closure ROADMAP/STATE/REQUIREMENTS sync (NSCH-07)
+
 **UI hint**: yes
 
 ### Phase 15: VERIFICATION.md backfill
@@ -144,7 +162,7 @@ Plans:
 | 11. Snelstart-SDK Saloon v4 upgrade | 3/3 | Complete   | 2026-05-18 |
 | 12. Snelstart productie-cert closeout | 0/? | Not started | - |
 | 13. Mollie Connect partner-resources | 4/4 | Complete    | 2026-05-18 |
-| 14. Naschool live E2E | 0/? | Not started | - |
+| 14. Naschool live E2E | 0/4 | Planned     | - |
 | 15. VERIFICATION.md backfill | 4/4 | Complete    | 2026-05-18 |
 
 ## Phases (Shipped)
@@ -189,4 +207,4 @@ Verzamelpunt voor ideeën die nog geen milestone hebben. Bij milestone-kickoff w
 
 ---
 
-*Roadmap last updated: 2026-05-18 — Phase 15 closed: 4 plans (15-01 t/m 15-04) in 2 waves, VERIF-01/02/03 = Complete.*
+*Roadmap last updated: 2026-05-20 — Phase 14 planned: 4 plans (14-01 t/m 14-04) in 4 waves, NSCH-04/05/06/07 = Pending; Phase 12 still blocked on partner-respons deadline 2026-05-26.*
