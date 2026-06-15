@@ -140,7 +140,7 @@ class AccountSubscriptionController extends Controller
             return AccountSubscriptionResource::collection(collect());
         }
 
-        $subs = $account->accountSubscriptions()->latest()->get();
+        $subs = $account->accountSubscriptions()->latest()->paginate(25);
 
         $this->auditCall($request, Response::HTTP_OK, '/v1/account-subscriptions', $account->id);
 

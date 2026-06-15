@@ -52,6 +52,23 @@ class ListAccountSubscriptionsTest extends TestCase
         $this->assertSame($returnedSub->id, $response->json('data.0.id'));
     }
 
+    public function test_list_response_is_paginated(): void
+    {
+        $consumer = Consumer::factory()->create();
+        $account = Account::factory()->for($consumer)->create(['external_id' => 'school-a']);
+        $connection = Connection::factory()->forMollie()->active()->for($account)->create();
+        AccountSubscription::factory()->forConnection($connection)->active()->create();
+
+        $token = $consumer->createToken('test', [TokenAbilities::MOLLIE_READ])->plainTextToken;
+
+        $response = $this->withHeader('Authorization', "Bearer {$token}")
+            ->getJson('/v1/account-subscriptions?account_external_id=school-a');
+
+        $response->assertOk()
+            ->assertJsonStructure(['data', 'links', 'meta'])
+            ->assertJsonPath('meta.per_page', 25);
+    }
+
     public function test_list_without_account_external_id_returns_422(): void
     {
         $consumer = Consumer::factory()->create();
