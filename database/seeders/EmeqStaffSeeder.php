@@ -32,6 +32,7 @@ class EmeqStaffSeeder extends Seeder
         'manage-consumers',
         'manage-connections',
         'view-webhooks',
+        'view-pass-through-calls',
         'view-account-subscriptions',
         'view-billing',
     ];
