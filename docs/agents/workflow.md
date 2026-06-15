@@ -13,15 +13,17 @@
 > Daarom **geen branch-protection op `master`**: dat zou de ff-merge-flow breken.
 > De ai-kit GH-hygiene is bewust met `--no-protection` gedraaid.
 
-## Planning-flow (GSD)
+## Planning-flow (ai-kit)
 
-Werk loopt via GSD-commands, niet ad-hoc edits:
+Werk loopt via de ai-kit-lifecycle + GitHub-issues, niet ad-hoc edits:
 
-- `/gsd-quick` — kleine fixes, docs, ad-hoc.
-- `/gsd-debug` — onderzoek + bugfixing.
-- `/gsd-execute-phase` — geplande fase-uitvoering.
+- `/ai:next` — ranked backlog (open issues + labels).
+- `/ai:tdd` — feature/bugfix via red-green-refactor.
+- `/ai:diagnose` — onderzoek + bugfixing.
+- `/ai:to-issues` / `/ai:to-prd` — plan → issues.
+- `/ai:review` — pre-merge review.
 
-Artefacten: `.planning/ROADMAP.md`, `.planning/STATE.md`, `.planning/phases/<NN>-<slug>/`.
+Bron-van-waarheid voor open + forward-werk: **GitHub-issues** (`P*`/`area/*`-labels). Historische GSD-planning (`.planning/`) is verwijderd uit de werkboom; raadpleegbaar via git-history.
 
 ## Tests
 
