@@ -79,6 +79,10 @@ Use these entry points:
 Do not make direct repo edits outside a GSD workflow unless the user explicitly asks to bypass it.
 <!-- GSD:workflow-end -->
 
+## Agent skills & lifecycle
+
+ai-kit draait als plugin (`/ai:*`-skills beschikbaar), geconfigureerd via `.ai-kit-setup` (`tier=full`, `mode=solo-global`). Lifecycle-fase: **development** — schema-migraties vrij te wijzigen, geen backwards-compat-eis vóór productie. Per-onderwerp agent-docs staan in `docs/agents/`. De authoritative project-conventies blijven `.ai/rules/`; de ai-kit canonical rules in `.claude/rules/` (gitignored) zijn aanvullend.
+
 <!-- GSD:profile-start -->
 ## Developer Profile
 

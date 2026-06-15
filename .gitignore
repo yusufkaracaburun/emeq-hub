@@ -3,6 +3,8 @@
 .env
 .env.backup
 .env.production
+.envrc
+.ai-kit-setup
 .phpactor.json
 .phpunit.result.cache
 /.codex
