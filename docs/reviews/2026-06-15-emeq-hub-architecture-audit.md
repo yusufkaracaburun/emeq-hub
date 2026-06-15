@@ -115,3 +115,12 @@ Branch `fix/architecture-audit-a1-provider-enum`. Full suite 574/577 groen
 | A11 | ❎ wontfix | `fingerprint()` zit op het display-pad (Filament-tabel); een `throw` op config-drift crasht de admin-UI — silent-null badge is een acceptabel signaal |
 
 Resterende open follow-up: A2/A5/A8 bij het oppakken van Exact Online (issue #3).
+
+---
+
+## Second-opinion re-walk — 2026-06-15
+
+Onafhankelijke herhaling (3 parallelle agents, blind voor dit rapport) bevestigt de
+conclusie: 0 blockers, alle fixes geland, A2/A5/A8 terecht deferred. Twee nieuwe minor
+🟡-nits (observability + comment-drift). Zie
+[`2026-06-15-emeq-hub-second-opinion-architecture-audit.md`](./2026-06-15-emeq-hub-second-opinion-architecture-audit.md).
