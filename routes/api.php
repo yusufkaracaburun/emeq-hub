@@ -94,9 +94,10 @@ Route::middleware('auth:sanctum')->group(function (): void {
         Route::get('/payment-links/{id}', [PaymentLinksController::class, 'show'])->name('api.mollie.payment-links.show');
     });
 
-    // Mollie Connect partner-resources (Phase 13). Géén resolve.mollie.account
-    // (D-07): partner-access-token via MollieAccessTokenResolver in de Connect-
-    // controllers; geen Account/Connection-context op deze routes.
+    // Mollie Connect partner-resources — zie .docs/decisions/mollie-connect-partner-resources.md.
+    // Géén resolve.mollie.account (D-07): partner-access-token via
+    // MollieAccessTokenResolver in de Connect-controllers; geen
+    // Account/Connection-context op deze routes.
     Route::prefix('mollie/connect')
         ->middleware(['feature.provider:mollie'])
         ->name('api.mollie.connect.')
