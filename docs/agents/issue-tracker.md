@@ -7,7 +7,7 @@
 - Issues + PR-beschrijvingen in het **Nederlands** (`.ai/rules/global.md`).
 - Eén issue = één onafhankelijk grijpbare verticale slice (tracer-bullet), niet een laag.
 - Prioriteit + categorie via labels — zie [triage-labels.md](./triage-labels.md).
-- Planning-werk dat (nog) geen issue is, leeft in `.planning/ROADMAP.md` + `.planning/phases/`.
+- Open + forward-werk leeft in GitHub-issues (`/ai:next` rankt ze); geen losse planning-files meer.
 
 ## Solo-context
 

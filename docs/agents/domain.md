@@ -28,5 +28,5 @@ nieuwe Resource-class. Zie `.docs/decisions/provider-credential-descriptor.md`.
 ## Verdere docs
 
 - ADRs: `.docs/decisions/` (let op: niet `docs/adr/` — dat is de ai-kit-scaffold).
-- Partner-API-research: `.docs/partners/<provider>/`.
-- Planning: `.planning/ROADMAP.md`, `.planning/STATE.md`.
+- Partner-API-research: `packages/<sdk>/docs/partners/<provider>/` (in de SDK-repos).
+- Planning / open werk: GitHub-issues (`/ai:next`).

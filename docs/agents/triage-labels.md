@@ -27,7 +27,7 @@ Label-taxonomie aangemaakt op de GitHub-repo door `setup-gh-workflow.sh`
 | `area/backend` | Hub-domeinlaag, SDK-calls, OAuth, webhooks |
 | `area/frontend` | Filament admin-paneel |
 | `area/infra` | Docker, Horizon, deploy, config |
-| `area/docs` | `.docs/`, `.planning/`, CLAUDE.md |
+| `area/docs` | `.docs/`, `docs/agents/`, CLAUDE.md |
 
 ## Mapping
 

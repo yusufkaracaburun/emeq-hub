@@ -27,10 +27,10 @@ Multi-tenant integration-platform: één Laravel-Hub die OAuth-koppelingen, webh
 - **Multi-tenant:** geen impliciete resolutie via session/query-string; alleen via `X-Account-Id` + Consumer-scoped lookup. Cross-consumer-lek = security-incident.
 - **Encryption-at-rest:** secrets encrypted cast; nooit raw in DB/logs/exceptions; fingerprint-only voor debugging.
 - **Forward-only migrations:** geen `down()` in prod-pad; schema-change = nieuwe migration.
-- **Geen verzonnen partner-features:** code/docs moeten exact kloppen met `.docs/partners/<provider>/`.
+- **Geen verzonnen partner-features:** code/docs moeten exact kloppen met de partner-research in de SDK-repos (`packages/<sdk>/docs/partners/<provider>/`).
 
 ## Docs-kaart
 
 - Architectuur/lagen: `docs/agents/architecture.md` · domein: `docs/agents/domain.md` · dev: `docs/agents/dev-environment.md` · docker: `docs/agents/docker.md` · workflow: `docs/agents/workflow.md`.
-- ADRs: `.docs/decisions/` (let op: niet `docs/adr/`). Partner-research: `.docs/partners/<provider>/`.
+- ADRs: `.docs/decisions/` (let op: niet `docs/adr/`). Partner-research: `packages/<sdk>/docs/partners/<provider>/` (in de SDK-repos).
 - Authoritative regels: `.ai/rules/` (auto-loaded).
