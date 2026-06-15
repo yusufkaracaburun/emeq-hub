@@ -54,6 +54,7 @@ class UserResourceTest extends TestCase
                 'name' => 'Nieuwe Admin',
                 'email' => 'new@emeq.test',
                 'password' => 'Secret123!',
+                'roles' => [Role::findByName('staff')->getKey()],
             ])
             ->call('create')
             ->assertHasNoFormErrors();

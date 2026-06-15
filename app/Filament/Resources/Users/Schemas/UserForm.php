@@ -44,7 +44,8 @@ class UserForm
                 Select::make('roles')
                     ->label('Rol')
                     ->relationship('roles', 'name')
-                    ->options(['super-admin' => 'Super admin', 'staff' => 'Staff'])
+                    ->multiple()
+                    ->preload()
                     ->visible(fn (string $operation): bool => $operation === 'create')
                     ->required(fn (string $operation): bool => $operation === 'create'),
             ]);
