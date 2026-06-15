@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Connections;
 
+use App\Enums\Provider;
 use App\Filament\Actions\StartOAuthFlowAction;
 use App\Filament\Resources\Connections\Pages\ListConnections;
 use App\Filament\Resources\Connections\Pages\ViewConnection;
@@ -54,7 +55,7 @@ class ConnectionResource extends Resource
     {
         return $schema->components([
             Section::make('Mollie OAuth')
-                ->visible(fn (?Connection $record): bool => $record?->provider === 'mollie')
+                ->visible(fn (?Connection $record): bool => $record?->provider === Provider::Mollie)
                 ->columns(2)
                 ->schema([
                     TextEntry::make('provider')->badge()->color('success'),
@@ -74,7 +75,7 @@ class ConnectionResource extends Resource
                 ]),
 
             Section::make('Snelstart credentials')
-                ->visible(fn (?Connection $record): bool => $record?->provider === 'snelstart')
+                ->visible(fn (?Connection $record): bool => $record?->provider === Provider::Snelstart)
                 ->columns(2)
                 ->schema([
                     TextEntry::make('provider')->badge()->color('info'),
@@ -103,10 +104,6 @@ class ConnectionResource extends Resource
             ->columns([
                 TextColumn::make('provider')
                     ->badge()
-                    ->colors([
-                        'success' => 'mollie',
-                        'info' => 'snelstart',
-                    ])
                     ->sortable(),
                 TextColumn::make('account.external_id')
                     ->label('Account')
@@ -137,10 +134,7 @@ class ConnectionResource extends Resource
             ])
             ->filters([
                 SelectFilter::make('provider')
-                    ->options([
-                        'mollie' => 'Mollie',
-                        'snelstart' => 'Snelstart',
-                    ]),
+                    ->options(Provider::class),
                 SelectFilter::make('status')
                     ->options([
                         'active' => 'Active',
@@ -176,7 +170,7 @@ class ConnectionResource extends Resource
                         }
 
                         try {
-                            $descriptor = ProviderCredentialDescriptor::for($record->provider);
+                            $descriptor = ProviderCredentialDescriptor::for($record->provider->value);
                         } catch (\InvalidArgumentException) {
                             return false;
                         }
@@ -185,7 +179,7 @@ class ConnectionResource extends Resource
                     })
                     ->action(function (Connection $record): void {
                         app(OAuthFlowRegistry::class)
-                            ->for($record->provider)
+                            ->for($record->provider->value)
                             ->revoke($record);
 
                         Notification::make()

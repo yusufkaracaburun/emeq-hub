@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1\OAuth;
 
+use App\Enums\Provider;
 use App\Http\Controllers\Controller;
 use App\Models\Connection;
 use App\Models\Consumer;
@@ -35,14 +36,14 @@ class InitController extends Controller
 
         $connection = Connection::create([
             'account_id' => $account->id,
-            'provider' => 'mollie',
+            'provider' => Provider::Mollie->value,
             'status' => 'pending',
             'oauth_state' => $state,
             'oauth_state_expires_at' => now()->addMinutes(30),
         ]);
 
         $scopes = config('services.mollie.connect.scopes');
-        $redirectUrl = $this->registry->for('mollie')->getAuthorizationUrl($account, $scopes, $state);
+        $redirectUrl = $this->registry->for(Provider::Mollie->value)->getAuthorizationUrl($account, $scopes, $state);
 
         return [
             'connection_id' => (string) $connection->id,

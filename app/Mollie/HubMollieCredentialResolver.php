@@ -2,6 +2,7 @@
 
 namespace App\Mollie;
 
+use App\Enums\Provider;
 use App\OAuth\OAuthFlowRegistry;
 use Emeq\MollieApi\Contracts\MollieCredentialResolver;
 use Emeq\MollieApi\Data\MollieCredentials;
@@ -19,7 +20,7 @@ final class HubMollieCredentialResolver implements MollieCredentialResolver
         $connection = $this->context->current();
 
         if ($connection->expires_at && $connection->expires_at->lt(now()->addMinutes(5))) {
-            $connection = $this->registry->for('mollie')->refreshToken($connection);
+            $connection = $this->registry->for(Provider::Mollie->value)->refreshToken($connection);
         }
 
         return new MollieOAuthCredentials(

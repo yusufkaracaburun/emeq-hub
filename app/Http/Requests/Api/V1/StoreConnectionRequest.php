@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Api\V1;
 
+use App\Enums\Provider;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -25,10 +26,10 @@ class StoreConnectionRequest extends FormRequest
                 'integer',
                 Rule::exists('accounts', 'id')->where('consumer_id', $consumerId),
             ],
-            'provider' => ['required', 'string', Rule::in(['snelstart'])],
+            'provider' => ['required', 'string', Rule::in([Provider::Snelstart->value])],
             'credentials' => ['required', 'array'],
-            'credentials.client_key' => ['required_if:provider,snelstart', 'string', 'min:10'],
-            'credentials.subscription_key' => ['required_if:provider,snelstart', 'string', 'min:10'],
+            'credentials.client_key' => ['required_if:provider,'.Provider::Snelstart->value, 'string', 'min:10'],
+            'credentials.subscription_key' => ['required_if:provider,'.Provider::Snelstart->value, 'string', 'min:10'],
             'credentials.subscription_id' => ['nullable', 'string', 'max:255'],
         ];
     }

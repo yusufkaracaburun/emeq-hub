@@ -7,6 +7,7 @@ namespace App\Filament\Resources\AccountSubscriptions;
 use App\Billing\Account\AccountSubscriptionManager;
 use App\Billing\Account\Exceptions\InvalidStateTransitionException;
 use App\Billing\Account\SubscriptionStatus;
+use App\Enums\Provider;
 use App\Filament\Resources\AccountSubscriptions\Pages\ListAccountSubscriptions;
 use App\Filament\Resources\AccountSubscriptions\Pages\ViewAccountSubscription;
 use App\Models\AccountSubscription;
@@ -22,6 +23,7 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Throwable;
 
 /**
@@ -143,7 +145,17 @@ class AccountSubscriptionResource extends Resource
                         ->all()),
                 SelectFilter::make('connection_provider')
                     ->label('Provider')
-                    ->relationship('connection', 'provider'),
+                    ->options(Provider::class)
+                    ->query(function (Builder $query, array $data): Builder {
+                        if (blank($data['value'] ?? null)) {
+                            return $query;
+                        }
+
+                        return $query->whereHas(
+                            'connection',
+                            fn (Builder $q): Builder => $q->where('provider', $data['value']),
+                        );
+                    }),
                 SelectFilter::make('account_id')
                     ->label('Account')
                     ->relationship('account', 'external_id'),

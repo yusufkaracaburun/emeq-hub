@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1\Mollie;
 
+use App\Enums\Provider;
 use App\Http\Controllers\Controller;
 use App\Models\Account;
 use App\Models\Connection;
@@ -104,7 +105,7 @@ abstract class AbstractMolliePassThroughController extends Controller
             'consumer_id' => $request->user()->getKey(),
             'account_id' => $account->getKey(),
             'connection_id' => $connection->getKey(),
-            'provider' => 'mollie',
+            'provider' => Provider::Mollie->value,
             'method' => $method,
             'path' => $endpoint,                       // CRITICAL: template, GEEN query-string
             'query_keys' => $query !== [] ? implode(',', array_keys($query)) : null,

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Dev;
 
+use App\Enums\Provider;
 use App\Models\Account;
 use App\Models\Connection;
 use App\Models\Consumer;
@@ -273,7 +274,7 @@ class PartnerPagesTest extends TestCase
 
         $connection = Connection::query()->where('account_id', $account->id)->first();
         $this->assertNotNull($connection);
-        $this->assertSame('mollie', $connection->provider);
+        $this->assertSame(Provider::Mollie, $connection->provider);
         $this->assertSame('pending', $connection->status);
         $this->assertNotNull($connection->oauth_state);
         $this->assertSame(48, strlen($connection->oauth_state));

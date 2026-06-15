@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Webhooks;
 
+use App\Enums\Provider;
 use App\Http\Controllers\Controller;
 use App\Jobs\ForwardMollieWebhookToConsumer;
 use App\Models\Connection;
@@ -68,7 +69,7 @@ class MollieWebhookController extends Controller
         // 2. Connection-lookup
         $connection = Connection::query()
             ->where('id', $connection_id)
-            ->where('provider', 'mollie')
+            ->where('provider', Provider::Mollie->value)
             ->whereNull('revoked_at')
             ->first();
 
@@ -120,7 +121,7 @@ class MollieWebhookController extends Controller
     private function auditWebhook(Request $request, array $payload, WebhookHandlerResult $result): void
     {
         $attributes = [
-            'name' => 'mollie',
+            'name' => Provider::Mollie->value,
             'url' => $request->fullUrl(),
             'headers' => $request->headers->all(),
             'payload' => $payload,
@@ -138,7 +139,7 @@ class MollieWebhookController extends Controller
     private function auditFailedWebhook(Request $request, string $exception): void
     {
         WebhookCall::create([
-            'name' => 'mollie',
+            'name' => Provider::Mollie->value,
             'url' => $request->fullUrl(),
             'headers' => $request->headers->all(),
             'payload' => $request->json()->all() ?: ['_raw' => substr($request->getContent(), 0, 1000)],

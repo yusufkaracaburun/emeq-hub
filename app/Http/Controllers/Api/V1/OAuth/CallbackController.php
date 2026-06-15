@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1\OAuth;
 
+use App\Enums\Provider;
 use App\Http\Controllers\Controller;
 use App\Models\Connection;
 use App\OAuth\OAuthFlowRegistry;
@@ -22,7 +23,7 @@ class CallbackController extends Controller
         ]);
 
         $connection = Connection::query()
-            ->where('provider', 'mollie')
+            ->where('provider', Provider::Mollie->value)
             ->where('status', 'pending')
             ->where('oauth_state', $validated['state'])
             ->where('oauth_state_expires_at', '>', now())
@@ -35,7 +36,7 @@ class CallbackController extends Controller
             );
         }
 
-        $this->registry->for('mollie')->exchangeCode($connection, $validated['code']);
+        $this->registry->for(Provider::Mollie->value)->exchangeCode($connection, $validated['code']);
 
         return response()->json([
             'connection_id' => (string) $connection->id,

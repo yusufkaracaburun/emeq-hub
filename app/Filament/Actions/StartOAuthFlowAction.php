@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Actions;
 
+use App\Enums\Provider;
 use App\Models\Account;
 use App\Models\Connection;
 use App\OAuth\Exceptions\ProviderDisabledException;
@@ -91,11 +92,11 @@ class StartOAuthFlowAction
             ->label('Start OAuth-koppeling')
             ->icon(Heroicon::OutlinedLink)
             ->visible(fn (Connection $record): bool => (auth()->user()?->can('manage-connections') ?? false)
-                && $record->provider === 'mollie'
+                && $record->provider === Provider::Mollie
                 && $record->access_token === null
                 && $record->revoked_at === null
             )
-            ->action(fn (Connection $record): RedirectResponse => self::dispatch($record->account, $record->provider, $record));
+            ->action(fn (Connection $record): RedirectResponse => self::dispatch($record->account, $record->provider->value, $record));
     }
 
     /**

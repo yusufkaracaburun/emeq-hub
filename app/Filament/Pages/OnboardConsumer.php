@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Pages;
 
+use App\Enums\Provider;
 use App\Filament\Resources\Consumers\ConsumerResource;
 use App\Sanctum\TokenAbilities;
 use App\Services\ConsumerOnboarding;
@@ -149,12 +150,12 @@ class OnboardConsumer extends Page
                                 TextInput::make('connection.subscription_id')
                                     ->label('Subscription ID')
                                     ->required(),
-                            ])->visible(fn (Get $get): bool => $get('connection.provider') === 'snelstart'),
+                            ])->visible(fn (Get $get): bool => $get('connection.provider') === Provider::Snelstart->value),
                             // Mollie-branch: alleen helper-text. OAuth-roundtrip gebeurt na wizard-completion
                             // via StartOAuthFlowAction op de Account-detailpagina (D-04 UX-split, zie PLAN 08-02).
                             Group::make([
                                 Text::make('Start Mollie OAuth-koppeling — je wordt naar Mollie gestuurd. Na goedkeuring keer je terug in deze wizard.'),
-                            ])->visible(fn (Get $get): bool => $get('connection.provider') === 'mollie'),
+                            ])->visible(fn (Get $get): bool => $get('connection.provider') === Provider::Mollie->value),
                         ]),
                     Step::make('PAT uitgeven')
                         ->description('Het token wordt eenmalig getoond. Bewaar het direct.')
@@ -314,9 +315,9 @@ class OnboardConsumer extends Page
             return null;
         }
 
-        if ($provider === 'snelstart') {
+        if ($provider === Provider::Snelstart->value) {
             return [
-                'provider' => 'snelstart',
+                'provider' => Provider::Snelstart->value,
                 'status' => 'active',
                 'client_key' => $connection['client_key'] ?? null,
                 'subscription_key' => $connection['subscription_key'] ?? null,

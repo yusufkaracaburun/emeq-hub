@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\Provider;
 use App\Support\ProviderCredentialDescriptor;
 use Database\Factories\ConnectionFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -46,7 +47,7 @@ class Connection extends Model
 
     public function fingerprint(): ?string
     {
-        $descriptor = ProviderCredentialDescriptor::tryFor($this->provider);
+        $descriptor = ProviderCredentialDescriptor::tryFor($this->provider->value);
 
         if ($descriptor === null) {
             return null;
@@ -69,6 +70,7 @@ class Connection extends Model
     protected function casts(): array
     {
         return [
+            'provider' => Provider::class,
             'access_token' => 'encrypted',
             'refresh_token' => 'encrypted',
             'client_key' => 'encrypted',

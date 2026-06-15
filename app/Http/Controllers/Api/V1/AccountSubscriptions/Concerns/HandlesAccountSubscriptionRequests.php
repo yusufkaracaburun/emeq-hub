@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api\V1\AccountSubscriptions\Concerns;
 
 use App\Billing\Account\Exceptions\InvalidStateTransitionException;
+use App\Enums\Provider;
 use App\Models\AccountSubscription;
 use App\Models\PassThroughCall;
 use App\Support\Mollie\MollieUpstreamErrorMapper;
@@ -90,7 +91,7 @@ trait HandlesAccountSubscriptionRequests
             'consumer_id' => (int) $request->user()?->getKey(),
             'account_id' => $accountId,
             'connection_id' => $connectionId,
-            'provider' => 'mollie',
+            'provider' => Provider::Mollie->value,
             'method' => $request->method(),
             'path' => $path,
             'status' => $status,

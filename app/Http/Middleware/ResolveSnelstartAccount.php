@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Enums\Provider;
 use App\Models\Account;
 use App\Models\Connection;
 use App\Services\Snelstart\HubSnelstartCredentialResolver;
@@ -52,7 +53,7 @@ class ResolveSnelstartAccount
 
         $connection = Connection::query()
             ->where('account_id', $account->getKey())
-            ->where('provider', 'snelstart')
+            ->where('provider', Provider::Snelstart->value)
             ->whereNull('revoked_at')
             ->first();
 

@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Enums\Provider;
 use App\Models\Account;
 use App\Models\Connection;
 use App\Mollie\MollieConnectionContext;
@@ -48,7 +49,7 @@ class ResolveMollieAccount
 
         $connection = Connection::query()
             ->where('account_id', $account->getKey())
-            ->where('provider', 'mollie')
+            ->where('provider', Provider::Mollie->value)
             ->whereNull('revoked_at')
             ->first();
 

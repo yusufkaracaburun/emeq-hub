@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Enums\Provider;
 use App\Models\Account;
 use App\Models\Connection;
 use Illuminate\Database\QueryException;
@@ -43,7 +44,7 @@ class ConnectionUniqueActiveTest extends TestCase
         $snelstart = Connection::factory()->forSnelstart()->create(['account_id' => $account->id]);
         $mollie = Connection::factory()->forMollie()->create(['account_id' => $account->id]);
 
-        $this->assertSame('snelstart', $snelstart->provider);
-        $this->assertSame('mollie', $mollie->provider);
+        $this->assertSame(Provider::Snelstart, $snelstart->provider);
+        $this->assertSame(Provider::Mollie, $mollie->provider);
     }
 }

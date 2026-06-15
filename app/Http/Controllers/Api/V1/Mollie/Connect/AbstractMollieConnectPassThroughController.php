@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1\Mollie\Connect;
 
+use App\Enums\Provider;
 use App\Exceptions\Mollie\MissingPartnerTokenException;
 use App\Http\Controllers\Controller;
 use App\Models\PassThroughCall;
@@ -187,7 +188,7 @@ abstract class AbstractMollieConnectPassThroughController extends Controller
             'consumer_id' => $request->user()->getKey(),
             'account_id' => null,
             'connection_id' => null,
-            'provider' => 'mollie',
+            'provider' => Provider::Mollie->value,
             'token_type' => 'partner',
             'method' => $method,
             'path' => $endpoint,

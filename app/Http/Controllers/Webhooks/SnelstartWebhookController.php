@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Webhooks;
 
+use App\Enums\Provider;
 use App\Http\Controllers\Controller;
 use App\Jobs\Webhooks\ForwardSnelstartWebhookToConsumerJob;
 use App\Models\Connection;
@@ -46,7 +47,7 @@ final class SnelstartWebhookController extends Controller
         if ($eventId !== null && $this->isDuplicateEvent($eventId)) {
             PassThroughCall::create([
                 'direction' => 'inbound',
-                'provider' => 'snelstart',
+                'provider' => Provider::Snelstart->value,
                 'method' => $request->getMethod(),
                 'path' => '/webhooks/snelstart',
                 'status' => 200,
@@ -61,7 +62,7 @@ final class SnelstartWebhookController extends Controller
         }
 
         $connection = Connection::query()
-            ->where('provider', 'snelstart')
+            ->where('provider', Provider::Snelstart->value)
             ->where('administratie_id', $payload['administratieId'])
             ->whereNull('revoked_at')
             ->first();
@@ -69,7 +70,7 @@ final class SnelstartWebhookController extends Controller
         if ($connection === null) {
             PassThroughCall::create([
                 'direction' => 'inbound',
-                'provider' => 'snelstart',
+                'provider' => Provider::Snelstart->value,
                 'method' => $request->getMethod(),
                 'path' => '/webhooks/snelstart',
                 'status' => 200,
@@ -87,7 +88,7 @@ final class SnelstartWebhookController extends Controller
             'consumer_id' => $connection->account->consumer_id,
             'account_id' => $connection->account_id,
             'connection_id' => $connection->id,
-            'provider' => 'snelstart',
+            'provider' => Provider::Snelstart->value,
             'method' => $request->getMethod(),
             'path' => '/webhooks/snelstart',
             'status' => 200,
@@ -109,7 +110,7 @@ final class SnelstartWebhookController extends Controller
     {
         return PassThroughCall::query()
             ->inbound()
-            ->where('provider', 'snelstart')
+            ->where('provider', Provider::Snelstart->value)
             ->where('event_id', $eventId)
             ->exists();
     }
@@ -118,7 +119,7 @@ final class SnelstartWebhookController extends Controller
     {
         PassThroughCall::create([
             'direction' => 'inbound',
-            'provider' => 'snelstart',
+            'provider' => Provider::Snelstart->value,
             'method' => $request->getMethod(),
             'path' => '/webhooks/snelstart',
             'status' => 400,

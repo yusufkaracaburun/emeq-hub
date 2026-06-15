@@ -23,12 +23,7 @@ final class ConnectionsRelationManager extends RelationManager
             ->columns([
                 TextColumn::make('provider')
                     ->label('Provider')
-                    ->badge()
-                    ->color(fn (string $state): string => match ($state) {
-                        'mollie' => 'success',
-                        'snelstart' => 'info',
-                        default => 'gray',
-                    }),
+                    ->badge(),
                 TextColumn::make('fingerprint')
                     ->label('Fingerprint')
                     ->state(fn (Connection $record): ?string => $record->fingerprint())

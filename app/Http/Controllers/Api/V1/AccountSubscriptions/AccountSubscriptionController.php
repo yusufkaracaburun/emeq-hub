@@ -7,6 +7,7 @@ namespace App\Http\Controllers\Api\V1\AccountSubscriptions;
 use App\Billing\Account\AccountSubscriptionManager;
 use App\Billing\Account\Dto\CreateAccountSubscriptionDto;
 use App\Billing\Account\Exceptions\InvalidStateTransitionException;
+use App\Enums\Provider;
 use App\Http\Controllers\Api\V1\AccountSubscriptions\Concerns\HandlesAccountSubscriptionRequests;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\AccountSubscriptions\CreateAccountSubscriptionRequest;
@@ -57,7 +58,7 @@ class AccountSubscriptionController extends Controller
 
         /** @var Connection|null $connection */
         $connection = $account->connections()
-            ->where('provider', 'mollie')
+            ->where('provider', Provider::Mollie->value)
             ->whereNull('revoked_at')
             ->first();
 

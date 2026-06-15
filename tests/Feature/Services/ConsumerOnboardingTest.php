@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Services;
 
+use App\Enums\Provider;
 use App\Models\Account;
 use App\Models\Connection;
 use App\Models\Consumer;
@@ -103,7 +104,7 @@ class ConsumerOnboardingTest extends TestCase
         ]);
 
         $this->assertInstanceOf(Connection::class, $result['connection']);
-        $this->assertSame('snelstart', $result['connection']->provider);
+        $this->assertSame(Provider::Snelstart, $result['connection']->provider);
         $this->assertSame('pending', $result['connection']->status);
         $this->assertSame($result['account']->id, $result['connection']->account_id);
 

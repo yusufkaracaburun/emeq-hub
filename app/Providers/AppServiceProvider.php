@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Enums\Provider;
 use App\Models\User;
 use App\Mollie\HubMollieCredentialResolver;
 use App\Mollie\MollieAccessTokenResolver;
@@ -28,7 +29,7 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->singleton(OAuthFlowRegistry::class, function (Application $app): OAuthFlowRegistry {
             $registry = new OAuthFlowRegistry($app);
-            $registry->register('mollie', MollieConnectOAuthFlow::class);
+            $registry->register(Provider::Mollie->value, MollieConnectOAuthFlow::class);
 
             return $registry;
         });

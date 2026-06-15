@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Admin;
 
+use App\Enums\Provider;
 use App\Filament\Pages\OnboardConsumer;
 use App\Filament\Resources\Consumers\ConsumerResource;
 use App\Filament\Resources\Consumers\Pages\ListConsumers;
@@ -193,7 +194,7 @@ class OnboardConsumerTest extends TestCase
 
         $connection = $account->connections()->first();
         $this->assertNotNull($connection, 'Snelstart Connection-rij moet bestaan');
-        $this->assertSame('snelstart', $connection->provider);
+        $this->assertSame(Provider::Snelstart, $connection->provider);
 
         $this->assertSame(1, $consumer->tokens()->count());
         $token = $consumer->tokens()->first();
