@@ -106,14 +106,19 @@ class ConnectionEncryptionTest extends TestCase
         $this->assertSame($expected, $connection->fingerprint());
     }
 
-    public function test_fingerprint_returns_null_for_unknown_provider(): void
+    public function test_unknown_provider_value_is_rejected_by_the_enum_cast(): void
     {
-        $connection = Connection::factory()->create([
+        // Sinds audit A1 is Connection::provider gecast naar App\Enums\Provider.
+        // De cast is nu de guard tegen onbekende providers: een waarde buiten de
+        // enum wordt al bij assignment geweigerd, vóór fingerprint() ooit draait.
+        // Het oude "fingerprint() geeft null voor unknown provider"-pad is daarmee
+        // structureel onbereikbaar geworden.
+        $this->expectException(\ValueError::class);
+
+        Connection::factory()->create([
             'provider' => 'future-provider',
             'client_key' => null,
             'access_token' => null,
         ]);
-
-        $this->assertNull($connection->fingerprint());
     }
 }
