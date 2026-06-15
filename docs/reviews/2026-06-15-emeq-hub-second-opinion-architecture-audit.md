@@ -94,8 +94,10 @@ Geen nieuwe (non-provider) duplicatie gevonden. **Aanbeveling ongewijzigd:** nie
 
 | ID | Finding | Dim | Severity | Fix direction | Owner |
 |----|---------|-----|----------|---------------|-------|
-| N1 | Fan-out-jobs silent skip zonder log bij ontbrekende `webhook_callback_url` (Mollie + Snelstart) | 8 | 🟡 | `Log::debug()` met skip-reden in beide jobs | backend |
-| N2 | `FeatureServiceProvider:14` vage "(later)"-comment zonder ADR-link | 5 | 🟡 | link Pennant-ADR of verwijder "(later)" | backend |
+| N1 | Fan-out-jobs silent skip zonder log bij ontbrekende `webhook_callback_url` (Mollie + Snelstart) | 8 | 🟡 | `Log::info('webhook.fanout_skipped', …)` in beide jobs | ✅ fixed |
+| N2 | `FeatureServiceProvider` vage "(later)"-comment zonder ADR-link | 5 | 🟡 | ADR-link i.p.v. "(later)" | ✅ fixed |
+
+**Resolutie 2026-06-16** (branch `fix/audit-n1-n2-webhook-skip-log`): N1 — `Log::info('webhook.fanout_skipped', [...])` met `provider`/`connection_id`/`consumer_id`/`reason` (+`event_id` Snelstart) in beide fan-out-jobs; skip-tests uitgebreid met log-assertie. N2 — comment vervangen door ADR-link. Webhook-suite 135/135 groen.
 
 Al-bekende open items (niet hernummerd): **A2/A5/A8** — provider-axis-duplicatie, deferred tot Exact Online (issue #3). Zie het [originele rapport](./2026-06-15-emeq-hub-architecture-audit.md).
 

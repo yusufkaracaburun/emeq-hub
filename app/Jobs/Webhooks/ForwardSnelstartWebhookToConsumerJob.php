@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace App\Jobs\Webhooks;
 
+use App\Enums\Provider;
 use App\Models\Connection;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
 use Spatie\WebhookServer\WebhookCall;
 
 /**
@@ -44,6 +46,16 @@ final class ForwardSnelstartWebhookToConsumerJob implements ShouldQueue
         $consumer = $this->snelstartConnection->account?->consumer;
 
         if ($consumer === null || ! $consumer->webhook_callback_url) {
+            Log::info('webhook.fanout_skipped', [
+                'provider' => Provider::Snelstart->value,
+                'connection_id' => $this->snelstartConnection->id,
+                'consumer_id' => $consumer?->id,
+                'event_id' => $this->eventId,
+                'reason' => $consumer === null
+                    ? 'consumer_chain_missing'
+                    : 'callback_url_not_configured',
+            ]);
+
             return;
         }
 

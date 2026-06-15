@@ -10,6 +10,7 @@ use Emeq\MollieApi\Mollie;
 use Emeq\MollieApi\Webhooks\MollieWebhookSignature;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Bus;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Queue;
 use Mollie\Api\Fake\MockResponse;
 use Mollie\Api\Http\Requests\GetPaymentRequest;
@@ -83,6 +84,11 @@ class MollieWebhookFanOutTest extends TestCase
     public function test_forward_job_silently_returns_when_consumer_has_no_callback_url(): void
     {
         Queue::fake();
+        Log::shouldReceive('info')
+            ->once()
+            ->withArgs(fn (string $message, array $context): bool => $message === 'webhook.fanout_skipped'
+                && $context['provider'] === 'mollie'
+                && $context['reason'] === 'callback_url_not_configured');
 
         // Consumer zonder webhook_callback_url (default state).
         $consumer = Consumer::factory()->create();

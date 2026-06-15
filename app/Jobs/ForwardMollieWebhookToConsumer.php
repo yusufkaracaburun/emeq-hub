@@ -2,12 +2,14 @@
 
 namespace App\Jobs;
 
+use App\Enums\Provider;
 use App\Models\Connection;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
 use Spatie\WebhookServer\WebhookCall;
 
 /**
@@ -37,6 +39,15 @@ class ForwardMollieWebhookToConsumer implements ShouldQueue
         $consumer = $this->mollieConnection->account?->consumer;
 
         if ($consumer === null || ! $consumer->webhook_callback_url) {
+            Log::info('webhook.fanout_skipped', [
+                'provider' => Provider::Mollie->value,
+                'connection_id' => $this->mollieConnection->id,
+                'consumer_id' => $consumer?->id,
+                'reason' => $consumer === null
+                    ? 'consumer_chain_missing'
+                    : 'callback_url_not_configured',
+            ]);
+
             return;
         }
 

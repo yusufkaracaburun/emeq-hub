@@ -11,7 +11,8 @@ use Laravel\Pennant\Feature;
  * Definieert globale kill-switch features per partner-provider.
  *
  * Per-provider feature-key shape: `provider-<key>-enabled`. Default = true (provider open).
- * Set kill-switch via Feature::deactivate(...) of Filament admin (later) zonder code-deploy.
+ * Set kill-switch via Feature::deactivate(...) zonder code-deploy.
+ * Zie .docs/decisions/feature-flags-pennant-kill-switch.md.
  *
  * Scope: null (globaal). Per-Consumer-scoping landt in v0.2.1 als de eerste use-case er om vraagt.
  */

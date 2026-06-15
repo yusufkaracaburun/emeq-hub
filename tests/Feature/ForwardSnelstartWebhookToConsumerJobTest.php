@@ -10,6 +10,7 @@ use App\Models\Connection;
 use App\Models\Consumer;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Bus;
+use Illuminate\Support\Facades\Log;
 use Spatie\WebhookServer\CallWebhookJob;
 use Tests\TestCase;
 
@@ -40,6 +41,12 @@ class ForwardSnelstartWebhookToConsumerJobTest extends TestCase
     public function test_handle_skips_silently_without_callback_url(): void
     {
         Bus::fake([CallWebhookJob::class]);
+        Log::shouldReceive('info')
+            ->once()
+            ->withArgs(fn (string $message, array $context): bool => $message === 'webhook.fanout_skipped'
+                && $context['provider'] === 'snelstart'
+                && $context['event_id'] === 'evt-no-callback'
+                && $context['reason'] === 'callback_url_not_configured');
 
         $consumer = Consumer::factory()->create();
         $account = Account::factory()->for($consumer)->create();
