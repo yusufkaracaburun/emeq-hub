@@ -155,6 +155,39 @@ class StoreDocumentTest extends TestCase
         });
     }
 
+    public function test_uses_connection_metadata_mapping(): void
+    {
+        // Geen fake → de echte ConnectionMappingExactReferenceResolver leest metadata.
+        MockClient::global([
+            RawExactRequest::class => MockResponse::make(['d' => ['ID' => 'inv-1']], 201),
+        ]);
+
+        [$consumer] = $this->consumerWithExactConnection([
+            'metadata' => ['accounting_mapping' => [
+                'vat_codes' => ['21' => '4'],
+                'gl_accounts' => ['_default' => 'gl-def'],
+                'relations' => ['acme-1' => 'cust-real'],
+                'journals' => ['sales' => '70'],
+            ]],
+        ]);
+        $token = $consumer->createToken('t', [TokenAbilities::EXACT_WRITE])->plainTextToken;
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->withHeader('X-Account-Id', 'school1')
+            ->postJson('/v1/accounting/documents', $this->salesInvoicePayload([
+                'party' => ['role' => 'debtor', 'name' => 'Acme BV', 'external_id' => 'acme-1'],
+            ]))
+            ->assertStatus(201);
+
+        MockClient::global()->assertSent(function (RawExactRequest $request): bool {
+            $body = $request->body()->all();
+
+            return $body['Customer'] === 'cust-real'
+                && $body['SalesInvoiceLines'][0]['VATCode'] === '4'
+                && $body['SalesInvoiceLines'][0]['GLAccount'] === 'gl-def';
+        });
+    }
+
     public function test_pushes_purchase_invoice_to_purchaseentry(): void
     {
         MockClient::global([

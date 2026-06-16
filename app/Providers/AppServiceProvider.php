@@ -3,8 +3,8 @@
 namespace App\Providers;
 
 use App\Accounting\AccountingTargetRegistry;
+use App\Accounting\Exact\ConnectionMappingExactReferenceResolver;
 use App\Accounting\Exact\Contracts\ExactReferenceResolver;
-use App\Accounting\Exact\DefaultExactReferenceResolver;
 use App\Accounting\Exact\ExactAccountingTarget;
 use App\Enums\Provider;
 use App\Models\User;
@@ -50,7 +50,7 @@ class AppServiceProvider extends ServiceProvider
             return $registry;
         });
 
-        $this->app->bind(ExactReferenceResolver::class, DefaultExactReferenceResolver::class);
+        $this->app->bind(ExactReferenceResolver::class, ConnectionMappingExactReferenceResolver::class);
 
         $this->app->bind(MollieCredentialResolver::class, HubMollieCredentialResolver::class);
 
