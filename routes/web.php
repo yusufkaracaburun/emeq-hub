@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Dev\ExactOAuthTracerController;
+use App\Http\Controllers\OAuthLandingController;
 use App\Models\Account;
 use App\Models\User;
 use App\OAuth\OAuthFlowRegistry;
@@ -22,6 +23,16 @@ Route::get('/up', function () {
         'database' => DB::connection()->getPdo() !== null ? 'ok' : 'fail',
         'redis' => str_contains((string) Redis::ping(), 'PONG') ? 'ok' : 'fail',
     ]);
+});
+
+// OAuth-landing — branded HTML na de partner-callback (PRG). De callbacks in
+// routes/api.php draaien stateless (`api`-middleware, geen sessie) en redirecten
+// hierheen met een tijdelijk-getekende URL; `signed` blokkeert tampering/enumeratie.
+Route::middleware('signed')->group(function (): void {
+    Route::get('/oauth/connected/{connection}', [OAuthLandingController::class, 'connected'])
+        ->name('oauth.connected');
+    Route::get('/oauth/failed', [OAuthLandingController::class, 'failed'])
+        ->name('oauth.failed');
 });
 
 // Dev-only routes — STRICT guard. `! app()->isProduction()` is te breed: laat

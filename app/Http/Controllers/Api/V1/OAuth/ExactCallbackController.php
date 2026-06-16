@@ -7,45 +7,69 @@ use App\Http\Controllers\Controller;
 use App\Models\Connection;
 use App\OAuth\OAuthFlowRegistry;
 use Dedoc\Scramble\Attributes\Group;
-use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\URL;
+use Throwable;
 
 /**
  * Exact Online OAuth-callback. Parallel aan CallbackController (Mollie) — dedup
  * naar een generieke {provider}-controller is een uitgestelde follow-up
  * (issue #3 / audit A2). Publiek: de state-parameter is de auth (D-07).
+ *
+ * Browser-endpoint: na afhandeling redirecten we (PRG) naar een getekende
+ * landingsroute (`oauth.connected` / `oauth.failed`) — zie OAuthLandingController.
  */
 #[Group(name: 'OAuth Connect', description: 'OAuth-broker — init de authorize-flow en handle de callback van de partner.', weight: 40)]
 class ExactCallbackController extends Controller
 {
     public function __construct(private readonly OAuthFlowRegistry $registry) {}
 
-    public function __invoke(Request $request): JsonResponse
+    public function __invoke(Request $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'code' => ['required', 'string'],
-            'state' => ['required', 'string'],
-        ]);
+        if ($request->filled('error')) {
+            return $this->failed((string) $request->query('error'));
+        }
+
+        $code = (string) $request->query('code', '');
+        $state = (string) $request->query('state', '');
+
+        if ($code === '' || $state === '') {
+            return $this->failed('missing_parameters');
+        }
 
         $connection = Connection::query()
             ->where('provider', Provider::Exact->value)
             ->where('status', 'pending')
-            ->where('oauth_state', $validated['state'])
+            ->where('oauth_state', $state)
             ->where('oauth_state_expires_at', '>', now())
             ->first();
 
         if ($connection === null) {
-            return response()->json(
-                ['error' => 'invalid_or_expired_state'],
-                400,
-            );
+            return $this->failed('invalid_or_expired_state');
         }
 
-        $this->registry->for(Provider::Exact->value)->exchangeCode($connection, $validated['code']);
+        try {
+            $this->registry->for(Provider::Exact->value)->exchangeCode($connection, $code);
+        } catch (Throwable $e) {
+            report($e);
 
-        return response()->json([
-            'connection_id' => (string) $connection->id,
-            'status' => 'active',
-        ]);
+            return $this->failed('exchange_failed');
+        }
+
+        return redirect()->to(URL::temporarySignedRoute(
+            'oauth.connected',
+            now()->addMinutes(10),
+            ['connection' => $connection->id],
+        ));
+    }
+
+    private function failed(string $reason): RedirectResponse
+    {
+        return redirect()->to(URL::temporarySignedRoute(
+            'oauth.failed',
+            now()->addMinutes(10),
+            ['provider' => Provider::Exact->value, 'reason' => $reason],
+        ));
     }
 }

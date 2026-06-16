@@ -33,14 +33,13 @@ class ExactCallbackTest extends TestCase
         ]);
     }
 
-    public function test_callback_exchanges_code_when_state_matches(): void
+    public function test_callback_exchanges_code_and_redirects_to_connected(): void
     {
         $connection = $this->pendingExactConnection();
         $state = $connection->oauth_state;
 
-        $this->getJson("/v1/oauth/exact/callback?code=auth_code_xyz&state={$state}")
-            ->assertOk()
-            ->assertJson(['status' => 'active']);
+        $this->get("/v1/oauth/exact/callback?code=auth_code_xyz&state={$state}")
+            ->assertRedirectContains('/oauth/connected');
 
         $connection->refresh();
         $this->assertSame('active', $connection->status);
@@ -48,30 +47,39 @@ class ExactCallbackTest extends TestCase
         $this->assertStringStartsWith('access_test_fake_', $connection->access_token);
     }
 
-    public function test_callback_with_invalid_state_returns_400(): void
+    public function test_callback_with_invalid_state_redirects_to_failed(): void
     {
         $this->pendingExactConnection();
 
-        $this->getJson('/v1/oauth/exact/callback?code=x&state=tampered_state')
-            ->assertStatus(400)
-            ->assertJson(['error' => 'invalid_or_expired_state']);
+        $this->get('/v1/oauth/exact/callback?code=x&state=tampered_state')
+            ->assertRedirectContains('/oauth/failed');
     }
 
-    public function test_callback_with_expired_state_returns_400(): void
+    public function test_callback_with_expired_state_redirects_to_failed(): void
     {
         $connection = $this->pendingExactConnection();
         $connection->update(['oauth_state_expires_at' => now()->subMinute()]);
 
-        $this->getJson("/v1/oauth/exact/callback?code=x&state={$connection->oauth_state}")
-            ->assertStatus(400);
+        $this->get("/v1/oauth/exact/callback?code=x&state={$connection->oauth_state}")
+            ->assertRedirectContains('/oauth/failed');
     }
 
-    public function test_second_callback_with_same_state_returns_400(): void
+    public function test_second_callback_with_same_state_redirects_to_failed(): void
     {
         $connection = $this->pendingExactConnection();
         $state = $connection->oauth_state;
 
-        $this->getJson("/v1/oauth/exact/callback?code=x&state={$state}")->assertOk();
-        $this->getJson("/v1/oauth/exact/callback?code=x&state={$state}")->assertStatus(400);
+        $this->get("/v1/oauth/exact/callback?code=x&state={$state}")
+            ->assertRedirectContains('/oauth/connected');
+        $this->get("/v1/oauth/exact/callback?code=x&state={$state}")
+            ->assertRedirectContains('/oauth/failed');
+    }
+
+    public function test_callback_with_provider_error_redirects_to_failed(): void
+    {
+        $this->pendingExactConnection();
+
+        $this->get('/v1/oauth/exact/callback?error=access_denied&error_description=nope')
+            ->assertRedirectContains('/oauth/failed');
     }
 }
