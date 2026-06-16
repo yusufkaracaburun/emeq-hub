@@ -49,7 +49,8 @@ services:
     ports:
       - "127.0.0.1:${PGADMIN_PORT:-8091}:80"
     environment:
-      PGADMIN_DEFAULT_EMAIL: "${PGADMIN_EMAIL:-admin@emeq.test}"
+      # NB: geen .test/.local hier — pgAdmin weigert reserved TLDs (RFC 6761).
+      PGADMIN_DEFAULT_EMAIL: "${PGADMIN_EMAIL:-admin@emeq.nl}"
       PGADMIN_DEFAULT_PASSWORD: "${PGADMIN_PASSWORD:-emeq_hub}"
       # Desktop-mode: geen per-user login, geen master-password-prompt (lokaal dev).
       PGADMIN_CONFIG_SERVER_MODE: "False"
