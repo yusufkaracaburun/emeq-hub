@@ -266,6 +266,38 @@ class StartOAuthFlowActionTest extends TestCase
     }
 
     // ============================================================
+    // Regressie: door Livewire heen (niet directe HTTP-call) geeft redirect()
+    // een Livewire\...\Redirector i.p.v. RedirectResponse — dispatch()'s
+    // return-type moet dat accepteren. Dit was het gat dat de directe
+    // dispatch()-test miste.
+    // ============================================================
+
+    public function test_account_action_through_livewire_redirects_for_exact(): void
+    {
+        config([
+            'services.exact.client_id' => 'app_test_id',
+            'services.exact.redirect_uri' => 'https://hub.test/v1/oauth/exact/callback',
+            'services.exact.auth_base_url' => 'https://start.exactonline.nl',
+        ]);
+
+        $staff = $this->staffUserWithPermission();
+        $staff->givePermissionTo('manage-consumers');
+        $this->actingAs($staff);
+
+        $account = $this->makeAccount();
+
+        Livewire::test(ListAccounts::class)
+            ->callTableAction('startOAuthFlow', $account, data: ['provider' => 'exact'])
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('connections', [
+            'account_id' => $account->id,
+            'provider' => 'exact',
+            'status' => 'pending',
+        ]);
+    }
+
+    // ============================================================
     // Task 2 mount-tests — wiring op ConnectionResource + AccountResource
     // ============================================================
 

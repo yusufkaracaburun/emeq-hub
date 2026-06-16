@@ -15,6 +15,7 @@ use Filament\Forms\Components\Select;
 use Filament\Notifications\Notification;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Routing\Redirector;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
 use Laravel\Pennant\Feature;
@@ -80,7 +81,7 @@ class StartOAuthFlowAction
             ->modalSubmitActionLabel('Start koppeling')
             ->modalCancelActionLabel('Annuleren')
             ->visible(fn (): bool => auth()->user()?->can('manage-connections') ?? false)
-            ->action(fn (Account $record, array $data): RedirectResponse => self::dispatch($record, $data['provider']));
+            ->action(fn (Account $record, array $data): RedirectResponse|Redirector => self::dispatch($record, $data['provider']));
     }
 
     /**
@@ -96,7 +97,7 @@ class StartOAuthFlowAction
                 && $record->access_token === null
                 && $record->revoked_at === null
             )
-            ->action(fn (Connection $record): RedirectResponse => self::dispatch($record->account, $record->provider->value, $record));
+            ->action(fn (Connection $record): RedirectResponse|Redirector => self::dispatch($record->account, $record->provider->value, $record));
     }
 
     /**
@@ -108,7 +109,7 @@ class StartOAuthFlowAction
      * Public static voor directe testability — anders moet je via Livewire-mount-stack
      * gaan, wat een onnodige indirectie is voor unit-coverage van de init-flow.
      */
-    public static function dispatch(Account $account, string $provider, ?Connection $existing = null): RedirectResponse
+    public static function dispatch(Account $account, string $provider, ?Connection $existing = null): RedirectResponse|Redirector
     {
         try {
             $flow = app(OAuthFlowRegistry::class)->for($provider);
