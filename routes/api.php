@@ -8,7 +8,10 @@ use App\Http\Controllers\Api\V1\AccountSubscriptions\ResumeController;
 use App\Http\Controllers\Api\V1\Billing\SubscriptionController;
 use App\Http\Controllers\Api\V1\ConnectionController;
 use App\Http\Controllers\Api\V1\Exact\GlAccountsController as ExactGlAccountsController;
+use App\Http\Controllers\Api\V1\Exact\JournalsController as ExactJournalsController;
 use App\Http\Controllers\Api\V1\Exact\PassThroughController as ExactPassThroughController;
+use App\Http\Controllers\Api\V1\Exact\RelationsController as ExactRelationsController;
+use App\Http\Controllers\Api\V1\Exact\VatCodesController as ExactVatCodesController;
 use App\Http\Controllers\Api\V1\Mollie\Connect\ClientLinksController as ConnectClientLinksController;
 use App\Http\Controllers\Api\V1\Mollie\Connect\OnboardingController as ConnectOnboardingController;
 use App\Http\Controllers\Api\V1\Mollie\Connect\OrganizationsController as ConnectOrganizationsController;
@@ -70,6 +73,18 @@ Route::middleware('auth:sanctum')->group(function (): void {
             Route::get('/gl-accounts', [ExactGlAccountsController::class, 'index'])
                 ->middleware('ability:exact:read,exact:write,*')
                 ->name('api.exact.gl-accounts.index');
+
+            Route::get('/vat-codes', [ExactVatCodesController::class, 'index'])
+                ->middleware('ability:exact:read,exact:write,*')
+                ->name('api.exact.vat-codes.index');
+
+            Route::get('/relations', [ExactRelationsController::class, 'index'])
+                ->middleware('ability:exact:read,exact:write,*')
+                ->name('api.exact.relations.index');
+
+            Route::get('/journals', [ExactJournalsController::class, 'index'])
+                ->middleware('ability:exact:read,exact:write,*')
+                ->name('api.exact.journals.index');
 
             // Generieke escape-hatch voor elk overig Exact-endpoint.
             Route::any('/{path}', ExactPassThroughController::class)
