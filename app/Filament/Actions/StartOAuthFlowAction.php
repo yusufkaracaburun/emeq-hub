@@ -158,8 +158,19 @@ class StartOAuthFlowAction
             return back();
         }
 
+        // Idempotent: hergebruik een bestaande niet-revoked Connection (orphan
+        // pending van een eerdere poging, of een active connection die her-koppelt).
+        // De partial unique-index (account_id, provider) WHERE revoked_at IS NULL
+        // staat geen tweede non-revoked rij toe → anders UniqueConstraintViolation.
+        $existing ??= $account->connections()
+            ->where('provider', $provider)
+            ->whereNull('revoked_at')
+            ->first();
+
         if ($existing !== null) {
             $existing->update([
+                // Reset naar pending: de callback zoekt op status='pending' + oauth_state.
+                'status' => 'pending',
                 'oauth_state' => $state,
                 'oauth_state_expires_at' => now()->addMinutes(30),
             ]);

@@ -266,6 +266,43 @@ class StartOAuthFlowActionTest extends TestCase
     }
 
     // ============================================================
+    // Regressie: dispatch() moet idempotent zijn. Een bestaande niet-revoked
+    // Connection (bv. orphan pending van een eerdere mislukte poging) mag NIET
+    // een tweede insert triggeren — de partial unique-index
+    // (account_id, provider) WHERE revoked_at IS NULL weigert dat anders.
+    // ============================================================
+
+    public function test_dispatch_reuses_existing_non_revoked_connection(): void
+    {
+        config([
+            'services.exact.client_id' => 'app_test_id',
+            'services.exact.redirect_uri' => 'https://hub.test/v1/oauth/exact/callback',
+            'services.exact.auth_base_url' => 'https://start.exactonline.nl',
+        ]);
+
+        $account = $this->makeAccount();
+        $existing = Connection::factory()->forExact()->create([
+            'account_id' => $account->id,
+            'status' => 'pending',
+            'oauth_state' => 'oude-state',
+            'access_token' => null,
+        ]);
+
+        $response = StartOAuthFlowAction::dispatch($account, 'exact');
+
+        // Geen tweede rij — de bestaande is hergebruikt.
+        $this->assertSame(
+            1,
+            Connection::query()->where('account_id', $account->id)->where('provider', 'exact')->count(),
+        );
+
+        $existing->refresh();
+        $this->assertSame('pending', $existing->status);
+        $this->assertNotSame('oude-state', $existing->oauth_state);
+        $this->assertStringStartsWith('https://start.exactonline.nl/api/oauth2/auth', $response->getTargetUrl());
+    }
+
+    // ============================================================
     // Regressie: door Livewire heen (niet directe HTTP-call) geeft redirect()
     // een Livewire\...\Redirector i.p.v. RedirectResponse — dispatch()'s
     // return-type moet dat accepteren. Dit was het gat dat de directe
