@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Connections;
 
 use App\Enums\Provider;
+use App\Filament\Actions\ManageAccountingMappingAction;
 use App\Filament\Actions\StartOAuthFlowAction;
 use App\Filament\Resources\Connections\Pages\ListConnections;
 use App\Filament\Resources\Connections\Pages\ViewConnection;
@@ -177,6 +178,7 @@ class ConnectionResource extends Resource
             ->recordActions([
                 ViewAction::make(),
                 StartOAuthFlowAction::forConnection(),
+                ManageAccountingMappingAction::make(),
                 Action::make('revoke')
                     ->label('Revoke')
                     ->icon(Heroicon::OutlinedNoSymbol)
