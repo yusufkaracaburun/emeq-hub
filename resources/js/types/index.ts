@@ -11,8 +11,17 @@ export interface Capability {
     description: string;
 }
 
+export interface EndpointRef {
+    method: string;
+    path: string;
+    target: string;
+    description: string;
+}
+
 export interface ProviderDetail extends ProviderSummary {
+    how_it_works?: string[];
     capabilities: Capability[];
+    endpoints?: EndpointRef[];
     connect_steps: string[];
     example_curl: string | null;
     docs_url: string | null;

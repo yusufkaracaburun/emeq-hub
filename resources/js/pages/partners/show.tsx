@@ -29,6 +29,22 @@ export default function PartnerShow({ provider }: { provider: ProviderDetail }) 
 
             <Separator className="mx-auto max-w-5xl" />
 
+            {provider.how_it_works && (
+                <>
+                    <section className="mx-auto max-w-5xl px-4 py-12">
+                        <h2 className="text-2xl font-semibold">Hoe het werkt</h2>
+                        <div className="mt-6 max-w-3xl space-y-4">
+                            {provider.how_it_works.map((paragraph, index) => (
+                                <p key={index} className="text-muted-foreground">
+                                    {paragraph}
+                                </p>
+                            ))}
+                        </div>
+                    </section>
+                    <Separator className="mx-auto max-w-5xl" />
+                </>
+            )}
+
             <section className="mx-auto max-w-5xl px-4 py-12">
                 <h2 className="text-2xl font-semibold">Wat we ondersteunen</h2>
                 <div className="mt-6 grid gap-5 md:grid-cols-2">
@@ -44,6 +60,35 @@ export default function PartnerShow({ provider }: { provider: ProviderDetail }) 
                     ))}
                 </div>
             </section>
+
+            {provider.endpoints && (
+                <section className="mx-auto max-w-5xl px-4 pb-12">
+                    <h2 className="text-2xl font-semibold">Endpoints</h2>
+                    <p className="mt-2 max-w-3xl text-sm text-muted-foreground">
+                        Welke Hub-endpoints je app aanroept en op welk partner-endpoint ze uitkomen. Elke call
+                        gebruikt je Bearer-token en de header <code>X-Account-Id</code>; elke call wordt geaudit.
+                    </p>
+                    <div className="mt-6 divide-y rounded-lg border">
+                        {provider.endpoints.map((endpoint) => (
+                            <div
+                                key={`${endpoint.method} ${endpoint.path}`}
+                                className="flex flex-col gap-1 p-4 sm:flex-row sm:items-baseline sm:gap-4"
+                            >
+                                <div className="flex shrink-0 items-center gap-2 sm:w-80">
+                                    <Badge variant="secondary" className="font-mono text-xs">
+                                        {endpoint.method}
+                                    </Badge>
+                                    <code className="text-sm">{endpoint.path}</code>
+                                </div>
+                                <div className="text-sm text-muted-foreground">
+                                    <span className="font-medium text-foreground">→ {endpoint.target}</span>
+                                    <span className="mt-0.5 block">{endpoint.description}</span>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </section>
+            )}
 
             <section className="mx-auto max-w-5xl px-4 pb-12">
                 <h2 className="text-2xl font-semibold">Koppelen</h2>

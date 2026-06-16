@@ -16,7 +16,9 @@ declare(strict_types=1);
  *   tagline       één regel onder de titel
  *   summary       korte alinea
  *   category      'Boekhouden' | 'Betalingen' | …
+ *   how_it_works  ?list<string>  uitleg-alinea's over het request-pad (optioneel)
  *   capabilities  list<array{title,description}>
+ *   endpoints     ?list<array{method,path,target,description}>  Hub→partner endpoint-kaart (optioneel)
  *   connect_steps list<string>
  *   example_curl  ?string  (null = geen snippet)
  *   docs_url      ?string
@@ -29,6 +31,17 @@ return [
         'summary' => 'Koppel je app aan Exact Online-administraties zonder zelf OAuth2, '
             .'token-refresh en division-routing te bouwen. De Hub regelt de koppeling, '
             .'multi-tenant token-opslag en audit-logging.',
+        'how_it_works' => [
+            'Je app authentiseert met een Bearer-token (Personal Access Token) en geeft per call mee '
+                .'om welke eindgebruiker het gaat via de header X-Account-Id. De Hub leidt daaruit de juiste '
+                .'Connection af (Consumer → Account → actieve Exact-koppeling) — nooit via een losse connection-id.',
+            'Voor die Connection injecteert de Hub de juiste division (administratie) en het OAuth-token, '
+                .'en stuurt je verzoek door naar de Exact REST-API. Tokens worden reactief ververst: Exact '
+                .'weigert een refresh zolang het access_token nog geldig is, dus de Hub ververst pas bij verloop.',
+            'Elke call — named resource én generieke pass-through — wordt vastgelegd in een audit-log '
+                .'(methode, geraakte Exact-endpoint, status, duur, response-grootte). Upstream-fouten worden '
+                .'naar een uniform Hub-formaat gemapt, zodat je app niet elk Exact-specifiek foutgeval hoeft te kennen.',
+        ],
         'capabilities' => [
             [
                 'title' => 'OAuth Connect-broker',
@@ -45,6 +58,56 @@ return [
                 'description' => 'POST één canonical FinancialDocument; de Hub mapt naar salesinvoice, '
                     .'purchaseentry of generaljournalentry. Per-Connection mapping (VATCode, GLAccount, '
                     .'relatie, dagboek) is instelbaar.',
+            ],
+        ],
+        'endpoints' => [
+            [
+                'method' => 'POST',
+                'path' => '/v1/oauth/exact/init',
+                'target' => 'start OAuth-flow',
+                'description' => 'Maakt een pending Connection en geeft de Exact authorize-URL terug (ability exact:write).',
+            ],
+            [
+                'method' => 'GET',
+                'path' => '/v1/oauth/exact/callback',
+                'target' => 'OAuth-callback',
+                'description' => 'Exact stuurt de eindgebruiker hierheen terug; tokens + division landen encrypted in de Connection.',
+            ],
+            [
+                'method' => 'GET',
+                'path' => '/v1/exact/gl-accounts',
+                'target' => 'financial/GLAccounts',
+                'description' => 'Grootboekrekeningen (read-only). OData-query ($select/$filter/$top) wordt doorgegeven.',
+            ],
+            [
+                'method' => 'GET',
+                'path' => '/v1/exact/vat-codes',
+                'target' => 'vat/VATCodes',
+                'description' => 'BTW-codes (read-only) — de referentie voor de tarief→VATCode-mapping.',
+            ],
+            [
+                'method' => 'GET',
+                'path' => '/v1/exact/relations',
+                'target' => 'crm/Accounts',
+                'description' => 'Relaties / debiteuren-crediteuren (read-only) — de referentie voor de relatie→GUID-mapping.',
+            ],
+            [
+                'method' => 'GET',
+                'path' => '/v1/exact/journals',
+                'target' => 'financial/Journals',
+                'description' => 'Dagboeken (read-only) — de referentie voor de doc-type→dagboek-mapping.',
+            ],
+            [
+                'method' => 'ANY',
+                'path' => '/v1/exact/{path}',
+                'target' => 'elk Exact OData-endpoint',
+                'description' => 'Generieke pass-through: bereik elk overig Exact-endpoint via dezelfde auth + audit.',
+            ],
+            [
+                'method' => 'POST',
+                'path' => '/v1/accounting/documents',
+                'target' => 'salesinvoice / purchaseentry / generaljournalentry',
+                'description' => 'Provider-agnostische boekhoud-sync: POST één canonical FinancialDocument; de Hub mapt naar het juiste Exact-endpoint.',
             ],
         ],
         'connect_steps' => [

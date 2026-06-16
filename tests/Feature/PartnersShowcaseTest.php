@@ -42,6 +42,19 @@ class PartnersShowcaseTest extends TestCase
             );
     }
 
+    public function test_exact_show_exposes_how_it_works_and_endpoint_map(): void
+    {
+        $this->get('/partners/exact')
+            ->assertOk()
+            ->assertInertia(fn (AssertableInertia $page) => $page
+                ->component('partners/show')
+                ->has('provider.how_it_works')
+                ->has('provider.endpoints', 8, fn (AssertableInertia $endpoint) => $endpoint
+                    ->hasAll(['method', 'path', 'target', 'description'])
+                )
+            );
+    }
+
     public function test_each_registered_provider_has_a_showcase_page(): void
     {
         foreach (['exact', 'mollie', 'snelstart'] as $provider) {
