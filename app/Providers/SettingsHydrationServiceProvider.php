@@ -10,12 +10,14 @@ use Illuminate\Support\ServiceProvider;
 use Throwable;
 
 /**
- * Hydrateert config('services.*') uit de DB-settings, met .env als fallback.
- * Hierdoor blijven de SDK's, OAuthFlows en credential-resolvers ongewijzigd
- * (ze lezen gewoon config()), terwijl de waardes via de admin beheerd worden.
+ * Hydrateert config('services.exact.*') uit de DB-settings — dé bron voor de
+ * Exact-credentials (config/services.php heeft geen env meer; creds = null,
+ * base-URLs een statische default). SDK's, OAuthFlows en credential-resolvers
+ * blijven ongewijzigd (ze lezen gewoon config()).
  *
  * Guard: vóór de settings-migratie (of in CI zonder DB) bestaat de tabel niet —
- * dan overslaan en op de env-config terugvallen. Lege settings → eveneens env.
+ * dan overslaan. Een lege setting valt via ?: terug op de config-default
+ * (null voor creds, statische base-URL) — niet op .env.
  */
 class SettingsHydrationServiceProvider extends ServiceProvider
 {

@@ -60,12 +60,16 @@ return [
     ],
 
     'exact' => [
-        'client_id' => env('EXACT_CLIENT_ID'),
-        'client_secret' => env('EXACT_CLIENT_SECRET'),
-        'redirect_uri' => env('EXACT_REDIRECT_URI'),
-        'webhook_secret' => env('EXACT_WEBHOOK_SECRET'),
-        'auth_base_url' => env('EXACT_AUTH_BASE_URL', 'https://start.exactonline.nl'),
-        'api_base_url' => env('EXACT_API_BASE_URL', 'https://start.exactonline.nl'),
+        // Credentials komen uit de DB-settings (ExactSettings) via
+        // SettingsHydrationServiceProvider — niet uit .env. Vul ze in de admin
+        // (Beheer → Integratie-instellingen). Base-URLs houden een statische
+        // default (geen secret, geen env).
+        'client_id' => null,
+        'client_secret' => null,
+        'redirect_uri' => null,
+        'webhook_secret' => null,
+        'auth_base_url' => 'https://start.exactonline.nl',
+        'api_base_url' => 'https://start.exactonline.nl',
     ],
 
 ];

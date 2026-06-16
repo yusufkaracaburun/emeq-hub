@@ -15,9 +15,9 @@ use Filament\Support\Icons\Heroicon;
 use UnitEnum;
 
 /**
- * Beheer partner-integratie-credentials in de DB i.p.v. .env. Secrets worden
- * encrypted opgeslagen (zie ExactSettings/MollieSettings::encrypted()).
- * SettingsHydrationServiceProvider hydrateert config('services.*') hiermee.
+ * Beheer Exact-integratie-credentials in de DB i.p.v. .env. Secrets worden
+ * encrypted opgeslagen (zie ExactSettings::encrypted()).
+ * SettingsHydrationServiceProvider hydrateert config('services.exact.*') hiermee.
  */
 class ManageIntegrationSettings extends Page
 {
