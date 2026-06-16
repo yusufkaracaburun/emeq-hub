@@ -11,6 +11,7 @@ use App\Models\Consumer;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Log;
+use Spatie\WebhookServer\BackoffStrategy\ExponentialBackoffStrategy;
 use Spatie\WebhookServer\CallWebhookJob;
 use Tests\TestCase;
 
@@ -102,6 +103,27 @@ class ForwardSnelstartWebhookToConsumerJobTest extends TestCase
 
         Bus::assertDispatched(CallWebhookJob::class, function (CallWebhookJob $job): bool {
             return ($job->headers['X-Emeq-Event-Id'] ?? null) === 'evt-001';
+        });
+    }
+
+    public function test_fanout_carries_the_durability_retry_policy(): void
+    {
+        Bus::fake([CallWebhookJob::class]);
+
+        $consumer = Consumer::factory()->withWebhookCallback()->create();
+        $account = Account::factory()->for($consumer)->create();
+        $connection = Connection::factory()->forSnelstart()->active()->for($account)->create();
+
+        (new ForwardSnelstartWebhookToConsumerJob(
+            $connection,
+            ['administratieId' => $connection->administratie_id],
+            'evt-retry-policy',
+        ))->handle();
+
+        Bus::assertDispatched(CallWebhookJob::class, function (CallWebhookJob $job): bool {
+            return $job->tries === 5
+                && $job->backoffStrategyClass === ExponentialBackoffStrategy::class
+                && $job->requestTimeout === 3;
         });
     }
 

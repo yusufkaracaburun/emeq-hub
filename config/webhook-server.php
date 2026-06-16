@@ -60,8 +60,13 @@ return [
 
     /*
      * The amount of times the webhook should be called before we give up.
+     *
+     * 5 tries over the ExponentialBackoffStrategy (10^attempt) spans ~3h
+     * (t=0, 10s, 110s, ~18m, ~3h) so a consumer that is down for a deploy
+     * window survives without losing the event. See
+     * .docs/decisions/webhook-fanout-retry-policy.md.
      */
-    'tries' => 3,
+    'tries' => 5,
 
     /*
      * This class determines how many seconds there should be between attempts.
