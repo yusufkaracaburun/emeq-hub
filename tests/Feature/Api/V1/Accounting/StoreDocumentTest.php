@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Api\V1\Accounting;
 
+use App\Accounting\Enums\DocumentType;
 use App\Accounting\Exact\Contracts\ExactReferenceResolver;
 use App\Accounting\Party;
 use App\Models\Connection;
@@ -41,9 +42,9 @@ class StoreDocumentTest extends TestCase
     {
         $this->app->bind(ExactReferenceResolver::class, fn (): ExactReferenceResolver => new class implements ExactReferenceResolver
         {
-            public function customerGuid(Party $party, Connection $connection): string
+            public function relationGuid(Party $party, Connection $connection): string
             {
-                return 'cust-guid';
+                return $party->role === 'creditor' ? 'supp-guid' : 'cust-guid';
             }
 
             public function vatCode(float $taxRate, Connection $connection): string
@@ -54,6 +55,11 @@ class StoreDocumentTest extends TestCase
             public function glAccountGuid(?string $category, Connection $connection): ?string
             {
                 return 'gl-guid';
+            }
+
+            public function journal(DocumentType $type, Connection $connection): string
+            {
+                return $type === DocumentType::PurchaseInvoice ? '20' : '90';
             }
         });
     }
@@ -147,6 +153,76 @@ class StoreDocumentTest extends TestCase
                 && $body['SalesInvoiceLines'][0]['GLAccount'] === 'gl-guid'
                 && (float) $body['SalesInvoiceLines'][0]['UnitPrice'] === 100.0;
         });
+    }
+
+    public function test_pushes_purchase_invoice_to_purchaseentry(): void
+    {
+        MockClient::global([
+            RawExactRequest::class => MockResponse::make(['d' => ['ID' => 'pe-1']], 201),
+        ]);
+        $this->bindFakeReferences();
+
+        [$consumer] = $this->consumerWithExactConnection();
+        $token = $consumer->createToken('t', [TokenAbilities::EXACT_WRITE])->plainTextToken;
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->withHeader('X-Account-Id', 'school1')
+            ->postJson('/v1/accounting/documents', $this->salesInvoicePayload([
+                'type' => 'purchase_invoice',
+                'party' => ['role' => 'creditor', 'name' => 'Leverancier BV'],
+            ]))
+            ->assertStatus(201)
+            ->assertJsonPath('external_ref', 'pe-1');
+
+        MockClient::global()->assertSent(function (RawExactRequest $request): bool {
+            $body = $request->body()->all();
+
+            return $request->resolveEndpoint() === '/purchaseentry/PurchaseEntries'
+                && $body['Supplier'] === 'supp-guid'
+                && $body['Journal'] === '20'
+                && $body['PurchaseEntryLines'][0]['VATCode'] === '4';
+        });
+
+        $this->assertDatabaseHas('pass_through_calls', [
+            'provider' => 'exact',
+            'path' => 'accounting/documents:purchase_invoice',
+            'status' => 201,
+        ]);
+    }
+
+    public function test_pushes_expense_to_generaljournalentry(): void
+    {
+        MockClient::global([
+            RawExactRequest::class => MockResponse::make(['d' => ['ID' => 'gj-1']], 201),
+        ]);
+        $this->bindFakeReferences();
+
+        [$consumer] = $this->consumerWithExactConnection();
+        $token = $consumer->createToken('t', [TokenAbilities::EXACT_WRITE])->plainTextToken;
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->withHeader('X-Account-Id', 'school1')
+            ->postJson('/v1/accounting/documents', $this->salesInvoicePayload([
+                'type' => 'expense',
+                'party' => ['role' => 'creditor', 'name' => 'Leverancier BV'],
+            ]))
+            ->assertStatus(201)
+            ->assertJsonPath('external_ref', 'gj-1');
+
+        MockClient::global()->assertSent(function (RawExactRequest $request): bool {
+            $body = $request->body()->all();
+
+            return $request->resolveEndpoint() === '/generaljournalentry/GeneralJournalEntries'
+                && $body['Journal'] === '90'
+                && (float) $body['GeneralJournalEntryLines'][0]['AmountDC'] === 200.0
+                && $body['GeneralJournalEntryLines'][0]['VATCode'] === '4';
+        });
+
+        $this->assertDatabaseHas('pass_through_calls', [
+            'provider' => 'exact',
+            'path' => 'accounting/documents:expense',
+            'status' => 201,
+        ]);
     }
 
     public function test_missing_account_header_returns_400(): void

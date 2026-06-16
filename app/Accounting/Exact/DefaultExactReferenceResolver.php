@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Accounting\Exact;
 
+use App\Accounting\Enums\DocumentType;
 use App\Accounting\Exact\Contracts\ExactReferenceResolver;
 use App\Accounting\Exceptions\AccountingMappingException;
 use App\Accounting\Party;
@@ -12,14 +13,14 @@ use App\Models\Connection;
 /**
  * Placeholder tot fase 3 (hybride mapping: auto-afleiding uit de admin + per-Connection
  * override). Bewust falend i.p.v. stilzwijgend foute bookings produceren — een lege
- * VATCode/GLAccount zou een verkeerde BTW-aangifte opleveren. Tests binden een echte
- * fake; de live-flow wacht op de mapping-configuratie.
+ * VATCode/GLAccount/journaal zou een verkeerde BTW-aangifte opleveren. Tests binden een
+ * echte fake; de live-flow wacht op de mapping-configuratie.
  */
 final class DefaultExactReferenceResolver implements ExactReferenceResolver
 {
-    public function customerGuid(Party $party, Connection $connection): string
+    public function relationGuid(Party $party, Connection $connection): string
     {
-        throw $this->notConfigured('Customer-GUID');
+        throw $this->notConfigured('relatie-GUID (Customer/Supplier)');
     }
 
     public function vatCode(float $taxRate, Connection $connection): string
@@ -30,6 +31,11 @@ final class DefaultExactReferenceResolver implements ExactReferenceResolver
     public function glAccountGuid(?string $category, Connection $connection): ?string
     {
         throw $this->notConfigured('GLAccount');
+    }
+
+    public function journal(DocumentType $type, Connection $connection): string
+    {
+        throw $this->notConfigured('dagboek (Journal)');
     }
 
     private function notConfigured(string $what): AccountingMappingException

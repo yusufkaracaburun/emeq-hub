@@ -24,8 +24,13 @@ use Saloon\Enums\Method;
  * Exact Online accounting-adapter. Mapt een canonical FinancialDocument naar de
  * Exact REST-API en schrijft het weg op de division van de Connection. Bindt de
  * Exact-SDK per-request (mirror ResolveExactAccount) zodat de reactieve token-
- * refresh tegen déze Connection loopt. Referentie-data (Customer/VATCode/GLAccount)
- * komt uit de ExactReferenceResolver-seam.
+ * refresh tegen déze Connection loopt. Referentie-data (relatie/VATCode/GLAccount/
+ * journaal) komt uit de ExactReferenceResolver-seam.
+ *
+ * NB: de exacte body-fidelity (verplichte velden zoals datum, debet/credit-teken
+ * bij journaalposten) wordt geverifieerd bij de eerste live-write (fase 2, ná de
+ * Data & Security-review). De endpoints + line-velden zijn gegrond op de officiële
+ * REST API-referentie (HlpRestAPIResources).
  */
 final class ExactAccountingTarget implements AccountingTarget
 {
@@ -79,9 +84,14 @@ final class ExactAccountingTarget implements AccountingTarget
                 '/salesinvoice/SalesInvoices',
                 $this->salesInvoiceBody($document, $connection),
             ],
-            default => throw new AccountingMappingException(
-                "Exact-adapter ondersteunt doc-type '{$document->type->value}' nog niet (fase 2)."
-            ),
+            DocumentType::PurchaseInvoice => [
+                '/purchaseentry/PurchaseEntries',
+                $this->purchaseEntryBody($document, $connection),
+            ],
+            DocumentType::Income, DocumentType::Expense => [
+                '/generaljournalentry/GeneralJournalEntries',
+                $this->generalJournalEntryBody($document, $connection),
+            ],
         };
     }
 
@@ -91,7 +101,7 @@ final class ExactAccountingTarget implements AccountingTarget
     private function salesInvoiceBody(FinancialDocument $document, Connection $connection): array
     {
         return [
-            'Customer' => $this->references->customerGuid($document->party, $connection),
+            'Customer' => $this->references->relationGuid($document->party, $connection),
             'InvoiceDate' => $document->issueDate->format('Y-m-d'),
             'YourRef' => $document->reference ?? $document->number,
             'Description' => $document->number ?? $document->externalId,
@@ -100,6 +110,48 @@ final class ExactAccountingTarget implements AccountingTarget
                     'Description' => $line->description,
                     'Quantity' => $line->quantity,
                     'UnitPrice' => $line->unitPrice,
+                    'VATCode' => $this->references->vatCode($line->taxRate, $connection),
+                    'GLAccount' => $this->references->glAccountGuid($line->category, $connection),
+                ], fn (mixed $v): bool => $v !== null),
+                $document->lines,
+            ),
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function purchaseEntryBody(FinancialDocument $document, Connection $connection): array
+    {
+        return [
+            'Supplier' => $this->references->relationGuid($document->party, $connection),
+            'EntryDate' => $document->issueDate->format('Y-m-d'),
+            'Journal' => $this->references->journal($document->type, $connection),
+            'Description' => $document->number ?? $document->externalId,
+            'PurchaseEntryLines' => array_map(
+                fn (FinancialDocumentLine $line): array => array_filter([
+                    'Description' => $line->description,
+                    'AmountFC' => $line->netAmount(),
+                    'VATCode' => $this->references->vatCode($line->taxRate, $connection),
+                    'GLAccount' => $this->references->glAccountGuid($line->category, $connection),
+                ], fn (mixed $v): bool => $v !== null),
+                $document->lines,
+            ),
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function generalJournalEntryBody(FinancialDocument $document, Connection $connection): array
+    {
+        return [
+            'Journal' => $this->references->journal($document->type, $connection),
+            'Description' => $document->number ?? $document->externalId,
+            'GeneralJournalEntryLines' => array_map(
+                fn (FinancialDocumentLine $line): array => array_filter([
+                    'Description' => $line->description,
+                    'AmountDC' => $line->netAmount(),
                     'VATCode' => $this->references->vatCode($line->taxRate, $connection),
                     'GLAccount' => $this->references->glAccountGuid($line->category, $connection),
                 ], fn (mixed $v): bool => $v !== null),
