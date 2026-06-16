@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\V1\AccountController;
+use App\Http\Controllers\Api\V1\Accounting\DocumentsController as AccountingDocumentsController;
 use App\Http\Controllers\Api\V1\AccountSubscriptions\AccountSubscriptionController;
 use App\Http\Controllers\Api\V1\AccountSubscriptions\PauseController;
 use App\Http\Controllers\Api\V1\AccountSubscriptions\ResumeController;
@@ -63,6 +64,12 @@ Route::middleware('auth:sanctum')->group(function (): void {
         ->where('path', '.*')
         ->middleware(['feature.provider:exact', 'resolve.exact.account'])
         ->name('api.exact.passthrough');
+
+    // Provider-agnostische accounting-sync: canonical doc → gekoppeld boekhoudpakket.
+    // Account + Connection + provider-gate worden in de controller geresolved
+    // (de provider is niet route-vast — kan Exact/Snelstart/… zijn).
+    Route::post('/accounting/documents', [AccountingDocumentsController::class, 'store'])
+        ->name('api.accounting.documents.store');
 
     Route::middleware('ability:billing:read,billing:write,*')->group(function (): void {
         Route::get('/billing/subscription', [SubscriptionController::class, 'show'])
