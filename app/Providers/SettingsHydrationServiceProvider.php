@@ -33,6 +33,8 @@ class SettingsHydrationServiceProvider extends ServiceProvider
                 'services.exact.client_secret' => $exact->client_secret ?: config('services.exact.client_secret'),
                 'services.exact.redirect_uri' => $exact->redirect_uri ?: config('services.exact.redirect_uri'),
                 'services.exact.webhook_secret' => $exact->webhook_secret ?: config('services.exact.webhook_secret'),
+                'services.exact.auth_base_url' => $exact->auth_base_url ?: config('services.exact.auth_base_url'),
+                'services.exact.api_base_url' => $exact->api_base_url ?: config('services.exact.api_base_url'),
             ]);
 
             $mollie = app(MollieSettings::class);

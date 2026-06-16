@@ -50,6 +50,8 @@ class ManageIntegrationSettings extends Page
             'exact_client_secret' => $exact->client_secret,
             'exact_redirect_uri' => $exact->redirect_uri,
             'exact_webhook_secret' => $exact->webhook_secret,
+            'exact_auth_base_url' => $exact->auth_base_url,
+            'exact_api_base_url' => $exact->api_base_url,
             'mollie_connect_client_id' => $mollie->connect_client_id,
             'mollie_connect_client_secret' => $mollie->connect_client_secret,
             'mollie_connect_redirect_uri' => $mollie->connect_redirect_uri,
@@ -68,6 +70,8 @@ class ManageIntegrationSettings extends Page
                         TextInput::make('exact_redirect_uri')->label('Redirect URI')->maxLength(255),
                         TextInput::make('exact_client_secret')->label('Client secret')->password()->revealable()->maxLength(255),
                         TextInput::make('exact_webhook_secret')->label('Webhook secret')->password()->revealable()->maxLength(255),
+                        TextInput::make('exact_auth_base_url')->label('Auth base URL')->maxLength(255)->placeholder('https://start.exactonline.nl'),
+                        TextInput::make('exact_api_base_url')->label('API base URL')->maxLength(255)->placeholder('https://start.exactonline.nl'),
                     ]),
                 Section::make('Mollie Connect')
                     ->description('Mollie Connect OAuth-app-credentials. Client secret wordt encrypted opgeslagen.')
@@ -90,6 +94,8 @@ class ManageIntegrationSettings extends Page
         $exact->client_secret = (string) $data['exact_client_secret'];
         $exact->redirect_uri = (string) $data['exact_redirect_uri'];
         $exact->webhook_secret = (string) $data['exact_webhook_secret'];
+        $exact->auth_base_url = (string) $data['exact_auth_base_url'];
+        $exact->api_base_url = (string) $data['exact_api_base_url'];
         $exact->save();
 
         $mollie = app(MollieSettings::class);

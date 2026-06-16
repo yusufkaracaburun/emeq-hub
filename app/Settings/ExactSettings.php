@@ -21,6 +21,10 @@ class ExactSettings extends Settings
 
     public string $webhook_secret;
 
+    public string $auth_base_url;
+
+    public string $api_base_url;
+
     public static function group(): string
     {
         return 'exact';
