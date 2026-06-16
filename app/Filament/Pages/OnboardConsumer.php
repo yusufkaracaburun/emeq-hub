@@ -75,7 +75,9 @@ class OnboardConsumer extends Page
 
     public static function shouldRegisterNavigation(): bool
     {
-        return static::canAccess();
+        // Géén los menu-item: onboarden start via de "Onboarden"-actie op de
+        // Consumers-lijst (ListConsumers). De page blijft via die knop bereikbaar.
+        return false;
     }
 
     public function form(Schema $schema): Schema
