@@ -234,6 +234,38 @@ class StartOAuthFlowActionTest extends TestCase
     }
 
     // ============================================================
+    // Regressie: provider zonder scopes (Exact) — dispatch mocht NIET breken
+    // op config("services.{provider}.connect.scopes") == null. De Filament-action
+    // is het echte UI-pad (anders dan ExactInitController, die [] hardcodeert).
+    // ============================================================
+
+    public function test_dispatch_for_exact_builds_authorize_redirect(): void
+    {
+        config([
+            'services.exact.client_id' => 'app_test_id',
+            'services.exact.redirect_uri' => 'https://hub.test/v1/oauth/exact/callback',
+            'services.exact.auth_base_url' => 'https://start.exactonline.nl',
+        ]);
+
+        $account = $this->makeAccount();
+
+        // Echte ExactOAuthFlow (niet gefaket) — getAuthorizationUrl bouwt enkel een
+        // string, geen HTTP. Vóór de fix gaf config('services.exact.connect.scopes')
+        // null → getAuthorizationUrl(array $scopes) TypeError → back().
+        $response = StartOAuthFlowAction::dispatch($account, 'exact');
+
+        $this->assertStringStartsWith('https://start.exactonline.nl/api/oauth2/auth', $response->getTargetUrl());
+        $this->assertStringContainsString('client_id=app_test_id', $response->getTargetUrl());
+        $this->assertStringNotContainsString('scope=', $response->getTargetUrl());
+
+        $this->assertDatabaseHas('connections', [
+            'account_id' => $account->id,
+            'provider' => 'exact',
+            'status' => 'pending',
+        ]);
+    }
+
+    // ============================================================
     // Task 2 mount-tests — wiring op ConnectionResource + AccountResource
     // ============================================================
 

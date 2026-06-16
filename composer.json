@@ -20,6 +20,7 @@
         "laravel/tinker": "^3.0",
         "mollie/laravel-cashier-mollie": "^2.20",
         "mollie/mollie-api-php": "^3.11",
+        "opcodesio/log-viewer": "^3.24",
         "predis/predis": "^3.4",
         "sentry/sentry-laravel": "^4.25",
         "spatie/laravel-permission": "^6.0",

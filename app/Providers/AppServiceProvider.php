@@ -21,6 +21,7 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Cashier\Cashier;
+use Opcodes\LogViewer\Facades\LogViewer;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -55,6 +56,10 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        // opcodesio/log-viewer (/log-viewer) — alleen super-admin. Hier staan de
+        // applicatie-logs (laravel.log), incl. de getAuthorizationUrl-fouten.
+        LogViewer::auth(fn (Request $request): bool => $request->user()?->hasRole('super-admin') ?? false);
+
         Gate::define('viewApiDocs', function (?User $user): bool {
             $token = config('scramble.access_token');
 

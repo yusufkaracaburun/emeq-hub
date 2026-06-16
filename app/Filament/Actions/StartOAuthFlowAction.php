@@ -135,7 +135,10 @@ class StartOAuthFlowAction
         }
 
         $state = Str::random(48);
-        $scopes = config("services.{$provider}.connect.scopes");
+        // (array)-cast: niet elke provider heeft een connect.scopes-config (Exact
+        // gebruikt geen scopes → null). getAuthorizationUrl() verwacht een array;
+        // null zou een TypeError geven. No-op voor Mollie's array.
+        $scopes = (array) config("services.{$provider}.connect.scopes");
 
         // CR-04-equivalent: bouw de authorize-URL VÓÓR we de pending Connection
         // wegschrijven. Een runtime-fout in getAuthorizationUrl() (network, config
@@ -147,7 +150,7 @@ class StartOAuthFlowAction
 
             Notification::make()
                 ->title("OAuth-flow voor {$provider} faalde")
-                ->body('Authorize-URL kon niet worden opgebouwd — bekijk Horizon-logs.')
+                ->body('Authorize-URL kon niet worden opgebouwd — bekijk de applicatie-logs (`php artisan pail` of de Logs-pagina in de admin).')
                 ->danger()
                 ->send();
 
