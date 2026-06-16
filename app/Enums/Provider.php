@@ -19,6 +19,7 @@ enum Provider: string implements HasColor, HasLabel
 {
     case Mollie = 'mollie';
     case Snelstart = 'snelstart';
+    case Exact = 'exact';
 
     /**
      * @return list<string>
@@ -33,6 +34,7 @@ enum Provider: string implements HasColor, HasLabel
         return match ($this) {
             self::Mollie => 'Mollie',
             self::Snelstart => 'Snelstart',
+            self::Exact => 'Exact Online',
         };
     }
 
@@ -41,6 +43,7 @@ enum Provider: string implements HasColor, HasLabel
         return match ($this) {
             self::Mollie => 'success',
             self::Snelstart => 'info',
+            self::Exact => 'danger',
         };
     }
 }

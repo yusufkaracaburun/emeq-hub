@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "87f83cb2e8c194a9a357a45c3437f702",
+    "content-hash": "304175edc11d18f60fa9e596438dd109",
     "packages": [
         {
             "name": "blade-ui-kit/blade-heroicons",
@@ -1279,6 +1279,106 @@
                 }
             ],
             "time": "2025-03-06T22:45:56+00:00"
+        },
+        {
+            "name": "emeq/exact-api",
+            "version": "v0.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/yusufkaracaburun/emeq-exact-api.git",
+                "reference": "2bf574d60f858f4de1bd7eb9f6462a5b9c2e2623"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/yusufkaracaburun/emeq-exact-api/zipball/2bf574d60f858f4de1bd7eb9f6462a5b9c2e2623",
+                "reference": "2bf574d60f858f4de1bd7eb9f6462a5b9c2e2623",
+                "shasum": ""
+            },
+            "require": {
+                "ext-json": "*",
+                "illuminate/contracts": "^11.0||^12.0||^13.0",
+                "php": "^8.3",
+                "saloonphp/laravel-plugin": "^4.0",
+                "saloonphp/saloon": "^4.0",
+                "spatie/laravel-data": "^4.0",
+                "spatie/laravel-package-tools": "^1.16"
+            },
+            "require-dev": {
+                "larastan/larastan": "^3.0",
+                "laravel/pint": "^1.14",
+                "nunomaduro/collision": "^8.8",
+                "orchestra/testbench": "^9.0||^10.0||^11.0",
+                "pestphp/pest": "^3.0||^4.0",
+                "pestphp/pest-plugin-arch": "^3.0||^4.0",
+                "pestphp/pest-plugin-laravel": "^3.0||^4.0",
+                "phpstan/extension-installer": "^1.4",
+                "phpstan/phpstan-deprecation-rules": "^2.0",
+                "phpstan/phpstan-phpunit": "^2.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Emeq\\ExactApi\\ExactServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Emeq\\ExactApi\\": "src/"
+                }
+            },
+            "autoload-dev": {
+                "psr-4": {
+                    "Emeq\\ExactApi\\Tests\\": "tests/"
+                }
+            },
+            "scripts": {
+                "post-autoload-dump": [
+                    "@composer run prepare"
+                ],
+                "prepare": [
+                    "@php vendor/bin/testbench package:discover --ansi"
+                ],
+                "analyse": [
+                    "vendor/bin/phpstan analyse"
+                ],
+                "test": [
+                    "vendor/bin/pest"
+                ],
+                "test-coverage": [
+                    "vendor/bin/pest --coverage"
+                ],
+                "format": [
+                    "vendor/bin/pint"
+                ]
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Yusuf Karacaburun",
+                    "email": "info@emeq.nl",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Modern Laravel SDK voor de Exact Online REST API — OAuth2 authorization_code met roterende refresh-tokens, Saloon v4 en Spatie laravel-data DTOs.",
+            "homepage": "https://github.com/emeq/exact-api",
+            "keywords": [
+                "api-client",
+                "boekhouding",
+                "emeq",
+                "exact",
+                "exact-online",
+                "laravel",
+                "saloon"
+            ],
+            "support": {
+                "source": "https://github.com/yusufkaracaburun/emeq-exact-api/tree/v0.1.0",
+                "issues": "https://github.com/yusufkaracaburun/emeq-exact-api/issues"
+            },
+            "time": "2026-06-16T10:34:32+00:00"
         },
         {
             "name": "emeq/mollie-api",

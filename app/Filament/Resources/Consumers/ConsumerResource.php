@@ -67,6 +67,18 @@ class ConsumerResource extends Resource
                 TokenAbilities::CONSUMER_MANAGE_ACCOUNTS,
             ],
         ],
+        'exact-read' => [
+            'label' => 'Exact Online read-only',
+            'abilities' => [TokenAbilities::EXACT_READ],
+        ],
+        'exact-write' => [
+            'label' => 'Exact Online read+write',
+            'abilities' => [
+                TokenAbilities::EXACT_READ,
+                TokenAbilities::EXACT_WRITE,
+                TokenAbilities::CONSUMER_MANAGE_ACCOUNTS,
+            ],
+        ],
         'admin' => [
             'label' => 'Admin',
             'abilities' => [TokenAbilities::ADMIN],

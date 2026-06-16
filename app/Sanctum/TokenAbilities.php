@@ -12,6 +12,10 @@ final class TokenAbilities
 
     public const MOLLIE_WRITE = 'mollie:write';
 
+    public const EXACT_READ = 'exact:read';
+
+    public const EXACT_WRITE = 'exact:write';
+
     public const CONSUMER_MANAGE_ACCOUNTS = 'consumer:manage-accounts';
 
     public const BILLING_READ = 'billing:read';
@@ -30,6 +34,8 @@ final class TokenAbilities
             self::SNELSTART_WRITE,
             self::MOLLIE_READ,
             self::MOLLIE_WRITE,
+            self::EXACT_READ,
+            self::EXACT_WRITE,
             self::CONSUMER_MANAGE_ACCOUNTS,
             self::BILLING_READ,
             self::BILLING_WRITE,

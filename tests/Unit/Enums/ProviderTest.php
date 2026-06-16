@@ -13,17 +13,19 @@ class ProviderTest extends TestCase
     {
         $this->assertSame('mollie', Provider::Mollie->value);
         $this->assertSame('snelstart', Provider::Snelstart->value);
+        $this->assertSame('exact', Provider::Exact->value);
     }
 
     public function test_values_returns_all_backing_strings(): void
     {
-        $this->assertSame(['mollie', 'snelstart'], Provider::values());
+        $this->assertSame(['mollie', 'snelstart', 'exact'], Provider::values());
     }
 
     public function test_labels_are_human_readable(): void
     {
         $this->assertSame('Mollie', Provider::Mollie->getLabel());
         $this->assertSame('Snelstart', Provider::Snelstart->getLabel());
+        $this->assertSame('Exact Online', Provider::Exact->getLabel());
     }
 
     public function test_each_case_has_a_filament_color(): void

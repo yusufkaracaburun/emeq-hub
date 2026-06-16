@@ -31,4 +31,9 @@ return [
         'primary_label' => 'Client key',
         'oauth_flow_key' => null,
     ],
+    'exact' => [
+        'encrypted_fields' => ['access_token', 'refresh_token'],
+        'primary_label' => 'OAuth token',
+        'oauth_flow_key' => 'exact',
+    ],
 ];
