@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\V1\AccountSubscriptions\PauseController;
 use App\Http\Controllers\Api\V1\AccountSubscriptions\ResumeController;
 use App\Http\Controllers\Api\V1\Billing\SubscriptionController;
 use App\Http\Controllers\Api\V1\ConnectionController;
+use App\Http\Controllers\Api\V1\Exact\GlAccountsController as ExactGlAccountsController;
 use App\Http\Controllers\Api\V1\Exact\PassThroughController as ExactPassThroughController;
 use App\Http\Controllers\Api\V1\Mollie\Connect\ClientLinksController as ConnectClientLinksController;
 use App\Http\Controllers\Api\V1\Mollie\Connect\OnboardingController as ConnectOnboardingController;
@@ -50,20 +51,32 @@ Route::middleware('auth:sanctum')->group(function (): void {
             ->name('api.oauth.mollie.init');
     });
 
-    Route::middleware(['ability:exact:write', 'feature.provider:exact'])->group(function (): void {
-        Route::post('/oauth/exact/init', ExactInitController::class)
-            ->name('api.oauth.exact.init');
-    });
-
     Route::any('/snelstart/{path}', PassThroughController::class)
         ->where('path', '.*')
         ->middleware(['feature.provider:snelstart', 'resolve.snelstart.account'])
         ->name('api.snelstart.passthrough');
 
-    Route::any('/exact/{path}', ExactPassThroughController::class)
-        ->where('path', '.*')
-        ->middleware(['feature.provider:exact', 'resolve.exact.account'])
-        ->name('api.exact.passthrough');
+    // Exact Online — OAuth-init + division-aware REST pass-through, gegroepeerd
+    // onder de provider-kill-switch (spiegelt het Mollie-blok). Structured
+    // resource-routes landen onder de `exact`-prefix vóór de catch-all.
+    Route::middleware('feature.provider:exact')->group(function (): void {
+        Route::post('/oauth/exact/init', ExactInitController::class)
+            ->middleware('ability:exact:write')
+            ->name('api.oauth.exact.init');
+
+        Route::prefix('exact')->middleware('resolve.exact.account')->group(function (): void {
+            // Named resource-endpoints — vóór de catch-all (route-volgorde). Elk
+            // mapt 1-op-1 op één Exact OData-endpoint, met eigen Scramble-groep.
+            Route::get('/gl-accounts', [ExactGlAccountsController::class, 'index'])
+                ->middleware('ability:exact:read,exact:write,*')
+                ->name('api.exact.gl-accounts.index');
+
+            // Generieke escape-hatch voor elk overig Exact-endpoint.
+            Route::any('/{path}', ExactPassThroughController::class)
+                ->where('path', '.*')
+                ->name('api.exact.passthrough');
+        });
+    });
 
     // Provider-agnostische accounting-sync: canonical doc → gekoppeld boekhoudpakket.
     // Account + Connection + provider-gate worden in de controller geresolved
