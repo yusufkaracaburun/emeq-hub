@@ -1,0 +1,13 @@
+{
+  "Servers": {
+    "1": {
+      "Name": "emeq-hub",
+      "Group": "Servers",
+      "Host": "db",
+      "Port": 5432,
+      "MaintenanceDB": "emeq_hub",
+      "Username": "emeq_hub",
+      "SSLMode": "prefer"
+    }
+  }
+}

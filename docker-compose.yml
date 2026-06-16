@@ -39,21 +39,30 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
-  adminer:
-    image: adminer:4.8.1-standalone
-    container_name: emeq-adminer
+  pgadmin:
+    image: dpage/pgadmin4:9.15.0
+    container_name: emeq-pgadmin
     restart: unless-stopped
     depends_on:
       db:
         condition: service_healthy
     ports:
-      - "127.0.0.1:${ADMINER_PORT:-8091}:8080"
+      - "127.0.0.1:${PGADMIN_PORT:-8091}:80"
     environment:
-      ADMINER_DEFAULT_SERVER: db
-      ADMINER_DESIGN: pepa-linha-dark
+      PGADMIN_DEFAULT_EMAIL: "${PGADMIN_EMAIL:-admin@emeq.test}"
+      PGADMIN_DEFAULT_PASSWORD: "${PGADMIN_PASSWORD:-emeq_hub}"
+      # Desktop-mode: geen per-user login, geen master-password-prompt (lokaal dev).
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: "False"
+      # Pre-registreert de `db`-server (equivalent van adminer's ADMINER_DEFAULT_SERVER).
+      PGADMIN_SERVER_JSON_FILE: /pgadmin4/servers.json
+    volumes:
+      - pgadmindata:/var/lib/pgadmin
+      - ./docker/pgadmin/servers.json:/pgadmin4/servers.json:ro
 
 volumes:
   pgdata:
   redisdata:
   caddydata:
   caddyconfig:
+  pgadmindata:
