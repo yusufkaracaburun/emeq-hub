@@ -24,6 +24,7 @@
         "predis/predis": "^3.4",
         "sentry/sentry-laravel": "^4.25",
         "spatie/laravel-permission": "^6.0",
+        "spatie/laravel-settings": "^3.9",
         "spatie/laravel-webhook-client": "^3.6",
         "spatie/laravel-webhook-server": "^3.10"
     },
