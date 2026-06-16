@@ -98,7 +98,7 @@ Lees dit vóór architecturele beslissingen.
 Snelle pointers:
 - **Planning / open werk**: GitHub-issues (`P*`/`area/*`-labels) zijn de bron voor open + forward-werk; `/ai:next` rankt ze. Historische GSD-planning leeft in git-history (verwijderd uit de werkboom bij de ai-kit-overgang).
 - **Werkdocumentatie** (lokaal, gitignored): `.docs/decisions/` (ADRs), `.docs/plans/`, `.docs/errors/`, `.docs/stack/`. Lees `.docs/README.md` voor de indeling. Partner-research is verplaatst naar de SDK-repos (`packages/<sdk>/docs/partners/`).
-- **Routes**: `routes/web.php` (smoke `/`, `/up`; publiek `/oauth/connected/{connection}` + `/oauth/failed` — signed OAuth-landing na de partner-callback; in `local`/`testing`-env ook `/admin/quick-login/{role?}` + `/dev/partners[/{provider}]`), `routes/console.php`, `routes/api.php` (`/v1/*` consumer-API achter Sanctum + `throttle:api`) en `routes/webhooks.php` (`/webhooks/{provider}/{...}` + Cashier-webhooks, publiek signature-verified) zijn geland.
+- **Routes**: `routes/web.php` (smoke `/`, `/up`; publiek `/oauth/connected/{connection}` + `/oauth/failed` — signed OAuth-landing na de partner-callback; publiek `/partners` + `/partners/{provider}` — Inertia/React integraties-showcase, indexeerbaar via `SetNoIndexHeaders`-uitzondering op `partners.*`; in `local`/`testing`-env ook `/admin/quick-login/{role?}` + `/dev/exact/*` OAuth-tracer), `routes/console.php`, `routes/api.php` (`/v1/*` consumer-API achter Sanctum + `throttle:api`) en `routes/webhooks.php` (`/webhooks/{provider}/{...}` + Cashier-webhooks, publiek signature-verified) zijn geland.
 - **Admin-paneel**: Filament v4 op `/admin` (Phase 9, HUB-04). `User` implementeert `FilamentUser` + `HasRoles` (Spatie); admin-access via Spatie-rollen `super-admin`/`staff` (zie `EmeqStaffSeeder`). Resource-management voor `manage-staff` ge-gate via gate in `AppServiceProvider::boot()`. 8 Resources gegroepeerd in 4 navigation-groups (Tenants / Integraties / Abonnementen / Beheer), incl. de read-only `PassThroughCallResource` (Integraties, gate `view-pass-through-calls`).
 - **Provider-credential-laag** (D-04): `config/hub-providers.php` + `App\Support\ProviderCredentialDescriptor` is de single source of truth voor per-provider credential-**metadata**. `Connection::fingerprint()` + Filament-views + `ConnectionStatsWidget` consumen via descriptor. Nieuwe provider = config-row + factory-state + infolist Section, geen nieuwe Resource-class. Zie `.docs/decisions/provider-credential-descriptor.md`. De provider-**identiteit** is getypeerd via `App\Enums\Provider` (string-backed, Filament `HasLabel`/`HasColor`); `Connection::provider` is hierop gecast en de enum vervangt verspreide `'mollie'`/`'snelstart'`-literals (audit A1, `docs/reviews/2026-06-15-emeq-hub-architecture-audit.md`).
 - **Feature-flags / kill-switch** (Phase 8): Pennant-based provider kill-switch via `feature.provider:{provider}` middleware-alias (`bootstrap/app.php:37` → `EnsureProviderEnabled`) op `/v1/{mollie,snelstart}/*`. `OAuthFlowRegistry::for()` checkt dezelfde feature en gooit `ProviderDisabledException` als inactive. Features auto-gedefinieerd in `FeatureServiceProvider` op basis van `config('hub-providers')` keys — nieuwe provider = nieuwe config-row, geen middleware/registry-edit. Zie `.docs/decisions/feature-flags-pennant-kill-switch.md`.
@@ -232,6 +232,7 @@ This application is a Laravel application and its main Laravel ecosystems packag
 
 - php - 8.4
 - filament/filament (FILAMENT) - v4
+- inertiajs/inertia-laravel (INERTIA_LARAVEL) - v3
 - laravel/framework (LARAVEL) - v13
 - laravel/horizon (HORIZON) - v5
 - laravel/nightwatch (NIGHTWATCH) - v1
@@ -339,6 +340,28 @@ This project has domain-specific skills available in `**/skills/**`. You MUST ac
 
 - Every change must be programmatically tested. Write a new test or update an existing test, then run the affected tests to make sure they pass.
 - Run the minimum number of tests needed to ensure code quality and speed. Use `php artisan test --compact` with a specific filename or filter.
+
+=== inertia-laravel/core rules ===
+
+# Inertia
+
+- Inertia creates fully client-side rendered SPAs without modern SPA complexity, leveraging existing server-side patterns.
+- Components live in `resources/js/Pages` (unless specified in `vite.config.js`). Use `Inertia::render()` for server-side routing instead of Blade views.
+- ALWAYS use `search-docs` tool for version-specific Inertia documentation and updated code examples.
+
+# Inertia v3
+
+- Use all Inertia features from v1, v2, and v3. Check the documentation before making changes to ensure the correct approach.
+- New v3 features: standalone HTTP requests (`useHttp` hook), optimistic updates with automatic rollback, layout props (`useLayoutProps` hook), instant visits, simplified SSR via `@inertiajs/vite` plugin, custom exception handling for error pages.
+- Carried over from v2: deferred props, infinite scroll, merging props, polling, prefetching, once props, flash data.
+- When using deferred props, add an empty state with a pulsing or animated skeleton.
+- Axios has been removed. Use the built-in XHR client with interceptors, or install Axios separately if needed.
+- `Inertia::lazy()` / `LazyProp` has been removed. Use `Inertia::optional()` instead.
+- Prop types (`Inertia::optional()`, `Inertia::defer()`, `Inertia::merge()`) work inside nested arrays with dot-notation paths.
+- SSR works automatically in Vite dev mode with `@inertiajs/vite` - no separate Node.js server needed during development.
+- Event renames: `invalid` is now `httpException`, `exception` is now `networkError`.
+- `router.cancel()` replaced by `router.cancelAll()`.
+- The `future` configuration namespace has been removed - all v2 future options are now always enabled.
 
 === laravel/core rules ===
 

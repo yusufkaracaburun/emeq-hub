@@ -2,6 +2,7 @@
 
 use App\Http\Middleware\EnsureEmeqAdminToken;
 use App\Http\Middleware\EnsureProviderEnabled;
+use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\RequireCashierWebhookSecret;
 use App\Http\Middleware\ResolveExactAccount;
 use App\Http\Middleware\ResolveMollieAccount;
@@ -29,6 +30,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->append(SetNoIndexHeaders::class);
+        $middleware->web(append: [HandleInertiaRequests::class]);
         $middleware->api(prepend: ['throttle:api']);
         $middleware->alias([
             'resolve.snelstart.account' => ResolveSnelstartAccount::class,

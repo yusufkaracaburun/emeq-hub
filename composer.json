@@ -12,6 +12,7 @@
         "emeq/mollie-api": "^0.1.0-alpha.1",
         "emeq/snelstart-api": "^0.2.0",
         "filament/filament": "^4.0",
+        "inertiajs/inertia-laravel": "^3.1",
         "laravel/framework": "^13.8",
         "laravel/horizon": "^5.46",
         "laravel/nightwatch": "^1.26",

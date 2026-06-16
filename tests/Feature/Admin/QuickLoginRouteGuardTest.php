@@ -31,10 +31,6 @@ class QuickLoginRouteGuardTest extends TestCase
                 $app['router']->getRoutes()->getByName('admin.quick-login'),
                 "Quick-login route mag NIET bestaan in env={$env} — CR-01 regressie."
             );
-            $this->assertNull(
-                $app['router']->getRoutes()->getByName('dev.partners.index'),
-                "/dev/partners-index mag NIET bestaan in env={$env} — CR-01 regressie."
-            );
         }
     }
 
