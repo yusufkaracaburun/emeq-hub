@@ -21,13 +21,23 @@ Een Hub-platform en losse, Saloon-gebaseerde Laravel SDK-packages (`emeq/snelsta
 
 ## Technology Stack
 
-Zie de Laravel Boost-guidelines onderaan dit bestand (`.ai/project rules` block) voor de canonical stack-beschrijving: PHP 8.4 / Laravel 13.9 / Postgres 16 / Redis 7 / Caddy 2 / Sanctum v4 / Horizon v5 / Spatie webhook-server+client / dedoc/scramble. SDK-laag: Saloon v4 + Spatie laravel-data.
+- **PHP 8.4**, **Laravel 13.9**
+- **Postgres 16** (eigen credentials + connections + audit-tabellen)
+- **Redis 7** (queue + cache + session via predis)
+- **Caddy 2** (reverse-proxy → host's `php artisan serve` op port 8001)
+- **Sanctum** v4 — consumer-app auth (Personal Access Tokens)
+- **Horizon** v5 — queue-dashboard + supervisor
+- **Spatie webhook-server/client** — partner-event-fan-out naar consumer-callback-URLs
+- **dedoc/scramble** — auto-OpenAPI op `/docs/api`
+- **SDK-laag**: Saloon v4 (in `emeq/snelstart-api`; `emeq/mollie-api` wrapt `mollie/mollie-api-php` rechtstreeks) + Spatie laravel-data
 
-Stack-details voor agents: `docs/agents/dev-environment.md` (commands + doc-URLs) en `docs/agents/architecture.md` (lagen + componenten).
+Lokaal: `php artisan serve --port=8001` op host, `docker compose up -d` voor db+redis+caddy → `http://hub.emeq.test:8090`.
+
+Stack-details voor agents: `docs/agents/dev-environment.md` (commands + doc-URLs) en `docs/agents/architecture.md` (lagen + componenten). Framework-/package-guidelines (PHP, Laravel, Pint, PHPUnit, Boost) staan in de Laravel Boost-block onderaan dit bestand.
 
 ## Conventions
 
-Authoritative regels staan in `.ai/rules/` (auto-loaded) en `.ai/guidelines/emeq-hub/` (in de Laravel Boost-block onderaan):
+Authoritative regels staan in `.ai/rules/` (auto-loaded):
 
 - **Taal**: code/identifiers Engels, commits/PRs/docs/conversatie Nederlands, partner-domeintermen volgen de partner-API (`.ai/rules/global.md`).
 - **Engineering**: chirurgisch wijzigen, conflicten oppervlakken niet uitmiddelen, lezen vóór schrijven (`.ai/rules/engineering.md`).
@@ -38,181 +48,13 @@ Projectspecifieke conventies stollen in `.ai/rules/`; er is geen aparte conventi
 
 ## Architecture
 
-De canonical architectuur-beschrijving (Consumer → Account → Connection → SDK-call chain, domeinmodel-tabel, invariants) staat in de Laravel Boost-block onderaan dit bestand (`.ai/project rules`). Lees die vóór architecturele beslissingen.
-
-Snelle pointers:
-- **Planning / open werk**: GitHub-issues (`P*`/`area/*`-labels) zijn de bron voor open + forward-werk; `/ai:next` rankt ze. Historische GSD-planning leeft in git-history (verwijderd uit de werkboom bij de ai-kit-overgang).
-- **Werkdocumentatie** (lokaal, gitignored): `.docs/decisions/` (ADRs), `.docs/plans/`, `.docs/errors/`, `.docs/stack/`. Lees `.docs/README.md` voor de indeling. Partner-research is verplaatst naar de SDK-repos (`packages/<sdk>/docs/partners/`).
-- **Routes**: `routes/web.php` (smoke `/`, `/up`; in `local`/`testing`-env ook `/admin/quick-login/{role?}` + `/dev/partners[/{provider}]`), `routes/console.php`, `routes/api.php` (`/v1/*` consumer-API achter Sanctum + `throttle:api`) en `routes/webhooks.php` (`/webhooks/{provider}/{...}` + Cashier-webhooks, publiek signature-verified) zijn geland.
-- **Admin-paneel**: Filament v4 op `/admin` (Phase 9, HUB-04). `User` implementeert `FilamentUser` + `HasRoles` (Spatie); admin-access via Spatie-rollen `super-admin`/`staff` (zie `EmeqStaffSeeder`). Resource-management voor `manage-staff` ge-gate via gate in `AppServiceProvider::boot()`. 8 Resources gegroepeerd in 4 navigation-groups (Tenants / Integraties / Abonnementen / Beheer), incl. de read-only `PassThroughCallResource` (Integraties, gate `view-pass-through-calls`).
-- **Provider-credential-laag** (D-04): `config/hub-providers.php` + `App\Support\ProviderCredentialDescriptor` is de single source of truth voor per-provider credential-**metadata**. `Connection::fingerprint()` + Filament-views + `ConnectionStatsWidget` consumen via descriptor. Nieuwe provider = config-row + factory-state + infolist Section, geen nieuwe Resource-class. Zie `.docs/decisions/provider-credential-descriptor.md`. De provider-**identiteit** is getypeerd via `App\Enums\Provider` (string-backed, Filament `HasLabel`/`HasColor`); `Connection::provider` is hierop gecast en de enum vervangt verspreide `'mollie'`/`'snelstart'`-literals (audit A1, `docs/reviews/2026-06-15-emeq-hub-architecture-audit.md`).
-- **Feature-flags / kill-switch** (Phase 8): Pennant-based provider kill-switch via `feature.provider:{provider}` middleware-alias (`bootstrap/app.php:37` → `EnsureProviderEnabled`) op `/v1/{mollie,snelstart}/*`. `OAuthFlowRegistry::for()` checkt dezelfde feature en gooit `ProviderDisabledException` als inactive. Features auto-gedefinieerd in `FeatureServiceProvider` op basis van `config('hub-providers')` keys — nieuwe provider = nieuwe config-row, geen middleware/registry-edit. Zie `.docs/decisions/feature-flags-pennant-kill-switch.md`.
-
-De gedetailleerde laag-/componentkaart staat in `docs/agents/architecture.md`.
-
-## Project Skills
-
-| Skill | Description | Path |
-|-------|-------------|------|
-| docs-sync | Detecteert en herstelt documentatie-drift én organisatie-issues in `.docs/`, `CLAUDE.md` en memory voor de emeq-hub repo. Triggert proactief na domein-wijzigingen — niet wachten op merge: model/entity hernoemd, kolom verplaatst, nieuwe migration, nieuwe Sanctum-ability of Connection-provider, OAuth-flow gewijzigd, SDK-package toegevoegd of verwijderd uit `packages/`, route toegevoegd of verwijderd. Triggert ook bij doc-toevoegingen of -verplaatsingen in `.docs/`. Reactief op vragen als "check de docs", "update de docs", "klopt de documentatie nog", "synchroniseer docs", "klaar voor commit?", "ruim de docs op". Vangt zes problemen af: (1) stale class-/file-references, (2) ontbrekende ADR voor architecturele wijzigingen, (3) completed TODOs die niet als ✅ zijn gemarkeerd, (4) structuur-drift (nieuwe folders/files niet in `.docs/README.md` index, files op verkeerde plek), (5) verweesde docs (gemergde plans nog in `plans/`, lange ongewijzigde files), en (6) dode links (markdown-links naar non-existing files of code-paden). Use proactively whenever the user wraps up a domein-wijziging, just merged a branch, ran a refactor, added/moved a doc, or before any commit/push. | `.claude/skills/docs-sync/SKILL.md` |
-
-## Workflow & Agent skills
-
-ai-kit draait als plugin (`/ai:*`-skills beschikbaar), geconfigureerd via `.ai-kit-setup` (`tier=full`, `mode=solo-global`). Lifecycle-fase: **development** — schema-migraties vrij te wijzigen, geen backwards-compat-eis vóór productie.
-
-- **Werkwijze**: feature-/fix-branch → tests groen → ff-merge naar `master` (geen PR-ceremonie voor solo-werk). Detail in `docs/agents/workflow.md`. Open + forward-werk staat in GitHub-issues (`/ai:next`).
-- **Entrypoints**: `/ai:tdd` (feature/bugfix TDD), `/ai:diagnose` (onderzoek/bug), `/ai:to-issues` (plan → issues), `/ai:review` (pre-merge). De `branch-guard`-hook blokkeert edits op `master`.
-- **Docs**: per-onderwerp in `docs/agents/`; authoritative regels in `.ai/rules/` (auto-loaded); ai-kit canonical rules in `.claude/rules/` (gitignored, aanvullend).
-
-===
-
-<laravel-boost-guidelines>
-=== .ai/dev-setup rules ===
-
-## Lokale dev — eerste keer
-
-```bash
-
-# 0. Eenmalig: /etc/hosts toevoegen
-
-echo "127.0.0.1 hub.emeq.test" | sudo tee -a /etc/hosts
-
-# 1. .env van .env.example
-
-cp .env.example .env
-php artisan key:generate
-
-# 2. Stack omhoog (postgres + redis + caddy)
-
-docker compose up -d
-
-# 3. Composer + migraties (SDK wordt automatisch vanaf GitHub gepakt)
-
-composer install
-php artisan migrate
-
-# 4. (Optioneel) SDK clonen in packages/ voor referentie/grep — geen live-edit-link
-
-mkdir -p packages
-git clone git@github.com:yusufkaracaburun/emeq-snelstart-api.git packages/snelstart-api
-
-# 5. Laravel + Horizon op host
-
-php artisan serve --port=8001
-php artisan horizon  # in 2e terminal
-
-# 6. SDK-changes: edit in de SDK-repo zelf, commit + push, daarna in de Hub:
-
-#    composer update emeq/snelstart-api
-
-```
-
-Open `http://hub.emeq.test:8090/up` → moet `{"status":"up","database":"ok","redis":"ok"}` teruggeven.
-
-## Veelgebruikte commando's
-
-```bash
-
-# DB
-
-php artisan migrate
-php artisan migrate:fresh --seed
-
-# Tests — Hub (PHPUnit)
-
-php artisan test --compact
-php artisan test --compact --filter=ExampleTest
-
-# Tests — SDK-package (Pest, eigen vendor)
-
-cd packages/snelstart-api && ./vendor/bin/pest
-
-# Format
-
-./vendor/bin/pint --dirty --format agent   # voor commit
-
-# Horizon
-
-php artisan horizon
-php artisan horizon:status
-
-# Routes
-
-php artisan route:list --except-vendor
-
-# Composer audit
-
-composer audit                              # zie ignored advisories in composer.json
-
-```
-
-## Routes
-
-```
-routes/web.php       smoke: GET /, GET /up
-routes/console.php   artisan-only commands (inspire)
-routes/api.php       /v1/* — consumer-API (Bearer Sanctum + throttle:api)
-routes/webhooks.php  /webhooks/{provider}/{...} + /cashier/webhook* — publiek, signature-verified
-```
-
-=== .ai/git-policy rules ===
-
-## Git policy — harde regels
-
-- Nooit op `master` werken.
-- Nooit `git push` zonder expliciete user-toestemming.
-- Nooit `--no-verify`, `--no-gpg-sign`, of force-push tenzij user expliciet vraagt.
-- Nooit secrets committen. Nooit `.env` aanpassen zonder approval.
-- Nooit >3 files wijzigen in één commit zonder approval.
-
-=== .ai/packages rules ===
-
-## Packages-conventie
-
-**`packages/` is gitignored** en is een **lees-clone** voor referentie/grep. SDK-packages hebben elk een eigen GitHub-repo:
-
-- `packages/snelstart-api/` ← `github.com:yusufkaracaburun/emeq-snelstart-api`
-- `packages/mollie-api/` ← `github.com:yusufkaracaburun/emeq-mollie-api`
-
-Composer require't de SDKs via een **VCS repository** in `composer.json` — niet meer via een path-symlink. Reden: `packages/` bestaat niet op Laravel Cloud, dus een path-dist in `composer.lock` breekt de deploy.
-
-**Workflow voor SDK-changes:**
-
-1. Edit in de SDK-repo (eigen clone, kan `packages/<name>/` zijn).
-2. Commit + push naar de SDK GitHub-repo.
-3. In de Hub: `composer update emeq/<name>` — pinst de nieuwe VCS-reference in `composer.lock`.
-4. Commit `composer.lock` in de Hub.
-
-Geen live-edit-symlink meer. Voor snelle iteratie in de SDK: werk daar gewoon zelf met `./vendor/bin/pest` in de SDK-repo, en sync pas naar de Hub als de change stabiel is.
-
-=== .ai/project rules ===
-
-## Wat dit project is
-
-`emeq/hub` — multi-tenant integration platform. Eén centrale Laravel-app die OAuth-koppelingen, webhook-routing en een uniforme REST-API exposeert naar boekhoud-/betaal-partner-API's:
+`emeq/hub` is een multi-tenant integration platform: één centrale Laravel-app die OAuth-koppelingen, webhook-routing en een uniforme REST-API exposeert naar boekhoud-/betaal-partner-API's:
 
 - **Snelstart** (boekhouden, NL) — via eigen SDK `emeq/snelstart-api` (VCS-repo, zie packages-conventie)
 - **Mollie** (betalingen, NL/EU) — via eigen SDK `emeq/mollie-api` (VCS-repo) bovenop officiële `mollie/mollie-api-php` + `mollie/laravel-cashier-mollie` voor Subscriptions
 - **Moneybird** (boekhouden, NL) — gepland, via toekomstige `emeq/moneybird-api` SDK
 - **Ibanity** (PSD2/banking) — gepland
 - **Exact Online** (boekhouden, NL/BE) — gepland
-
-**Doelgroep v0.2**: Emeq's eigen SaaS-apps die nu ad-hoc partner-integraties hebben (Snelstart-pattern in v0.1 gevalideerd, Mollie + Connect + Subscriptions + Hub-skeleton in v0.2). v1.0+: commercieel beschikbaar voor andere NL dev-shops.
-
-## Stack
-
-- **PHP 8.4**, **Laravel 13.9**
-- **Postgres 16** (eigen credentials + connections + audit-tabellen)
-- **Redis 7** (queue + cache + session via predis)
-- **Caddy 2** (reverse-proxy → host's `php artisan serve` op port 8001)
-- **Sanctum** v4 — consumer-app auth (Personal Access Tokens)
-- **Horizon** v5 — queue-dashboard + supervisor
-- **Spatie webhook-server/client** — partner-event-fan-out naar consumer-callback-URLs
-- **dedoc/scramble** — auto-OpenAPI op `/docs/api`
-
-Lokaal: `php artisan serve --port=8001` op host, `docker compose up -d` voor db+redis+caddy → `http://hub.emeq.test:8090`.
-
-## Architectuur
 
 ```
 ┌─────────────┐  HTTP/REST    ┌──────────────────────────┐  SDK calls   ┌─────────────┐
@@ -244,13 +86,138 @@ Lokaal: `php artisan serve --port=8001` op host, `docker compose up -d` voor db+
 | **PassThroughCall** | Audit-log voor Hub-pass-through-calls (Consumer → Hub → Partner → Consumer). Eén rij per request, immutable. Zie `.docs/decisions/pass-through-calls-table.md`. |
 | **WebhookCall** (Spatie) | Fan-out-audit voor inkomende partner-webhooks en uitgaande consumer-callbacks via `spatie/laravel-webhook-client` + `…-server`. |
 
-## Architectuur-invariants — niet zonder approval doorbreken
+**Architectuur-invariants — niet zonder approval doorbreken:**
 
 - **Consumer ↔ Account ↔ Connection chain is strict.** Een endpoint dat een Connection resolved doet dat altijd via `Bearer-token → Consumer → Account → Connection`. Nooit query-string `?connection_id=`, nooit X-headers zonder Consumer-validatie.
 - **Tokens zijn versleuteld at rest.** `access_token`, `refresh_token`, `client_key` etc. op het Connection-model krijgen `protected $casts = ['access_token' => 'encrypted', …]`. Geen rauwe tokens in DB.
 - **Geen partner-business-logic in SDK-packages.** SDKs zijn dun: HTTP-laag, auth-laag, DTOs. Webhook-routing, multi-tenancy, audit — leeft in de Hub.
 - **Migrations zijn forward-only in prod.** Geen `down()` aanroepen na merge; voor schema-changes nieuwe migration.
 
+Lees dit vóór architecturele beslissingen.
+
+Snelle pointers:
+- **Planning / open werk**: GitHub-issues (`P*`/`area/*`-labels) zijn de bron voor open + forward-werk; `/ai:next` rankt ze. Historische GSD-planning leeft in git-history (verwijderd uit de werkboom bij de ai-kit-overgang).
+- **Werkdocumentatie** (lokaal, gitignored): `.docs/decisions/` (ADRs), `.docs/plans/`, `.docs/errors/`, `.docs/stack/`. Lees `.docs/README.md` voor de indeling. Partner-research is verplaatst naar de SDK-repos (`packages/<sdk>/docs/partners/`).
+- **Routes**: `routes/web.php` (smoke `/`, `/up`; in `local`/`testing`-env ook `/admin/quick-login/{role?}` + `/dev/partners[/{provider}]`), `routes/console.php`, `routes/api.php` (`/v1/*` consumer-API achter Sanctum + `throttle:api`) en `routes/webhooks.php` (`/webhooks/{provider}/{...}` + Cashier-webhooks, publiek signature-verified) zijn geland.
+- **Admin-paneel**: Filament v4 op `/admin` (Phase 9, HUB-04). `User` implementeert `FilamentUser` + `HasRoles` (Spatie); admin-access via Spatie-rollen `super-admin`/`staff` (zie `EmeqStaffSeeder`). Resource-management voor `manage-staff` ge-gate via gate in `AppServiceProvider::boot()`. 8 Resources gegroepeerd in 4 navigation-groups (Tenants / Integraties / Abonnementen / Beheer), incl. de read-only `PassThroughCallResource` (Integraties, gate `view-pass-through-calls`).
+- **Provider-credential-laag** (D-04): `config/hub-providers.php` + `App\Support\ProviderCredentialDescriptor` is de single source of truth voor per-provider credential-**metadata**. `Connection::fingerprint()` + Filament-views + `ConnectionStatsWidget` consumen via descriptor. Nieuwe provider = config-row + factory-state + infolist Section, geen nieuwe Resource-class. Zie `.docs/decisions/provider-credential-descriptor.md`. De provider-**identiteit** is getypeerd via `App\Enums\Provider` (string-backed, Filament `HasLabel`/`HasColor`); `Connection::provider` is hierop gecast en de enum vervangt verspreide `'mollie'`/`'snelstart'`-literals (audit A1, `docs/reviews/2026-06-15-emeq-hub-architecture-audit.md`).
+- **Feature-flags / kill-switch** (Phase 8): Pennant-based provider kill-switch via `feature.provider:{provider}` middleware-alias (`bootstrap/app.php:37` → `EnsureProviderEnabled`) op `/v1/{mollie,snelstart}/*`. `OAuthFlowRegistry::for()` checkt dezelfde feature en gooit `ProviderDisabledException` als inactive. Features auto-gedefinieerd in `FeatureServiceProvider` op basis van `config('hub-providers')` keys — nieuwe provider = nieuwe config-row, geen middleware/registry-edit. Zie `.docs/decisions/feature-flags-pennant-kill-switch.md`.
+
+De gedetailleerde laag-/componentkaart staat in `docs/agents/architecture.md`.
+
+## Dev-setup
+
+### Lokale dev — eerste keer
+
+```bash
+# 0. Eenmalig: /etc/hosts toevoegen
+echo "127.0.0.1 hub.emeq.test" | sudo tee -a /etc/hosts
+
+# 1. .env van .env.example
+cp .env.example .env
+php artisan key:generate
+
+# 2. Stack omhoog (postgres + redis + caddy)
+docker compose up -d
+
+# 3. Composer + migraties (SDK wordt automatisch vanaf GitHub gepakt)
+composer install
+php artisan migrate
+
+# 4. (Optioneel) SDK clonen in packages/ voor referentie/grep — geen live-edit-link
+mkdir -p packages
+git clone git@github.com:yusufkaracaburun/emeq-snelstart-api.git packages/snelstart-api
+
+# 5. Laravel + Horizon op host
+php artisan serve --port=8001
+php artisan horizon  # in 2e terminal
+
+# 6. SDK-changes: edit in de SDK-repo zelf, commit + push, daarna in de Hub:
+#    composer update emeq/snelstart-api
+```
+
+Open `http://hub.emeq.test:8090/up` → moet `{"status":"up","database":"ok","redis":"ok"}` teruggeven.
+
+### Veelgebruikte commando's
+
+```bash
+# DB
+php artisan migrate
+php artisan migrate:fresh --seed
+
+# Tests — Hub (PHPUnit)
+php artisan test --compact
+php artisan test --compact --filter=ExampleTest
+
+# Tests — SDK-package (Pest, eigen vendor)
+cd packages/snelstart-api && ./vendor/bin/pest
+
+# Format
+./vendor/bin/pint --dirty --format agent   # voor commit
+
+# Horizon
+php artisan horizon
+php artisan horizon:status
+
+# Routes
+php artisan route:list --except-vendor
+
+# Composer audit
+composer audit                              # zie ignored advisories in composer.json
+```
+
+### Routes
+
+```
+routes/web.php       smoke: GET /, GET /up
+routes/console.php   artisan-only commands (inspire)
+routes/api.php       /v1/* — consumer-API (Bearer Sanctum + throttle:api)
+routes/webhooks.php  /webhooks/{provider}/{...} + /cashier/webhook* — publiek, signature-verified
+```
+
+## Packages-conventie
+
+**`packages/` is gitignored** en is een **lees-clone** voor referentie/grep. SDK-packages hebben elk een eigen GitHub-repo:
+
+- `packages/snelstart-api/` ← `github.com:yusufkaracaburun/emeq-snelstart-api`
+- `packages/mollie-api/` ← `github.com:yusufkaracaburun/emeq-mollie-api`
+
+Composer require't de SDKs via een **VCS repository** in `composer.json` — niet meer via een path-symlink. Reden: `packages/` bestaat niet op Laravel Cloud, dus een path-dist in `composer.lock` breekt de deploy.
+
+**Workflow voor SDK-changes:**
+
+1. Edit in de SDK-repo (eigen clone, kan `packages/<name>/` zijn).
+2. Commit + push naar de SDK GitHub-repo.
+3. In de Hub: `composer update emeq/<name>` — pinst de nieuwe VCS-reference in `composer.lock`.
+4. Commit `composer.lock` in de Hub.
+
+Geen live-edit-symlink meer. Voor snelle iteratie in de SDK: werk daar gewoon zelf met `./vendor/bin/pest` in de SDK-repo, en sync pas naar de Hub als de change stabiel is.
+
+## Git policy — harde regels
+
+- Nooit op `master` werken.
+- Nooit `git push` zonder expliciete user-toestemming.
+- Nooit `--no-verify`, `--no-gpg-sign`, of force-push tenzij user expliciet vraagt.
+- Nooit secrets committen. Nooit `.env` aanpassen zonder approval.
+- Nooit >3 files wijzigen in één commit zonder approval.
+
+## Project Skills
+
+| Skill | Description | Path |
+|-------|-------------|------|
+| docs-sync | Detecteert en herstelt documentatie-drift én organisatie-issues in `.docs/`, `CLAUDE.md` en memory voor de emeq-hub repo. Triggert proactief na domein-wijzigingen — niet wachten op merge: model/entity hernoemd, kolom verplaatst, nieuwe migration, nieuwe Sanctum-ability of Connection-provider, OAuth-flow gewijzigd, SDK-package toegevoegd of verwijderd uit `packages/`, route toegevoegd of verwijderd. Triggert ook bij doc-toevoegingen of -verplaatsingen in `.docs/`. Reactief op vragen als "check de docs", "update de docs", "klopt de documentatie nog", "synchroniseer docs", "klaar voor commit?", "ruim de docs op". Vangt zes problemen af: (1) stale class-/file-references, (2) ontbrekende ADR voor architecturele wijzigingen, (3) completed TODOs die niet als ✅ zijn gemarkeerd, (4) structuur-drift (nieuwe folders/files niet in `.docs/README.md` index, files op verkeerde plek), (5) verweesde docs (gemergde plans nog in `plans/`, lange ongewijzigde files), en (6) dode links (markdown-links naar non-existing files of code-paden). Use proactively whenever the user wraps up a domein-wijziging, just merged a branch, ran a refactor, added/moved a doc, or before any commit/push. | `.claude/skills/docs-sync/SKILL.md` |
+
+## Workflow & Agent skills
+
+ai-kit draait als plugin (`/ai:*`-skills beschikbaar), geconfigureerd via `.ai-kit-setup` (`tier=full`, `mode=solo-global`). Lifecycle-fase: **development** — schema-migraties vrij te wijzigen, geen backwards-compat-eis vóór productie.
+
+- **Werkwijze**: feature-/fix-branch → tests groen → ff-merge naar `master` (geen PR-ceremonie voor solo-werk). Detail in `docs/agents/workflow.md`. Open + forward-werk staat in GitHub-issues (`/ai:next`).
+- **Entrypoints**: `/ai:tdd` (feature/bugfix TDD), `/ai:diagnose` (onderzoek/bug), `/ai:to-issues` (plan → issues), `/ai:review` (pre-merge). De `branch-guard`-hook blokkeert edits op `master`.
+- **Docs**: per-onderwerp in `docs/agents/`; authoritative regels in `.ai/rules/` (auto-loaded); ai-kit canonical rules in `.claude/rules/` (gitignored, aanvullend).
+
+===
+
+<laravel-boost-guidelines>
 === foundation rules ===
 
 # Laravel Boost Guidelines
