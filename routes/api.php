@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\V1\AccountSubscriptions\PauseController;
 use App\Http\Controllers\Api\V1\AccountSubscriptions\ResumeController;
 use App\Http\Controllers\Api\V1\Billing\SubscriptionController;
 use App\Http\Controllers\Api\V1\ConnectionController;
+use App\Http\Controllers\Api\V1\Exact\PassThroughController as ExactPassThroughController;
 use App\Http\Controllers\Api\V1\Mollie\Connect\ClientLinksController as ConnectClientLinksController;
 use App\Http\Controllers\Api\V1\Mollie\Connect\OnboardingController as ConnectOnboardingController;
 use App\Http\Controllers\Api\V1\Mollie\Connect\OrganizationsController as ConnectOrganizationsController;
@@ -57,6 +58,11 @@ Route::middleware('auth:sanctum')->group(function (): void {
         ->where('path', '.*')
         ->middleware(['feature.provider:snelstart', 'resolve.snelstart.account'])
         ->name('api.snelstart.passthrough');
+
+    Route::any('/exact/{path}', ExactPassThroughController::class)
+        ->where('path', '.*')
+        ->middleware(['feature.provider:exact', 'resolve.exact.account'])
+        ->name('api.exact.passthrough');
 
     Route::middleware('ability:billing:read,billing:write,*')->group(function (): void {
         Route::get('/billing/subscription', [SubscriptionController::class, 'show'])
