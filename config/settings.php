@@ -2,6 +2,7 @@
 
 use App\Settings\ExactSettings;
 use App\Settings\MollieSettings;
+use App\Settings\SnelstartSettings;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelSettings\SettingsCasts\DataCast;
 use Spatie\LaravelSettings\SettingsCasts\DateTimeInterfaceCast;
@@ -18,6 +19,7 @@ return [
     'settings' => [
         ExactSettings::class,
         MollieSettings::class,
+        SnelstartSettings::class,
     ],
 
     /*

@@ -7,11 +7,11 @@ namespace App\Settings;
 use Spatie\LaravelSettings\Settings;
 
 /**
- * Mollie Connect app-level OAuth-credentials (symmetrisch met ExactSettings).
- * connect_client_secret encrypted. Hydrateert config('services.mollie.connect.*').
+ * Mollie Connect OAuth-credentials + partner-access-token. Secrets encrypted.
+ * Hydrateert config('services.mollie.connect.*') + services.mollie.partner_access_token.
  *
- * Scope: alleen de OAuth-app-creds. partner_access_token + cashier-webhook-secret
- * blijven voorlopig in .env (entangled met Cashier) — follow-up.
+ * cashier-webhook-secret (CASHIER_WEBHOOK_SECRET) blijft voorlopig in .env
+ * (entangled met Cashier) — follow-up.
  */
 class MollieSettings extends Settings
 {
@@ -20,6 +20,8 @@ class MollieSettings extends Settings
     public string $connect_client_secret;
 
     public string $connect_redirect_uri;
+
+    public string $partner_access_token;
 
     public static function group(): string
     {
@@ -31,6 +33,6 @@ class MollieSettings extends Settings
      */
     public static function encrypted(): array
     {
-        return ['connect_client_secret'];
+        return ['connect_client_secret', 'partner_access_token'];
     }
 }

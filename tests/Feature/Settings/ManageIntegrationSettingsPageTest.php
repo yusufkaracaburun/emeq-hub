@@ -7,6 +7,8 @@ namespace Tests\Feature\Settings;
 use App\Filament\Pages\ManageIntegrationSettings;
 use App\Models\User;
 use App\Settings\ExactSettings;
+use App\Settings\MollieSettings;
+use App\Settings\SnelstartSettings;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Spatie\Permission\Models\Role;
@@ -52,12 +54,18 @@ class ManageIntegrationSettingsPageTest extends TestCase
                 'mollie_connect_client_id' => 'm-cid',
                 'mollie_connect_client_secret' => 'm-secret',
                 'mollie_connect_redirect_uri' => 'https://hub.test/v1/oauth/mollie/callback',
+                'mollie_partner_access_token' => 'm-token',
+                'snelstart_webhook_secret' => 'sns-wh',
             ])
             ->call('save')
             ->assertHasNoFormErrors();
 
         app()->forgetInstance(ExactSettings::class);
+        app()->forgetInstance(MollieSettings::class);
+        app()->forgetInstance(SnelstartSettings::class);
         $this->assertSame('new-cid', app(ExactSettings::class)->client_id);
         $this->assertSame('new-secret', app(ExactSettings::class)->client_secret);
+        $this->assertSame('m-token', app(MollieSettings::class)->partner_access_token);
+        $this->assertSame('sns-wh', app(SnelstartSettings::class)->webhook_secret);
     }
 }
