@@ -59,4 +59,12 @@ return [
         'webhook_secret' => env('CASHIER_WEBHOOK_SECRET'),
     ],
 
+    'exact' => [
+        'client_id' => env('EXACT_CLIENT_ID'),
+        'client_secret' => env('EXACT_CLIENT_SECRET'),
+        'redirect_uri' => env('EXACT_REDIRECT_URI'),
+        'webhook_secret' => env('EXACT_WEBHOOK_SECRET'),
+        'auth_base_url' => env('EXACT_AUTH_BASE_URL', 'https://start.exactonline.nl'),
+    ],
+
 ];

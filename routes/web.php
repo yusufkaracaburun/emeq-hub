@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Dev\ExactOAuthTracerController;
 use App\Models\Account;
 use App\Models\User;
 use App\OAuth\OAuthFlowRegistry;
@@ -92,4 +93,16 @@ if (app()->environment('local', 'testing')) {
 
         return redirect()->away($url);
     })->name('dev.partners.mollie.start-oauth');
+
+    // Exact Online OAuth + Seamless-connection TRACER (wegwerp-harnas).
+    // Draait een echte OAuth-round-trip met de test-app-creds en legt vast wat
+    // Exact naar de Seamless-lifecycle-URIs stuurt. Aparte `/dev/exact/*`-paden
+    // zodat ze niet botsen met de echte `/v1/oauth/exact/*`-endpoints uit de
+    // Hub-wiring-slice. Registreer deze als de tunnel-URI's in het Exact App
+    // Center; captures → storage/logs/exact-tracer.log.
+    Route::get('/dev/exact/start', [ExactOAuthTracerController::class, 'start'])->name('dev.exact.start');
+    Route::match(['get', 'post'], '/dev/exact/callback', [ExactOAuthTracerController::class, 'callback'])->name('dev.exact.callback');
+    Route::get('/dev/exact/refresh', [ExactOAuthTracerController::class, 'refresh'])->name('dev.exact.refresh');
+    Route::match(['get', 'post'], '/dev/exact/stop', [ExactOAuthTracerController::class, 'stop'])->name('dev.exact.stop');
+    Route::match(['get', 'post'], '/dev/exact/info', [ExactOAuthTracerController::class, 'info'])->name('dev.exact.info');
 }
