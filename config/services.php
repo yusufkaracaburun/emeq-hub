@@ -65,6 +65,7 @@ return [
         'redirect_uri' => env('EXACT_REDIRECT_URI'),
         'webhook_secret' => env('EXACT_WEBHOOK_SECRET'),
         'auth_base_url' => env('EXACT_AUTH_BASE_URL', 'https://start.exactonline.nl'),
+        'api_base_url' => env('EXACT_API_BASE_URL', 'https://start.exactonline.nl'),
     ],
 
 ];

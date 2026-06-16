@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Mollie\HubMollieCredentialResolver;
 use App\Mollie\MollieAccessTokenResolver;
 use App\Mollie\MollieConnectionContext;
+use App\OAuth\Exact\ExactOAuthFlow;
 use App\OAuth\Mollie\MollieConnectOAuthFlow;
 use App\OAuth\OAuthFlowRegistry;
 use Dedoc\Scramble\Scramble;
@@ -30,6 +31,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(OAuthFlowRegistry::class, function (Application $app): OAuthFlowRegistry {
             $registry = new OAuthFlowRegistry($app);
             $registry->register(Provider::Mollie->value, MollieConnectOAuthFlow::class);
+            $registry->register(Provider::Exact->value, ExactOAuthFlow::class);
 
             return $registry;
         });

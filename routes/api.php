@@ -19,6 +19,8 @@ use App\Http\Controllers\Api\V1\Mollie\PaymentsController;
 use App\Http\Controllers\Api\V1\Mollie\RefundsController;
 use App\Http\Controllers\Api\V1\Mollie\SubscriptionsController;
 use App\Http\Controllers\Api\V1\OAuth\CallbackController;
+use App\Http\Controllers\Api\V1\OAuth\ExactCallbackController;
+use App\Http\Controllers\Api\V1\OAuth\ExactInitController;
 use App\Http\Controllers\Api\V1\OAuth\InitController;
 use App\Http\Controllers\Api\V1\PingController;
 use App\Http\Controllers\Api\V1\Snelstart\PassThroughController;
@@ -44,6 +46,11 @@ Route::middleware('auth:sanctum')->group(function (): void {
     Route::middleware(['ability:mollie:write', 'feature.provider:mollie'])->group(function (): void {
         Route::post('/oauth/mollie/init', InitController::class)
             ->name('api.oauth.mollie.init');
+    });
+
+    Route::middleware(['ability:exact:write', 'feature.provider:exact'])->group(function (): void {
+        Route::post('/oauth/exact/init', ExactInitController::class)
+            ->name('api.oauth.exact.init');
     });
 
     Route::any('/snelstart/{path}', PassThroughController::class)
@@ -144,3 +151,6 @@ Route::middleware('auth:sanctum')->group(function (): void {
 // Publiek — state-parameter is de auth (D-07).
 Route::get('/oauth/mollie/callback', CallbackController::class)
     ->name('api.oauth.mollie.callback');
+
+Route::get('/oauth/exact/callback', ExactCallbackController::class)
+    ->name('api.oauth.exact.callback');

@@ -74,6 +74,26 @@ class ConnectionResource extends Resource
                     TextEntry::make('created_at')->dateTime(),
                 ]),
 
+            Section::make('Exact Online OAuth')
+                ->visible(fn (?Connection $record): bool => $record?->provider === Provider::Exact)
+                ->columns(2)
+                ->schema([
+                    TextEntry::make('provider')->badge()->color('danger'),
+                    TextEntry::make('account.external_id')->label('Account'),
+                    TextEntry::make('fingerprint')
+                        ->label('Fingerprint (sha256[:12])')
+                        ->state(fn (Connection $record): ?string => $record->fingerprint())
+                        ->copyable()
+                        ->placeholder('—'),
+                    TextEntry::make('status')->badge(),
+                    TextEntry::make('expires_at')->dateTime()->placeholder('—'),
+                    TextEntry::make('administratie_id')
+                        ->label('Division')
+                        ->placeholder('—'),
+                    TextEntry::make('revoked_at')->dateTime()->placeholder('—'),
+                    TextEntry::make('created_at')->dateTime(),
+                ]),
+
             Section::make('Snelstart credentials')
                 ->visible(fn (?Connection $record): bool => $record?->provider === Provider::Snelstart)
                 ->columns(2)

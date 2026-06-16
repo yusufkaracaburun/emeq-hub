@@ -55,6 +55,21 @@ class ConnectionFactory extends Factory
         ]);
     }
 
+    public function forExact(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'provider' => 'exact',
+            'access_token' => 'access_'.Str::random(40),
+            'refresh_token' => 'refresh_'.Str::random(40),
+            'expires_at' => now()->addSeconds(600),
+            'administratie_id' => '4471372',
+            'scopes' => null,
+            'client_key' => null,
+            'subscription_key' => null,
+            'subscription_id' => null,
+        ]);
+    }
+
     public function pending(): static
     {
         return $this->state(fn (array $attributes) => [
