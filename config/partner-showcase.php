@@ -152,8 +152,9 @@ return [
                 'title' => 'Vertaal je documenten naar het Hub-formaat',
                 'description' => 'Je stuurt geen Exact-velden. Map je eigen factuur of boeking naar één gestandaardiseerd '
                     .'document — documentsoort, relatie, regels (omschrijving, bedrag, btw-tarief, categorie), datum — en '
-                    .'POST dat naar /v1/accounting/documents. De Hub buigt dat naar het juiste Exact-endpoint; Exact-veldnamen '
-                    .'hoef je niet te kennen.',
+                    .'POST dat naar /v1/accounting/documents met een Idempotency-Key-header (UUID per document) — een '
+                    .'herhaalde verzending met dezelfde key boekt niet dubbel. De Hub buigt het document naar het juiste '
+                    .'Exact-endpoint; Exact-veldnamen hoef je niet te kennen.',
             ],
             [
                 'title' => 'Stuur brondocumenten, geen betalingen',

@@ -27,6 +27,7 @@ Multi-tenant integration-platform: één Laravel-Hub die OAuth-koppelingen, webh
 | **Attachment** | Bewijsstuk (PDF/scan, bv. bonnetje) bij een FinancialDocument, inline base64. De Exact-adapter zet het via `documents/Documents` + `DocumentAttachments` bij de boeking. |
 | **AccountingTarget** | Provider-adapter die canonical → boekhoudpakket-body mapt, geresolved via `AccountingTargetRegistry` (spiegel van `OAuthFlowRegistry` + dezelfde Pennant-gate). |
 | **Brondocument / Afhandeling** | Sync-grens: brondocumenten (facturen, losse income/expense) worden gesynct; afhandelingen (de betaling van een al-gesynct document) niet — die boekt de provider via bankreconciliatie. |
+| **EnsureIdempotency** | Hub-brede write-idempotentie (middleware-alias `idempotent`). Consumer stuurt een `Idempotency-Key`-header; de Hub bewaart de eerste 2xx-respons per `(consumer, key)` in `idempotency_keys` en herhaalt die bij retry i.p.v. opnieuw uit te voeren. `idempotent:required` waar dubbel-uitvoeren schadelijk is (accounting); één alias, herbruikbaar op elke write-route — geen partner-duplicatie. |
 
 ## Grenzen / invariants
 
