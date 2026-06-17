@@ -5,7 +5,7 @@ namespace Tests\Feature\Api\V1\Exact;
 use App\Models\Connection;
 use App\Models\Consumer;
 use App\Sanctum\TokenAbilities;
-use Emeq\ExactApi\Http\Request\RawExactRequest;
+use Emeq\ExactApi\Http\Request\Read\GetRelations;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Saloon\Http\Faking\MockClient;
 use Saloon\Http\Faking\MockResponse;
@@ -58,7 +58,7 @@ class RelationsTest extends TestCase
     public function test_relations_forwards_to_crm_accounts_endpoint(): void
     {
         MockClient::global([
-            RawExactRequest::class => MockResponse::make([
+            GetRelations::class => MockResponse::make([
                 'd' => ['results' => [['ID' => 'acc-1', 'Name' => 'Klant BV', 'Code' => '                 1']]],
             ], 200),
         ]);

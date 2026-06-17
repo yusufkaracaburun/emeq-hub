@@ -8,7 +8,9 @@ use App\Accounting\Party;
 use App\Models\Connection;
 use App\Models\Consumer;
 use App\Sanctum\TokenAbilities;
-use Emeq\ExactApi\Http\Request\RawExactRequest;
+use Emeq\ExactApi\Http\Request\Write\CreateGeneralJournalEntry;
+use Emeq\ExactApi\Http\Request\Write\CreatePurchaseEntry;
+use Emeq\ExactApi\Http\Request\Write\CreateSalesEntry;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
 use Saloon\Http\Faking\MockClient;
@@ -107,7 +109,7 @@ class StoreDocumentTest extends TestCase
     public function test_pushes_canonical_sales_invoice_to_exact(): void
     {
         MockClient::global([
-            RawExactRequest::class => MockResponse::make(['d' => ['ID' => 'inv-guid-1']], 201),
+            CreateSalesEntry::class => MockResponse::make(['d' => ['ID' => 'inv-guid-1']], 201),
         ]);
         $this->bindFakeReferences();
 
@@ -134,7 +136,7 @@ class StoreDocumentTest extends TestCase
     public function test_successful_push_returns_posted_status(): void
     {
         MockClient::global([
-            RawExactRequest::class => MockResponse::make(['d' => ['ID' => 'inv-guid-1']], 201),
+            CreateSalesEntry::class => MockResponse::make(['d' => ['ID' => 'inv-guid-1']], 201),
         ]);
         $this->bindFakeReferences();
 
@@ -152,7 +154,7 @@ class StoreDocumentTest extends TestCase
     public function test_maps_canonical_to_exact_salesinvoice_body(): void
     {
         MockClient::global([
-            RawExactRequest::class => MockResponse::make(['d' => ['ID' => 'inv-guid-1']], 201),
+            CreateSalesEntry::class => MockResponse::make(['d' => ['ID' => 'inv-guid-1']], 201),
         ]);
         $this->bindFakeReferences();
 
@@ -165,7 +167,7 @@ class StoreDocumentTest extends TestCase
             ->postJson('/v1/accounting/documents', $this->salesInvoicePayload())
             ->assertStatus(201);
 
-        MockClient::global()->assertSent(function (RawExactRequest $request): bool {
+        MockClient::global()->assertSent(function (CreateSalesEntry $request): bool {
             $body = $request->body()->all();
 
             return $request->resolveEndpoint() === '/salesentry/SalesEntries'
@@ -181,7 +183,7 @@ class StoreDocumentTest extends TestCase
     {
         // Geen fake → de echte ConnectionMappingExactReferenceResolver leest metadata.
         MockClient::global([
-            RawExactRequest::class => MockResponse::make(['d' => ['ID' => 'inv-1']], 201),
+            CreateSalesEntry::class => MockResponse::make(['d' => ['ID' => 'inv-1']], 201),
         ]);
 
         [$consumer] = $this->consumerWithExactConnection([
@@ -202,7 +204,7 @@ class StoreDocumentTest extends TestCase
             ]))
             ->assertStatus(201);
 
-        MockClient::global()->assertSent(function (RawExactRequest $request): bool {
+        MockClient::global()->assertSent(function (CreateSalesEntry $request): bool {
             $body = $request->body()->all();
 
             return $body['Customer'] === 'cust-real'
@@ -215,7 +217,7 @@ class StoreDocumentTest extends TestCase
     public function test_line_amount_drives_booking_without_quantity_or_price(): void
     {
         MockClient::global([
-            RawExactRequest::class => MockResponse::make(['d' => ['ID' => 'pe-1']], 201),
+            CreatePurchaseEntry::class => MockResponse::make(['d' => ['ID' => 'pe-1']], 201),
         ]);
         $this->bindFakeReferences();
 
@@ -234,7 +236,7 @@ class StoreDocumentTest extends TestCase
             ]))
             ->assertStatus(201);
 
-        MockClient::global()->assertSent(function (RawExactRequest $request): bool {
+        MockClient::global()->assertSent(function (CreatePurchaseEntry $request): bool {
             $body = $request->body()->all();
 
             return (float) $body['PurchaseEntryLines'][0]['AmountFC'] === 250.50;
@@ -244,7 +246,7 @@ class StoreDocumentTest extends TestCase
     public function test_pushes_purchase_invoice_to_purchaseentry(): void
     {
         MockClient::global([
-            RawExactRequest::class => MockResponse::make(['d' => ['ID' => 'pe-1']], 201),
+            CreatePurchaseEntry::class => MockResponse::make(['d' => ['ID' => 'pe-1']], 201),
         ]);
         $this->bindFakeReferences();
 
@@ -261,7 +263,7 @@ class StoreDocumentTest extends TestCase
             ->assertStatus(201)
             ->assertJsonPath('external_ref', 'pe-1');
 
-        MockClient::global()->assertSent(function (RawExactRequest $request): bool {
+        MockClient::global()->assertSent(function (CreatePurchaseEntry $request): bool {
             $body = $request->body()->all();
 
             return $request->resolveEndpoint() === '/purchaseentry/PurchaseEntries'
@@ -280,7 +282,7 @@ class StoreDocumentTest extends TestCase
     public function test_pushes_expense_to_generaljournalentry(): void
     {
         MockClient::global([
-            RawExactRequest::class => MockResponse::make(['d' => ['EntryID' => 'gj-1']], 201),
+            CreateGeneralJournalEntry::class => MockResponse::make(['d' => ['EntryID' => 'gj-1']], 201),
         ]);
         $this->bindFakeReferences();
 
@@ -297,7 +299,7 @@ class StoreDocumentTest extends TestCase
             ->assertStatus(201)
             ->assertJsonPath('external_ref', 'gj-1');
 
-        MockClient::global()->assertSent(function (RawExactRequest $request): bool {
+        MockClient::global()->assertSent(function (CreateGeneralJournalEntry $request): bool {
             $body = $request->body()->all();
 
             // Exact weigert op een GeneralJournalEntry zowel een header-Description als
@@ -319,7 +321,7 @@ class StoreDocumentTest extends TestCase
     public function test_missing_idempotency_key_returns_400(): void
     {
         MockClient::global([
-            RawExactRequest::class => MockResponse::make(['d' => ['ID' => 'x']], 201),
+            CreateSalesEntry::class => MockResponse::make(['d' => ['ID' => 'x']], 201),
         ]);
         $this->bindFakeReferences();
 
@@ -338,7 +340,7 @@ class StoreDocumentTest extends TestCase
     public function test_retry_with_same_idempotency_key_books_once(): void
     {
         MockClient::global([
-            RawExactRequest::class => MockResponse::make(['d' => ['ID' => 'inv-1']], 201),
+            CreateSalesEntry::class => MockResponse::make(['d' => ['ID' => 'inv-1']], 201),
         ]);
         $this->bindFakeReferences();
 
@@ -402,7 +404,7 @@ class StoreDocumentTest extends TestCase
     {
         // Geen fake gebonden → DefaultExactReferenceResolver gooit → mapping_failed.
         MockClient::global([
-            RawExactRequest::class => MockResponse::make(['d' => ['ID' => 'x']], 201),
+            CreateSalesEntry::class => MockResponse::make(['d' => ['ID' => 'x']], 201),
         ]);
 
         [$consumer] = $this->consumerWithExactConnection();

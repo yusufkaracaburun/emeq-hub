@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a6ced07b09c7e0c2484d4753bb27d8b1",
+    "content-hash": "6e395d9fab64ac426c8dba94d0c7142e",
     "packages": [
         {
             "name": "blade-ui-kit/blade-heroicons",
@@ -1282,16 +1282,16 @@
         },
         {
             "name": "emeq/exact-api",
-            "version": "v0.1.0",
+            "version": "v0.2.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/yusufkaracaburun/emeq-exact-api.git",
-                "reference": "2bf574d60f858f4de1bd7eb9f6462a5b9c2e2623"
+                "reference": "0e8c65c3e8c7d44c5e6a8375899784d917bdf37a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/yusufkaracaburun/emeq-exact-api/zipball/2bf574d60f858f4de1bd7eb9f6462a5b9c2e2623",
-                "reference": "2bf574d60f858f4de1bd7eb9f6462a5b9c2e2623",
+                "url": "https://api.github.com/repos/yusufkaracaburun/emeq-exact-api/zipball/0e8c65c3e8c7d44c5e6a8375899784d917bdf37a",
+                "reference": "0e8c65c3e8c7d44c5e6a8375899784d917bdf37a",
                 "shasum": ""
             },
             "require": {
@@ -1375,10 +1375,10 @@
                 "saloon"
             ],
             "support": {
-                "source": "https://github.com/yusufkaracaburun/emeq-exact-api/tree/v0.1.0",
+                "source": "https://github.com/yusufkaracaburun/emeq-exact-api/tree/v0.2.2",
                 "issues": "https://github.com/yusufkaracaburun/emeq-exact-api/issues"
             },
-            "time": "2026-06-16T10:34:32+00:00"
+            "time": "2026-06-17T19:19:45+00:00"
         },
         {
             "name": "emeq/mollie-api",

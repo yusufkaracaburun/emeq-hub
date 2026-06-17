@@ -7,6 +7,7 @@ use App\Models\Account;
 use App\Models\Connection;
 use App\Support\Exact\ExactForwarder;
 use Dedoc\Scramble\Attributes\Group;
+use Emeq\ExactApi\Http\Request\Read\GetVatCodes;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -39,9 +40,7 @@ class VatCodesController extends Controller
             $request,
             $account,
             $connection,
-            'GET',
-            '/vat/VATCodes',
-            $request->query(),
+            new GetVatCodes($request->query()),
         );
     }
 }

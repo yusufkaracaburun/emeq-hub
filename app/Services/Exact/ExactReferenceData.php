@@ -8,8 +8,12 @@ use App\Models\Connection;
 use Emeq\ExactApi\Contracts\ExactCredentialResolver;
 use Emeq\ExactApi\Contracts\TokenStore;
 use Emeq\ExactApi\Exact;
-use Emeq\ExactApi\Http\Request\RawExactRequest;
-use Saloon\Enums\Method;
+use Emeq\ExactApi\Http\Request\Read\GetGlAccounts;
+use Emeq\ExactApi\Http\Request\Read\GetJournals;
+use Emeq\ExactApi\Http\Request\Read\GetRelations;
+use Emeq\ExactApi\Http\Request\Read\GetVatCodes;
+use Emeq\ExactApi\OData\Envelope;
+use Saloon\Http\Request as SdkRequest;
 use Throwable;
 
 /**
@@ -18,8 +22,10 @@ use Throwable;
  * — geen consumer-request, dus géén ExactForwarder/pass-through-audit — en bindt de
  * SDK per-call zoals ResolveExactAccount + ExactAccountingTarget.
  *
- * Faalt zacht: bij een ontbrekende division, een pending Connection of een Exact-
- * fout levert elke methode een lege lijst, zodat de UI terugvalt op handinvoer.
+ * De endpoints + response-envelope leven in de emeq/exact-api SDK (named read-requests
+ * + Envelope); deze service kiest alleen de `$select` en mapt de records naar UI-labels.
+ * Faalt zacht: bij een ontbrekende division, een pending Connection of een Exact-fout
+ * levert elke methode een lege lijst, zodat de UI terugvalt op handinvoer.
  */
 final class ExactReferenceData
 {
@@ -34,7 +40,7 @@ final class ExactReferenceData
     {
         $out = [];
 
-        foreach ($this->query('/vat/VATCodes', 'Code,Description,Percentage') as $row) {
+        foreach ($this->fetch(new GetVatCodes(['$select' => 'Code,Description,Percentage'])) as $row) {
             $code = trim((string) ($row['Code'] ?? ''));
 
             if ($code === '') {
@@ -56,7 +62,7 @@ final class ExactReferenceData
     {
         $out = [];
 
-        foreach ($this->query('/financial/GLAccounts', 'ID,Code,Description') as $row) {
+        foreach ($this->fetch(new GetGlAccounts(['$select' => 'ID,Code,Description'])) as $row) {
             $id = (string) ($row['ID'] ?? '');
 
             if ($id === '') {
@@ -78,7 +84,7 @@ final class ExactReferenceData
     {
         $out = [];
 
-        foreach ($this->query('/crm/Accounts', 'ID,Name,Code') as $row) {
+        foreach ($this->fetch(new GetRelations(['$select' => 'ID,Name,Code'])) as $row) {
             $id = (string) ($row['ID'] ?? '');
 
             if ($id === '') {
@@ -100,7 +106,7 @@ final class ExactReferenceData
     {
         $out = [];
 
-        foreach ($this->query('/financial/Journals', 'Code,Description,Type') as $row) {
+        foreach ($this->fetch(new GetJournals(['$select' => 'Code,Description,Type'])) as $row) {
             $code = trim((string) ($row['Code'] ?? ''));
 
             if ($code === '') {
@@ -116,7 +122,7 @@ final class ExactReferenceData
     /**
      * @return list<array<string, mixed>>
      */
-    private function query(string $endpoint, string $select): array
+    private function fetch(SdkRequest $request): array
     {
         $division = (string) $this->connection->administratie_id;
 
@@ -132,19 +138,13 @@ final class ExactReferenceData
             /** @var Exact $exact */
             $exact = app(Exact::class);
 
-            $response = $exact->connector($division)->send(new RawExactRequest(
-                method: Method::GET,
-                endpoint: $endpoint,
-                query: ['$select' => $select],
-            ));
+            $response = $exact->connector($division)->send($request);
 
             if ($response->failed()) {
                 return [];
             }
 
-            $results = data_get($response->json(), 'd.results', data_get($response->json(), 'd', []));
-
-            return is_array($results) ? array_values($results) : [];
+            return Envelope::results($response->json());
         } catch (Throwable) {
             return [];
         }

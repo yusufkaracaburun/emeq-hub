@@ -5,7 +5,9 @@ namespace Tests\Feature\Exact;
 use App\Models\Connection;
 use App\Models\Consumer;
 use App\Services\Exact\ExactReferenceData;
-use Emeq\ExactApi\Http\Request\RawExactRequest;
+use Emeq\ExactApi\Http\Request\Read\GetGlAccounts;
+use Emeq\ExactApi\Http\Request\Read\GetRelations;
+use Emeq\ExactApi\Http\Request\Read\GetVatCodes;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Saloon\Http\Faking\MockClient;
 use Saloon\Http\Faking\MockResponse;
@@ -53,7 +55,7 @@ class ExactReferenceDataTest extends TestCase
     public function test_vat_codes_are_mapped_to_code_keyed_labels(): void
     {
         MockClient::global([
-            RawExactRequest::class => MockResponse::make([
+            GetVatCodes::class => MockResponse::make([
                 'd' => ['results' => [
                     ['ID' => 'v1', 'Code' => '4', 'Description' => 'Hoog', 'Percentage' => 21],
                     ['ID' => 'v2', 'Code' => '2', 'Description' => 'Laag', 'Percentage' => 9],
@@ -71,7 +73,7 @@ class ExactReferenceDataTest extends TestCase
     public function test_relations_are_mapped_to_guid_keyed_names(): void
     {
         MockClient::global([
-            RawExactRequest::class => MockResponse::make([
+            GetRelations::class => MockResponse::make([
                 'd' => ['results' => [
                     ['ID' => 'guid-1', 'Name' => 'Klant BV', 'Code' => '   1'],
                 ]],
@@ -93,7 +95,7 @@ class ExactReferenceDataTest extends TestCase
     public function test_fails_soft_to_empty_on_upstream_error(): void
     {
         MockClient::global([
-            RawExactRequest::class => MockResponse::make(['error' => 'boom'], 500),
+            GetGlAccounts::class => MockResponse::make(['error' => 'boom'], 500),
         ]);
 
         $this->assertSame([], (new ExactReferenceData($this->exactConnection()))->glAccounts());

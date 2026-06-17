@@ -7,6 +7,7 @@ use App\Models\Account;
 use App\Models\Connection;
 use App\Support\Exact\ExactForwarder;
 use Dedoc\Scramble\Attributes\Group;
+use Emeq\ExactApi\Http\Request\Read\GetJournals;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -39,9 +40,7 @@ class JournalsController extends Controller
             $request,
             $account,
             $connection,
-            'GET',
-            '/financial/Journals',
-            $request->query(),
+            new GetJournals($request->query()),
         );
     }
 }

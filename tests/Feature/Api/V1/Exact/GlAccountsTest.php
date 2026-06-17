@@ -5,7 +5,7 @@ namespace Tests\Feature\Api\V1\Exact;
 use App\Models\Connection;
 use App\Models\Consumer;
 use App\Sanctum\TokenAbilities;
-use Emeq\ExactApi\Http\Request\RawExactRequest;
+use Emeq\ExactApi\Http\Request\Read\GetGlAccounts;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Saloon\Http\Faking\MockClient;
 use Saloon\Http\Faking\MockResponse;
@@ -58,7 +58,7 @@ class GlAccountsTest extends TestCase
     public function test_gl_accounts_forwards_to_financial_glaccounts_endpoint(): void
     {
         MockClient::global([
-            RawExactRequest::class => MockResponse::make([
+            GetGlAccounts::class => MockResponse::make([
                 'd' => ['results' => [['ID' => 'gl-1', 'Code' => '8000', 'Description' => 'Omzet']]],
             ], 200),
         ]);

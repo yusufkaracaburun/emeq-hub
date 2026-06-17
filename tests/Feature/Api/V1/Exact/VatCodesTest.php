@@ -5,7 +5,7 @@ namespace Tests\Feature\Api\V1\Exact;
 use App\Models\Connection;
 use App\Models\Consumer;
 use App\Sanctum\TokenAbilities;
-use Emeq\ExactApi\Http\Request\RawExactRequest;
+use Emeq\ExactApi\Http\Request\Read\GetVatCodes;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Saloon\Http\Faking\MockClient;
 use Saloon\Http\Faking\MockResponse;
@@ -58,7 +58,7 @@ class VatCodesTest extends TestCase
     public function test_vat_codes_forwards_to_vat_vatcodes_endpoint(): void
     {
         MockClient::global([
-            RawExactRequest::class => MockResponse::make([
+            GetVatCodes::class => MockResponse::make([
                 'd' => ['results' => [['ID' => 'vat-1', 'Code' => '4', 'Description' => 'Hoog', 'Percentage' => 21]]],
             ], 200),
         ]);

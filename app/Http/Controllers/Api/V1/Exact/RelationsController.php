@@ -7,6 +7,7 @@ use App\Models\Account;
 use App\Models\Connection;
 use App\Support\Exact\ExactForwarder;
 use Dedoc\Scramble\Attributes\Group;
+use Emeq\ExactApi\Http\Request\Read\GetRelations;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -39,9 +40,7 @@ class RelationsController extends Controller
             $request,
             $account,
             $connection,
-            'GET',
-            '/crm/Accounts',
-            $request->query(),
+            new GetRelations($request->query()),
         );
     }
 }

@@ -5,7 +5,7 @@ namespace Tests\Feature\Api\V1\Exact;
 use App\Models\Connection;
 use App\Models\Consumer;
 use App\Sanctum\TokenAbilities;
-use Emeq\ExactApi\Http\Request\RawExactRequest;
+use Emeq\ExactApi\Http\Request\Read\GetJournals;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Saloon\Http\Faking\MockClient;
 use Saloon\Http\Faking\MockResponse;
@@ -58,7 +58,7 @@ class JournalsTest extends TestCase
     public function test_journals_forwards_to_financial_journals_endpoint(): void
     {
         MockClient::global([
-            RawExactRequest::class => MockResponse::make([
+            GetJournals::class => MockResponse::make([
                 'd' => ['results' => [['ID' => 'jnl-1', 'Code' => '70', 'Description' => 'Verkoop', 'Type' => 20]]],
             ], 200),
         ]);

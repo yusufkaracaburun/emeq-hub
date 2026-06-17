@@ -9,35 +9,27 @@ use App\Models\Account;
 use App\Models\Connection;
 use App\Models\PassThroughCall;
 use Emeq\ExactApi\Exact;
-use Emeq\ExactApi\Http\Request\RawExactRequest;
 use Illuminate\Http\Request;
-use Saloon\Enums\Method;
+use Saloon\Contracts\Body\HasBody;
+use Saloon\Http\Request as SdkRequest;
 use Symfony\Component\HttpFoundation\Response;
 use Throwable;
 
 /**
- * Stuurt één division-scoped Exact REST-call door en logt 'm in pass_through_calls.
+ * Stuurt één division-scoped Exact-SDK-request door en logt 'm in pass_through_calls.
  *
- * Eén audit-/trace-pad voor zowel de generieke pass-through als de named
- * resource-endpoints: elke call legt provider + method + de geraakte Exact-
- * endpoint (`path`) vast, zodat per request herleidbaar is welke Exact-endpoint
- * achter een Hub-endpoint zit. Validatie (method/ability/content-type) en de
- * endpoint-keuze blijven bij de aanroepende controller.
+ * Eén audit-/trace-pad voor zowel de generieke pass-through (RawExactRequest) als de
+ * named resource-endpoints (GetGlAccounts/…): method + geraakte Exact-endpoint komen
+ * uit het SDK-request zelf (`resolveEndpoint()`), zodat de Hub het pad niet dupliceert.
+ * De endpoint-/payload-kennis leeft in de SDK; de Hub regelt division-scope + audit.
  */
 final class ExactForwarder
 {
-    /**
-     * @param  array<string, scalar|null>  $query
-     * @param  array<string, mixed>|null  $body
-     */
     public function forward(
         Request $request,
         Account $account,
         Connection $connection,
-        string $method,
-        string $endpoint,
-        array $query = [],
-        ?array $body = null,
+        SdkRequest $sdkRequest,
     ): Response {
         $division = (string) $connection->administratie_id;
 
@@ -48,8 +40,10 @@ final class ExactForwarder
             ], Response::HTTP_CONFLICT);
         }
 
-        $endpoint = '/'.ltrim($endpoint, '/');
-        $headers = HeaderForwarder::forward($request);
+        $method = $sdkRequest->getMethod()->value;
+        $endpoint = '/'.ltrim($sdkRequest->resolveEndpoint(), '/');
+        $query = $sdkRequest->query()->all();
+        $body = $sdkRequest instanceof HasBody ? $sdkRequest->body()->all() : null;
 
         $start = microtime(true);
         $upstreamError = null;
@@ -62,13 +56,7 @@ final class ExactForwarder
             /** @var Exact $exact */
             $exact = app(Exact::class);
 
-            $sdkResponse = $exact->connector($division)->send(new RawExactRequest(
-                method: Method::from($method),
-                endpoint: $endpoint,
-                query: $query,
-                body: $body,
-                headers: $headers,
-            ));
+            $sdkResponse = $exact->connector($division)->send($sdkRequest);
 
             // De SDK throwt niet automatisch op failed-status — geef de Exact-mapped
             // exception een kans om door UpstreamErrorMapper te worden gemapt.

@@ -7,8 +7,11 @@ use App\Models\Account;
 use App\Models\Connection;
 use App\Sanctum\TokenAbilities;
 use App\Support\Exact\ExactForwarder;
+use App\Support\Exact\HeaderForwarder;
 use Dedoc\Scramble\Attributes\Group;
+use Emeq\ExactApi\Http\Request\RawExactRequest;
 use Illuminate\Http\Request;
+use Saloon\Enums\Method;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -71,14 +74,12 @@ class PassThroughController extends Controller
         /** @var Connection $connection */
         $connection = $request->attributes->get('exact_connection');
 
-        return $this->forwarder->forward(
-            $request,
-            $account,
-            $connection,
-            $method,
-            $path,
-            $request->query(),
-            $body,
-        );
+        return $this->forwarder->forward($request, $account, $connection, new RawExactRequest(
+            method: Method::from($method),
+            endpoint: '/'.ltrim($path, '/'),
+            query: $request->query(),
+            body: $body,
+            headers: HeaderForwarder::forward($request),
+        ));
     }
 }
