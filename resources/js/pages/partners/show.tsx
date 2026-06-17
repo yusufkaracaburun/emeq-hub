@@ -29,15 +29,23 @@ export default function PartnerShow({ provider }: { provider: ProviderDetail }) 
 
             <Separator className="mx-auto max-w-5xl" />
 
-            {provider.how_it_works && (
+            {provider.use_cases && (
                 <>
                     <section className="mx-auto max-w-5xl px-4 py-12">
-                        <h2 className="text-2xl font-semibold">Hoe het werkt</h2>
-                        <div className="mt-6 max-w-3xl space-y-4">
-                            {provider.how_it_works.map((paragraph, index) => (
-                                <p key={index} className="text-muted-foreground">
-                                    {paragraph}
-                                </p>
+                        <h2 className="text-2xl font-semibold">Wat het je oplevert</h2>
+                        <p className="mt-2 max-w-3xl text-muted-foreground">
+                            Concrete dingen die je met de koppeling regelt — zonder dubbel werk of overtypen.
+                        </p>
+                        <div className="mt-6 grid gap-5 md:grid-cols-2">
+                            {provider.use_cases.map((useCase) => (
+                                <Card key={useCase.title}>
+                                    <CardHeader>
+                                        <CardTitle className="text-base">{useCase.title}</CardTitle>
+                                    </CardHeader>
+                                    <CardContent className="text-sm text-muted-foreground">
+                                        {useCase.value}
+                                    </CardContent>
+                                </Card>
                             ))}
                         </div>
                     </section>
@@ -60,6 +68,31 @@ export default function PartnerShow({ provider }: { provider: ProviderDetail }) 
                     ))}
                 </div>
             </section>
+
+            {(provider.how_it_works || provider.endpoints) && (
+                <section className="mx-auto max-w-5xl px-4 pb-2 pt-10">
+                    <Badge variant="outline" className="mb-3">
+                        Voor ontwikkelaars
+                    </Badge>
+                    <p className="max-w-3xl text-sm text-muted-foreground">
+                        Het deel hieronder is voor de ontwikkelaar die de koppeling inbouwt. Om te beoordelen of
+                        deze integratie iets voor je is, heb je alleen het bovenstaande nodig.
+                    </p>
+                </section>
+            )}
+
+            {provider.how_it_works && (
+                <section className="mx-auto max-w-5xl px-4 pb-8">
+                    <h2 className="text-2xl font-semibold">Hoe het werkt</h2>
+                    <div className="mt-6 max-w-3xl space-y-4">
+                        {provider.how_it_works.map((paragraph, index) => (
+                            <p key={index} className="text-muted-foreground">
+                                {paragraph}
+                            </p>
+                        ))}
+                    </div>
+                </section>
+            )}
 
             {provider.endpoints && (
                 <section className="mx-auto max-w-5xl px-4 pb-12">

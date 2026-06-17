@@ -18,8 +18,14 @@ export interface EndpointRef {
     description: string;
 }
 
+export interface UseCase {
+    title: string;
+    value: string;
+}
+
 export interface ProviderDetail extends ProviderSummary {
     how_it_works?: string[];
+    use_cases?: UseCase[];
     capabilities: Capability[];
     endpoints?: EndpointRef[];
     connect_steps: string[];

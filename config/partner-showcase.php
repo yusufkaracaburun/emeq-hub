@@ -42,22 +42,41 @@ return [
                 .'(methode, geraakte Exact-endpoint, status, duur, response-grootte). Upstream-fouten worden '
                 .'naar een uniform Hub-formaat gemapt, zodat je app niet elk Exact-specifiek foutgeval hoeft te kennen.',
         ],
+        'use_cases' => [
+            [
+                'title' => 'Koppelen in één keer, daarna automatisch',
+                'value' => 'Je klant geeft de koppeling eenmalig toestemming. Daarna wisselen je app en '
+                    .'Exact Online automatisch gegevens uit — niemand hoeft nog in twee systemen bij te werken '
+                    .'of gegevens over te typen.',
+            ],
+            [
+                'title' => 'Altijd de juiste Exact-gegevens in je app',
+                'value' => 'Grootboekrekeningen, btw-codes, dagboeken en relaties komen rechtstreeks uit de '
+                    .'administratie van je klant. Keuzelijsten in je app blijven kloppen, zonder dubbel beheer.',
+            ],
+            [
+                'title' => 'Boekhoudgegevens opvragen wanneer je ze nodig hebt',
+                'value' => 'Je app kan gegevens uit de administratie tonen — bijvoorbeeld relaties of facturen — '
+                    .'zonder dat je klant Exact Online apart hoeft open te zetten.',
+            ],
+            [
+                'title' => 'Wijzigingen stromen terug naar Exact',
+                'value' => 'Een nieuwe relatie of aanpassing vanuit je app belandt direct in de juiste '
+                    .'Exact-administratie. De boekhouding blijft actueel zonder extra handwerk.',
+            ],
+        ],
         'capabilities' => [
             [
-                'title' => 'OAuth Connect-broker',
-                'description' => 'OAuth2-koppeling per Account met reactieve refresh-token-rotatie '
-                    .'(Exact weigert een refresh zolang het access_token nog geldig is) en encryption-at-rest.',
+                'title' => 'Veilige koppeling per klant',
+                'description' => 'Elke klant koppelt zijn eigen Exact-administratie. De toegang wordt '
+                    .'versleuteld bewaard en vernieuwt automatisch — je klant hoeft niet telkens opnieuw '
+                    .'in te loggen.',
             ],
             [
-                'title' => 'Division-aware pass-through',
-                'description' => 'Elk Exact REST-endpoint via één route; de Hub injecteert de juiste '
-                    .'division en token, logt elke call en mapt upstream-fouten naar een uniform formaat.',
-            ],
-            [
-                'title' => 'Boekhoud-sync',
-                'description' => 'POST één canonical FinancialDocument; de Hub mapt naar salesinvoice, '
-                    .'purchaseentry of generaljournalentry. Per-Connection mapping (VATCode, GLAccount, '
-                    .'relatie, dagboek) is instelbaar.',
+                'title' => 'Lezen én bijwerken',
+                'description' => 'Gegevens uit Exact — grootboek, btw-codes, relaties en dagboeken — zijn '
+                    .'zichtbaar in je app én bij te werken vanuit je app, altijd op de juiste administratie '
+                    .'van je klant.',
             ],
         ],
         'endpoints' => [
