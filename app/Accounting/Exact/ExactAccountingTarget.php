@@ -27,10 +27,12 @@ use Saloon\Enums\Method;
  * refresh tegen déze Connection loopt. Referentie-data (relatie/VATCode/GLAccount/
  * journaal) komt uit de ExactReferenceResolver-seam.
  *
- * NB: de exacte body-fidelity (verplichte velden zoals datum, debet/credit-teken
- * bij journaalposten) wordt geverifieerd bij de eerste live-write (fase 2, ná de
- * Data & Security-review). De endpoints + line-velden zijn gegrond op de officiële
- * REST API-referentie (HlpRestAPIResources).
+ * Endpoints + verplichte header-velden zijn gegrond op de officiële REST API-
+ * referentie (HlpRestAPIResources): verkoop = salesentry/SalesEntries (Customer/
+ * Journal), inkoop = purchaseentry/PurchaseEntries (Supplier/Journal), memoriaal =
+ * generaljournalentry/GeneralJournalEntries (JournalCode — afwijkend veld). Het
+ * debet/credit-teken (AmountFC/AmountDC) wordt per type bij de live-write tegen de
+ * test-administratie geverifieerd.
  */
 final class ExactAccountingTarget implements AccountingTarget
 {
@@ -81,8 +83,8 @@ final class ExactAccountingTarget implements AccountingTarget
     {
         return match ($document->type) {
             DocumentType::SalesInvoice, DocumentType::CreditNote => [
-                '/salesinvoice/SalesInvoices',
-                $this->salesInvoiceBody($document, $connection),
+                '/salesentry/SalesEntries',
+                $this->salesEntryBody($document, $connection),
             ],
             DocumentType::PurchaseInvoice => [
                 '/purchaseentry/PurchaseEntries',
@@ -96,21 +98,24 @@ final class ExactAccountingTarget implements AccountingTarget
     }
 
     /**
+     * Verkoop-BOEKING in het verkoopdagboek (salesentry), niet een item-based
+     * SalesInvoice. Spiegel van purchaseEntryBody: GL-based regels, géén Item —
+     * accounting-sync zet boekhoud-data in Exact, het invoicen gebeurt bij de
+     * Consumer. Zie de SalesEntries-keuze-ADR.
+     *
      * @return array<string, mixed>
      */
-    private function salesInvoiceBody(FinancialDocument $document, Connection $connection): array
+    private function salesEntryBody(FinancialDocument $document, Connection $connection): array
     {
         return [
-            'OrderedBy' => $this->references->relationGuid($document->party, $connection),
+            'Customer' => $this->references->relationGuid($document->party, $connection),
+            'EntryDate' => $document->issueDate->format('Y-m-d'),
             'Journal' => $this->references->journal($document->type, $connection),
-            'InvoiceDate' => $document->issueDate->format('Y-m-d'),
-            'YourRef' => $document->reference ?? $document->number,
             'Description' => $document->number ?? $document->externalId,
-            'SalesInvoiceLines' => array_map(
+            'SalesEntryLines' => array_map(
                 fn (FinancialDocumentLine $line): array => array_filter([
                     'Description' => $line->description,
-                    'Quantity' => $line->quantity,
-                    'UnitPrice' => $line->unitPrice,
+                    'AmountFC' => $line->netAmount(),
                     'VATCode' => $this->references->vatCode($line->taxRate, $connection),
                     'GLAccount' => $this->references->glAccountGuid($line->category, $connection),
                 ], fn (mixed $v): bool => $v !== null),
@@ -147,7 +152,7 @@ final class ExactAccountingTarget implements AccountingTarget
     private function generalJournalEntryBody(FinancialDocument $document, Connection $connection): array
     {
         return [
-            'Journal' => $this->references->journal($document->type, $connection),
+            'JournalCode' => $this->references->journal($document->type, $connection),
             'Description' => $document->number ?? $document->externalId,
             'GeneralJournalEntryLines' => array_map(
                 fn (FinancialDocumentLine $line): array => array_filter([

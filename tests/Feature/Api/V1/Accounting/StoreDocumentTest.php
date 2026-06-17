@@ -147,12 +147,12 @@ class StoreDocumentTest extends TestCase
         MockClient::global()->assertSent(function (RawExactRequest $request): bool {
             $body = $request->body()->all();
 
-            return $request->resolveEndpoint() === '/salesinvoice/SalesInvoices'
-                && $body['OrderedBy'] === 'cust-guid'
+            return $request->resolveEndpoint() === '/salesentry/SalesEntries'
+                && $body['Customer'] === 'cust-guid'
                 && $body['Journal'] === '90'
-                && $body['SalesInvoiceLines'][0]['VATCode'] === '4'
-                && $body['SalesInvoiceLines'][0]['GLAccount'] === 'gl-guid'
-                && (float) $body['SalesInvoiceLines'][0]['UnitPrice'] === 100.0;
+                && $body['SalesEntryLines'][0]['VATCode'] === '4'
+                && $body['SalesEntryLines'][0]['GLAccount'] === 'gl-guid'
+                && (float) $body['SalesEntryLines'][0]['AmountFC'] === 200.0;
         });
     }
 
@@ -183,10 +183,10 @@ class StoreDocumentTest extends TestCase
         MockClient::global()->assertSent(function (RawExactRequest $request): bool {
             $body = $request->body()->all();
 
-            return $body['OrderedBy'] === 'cust-real'
+            return $body['Customer'] === 'cust-real'
                 && $body['Journal'] === '70'
-                && $body['SalesInvoiceLines'][0]['VATCode'] === '4'
-                && $body['SalesInvoiceLines'][0]['GLAccount'] === 'gl-def';
+                && $body['SalesEntryLines'][0]['VATCode'] === '4'
+                && $body['SalesEntryLines'][0]['GLAccount'] === 'gl-def';
         });
     }
 
@@ -248,7 +248,7 @@ class StoreDocumentTest extends TestCase
             $body = $request->body()->all();
 
             return $request->resolveEndpoint() === '/generaljournalentry/GeneralJournalEntries'
-                && $body['Journal'] === '90'
+                && $body['JournalCode'] === '90'
                 && (float) $body['GeneralJournalEntryLines'][0]['AmountDC'] === 200.0
                 && $body['GeneralJournalEntryLines'][0]['VATCode'] === '4';
         });
