@@ -13,6 +13,7 @@ use App\Support\ProviderCredentialDescriptor;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Actions\ViewAction;
+use Filament\Infolists\Components\KeyValueEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
@@ -115,6 +116,37 @@ class ConnectionResource extends Resource
                         ->placeholder('—'),
                     TextEntry::make('revoked_at')->dateTime()->placeholder('—'),
                     TextEntry::make('created_at')->dateTime(),
+                ]),
+
+            Section::make('Boekhoud-mapping')
+                ->description('Per-Connection mapping uit metadata.accounting_mapping — gebruikt door de accounting-sync.')
+                ->visible(fn (?Connection $record): bool => filled($record?->metadata['accounting_mapping'] ?? null))
+                ->columns(2)
+                ->schema([
+                    KeyValueEntry::make('vat_codes')
+                        ->label('BTW-tarief → VATCode')
+                        ->state(fn (Connection $record): array => $record->metadata['accounting_mapping']['vat_codes'] ?? [])
+                        ->keyLabel('Tarief')
+                        ->valueLabel('VATCode')
+                        ->emptyMessage('Geen tarieven gemapt'),
+                    KeyValueEntry::make('journals')
+                        ->label('Doc-type → dagboek')
+                        ->state(fn (Connection $record): array => $record->metadata['accounting_mapping']['journals'] ?? [])
+                        ->keyLabel('Type')
+                        ->valueLabel('Dagboek')
+                        ->emptyMessage('Geen dagboeken gemapt'),
+                    KeyValueEntry::make('gl_accounts')
+                        ->label('Categorie → GLAccount (GUID)')
+                        ->state(fn (Connection $record): array => $record->metadata['accounting_mapping']['gl_accounts'] ?? [])
+                        ->keyLabel('Categorie')
+                        ->valueLabel('GLAccount')
+                        ->emptyMessage('Geen grootboek gemapt'),
+                    KeyValueEntry::make('relations')
+                        ->label('Relatie → GUID')
+                        ->state(fn (Connection $record): array => $record->metadata['accounting_mapping']['relations'] ?? [])
+                        ->keyLabel('Relatie')
+                        ->valueLabel('GUID')
+                        ->emptyMessage('Geen relaties gemapt'),
                 ]),
         ]);
     }
