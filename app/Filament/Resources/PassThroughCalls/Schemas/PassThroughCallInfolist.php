@@ -47,6 +47,15 @@ class PassThroughCallInfolist
                     TextEntry::make('upstream_error')->label('Upstream-error')->placeholder('—'),
                     TextEntry::make('created_at')->label('Aangemaakt')->dateTime(),
                 ]),
+
+            Section::make('Response-body (alleen bij fouten ≥400)')
+                ->visible(fn ($record): bool => filled($record->response_body))
+                ->schema([
+                    TextEntry::make('response_body')
+                        ->hiddenLabel()
+                        ->copyable()
+                        ->columnSpanFull(),
+                ]),
         ]);
     }
 }

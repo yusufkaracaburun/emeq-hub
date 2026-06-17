@@ -26,6 +26,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'event_id',
     'response_size_bytes',
     'upstream_error',
+    'response_body',
     'created_at',
 ])]
 class PassThroughCall extends Model
@@ -43,6 +44,22 @@ class PassThroughCall extends Model
     public function scopeOutbound(Builder $query): Builder
     {
         return $query->where('direction', 'outbound');
+    }
+
+    /**
+     * Response-body voor de audit-detail: alleen bij fouten (status >= 400),
+     * afgekapt op 8 KB. Rauwe tokens zitten in request-headers (niet de response);
+     * de cap beperkt PII/grootte at rest. Eén bron voor alle pass-through-writers.
+     */
+    public static function errorBody(int $status, ?string $body): ?string
+    {
+        if ($status < 400 || $body === null || $body === '') {
+            return null;
+        }
+
+        return mb_strlen($body) > 8000
+            ? mb_substr($body, 0, 8000)."\n…[afgekapt]"
+            : $body;
     }
 
     public function consumer(): BelongsTo

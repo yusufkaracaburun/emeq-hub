@@ -147,6 +147,7 @@ class DocumentsController extends Controller
             'request_fingerprint' => substr(hash('sha256', $document->externalId), 0, 12),
             'response_size_bytes' => strlen((string) json_encode($responseBody)),
             'upstream_error' => $upstreamError,
+            'response_body' => PassThroughCall::errorBody($status, (string) json_encode($responseBody)),
             'created_at' => now(),
         ]);
     }

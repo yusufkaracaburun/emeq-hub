@@ -103,6 +103,7 @@ final class ExactForwarder
                 : null,
             'response_size_bytes' => strlen($responseBody),
             'upstream_error' => $upstreamError,
+            'response_body' => PassThroughCall::errorBody($status, $responseBody),
             'created_at' => now(),
         ]);
 
