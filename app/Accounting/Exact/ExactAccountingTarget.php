@@ -151,14 +151,18 @@ final class ExactAccountingTarget implements AccountingTarget
      */
     private function generalJournalEntryBody(FinancialDocument $document, Connection $connection): array
     {
+        // Memoriaal (GeneralJournalEntry) wijkt af van Sales/PurchaseEntries (live-
+        // geverifieerd 2026-06-17): Exact weigert een header-`Description` (HTTP 400) én
+        // een `VATCode` op de regel ("Niet toegestaan: Btw-code"). LET OP: een memoriaal
+        // moet balanceren (debet=credit) — één canonical bedrag-regel mist de tegenrekening.
+        // Volledige income/expense-boeking vergt nog een ontwerpkeuze (offset-grootboek in
+        // de mapping → 2e regel, of routeren naar PurchaseEntry). Zie het hardening-plan.
         return [
             'JournalCode' => $this->references->journal($document->type, $connection),
-            'Description' => $document->number ?? $document->externalId,
             'GeneralJournalEntryLines' => array_map(
                 fn (FinancialDocumentLine $line): array => array_filter([
                     'Description' => $line->description,
                     'AmountDC' => $line->netAmount(),
-                    'VATCode' => $this->references->vatCode($line->taxRate, $connection),
                     'GLAccount' => $this->references->glAccountGuid($line->category, $connection),
                 ], fn (mixed $v): bool => $v !== null),
                 $document->lines,
@@ -175,7 +179,12 @@ final class ExactAccountingTarget implements AccountingTarget
             return null;
         }
 
-        $id = data_get($json, 'd.ID') ?? data_get($json, 'd.0.ID') ?? data_get($json, 'd.results.0.ID');
+        $id = data_get($json, 'd.EntryID')
+            ?? data_get($json, 'd.ID')
+            ?? data_get($json, 'd.results.0.EntryID')
+            ?? data_get($json, 'd.results.0.ID')
+            ?? data_get($json, 'd.0.EntryID')
+            ?? data_get($json, 'd.0.ID');
 
         return $id !== null ? (string) $id : null;
     }

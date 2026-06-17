@@ -280,7 +280,7 @@ class StoreDocumentTest extends TestCase
     public function test_pushes_expense_to_generaljournalentry(): void
     {
         MockClient::global([
-            RawExactRequest::class => MockResponse::make(['d' => ['ID' => 'gj-1']], 201),
+            RawExactRequest::class => MockResponse::make(['d' => ['EntryID' => 'gj-1']], 201),
         ]);
         $this->bindFakeReferences();
 
@@ -300,10 +300,13 @@ class StoreDocumentTest extends TestCase
         MockClient::global()->assertSent(function (RawExactRequest $request): bool {
             $body = $request->body()->all();
 
+            // Exact weigert op een GeneralJournalEntry zowel een header-Description als
+            // een regel-VATCode (live-geverifieerd 2026-06-17).
             return $request->resolveEndpoint() === '/generaljournalentry/GeneralJournalEntries'
+                && ! array_key_exists('Description', $body)
                 && $body['JournalCode'] === '90'
                 && (float) $body['GeneralJournalEntryLines'][0]['AmountDC'] === 200.0
-                && $body['GeneralJournalEntryLines'][0]['VATCode'] === '4';
+                && ! array_key_exists('VATCode', $body['GeneralJournalEntryLines'][0]);
         });
 
         $this->assertDatabaseHas('pass_through_calls', [
