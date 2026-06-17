@@ -6,7 +6,6 @@ namespace App\Http\Controllers\Api\V1\Accounting;
 
 use App\Accounting\AccountingSyncRunner;
 use App\Accounting\AccountingTargetRegistry;
-use App\Accounting\Enums\DocumentType;
 use App\Accounting\Enums\SyncStatus;
 use App\Accounting\FinancialDocument;
 use App\Http\Controllers\Controller;
@@ -80,18 +79,6 @@ class DocumentsController extends Controller
         }
 
         $document = FinancialDocument::fromArray($request->validated());
-
-        // v1-grens: alleen verkoop/inkoop (sales_invoice/purchase_invoice/credit_note).
-        // Ad-hoc income/expense → memoriaal hangt aan de GeneralJournalEntry-balancering
-        // (#12) en komt in v2 — weiger nu expliciet i.p.v. een rauwe Exact-500 door te laten.
-        if (in_array($document->type, [DocumentType::Income, DocumentType::Expense], true)) {
-            return response()->json([
-                'status' => SyncStatus::Rejected->value,
-                'external_id' => $document->externalId,
-                'error' => 'unsupported_document_type',
-                'message' => "Doc-type '{$document->type->value}' wordt vanaf v2 ondersteund (ad-hoc income/expense → memoriaal, zie #12).",
-            ], 422);
-        }
 
         $consumerId = (int) $request->user()?->getKey();
 

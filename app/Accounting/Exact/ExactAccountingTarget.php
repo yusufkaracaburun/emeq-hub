@@ -22,7 +22,6 @@ use Emeq\ExactApi\Exact;
 use Emeq\ExactApi\Http\ExactConnector;
 use Emeq\ExactApi\Http\Request\Write\CreateDocument;
 use Emeq\ExactApi\Http\Request\Write\CreateDocumentAttachment;
-use Emeq\ExactApi\Http\Request\Write\CreateGeneralJournalEntry;
 use Emeq\ExactApi\Http\Request\Write\CreatePurchaseEntry;
 use Emeq\ExactApi\Http\Request\Write\CreateSalesEntry;
 use Emeq\ExactApi\OData\Envelope;
@@ -192,8 +191,12 @@ final class ExactAccountingTarget implements AccountingTarget
         $description = $document->number ?? $document->externalId;
         $yourRef = $this->provenance($document, $connection);
 
+        // income = ontvangst met relatie-debiteur → SalesEntry; expense = declaratie/
+        // kosten met relatie-crediteur → PurchaseEntry. Beide dragen altijd relatie +
+        // BTW + categorie-GL, dus geen memoriaal (zie #12). De openstaande post wordt
+        // later via Exact-bankreconciliatie afgeletterd.
         return match ($document->type) {
-            DocumentType::SalesInvoice, DocumentType::CreditNote => new CreateSalesEntry(
+            DocumentType::SalesInvoice, DocumentType::CreditNote, DocumentType::Income => new CreateSalesEntry(
                 customer: $this->references->relationGuid($document->party, $connection),
                 entryDate: $entryDate,
                 journal: $this->references->journal($document->type, $connection),
@@ -201,17 +204,13 @@ final class ExactAccountingTarget implements AccountingTarget
                 lines: $this->lines($document, $connection),
                 yourRef: $yourRef,
             ),
-            DocumentType::PurchaseInvoice => new CreatePurchaseEntry(
+            DocumentType::PurchaseInvoice, DocumentType::Expense => new CreatePurchaseEntry(
                 supplier: $this->references->relationGuid($document->party, $connection),
                 entryDate: $entryDate,
                 journal: $this->references->journal($document->type, $connection),
                 description: $description,
                 lines: $this->lines($document, $connection),
                 yourRef: $yourRef,
-            ),
-            DocumentType::Income, DocumentType::Expense => new CreateGeneralJournalEntry(
-                journalCode: $this->references->journal($document->type, $connection),
-                lines: $this->lines($document, $connection),
             ),
         };
     }

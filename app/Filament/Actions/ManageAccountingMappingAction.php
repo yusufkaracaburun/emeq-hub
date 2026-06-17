@@ -97,11 +97,14 @@ final class ManageAccountingMappingAction
                         ]),
                 ]),
             Section::make('Dagboeken (Journal)')
-                ->columns(3)
+                ->columns(2)
                 ->schema([
                     self::optionField('journal_sales', 'Verkoop', $journals),
                     self::optionField('journal_purchase', 'Inkoop', $journals),
-                    self::optionField('journal_general', 'Memoriaal', $journals),
+                    self::optionField('journal_income', 'Ad-hoc income', $journals)
+                        ->helperText('Leeg = verkoopdagboek.'),
+                    self::optionField('journal_expense', 'Ad-hoc expense', $journals)
+                        ->helperText('Leeg = inkoopdagboek.'),
                 ]),
         ];
     }
@@ -141,7 +144,8 @@ final class ManageAccountingMappingAction
             'relations' => self::toRows($mapping['relations'] ?? [], 'external_id'),
             'journal_sales' => $journals['sales'] ?? null,
             'journal_purchase' => $journals['purchase'] ?? null,
-            'journal_general' => $journals['general'] ?? null,
+            'journal_income' => $journals['income'] ?? null,
+            'journal_expense' => $journals['expense'] ?? null,
         ];
     }
 
@@ -162,7 +166,8 @@ final class ManageAccountingMappingAction
             'journals' => self::scalarMap([
                 'sales' => $data['journal_sales'] ?? null,
                 'purchase' => $data['journal_purchase'] ?? null,
-                'general' => $data['journal_general'] ?? null,
+                'income' => $data['journal_income'] ?? null,
+                'expense' => $data['journal_expense'] ?? null,
             ]),
         ];
     }

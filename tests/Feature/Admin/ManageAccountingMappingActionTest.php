@@ -116,7 +116,8 @@ class ManageAccountingMappingActionTest extends TestCase
                 ],
                 'journal_sales' => '70',
                 'journal_purchase' => '20',
-                'journal_general' => '90',
+                'journal_income' => '71',
+                'journal_expense' => '21',
             ])
             ->assertHasNoTableActionErrors();
 
@@ -126,7 +127,7 @@ class ManageAccountingMappingActionTest extends TestCase
             'vat_codes' => ['21' => '4', '9' => '2', '0' => '1'],
             'gl_accounts' => ['_default' => 'gl-def', 'omzet' => 'gl-omzet'],
             'relations' => ['ext-1' => 'cust-1'],
-            'journals' => ['sales' => '70', 'purchase' => '20', 'general' => '90'],
+            'journals' => ['sales' => '70', 'purchase' => '20', 'income' => '71', 'expense' => '21'],
         ], $connection->metadata['accounting_mapping']);
     }
 

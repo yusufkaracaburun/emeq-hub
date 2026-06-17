@@ -22,8 +22,10 @@ use App\Models\Connection;
  *     "vat_codes":  { "21": "4", "9": "2", "0": "1" },          // tarief → VATCode
  *     "gl_accounts": { "_default": "<guid>", "omzet": "<guid>" }, // categorie → GLAccount-GUID
  *     "relations":  { "<party.external_id>": "<crm-account-guid>" },
- *     "journals":   { "sales": "70", "purchase": "20", "general": "90" }
+ *     "journals":   { "sales": "70", "purchase": "20", "income": "71", "expense": "21" }
  *   }
+ *
+ * income/expense vallen terug op sales/purchase als geen eigen dagboek staat.
  */
 final class ConnectionMappingExactReferenceResolver implements ExactReferenceResolver
 {
@@ -52,9 +54,14 @@ final class ConnectionMappingExactReferenceResolver implements ExactReferenceRes
     public function journal(DocumentType $type, Connection $connection): string
     {
         $journals = $this->section($connection, 'journals');
-        $key = $this->journalKey($type);
 
-        return $journals[$key] ?? throw $this->missing("dagboek voor '{$type->value}'", 'journals');
+        foreach ($this->journalKeys($type) as $key) {
+            if (isset($journals[$key])) {
+                return $journals[$key];
+            }
+        }
+
+        return throw $this->missing("dagboek voor '{$type->value}'", 'journals');
     }
 
     /**
@@ -73,12 +80,20 @@ final class ConnectionMappingExactReferenceResolver implements ExactReferenceRes
         return rtrim(rtrim(number_format($taxRate, 2, '.', ''), '0'), '.');
     }
 
-    private function journalKey(DocumentType $type): string
+    /**
+     * Geordende dagboek-kandidaten per doc-type. income/expense mogen een eigen
+     * dagboek hebben maar vallen terug op verkoop/inkoop, zodat ze zonder extra
+     * config werken (income → SalesEntry, expense → PurchaseEntry; zie #12).
+     *
+     * @return list<string>
+     */
+    private function journalKeys(DocumentType $type): array
     {
         return match ($type) {
-            DocumentType::SalesInvoice, DocumentType::CreditNote => 'sales',
-            DocumentType::PurchaseInvoice => 'purchase',
-            DocumentType::Income, DocumentType::Expense => 'general',
+            DocumentType::SalesInvoice, DocumentType::CreditNote => ['sales'],
+            DocumentType::PurchaseInvoice => ['purchase'],
+            DocumentType::Income => ['income', 'sales'],
+            DocumentType::Expense => ['expense', 'purchase'],
         };
     }
 

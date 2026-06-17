@@ -43,7 +43,29 @@ class ConnectionMappingExactReferenceResolverTest extends TestCase
         $this->assertSame('cust-1', $resolver->relationGuid(new Party('debtor', 'Acme', externalId: 'ext-1'), $connection));
         $this->assertSame('70', $resolver->journal(DocumentType::SalesInvoice, $connection));
         $this->assertSame('20', $resolver->journal(DocumentType::PurchaseInvoice, $connection));
-        $this->assertSame('90', $resolver->journal(DocumentType::Expense, $connection));
+    }
+
+    public function test_income_expense_use_own_journal_when_configured(): void
+    {
+        $resolver = new ConnectionMappingExactReferenceResolver;
+        $connection = $this->connection([
+            'journals' => ['sales' => '70', 'purchase' => '20', 'income' => '71', 'expense' => '21'],
+        ]);
+
+        $this->assertSame('71', $resolver->journal(DocumentType::Income, $connection));
+        $this->assertSame('21', $resolver->journal(DocumentType::Expense, $connection));
+    }
+
+    public function test_income_expense_fall_back_to_sales_purchase_journals(): void
+    {
+        $resolver = new ConnectionMappingExactReferenceResolver;
+        $connection = $this->connection([
+            'journals' => ['sales' => '70', 'purchase' => '20'],
+        ]);
+
+        // Geen eigen income/expense-dagboek geconfigureerd → verkoop/inkoop.
+        $this->assertSame('70', $resolver->journal(DocumentType::Income, $connection));
+        $this->assertSame('20', $resolver->journal(DocumentType::Expense, $connection));
     }
 
     public function test_gl_account_falls_back_to_default(): void

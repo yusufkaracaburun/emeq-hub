@@ -10,7 +10,6 @@ use App\Models\Consumer;
 use App\Sanctum\TokenAbilities;
 use Emeq\ExactApi\Http\Request\Write\CreateDocument;
 use Emeq\ExactApi\Http\Request\Write\CreateDocumentAttachment;
-use Emeq\ExactApi\Http\Request\Write\CreateGeneralJournalEntry;
 use Emeq\ExactApi\Http\Request\Write\CreatePurchaseEntry;
 use Emeq\ExactApi\Http\Request\Write\CreateSalesEntry;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -64,7 +63,7 @@ class StoreDocumentTest extends TestCase
 
             public function journal(DocumentType $type, Connection $connection): string
             {
-                return $type === DocumentType::PurchaseInvoice ? '20' : '90';
+                return in_array($type, [DocumentType::PurchaseInvoice, DocumentType::Expense], true) ? '20' : '90';
             }
         });
     }
@@ -323,24 +322,14 @@ class StoreDocumentTest extends TestCase
     }
 
     /**
-     * v1-grens: ad-hoc income/expense (→ memoriaal, #12) worden expliciet geweigerd
-     * met 422 i.p.v. een rauwe Exact-500. Komt in v2. De GeneralJournalEntry-mapping
-     * blijft in de adapter + SDK staan voor v2; de Hub-edge gate't 'm nu af.
+     * income = ontvangst met relatie als debiteur → SalesEntry (geen memoriaal): elke
+     * income/expense draagt altijd een relatie + categorie + (eventueel) BTW, dus het
+     * is een gewone verkoop-/inkoopboeking, niet een relatieloze GL-mutatie. Zie #12.
      */
-    public function test_income_is_rejected_until_v2(): void
-    {
-        $this->assertUnsupportedDocumentTypeRejected('income');
-    }
-
-    public function test_expense_is_rejected_until_v2(): void
-    {
-        $this->assertUnsupportedDocumentTypeRejected('expense');
-    }
-
-    private function assertUnsupportedDocumentTypeRejected(string $type): void
+    public function test_pushes_income_to_salesentry(): void
     {
         MockClient::global([
-            CreateGeneralJournalEntry::class => MockResponse::make(['d' => ['EntryID' => 'gj-1']], 201),
+            CreateSalesEntry::class => MockResponse::make(['d' => ['ID' => 'inc-1']], 201),
         ]);
         $this->bindFakeReferences();
 
@@ -351,14 +340,58 @@ class StoreDocumentTest extends TestCase
             ->withHeader('X-Account-Id', 'school1')
             ->withHeader('Idempotency-Key', (string) Str::uuid())
             ->postJson('/v1/accounting/documents', $this->salesInvoicePayload([
-                'type' => $type,
+                'type' => 'income',
+                'party' => ['role' => 'debtor', 'name' => 'Klant BV'],
+            ]))
+            ->assertStatus(201)
+            ->assertJsonPath('status', 'posted')
+            ->assertJsonPath('external_ref', 'inc-1');
+
+        MockClient::global()->assertSent(function (CreateSalesEntry $request): bool {
+            $body = $request->body()->all();
+
+            return $request->resolveEndpoint() === '/salesentry/SalesEntries'
+                && $body['Customer'] === 'cust-guid'
+                && $body['SalesEntryLines'][0]['VATCode'] === '4';
+        });
+
+        $this->assertDatabaseHas('pass_through_calls', [
+            'provider' => 'exact',
+            'path' => 'accounting/documents:income',
+            'status' => 201,
+        ]);
+    }
+
+    public function test_pushes_expense_to_purchaseentry(): void
+    {
+        MockClient::global([
+            CreatePurchaseEntry::class => MockResponse::make(['d' => ['ID' => 'exp-1']], 201),
+        ]);
+        $this->bindFakeReferences();
+
+        [$consumer] = $this->consumerWithExactConnection();
+        $token = $consumer->createToken('t', [TokenAbilities::EXACT_WRITE])->plainTextToken;
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->withHeader('X-Account-Id', 'school1')
+            ->withHeader('Idempotency-Key', (string) Str::uuid())
+            ->postJson('/v1/accounting/documents', $this->salesInvoicePayload([
+                'type' => 'expense',
                 'party' => ['role' => 'creditor', 'name' => 'Leverancier BV'],
             ]))
-            ->assertStatus(422)
-            ->assertJson(['error' => 'unsupported_document_type']);
+            ->assertStatus(201)
+            ->assertJsonPath('status', 'posted')
+            ->assertJsonPath('external_ref', 'exp-1');
 
-        // Niks naar Exact gestuurd — de edge-guard staat vóór de push.
-        MockClient::global()->assertNothingSent();
+        // expense = declaratie/kosten met relatie als crediteur → PurchaseEntry.
+        MockClient::global()->assertSent(function (CreatePurchaseEntry $request): bool {
+            $body = $request->body()->all();
+
+            return $request->resolveEndpoint() === '/purchaseentry/PurchaseEntries'
+                && $body['Supplier'] === 'supp-guid'
+                && $body['Journal'] === '20'
+                && $body['PurchaseEntryLines'][0]['VATCode'] === '4';
+        });
     }
 
     public function test_missing_idempotency_key_returns_400(): void
