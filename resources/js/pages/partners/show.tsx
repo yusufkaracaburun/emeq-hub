@@ -94,6 +94,29 @@ export default function PartnerShow({ provider }: { provider: ProviderDetail }) 
                 </section>
             )}
 
+            {provider.integration && (
+                <section className="mx-auto max-w-5xl px-4 pb-8">
+                    <h2 className="text-2xl font-semibold">Inrichten aan jouw kant</h2>
+                    <p className="mt-2 max-w-3xl text-sm text-muted-foreground">
+                        Wat je app eenmalig opzet om via de Hub met Exact te koppelen — en wat je per document
+                        meestuurt. De Hub regelt OAuth, token-refresh en de vertaling naar Exact.
+                    </p>
+                    <ol className="mt-6 space-y-5">
+                        {provider.integration.map((step, index) => (
+                            <li key={step.title} className="flex gap-3">
+                                <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-amber-500/10 text-sm font-medium text-amber-600">
+                                    {index + 1}
+                                </span>
+                                <div>
+                                    <p className="font-medium">{step.title}</p>
+                                    <p className="mt-0.5 text-sm text-muted-foreground">{step.description}</p>
+                                </div>
+                            </li>
+                        ))}
+                    </ol>
+                </section>
+            )}
+
             {provider.endpoints && (
                 <section className="mx-auto max-w-5xl px-4 pb-12">
                     <h2 className="text-2xl font-semibold">Endpoints</h2>

@@ -23,11 +23,17 @@ export interface UseCase {
     value: string;
 }
 
+export interface IntegrationStep {
+    title: string;
+    description: string;
+}
+
 export interface ProviderDetail extends ProviderSummary {
     how_it_works?: string[];
     use_cases?: UseCase[];
     capabilities: Capability[];
     endpoints?: EndpointRef[];
+    integration?: IntegrationStep[];
     connect_steps: string[];
     example_curl: string | null;
     docs_url: string | null;

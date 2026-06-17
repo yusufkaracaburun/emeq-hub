@@ -125,8 +125,41 @@ return [
             [
                 'method' => 'POST',
                 'path' => '/v1/accounting/documents',
-                'target' => 'salesinvoice / purchaseentry / generaljournalentry',
-                'description' => 'Provider-agnostische boekhoud-sync: POST één canonical FinancialDocument; de Hub mapt naar het juiste Exact-endpoint.',
+                'target' => 'salesentry / purchaseentry / generaljournalentry',
+                'description' => 'Provider-agnostische boekhoud-sync: POST één canonical FinancialDocument; de Hub mapt naar het juiste Exact-endpoint (verkoop- en inkoopboeking of memoriaal).',
+            ],
+        ],
+        'integration' => [
+            [
+                'title' => 'Vraag een Hub-koppeling aan',
+                'description' => 'Je krijgt van Emeq een Personal Access Token met de ability exact:write. '
+                    .'Daarmee praat je app met de Hub — je bouwt zelf geen Exact-app, geen OAuth en geen token-opslag.',
+            ],
+            [
+                'title' => 'Laat je klant zijn administratie koppelen',
+                'description' => 'Start de koppeling per eindgebruiker via /v1/oauth/exact/init en stuur de klant naar Exact. '
+                    .'De Hub bewaart de tokens en de gekozen administratie versleuteld. In je eigen systeem leg je alleen '
+                    .'je account-id vast — dat geef je bij elke call mee als X-Account-Id.',
+            ],
+            [
+                'title' => 'Vul de boekhoud-mapping in',
+                'description' => 'Leg per koppeling één keer vast hoe jouw gegevens op die administratie landen: relatie → '
+                    .'Exact-relatie, btw-tarief → btw-code, categorie → grootboekrekening, documentsoort → dagboek. '
+                    .'De keuzelijsten komen rechtstreeks uit de administratie van je klant. Ontbreekt een mapping, dan '
+                    .'weigert de Hub de boeking met een duidelijke melding in plaats van fout te boeken.',
+            ],
+            [
+                'title' => 'Vertaal je documenten naar het Hub-formaat',
+                'description' => 'Je stuurt geen Exact-velden. Map je eigen factuur of boeking naar één gestandaardiseerd '
+                    .'document — documentsoort, relatie, regels (omschrijving, bedrag, btw-tarief, categorie), datum — en '
+                    .'POST dat naar /v1/accounting/documents. De Hub buigt dat naar het juiste Exact-endpoint; Exact-veldnamen '
+                    .'hoef je niet te kennen.',
+            ],
+            [
+                'title' => 'Stuur brondocumenten, geen betalingen',
+                'description' => 'Verkoopfacturen, inkoopfacturen en losse inkomsten of uitgaven stuur je door. De betaling of '
+                    .'afhandeling van een al-doorgestuurd document stuur je niet — die verwerkt Exact via de bankkoppeling. '
+                    .'Zo komt omzet of kosten nooit dubbel in de boekhouding.',
             ],
         ],
         'connect_steps' => [
