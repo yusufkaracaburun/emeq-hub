@@ -104,7 +104,7 @@ Snelle pointers:
 - **Feature-flags / kill-switch** (Phase 8): Pennant-based provider kill-switch via `feature.provider:{provider}` middleware-alias (`bootstrap/app.php:37` → `EnsureProviderEnabled`) op `/v1/{mollie,snelstart}/*`. `OAuthFlowRegistry::for()` checkt dezelfde feature en gooit `ProviderDisabledException` als inactive. Features auto-gedefinieerd in `FeatureServiceProvider` op basis van `config('hub-providers')` keys — nieuwe provider = nieuwe config-row, geen middleware/registry-edit. Zie `.docs/decisions/feature-flags-pennant-kill-switch.md`.
 - **Accounting-sync** (provider-agnostisch): consumers POSTen een Hub-canonical `App\Accounting\FinancialDocument` op `POST /v1/accounting/documents`; de Hub resolvet de boekhoud-Connection van de Account en dispatcht via `App\Accounting\AccountingTargetRegistry` (spiegel van `OAuthFlowRegistry` + dezelfde Pennant-gate) naar de `AccountingTarget`-adapter van die provider. `ExactAccountingTarget` mapt de 5 doc-types → `salesentry` (verkoopboeking, GL-based, géén Item)/`purchaseentry`/`generaljournalentry` (`JournalCode`). Apps leveren in het Hub-formaat; de Hub buigt niet mee. De canonical regel draagt een leidend `amount` (qty/price optioneel). De per-Connection mapping (tarief→VATCode, categorie→GLAccount, relatie→GUID, doc-type→dagboek) leeft in `connection.metadata.accounting_mapping`, beheerd via de `ManageAccountingMappingAction`-table-action. Nieuwe provider = nieuwe adapter + 1 registratie-regel. Zie `.docs/decisions/provider-agnostic-accounting-sync.md` + `.docs/decisions/accounting-canonical-contract-hardening.md`.
 - **Idempotency (Hub-breed)**: write-idempotentie via `App\Http\Middleware\EnsureIdempotency` (alias `idempotent` in `bootstrap/app.php`). Consumer stuurt een `Idempotency-Key`-header; de eerste 2xx-respons wordt bewaard per `(consumer, key)` in `idempotency_keys` (raw body, herbruikbaar voor niet-JSON) en bij retry herhaald i.p.v. opnieuw uitgevoerd. `idempotent:required` op `/v1/accounting/documents`; pass-through writes volgen met `idempotent`. Eén alias, geen partner-duplicatie — Exact heeft geen native idempotency. Zie `.docs/decisions/accounting-canonical-contract-hardening.md`.
-- **Exact pass-through + named resources**: consumer-calls naar Exact lopen via `/v1/exact/*` (Bearer-PAT + `X-Account-Id`, `feature.provider:exact`-gate, `resolve.exact.account`-middleware). Elke call gaat door `App\Support\Exact\ExactForwarder` — division-injectie + token + `UpstreamErrorMapper` + één `pass_through_calls`-auditrij per request. `Route::any('/{path}')` is de generieke escape-hatch; daarvóór staan **named read-resources** (eigen Scramble-groep + gegronde OData-endpoint): `GET /v1/exact/gl-accounts` (`financial/GLAccounts`), `/vat-codes` (`vat/VATCodes`), `/relations` (`crm/Accounts`), `/journals` (`financial/Journals`). Nieuwe named-resource = controller (`#[Group]` + `ExactForwarder::forward()`) + 1 route-regel vóór de catch-all + test; paden gronden in officiële Exact-docs. De Filament boekhoud-mapping-UI vult zijn keuzelijsten via `App\Services\Exact\ExactReferenceData` (server-side, fail-soft) uit dezelfde Exact-data.
+- **Exact pass-through + named resources**: consumer-calls naar Exact lopen via `/v1/exact/*` (Bearer-PAT + `X-Account-Id`, `feature.provider:exact`-gate, `resolve.exact.account`-middleware). Elke call gaat door `App\Support\Exact\ExactForwarder` — die neemt een Saloon-`Request` van de SDK, doet division-scope + `UpstreamErrorMapper` + één `pass_through_calls`-auditrij per request en audit't het pad via `resolveEndpoint()`. `Route::any('/{path}')` is de generieke escape-hatch (`RawExactRequest`); daarvóór staan **named read-resources** (eigen Scramble-groep + gegronde OData-endpoint): `GET /v1/exact/gl-accounts` (`financial/GLAccounts`), `/vat-codes` (`vat/VATCodes`), `/relations` (`crm/Accounts`), `/journals` (`financial/Journals`). De Exact-wire (paden, veldnamen, `AmountFC`/`AmountDC`, OData-envelope) leeft in de `emeq/exact-api` named requests (`Http/Request/Read|Write/*`) + `OData\Envelope`, niet in de Hub — zie `.docs/decisions/sdk-named-request-contract.md`. Nieuwe named-resource = SDK-read-request + dun controllertje (`#[Group]` → `ExactForwarder::forward()` met die request) + 1 route-regel vóór de catch-all + test. De Filament boekhoud-mapping-UI vult zijn keuzelijsten via `App\Services\Exact\ExactReferenceData` (server-side, fail-soft) uit dezelfde Exact-data.
 - **Partner-credentials in DB** (niet `.env`): Exact-app-credentials leven in `App\Settings\ExactSettings` (spatie/laravel-settings, secrets encrypted at rest), gehydrateerd naar `config('services.exact.*')` via `SettingsHydrationServiceProvider`; beheer in admin → Beheer → Integratie-instellingen (`ManageIntegrationSettings`). Geen env-fallback — de DB is de bron. Zie `.docs/decisions/db-managed-credentials.md`.
 
 De gedetailleerde laag-/componentkaart staat in `docs/agents/architecture.md`.
@@ -210,6 +210,8 @@ Geen live-edit-symlink meer. Voor snelle iteratie in de SDK: werk daar gewoon ze
 | Skill | Description | Path |
 |-------|-------------|------|
 | docs-sync | Detecteert en herstelt documentatie-drift én organisatie-issues in `.docs/`, `CLAUDE.md` en memory voor de emeq-hub repo. Triggert proactief na domein-wijzigingen — niet wachten op merge: model/entity hernoemd, kolom verplaatst, nieuwe migration, nieuwe Sanctum-ability of Connection-provider, OAuth-flow gewijzigd, SDK-package toegevoegd of verwijderd uit `packages/`, route toegevoegd of verwijderd. Triggert ook bij doc-toevoegingen of -verplaatsingen in `.docs/`. Reactief op vragen als "check de docs", "update de docs", "klopt de documentatie nog", "synchroniseer docs", "klaar voor commit?", "ruim de docs op". Vangt zes problemen af: (1) stale class-/file-references, (2) ontbrekende ADR voor architecturele wijzigingen, (3) completed TODOs die niet als ✅ zijn gemarkeerd, (4) structuur-drift (nieuwe folders/files niet in `.docs/README.md` index, files op verkeerde plek), (5) verweesde docs (gemergde plans nog in `plans/`, lange ongewijzigde files), en (6) dode links (markdown-links naar non-existing files of code-paden). Use proactively whenever the user wraps up a domein-wijziging, just merged a branch, ran a refactor, added/moved a doc, or before any commit/push. | `.claude/skills/docs-sync/SKILL.md` |
+| add-provider | Step-by-step voor het toevoegen van een nieuwe partner-provider: een dunne `emeq/<provider>-api` SDK bouwen (Connector + auth + named requests + decoder + partner-docs) én aan de Hub koppelen (Provider-enum + `config/hub-providers.php` + `OAuthFlow` + `*Settings` + optioneel `AccountingTarget`/named resources). Codificeert de laag-grens **state→Hub, protocol→SDK**. Gebruik bij "voeg provider X toe", "nieuwe SDK koppelen", "nieuwe boekhoud-/betaal-integratie". | `.claude/skills/add-provider/SKILL.md` |
+| change-sdk | Beslis-gids + cross-repo werkwijze voor het wijzigen van een bestaande `emeq/<provider>-api` SDK, met de tabel **"raak ik de Hub aan?"** (wire-only = SDK-only `composer update`; nieuwe input/named-resource = SDK + dunne Hub-touch; nieuw canonical begrip = SDK + Hub). Gebruik bij "wijzig de SDK", "endpoint toevoegen", "moet ik nu ook de Hub aanpassen", "veld hernoemen". | `.claude/skills/change-sdk/SKILL.md` |
 
 ## Workflow & Agent skills
 
@@ -247,6 +249,8 @@ This application is a Laravel application and its main Laravel ecosystems packag
 - laravel/pail (PAIL) - v1
 - laravel/pint (PINT) - v1
 - phpunit/phpunit (PHPUNIT) - v12
+- @inertiajs/react (INERTIA_REACT) - v3
+- react (REACT) - v19
 - tailwindcss (TAILWINDCSS) - v4
 
 ## Skills Activation
@@ -348,8 +352,9 @@ This project has domain-specific skills available in `**/skills/**`. You MUST ac
 # Inertia
 
 - Inertia creates fully client-side rendered SPAs without modern SPA complexity, leveraging existing server-side patterns.
-- Components live in `resources/js/Pages` (unless specified in `vite.config.js`). Use `Inertia::render()` for server-side routing instead of Blade views.
+- Components live in `resources/js/pages` (unless specified in `vite.config.js`). Use `Inertia::render()` for server-side routing instead of Blade views.
 - ALWAYS use `search-docs` tool for version-specific Inertia documentation and updated code examples.
+- IMPORTANT: Activate `inertia-react-development` when working with Inertia client-side patterns.
 
 # Inertia v3
 
@@ -419,5 +424,11 @@ This project has domain-specific skills available in `**/skills/**`. You MUST ac
 - To run all tests: `php artisan test --compact`.
 - To run all tests in a file: `php artisan test --compact tests/Feature/ExampleTest.php`.
 - To filter on a particular test name: `php artisan test --compact --filter=testName` (recommended after making a change to a related file).
+
+=== inertia-react/core rules ===
+
+# Inertia + React
+
+- IMPORTANT: Activate `inertia-react-development` when working with Inertia React client-side patterns.
 
 </laravel-boost-guidelines>
