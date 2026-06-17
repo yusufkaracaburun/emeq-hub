@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\EnsureEmeqAdminToken;
+use App\Http\Middleware\EnsureIdempotency;
 use App\Http\Middleware\EnsureProviderEnabled;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\RequireCashierWebhookSecret;
@@ -39,6 +40,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'emeq.admin' => EnsureEmeqAdminToken::class,
             'cashier.webhook.secret' => RequireCashierWebhookSecret::class,
             'feature.provider' => EnsureProviderEnabled::class,
+            'idempotent' => EnsureIdempotency::class,
             'abilities' => CheckAbilities::class,
             'ability' => CheckForAnyAbility::class,
         ]);

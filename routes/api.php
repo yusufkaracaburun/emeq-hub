@@ -97,6 +97,7 @@ Route::middleware('auth:sanctum')->group(function (): void {
     // Account + Connection + provider-gate worden in de controller geresolved
     // (de provider is niet route-vast — kan Exact/Snelstart/… zijn).
     Route::post('/accounting/documents', [AccountingDocumentsController::class, 'store'])
+        ->middleware('idempotent:required')
         ->name('api.accounting.documents.store');
 
     Route::middleware('ability:billing:read,billing:write,*')->group(function (): void {

@@ -43,8 +43,9 @@ class StoreDocumentRequest extends FormRequest
 
             'lines' => ['required', 'array', 'min:1'],
             'lines.*.description' => ['required', 'string', 'max:1000'],
-            'lines.*.quantity' => ['required', 'numeric'],
-            'lines.*.unit_price' => ['required', 'numeric'],
+            'lines.*.amount' => ['required', 'numeric'],
+            'lines.*.quantity' => ['nullable', 'numeric'],
+            'lines.*.unit_price' => ['nullable', 'numeric'],
             'lines.*.tax_rate' => ['required', 'numeric', 'min:0'],
             'lines.*.category' => ['nullable', 'string', 'max:255'],
         ];

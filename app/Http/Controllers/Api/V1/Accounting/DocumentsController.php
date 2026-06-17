@@ -86,7 +86,7 @@ class DocumentsController extends Controller
             $status = $result->status;
             $responseBody = [
                 'provider' => $provider,
-                'status' => $result->status,
+                'status' => 'posted',
                 'external_ref' => $result->externalRef,
             ];
         } catch (ProviderDisabledException $e) {

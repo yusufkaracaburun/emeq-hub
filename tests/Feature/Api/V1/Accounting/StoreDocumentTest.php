@@ -10,6 +10,7 @@ use App\Models\Consumer;
 use App\Sanctum\TokenAbilities;
 use Emeq\ExactApi\Http\Request\RawExactRequest;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Str;
 use Saloon\Http\Faking\MockClient;
 use Saloon\Http\Faking\MockResponse;
 use Tests\TestCase;
@@ -98,7 +99,7 @@ class StoreDocumentTest extends TestCase
             'issue_date' => '2026-06-16',
             'party' => ['role' => 'debtor', 'name' => 'Acme BV', 'vat_number' => 'NL000099998B57'],
             'lines' => [
-                ['description' => 'Consultancy', 'quantity' => 2, 'unit_price' => 100, 'tax_rate' => 21, 'category' => 'omzet'],
+                ['description' => 'Consultancy', 'amount' => 200, 'quantity' => 2, 'unit_price' => 100, 'tax_rate' => 21, 'category' => 'omzet'],
             ],
         ], $overrides);
     }
@@ -115,6 +116,7 @@ class StoreDocumentTest extends TestCase
 
         $this->withHeader('Authorization', "Bearer {$token}")
             ->withHeader('X-Account-Id', 'school1')
+            ->withHeader('Idempotency-Key', (string) Str::uuid())
             ->postJson('/v1/accounting/documents', $this->salesInvoicePayload())
             ->assertStatus(201)
             ->assertJsonPath('provider', 'exact')
@@ -129,6 +131,24 @@ class StoreDocumentTest extends TestCase
         ]);
     }
 
+    public function test_successful_push_returns_posted_status(): void
+    {
+        MockClient::global([
+            RawExactRequest::class => MockResponse::make(['d' => ['ID' => 'inv-guid-1']], 201),
+        ]);
+        $this->bindFakeReferences();
+
+        [$consumer] = $this->consumerWithExactConnection();
+        $token = $consumer->createToken('t', [TokenAbilities::EXACT_WRITE])->plainTextToken;
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->withHeader('X-Account-Id', 'school1')
+            ->withHeader('Idempotency-Key', (string) Str::uuid())
+            ->postJson('/v1/accounting/documents', $this->salesInvoicePayload())
+            ->assertStatus(201)
+            ->assertJsonPath('status', 'posted');
+    }
+
     public function test_maps_canonical_to_exact_salesinvoice_body(): void
     {
         MockClient::global([
@@ -141,6 +161,7 @@ class StoreDocumentTest extends TestCase
 
         $this->withHeader('Authorization', "Bearer {$token}")
             ->withHeader('X-Account-Id', 'school1')
+            ->withHeader('Idempotency-Key', (string) Str::uuid())
             ->postJson('/v1/accounting/documents', $this->salesInvoicePayload())
             ->assertStatus(201);
 
@@ -175,6 +196,7 @@ class StoreDocumentTest extends TestCase
 
         $this->withHeader('Authorization', "Bearer {$token}")
             ->withHeader('X-Account-Id', 'school1')
+            ->withHeader('Idempotency-Key', (string) Str::uuid())
             ->postJson('/v1/accounting/documents', $this->salesInvoicePayload([
                 'party' => ['role' => 'debtor', 'name' => 'Acme BV', 'external_id' => 'acme-1'],
             ]))
@@ -190,6 +212,35 @@ class StoreDocumentTest extends TestCase
         });
     }
 
+    public function test_line_amount_drives_booking_without_quantity_or_price(): void
+    {
+        MockClient::global([
+            RawExactRequest::class => MockResponse::make(['d' => ['ID' => 'pe-1']], 201),
+        ]);
+        $this->bindFakeReferences();
+
+        [$consumer] = $this->consumerWithExactConnection();
+        $token = $consumer->createToken('t', [TokenAbilities::EXACT_WRITE])->plainTextToken;
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->withHeader('X-Account-Id', 'school1')
+            ->withHeader('Idempotency-Key', (string) Str::uuid())
+            ->postJson('/v1/accounting/documents', $this->salesInvoicePayload([
+                'type' => 'purchase_invoice',
+                'party' => ['role' => 'creditor', 'name' => 'Leverancier BV'],
+                'lines' => [
+                    ['description' => 'Dienst', 'amount' => 250.50, 'tax_rate' => 21, 'category' => 'kosten'],
+                ],
+            ]))
+            ->assertStatus(201);
+
+        MockClient::global()->assertSent(function (RawExactRequest $request): bool {
+            $body = $request->body()->all();
+
+            return (float) $body['PurchaseEntryLines'][0]['AmountFC'] === 250.50;
+        });
+    }
+
     public function test_pushes_purchase_invoice_to_purchaseentry(): void
     {
         MockClient::global([
@@ -202,6 +253,7 @@ class StoreDocumentTest extends TestCase
 
         $this->withHeader('Authorization', "Bearer {$token}")
             ->withHeader('X-Account-Id', 'school1')
+            ->withHeader('Idempotency-Key', (string) Str::uuid())
             ->postJson('/v1/accounting/documents', $this->salesInvoicePayload([
                 'type' => 'purchase_invoice',
                 'party' => ['role' => 'creditor', 'name' => 'Leverancier BV'],
@@ -237,6 +289,7 @@ class StoreDocumentTest extends TestCase
 
         $this->withHeader('Authorization', "Bearer {$token}")
             ->withHeader('X-Account-Id', 'school1')
+            ->withHeader('Idempotency-Key', (string) Str::uuid())
             ->postJson('/v1/accounting/documents', $this->salesInvoicePayload([
                 'type' => 'expense',
                 'party' => ['role' => 'creditor', 'name' => 'Leverancier BV'],
@@ -260,12 +313,56 @@ class StoreDocumentTest extends TestCase
         ]);
     }
 
+    public function test_missing_idempotency_key_returns_400(): void
+    {
+        MockClient::global([
+            RawExactRequest::class => MockResponse::make(['d' => ['ID' => 'x']], 201),
+        ]);
+        $this->bindFakeReferences();
+
+        [$consumer] = $this->consumerWithExactConnection();
+        $token = $consumer->createToken('t', [TokenAbilities::EXACT_WRITE])->plainTextToken;
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->withHeader('X-Account-Id', 'school1')
+            ->postJson('/v1/accounting/documents', $this->salesInvoicePayload())
+            ->assertStatus(400)
+            ->assertJson(['error' => 'idempotency_key_required']);
+
+        MockClient::global()->assertNothingSent();
+    }
+
+    public function test_retry_with_same_idempotency_key_books_once(): void
+    {
+        MockClient::global([
+            RawExactRequest::class => MockResponse::make(['d' => ['ID' => 'inv-1']], 201),
+        ]);
+        $this->bindFakeReferences();
+
+        [$consumer] = $this->consumerWithExactConnection();
+        $token = $consumer->createToken('t', [TokenAbilities::EXACT_WRITE])->plainTextToken;
+        $key = (string) Str::uuid();
+
+        foreach ([1, 2] as $attempt) {
+            $this->withHeader('Authorization', "Bearer {$token}")
+                ->withHeader('X-Account-Id', 'school1')
+                ->withHeader('Idempotency-Key', $key)
+                ->postJson('/v1/accounting/documents', $this->salesInvoicePayload())
+                ->assertStatus(201)
+                ->assertJsonPath('external_ref', 'inv-1');
+        }
+
+        // Twee POSTs met dezelfde key → één boeking bij Exact, tweede is een replay.
+        MockClient::global()->assertSentCount(1);
+    }
+
     public function test_missing_account_header_returns_400(): void
     {
         [$consumer] = $this->consumerWithExactConnection();
         $token = $consumer->createToken('t', [TokenAbilities::EXACT_WRITE])->plainTextToken;
 
         $this->withHeader('Authorization', "Bearer {$token}")
+            ->withHeader('Idempotency-Key', (string) Str::uuid())
             ->postJson('/v1/accounting/documents', $this->salesInvoicePayload())
             ->assertStatus(400)
             ->assertJson(['error' => 'missing_account_header']);
@@ -279,6 +376,7 @@ class StoreDocumentTest extends TestCase
 
         $this->withHeader('Authorization', "Bearer {$token}")
             ->withHeader('X-Account-Id', 'school1')
+            ->withHeader('Idempotency-Key', (string) Str::uuid())
             ->postJson('/v1/accounting/documents', $this->salesInvoicePayload())
             ->assertStatus(404)
             ->assertJson(['error' => 'no_accounting_connection']);
@@ -291,6 +389,7 @@ class StoreDocumentTest extends TestCase
 
         $this->withHeader('Authorization', "Bearer {$token}")
             ->withHeader('X-Account-Id', 'school1')
+            ->withHeader('Idempotency-Key', (string) Str::uuid())
             ->postJson('/v1/accounting/documents', $this->salesInvoicePayload())
             ->assertStatus(403)
             ->assertJson(['error' => 'insufficient_ability']);
@@ -308,6 +407,7 @@ class StoreDocumentTest extends TestCase
 
         $this->withHeader('Authorization', "Bearer {$token}")
             ->withHeader('X-Account-Id', 'school1')
+            ->withHeader('Idempotency-Key', (string) Str::uuid())
             ->postJson('/v1/accounting/documents', $this->salesInvoicePayload())
             ->assertStatus(422)
             ->assertJson(['error' => 'mapping_failed']);
@@ -320,6 +420,7 @@ class StoreDocumentTest extends TestCase
 
         $this->withHeader('Authorization', "Bearer {$token}")
             ->withHeader('X-Account-Id', 'school1')
+            ->withHeader('Idempotency-Key', (string) Str::uuid())
             ->postJson('/v1/accounting/documents', $this->salesInvoicePayload(['type' => 'bogus']))
             ->assertStatus(422)
             ->assertJsonValidationErrors('type');
