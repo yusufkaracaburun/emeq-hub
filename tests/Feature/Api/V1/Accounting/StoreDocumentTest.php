@@ -181,6 +181,47 @@ class StoreDocumentTest extends TestCase
         });
     }
 
+    public function test_response_echoes_external_id_and_status(): void
+    {
+        MockClient::global([
+            CreateSalesEntry::class => MockResponse::make(['d' => ['ID' => 'inv-1']], 201),
+        ]);
+        $this->bindFakeReferences();
+
+        [$consumer] = $this->consumerWithExactConnection();
+        $token = $consumer->createToken('t', [TokenAbilities::EXACT_WRITE])->plainTextToken;
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->withHeader('X-Account-Id', 'school1')
+            ->withHeader('Idempotency-Key', (string) Str::uuid())
+            ->postJson('/v1/accounting/documents', $this->salesInvoicePayload())
+            ->assertStatus(201)
+            ->assertJsonPath('status', 'posted')
+            ->assertJsonPath('external_id', 'INV-2026-001');
+    }
+
+    public function test_stamps_consumer_provenance_in_yourref(): void
+    {
+        MockClient::global([
+            CreateSalesEntry::class => MockResponse::make(['d' => ['ID' => 'inv-1']], 201),
+        ]);
+        $this->bindFakeReferences();
+
+        [$consumer] = $this->consumerWithExactConnection();
+        $token = $consumer->createToken('t', [TokenAbilities::EXACT_WRITE])->plainTextToken;
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->withHeader('X-Account-Id', 'school1')
+            ->withHeader('Idempotency-Key', (string) Str::uuid())
+            ->postJson('/v1/accounting/documents', $this->salesInvoicePayload())
+            ->assertStatus(201);
+
+        // YourRef stempelt de herkomst: "{consumer-app} · {external_id}" (max 50 tekens).
+        $expected = mb_substr($consumer->name.' · INV-2026-001', 0, 50);
+        MockClient::global()->assertSent(fn ($request): bool => $request instanceof CreateSalesEntry
+            && ($request->body()->all()['YourRef'] ?? null) === $expected);
+    }
+
     public function test_uses_connection_metadata_mapping(): void
     {
         // Geen fake → de echte ConnectionMappingExactReferenceResolver leest metadata.
@@ -470,6 +511,38 @@ class StoreDocumentTest extends TestCase
             && $request->body()->all()['Document'] === 'doc-guid-1'
             && $request->body()->all()['FileName'] === 'factuur.pdf'
             && $request->body()->all()['Attachment'] === 'JVBERi0xLjQK');
+    }
+
+    public function test_purchase_attachment_reuses_exacts_auto_document(): void
+    {
+        // PurchaseEntry-respons draagt Exact's auto-Document (d.Document); de bijlage hangt
+        // daaraan — géén tweede CreateDocument (anders dubbel document op de inkoopfactuur).
+        MockClient::global([
+            CreatePurchaseEntry::class => MockResponse::make(['d' => ['ID' => 'pe-1', 'Document' => 'auto-doc-1']], 201),
+            CreateDocumentAttachment::class => MockResponse::make(['d' => ['ID' => 'att-1']], 201),
+        ]);
+        $this->bindFakeReferences();
+
+        [$consumer] = $this->consumerWithExactConnection();
+        $token = $consumer->createToken('t', [TokenAbilities::EXACT_WRITE])->plainTextToken;
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->withHeader('X-Account-Id', 'school1')
+            ->withHeader('Idempotency-Key', (string) Str::uuid())
+            ->postJson('/v1/accounting/documents', $this->salesInvoicePayload([
+                'type' => 'purchase_invoice',
+                'party' => ['role' => 'creditor', 'name' => 'Leverancier BV', 'external_id' => 'sup-1'],
+                'attachments' => [
+                    ['filename' => 'sbi.pdf', 'mime_type' => 'application/pdf', 'content' => 'JVBERi0xLjQK'],
+                ],
+            ]))
+            ->assertStatus(201)
+            ->assertJsonPath('attachments.0.status', 'uploaded')
+            ->assertJsonPath('attachments.0.document_ref', 'auto-doc-1');
+
+        MockClient::global()->assertNotSent(CreateDocument::class);
+        MockClient::global()->assertSent(fn ($request): bool => $request instanceof CreateDocumentAttachment
+            && $request->body()->all()['Document'] === 'auto-doc-1');
     }
 
     public function test_without_attachments_no_document_calls_are_made(): void

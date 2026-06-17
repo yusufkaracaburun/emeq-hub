@@ -75,7 +75,7 @@ final class ExactAccountingTarget implements AccountingTarget
             status: $response->status(),
             externalRef: $entryId,
             raw: (array) $response->json(),
-            attachments: $this->uploadAttachments($document, $connection, $connector, $entryId),
+            attachments: $this->uploadAttachments($document, $connection, $connector, $entryId, Envelope::documentRef($response->json())),
         );
     }
 
@@ -91,6 +91,7 @@ final class ExactAccountingTarget implements AccountingTarget
         Connection $connection,
         ExactConnector $connector,
         ?string $entryId,
+        ?string $autoDocRef,
     ): array {
         if ($document->attachments === []) {
             return [];
@@ -108,6 +109,7 @@ final class ExactAccountingTarget implements AccountingTarget
                 $type,
                 $subject,
                 $entryId,
+                $autoDocRef,
             ),
             array_values($document->attachments),
         );
@@ -124,20 +126,28 @@ final class ExactAccountingTarget implements AccountingTarget
         int $type,
         string $subject,
         ?string $entryId,
+        ?string $autoDocRef,
     ): array {
         try {
-            $docResponse = $connector->send(new CreateDocument(
-                subject: $subject,
-                type: $type,
-                account: $this->references->relationGuid($document->party, $connection),
-                financialTransactionEntryId: $entryId,
-            ));
+            // Inkoop: Exact koppelt al automatisch een Document aan de boeking (`d.Document`)
+            // → de bijlage dáár aan hangen, anders krijg je een dubbel document. Verkoop
+            // heeft geen auto-Document → er zelf één aanmaken en koppelen.
+            $documentRef = $autoDocRef;
 
-            if ($docResponse->failed()) {
-                $docResponse->throw();
+            if ($documentRef === null) {
+                $docResponse = $connector->send(new CreateDocument(
+                    subject: $subject,
+                    type: $type,
+                    account: $this->references->relationGuid($document->party, $connection),
+                    financialTransactionEntryId: $entryId,
+                ));
+
+                if ($docResponse->failed()) {
+                    $docResponse->throw();
+                }
+
+                $documentRef = Envelope::firstId($docResponse->json());
             }
-
-            $documentRef = Envelope::firstId($docResponse->json());
 
             $attachResponse = $connector->send(new CreateDocumentAttachment(
                 document: (string) $documentRef,
@@ -180,6 +190,7 @@ final class ExactAccountingTarget implements AccountingTarget
     {
         $entryDate = $document->issueDate->format('Y-m-d');
         $description = $document->number ?? $document->externalId;
+        $yourRef = $this->provenance($document, $connection);
 
         return match ($document->type) {
             DocumentType::SalesInvoice, DocumentType::CreditNote => new CreateSalesEntry(
@@ -188,6 +199,7 @@ final class ExactAccountingTarget implements AccountingTarget
                 journal: $this->references->journal($document->type, $connection),
                 description: $description,
                 lines: $this->lines($document, $connection),
+                yourRef: $yourRef,
             ),
             DocumentType::PurchaseInvoice => new CreatePurchaseEntry(
                 supplier: $this->references->relationGuid($document->party, $connection),
@@ -195,12 +207,25 @@ final class ExactAccountingTarget implements AccountingTarget
                 journal: $this->references->journal($document->type, $connection),
                 description: $description,
                 lines: $this->lines($document, $connection),
+                yourRef: $yourRef,
             ),
             DocumentType::Income, DocumentType::Expense => new CreateGeneralJournalEntry(
                 journalCode: $this->references->journal($document->type, $connection),
                 lines: $this->lines($document, $connection),
             ),
         };
+    }
+
+    /**
+     * Herkomst-stempel voor Exact `YourRef`: "{consumer-app} · {external_id}" — zo ziet
+     * de boekhouder per boeking welke consumer-app + bron-document 'm aanmaakte. Max 50
+     * tekens (Exact kapt YourRef af); de consumer-naam houdt voorrang.
+     */
+    private function provenance(FinancialDocument $document, Connection $connection): string
+    {
+        $consumer = $connection->account?->consumer?->name ?? 'Emeq Hub';
+
+        return mb_substr($consumer.' · '.$document->externalId, 0, 50);
     }
 
     /**

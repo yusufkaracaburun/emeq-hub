@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Api\V1\Accounting;
 
 use App\Accounting\AccountingTargetRegistry;
 use App\Accounting\Enums\DocumentType;
+use App\Accounting\Enums\SyncStatus;
 use App\Accounting\Exceptions\AccountingMappingException;
 use App\Accounting\FinancialDocument;
 use App\Http\Controllers\Controller;
@@ -82,6 +83,8 @@ class DocumentsController extends Controller
         // (#12) en komt in v2 — weiger nu expliciet i.p.v. een rauwe Exact-500 door te laten.
         if (in_array($document->type, [DocumentType::Income, DocumentType::Expense], true)) {
             return response()->json([
+                'status' => SyncStatus::Rejected->value,
+                'external_id' => $document->externalId,
                 'error' => 'unsupported_document_type',
                 'message' => "Doc-type '{$document->type->value}' wordt vanaf v2 ondersteund (ad-hoc income/expense → memoriaal, zie #12).",
             ], 422);
@@ -97,7 +100,8 @@ class DocumentsController extends Controller
             $status = $result->status;
             $responseBody = [
                 'provider' => $provider,
-                'status' => 'posted',
+                'status' => SyncStatus::Posted->value,
+                'external_id' => $document->externalId,
                 'external_ref' => $result->externalRef,
             ];
 
@@ -107,16 +111,16 @@ class DocumentsController extends Controller
         } catch (ProviderDisabledException $e) {
             $status = 503;
             $upstreamError = 'provider_disabled';
-            $responseBody = ['error' => 'provider_disabled', 'message' => $e->getMessage()];
+            $responseBody = ['status' => SyncStatus::Failed->value, 'external_id' => $document->externalId, 'error' => 'provider_disabled', 'message' => $e->getMessage()];
         } catch (AccountingMappingException $e) {
             $status = 422;
             $upstreamError = 'mapping_failed';
-            $responseBody = ['error' => 'mapping_failed', 'message' => $e->getMessage()];
+            $responseBody = ['status' => SyncStatus::Failed->value, 'external_id' => $document->externalId, 'error' => 'mapping_failed', 'message' => $e->getMessage()];
         } catch (Throwable $e) {
             $mapped = UpstreamErrorMapper::mapException($e);
             $status = $mapped['status'];
             $upstreamError = $mapped['short_code'];
-            $responseBody = $mapped['body'];
+            $responseBody = ['status' => SyncStatus::Failed->value, 'external_id' => $document->externalId, ...$mapped['body']];
         }
 
         $this->audit($request, $account, $connection, $provider, $document, $status, $start, $upstreamError, $responseBody);
