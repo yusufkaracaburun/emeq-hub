@@ -4,33 +4,36 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1\Accounting;
 
+use App\Accounting\AccountingSyncRunner;
 use App\Accounting\AccountingTargetRegistry;
 use App\Accounting\Enums\DocumentType;
 use App\Accounting\Enums\SyncStatus;
-use App\Accounting\Exceptions\AccountingMappingException;
 use App\Accounting\FinancialDocument;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Accounting\StoreDocumentRequest;
+use App\Jobs\Accounting\SyncAccountingDocumentJob;
 use App\Models\Account;
 use App\Models\Connection;
-use App\Models\PassThroughCall;
-use App\OAuth\Exceptions\ProviderDisabledException;
 use App\Sanctum\TokenAbilities;
-use App\Support\Exact\UpstreamErrorMapper;
 use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Http\JsonResponse;
-use Throwable;
 
 /**
  * Provider-agnostische accounting-sync. Een consumer POST een canonical
  * FinancialDocument; de Hub resolvet de gekoppelde boekhoud-Connection van de
  * Account, dispatcht naar de juiste AccountingTarget-adapter en audit het als
  * uitgaande PassThroughCall. Welk pakket (Exact/Snelstart/…) is transparant.
+ *
+ * Default synchroon (201 + `status:posted`). Met `Prefer: respond-async` draait de
+ * partner-push in een queue-job die het resultaat per webhook terugmeldt (202 + pending).
  */
 #[Group(name: 'Accounting Sync', description: 'Push canonical financiële documenten naar het gekoppelde boekhoudpakket van de Account.', weight: 50)]
 class DocumentsController extends Controller
 {
-    public function __construct(private readonly AccountingTargetRegistry $registry) {}
+    public function __construct(
+        private readonly AccountingTargetRegistry $registry,
+        private readonly AccountingSyncRunner $runner,
+    ) {}
 
     public function store(StoreDocumentRequest $request): JsonResponse
     {
@@ -90,42 +93,49 @@ class DocumentsController extends Controller
             ], 422);
         }
 
-        $start = microtime(true);
-        $upstreamError = null;
-        $responseBody = [];
-        $status = 0;
+        $consumerId = (int) $request->user()?->getKey();
 
-        try {
-            $result = $this->registry->for($provider)->push($document, $connection);
-            $status = $result->status;
-            $responseBody = [
-                'provider' => $provider,
-                'status' => SyncStatus::Posted->value,
-                'external_id' => $document->externalId,
-                'external_ref' => $result->externalRef,
-            ];
-
-            if ($result->attachments !== []) {
-                $responseBody['attachments'] = $result->attachments;
-            }
-        } catch (ProviderDisabledException $e) {
-            $status = 503;
-            $upstreamError = 'provider_disabled';
-            $responseBody = ['status' => SyncStatus::Failed->value, 'external_id' => $document->externalId, 'error' => 'provider_disabled', 'message' => $e->getMessage()];
-        } catch (AccountingMappingException $e) {
-            $status = 422;
-            $upstreamError = 'mapping_failed';
-            $responseBody = ['status' => SyncStatus::Failed->value, 'external_id' => $document->externalId, 'error' => 'mapping_failed', 'message' => $e->getMessage()];
-        } catch (Throwable $e) {
-            $mapped = UpstreamErrorMapper::mapException($e);
-            $status = $mapped['status'];
-            $upstreamError = $mapped['short_code'];
-            $responseBody = ['status' => SyncStatus::Failed->value, 'external_id' => $document->externalId, ...$mapped['body']];
+        if ($this->wantsAsync($request)) {
+            return $this->dispatchAsync($request, $document, $connection, $account, $consumerId);
         }
 
-        $this->audit($request, $account, $connection, $provider, $document, $status, $start, $upstreamError, $responseBody);
+        $outcome = $this->runner->run($document, $connection, $account, $consumerId);
 
-        return response()->json($responseBody, $status);
+        return response()->json($outcome->responseBody, $outcome->httpStatus);
+    }
+
+    private function dispatchAsync(
+        StoreDocumentRequest $request,
+        FinancialDocument $document,
+        Connection $connection,
+        Account $account,
+        int $consumerId,
+    ): JsonResponse {
+        // Async zonder terugmeld-kanaal is een zwart gat — weiger fail-fast i.p.v. de
+        // uitkomst alleen in de audit te laten verdwijnen.
+        if (! $request->user()?->webhook_callback_url) {
+            return response()->json([
+                'status' => SyncStatus::Rejected->value,
+                'external_id' => $document->externalId,
+                'error' => 'webhook_required',
+                'message' => 'Async-modus vereist een geregistreerde webhook_callback_url op de Consumer.',
+            ], 400);
+        }
+
+        SyncAccountingDocumentJob::dispatch($document, $connection, $account, $consumerId);
+
+        return response()->json([
+            'status' => SyncStatus::Pending->value,
+            'external_id' => $document->externalId,
+        ], 202);
+    }
+
+    /**
+     * RFC 7240 `Prefer: respond-async` — de consumer vraagt de async-variant aan.
+     */
+    private function wantsAsync(StoreDocumentRequest $request): bool
+    {
+        return str_contains(strtolower((string) $request->header('Prefer', '')), 'respond-async');
     }
 
     private function tokenCanWrite(StoreDocumentRequest $request, string $provider): bool
@@ -137,37 +147,5 @@ class DocumentsController extends Controller
         }
 
         return $token->can("{$provider}:write") || $token->can(TokenAbilities::ADMIN);
-    }
-
-    /**
-     * @param  array<string, mixed>  $responseBody
-     */
-    private function audit(
-        StoreDocumentRequest $request,
-        Account $account,
-        Connection $connection,
-        string $provider,
-        FinancialDocument $document,
-        int $status,
-        float $start,
-        ?string $upstreamError,
-        array $responseBody,
-    ): void {
-        PassThroughCall::create([
-            'direction' => 'outbound',
-            'consumer_id' => $request->user()?->getKey(),
-            'account_id' => $account->getKey(),
-            'connection_id' => $connection->getKey(),
-            'provider' => $provider,
-            'method' => 'POST',
-            'path' => 'accounting/documents:'.$document->type->value,
-            'status' => $status,
-            'duration_ms' => (int) round((microtime(true) - $start) * 1000),
-            'request_fingerprint' => substr(hash('sha256', $document->externalId), 0, 12),
-            'response_size_bytes' => strlen((string) json_encode($responseBody)),
-            'upstream_error' => $upstreamError,
-            'response_body' => PassThroughCall::errorBody($status, (string) json_encode($responseBody)),
-            'created_at' => now(),
-        ]);
     }
 }
