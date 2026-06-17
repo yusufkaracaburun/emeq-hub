@@ -67,6 +67,7 @@ final class ExactForwarder
             $status = $sdkResponse->status();
             $responseBody = $sdkResponse->body();
             $contentType = $sdkResponse->header('Content-Type') ?? 'application/json';
+            $extraHeaders = HeaderForwarder::forwardResponse($sdkResponse);
         } catch (Throwable $e) {
             $mapped = UpstreamErrorMapper::mapException($e);
             $status = $mapped['status'];

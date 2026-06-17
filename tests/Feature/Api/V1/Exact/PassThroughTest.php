@@ -145,6 +145,76 @@ class PassThroughTest extends TestCase
             ->assertJson(['error' => 'insufficient_ability']);
     }
 
+    public function test_pass_through_forwards_rate_limit_headers_on_success(): void
+    {
+        MockClient::global([
+            RawExactRequest::class => MockResponse::make(['d' => ['results' => []]], 200, [
+                'X-RateLimit-Remaining' => '58',
+                'X-RateLimit-Reset' => '1718700000000',
+                'X-RateLimit-Minutely-Remaining' => '9',
+            ]),
+        ]);
+
+        [$consumer] = $this->consumerWithExactConnection();
+        $token = $consumer->createToken('t', [TokenAbilities::EXACT_READ])->plainTextToken;
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->withHeader('X-Account-Id', 'school1')
+            ->getJson('/v1/exact/crm/Accounts')
+            ->assertOk()
+            ->assertHeader('X-RateLimit-Remaining', '58')
+            ->assertHeader('X-RateLimit-Reset', '1718700000000')
+            ->assertHeader('X-RateLimit-Minutely-Remaining', '9');
+    }
+
+    public function test_pass_through_surfaces_exact_server_error_and_audits_5xx(): void
+    {
+        MockClient::global([
+            RawExactRequest::class => MockResponse::make(
+                '{"error":{"message":{"value":"Can\'t delete: used in journal entry"}}}',
+                500,
+            ),
+        ]);
+
+        [$consumer] = $this->consumerWithExactConnection();
+        $token = $consumer->createToken('t', [TokenAbilities::EXACT_WRITE])->plainTextToken;
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->withHeader('X-Account-Id', 'school1')
+            ->deleteJson('/v1/exact/crm/Accounts/guid')
+            ->assertStatus(502)
+            ->assertJsonPath('message', "Can't delete: used in journal entry")
+            ->assertJsonPath('upstream_status', 500);
+
+        $this->assertDatabaseHas('pass_through_calls', [
+            'provider' => 'exact',
+            'status' => 502,
+            'upstream_error' => 'exact_5xx',
+        ]);
+    }
+
+    public function test_pass_through_masks_403_but_distinguishes_it_in_audit(): void
+    {
+        MockClient::global([
+            RawExactRequest::class => MockResponse::make('forbidden', 403),
+        ]);
+
+        [$consumer] = $this->consumerWithExactConnection();
+        $token = $consumer->createToken('t', [TokenAbilities::EXACT_READ])->plainTextToken;
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->withHeader('X-Account-Id', 'school1')
+            ->getJson('/v1/exact/crm/Accounts')
+            ->assertStatus(502)
+            ->assertJsonPath('upstream_status', 403);
+
+        $this->assertDatabaseHas('pass_through_calls', [
+            'provider' => 'exact',
+            'status' => 502,
+            'upstream_error' => 'exact_forbidden',
+        ]);
+    }
+
     public function test_pass_through_without_division_returns_409(): void
     {
         MockClient::global([
