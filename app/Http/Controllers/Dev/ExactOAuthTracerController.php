@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Dev;
 
+use Emeq\ExactApi\OData\Envelope;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -215,12 +216,13 @@ final class ExactOAuthTracerController
         }
 
         $me = Http::withToken($accessToken)->acceptJson()->get($this->meUrl());
-        $division = data_get($me->json(), 'd.results.0.CurrentDivision');
+        $record = Envelope::results($me->json())[0] ?? [];
+        $division = $record['CurrentDivision'] ?? null;
 
         $this->logger()->info('[exact-tracer] division probe (/api/v1/current/Me)', [
             'status' => $me->status(),
             'current_division' => $division,
-            'me_keys' => array_keys((array) data_get($me->json(), 'd.results.0', [])),
+            'me_keys' => array_keys($record),
         ]);
 
         return [$me->status(), $division];

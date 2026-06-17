@@ -5,6 +5,7 @@ namespace App\OAuth\Exact;
 use App\Models\Account;
 use App\Models\Connection;
 use App\OAuth\Contracts\OAuthFlow;
+use Emeq\ExactApi\OData\Envelope;
 use Illuminate\Contracts\Config\Repository as ConfigRepository;
 use Illuminate\Http\Client\Factory as HttpFactory;
 use Illuminate\Support\Facades\Cache;
@@ -131,7 +132,7 @@ final class ExactOAuthFlow implements OAuthFlow
             return null;
         }
 
-        $division = data_get($response->json(), 'd.results.0.CurrentDivision');
+        $division = Envelope::results($response->json())[0]['CurrentDivision'] ?? null;
 
         return $division !== null ? (string) $division : null;
     }
