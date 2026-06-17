@@ -148,7 +148,8 @@ class StoreDocumentTest extends TestCase
             $body = $request->body()->all();
 
             return $request->resolveEndpoint() === '/salesinvoice/SalesInvoices'
-                && $body['Customer'] === 'cust-guid'
+                && $body['OrderedBy'] === 'cust-guid'
+                && $body['Journal'] === '90'
                 && $body['SalesInvoiceLines'][0]['VATCode'] === '4'
                 && $body['SalesInvoiceLines'][0]['GLAccount'] === 'gl-guid'
                 && (float) $body['SalesInvoiceLines'][0]['UnitPrice'] === 100.0;
@@ -182,7 +183,8 @@ class StoreDocumentTest extends TestCase
         MockClient::global()->assertSent(function (RawExactRequest $request): bool {
             $body = $request->body()->all();
 
-            return $body['Customer'] === 'cust-real'
+            return $body['OrderedBy'] === 'cust-real'
+                && $body['Journal'] === '70'
                 && $body['SalesInvoiceLines'][0]['VATCode'] === '4'
                 && $body['SalesInvoiceLines'][0]['GLAccount'] === 'gl-def';
         });

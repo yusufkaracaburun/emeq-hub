@@ -101,7 +101,8 @@ final class ExactAccountingTarget implements AccountingTarget
     private function salesInvoiceBody(FinancialDocument $document, Connection $connection): array
     {
         return [
-            'Customer' => $this->references->relationGuid($document->party, $connection),
+            'OrderedBy' => $this->references->relationGuid($document->party, $connection),
+            'Journal' => $this->references->journal($document->type, $connection),
             'InvoiceDate' => $document->issueDate->format('Y-m-d'),
             'YourRef' => $document->reference ?? $document->number,
             'Description' => $document->number ?? $document->externalId,
