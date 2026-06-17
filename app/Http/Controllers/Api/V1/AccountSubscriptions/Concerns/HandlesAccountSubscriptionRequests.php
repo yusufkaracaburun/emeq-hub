@@ -78,6 +78,7 @@ trait HandlesAccountSubscriptionRequests
         string $path,
         ?int $accountId = null,
         ?int $connectionId = null,
+        ?string $responseBody = null,
     ): void {
         // Account-id is FK NOT NULL in pass_through_calls; fallback op
         // request->user->id leeft hier niet (er is geen consumer-account-relatie
@@ -96,6 +97,7 @@ trait HandlesAccountSubscriptionRequests
             'path' => $path,
             'status' => $status,
             'duration_ms' => 0,
+            'response_body' => PassThroughCall::errorBody($status, $responseBody),
         ]);
     }
 }

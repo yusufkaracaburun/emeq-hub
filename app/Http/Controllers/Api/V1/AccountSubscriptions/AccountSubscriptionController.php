@@ -95,11 +95,11 @@ class AccountSubscriptionController extends Controller
                 is_string($idempotencyKey) && $idempotencyKey !== '' ? $idempotencyKey : null,
             );
         } catch (MollieApiException $e) {
-            $this->auditCall($request, Response::HTTP_BAD_GATEWAY, '/v1/account-subscriptions', $account->id, $connection->id);
+            $this->auditCall($request, Response::HTTP_BAD_GATEWAY, '/v1/account-subscriptions', $account->id, $connection->id, $e->getMessage());
 
             return $this->mollieError($e);
         } catch (Throwable $e) {
-            $this->auditCall($request, Response::HTTP_BAD_GATEWAY, '/v1/account-subscriptions', $account->id, $connection->id);
+            $this->auditCall($request, Response::HTTP_BAD_GATEWAY, '/v1/account-subscriptions', $account->id, $connection->id, $e->getMessage());
 
             return $this->mollieError($e);
         }

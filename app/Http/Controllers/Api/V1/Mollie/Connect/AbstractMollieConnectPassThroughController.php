@@ -201,6 +201,7 @@ abstract class AbstractMollieConnectPassThroughController extends Controller
             'partner_token_fingerprint' => $partnerFingerprint,
             'response_size_bytes' => strlen($responseBody),
             'upstream_error' => $upstreamError,
+            'response_body' => PassThroughCall::errorBody($status, $responseBody),
             'created_at' => now(),
         ]);
 
