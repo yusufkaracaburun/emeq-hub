@@ -8,6 +8,8 @@ use App\Accounting\Party;
 use App\Models\Connection;
 use App\Models\Consumer;
 use App\Sanctum\TokenAbilities;
+use Emeq\ExactApi\Http\Request\Write\CreateDocument;
+use Emeq\ExactApi\Http\Request\Write\CreateDocumentAttachment;
 use Emeq\ExactApi\Http\Request\Write\CreateGeneralJournalEntry;
 use Emeq\ExactApi\Http\Request\Write\CreatePurchaseEntry;
 use Emeq\ExactApi\Http\Request\Write\CreateSalesEntry;
@@ -279,7 +281,22 @@ class StoreDocumentTest extends TestCase
         ]);
     }
 
-    public function test_pushes_expense_to_generaljournalentry(): void
+    /**
+     * v1-grens: ad-hoc income/expense (→ memoriaal, #12) worden expliciet geweigerd
+     * met 422 i.p.v. een rauwe Exact-500. Komt in v2. De GeneralJournalEntry-mapping
+     * blijft in de adapter + SDK staan voor v2; de Hub-edge gate't 'm nu af.
+     */
+    public function test_income_is_rejected_until_v2(): void
+    {
+        $this->assertUnsupportedDocumentTypeRejected('income');
+    }
+
+    public function test_expense_is_rejected_until_v2(): void
+    {
+        $this->assertUnsupportedDocumentTypeRejected('expense');
+    }
+
+    private function assertUnsupportedDocumentTypeRejected(string $type): void
     {
         MockClient::global([
             CreateGeneralJournalEntry::class => MockResponse::make(['d' => ['EntryID' => 'gj-1']], 201),
@@ -293,29 +310,14 @@ class StoreDocumentTest extends TestCase
             ->withHeader('X-Account-Id', 'school1')
             ->withHeader('Idempotency-Key', (string) Str::uuid())
             ->postJson('/v1/accounting/documents', $this->salesInvoicePayload([
-                'type' => 'expense',
+                'type' => $type,
                 'party' => ['role' => 'creditor', 'name' => 'Leverancier BV'],
             ]))
-            ->assertStatus(201)
-            ->assertJsonPath('external_ref', 'gj-1');
+            ->assertStatus(422)
+            ->assertJson(['error' => 'unsupported_document_type']);
 
-        MockClient::global()->assertSent(function (CreateGeneralJournalEntry $request): bool {
-            $body = $request->body()->all();
-
-            // Exact weigert op een GeneralJournalEntry zowel een header-Description als
-            // een regel-VATCode (live-geverifieerd 2026-06-17).
-            return $request->resolveEndpoint() === '/generaljournalentry/GeneralJournalEntries'
-                && ! array_key_exists('Description', $body)
-                && $body['JournalCode'] === '90'
-                && (float) $body['GeneralJournalEntryLines'][0]['AmountDC'] === 200.0
-                && ! array_key_exists('VATCode', $body['GeneralJournalEntryLines'][0]);
-        });
-
-        $this->assertDatabaseHas('pass_through_calls', [
-            'provider' => 'exact',
-            'path' => 'accounting/documents:expense',
-            'status' => 201,
-        ]);
+        // Niks naar Exact gestuurd — de edge-guard staat vóór de push.
+        MockClient::global()->assertNothingSent();
     }
 
     public function test_missing_idempotency_key_returns_400(): void
@@ -429,5 +431,100 @@ class StoreDocumentTest extends TestCase
             ->postJson('/v1/accounting/documents', $this->salesInvoicePayload(['type' => 'bogus']))
             ->assertStatus(422)
             ->assertJsonValidationErrors('type');
+    }
+
+    public function test_sales_invoice_with_attachment_uploads_document_then_attachment(): void
+    {
+        MockClient::global([
+            CreateSalesEntry::class => MockResponse::make(['d' => ['ID' => 'inv-guid-1']], 201),
+            CreateDocument::class => MockResponse::make(['d' => ['ID' => 'doc-guid-1']], 201),
+            CreateDocumentAttachment::class => MockResponse::make(['d' => ['ID' => 'att-guid-1']], 201),
+        ]);
+        $this->bindFakeReferences();
+
+        [$consumer] = $this->consumerWithExactConnection();
+        $token = $consumer->createToken('t', [TokenAbilities::EXACT_WRITE])->plainTextToken;
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->withHeader('X-Account-Id', 'school1')
+            ->withHeader('Idempotency-Key', (string) Str::uuid())
+            ->postJson('/v1/accounting/documents', $this->salesInvoicePayload([
+                'attachments' => [
+                    ['filename' => 'factuur.pdf', 'mime_type' => 'application/pdf', 'content' => 'JVBERi0xLjQK'],
+                ],
+            ]))
+            ->assertStatus(201)
+            ->assertJsonPath('external_ref', 'inv-guid-1')
+            ->assertJsonPath('attachments.0.status', 'uploaded')
+            ->assertJsonPath('attachments.0.document_ref', 'doc-guid-1');
+
+        // Document gekoppeld aan de boeking (FinancialTransactionEntryID = SalesEntry-ID)
+        // en aan de relatie (Account), met de gegronde DocumentType 10 (Sales invoice).
+        MockClient::global()->assertSent(fn ($request): bool => $request instanceof CreateDocument
+            && $request->resolveEndpoint() === '/documents/Documents'
+            && $request->body()->all()['Type'] === 10
+            && $request->body()->all()['Account'] === 'cust-guid'
+            && $request->body()->all()['FinancialTransactionEntryID'] === 'inv-guid-1');
+
+        MockClient::global()->assertSent(fn ($request): bool => $request instanceof CreateDocumentAttachment
+            && $request->body()->all()['Document'] === 'doc-guid-1'
+            && $request->body()->all()['FileName'] === 'factuur.pdf'
+            && $request->body()->all()['Attachment'] === 'JVBERi0xLjQK');
+    }
+
+    public function test_without_attachments_no_document_calls_are_made(): void
+    {
+        MockClient::global([
+            CreateSalesEntry::class => MockResponse::make(['d' => ['ID' => 'inv-guid-1']], 201),
+        ]);
+        $this->bindFakeReferences();
+
+        [$consumer] = $this->consumerWithExactConnection();
+        $token = $consumer->createToken('t', [TokenAbilities::EXACT_WRITE])->plainTextToken;
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->withHeader('X-Account-Id', 'school1')
+            ->withHeader('Idempotency-Key', (string) Str::uuid())
+            ->postJson('/v1/accounting/documents', $this->salesInvoicePayload())
+            ->assertStatus(201)
+            ->assertJsonMissingPath('attachments');
+
+        MockClient::global()->assertNotSent(CreateDocument::class);
+        MockClient::global()->assertNotSent(CreateDocumentAttachment::class);
+        MockClient::global()->assertSentCount(1);
+    }
+
+    public function test_attachment_with_unsupported_mime_returns_422(): void
+    {
+        [$consumer] = $this->consumerWithExactConnection();
+        $token = $consumer->createToken('t', [TokenAbilities::EXACT_WRITE])->plainTextToken;
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->withHeader('X-Account-Id', 'school1')
+            ->withHeader('Idempotency-Key', (string) Str::uuid())
+            ->postJson('/v1/accounting/documents', $this->salesInvoicePayload([
+                'attachments' => [
+                    ['filename' => 'virus.exe', 'mime_type' => 'application/x-msdownload', 'content' => 'AAAA'],
+                ],
+            ]))
+            ->assertStatus(422)
+            ->assertJsonValidationErrors('attachments.0.mime_type');
+    }
+
+    public function test_attachment_over_size_limit_returns_422(): void
+    {
+        [$consumer] = $this->consumerWithExactConnection();
+        $token = $consumer->createToken('t', [TokenAbilities::EXACT_WRITE])->plainTextToken;
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->withHeader('X-Account-Id', 'school1')
+            ->withHeader('Idempotency-Key', (string) Str::uuid())
+            ->postJson('/v1/accounting/documents', $this->salesInvoicePayload([
+                'attachments' => [
+                    ['filename' => 'big.pdf', 'mime_type' => 'application/pdf', 'content' => str_repeat('A', 1_400_001)],
+                ],
+            ]))
+            ->assertStatus(422)
+            ->assertJsonValidationErrors('attachments.0.content');
     }
 }

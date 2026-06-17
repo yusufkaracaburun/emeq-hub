@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Accounting\Exact;
 
 use App\Accounting\AccountingResult;
+use App\Accounting\Attachment;
 use App\Accounting\Contracts\AccountingTarget;
 use App\Accounting\Enums\DocumentType;
 use App\Accounting\Exact\Contracts\ExactReferenceResolver;
@@ -16,12 +17,17 @@ use App\Services\Exact\ConnectionTokenStore;
 use App\Services\Exact\HubExactCredentialResolver;
 use Emeq\ExactApi\Contracts\ExactCredentialResolver;
 use Emeq\ExactApi\Contracts\TokenStore;
+use Emeq\ExactApi\Enums\ExactDocumentType;
 use Emeq\ExactApi\Exact;
+use Emeq\ExactApi\Http\ExactConnector;
+use Emeq\ExactApi\Http\Request\Write\CreateDocument;
+use Emeq\ExactApi\Http\Request\Write\CreateDocumentAttachment;
 use Emeq\ExactApi\Http\Request\Write\CreateGeneralJournalEntry;
 use Emeq\ExactApi\Http\Request\Write\CreatePurchaseEntry;
 use Emeq\ExactApi\Http\Request\Write\CreateSalesEntry;
 use Emeq\ExactApi\OData\Envelope;
 use Saloon\Http\Request as SdkRequest;
+use Throwable;
 
 /**
  * Exact Online accounting-adapter. Mapt een canonical FinancialDocument op de juiste
@@ -55,18 +61,119 @@ final class ExactAccountingTarget implements AccountingTarget
 
         /** @var Exact $exact */
         $exact = app(Exact::class);
+        $connector = $exact->connector($division);
 
-        $response = $exact->connector($division)->send($this->buildRequest($document, $connection));
+        $response = $connector->send($this->buildRequest($document, $connection));
 
         if ($response->failed()) {
             $response->throw();
         }
 
+        $entryId = Envelope::firstId($response->json());
+
         return new AccountingResult(
             status: $response->status(),
-            externalRef: Envelope::firstId($response->json()),
+            externalRef: $entryId,
             raw: (array) $response->json(),
+            attachments: $this->uploadAttachments($document, $connection, $connector, $entryId),
         );
+    }
+
+    /**
+     * Uploadt elke bijlage in 2 stappen (Document → DocumentAttachment) ná de boeking.
+     * Best-effort: de boeking is leidend en al persistent; een mislukte bijlage gooit
+     * niet (anders herboekt een idempotency-retry) maar wordt per stuk gerapporteerd.
+     *
+     * @return list<array{filename: string, status: string, document_ref: ?string, error: ?string}>
+     */
+    private function uploadAttachments(
+        FinancialDocument $document,
+        Connection $connection,
+        ExactConnector $connector,
+        ?string $entryId,
+    ): array {
+        if ($document->attachments === []) {
+            return [];
+        }
+
+        $type = $this->documentTypeId($document->type);
+        $subject = $document->number ?? $document->externalId;
+
+        return array_map(
+            fn (Attachment $attachment): array => $this->uploadAttachment(
+                $attachment,
+                $connection,
+                $connector,
+                $document,
+                $type,
+                $subject,
+                $entryId,
+            ),
+            array_values($document->attachments),
+        );
+    }
+
+    /**
+     * @return array{filename: string, status: string, document_ref: ?string, error: ?string}
+     */
+    private function uploadAttachment(
+        Attachment $attachment,
+        Connection $connection,
+        ExactConnector $connector,
+        FinancialDocument $document,
+        int $type,
+        string $subject,
+        ?string $entryId,
+    ): array {
+        try {
+            $docResponse = $connector->send(new CreateDocument(
+                subject: $subject,
+                type: $type,
+                account: $this->references->relationGuid($document->party, $connection),
+                financialTransactionEntryId: $entryId,
+            ));
+
+            if ($docResponse->failed()) {
+                $docResponse->throw();
+            }
+
+            $documentRef = Envelope::firstId($docResponse->json());
+
+            $attachResponse = $connector->send(new CreateDocumentAttachment(
+                document: (string) $documentRef,
+                fileName: $attachment->filename,
+                attachment: $attachment->content,
+            ));
+
+            if ($attachResponse->failed()) {
+                $attachResponse->throw();
+            }
+
+            return [
+                'filename' => $attachment->filename,
+                'status' => 'uploaded',
+                'document_ref' => $documentRef,
+                'error' => null,
+            ];
+        } catch (Throwable $e) {
+            report($e);
+
+            return [
+                'filename' => $attachment->filename,
+                'status' => 'failed',
+                'document_ref' => null,
+                'error' => $e->getMessage(),
+            ];
+        }
+    }
+
+    private function documentTypeId(DocumentType $type): int
+    {
+        return match ($type) {
+            DocumentType::SalesInvoice, DocumentType::CreditNote => ExactDocumentType::SalesInvoice->value,
+            DocumentType::PurchaseInvoice => ExactDocumentType::PurchaseInvoice->value,
+            DocumentType::Income, DocumentType::Expense => ExactDocumentType::Miscellaneous->value,
+        };
     }
 
     private function buildRequest(FinancialDocument $document, Connection $connection): SdkRequest

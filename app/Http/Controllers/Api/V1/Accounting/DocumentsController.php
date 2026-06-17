@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api\V1\Accounting;
 
 use App\Accounting\AccountingTargetRegistry;
+use App\Accounting\Enums\DocumentType;
 use App\Accounting\Exceptions\AccountingMappingException;
 use App\Accounting\FinancialDocument;
 use App\Http\Controllers\Controller;
@@ -76,6 +77,16 @@ class DocumentsController extends Controller
 
         $document = FinancialDocument::fromArray($request->validated());
 
+        // v1-grens: alleen verkoop/inkoop (sales_invoice/purchase_invoice/credit_note).
+        // Ad-hoc income/expense → memoriaal hangt aan de GeneralJournalEntry-balancering
+        // (#12) en komt in v2 — weiger nu expliciet i.p.v. een rauwe Exact-500 door te laten.
+        if (in_array($document->type, [DocumentType::Income, DocumentType::Expense], true)) {
+            return response()->json([
+                'error' => 'unsupported_document_type',
+                'message' => "Doc-type '{$document->type->value}' wordt vanaf v2 ondersteund (ad-hoc income/expense → memoriaal, zie #12).",
+            ], 422);
+        }
+
         $start = microtime(true);
         $upstreamError = null;
         $responseBody = [];
@@ -89,6 +100,10 @@ class DocumentsController extends Controller
                 'status' => 'posted',
                 'external_ref' => $result->externalRef,
             ];
+
+            if ($result->attachments !== []) {
+                $responseBody['attachments'] = $result->attachments;
+            }
         } catch (ProviderDisabledException $e) {
             $status = 503;
             $upstreamError = 'provider_disabled';

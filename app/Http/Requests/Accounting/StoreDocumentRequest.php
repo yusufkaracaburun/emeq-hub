@@ -48,6 +48,12 @@ class StoreDocumentRequest extends FormRequest
             'lines.*.unit_price' => ['nullable', 'numeric'],
             'lines.*.tax_rate' => ['required', 'numeric', 'min:0'],
             'lines.*.category' => ['nullable', 'string', 'max:255'],
+
+            // Bijlagen: inline base64. max ~1,4M chars base64 ≈ 1MB binair (ADR < 1MB).
+            'attachments' => ['nullable', 'array'],
+            'attachments.*.filename' => ['required', 'string', 'max:255'],
+            'attachments.*.mime_type' => ['required', 'string', Rule::in(['application/pdf', 'image/png', 'image/jpeg'])],
+            'attachments.*.content' => ['required', 'string', 'max:1400000'],
         ];
     }
 }

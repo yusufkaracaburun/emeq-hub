@@ -16,6 +16,7 @@ final readonly class FinancialDocument
 {
     /**
      * @param  list<FinancialDocumentLine>  $lines
+     * @param  list<Attachment>  $attachments
      */
     public function __construct(
         public DocumentType $type,
@@ -28,6 +29,7 @@ final readonly class FinancialDocument
         public ?string $reference = null,
         public string $currency = 'EUR',
         public bool $pricesIncludeTax = false,
+        public array $attachments = [],
     ) {}
 
     /**
@@ -49,6 +51,10 @@ final readonly class FinancialDocument
             reference: isset($data['reference']) ? (string) $data['reference'] : null,
             currency: isset($data['currency']) ? (string) $data['currency'] : 'EUR',
             pricesIncludeTax: (bool) ($data['prices_include_tax'] ?? false),
+            attachments: array_values(array_map(
+                fn (array $attachment): Attachment => Attachment::fromArray($attachment),
+                $data['attachments'] ?? [],
+            )),
         );
     }
 
