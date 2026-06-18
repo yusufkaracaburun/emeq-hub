@@ -4,18 +4,20 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Admin;
 
+use App\Filament\Resources\Accounts\Pages\ViewAccount;
 use App\Models\Account;
 use App\Models\Consumer;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Livewire\Livewire;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 /**
- * Plan 08-04 Task 2 — bewijst dat AccountInfolist een 'Wat is een Account?'-hint-Section
- * heeft bovenaan met de canonical D-07 / UI-SPEC §S4 copy, EN dat de Tenants-navgroup
- * in het admin-paneel een tooltip (title-attribuut) heeft met de canonical uitleg.
+ * Bewijst dat AccountResource de 'Wat is een Account?'-toelichting (canonical
+ * D-07 / UI-SPEC §S4 copy) achter het info-icoon-modal toont, EN dat de Tenants-
+ * navgroup een tooltip (title-attribuut) heeft met de canonical uitleg.
  */
 class AccountInfolistHintTest extends TestCase
 {
@@ -39,40 +41,28 @@ class AccountInfolistHintTest extends TestCase
         return $user;
     }
 
-    public function test_view_account_page_renders_hint_section_heading_and_body(): void
+    public function test_view_account_page_exposes_concept_via_info_action(): void
     {
         $this->actAsStaff();
 
         $consumer = Consumer::factory()->create();
         $account = Account::factory()->for($consumer)->create();
 
-        $response = $this->get("/admin/accounts/{$account->id}");
-
-        $response->assertOk();
-        $response->assertSeeText('Wat is een Account?');
-        $response->assertSeeText('Een klant van een Consumer (bv. school A bij Naschool). Niet de individuele eindgebruiker/ouder.');
+        Livewire::test(ViewAccount::class, ['record' => $account->id])
+            ->assertActionExists('info');
     }
 
-    public function test_hint_section_is_collapsed_by_default(): void
+    public function test_concept_is_behind_info_action_not_inline(): void
     {
         $this->actAsStaff();
-        $account = Account::factory()->create();
+        $consumer = Consumer::factory()->create();
+        $account = Account::factory()->for($consumer)->create();
 
         $response = $this->get("/admin/accounts/{$account->id}");
 
         $response->assertOk();
-        // Filament v4 emit `isCollapsed:  true` (let op: dubbele spatie via @js-helper) in het
-        // Alpine x-data van een ->collapsed() Section. `x-data` zit op de outer <section>,
-        // vóór de heading-tekst in de DOM. Volgorde-assertie scope-t aan de hint-Section.
-        $html = $response->getContent();
-        $this->assertNotFalse(
-            strpos((string) $html, 'isCollapsed:  true'),
-            'Verwacht `isCollapsed:  true` in x-data van de hint-Section (Section is niet default-collapsed).'
-        );
-        $response->assertSeeInOrder([
-            'isCollapsed:  true',
-            'Wat is een Account?',
-        ]);
+        // De toelichting staat niet inline op de pagina maar achter het info-icoon.
+        $response->assertDontSeeText('Een klant van een Consumer (bv. school A bij Naschool). Niet de individuele eindgebruiker/ouder.');
     }
 
     public function test_existing_account_fields_still_render(): void

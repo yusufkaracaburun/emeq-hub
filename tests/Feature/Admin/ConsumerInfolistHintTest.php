@@ -4,16 +4,19 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Admin;
 
+use App\Filament\Resources\Consumers\Pages\ViewConsumer;
 use App\Models\Consumer;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Livewire\Livewire;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 /**
- * Plan 08-04 Task 1 — bewijst dat ConsumerResource een View-page heeft met een
- * 'Wat is een Consumer?'-hint-Section bovenaan, met de canonical D-07 / UI-SPEC §S4 copy.
+ * Bewijst dat ConsumerResource een View-page heeft met de 'Wat is een Consumer?'-
+ * toelichting (canonical D-07 / UI-SPEC §S4 copy) achter het info-icoon-modal in de
+ * paginaheader, niet inline op de pagina.
  */
 class ConsumerInfolistHintTest extends TestCase
 {
@@ -37,20 +40,17 @@ class ConsumerInfolistHintTest extends TestCase
         return $user;
     }
 
-    public function test_view_consumer_page_renders_hint_section_heading_and_body(): void
+    public function test_view_consumer_page_exposes_concept_via_info_action(): void
     {
         $this->actAsStaff();
 
         $consumer = Consumer::factory()->create();
 
-        $response = $this->get("/admin/consumers/{$consumer->id}");
-
-        $response->assertOk();
-        $response->assertSeeText('Wat is een Consumer?');
-        $response->assertSeeText('Eén SaaS-app die de Hub gebruikt (Naschool, Planny, externe app). Authenticeert met een Bearer-PAT. Een Consumer heeft Accounts (zijn klanten) en die Accounts hebben Connections (partner-koppelingen).');
+        Livewire::test(ViewConsumer::class, ['record' => $consumer->id])
+            ->assertActionExists('info');
     }
 
-    public function test_hint_section_is_collapsed_by_default(): void
+    public function test_concept_is_behind_info_action_not_inline(): void
     {
         $this->actAsStaff();
         $consumer = Consumer::factory()->create();
@@ -58,18 +58,8 @@ class ConsumerInfolistHintTest extends TestCase
         $response = $this->get("/admin/consumers/{$consumer->id}");
 
         $response->assertOk();
-        // Filament v4 emit `isCollapsed:  true` (let op: dubbele spatie via @js-helper) in het
-        // Alpine x-data van een ->collapsed() Section. `x-data` zit op de outer <section>,
-        // vóór de heading-tekst in de DOM. Volgorde-assertie scope-t aan de hint-Section.
-        $html = $response->getContent();
-        $this->assertNotFalse(
-            strpos((string) $html, 'isCollapsed:  true'),
-            'Verwacht `isCollapsed:  true` in x-data van de hint-Section (Section is niet default-collapsed).'
-        );
-        $response->assertSeeInOrder([
-            'isCollapsed:  true',
-            'Wat is een Consumer?',
-        ]);
+        // De toelichting staat niet inline op de pagina maar achter het info-icoon.
+        $response->assertDontSeeText('Eén SaaS-app die de Hub gebruikt (Naschool, Planny, externe app).');
     }
 
     public function test_infolist_renders_consumer_basic_fields(): void

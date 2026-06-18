@@ -4,15 +4,13 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Consumers\Schemas;
 
+use App\Filament\Support\InfoModalAction;
 use Filament\Infolists\Components\TextEntry;
-use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
 /**
- * Plan 08-04 — Infolist voor ConsumerResource met D-07 hint-Section bovenaan.
- *
- * Eerste Section bevat canonical D-07 / UI-SPEC §S4 copy, default-collapsed,
- * geen interactie behalve native collapse/expand. Daarna basis Consumer-velden.
+ * Infolist voor ConsumerResource. De "Wat is een Consumer?"-toelichting leeft als
+ * info-icoon-modal in de paginaheader ({@see InfoModalAction}).
  */
 class ConsumerInfolist
 {
@@ -20,10 +18,6 @@ class ConsumerInfolist
     {
         return $schema
             ->components([
-                Section::make('Wat is een Consumer?')
-                    ->description('Eén SaaS-app die de Hub gebruikt (Naschool, Planny, externe app). Authenticeert met een Bearer-PAT. Een Consumer heeft Accounts (zijn klanten) en die Accounts hebben Connections (partner-koppelingen).')
-                    ->collapsed()
-                    ->schema([]),
                 TextEntry::make('id')
                     ->label('ID'),
                 TextEntry::make('name'),
