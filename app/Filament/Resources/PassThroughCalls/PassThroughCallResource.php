@@ -8,6 +8,7 @@ use App\Filament\Resources\PassThroughCalls\Pages\ListPassThroughCalls;
 use App\Filament\Resources\PassThroughCalls\Pages\ViewPassThroughCall;
 use App\Filament\Resources\PassThroughCalls\Schemas\PassThroughCallInfolist;
 use App\Filament\Resources\PassThroughCalls\Tables\PassThroughCallsTable;
+use App\Filament\Widgets\OperationalHealthWidget;
 use App\Models\PassThroughCall;
 use BackedEnum;
 use Filament\Resources\Resource;
@@ -45,6 +46,18 @@ class PassThroughCallResource extends Resource
     public static function shouldRegisterNavigation(): bool
     {
         return static::canAccess();
+    }
+
+    public static function getNavigationBadge(): ?string
+    {
+        $count = OperationalHealthWidget::failedPassThroughCount();
+
+        return $count > 0 ? (string) $count : null;
+    }
+
+    public static function getNavigationBadgeColor(): ?string
+    {
+        return 'danger';
     }
 
     public static function canCreate(): bool

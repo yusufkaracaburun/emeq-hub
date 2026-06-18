@@ -8,6 +8,7 @@ use App\Filament\Resources\InboundWebhookEvents\Pages\ListInboundWebhookEvents;
 use App\Filament\Resources\InboundWebhookEvents\Pages\ViewInboundWebhookEvent;
 use App\Filament\Resources\InboundWebhookEvents\Schemas\InboundWebhookEventInfolist;
 use App\Filament\Resources\InboundWebhookEvents\Tables\InboundWebhookEventsTable;
+use App\Filament\Widgets\OperationalHealthWidget;
 use App\Models\InboundWebhookEvent;
 use BackedEnum;
 use Filament\Resources\Resource;
@@ -44,6 +45,18 @@ class InboundWebhookEventResource extends Resource
     public static function shouldRegisterNavigation(): bool
     {
         return static::canAccess();
+    }
+
+    public static function getNavigationBadge(): ?string
+    {
+        $count = OperationalHealthWidget::webhookProblemCount();
+
+        return $count > 0 ? (string) $count : null;
+    }
+
+    public static function getNavigationBadgeColor(): ?string
+    {
+        return 'danger';
     }
 
     public static function canCreate(): bool

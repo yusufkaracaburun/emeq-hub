@@ -7,6 +7,7 @@ use App\Filament\Actions\ManageAccountingMappingAction;
 use App\Filament\Actions\StartOAuthFlowAction;
 use App\Filament\Resources\Connections\Pages\ListConnections;
 use App\Filament\Resources\Connections\Pages\ViewConnection;
+use App\Filament\Widgets\OperationalHealthWidget;
 use App\Models\Connection;
 use App\OAuth\OAuthFlowRegistry;
 use App\Support\ProviderCredentialDescriptor;
@@ -44,6 +45,18 @@ class ConnectionResource extends Resource
     public static function shouldRegisterNavigation(): bool
     {
         return static::canAccess();
+    }
+
+    public static function getNavigationBadge(): ?string
+    {
+        $count = OperationalHealthWidget::expiringConnectionCount();
+
+        return $count > 0 ? (string) $count : null;
+    }
+
+    public static function getNavigationBadgeColor(): ?string
+    {
+        return 'warning';
     }
 
     public static function form(Schema $schema): Schema
