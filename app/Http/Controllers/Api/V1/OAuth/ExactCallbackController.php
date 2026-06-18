@@ -54,7 +54,7 @@ class ExactCallbackController extends Controller
         } catch (Throwable $e) {
             report($e);
 
-            return $this->failed('exchange_failed');
+            return $this->failed('exchange_failed', $connection->oauth_return_url);
         }
 
         return redirect()->to(URL::temporarySignedRoute(
@@ -64,12 +64,18 @@ class ExactCallbackController extends Controller
         ));
     }
 
-    private function failed(string $reason): RedirectResponse
+    private function failed(string $reason, ?string $returnUrl = null): RedirectResponse
     {
+        $params = ['provider' => Provider::Exact->value, 'reason' => $reason];
+
+        if ($returnUrl !== null) {
+            $params['return_url'] = $returnUrl;
+        }
+
         return redirect()->to(URL::temporarySignedRoute(
             'oauth.failed',
             now()->addMinutes(10),
-            ['provider' => Provider::Exact->value, 'reason' => $reason],
+            $params,
         ));
     }
 }

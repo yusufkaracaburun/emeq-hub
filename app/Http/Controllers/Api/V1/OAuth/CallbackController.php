@@ -41,6 +41,7 @@ class CallbackController extends Controller
         return response()->json([
             'connection_id' => (string) $connection->id,
             'status' => 'active',
+            'return_url' => $connection->oauth_return_url,
         ]);
     }
 }

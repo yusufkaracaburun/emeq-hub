@@ -20,12 +20,15 @@ class OAuthLandingController extends Controller
 {
     public function connected(Connection $connection): View
     {
+        $returnUrl = $connection->oauth_return_url;
+
         return view('oauth.result', [
             'success' => true,
             'provider' => $connection->provider,
             'connection' => $connection,
             'reason' => null,
-            'backUrl' => $this->backUrl(),
+            'backUrl' => $returnUrl ?? $this->hubBackUrl(),
+            'isConsumerReturn' => $returnUrl !== null,
         ]);
     }
 
@@ -34,18 +37,22 @@ class OAuthLandingController extends Controller
         $validated = $request->validate([
             'provider' => ['required', 'string'],
             'reason' => ['nullable', 'string'],
+            'return_url' => ['nullable', 'url'],
         ]);
+
+        $returnUrl = $validated['return_url'] ?? null;
 
         return view('oauth.result', [
             'success' => false,
             'provider' => Provider::tryFrom($validated['provider']),
             'connection' => null,
             'reason' => $validated['reason'] ?? 'unknown_error',
-            'backUrl' => $this->backUrl(),
+            'backUrl' => $returnUrl ?? $this->hubBackUrl(),
+            'isConsumerReturn' => $returnUrl !== null,
         ]);
     }
 
-    private function backUrl(): string
+    private function hubBackUrl(): string
     {
         return Route::has('filament.admin.resources.connections.index')
             ? route('filament.admin.resources.connections.index')

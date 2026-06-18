@@ -4,6 +4,7 @@
     /** @var \App\Models\Connection|null $connection */
     /** @var string|null $reason */
     /** @var string $backUrl */
+    /** @var bool $isConsumerReturn */
 
     $providerLabel = $provider?->getLabel() ?? 'de partner';
 
@@ -169,7 +170,7 @@
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
                 </div>
                 <h1>Verbonden met {{ $providerLabel }}</h1>
-                <p class="sub">De koppeling is actief. Je kunt dit venster sluiten of teruggaan naar het paneel.</p>
+                <p class="sub">De koppeling is actief. Je kunt dit venster sluiten of teruggaan naar {{ $isConsumerReturn ? 'de app' : 'het paneel' }}.</p>
 
                 <div class="details">
                     <div class="r"><span class="k">Status</span><span class="v"><span class="pill">{{ $connection->status }}</span></span></div>
@@ -180,7 +181,7 @@
                     <div class="r"><span class="k">Verbonden op</span><span class="v">{{ $connection->updated_at?->format('d-m-Y H:i') }}</span></div>
                 </div>
 
-                <a class="btn" href="{{ $backUrl }}">Terug naar Connections</a>
+                <a class="btn" href="{{ $backUrl }}">{{ $isConsumerReturn ? 'Terug naar de app' : 'Terug naar Connections' }}</a>
             @else
                 <div class="icon bad" aria-hidden="true">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
@@ -188,7 +189,7 @@
                 <h1>Koppeling mislukt</h1>
                 <p class="sub">{{ $reasonText }}</p>
 
-                <a class="btn" href="{{ $backUrl }}">Terug naar het admin-paneel</a>
+                <a class="btn" href="{{ $backUrl }}">{{ $isConsumerReturn ? 'Terug naar de app' : 'Terug naar het admin-paneel' }}</a>
             @endif
         </div>
     </main>
