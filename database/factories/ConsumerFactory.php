@@ -35,6 +35,13 @@ class ConsumerFactory extends Factory
         ]);
     }
 
+    public function withAppUrl(string $url = 'https://consumer.test'): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'app_url' => $url,
+        ]);
+    }
+
     /**
      * Maak een Consumer aan met een actieve subscription-rij voor de gegeven
      * plan-slug. Vereist dat plan 06-02's subscriptions-tabel is gemigreerd.

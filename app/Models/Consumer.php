@@ -11,7 +11,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Laravel\Cashier\Billable;
 use Laravel\Sanctum\HasApiTokens;
 
-#[Fillable(['name', 'slug', 'webhook_callback_url', 'webhook_callback_secret'])]
+#[Fillable(['name', 'slug', 'webhook_callback_url', 'webhook_callback_secret', 'app_url'])]
 class Consumer extends Authenticatable
 {
     /** @use HasFactory<ConsumerFactory> */

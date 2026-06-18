@@ -28,6 +28,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'revoked_at',
     'oauth_state',
     'oauth_state_expires_at',
+    'oauth_return_url',
 ])]
 #[Hidden(['access_token', 'refresh_token', 'client_key', 'subscription_key'])]
 class Connection extends Model
