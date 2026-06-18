@@ -36,6 +36,9 @@ class SettingsHydrationServiceProvider extends ServiceProvider
                 'services.exact.webhook_secret' => $exact->webhook_secret ?: config('services.exact.webhook_secret'),
                 'services.exact.auth_base_url' => $exact->auth_base_url ?: config('services.exact.auth_base_url'),
                 'services.exact.api_base_url' => $exact->api_base_url ?: config('services.exact.api_base_url'),
+                // De SDK-webhook-middleware (verify.exact.signature) leest zijn eigen
+                // namespace exact.webhook.secret — vul die uit dezelfde DB-setting.
+                'exact.webhook.secret' => $exact->webhook_secret ?: config('exact.webhook.secret'),
             ]);
         } catch (Throwable $e) {
             // Settings nog niet geseed (rows ontbreken) e.d. → val terug op env-config.

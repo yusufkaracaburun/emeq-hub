@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Webhooks\ExactWebhookController;
 use App\Http\Controllers\Webhooks\MollieWebhookController;
 use App\Http\Controllers\Webhooks\SnelstartWebhookController;
 use Illuminate\Support\Facades\Route;
@@ -32,6 +33,20 @@ Route::post('/webhooks/snelstart', SnelstartWebhookController::class)
     ->middleware(['verify.snelstart.signature'])
     ->withoutMiddleware(['throttle:api'])
     ->name('webhooks.snelstart');
+
+/*
+ * Exact Online webhook-ingress (#10). Eén publieke URL voor alle divisions;
+ * per-Connection routing in de controller op `Content.Division`. HashCode-
+ * signature (SDK-side, app-brede secret, auto-aliased) is de enige gatekeeper.
+ *
+ * `throttle:api` gestript — Exact hertried een non-2xx tot 10× over ~34u, dus
+ * throttling zou events verliezen. De lege-body-validatieping bij subscribe
+ * passeert de middleware en krijgt 200 van de controller.
+ */
+Route::post('/webhooks/exact', ExactWebhookController::class)
+    ->middleware(['verify.exact.signature'])
+    ->withoutMiddleware(['throttle:api'])
+    ->name('webhooks.exact');
 
 /*
  * Cashier-Mollie webhook-ingress (D-10/D-11). Separaat van Phase 5a's
