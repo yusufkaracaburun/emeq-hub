@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Connection;
 use App\Models\Consumer;
 use App\OAuth\OAuthFlowRegistry;
+use App\Support\OAuth\ReturnUrlResolver;
 use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -14,7 +15,10 @@ use Illuminate\Support\Str;
 #[Group(name: 'OAuth Connect', description: 'OAuth-broker — init de authorize-flow en handle de callback van de partner.', weight: 40)]
 class InitController extends Controller
 {
-    public function __construct(private readonly OAuthFlowRegistry $registry) {}
+    public function __construct(
+        private readonly OAuthFlowRegistry $registry,
+        private readonly ReturnUrlResolver $returnUrls,
+    ) {}
 
     /**
      * @return array<string, string>
@@ -23,6 +27,7 @@ class InitController extends Controller
     {
         $validated = $request->validate([
             'account_external_id' => ['required', 'string'],
+            'return_url' => ['nullable', 'url'],
         ]);
 
         /** @var Consumer $consumer */
@@ -40,6 +45,7 @@ class InitController extends Controller
             'status' => 'pending',
             'oauth_state' => $state,
             'oauth_state_expires_at' => now()->addMinutes(30),
+            'oauth_return_url' => $this->returnUrls->resolve($consumer, $validated['return_url'] ?? null),
         ]);
 
         $scopes = config('services.mollie.connect.scopes');
