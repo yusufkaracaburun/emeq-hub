@@ -6,6 +6,7 @@
 
     <title inertia>{{ config('app.name', 'Emeq Hub') }}</title>
 
+    @viteReactRefresh
     @vite(['resources/css/app.css', 'resources/js/app.tsx'])
     @inertiaHead
 </head>

@@ -1,0 +1,67 @@
+# Prod-stack — directe deploy op een eigen server, achter Cloudflare.
+#   docker compose -f docker-compose.prod.yml --env-file .env.prod up -d --build
+#
+# Cloudflare termineert TLS; de origin serveert plain HTTP op :80 (geen Let's
+# Encrypt). Wijs Cloudflare naar de server-IP:80, of gebruik een Cloudflare Tunnel
+# (cloudflared) zodat geen poort open hoeft. Firewall :80 bij voorkeur tot CF-ranges.
+# Post-deploy eenmalig: `docker compose -f docker-compose.prod.yml exec app \
+#   sh -c "php artisan migrate --force && php artisan optimize"`.
+services:
+  app:
+    build:
+      context: .
+      target: prod
+    image: emeq-hub-app:prod
+    restart: unless-stopped
+    env_file: .env.prod
+    ports:
+      - "80:80"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  horizon:
+    image: emeq-hub-app:prod
+    restart: unless-stopped
+    env_file: .env.prod
+    command: php artisan horizon
+    depends_on:
+      app:
+        condition: service_started
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: "${DB_DATABASE}"
+      POSTGRES_USER: "${DB_USERNAME}"
+      POSTGRES_PASSWORD: "${DB_PASSWORD}"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  pgdata:
+  redisdata:

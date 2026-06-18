@@ -25,7 +25,14 @@ export default defineConfig({
         },
     },
     server: {
+        host: '0.0.0.0',
+        port: 5173,
+        // Browser bereikt de dev-server op localhost:5173 (gepubliceerde poort);
+        // de container luistert op 0.0.0.0. usePolling = betrouwbare FS-events
+        // op macOS-bind-mounts.
+        hmr: { host: 'localhost' },
         watch: {
+            usePolling: true,
             ignored: ['**/storage/framework/views/**'],
         },
     },

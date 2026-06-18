@@ -1,0 +1,20 @@
+# Dev Caddyfile — zelfde FrankenPHP worker-mode als prod, mét `watch` zodat de
+# worker automatisch herstart bij een PHP-wijziging (bind-mounted /app). Geen TLS
+# lokaal (auto_https off); luistert op :80, gepubliceerd als ${APP_PORT}.
+{
+	frankenphp {
+		worker {
+			file /app/public/frankenphp-worker.php
+			watch
+		}
+	}
+	order php_server before file_server
+	auto_https off
+}
+
+{$SERVER_NAME::80} {
+	root /app/public
+	encode zstd br gzip
+
+	php_server
+}

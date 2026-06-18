@@ -30,6 +30,11 @@ return Application::configure(basePath: dirname(__DIR__))
         },
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Achter Cloudflare termineert CF de TLS; vertrouw X-Forwarded-Proto/For zodat
+        // Laravel https detecteert (secure cookies, url()) en de echte client-IP ziet.
+        // Beperk origin-poort 80 tot Cloudflare-IP-ranges (firewall) of gebruik een
+        // Cloudflare Tunnel — anders is at:'*' spoofbaar.
+        $middleware->trustProxies(at: '*');
         $middleware->append(SetNoIndexHeaders::class);
         $middleware->web(append: [HandleInertiaRequests::class]);
         $middleware->api(prepend: ['throttle:api']);

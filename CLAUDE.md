@@ -24,14 +24,15 @@ Een Hub-platform en losse, Saloon-gebaseerde Laravel SDK-packages (`emeq/snelsta
 - **PHP 8.4**, **Laravel 13.9**
 - **Postgres 16** (eigen credentials + connections + audit-tabellen)
 - **Redis 7** (queue + cache + session via predis)
-- **Caddy 2** (reverse-proxy → host's `php artisan serve` op port 8001)
+- **FrankenPHP** (app-server, = Caddy + PHP; worker-mode via Octane) — vervangt de losse Caddy-reverse-proxy
+- **Laravel Octane** v2 (FrankenPHP worker-mode, dev én prod — runtime-parity)
 - **Sanctum** v4 — consumer-app auth (Personal Access Tokens)
 - **Horizon** v5 — queue-dashboard + supervisor
 - **Spatie webhook-server/client** — partner-event-fan-out naar consumer-callback-URLs
 - **dedoc/scramble** — auto-OpenAPI op `/docs/api`
 - **SDK-laag**: Saloon v4 (in `emeq/snelstart-api`; `emeq/mollie-api` wrapt `mollie/mollie-api-php` rechtstreeks) + Spatie laravel-data
 
-Lokaal: `php artisan serve --port=8001` op host, `docker compose up -d` voor db+redis+caddy → `http://hub.emeq.test:8090`.
+Lokaal draait **de hele stack in Docker** (app + worker + vite + db + redis): `docker compose up -d --build` → `http://hub.emeq.test:8092`. Dev = FrankenPHP worker-mode met `watch` (instant code-reload, geen rebuild) + Vite-HMR; identiek aan prod op runtime-niveau. Host-`php artisan serve` is enkel nog fallback. Zie `docker/Caddyfile{,.dev}` + `Dockerfile` (multi-stage). Prod: `docker compose -f docker-compose.prod.yml --env-file .env.prod up -d --build` (HTTP-origin op `:80` achter Cloudflare-TLS + horizon; `trustProxies` aan).
 
 Stack-details voor agents: `docs/agents/dev-environment.md` (commands + doc-URLs) en `docs/agents/architecture.md` (lagen + componenten). Framework-/package-guidelines (PHP, Laravel, Pint, PHPUnit, Boost) staan in de Laravel Boost-block onderaan dit bestand.
 
@@ -121,26 +122,26 @@ echo "127.0.0.1 hub.emeq.test" | sudo tee -a /etc/hosts
 cp .env.example .env
 php artisan key:generate
 
-# 2. Stack omhoog (postgres + redis + caddy)
-docker compose up -d
-
-# 3. Composer + migraties (SDK wordt automatisch vanaf GitHub gepakt)
+# 2. Composer-deps op host (voor IDE/grep; container regenereert vendor zelf)
 composer install
-php artisan migrate
 
-# 4. (Optioneel) SDK clonen in packages/ voor referentie/grep — geen live-edit-link
+# 3. Hele stack omhoog in Docker (app + worker + vite + db + redis)
+docker compose up -d --build
+
+# 4. Migraties draaien in de app-container
+docker compose exec app php artisan migrate
+
+# 5. (Optioneel) SDK clonen in packages/ voor referentie/grep — geen live-edit-link
 mkdir -p packages
 git clone git@github.com:yusufkaracaburun/emeq-snelstart-api.git packages/snelstart-api
-
-# 5. Laravel + Horizon op host
-php artisan serve --port=8001
-php artisan horizon  # in 2e terminal
 
 # 6. SDK-changes: edit in de SDK-repo zelf, commit + push, daarna in de Hub:
 #    composer update emeq/snelstart-api
 ```
 
-Open `http://hub.emeq.test:8090/up` → moet `{"status":"up","database":"ok","redis":"ok"}` teruggeven.
+Open `http://hub.emeq.test:8092/up` → moet `{"status":"up","database":"ok","redis":"ok"}` teruggeven.
+
+Dev draait in worker-mode met `watch`: PHP-changes zijn na een korte worker-restart zichtbaar (geen rebuild), React via Vite-HMR op `:5173`. Tests in de container: `docker compose exec app php artisan test --compact`.
 
 ### Veelgebruikte commando's
 
@@ -240,6 +241,7 @@ This application is a Laravel application and its main Laravel ecosystems packag
 - laravel/framework (LARAVEL) - v13
 - laravel/horizon (HORIZON) - v5
 - laravel/nightwatch (NIGHTWATCH) - v1
+- laravel/octane (OCTANE) - v2
 - laravel/pennant (PENNANT) - v1
 - laravel/prompts (PROMPTS) - v0
 - laravel/sanctum (SANCTUM) - v4
@@ -399,6 +401,18 @@ This project has domain-specific skills available in `**/skills/**`. You MUST ac
 ## Vite Error
 
 - If you receive an "Illuminate\Foundation\ViteException: Unable to locate file in Vite manifest" error, you can run `npm run build` or ask the user to run `npm run dev` or `composer run dev`.
+
+=== octane/core rules ===
+
+# Laravel Octane
+
+This application uses Laravel Octane, a long-running PHP server. The application bootstraps once and handles many requests within the same process.
+
+- Never store request-specific state in singletons or static properties, because it can leak across requests.
+- Use `config('octane.server')` to detect the active driver (`swoole`, `roadrunner`, or `frankenphp`).
+- Prefer scoped bindings (`$this->app->scoped()`) over singletons for per-request services.
+
+When working on Octane-specific features (concurrency, shared tables, memory, driver configuration, testing), invoke `octane-development` for detailed rules.
 
 === pint/core rules ===
 

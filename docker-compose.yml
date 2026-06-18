@@ -1,4 +1,69 @@
+# Dev-stack — alles in Docker, prod-like (FrankenPHP worker-mode + Octane).
+# Source bind-mounted → code-changes zonder rebuild; `watch` in de dev-Caddyfile
+# herstart de worker. React via de aparte vite-service (HMR).
+#
+# DB_HOST/REDIS_HOST worden hier naar de container-namen overschreven; de host-.env
+# blijft 127.0.0.1:5433/6380 zodat host-tinker/tests blijven werken.
 services:
+  app:
+    build:
+      context: .
+      target: dev
+    command: frankenphp run --config /app/docker/Caddyfile.dev
+    volumes:
+      - .:/app
+    ports:
+      - "${APP_PORT:-8092}:80"
+    environment:
+      SERVER_NAME: ":80"
+      OCTANE_SERVER: frankenphp
+      DB_HOST: db
+      DB_PORT: 5432
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  worker:
+    build:
+      context: .
+      target: dev
+    # queue:listen boot per job fresh → pakt code-changes zonder restart, node-vrij.
+    # Zelfde redis-queue + jobs als prod-horizon; prod supervised via `php artisan horizon`.
+    command: php artisan queue:listen --tries=1 --timeout=0
+    # Het FrankenPHP-image healthcheckt de webserver; deze service draait geen web → uit.
+    healthcheck:
+      disable: true
+    volumes:
+      - .:/app
+    environment:
+      OCTANE_SERVER: frankenphp
+      DB_HOST: db
+      DB_PORT: 5432
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  vite:
+    image: node:22-slim
+    working_dir: /app
+    # npm ci muteert package-lock niet (geen name-churn); conditional = alleen 1e boot.
+    command: sh -c "[ -d node_modules/.bin ] || npm ci; npm run dev -- --host"
+    volumes:
+      - .:/app
+      # Anonymous volume maskeert de host-(darwin)node_modules → container krijgt
+      # eigen linux-binaries (esbuild/rollup), anders crasht Vite op arch-mismatch.
+      - /app/node_modules
+    ports:
+      - "5173:5173"
+
   db:
     image: postgres:16-alpine
     environment:
@@ -28,17 +93,6 @@ services:
       timeout: 3s
       retries: 10
 
-  caddy:
-    image: caddy:2
-    ports:
-      - "${CADDY_PORT:-8090}:80"
-    volumes:
-      - ./docker/Caddyfile:/etc/caddy/Caddyfile:ro
-      - caddydata:/data
-      - caddyconfig:/config
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
-
   pgadmin:
     image: dpage/pgadmin4:9.15.0
     container_name: emeq-pgadmin
@@ -64,6 +118,4 @@ services:
 volumes:
   pgdata:
   redisdata:
-  caddydata:
-  caddyconfig:
   pgadmindata:

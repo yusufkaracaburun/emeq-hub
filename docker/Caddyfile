@@ -1,8 +1,20 @@
+# Prod Caddyfile — FrankenPHP worker-mode, achter Cloudflare.
+# Cloudflare termineert TLS; de origin serveert plain HTTP op :80. Daarom
+# auto_https off en geen Let's Encrypt — CF levert het cert. Laravel detecteert
+# https via trusted proxies (bootstrap/app.php) + APP_URL=https://hub.emeq.nl.
 {
-    auto_https off
-    admin off
+	frankenphp {
+		worker {
+			file /app/public/frankenphp-worker.php
+		}
+	}
+	order php_server before file_server
+	auto_https off
 }
 
-http://hub.emeq.test:80, http://localhost:80 {
-    reverse_proxy host.docker.internal:8001
+:80 {
+	root /app/public
+	encode zstd br gzip
+
+	php_server
 }
