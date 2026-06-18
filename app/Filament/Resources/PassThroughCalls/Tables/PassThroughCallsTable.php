@@ -5,9 +5,10 @@ declare(strict_types=1);
 namespace App\Filament\Resources\PassThroughCalls\Tables;
 
 use App\Enums\Provider;
+use App\Filament\Resources\PassThroughCalls\PassThroughCallResource;
 use App\Models\Consumer;
+use App\Models\PassThroughCall;
 use App\Support\Filament\BadgeColor;
-use Filament\Actions\ViewAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
@@ -116,8 +117,6 @@ class PassThroughCallsTable
             ->emptyStateHeading('Nog geen pass-through-calls')
             ->emptyStateDescription('Zodra een consumer via de Hub een partner-API aanroept, verschijnt hier een auditrij.')
             ->emptyStateIcon('heroicon-o-arrows-right-left')
-            ->recordActions([
-                ViewAction::make(),
-            ]);
+            ->recordUrl(fn (PassThroughCall $record): string => PassThroughCallResource::getUrl('view', ['record' => $record]));
     }
 }

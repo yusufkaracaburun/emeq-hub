@@ -5,9 +5,10 @@ declare(strict_types=1);
 namespace App\Filament\Resources\InboundWebhookEvents\Tables;
 
 use App\Enums\Provider;
+use App\Filament\Resources\InboundWebhookEvents\InboundWebhookEventResource;
 use App\Models\Consumer;
+use App\Models\InboundWebhookEvent;
 use App\Support\Filament\BadgeColor;
-use Filament\Actions\ViewAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
@@ -103,8 +104,6 @@ class InboundWebhookEventsTable
             ->emptyStateHeading('Nog geen inbound webhook-events')
             ->emptyStateDescription('Zodra een partner (Mollie/Snelstart/Exact/Cashier) een webhook naar de Hub stuurt, verschijnt hier een metadata-auditrij.')
             ->emptyStateIcon('heroicon-o-inbox-arrow-down')
-            ->recordActions([
-                ViewAction::make(),
-            ]);
+            ->recordUrl(fn (InboundWebhookEvent $record): string => InboundWebhookEventResource::getUrl('view', ['record' => $record]));
     }
 }

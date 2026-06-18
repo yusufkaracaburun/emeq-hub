@@ -5,7 +5,8 @@ declare(strict_types=1);
 namespace App\Filament\Resources\Accounts\Tables;
 
 use App\Filament\Actions\StartOAuthFlowAction;
-use Filament\Actions\ViewAction;
+use App\Filament\Resources\Accounts\AccountResource;
+use App\Models\Account;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -42,9 +43,9 @@ class AccountsTable
                     ->searchable()
                     ->preload(),
             ])
+            ->recordUrl(fn (Account $record): string => AccountResource::getUrl('view', ['record' => $record]))
             ->recordActions([
-                ViewAction::make(),
-                StartOAuthFlowAction::forAccount(),
+                StartOAuthFlowAction::forAccount()->iconButton(),
             ]);
     }
 }

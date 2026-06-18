@@ -14,7 +14,6 @@ use App\Support\Filament\BadgeColor;
 use App\Support\ProviderCredentialDescriptor;
 use BackedEnum;
 use Filament\Actions\Action;
-use Filament\Actions\ViewAction;
 use Filament\Infolists\Components\KeyValueEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Notifications\Notification;
@@ -220,13 +219,14 @@ class ConnectionResource extends Resource
                         blank: fn (Builder $query): Builder => $query,
                     ),
             ])
+            ->recordUrl(fn (Connection $record): string => self::getUrl('view', ['record' => $record]))
             ->recordActions([
-                ViewAction::make(),
-                StartOAuthFlowAction::forConnection(),
-                ManageAccountingMappingAction::make(),
+                StartOAuthFlowAction::forConnection()->iconButton(),
+                ManageAccountingMappingAction::make()->iconButton(),
                 Action::make('revoke')
                     ->label('Revoke')
                     ->icon(Heroicon::OutlinedNoSymbol)
+                    ->iconButton()
                     ->color('danger')
                     ->requiresConfirmation()
                     ->modalHeading('Connection intrekken bij provider')

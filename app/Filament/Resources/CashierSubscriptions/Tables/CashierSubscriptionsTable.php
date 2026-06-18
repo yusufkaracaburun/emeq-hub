@@ -2,8 +2,8 @@
 
 namespace App\Filament\Resources\CashierSubscriptions\Tables;
 
+use App\Filament\Resources\CashierSubscriptions\CashierSubscriptionResource;
 use App\Support\Filament\BadgeColor;
-use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -57,9 +57,7 @@ class CashierSubscriptionsTable
                     ])
                     ->query(fn (Builder $query, array $data): Builder => self::applyStatusFilter($query, $data['value'] ?? null)),
             ])
-            ->recordActions([
-                ViewAction::make(),
-            ]);
+            ->recordUrl(fn (Subscription $record): string => CashierSubscriptionResource::getUrl('view', ['record' => $record]));
     }
 
     /**

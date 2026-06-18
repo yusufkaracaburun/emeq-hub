@@ -13,7 +13,6 @@ use App\Filament\Resources\AccountSubscriptions\Pages\ViewAccountSubscription;
 use App\Models\AccountSubscription;
 use BackedEnum;
 use Filament\Actions\Action;
-use Filament\Actions\ViewAction;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
@@ -160,11 +159,11 @@ class AccountSubscriptionResource extends Resource
                     ->label('Account')
                     ->relationship('account', 'external_id'),
             ])
+            ->recordUrl(fn (AccountSubscription $record): string => self::getUrl('view', ['record' => $record]))
             ->recordActions([
-                ViewAction::make(),
-                self::pauseAction(),
-                self::resumeAction(),
-                self::cancelAction(),
+                self::pauseAction()->iconButton(),
+                self::resumeAction()->iconButton(),
+                self::cancelAction()->iconButton(),
             ])
             ->toolbarActions([]);
     }

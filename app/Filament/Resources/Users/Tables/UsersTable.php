@@ -7,6 +7,7 @@ namespace App\Filament\Resources\Users\Tables;
 use App\Models\User;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\Select;
@@ -49,10 +50,11 @@ class UsersTable
                 //
             ])
             ->recordActions([
-                EditAction::make(),
+                EditAction::make()->iconButton(),
                 Action::make('assignRole')
                     ->label('Wijs rol toe')
                     ->icon('heroicon-o-shield-check')
+                    ->iconButton()
                     ->schema([
                         Select::make('role')
                             ->label('Rol')
@@ -104,6 +106,7 @@ class UsersTable
                             ->success()
                             ->send();
                     }),
+                DeleteAction::make()->iconButton(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

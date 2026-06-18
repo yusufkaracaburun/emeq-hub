@@ -12,9 +12,9 @@ use App\Sanctum\TokenAbilities;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Actions\ViewAction;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\TextInput;
@@ -160,10 +160,11 @@ class ConsumerResource extends Resource
             ->filters([
                 //
             ])
+            ->recordUrl(fn (Consumer $record): string => self::getUrl('view', ['record' => $record]))
             ->recordActions([
-                ViewAction::make(),
-                EditAction::make(),
-                self::issuePatAction(),
+                EditAction::make()->iconButton(),
+                self::issuePatAction()->iconButton(),
+                DeleteAction::make()->iconButton(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
