@@ -21,6 +21,8 @@ class ConnectionStatsWidget extends StatsOverviewWidget
 
     protected ?string $description = 'Aantal actieve OAuth- en credential-koppelingen per provider, inclusief eventueel revoked tokens.';
 
+    protected static ?int $sort = 2;
+
     protected function getStats(): array
     {
         $stats = [];
