@@ -10,6 +10,8 @@ use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use UnitEnum;
@@ -55,18 +57,29 @@ class ManageIntegrationSettings extends Page
 
     public function form(Schema $schema): Schema
     {
+        // Eén tab per partner-integratie — nieuwe provider = nieuwe Tab met zijn
+        // eigen *Settings-velden, zonder de bestaande integraties te raken.
         return $schema
             ->components([
-                Section::make('Exact Online')
-                    ->description('App-credentials uit het Exact App Center. Secrets worden encrypted opgeslagen.')
-                    ->columns(2)
-                    ->schema([
-                        TextInput::make('exact_client_id')->label('Client ID')->maxLength(255),
-                        TextInput::make('exact_redirect_uri')->label('Redirect URI')->maxLength(255),
-                        TextInput::make('exact_client_secret')->label('Client secret')->password()->revealable()->maxLength(255),
-                        TextInput::make('exact_webhook_secret')->label('Webhook secret')->password()->revealable()->maxLength(255),
-                        TextInput::make('exact_auth_base_url')->label('Auth base URL')->maxLength(255)->placeholder('https://start.exactonline.nl'),
-                        TextInput::make('exact_api_base_url')->label('API base URL')->maxLength(255)->placeholder('https://start.exactonline.nl'),
+                Tabs::make('Integraties')
+                    ->columnSpanFull()
+                    ->persistTabInQueryString()
+                    ->tabs([
+                        Tab::make('Exact Online')
+                            ->icon(Heroicon::OutlinedBuildingOffice2)
+                            ->schema([
+                                Section::make()
+                                    ->description('App-credentials uit het Exact App Center. Secrets worden encrypted opgeslagen.')
+                                    ->columns(2)
+                                    ->schema([
+                                        TextInput::make('exact_client_id')->label('Client ID')->maxLength(255),
+                                        TextInput::make('exact_redirect_uri')->label('Redirect URI')->maxLength(255),
+                                        TextInput::make('exact_client_secret')->label('Client secret')->password()->revealable()->maxLength(255),
+                                        TextInput::make('exact_webhook_secret')->label('Webhook secret')->password()->revealable()->maxLength(255),
+                                        TextInput::make('exact_auth_base_url')->label('Auth base URL')->maxLength(255)->placeholder('https://start.exactonline.nl'),
+                                        TextInput::make('exact_api_base_url')->label('API base URL')->maxLength(255)->placeholder('https://start.exactonline.nl'),
+                                    ]),
+                            ]),
                     ]),
             ])
             ->statePath('data');
