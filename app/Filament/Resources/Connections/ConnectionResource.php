@@ -223,39 +223,48 @@ class ConnectionResource extends Resource
             ->recordActions([
                 StartOAuthFlowAction::forConnection()->iconButton(),
                 ManageAccountingMappingAction::make()->iconButton(),
-                Action::make('revoke')
-                    ->label('Revoke')
-                    ->icon(Heroicon::OutlinedNoSymbol)
-                    ->iconButton()
-                    ->color('danger')
-                    ->requiresConfirmation()
-                    ->modalHeading('Connection intrekken bij provider')
-                    ->modalDescription('Dit roept de upstream OAuth-revoke aan en zet revoked_at lokaal. Niet ongedaan te maken.')
-                    ->visible(function (Connection $record): bool {
-                        if ($record->revoked_at !== null) {
-                            return false;
-                        }
-
-                        try {
-                            $descriptor = ProviderCredentialDescriptor::for($record->provider->value);
-                        } catch (\InvalidArgumentException) {
-                            return false;
-                        }
-
-                        return $descriptor->oauthFlowKey !== null;
-                    })
-                    ->action(function (Connection $record): void {
-                        app(OAuthFlowRegistry::class)
-                            ->for($record->provider->value)
-                            ->revoke($record);
-
-                        Notification::make()
-                            ->title('Connection ingetrokken')
-                            ->success()
-                            ->send();
-                    }),
+                self::revokeAction()->iconButton(),
             ])
             ->toolbarActions([]);
+    }
+
+    /**
+     * Revoke-actie — gedeeld door de lijst-rij (icoon) en de Connection-detail-header.
+     * Roept de upstream OAuth-revoke aan en zet revoked_at lokaal; alleen zichtbaar
+     * voor een nog-actieve OAuth-connection.
+     */
+    public static function revokeAction(): Action
+    {
+        return Action::make('revoke')
+            ->label('Revoke')
+            ->icon(Heroicon::OutlinedNoSymbol)
+            ->color('danger')
+            ->requiresConfirmation()
+            ->modalHeading('Connection intrekken bij provider')
+            ->modalDescription('Dit roept de upstream OAuth-revoke aan en zet revoked_at lokaal. Niet ongedaan te maken.')
+            ->visible(function (Connection $record): bool {
+                if ($record->revoked_at !== null) {
+                    return false;
+                }
+
+                try {
+                    $descriptor = ProviderCredentialDescriptor::for($record->provider->value);
+                } catch (\InvalidArgumentException) {
+                    return false;
+                }
+
+                return $descriptor->oauthFlowKey !== null;
+            })
+            ->action(function (Connection $record): void {
+                app(OAuthFlowRegistry::class)
+                    ->for($record->provider->value)
+                    ->revoke($record);
+
+                Notification::make()
+                    ->title('Connection ingetrokken')
+                    ->success()
+                    ->send();
+            });
     }
 
     public static function getRelations(): array

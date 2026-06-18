@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\Connections\Pages;
 
+use App\Filament\Actions\ManageAccountingMappingAction;
+use App\Filament\Actions\StartOAuthFlowAction;
 use App\Filament\Resources\Connections\ConnectionResource;
 use Filament\Resources\Pages\ViewRecord;
 
@@ -11,7 +13,11 @@ class ViewConnection extends ViewRecord
 
     protected function getHeaderActions(): array
     {
-        // Read-only: geen Edit/Delete. Revoke leeft als row-action in de table (Task 2).
-        return [];
+        // Dezelfde acties als de lijst-rij, nu ook vanaf de detailpagina bereikbaar.
+        return [
+            StartOAuthFlowAction::forConnection(),
+            ManageAccountingMappingAction::make(),
+            ConnectionResource::revokeAction(),
+        ];
     }
 }
