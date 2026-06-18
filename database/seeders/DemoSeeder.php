@@ -6,8 +6,8 @@ use App\Models\Account;
 use App\Models\AccountSubscription;
 use App\Models\Connection;
 use App\Models\Consumer;
+use App\Models\InboundWebhookEvent;
 use App\Models\PassThroughCall;
-use App\Models\WebhookCall;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -53,7 +53,7 @@ class DemoSeeder extends Seeder
 
         $this->seedAccountSubscriptions();
         $this->seedCashierSubscriptions($consumers);
-        $this->seedWebhookCalls($consumers);
+        $this->seedInboundWebhookEvents($consumers);
         $this->seedPassThroughCalls();
 
         $this->command?->info('DemoSeeder: '.implode(', ', array_map(fn (Consumer $c) => $c->slug, $consumers)).' geseed.');
@@ -98,7 +98,7 @@ class DemoSeeder extends Seeder
         AccountSubscription::whereIn('account_id', $accountIds)->delete();
         Connection::whereIn('account_id', $accountIds)->delete();
         PassThroughCall::whereIn('consumer_id', $consumerIds)->delete();
-        WebhookCall::whereIn('consumer_id', $consumerIds)->delete();
+        InboundWebhookEvent::whereIn('consumer_id', $consumerIds)->delete();
         DB::table('subscriptions')
             ->whereIn('owner_id', $consumerIds)
             ->where('owner_type', Consumer::class)
@@ -201,28 +201,25 @@ class DemoSeeder extends Seeder
     }
 
     /** @param array<int, Consumer> $consumers */
-    private function seedWebhookCalls(array $consumers): void
+    private function seedInboundWebhookEvents(array $consumers): void
     {
-        $providers = ['mollie', 'snelstart', 'cashier'];
-        $statuses = ['processed', 'pending', 'failed'];
-        $directions = ['incoming', 'outgoing'];
+        // Metadata-only (AVG): geen payload/headers. Mix van providers + outcomes
+        // voor de incident-triage-UI.
+        $rows = [
+            ['provider' => 'exact', 'topic' => 'GeneralJournalEntries', 'action' => 'Update', 'status' => 200, 'outcome' => 'processed', 'fanout_status' => 'dispatched'],
+            ['provider' => 'mollie', 'topic' => null, 'action' => null, 'status' => 202, 'outcome' => 'processed', 'fanout_status' => 'dispatched'],
+            ['provider' => 'snelstart', 'topic' => 'Relatie.Created', 'action' => null, 'status' => 200, 'outcome' => 'unknown_tenant', 'fanout_status' => null],
+            ['provider' => 'cashier', 'topic' => null, 'action' => null, 'status' => 500, 'outcome' => 'misconfigured', 'fanout_status' => null],
+        ];
 
         foreach ($consumers as $consumer) {
-            for ($i = 0; $i < 4; $i++) {
-                $provider = $providers[$i % count($providers)];
-                $direction = $directions[$i % count($directions)];
-                $status = $statuses[$i % count($statuses)];
-
-                WebhookCall::create([
-                    'name' => "{$provider}-webhook",
-                    'url' => "https://hub.emeq.test/webhooks/{$provider}/{$consumer->slug}",
-                    'headers' => json_encode(['User-Agent' => 'Demo/1.0', 'Content-Type' => 'application/json']),
-                    'payload' => ['event' => 'demo.test', 'consumer' => $consumer->slug, 'idx' => $i],
-                    'exception' => $status === 'failed' ? 'DemoException: simulated failure' : null,
-                    'direction' => $direction,
-                    'provider' => $provider,
+            foreach ($rows as $i => $row) {
+                InboundWebhookEvent::create([
+                    ...$row,
+                    'event_id' => $row['outcome'] === 'duplicate' ? null : "demo-{$consumer->id}-{$i}",
                     'consumer_id' => $consumer->id,
-                    'status' => $status,
+                    'request_fingerprint' => mb_substr(hash('sha256', "demo-{$consumer->id}-{$i}"), 0, 12),
+                    'received_at' => now()->subMinutes($i),
                 ]);
             }
         }

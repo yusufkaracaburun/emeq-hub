@@ -129,7 +129,7 @@ class StoreDocumentTest extends TestCase
             'direction' => 'outbound',
             'provider' => 'exact',
             'method' => 'POST',
-            'path' => 'accounting/documents:sales_invoice',
+            'path' => '/v1/accounting/documents',
             'status' => 201,
         ]);
     }
@@ -316,7 +316,7 @@ class StoreDocumentTest extends TestCase
 
         $this->assertDatabaseHas('pass_through_calls', [
             'provider' => 'exact',
-            'path' => 'accounting/documents:purchase_invoice',
+            'path' => '/v1/accounting/documents',
             'status' => 201,
         ]);
     }
@@ -357,7 +357,7 @@ class StoreDocumentTest extends TestCase
 
         $this->assertDatabaseHas('pass_through_calls', [
             'provider' => 'exact',
-            'path' => 'accounting/documents:income',
+            'path' => '/v1/accounting/documents',
             'status' => 201,
         ]);
     }

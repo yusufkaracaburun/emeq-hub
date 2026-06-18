@@ -19,7 +19,7 @@ use Tests\TestCase;
  * Permission-mapping (locked per 10-CONTEXT.md D-1):
  *  - consumers / accounts       → manage-consumers
  *  - connections                → manage-connections
- *  - webhook-calls              → view-webhooks
+ *  - inbound-webhook-events     → view-webhooks
  *  - account-subscriptions      → view-account-subscriptions
  *  - cashier-subscriptions      → view-billing
  *
@@ -112,21 +112,21 @@ class ResourceCanAccessTest extends TestCase
         $this->actingAs($user)->get('/admin/accounts')->assertOk();
     }
 
-    // ---------------- WebhookCallResource (view-webhooks) ----------------
+    // ---------------- InboundWebhookEventResource (view-webhooks) ----------------
 
-    public function test_webhook_calls_returns_403_for_staff_without_permission(): void
+    public function test_inbound_webhook_events_returns_403_for_staff_without_permission(): void
     {
         $user = $this->staffUser();
 
-        $this->actingAs($user)->get('/admin/webhook-calls')->assertForbidden();
+        $this->actingAs($user)->get('/admin/inbound-webhook-events')->assertForbidden();
     }
 
-    public function test_webhook_calls_returns_200_for_staff_with_permission(): void
+    public function test_inbound_webhook_events_returns_200_for_staff_with_permission(): void
     {
         $user = $this->staffUser();
         $user->givePermissionTo('view-webhooks');
 
-        $this->actingAs($user)->get('/admin/webhook-calls')->assertOk();
+        $this->actingAs($user)->get('/admin/inbound-webhook-events')->assertOk();
     }
 
     // ---------------- AccountSubscriptionResource (view-account-subscriptions) ----------------

@@ -14,6 +14,9 @@ return new class extends Migration
             $table->string('slug')->unique();
             $table->string('webhook_callback_url')->nullable();
             $table->text('webhook_callback_secret')->nullable();
+            // Return-to-consumer na OAuth-connect: geregistreerde app-base
+            // (allowlist-anker + default-terugkeer).
+            $table->string('app_url')->nullable();
             $table->timestamps();
         });
     }

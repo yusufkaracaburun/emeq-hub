@@ -226,7 +226,7 @@ class AsyncStoreDocumentTest extends TestCase
         $this->assertDatabaseHas('pass_through_calls', [
             'direction' => 'outbound',
             'provider' => 'exact',
-            'path' => 'accounting/documents:sales_invoice',
+            'path' => '/v1/accounting/documents',
             'status' => 201,
         ]);
     }

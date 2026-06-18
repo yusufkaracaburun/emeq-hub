@@ -6,13 +6,13 @@ use App\Jobs\ForwardMollieWebhookToConsumer;
 use App\Models\Account;
 use App\Models\Connection;
 use App\Models\Consumer;
+use App\Models\InboundWebhookEvent;
 use Emeq\MollieApi\Exceptions\AuthenticationException;
 use Emeq\MollieApi\Exceptions\NotFoundException;
 use Emeq\MollieApi\Mollie;
 use Emeq\MollieApi\Webhooks\MollieWebhookSignature;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Bus;
-use Spatie\WebhookClient\Models\WebhookCall;
 use Tests\TestCase;
 use Throwable;
 
@@ -49,10 +49,10 @@ class MollieWebhookAntiSpoofingTest extends TestCase
         $response->assertJsonPath('error', 'resource_ownership_failed');
         Bus::assertNotDispatched(ForwardMollieWebhookToConsumer::class);
 
-        $row = WebhookCall::query()->latest('id')->first();
-        $this->assertNotNull($row);
-        $this->assertNotNull($row->exception);
-        $this->assertStringStartsWith('spoof_check_failed', $row->exception);
+        $event = InboundWebhookEvent::query()->latest('id')->first();
+        $this->assertNotNull($event);
+        $this->assertSame('invalid_signature', $event->outcome);
+        $this->assertSame(400, $event->status);
     }
 
     public function test_webhook_for_id_that_returns_auth_error_from_mollie_returns_400(): void
@@ -76,9 +76,10 @@ class MollieWebhookAntiSpoofingTest extends TestCase
         $response->assertJsonPath('error', 'resource_ownership_failed');
         Bus::assertNotDispatched(ForwardMollieWebhookToConsumer::class);
 
-        $row = WebhookCall::query()->latest('id')->first();
-        $this->assertNotNull($row);
-        $this->assertStringStartsWith('spoof_check_failed', $row->exception);
+        $event = InboundWebhookEvent::query()->latest('id')->first();
+        $this->assertNotNull($event);
+        $this->assertSame('invalid_signature', $event->outcome);
+        $this->assertSame(400, $event->status);
     }
 
     private function makeMollieConnection(): Connection

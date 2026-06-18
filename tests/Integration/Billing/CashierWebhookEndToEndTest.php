@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Tests\Integration\Billing;
 
+use App\Models\InboundWebhookEvent;
 use Mollie\Api\MollieApiClient;
 use PHPUnit\Framework\Attributes\Group;
-use Spatie\WebhookClient\Models\WebhookCall;
 use Tests\Integration\IntegrationTestCase;
 
 /**
@@ -55,13 +55,11 @@ class CashierWebhookEndToEndTest extends IntegrationTestCase
             $response->content(),
         ));
 
-        // Belangrijkste invariant: de 06-06-guard heeft GEEN
-        // webhook_secret_not_configured-audit-rij geschreven omdat de secret
-        // wel degelijk was gezet.
-        $failedRows = WebhookCall::query()
-            ->where('name', 'cashier')
-            ->get()
-            ->filter(fn (WebhookCall $row): bool => $row->exception === 'webhook_secret_not_configured')
+        // Belangrijkste invariant: de 06-06-guard heeft GEEN misconfigured-
+        // audit-rij geschreven omdat de secret wel degelijk was gezet.
+        $failedRows = InboundWebhookEvent::query()
+            ->where('provider', 'cashier')
+            ->where('outcome', 'misconfigured')
             ->count();
         $this->assertSame(0, $failedRows);
     }
@@ -80,12 +78,12 @@ class CashierWebhookEndToEndTest extends IntegrationTestCase
         $response->assertStatus(500);
         $response->assertJsonPath('error', 'webhook_misconfigured');
 
-        $auditRow = WebhookCall::query()
-            ->where('name', 'cashier')
+        $auditRow = InboundWebhookEvent::query()
+            ->where('provider', 'cashier')
             ->latest('id')
             ->first();
 
         $this->assertNotNull($auditRow);
-        $this->assertSame('webhook_secret_not_configured', $auditRow->exception);
+        $this->assertSame('misconfigured', $auditRow->outcome);
     }
 }

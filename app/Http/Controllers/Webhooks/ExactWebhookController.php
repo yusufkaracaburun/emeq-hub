@@ -8,7 +8,7 @@ use App\Enums\Provider;
 use App\Http\Controllers\Controller;
 use App\Jobs\Webhooks\ForwardExactWebhookToConsumerJob;
 use App\Models\Connection;
-use App\Models\PassThroughCall;
+use App\Webhooks\InboundWebhookRecorder;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -16,21 +16,20 @@ use Symfony\Component\HttpFoundation\Response;
  * Exact Online webhook-ingress.
  *
  * Aangeroepen ná `verify.exact.signature` (SDK-side middleware) — de HashCode is
- * hier al gevalideerd. Spiegelt SnelstartWebhookController: parse payload, check
- * idempotency, resolve de Connection op de division (`Content.Division`), schrijf
- * audit en dispatch de async fan-out.
+ * hier al gevalideerd. Parse de Content-node, check idempotency, resolve de
+ * Connection op de division (`Content.Division`), audit via de provider-agnostische
+ * InboundWebhookRecorder en dispatch de async fan-out.
  *
  * Exact-specifiek:
  *  - Bij subscribe POST't Exact direct een **lege-body-validatieping** die de
  *    middleware doorlaat → hier 200, geen audit/fan-out (anders faalt de subscription).
  *  - Exact draagt geen natuurlijke notification-id; de idempotency-sleutel is een
  *    hash van de raw body (identiek op een Exact-retry → dedup).
- *  - Onbekende division → 200 + NULL-tenant audit (anti-retry-storm; Exact hertried
- *    non-2xx tot 10× over ~34u).
+ *  - Onbekende division → 200 + unknown_tenant-audit (anti-retry-storm).
  */
 final class ExactWebhookController extends Controller
 {
-    private const PATH = '/webhooks/exact';
+    public function __construct(private readonly InboundWebhookRecorder $recorder) {}
 
     public function __invoke(Request $request): Response
     {
@@ -51,26 +50,17 @@ final class ExactWebhookController extends Controller
             : null;
 
         if ($division === null || $division === '') {
-            $this->auditMalformed($request, $rawBody);
+            $this->recorder->record(Provider::Exact->value, $request, 400, InboundWebhookRecorder::OUTCOME_MALFORMED);
 
             return response()->json(['error' => 'malformed_payload'], 400);
         }
 
+        $topic = isset($content['Topic']) && is_string($content['Topic']) ? $content['Topic'] : null;
+        $action = isset($content['Action']) && is_string($content['Action']) ? $content['Action'] : null;
         $eventId = $this->deriveEventId($rawBody);
 
-        if ($this->isDuplicateEvent($eventId)) {
-            PassThroughCall::create([
-                'direction' => 'inbound',
-                'provider' => Provider::Exact->value,
-                'method' => $request->getMethod(),
-                'path' => self::PATH,
-                'status' => 200,
-                'duration_ms' => 0,
-                'request_fingerprint' => $this->fingerprint($rawBody),
-                // event_id bewust NULL — anders triggert de (provider, event_id)
-                // unique-index. upstream_error houdt forensics.
-                'upstream_error' => 'duplicate_event',
-            ]);
+        if ($this->recorder->isDuplicate(Provider::Exact->value, $eventId)) {
+            $this->recorder->record(Provider::Exact->value, $request, 200, InboundWebhookRecorder::OUTCOME_DUPLICATE, $eventId, $topic, $action);
 
             return response('', 200);
         }
@@ -82,34 +72,22 @@ final class ExactWebhookController extends Controller
             ->first();
 
         if ($connection === null) {
-            PassThroughCall::create([
-                'direction' => 'inbound',
-                'provider' => Provider::Exact->value,
-                'method' => $request->getMethod(),
-                'path' => self::PATH,
-                'status' => 200,
-                'duration_ms' => 0,
-                'request_fingerprint' => $this->fingerprint($rawBody),
-                'event_id' => $eventId,
-                'upstream_error' => 'unknown_division',
-            ]);
+            $this->recorder->record(Provider::Exact->value, $request, 200, InboundWebhookRecorder::OUTCOME_UNKNOWN_TENANT, $eventId, $topic, $action);
 
             return response('', 200);
         }
 
-        PassThroughCall::create([
-            'direction' => 'inbound',
-            'consumer_id' => $connection->account->consumer_id,
-            'account_id' => $connection->account_id,
-            'connection_id' => $connection->id,
-            'provider' => Provider::Exact->value,
-            'method' => $request->getMethod(),
-            'path' => self::PATH,
-            'status' => 200,
-            'duration_ms' => 0,
-            'request_fingerprint' => $this->fingerprint($rawBody),
-            'event_id' => $eventId,
-        ]);
+        $this->recorder->record(
+            Provider::Exact->value,
+            $request,
+            200,
+            InboundWebhookRecorder::OUTCOME_PROCESSED,
+            $eventId,
+            $topic,
+            $action,
+            $connection,
+            InboundWebhookRecorder::FANOUT_DISPATCHED,
+        );
 
         ForwardExactWebhookToConsumerJob::dispatch($connection, $payload, $eventId);
 
@@ -123,33 +101,5 @@ final class ExactWebhookController extends Controller
     private function deriveEventId(string $rawBody): string
     {
         return hash('sha256', $rawBody);
-    }
-
-    private function isDuplicateEvent(string $eventId): bool
-    {
-        return PassThroughCall::query()
-            ->inbound()
-            ->where('provider', Provider::Exact->value)
-            ->where('event_id', $eventId)
-            ->exists();
-    }
-
-    private function auditMalformed(Request $request, string $rawBody): void
-    {
-        PassThroughCall::create([
-            'direction' => 'inbound',
-            'provider' => Provider::Exact->value,
-            'method' => $request->getMethod(),
-            'path' => self::PATH,
-            'status' => 400,
-            'duration_ms' => 0,
-            'request_fingerprint' => $this->fingerprint($rawBody),
-            'upstream_error' => 'malformed_payload',
-        ]);
-    }
-
-    private function fingerprint(string $rawBody): ?string
-    {
-        return $rawBody === '' ? null : mb_substr(hash('sha256', $rawBody), 0, 12);
     }
 }

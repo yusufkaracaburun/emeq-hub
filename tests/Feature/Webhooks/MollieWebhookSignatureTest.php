@@ -6,6 +6,7 @@ use App\Jobs\ForwardMollieWebhookToConsumer;
 use App\Models\Account;
 use App\Models\Connection;
 use App\Models\Consumer;
+use App\Models\InboundWebhookEvent;
 use Emeq\MollieApi\Mollie;
 use Emeq\MollieApi\Webhooks\MollieWebhookSignature;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -13,7 +14,6 @@ use Illuminate\Support\Facades\Bus;
 use Mollie\Api\Fake\MockResponse;
 use Mollie\Api\Http\Requests\GetPaymentRequest;
 use Mollie\Api\MollieApiClient;
-use Spatie\WebhookClient\Models\WebhookCall;
 use Tests\TestCase;
 use Throwable;
 
@@ -48,8 +48,14 @@ class MollieWebhookSignatureTest extends TestCase
 
         $response->assertStatus(202);
         $response->assertJsonPath('status', 'accepted');
-        $this->assertDatabaseHas('webhook_calls', ['name' => 'mollie']);
-        $this->assertSame(1, WebhookCall::query()->whereNull('exception')->count());
+
+        $event = InboundWebhookEvent::query()->latest('id')->first();
+        $this->assertNotNull($event);
+        $this->assertSame('mollie', $event->provider);
+        $this->assertSame('processed', $event->outcome);
+        $this->assertSame(202, $event->status);
+        $this->assertNull($event->event_id);
+        $this->assertSame($connection->id, $event->connection_id);
         Bus::assertDispatched(ForwardMollieWebhookToConsumer::class);
     }
 
@@ -72,10 +78,10 @@ class MollieWebhookSignatureTest extends TestCase
         $response->assertJsonPath('error', 'invalid_signature');
         Bus::assertNotDispatched(ForwardMollieWebhookToConsumer::class);
 
-        $row = WebhookCall::query()->latest('id')->first();
-        $this->assertNotNull($row);
-        $this->assertNotNull($row->exception);
-        $this->assertStringStartsWith('invalid_signature', $row->exception);
+        $event = InboundWebhookEvent::query()->latest('id')->first();
+        $this->assertNotNull($event);
+        $this->assertSame('invalid_signature', $event->outcome);
+        $this->assertSame(400, $event->status);
     }
 
     public function test_missing_signature_header_returns_400_with_missing_signature(): void
@@ -96,9 +102,10 @@ class MollieWebhookSignatureTest extends TestCase
         $response->assertJsonPath('error', 'missing_signature');
         Bus::assertNotDispatched(ForwardMollieWebhookToConsumer::class);
 
-        $row = WebhookCall::query()->latest('id')->first();
-        $this->assertNotNull($row);
-        $this->assertSame('missing_signature_header', $row->exception);
+        $event = InboundWebhookEvent::query()->latest('id')->first();
+        $this->assertNotNull($event);
+        $this->assertSame('invalid_signature', $event->outcome);
+        $this->assertSame(400, $event->status);
     }
 
     public function test_unknown_connection_id_returns_410_gone(): void
@@ -119,9 +126,10 @@ class MollieWebhookSignatureTest extends TestCase
         $response->assertJsonPath('error', 'connection_gone');
         Bus::assertNotDispatched(ForwardMollieWebhookToConsumer::class);
 
-        $row = WebhookCall::query()->latest('id')->first();
-        $this->assertNotNull($row);
-        $this->assertSame('unknown_or_revoked_connection', $row->exception);
+        $event = InboundWebhookEvent::query()->latest('id')->first();
+        $this->assertNotNull($event);
+        $this->assertSame('unknown_tenant', $event->outcome);
+        $this->assertSame(410, $event->status);
     }
 
     public function test_revoked_connection_returns_410_gone(): void
@@ -166,9 +174,11 @@ class MollieWebhookSignatureTest extends TestCase
         $response->assertJsonPath('error', 'missing_id');
         Bus::assertNotDispatched(ForwardMollieWebhookToConsumer::class);
 
-        $row = WebhookCall::query()->latest('id')->first();
-        $this->assertNotNull($row);
-        $this->assertSame('missing_payload_id', $row->exception);
+        $event = InboundWebhookEvent::query()->latest('id')->first();
+        $this->assertNotNull($event);
+        $this->assertSame('malformed', $event->outcome);
+        $this->assertSame(400, $event->status);
+        $this->assertSame($connection->id, $event->connection_id);
     }
 
     public function test_null_platform_secret_returns_500_and_does_not_dispatch(): void
@@ -193,9 +203,10 @@ class MollieWebhookSignatureTest extends TestCase
         $response->assertJsonPath('error', 'webhook_misconfigured');
         Bus::assertNotDispatched(ForwardMollieWebhookToConsumer::class);
 
-        $row = WebhookCall::query()->latest('id')->first();
-        $this->assertNotNull($row);
-        $this->assertSame('webhook_secret_not_configured', $row->exception);
+        $event = InboundWebhookEvent::query()->latest('id')->first();
+        $this->assertNotNull($event);
+        $this->assertSame('misconfigured', $event->outcome);
+        $this->assertSame(500, $event->status);
     }
 
     public function test_empty_string_platform_secret_returns_500_and_does_not_dispatch(): void
@@ -219,9 +230,10 @@ class MollieWebhookSignatureTest extends TestCase
         $response->assertJsonPath('error', 'webhook_misconfigured');
         Bus::assertNotDispatched(ForwardMollieWebhookToConsumer::class);
 
-        $row = WebhookCall::query()->latest('id')->first();
-        $this->assertNotNull($row);
-        $this->assertSame('webhook_secret_not_configured', $row->exception);
+        $event = InboundWebhookEvent::query()->latest('id')->first();
+        $this->assertNotNull($event);
+        $this->assertSame('misconfigured', $event->outcome);
+        $this->assertSame(500, $event->status);
     }
 
     private function makeMollieConnection(): Connection

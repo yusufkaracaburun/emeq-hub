@@ -22,6 +22,8 @@ return new class extends Migration
             $table->json('scopes')->nullable();
             $table->string('oauth_state', 64)->nullable();
             $table->timestamp('oauth_state_expires_at')->nullable();
+            // Per-request gevalideerde terugkeer-URL (gezet bij init, gelezen door de landing).
+            $table->string('oauth_return_url')->nullable();
 
             // Key-based-shape (Snelstart) — subscription_id + administratie_id zijn geen secrets (tenant-UUIDs)
             $table->text('client_key')->nullable();

@@ -85,7 +85,9 @@ final readonly class AccountingSyncRunner
             'connection_id' => $connection->getKey(),
             'provider' => $provider,
             'method' => 'POST',
-            'path' => 'accounting/documents:'.$document->type->value,
+            // Genormaliseerd endpoint-pad (leading /, conform de andere audit-paden).
+            // De doc-type-suffix is verwijderd — hoort niet in `path`.
+            'path' => '/v1/accounting/documents',
             'status' => $status,
             'duration_ms' => (int) round((microtime(true) - $start) * 1000),
             'request_fingerprint' => substr(hash('sha256', $document->externalId), 0, 12),

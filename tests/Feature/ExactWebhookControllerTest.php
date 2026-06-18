@@ -8,7 +8,7 @@ use App\Jobs\Webhooks\ForwardExactWebhookToConsumerJob;
 use App\Models\Account;
 use App\Models\Connection;
 use App\Models\Consumer;
-use App\Models\PassThroughCall;
+use App\Models\InboundWebhookEvent;
 use Emeq\ExactApi\Webhooks\ExactWebhookSignature;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Bus;
@@ -48,16 +48,18 @@ class ExactWebhookControllerTest extends TestCase
         $response->assertStatus(200);
         $response->assertNoContent(200);
 
-        $audit = PassThroughCall::query()->inbound()->sole();
-        $this->assertSame('exact', $audit->provider);
-        $this->assertSame('/webhooks/exact', $audit->path);
-        $this->assertSame(200, $audit->status);
-        $this->assertNotNull($audit->event_id);
-        $this->assertSame($consumer->id, $audit->consumer_id);
-        $this->assertSame($account->id, $audit->account_id);
-        $this->assertSame($connection->id, $audit->connection_id);
-        $this->assertNull($audit->upstream_error);
-        $this->assertNotNull($audit->request_fingerprint);
+        $event = InboundWebhookEvent::query()->sole();
+        $this->assertSame('exact', $event->provider);
+        $this->assertSame('GeneralJournalEntries', $event->topic);
+        $this->assertSame('Update', $event->action);
+        $this->assertSame('processed', $event->outcome);
+        $this->assertSame(200, $event->status);
+        $this->assertSame('dispatched', $event->fanout_status);
+        $this->assertNotNull($event->event_id);
+        $this->assertSame($consumer->id, $event->consumer_id);
+        $this->assertSame($account->id, $event->account_id);
+        $this->assertSame($connection->id, $event->connection_id);
+        $this->assertNotNull($event->request_fingerprint);
 
         Bus::assertDispatched(
             ForwardExactWebhookToConsumerJob::class,
@@ -78,7 +80,7 @@ class ExactWebhookControllerTest extends TestCase
         );
 
         $response->assertStatus(200);
-        $this->assertSame(0, PassThroughCall::query()->count());
+        $this->assertSame(0, InboundWebhookEvent::query()->count());
         Bus::assertNothingDispatched();
     }
 
@@ -90,12 +92,12 @@ class ExactWebhookControllerTest extends TestCase
 
         $response->assertStatus(200);
 
-        $audit = PassThroughCall::query()->inbound()->sole();
-        $this->assertNull($audit->consumer_id);
-        $this->assertNull($audit->account_id);
-        $this->assertNull($audit->connection_id);
-        $this->assertSame('unknown_division', $audit->upstream_error);
-        $this->assertNotNull($audit->event_id);
+        $event = InboundWebhookEvent::query()->sole();
+        $this->assertNull($event->consumer_id);
+        $this->assertNull($event->account_id);
+        $this->assertNull($event->connection_id);
+        $this->assertSame('unknown_tenant', $event->outcome);
+        $this->assertNotNull($event->event_id);
 
         Bus::assertNothingDispatched();
     }
@@ -117,14 +119,14 @@ class ExactWebhookControllerTest extends TestCase
         $this->postSignedWebhook($content)->assertStatus(200);
         $this->postSignedWebhook($content)->assertStatus(200);
 
-        $audits = PassThroughCall::query()->inbound()->orderBy('id')->get();
-        $this->assertCount(2, $audits);
+        $events = InboundWebhookEvent::query()->orderBy('id')->get();
+        $this->assertCount(2, $events);
 
-        $this->assertNotNull($audits[0]->event_id);
-        $this->assertNull($audits[0]->upstream_error);
+        $this->assertSame('processed', $events[0]->outcome);
+        $this->assertNotNull($events[0]->event_id);
 
-        $this->assertNull($audits[1]->event_id, 'Duplicate-rij heeft event_id NULL om de unique-index niet te triggeren');
-        $this->assertSame('duplicate_event', $audits[1]->upstream_error);
+        $this->assertSame('duplicate', $events[1]->outcome);
+        $this->assertNull($events[1]->event_id, 'Duplicate-rij heeft event_id NULL om de unique-index niet te triggeren');
 
         Bus::assertDispatchedTimes(ForwardExactWebhookToConsumerJob::class, 1);
     }
@@ -133,15 +135,15 @@ class ExactWebhookControllerTest extends TestCase
     {
         Bus::fake([ForwardExactWebhookToConsumerJob::class]);
 
-        $response = $this->postSignedWebhook(['Topic' => 'FinancialTransactions', 'Action' => 'UPDATE']);
+        $response = $this->postSignedWebhook(['Topic' => 'GeneralJournalEntries', 'Action' => 'Update']);
 
         $response->assertStatus(400);
         $response->assertJson(['error' => 'malformed_payload']);
 
-        $audit = PassThroughCall::query()->inbound()->sole();
-        $this->assertSame(400, $audit->status);
-        $this->assertSame('malformed_payload', $audit->upstream_error);
-        $this->assertNull($audit->consumer_id);
+        $event = InboundWebhookEvent::query()->sole();
+        $this->assertSame(400, $event->status);
+        $this->assertSame('malformed', $event->outcome);
+        $this->assertNull($event->consumer_id);
 
         Bus::assertNothingDispatched();
     }
@@ -161,7 +163,7 @@ class ExactWebhookControllerTest extends TestCase
         );
 
         $response->assertStatus(401);
-        $this->assertSame(0, PassThroughCall::query()->count());
+        $this->assertSame(0, InboundWebhookEvent::query()->count());
         Bus::assertNothingDispatched();
     }
 
@@ -184,10 +186,10 @@ class ExactWebhookControllerTest extends TestCase
 
         $response->assertStatus(200);
 
-        $audit = PassThroughCall::query()->inbound()->sole();
-        $this->assertNull($audit->consumer_id);
-        $this->assertNull($audit->connection_id);
-        $this->assertSame('unknown_division', $audit->upstream_error);
+        $event = InboundWebhookEvent::query()->sole();
+        $this->assertNull($event->consumer_id);
+        $this->assertNull($event->connection_id);
+        $this->assertSame('unknown_tenant', $event->outcome);
 
         Bus::assertNothingDispatched();
     }
@@ -198,19 +200,16 @@ class ExactWebhookControllerTest extends TestCase
     private function content(int|string $division = self::DIVISION): array
     {
         return [
-            'Topic' => 'FinancialTransactions',
-            'Action' => 'UPDATE',
+            'Topic' => 'GeneralJournalEntries',
+            'Action' => 'Update',
             'Division' => (int) $division,
             'Key' => '11111111-2222-3333-4444-555555555555',
-            'ExactOnlineEndpoint' => "/api/v1/{$division}/financialtransaction/Transactions",
+            'ExactOnlineEndpoint' => "/api/v1/{$division}/generaljournalentry/GeneralJournalEntries",
             'EventCreatedOn' => '/Date(1781791000000)/',
         ];
     }
 
     /**
-     * Bouwt een Exact-notificatie waarvan de HashCode over de letterlijke
-     * Content-substring is berekend (zoals Exact zelf doet).
-     *
      * @param  array<string, mixed>  $content
      */
     private function postSignedWebhook(array $content): TestResponse

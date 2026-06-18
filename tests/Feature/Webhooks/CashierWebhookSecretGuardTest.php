@@ -2,8 +2,8 @@
 
 namespace Tests\Feature\Webhooks;
 
+use App\Models\InboundWebhookEvent;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Spatie\WebhookClient\Models\WebhookCall;
 use Tests\TestCase;
 
 class CashierWebhookSecretGuardTest extends TestCase
@@ -19,10 +19,11 @@ class CashierWebhookSecretGuardTest extends TestCase
         $response->assertStatus(500);
         $response->assertJsonPath('error', 'webhook_misconfigured');
 
-        $row = WebhookCall::query()->latest('id')->first();
-        $this->assertNotNull($row);
-        $this->assertSame('cashier', $row->name);
-        $this->assertSame('webhook_secret_not_configured', $row->exception);
+        $event = InboundWebhookEvent::query()->latest('id')->first();
+        $this->assertNotNull($event);
+        $this->assertSame('cashier', $event->provider);
+        $this->assertSame('misconfigured', $event->outcome);
+        $this->assertSame(500, $event->status);
     }
 
     public function test_null_secret_returns_500_and_writes_audit_row(): void
@@ -34,10 +35,11 @@ class CashierWebhookSecretGuardTest extends TestCase
         $response->assertStatus(500);
         $response->assertJsonPath('error', 'webhook_misconfigured');
 
-        $row = WebhookCall::query()->latest('id')->first();
-        $this->assertNotNull($row);
-        $this->assertSame('cashier', $row->name);
-        $this->assertSame('webhook_secret_not_configured', $row->exception);
+        $event = InboundWebhookEvent::query()->latest('id')->first();
+        $this->assertNotNull($event);
+        $this->assertSame('cashier', $event->provider);
+        $this->assertSame('misconfigured', $event->outcome);
+        $this->assertSame(500, $event->status);
     }
 
     public function test_set_secret_passes_guard_and_does_not_write_misconfigured_audit(): void
@@ -52,26 +54,26 @@ class CashierWebhookSecretGuardTest extends TestCase
 
         $this->postJson('/cashier/webhook', ['id' => 'tr_test_xyz']);
 
-        // Audit-rij voor webhook_misconfigured mag NIET bestaan.
-        $misconfigured = WebhookCall::query()
-            ->where('name', 'cashier')
-            ->get()
-            ->first(fn ($row) => $row->exception === 'webhook_secret_not_configured');
+        // Audit-rij voor misconfigured mag NIET bestaan.
+        $misconfigured = InboundWebhookEvent::query()
+            ->where('provider', 'cashier')
+            ->where('outcome', 'misconfigured')
+            ->first();
 
         $this->assertNull(
             $misconfigured,
-            'Guard mag GEEN webhook_secret_not_configured-audit schrijven wanneer secret gezet is.',
+            'Guard mag GEEN misconfigured-audit schrijven wanneer secret gezet is.',
         );
     }
 
-    public function test_audit_row_uses_name_cashier_not_mollie(): void
+    public function test_audit_row_uses_provider_cashier_not_mollie(): void
     {
         config(['services.cashier.webhook_secret' => '']);
 
         $this->postJson('/cashier/webhook', ['id' => 'tr_test']);
 
-        $latest = WebhookCall::query()->latest('id')->first();
+        $latest = InboundWebhookEvent::query()->latest('id')->first();
         $this->assertNotNull($latest);
-        $this->assertSame('cashier', $latest->name);
+        $this->assertSame('cashier', $latest->provider);
     }
 }

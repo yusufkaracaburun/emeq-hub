@@ -37,8 +37,8 @@ class Consumer extends Authenticatable
         return $this->hasManyThrough(Connection::class, Account::class);
     }
 
-    public function webhookCalls(): HasMany
+    public function inboundWebhookEvents(): HasMany
     {
-        return $this->hasMany(WebhookCall::class);
+        return $this->hasMany(InboundWebhookEvent::class);
     }
 }

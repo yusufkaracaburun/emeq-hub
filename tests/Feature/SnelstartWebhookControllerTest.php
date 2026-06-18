@@ -8,7 +8,7 @@ use App\Jobs\Webhooks\ForwardSnelstartWebhookToConsumerJob;
 use App\Models\Account;
 use App\Models\Connection;
 use App\Models\Consumer;
-use App\Models\PassThroughCall;
+use App\Models\InboundWebhookEvent;
 use Emeq\SnelstartApi\Webhooks\SnelstartWebhookSignature;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Bus;
@@ -52,19 +52,20 @@ class SnelstartWebhookControllerTest extends TestCase
         $response->assertStatus(200);
         $response->assertNoContent(200);
 
-        $audits = PassThroughCall::query()->inbound()->get();
-        $this->assertCount(1, $audits);
+        $events = InboundWebhookEvent::query()->get();
+        $this->assertCount(1, $events);
 
-        $audit = $audits->first();
-        $this->assertSame('snelstart', $audit->provider);
-        $this->assertSame('/webhooks/snelstart', $audit->path);
-        $this->assertSame(200, $audit->status);
-        $this->assertSame('evt-1', $audit->event_id);
-        $this->assertSame($consumer->id, $audit->consumer_id);
-        $this->assertSame($account->id, $audit->account_id);
-        $this->assertSame($connection->id, $audit->connection_id);
-        $this->assertNull($audit->upstream_error);
-        $this->assertNotNull($audit->request_fingerprint);
+        $event = $events->first();
+        $this->assertSame('snelstart', $event->provider);
+        $this->assertSame(200, $event->status);
+        $this->assertSame('processed', $event->outcome);
+        $this->assertSame('dispatched', $event->fanout_status);
+        $this->assertSame('evt-1', $event->event_id);
+        $this->assertSame('Relatie.Created', $event->topic);
+        $this->assertSame($consumer->id, $event->consumer_id);
+        $this->assertSame($account->id, $event->account_id);
+        $this->assertSame($connection->id, $event->connection_id);
+        $this->assertNotNull($event->request_fingerprint);
 
         Bus::assertDispatched(
             ForwardSnelstartWebhookToConsumerJob::class,
@@ -87,12 +88,12 @@ class SnelstartWebhookControllerTest extends TestCase
 
         $response->assertStatus(200);
 
-        $audit = PassThroughCall::query()->inbound()->sole();
-        $this->assertNull($audit->consumer_id);
-        $this->assertNull($audit->account_id);
-        $this->assertNull($audit->connection_id);
-        $this->assertSame('unknown_administratie_id', $audit->upstream_error);
-        $this->assertSame('evt-unknown', $audit->event_id);
+        $event = InboundWebhookEvent::query()->sole();
+        $this->assertNull($event->consumer_id);
+        $this->assertNull($event->account_id);
+        $this->assertNull($event->connection_id);
+        $this->assertSame('unknown_tenant', $event->outcome);
+        $this->assertSame('evt-unknown', $event->event_id);
 
         Bus::assertNothingDispatched();
     }
@@ -118,14 +119,15 @@ class SnelstartWebhookControllerTest extends TestCase
         $this->postSignedWebhook($payload)->assertStatus(200);
         $this->postSignedWebhook($payload)->assertStatus(200);
 
-        $audits = PassThroughCall::query()->inbound()->orderBy('id')->get();
-        $this->assertCount(2, $audits);
+        $events = InboundWebhookEvent::query()->orderBy('id')->get();
+        $this->assertCount(2, $events);
 
-        $this->assertSame('evt-duplicate', $audits[0]->event_id);
-        $this->assertNull($audits[0]->upstream_error);
+        $this->assertSame('evt-duplicate', $events[0]->event_id);
+        $this->assertSame('processed', $events[0]->outcome);
 
-        $this->assertNull($audits[1]->event_id, 'Duplicate-rij heeft event_id NULL om unique-index niet te triggeren');
-        $this->assertSame('duplicate_event', $audits[1]->upstream_error);
+        $this->assertNull($events[1]->event_id, 'Duplicate-rij heeft event_id NULL om unique-index niet te triggeren');
+        $this->assertSame('duplicate', $events[1]->outcome);
+        $this->assertSame(200, $events[1]->status);
 
         Bus::assertDispatchedTimes(ForwardSnelstartWebhookToConsumerJob::class, 1);
     }
@@ -142,10 +144,10 @@ class SnelstartWebhookControllerTest extends TestCase
         $response->assertStatus(400);
         $response->assertJson(['error' => 'malformed_payload']);
 
-        $audit = PassThroughCall::query()->inbound()->sole();
-        $this->assertSame(400, $audit->status);
-        $this->assertSame('malformed_payload', $audit->upstream_error);
-        $this->assertNull($audit->consumer_id);
+        $event = InboundWebhookEvent::query()->sole();
+        $this->assertSame(400, $event->status);
+        $this->assertSame('malformed', $event->outcome);
+        $this->assertNull($event->consumer_id);
 
         Bus::assertNothingDispatched();
     }
@@ -162,7 +164,7 @@ class SnelstartWebhookControllerTest extends TestCase
 
         $response->assertStatus(401);
 
-        $this->assertSame(0, PassThroughCall::query()->count());
+        $this->assertSame(0, InboundWebhookEvent::query()->count());
 
         Bus::assertNothingDispatched();
     }
@@ -189,10 +191,10 @@ class SnelstartWebhookControllerTest extends TestCase
 
         $response->assertStatus(200);
 
-        $audit = PassThroughCall::query()->inbound()->sole();
-        $this->assertNull($audit->consumer_id);
-        $this->assertNull($audit->connection_id);
-        $this->assertSame('unknown_administratie_id', $audit->upstream_error);
+        $event = InboundWebhookEvent::query()->sole();
+        $this->assertNull($event->consumer_id);
+        $this->assertNull($event->connection_id);
+        $this->assertSame('unknown_tenant', $event->outcome);
 
         Bus::assertNothingDispatched();
     }
@@ -222,10 +224,10 @@ class SnelstartWebhookControllerTest extends TestCase
             'eventId' => 'evt-cross-A',
         ])->assertStatus(200);
 
-        $audit = PassThroughCall::query()->inbound()->sole();
-        $this->assertSame($consumerA->id, $audit->consumer_id);
-        $this->assertSame($accountA->id, $audit->account_id);
-        $this->assertSame($connectionA->id, $audit->connection_id);
+        $event = InboundWebhookEvent::query()->sole();
+        $this->assertSame($consumerA->id, $event->consumer_id);
+        $this->assertSame($accountA->id, $event->account_id);
+        $this->assertSame($connectionA->id, $event->connection_id);
 
         Bus::assertDispatched(
             ForwardSnelstartWebhookToConsumerJob::class,
