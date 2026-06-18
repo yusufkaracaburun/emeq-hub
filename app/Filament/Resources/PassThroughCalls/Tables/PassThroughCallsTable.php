@@ -121,6 +121,10 @@ class PassThroughCallsTable
                     }),
             ])
             ->defaultSort('created_at', 'desc')
+            ->poll('30s')
+            ->emptyStateHeading('Nog geen pass-through-calls')
+            ->emptyStateDescription('Zodra een consumer via de Hub een partner-API aanroept, verschijnt hier een auditrij.')
+            ->emptyStateIcon('heroicon-o-arrows-right-left')
             ->recordActions([
                 ViewAction::make(),
             ]);

@@ -110,6 +110,10 @@ class InboundWebhookEventsTable
                     }),
             ])
             ->defaultSort('received_at', 'desc')
+            ->poll('30s')
+            ->emptyStateHeading('Nog geen inbound webhook-events')
+            ->emptyStateDescription('Zodra een partner (Mollie/Snelstart/Exact/Cashier) een webhook naar de Hub stuurt, verschijnt hier een metadata-auditrij.')
+            ->emptyStateIcon('heroicon-o-inbox-arrow-down')
             ->recordActions([
                 ViewAction::make(),
             ]);
