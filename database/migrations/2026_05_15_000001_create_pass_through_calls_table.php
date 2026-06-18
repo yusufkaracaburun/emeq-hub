@@ -17,15 +17,20 @@ return new class extends Migration
             $table->foreignId('account_id')->nullable()->constrained('accounts')->cascadeOnDelete();
             $table->foreignId('connection_id')->nullable()->constrained('connections')->nullOnDelete();
             $table->string('provider');
+            $table->string('token_type', 16)->nullable()->index();
             $table->string('method', 10);
             $table->text('path');
             $table->string('query_keys')->nullable();
             $table->smallInteger('status');
             $table->integer('duration_ms');
             $table->string('request_fingerprint', 12)->nullable();
+            $table->string('partner_token_fingerprint', 16)->nullable();
             $table->string('event_id')->nullable();
             $table->integer('response_size_bytes')->nullable();
             $table->string('upstream_error')->nullable();
+            // Errors-only response-body (status >= 400), capped + redacted. Geen
+            // succesvolle reads → minimaliseert klant-PII at rest in de audit-tabel.
+            $table->text('response_body')->nullable();
             $table->timestamp('created_at')->useCurrent();
 
             $table->index(['consumer_id', 'created_at']);
