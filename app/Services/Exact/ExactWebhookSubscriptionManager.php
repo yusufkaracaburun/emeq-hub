@@ -111,10 +111,11 @@ final class ExactWebhookSubscriptionManager
         // idempotent, geen fout. We krijgen dan geen ID; een volgende register()
         // pakt 'm via de list-stap.
         try {
+            // IsInstant NIET meesturen: Exact accepteert die parameter alléén voor
+            // het topic 'GoodsDeliveries' (anders HTTP 500). Default = batched.
             $response = $connector->send(new CreateWebhookSubscription(
                 topic: $topic,
                 callbackUrl: $callbackUrl,
-                isInstant: true,
             ));
         } catch (Throwable $e) {
             if ($this->isDuplicate($e->getMessage())) {
@@ -199,8 +200,24 @@ final class ExactWebhookSubscriptionManager
         ));
     }
 
+    /**
+     * Exact eist dat de CallbackURL hetzelfde scheme+domein heeft als de
+     * geregistreerde RedirectURI (en HTTPS). Daarom leiden we de origin af van
+     * `services.exact.redirect_uri` — niet van APP_URL, dat in dev de lokale
+     * (niet-publieke, http) host is. Zo kan de CallbackURL nooit van de
+     * Exact-constraint afdrijven. Geen redirect_uri (standalone/tests) → route().
+     */
     private function callbackUrl(): string
     {
-        return route('webhooks.exact');
+        $redirectUri = (string) $this->config->get('services.exact.redirect_uri');
+        $parts = $redirectUri !== '' ? parse_url($redirectUri) : false;
+
+        if ($parts === false || ! isset($parts['scheme'], $parts['host'])) {
+            return route('webhooks.exact');
+        }
+
+        $port = isset($parts['port']) ? ':'.$parts['port'] : '';
+
+        return $parts['scheme'].'://'.$parts['host'].$port.'/webhooks/exact';
     }
 }

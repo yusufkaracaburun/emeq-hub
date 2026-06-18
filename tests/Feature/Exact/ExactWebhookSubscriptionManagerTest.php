@@ -58,7 +58,9 @@ class ExactWebhookSubscriptionManagerTest extends TestCase
         $this->assertSame(self::TOPICS, array_keys($stored));
         $this->assertSame('sub-new', $stored['FinancialTransactions']);
 
-        MockClient::global()->assertSent(fn (CreateWebhookSubscription $request): bool => $request->body()->all()['CallbackURL'] === route('webhooks.exact'));
+        // CallbackURL deelt scheme+domein met de redirect_uri (Exact-constraint),
+        // niet de lokale APP_URL.
+        MockClient::global()->assertSent(fn (CreateWebhookSubscription $request): bool => $request->body()->all()['CallbackURL'] === 'https://hub.test/webhooks/exact');
     }
 
     public function test_register_is_idempotent_and_skips_existing_topics(): void
