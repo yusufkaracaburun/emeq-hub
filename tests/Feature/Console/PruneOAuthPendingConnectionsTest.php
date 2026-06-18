@@ -23,6 +23,19 @@ class PruneOAuthPendingConnectionsTest extends TestCase
         $this->assertNotNull(Connection::find($active->id));
     }
 
+    public function test_does_not_prune_expired_pending_with_tokens(): void
+    {
+        // Van-active her-gekoppelde rij: pending + verlopen state, maar nog tokens.
+        // Mag niet gewist worden — afgebroken re-link verliest anders een werkende connectie.
+        $relinking = Connection::factory()->forMollie()->expired()->create([
+            'status' => 'pending',
+        ]);
+
+        $this->artisan('oauth:prune-pending')->assertExitCode(0);
+
+        $this->assertNotNull(Connection::find($relinking->id));
+    }
+
     public function test_dry_run_does_not_delete_anything(): void
     {
         $expired = Connection::factory()->forMollie()->pending()->expired()->create();

@@ -10,12 +10,15 @@ class PruneOAuthPendingConnections extends Command
     protected $signature = 'oauth:prune-pending
                             {--dry-run : Toon welke rows verwijderd zouden worden zonder ze te raken}';
 
-    protected $description = 'Ruim expired pending OAuth-Connections op (status=pending AND oauth_state_expires_at < now)';
+    protected $description = 'Ruim expired pending OAuth-Connections op (status=pending AND oauth_state_expires_at < now AND geen tokens)';
 
     public function handle(): int
     {
+        // whereNull(access_token): een van-active her-gekoppelde rij houdt z'n
+        // oude tokens en mag niet worden gewist als de re-link wordt afgebroken.
         $query = Connection::query()
             ->where('status', 'pending')
+            ->whereNull('access_token')
             ->where('oauth_state_expires_at', '<', now());
 
         if ($this->option('dry-run')) {

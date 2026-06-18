@@ -39,14 +39,12 @@ class InitController extends Controller
 
         $state = Str::random(48);
 
-        $connection = Connection::create([
-            'account_id' => $account->id,
-            'provider' => Provider::Mollie->value,
-            'status' => 'pending',
-            'oauth_state' => $state,
-            'oauth_state_expires_at' => now()->addMinutes(30),
-            'oauth_return_url' => $this->returnUrls->resolve($consumer, $validated['return_url'] ?? null),
-        ]);
+        $connection = Connection::startOAuthFlow(
+            $account,
+            Provider::Mollie,
+            $state,
+            $this->returnUrls->resolve($consumer, $validated['return_url'] ?? null),
+        );
 
         $scopes = config('services.mollie.connect.scopes');
         $redirectUrl = $this->registry->for(Provider::Mollie->value)->getAuthorizationUrl($account, $scopes, $state);

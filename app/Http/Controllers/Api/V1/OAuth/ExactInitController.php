@@ -43,14 +43,12 @@ class ExactInitController extends Controller
 
         $state = Str::random(48);
 
-        $connection = Connection::create([
-            'account_id' => $account->id,
-            'provider' => Provider::Exact->value,
-            'status' => 'pending',
-            'oauth_state' => $state,
-            'oauth_state_expires_at' => now()->addMinutes(30),
-            'oauth_return_url' => $this->returnUrls->resolve($consumer, $validated['return_url'] ?? null),
-        ]);
+        $connection = Connection::startOAuthFlow(
+            $account,
+            Provider::Exact,
+            $state,
+            $this->returnUrls->resolve($consumer, $validated['return_url'] ?? null),
+        );
 
         // Exact gebruikt géén scopes.
         $redirectUrl = $this->registry->for(Provider::Exact->value)->getAuthorizationUrl($account, [], $state);

@@ -46,6 +46,36 @@ class Connection extends Model
         return $this->hasMany(AccountSubscription::class);
     }
 
+    /**
+     * Reuse-or-create de (account, provider)-connection voor een OAuth-init.
+     * Eén rij per (account, provider): voorkomt gestapelde pending-rijen bij
+     * herhaalde connect-pogingen. Een al-active connection wordt op dezelfde
+     * rij her-gekoppeld (status terug naar 'pending'); de bestaande tokens
+     * blijven staan tot de callback nieuwe levert, zodat een afgebroken
+     * re-link een werkende connectie niet weggooit (Prune skipt rijen mét
+     * access_token).
+     */
+    public static function startOAuthFlow(
+        Account $account,
+        Provider $provider,
+        string $state,
+        ?string $returnUrl,
+    ): self {
+        $connection = static::firstOrNew([
+            'account_id' => $account->id,
+            'provider' => $provider->value,
+        ]);
+
+        $connection->fill([
+            'status' => 'pending',
+            'oauth_state' => $state,
+            'oauth_state_expires_at' => now()->addMinutes(30),
+            'oauth_return_url' => $returnUrl,
+        ])->save();
+
+        return $connection;
+    }
+
     public function fingerprint(): ?string
     {
         $descriptor = ProviderCredentialDescriptor::tryFor($this->provider->value);

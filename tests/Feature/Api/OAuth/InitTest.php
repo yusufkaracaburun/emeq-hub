@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Api\OAuth;
 
+use App\Models\Connection;
 use App\Models\Consumer;
 use App\OAuth\Mollie\MollieConnectOAuthFlow;
 use App\OAuth\Testing\FakeOAuthFlow;
@@ -40,6 +41,27 @@ class InitTest extends TestCase
             'provider' => 'mollie',
             'status' => 'pending',
         ]);
+    }
+
+    public function test_repeated_init_reuses_pending_connection_instead_of_stacking(): void
+    {
+        $consumer = Consumer::factory()->create();
+        $account = $consumer->accounts()->create([
+            'external_id' => 'school1',
+            'display_name' => 'School 1',
+        ]);
+        $token = $consumer->createToken('t', [TokenAbilities::MOLLIE_WRITE])->plainTextToken;
+
+        $first = $this->withHeader('Authorization', "Bearer {$token}")
+            ->postJson('/v1/oauth/mollie/init', ['account_external_id' => 'school1'])
+            ->assertOk()->json('connection_id');
+
+        $second = $this->withHeader('Authorization', "Bearer {$token}")
+            ->postJson('/v1/oauth/mollie/init', ['account_external_id' => 'school1'])
+            ->assertOk()->json('connection_id');
+
+        $this->assertSame($first, $second);
+        $this->assertSame(1, Connection::where('account_id', $account->id)->where('provider', 'mollie')->count());
     }
 
     public function test_init_without_ability_returns_403(): void
