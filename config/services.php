@@ -70,6 +70,16 @@ return [
         'webhook_secret' => null,
         'auth_base_url' => 'https://start.exactonline.nl',
         'api_base_url' => 'https://start.exactonline.nl',
+
+        // Topics waarop de Hub per Exact-Connection abonneert bij OAuth-connect
+        // (Hub-orchestratie, niet SDK-protocol). Verifieer de exacte strings via
+        // GET webhooks/WebhookTopics (ListWebhookTopics). Nieuwe topic = regel hier.
+        'webhook_topics' => [
+            'FinancialTransactions',
+            'Documents',
+            'Accounts',
+            'Items',
+        ],
     ],
 
 ];

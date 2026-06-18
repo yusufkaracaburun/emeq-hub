@@ -2,6 +2,8 @@
 
 namespace App\OAuth\Exact;
 
+use App\Jobs\Exact\DeleteExactWebhookSubscriptionsJob;
+use App\Jobs\Exact\RegisterExactWebhookSubscriptionsJob;
 use App\Models\Account;
 use App\Models\Connection;
 use App\OAuth\Contracts\OAuthFlow;
@@ -69,6 +71,11 @@ final class ExactOAuthFlow implements OAuthFlow
             'oauth_state_expires_at' => null,
         ])->save();
 
+        // Division is nu bekend → registreer de webhook-subscriptions async (de
+        // subscribe-handshake mag de OAuth-callback niet blokkeren). No-op als er
+        // geen topics geconfigureerd zijn.
+        RegisterExactWebhookSubscriptionsJob::dispatch($connection);
+
         return $connection;
     }
 
@@ -118,8 +125,10 @@ final class ExactOAuthFlow implements OAuthFlow
     {
         // Exact heeft geen gedocumenteerd token-revoke-endpoint; deprovisioning loopt
         // via de App-Center "Niet meer gebruiken"-flow (server-contract nog niet
-        // vastgelegd) + later het opzeggen van webhook-subscriptions. Lokaal
-        // markeren volstaat voor nu.
+        // vastgelegd). Lokaal markeren + de webhook-subscriptions opzeggen (best-effort,
+        // de job faalt niet hard als de delete na revoke niet meer kan).
+        DeleteExactWebhookSubscriptionsJob::dispatch($connection);
+
         $connection->update(['status' => 'revoked', 'revoked_at' => now()]);
     }
 

@@ -2,10 +2,13 @@
 
 namespace Tests\Feature\OAuth;
 
+use App\Jobs\Exact\DeleteExactWebhookSubscriptionsJob;
+use App\Jobs\Exact\RegisterExactWebhookSubscriptionsJob;
 use App\Models\Account;
 use App\Models\Connection;
 use App\OAuth\Exact\ExactOAuthFlow;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 
@@ -28,6 +31,8 @@ class ExactOAuthFlowTest extends TestCase
 
     public function test_exchange_code_writes_tokens_and_division(): void
     {
+        Bus::fake([RegisterExactWebhookSubscriptionsJob::class]);
+
         Http::fake([
             'start.exactonline.nl/api/oauth2/token' => Http::response([
                 'access_token' => 'acc_xyz',
@@ -58,6 +63,11 @@ class ExactOAuthFlowTest extends TestCase
         $this->assertSame('ref_xyz', $connection->refresh_token);
         $this->assertSame('4471372', $connection->administratie_id);
         $this->assertNull($connection->oauth_state);
+
+        Bus::assertDispatched(
+            RegisterExactWebhookSubscriptionsJob::class,
+            fn (RegisterExactWebhookSubscriptionsJob $job): bool => $job->exactConnection->is($connection),
+        );
     }
 
     public function test_get_authorization_url_contains_required_params_without_scope(): void
@@ -136,8 +146,9 @@ class ExactOAuthFlowTest extends TestCase
         $this->assertSame('ref_current', $connection->refresh_token);
     }
 
-    public function test_revoke_marks_connection_revoked_locally(): void
+    public function test_revoke_marks_connection_revoked_locally_and_dispatches_unsubscribe(): void
     {
+        Bus::fake([DeleteExactWebhookSubscriptionsJob::class]);
         Http::fake();
 
         $connection = Connection::factory()->forExact()->create(['status' => 'active']);
@@ -147,5 +158,10 @@ class ExactOAuthFlowTest extends TestCase
         $connection->refresh();
         $this->assertSame('revoked', $connection->status);
         $this->assertNotNull($connection->revoked_at);
+
+        Bus::assertDispatched(
+            DeleteExactWebhookSubscriptionsJob::class,
+            fn (DeleteExactWebhookSubscriptionsJob $job): bool => $job->exactConnection->is($connection),
+        );
     }
 }
