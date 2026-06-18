@@ -58,8 +58,9 @@ class IntegrationSettingsTest extends TestCase
 
     public function test_hydration_falls_back_to_config_when_setting_empty(): void
     {
-        // Expliciet leeg (de migratie seedt uit .env, die lokaal een echte
-        // EXACT_CLIENT_ID kan bevatten) → lege setting valt terug op config/env.
+        // Expliciet leeg: de settings-migratie seedt lege defaults (geen .env);
+        // de dev-.env-hydratie zit in ExactDevSettingsSeeder. Lege setting valt
+        // terug op config/env.
         $settings = app(ExactSettings::class);
         $settings->client_id = '';
         $settings->save();
