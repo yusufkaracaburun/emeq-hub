@@ -73,6 +73,9 @@
             "@php artisan config:clear --ansi",
             "vendor/bin/phpunit --configuration=phpunit.integration.xml"
         ],
+        "db:fresh": [
+            "@php artisan migrate:fresh --seed"
+        ],
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
             "@php artisan package:discover --ansi",
