@@ -1,7 +1,7 @@
 APP := http://hub.emeq.test:8092
 
 .DEFAULT_GOAL := help
-.PHONY: help up down restart urls fresh logs shell test ps
+.PHONY: help up down restart urls fresh logs shell test ps tunnel
 
 help: ## Toon deze hulp
 	@grep -E '^[a-z-]+:.*##' $(MAKEFILE_LIST) | sort | awk 'BEGIN{FS=":.*## "}{printf "  \033[36m%-10s\033[0m %s\n", $$1, $$2}'
@@ -29,6 +29,9 @@ test: ## Draai de testsuite in de container
 
 ps: ## Toon container-status
 	docker compose ps
+
+tunnel: ## Start de stabiele Cloudflare named-tunnel (hub-dev.emeq.nl -> :8092)
+	cloudflared tunnel run emeq-hub-dev
 
 urls: ## Toon de UI-URLs
 	@printf '\n'
