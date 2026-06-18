@@ -33,7 +33,10 @@ services:
       target: dev
     # queue:listen boot per job fresh → pakt code-changes zonder restart, node-vrij.
     # Zelfde redis-queue + jobs als prod-horizon; prod supervised via `php artisan horizon`.
-    command: php artisan queue:listen --tries=1 --timeout=0
+    # Expliciet beide queues: prod-Horizon heeft supervisor-1 (default) +
+    # supervisor-webhooks (webhooks) — zónder --queue pakt listen alleen 'default'
+    # en blijven fan-out + webhook-subscription-lifecycle-jobs hangen (dev/prod-drift).
+    command: php artisan queue:listen --queue=default,webhooks --tries=1 --timeout=0
     # Het FrankenPHP-image healthcheckt de webserver; deze service draait geen web → uit.
     healthcheck:
       disable: true
