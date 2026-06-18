@@ -261,7 +261,8 @@ class ConnectionResource extends Resource
     public static function getRelations(): array
     {
         return [
-            RelationManagers\AccountSubscriptionsRelationManager::class,
+            RelationManagers\PassThroughCallsRelationManager::class,
+            RelationManagers\InboundWebhookEventsRelationManager::class,
         ];
     }
 

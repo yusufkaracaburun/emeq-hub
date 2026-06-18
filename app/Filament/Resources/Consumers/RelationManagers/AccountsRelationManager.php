@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Consumers\RelationManagers;
 
+use App\Filament\Resources\Accounts\AccountResource;
+use App\Models\Account;
+use Filament\Actions\CreateAction;
+use Filament\Forms\Components\TextInput;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -18,6 +22,21 @@ final class AccountsRelationManager extends RelationManager
     {
         return $table
             ->recordTitleAttribute('external_id')
+            ->headerActions([
+                CreateAction::make()
+                    ->label('Account toevoegen')
+                    ->icon('heroicon-o-plus')
+                    ->schema([
+                        TextInput::make('external_id')
+                            ->label('External ID')
+                            ->required()
+                            ->maxLength(255),
+                        TextInput::make('display_name')
+                            ->label('Naam')
+                            ->maxLength(255),
+                    ]),
+            ])
+            ->recordUrl(fn (Account $record): string => AccountResource::getUrl('view', ['record' => $record]))
             ->columns([
                 TextColumn::make('external_id')
                     ->label('External ID')

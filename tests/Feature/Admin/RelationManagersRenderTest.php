@@ -7,11 +7,13 @@ namespace Tests\Feature\Admin;
 use App\Filament\Resources\Accounts\Pages\ViewAccount;
 use App\Filament\Resources\Accounts\RelationManagers\AccountSubscriptionsRelationManager as AccountSubsRm;
 use App\Filament\Resources\Connections\Pages\ViewConnection;
-use App\Filament\Resources\Connections\RelationManagers\AccountSubscriptionsRelationManager as ConnectionSubsRm;
+use App\Filament\Resources\Connections\RelationManagers\InboundWebhookEventsRelationManager;
+use App\Filament\Resources\Connections\RelationManagers\PassThroughCallsRelationManager;
 use App\Models\Account;
 use App\Models\AccountSubscription;
 use App\Models\Connection;
 use App\Models\Consumer;
+use App\Models\PassThroughCall;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
@@ -84,31 +86,35 @@ class RelationManagersRenderTest extends TestCase
         ])->assertSuccessful();
     }
 
-    public function test_connection_view_page_renders_subscriptions_relation_manager(): void
+    public function test_connection_view_page_renders_pass_through_relation_manager(): void
     {
         $admin = $this->makeStaffUser();
         $consumer = Consumer::factory()->create();
         $account = Account::factory()->for($consumer)->create();
         $mollie = Connection::factory()->forMollie()->for($account)->create();
-        AccountSubscription::factory()->for($account)->for($mollie, 'connection')->create();
+        PassThroughCall::factory()->create(['connection_id' => $mollie->id]);
 
         $response = $this->actingAs($admin)->get("/admin/connections/{$mollie->id}");
 
         $response->assertOk();
-        $response->assertSee('AccountSubscriptionsRelationManager');
+        $response->assertSee('PassThroughCallsRelationManager');
     }
 
-    public function test_connection_subscriptions_relation_manager_renders_isolated(): void
+    public function test_connection_relation_managers_render_isolated(): void
     {
         $admin = $this->makeStaffUser();
         $consumer = Consumer::factory()->create();
         $account = Account::factory()->for($consumer)->create();
         $mollie = Connection::factory()->forMollie()->for($account)->create();
-        AccountSubscription::factory()->for($account)->for($mollie, 'connection')->create();
 
         $this->actingAs($admin);
 
-        Livewire::test(ConnectionSubsRm::class, [
+        Livewire::test(PassThroughCallsRelationManager::class, [
+            'ownerRecord' => $mollie,
+            'pageClass' => ViewConnection::class,
+        ])->assertSuccessful();
+
+        Livewire::test(InboundWebhookEventsRelationManager::class, [
             'ownerRecord' => $mollie,
             'pageClass' => ViewConnection::class,
         ])->assertSuccessful();

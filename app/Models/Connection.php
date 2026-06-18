@@ -46,6 +46,16 @@ class Connection extends Model
         return $this->hasMany(AccountSubscription::class);
     }
 
+    public function passThroughCalls(): HasMany
+    {
+        return $this->hasMany(PassThroughCall::class);
+    }
+
+    public function inboundWebhookEvents(): HasMany
+    {
+        return $this->hasMany(InboundWebhookEvent::class);
+    }
+
     /**
      * Reuse-or-create de (account, provider)-connection voor een OAuth-init.
      * Eén rij per (account, provider): voorkomt gestapelde pending-rijen bij

@@ -7,6 +7,8 @@ namespace App\Filament\Resources\Accounts\Tables;
 use App\Filament\Actions\StartOAuthFlowAction;
 use App\Filament\Resources\Accounts\AccountResource;
 use App\Models\Account;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -46,6 +48,8 @@ class AccountsTable
             ->recordUrl(fn (Account $record): string => AccountResource::getUrl('view', ['record' => $record]))
             ->recordActions([
                 StartOAuthFlowAction::forAccount()->iconButton(),
+                EditAction::make()->iconButton(),
+                DeleteAction::make()->iconButton(),
             ]);
     }
 }

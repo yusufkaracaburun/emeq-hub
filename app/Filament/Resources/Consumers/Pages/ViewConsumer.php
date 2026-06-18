@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Resources\Consumers\Pages;
 
 use App\Filament\Resources\Consumers\ConsumerResource;
+use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
 
 /**
@@ -19,6 +20,8 @@ class ViewConsumer extends ViewRecord
 
     protected function getHeaderActions(): array
     {
-        return [];
+        return [
+            EditAction::make(),
+        ];
     }
 }

@@ -5,17 +5,17 @@ declare(strict_types=1);
 namespace App\Filament\Resources\Accounts\Pages;
 
 use App\Filament\Resources\Accounts\AccountResource;
-use Filament\Actions\EditAction;
-use Filament\Resources\Pages\ViewRecord;
+use Filament\Actions\DeleteAction;
+use Filament\Resources\Pages\EditRecord;
 
-class ViewAccount extends ViewRecord
+class EditAccount extends EditRecord
 {
     protected static string $resource = AccountResource::class;
 
     protected function getHeaderActions(): array
     {
         return [
-            EditAction::make(),
+            DeleteAction::make(),
         ];
     }
 }

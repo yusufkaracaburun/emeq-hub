@@ -4,11 +4,18 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Accounts\RelationManagers;
 
+use App\Filament\Actions\StartOAuthFlowAction;
+use App\Filament\Resources\Connections\ConnectionResource;
+use App\Models\Account;
 use App\Models\Connection;
+use Filament\Actions\Action;
+use Filament\Forms\Components\Select;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Routing\Redirector;
 
 final class ConnectionsRelationManager extends RelationManager
 {
@@ -20,6 +27,28 @@ final class ConnectionsRelationManager extends RelationManager
     {
         return $table
             ->recordTitleAttribute('id')
+            ->headerActions([
+                Action::make('addConnection')
+                    ->label('Connection toevoegen')
+                    ->icon('heroicon-o-plus')
+                    ->modalHeading('Provider kiezen')
+                    ->schema([
+                        Select::make('provider')
+                            ->label('Provider')
+                            ->helperText('Alleen providers met OAuth-flow zijn beschikbaar.')
+                            ->options(StartOAuthFlowAction::oauthCapableProviders())
+                            ->required(),
+                    ])
+                    ->modalSubmitActionLabel('Start koppeling')
+                    ->visible(fn (): bool => auth()->user()?->can('manage-connections') ?? false)
+                    ->action(function (array $data): RedirectResponse|Redirector {
+                        /** @var Account $account */
+                        $account = $this->getOwnerRecord();
+
+                        return StartOAuthFlowAction::dispatch($account, $data['provider']);
+                    }),
+            ])
+            ->recordUrl(fn (Connection $record): string => ConnectionResource::getUrl('view', ['record' => $record]))
             ->columns([
                 TextColumn::make('provider')
                     ->label('Provider')
