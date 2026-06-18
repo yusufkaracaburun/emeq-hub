@@ -57,6 +57,7 @@ class DatabaseSeeder extends Seeder
         $this->seedRbac($testUser);
 
         $this->call(EmeqStaffSeeder::class);
+        $this->call(ExactDevSettingsSeeder::class);
     }
 
     private function seedRbac(User $testUser): void
