@@ -25,6 +25,8 @@ use Throwable;
  */
 final class ExactForwarder
 {
+    public function __construct(private readonly ExactErrorBudget $errorBudget) {}
+
     public function forward(
         Request $request,
         Account $account,
@@ -42,6 +44,10 @@ final class ExactForwarder
 
         $method = $sdkRequest->getMethod()->value;
         $endpoint = '/'.ltrim($sdkRequest->resolveEndpoint(), '/');
+
+        if ($this->errorBudget->isOpen($connection, $endpoint)) {
+            return $this->blocked($request, $account, $connection, $method, $endpoint, $sdkRequest);
+        }
         $query = $sdkRequest->query()->all();
         $body = $sdkRequest instanceof HasBody ? $sdkRequest->body()->all() : null;
 
@@ -49,6 +55,7 @@ final class ExactForwarder
         $upstreamError = null;
         $responseBody = '';
         $status = 0;
+        $upstreamStatus = 0;
         $contentType = 'application/json';
         $extraHeaders = [];
 
@@ -65,17 +72,23 @@ final class ExactForwarder
             }
 
             $status = $sdkResponse->status();
+            $upstreamStatus = $status;
             $responseBody = $sdkResponse->body();
             $contentType = $sdkResponse->header('Content-Type') ?? 'application/json';
             $extraHeaders = HeaderForwarder::forwardResponse($sdkResponse);
         } catch (Throwable $e) {
             $mapped = UpstreamErrorMapper::mapException($e);
             $status = $mapped['status'];
+            // Tel tegen het error-budget op wat Exact zélf teruggaf (de mapper maskeert
+            // 401/403 naar 502 voor de consumer; de breaker spiegelt Exact's limiet).
+            $upstreamStatus = (int) ($mapped['body']['upstream_status'] ?? $mapped['status']);
             $responseBody = json_encode($mapped['body'], JSON_THROW_ON_ERROR);
             $contentType = 'application/json';
             $extraHeaders = $mapped['headers'];
             $upstreamError = $mapped['short_code'];
         }
+
+        $this->errorBudget->record($connection, $endpoint, $upstreamStatus);
 
         PassThroughCall::create([
             'consumer_id' => $request->user()->getKey(),
@@ -100,5 +113,49 @@ final class ExactForwarder
             ['Content-Type' => $contentType],
             $extraHeaders,
         ));
+    }
+
+    /**
+     * Breaker open: blokkeer Hub-side met 429 i.p.v. door te tikken naar Exact.
+     * Wordt als pass_through_call gelogd (status 429, upstream_error=circuit_open)
+     * zodat de blokkade zichtbaar is in de audit-/admin-laag.
+     */
+    private function blocked(
+        Request $request,
+        Account $account,
+        Connection $connection,
+        string $method,
+        string $endpoint,
+        SdkRequest $sdkRequest,
+    ): Response {
+        $query = $sdkRequest->query()->all();
+        $retryAfter = $this->errorBudget->retryAfter();
+
+        $body = json_encode([
+            'error' => 'rate_limited',
+            'message' => 'Te veel fouten op dit Exact-endpoint; tijdelijk geblokkeerd om de gedeelde Exact-app-key te beschermen.',
+        ], JSON_THROW_ON_ERROR);
+
+        PassThroughCall::create([
+            'consumer_id' => $request->user()->getKey(),
+            'account_id' => $account->getKey(),
+            'connection_id' => $connection->getKey(),
+            'provider' => Provider::Exact->value,
+            'method' => $method,
+            'path' => $endpoint,
+            'query_keys' => $query !== [] ? implode(',', array_keys($query)) : null,
+            'status' => Response::HTTP_TOO_MANY_REQUESTS,
+            'duration_ms' => 0,
+            'request_fingerprint' => null,
+            'response_size_bytes' => strlen($body),
+            'upstream_error' => 'circuit_open',
+            'response_body' => $body,
+            'created_at' => now(),
+        ]);
+
+        return response($body, Response::HTTP_TOO_MANY_REQUESTS)->withHeaders([
+            'Content-Type' => 'application/json',
+            'Retry-After' => (string) $retryAfter,
+        ]);
     }
 }

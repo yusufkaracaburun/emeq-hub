@@ -215,6 +215,72 @@ class PassThroughTest extends TestCase
         ]);
     }
 
+    public function test_circuit_breaker_trips_after_repeated_4xx_and_blocks_hub_side(): void
+    {
+        MockClient::global([
+            RawExactRequest::class => MockResponse::make('forbidden', 403),
+        ]);
+
+        [$consumer] = $this->consumerWithExactConnection();
+        $token = $consumer->createToken('t', [TokenAbilities::EXACT_READ])->plainTextToken;
+
+        // 6 fouten reiken Exact (403 → gemaskeerd naar 502); de 7e wordt Hub-side geblokkeerd.
+        for ($i = 0; $i < 6; $i++) {
+            $this->withHeader('Authorization', "Bearer {$token}")
+                ->withHeader('X-Account-Id', 'school1')
+                ->getJson('/v1/exact/crm/Accounts')
+                ->assertStatus(502);
+        }
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->withHeader('X-Account-Id', 'school1')
+            ->getJson('/v1/exact/crm/Accounts')
+            ->assertStatus(429)
+            ->assertJson(['error' => 'rate_limited'])
+            ->assertHeader('Retry-After', '3600');
+
+        $this->assertDatabaseHas('pass_through_calls', [
+            'provider' => 'exact',
+            'status' => 429,
+            'upstream_error' => 'circuit_open',
+        ]);
+    }
+
+    public function test_circuit_breaker_isolates_per_connection(): void
+    {
+        MockClient::global([
+            RawExactRequest::class => MockResponse::make('forbidden', 403),
+        ]);
+
+        $consumer = Consumer::factory()->create();
+        $accountA = $consumer->accounts()->create(['external_id' => 'a', 'display_name' => 'A']);
+        $accountB = $consumer->accounts()->create(['external_id' => 'b', 'display_name' => 'B']);
+        Connection::factory()->forExact()->create([
+            'account_id' => $accountA->id, 'status' => 'active', 'expires_at' => now()->addSeconds(600),
+        ]);
+        Connection::factory()->forExact()->create([
+            'account_id' => $accountB->id, 'status' => 'active', 'expires_at' => now()->addSeconds(600),
+        ]);
+        $token = $consumer->createToken('t', [TokenAbilities::EXACT_READ])->plainTextToken;
+
+        for ($i = 0; $i < 6; $i++) {
+            $this->withHeader('Authorization', "Bearer {$token}")
+                ->withHeader('X-Account-Id', 'a')
+                ->getJson('/v1/exact/crm/Accounts');
+        }
+
+        // A is geblokkeerd, B niet (krijgt nog de upstream-mapped 502).
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->withHeader('X-Account-Id', 'a')
+            ->getJson('/v1/exact/crm/Accounts')
+            ->assertStatus(429);
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->withHeader('X-Account-Id', 'b')
+            ->getJson('/v1/exact/crm/Accounts')
+            ->assertStatus(502);
+    }
+
     public function test_pass_through_without_division_returns_409(): void
     {
         MockClient::global([

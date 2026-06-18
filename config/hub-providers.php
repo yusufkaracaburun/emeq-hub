@@ -19,6 +19,9 @@ declare(strict_types=1);
  * primary_label: human-readable label voor de fingerprint-kolom-header.
  * oauth_flow_key: matches OAuthFlowRegistry::register(...)-key, of null
  *   wanneer provider géén OAuth-flow heeft (Snelstart's clientkey/subscription).
+ * error_budget: optioneel per-provider — pass-through-circuit-breaker (enabled,
+ *   threshold, window-seconden). Alleen Exact heeft een gedeelde error-key-limiet
+ *   die een breaker rechtvaardigt; gelezen door App\Support\Exact\ExactErrorBudget.
  */
 return [
     'mollie' => [
@@ -35,5 +38,10 @@ return [
         'encrypted_fields' => ['access_token', 'refresh_token'],
         'primary_label' => 'OAuth token',
         'oauth_flow_key' => 'exact',
+        'error_budget' => [
+            'enabled' => true,
+            'threshold' => 6,   // trip ruim onder Exact's 10/uur/endpoint
+            'window' => 3600,   // seconden — rollend uur-venster vanaf de eerste fout
+        ],
     ],
 ];
