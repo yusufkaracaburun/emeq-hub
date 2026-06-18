@@ -72,7 +72,7 @@ class AccountSubscriptionResource extends Resource
                     TextEntry::make('connection.provider')->badge(),
                     TextEntry::make('status')
                         ->badge()
-                        ->color(fn (SubscriptionStatus $state): string => self::statusColor($state)),
+                        ->color(fn (SubscriptionStatus $state): string => $state->getColor()),
                     TextEntry::make('amount')
                         ->state(fn (AccountSubscription $record): string => $record->amount_value.' '.$record->amount_currency),
                     TextEntry::make('interval'),
@@ -124,7 +124,7 @@ class AccountSubscriptionResource extends Resource
                     ->sortable(),
                 TextColumn::make('status')
                     ->badge()
-                    ->color(fn (SubscriptionStatus $state): string => self::statusColor($state))
+                    ->color(fn (SubscriptionStatus $state): string => $state->getColor())
                     ->sortable(),
                 TextColumn::make('amount')
                     ->state(fn (AccountSubscription $record): string => $record->amount_value.' '.$record->amount_currency),
@@ -294,20 +294,5 @@ class AccountSubscriptionResource extends Resource
             'index' => ListAccountSubscriptions::route('/'),
             'view' => ViewAccountSubscription::route('/{record}'),
         ];
-    }
-
-    /**
-     * BadgeColumn kleuren-map per state (Plan 09-08 acceptance_criteria).
-     */
-    private static function statusColor(SubscriptionStatus $state): string
-    {
-        return match ($state) {
-            SubscriptionStatus::Pending => 'warning',
-            SubscriptionStatus::Active => 'success',
-            SubscriptionStatus::Paused => 'info',
-            SubscriptionStatus::Canceled => 'danger',
-            SubscriptionStatus::Completed => 'gray',
-            SubscriptionStatus::Unknown => 'gray',
-        };
     }
 }

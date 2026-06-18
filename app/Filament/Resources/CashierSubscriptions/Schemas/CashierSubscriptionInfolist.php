@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\CashierSubscriptions\Schemas;
 
+use App\Support\Filament\BadgeColor;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Schema;
 use Laravel\Cashier\Subscription;
@@ -23,14 +24,7 @@ class CashierSubscriptionInfolist
                     ->label('Status')
                     ->state(fn (Subscription $record): string => self::deriveStatus($record))
                     ->badge()
-                    ->color(fn (string $state): string => match ($state) {
-                        'active' => 'success',
-                        'trialing' => 'info',
-                        'grace' => 'warning',
-                        'cancelled' => 'danger',
-                        'ended' => 'gray',
-                        default => 'gray',
-                    }),
+                    ->color(fn (string $state): string => BadgeColor::cashierStatus($state)),
                 TextEntry::make('trial_ends_at')
                     ->label('Trial eindigt')
                     ->dateTime()

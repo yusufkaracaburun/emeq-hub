@@ -10,6 +10,7 @@ use App\Filament\Resources\Connections\Pages\ViewConnection;
 use App\Filament\Widgets\OperationalHealthWidget;
 use App\Models\Connection;
 use App\OAuth\OAuthFlowRegistry;
+use App\Support\Filament\BadgeColor;
 use App\Support\ProviderCredentialDescriptor;
 use BackedEnum;
 use Filament\Actions\Action;
@@ -73,14 +74,15 @@ class ConnectionResource extends Resource
                 ->visible(fn (?Connection $record): bool => $record?->provider === Provider::Mollie)
                 ->columns(2)
                 ->schema([
-                    TextEntry::make('provider')->badge()->color('success'),
+                    TextEntry::make('provider')->badge()->color(Provider::Mollie->getColor()),
                     TextEntry::make('account.external_id')->label('Account'),
                     TextEntry::make('fingerprint')
                         ->label('Fingerprint (sha256[:12])')
                         ->state(fn (Connection $record): ?string => $record->fingerprint())
                         ->copyable()
                         ->placeholder('—'),
-                    TextEntry::make('status')->badge(),
+                    TextEntry::make('status')->badge()
+                        ->color(fn (?string $state): string => BadgeColor::connectionStatus($state)),
                     TextEntry::make('expires_at')->dateTime()->placeholder('—'),
                     TextEntry::make('scopes')
                         ->listWithLineBreaks()
@@ -93,14 +95,15 @@ class ConnectionResource extends Resource
                 ->visible(fn (?Connection $record): bool => $record?->provider === Provider::Exact)
                 ->columns(2)
                 ->schema([
-                    TextEntry::make('provider')->badge()->color('danger'),
+                    TextEntry::make('provider')->badge()->color(Provider::Exact->getColor()),
                     TextEntry::make('account.external_id')->label('Account'),
                     TextEntry::make('fingerprint')
                         ->label('Fingerprint (sha256[:12])')
                         ->state(fn (Connection $record): ?string => $record->fingerprint())
                         ->copyable()
                         ->placeholder('—'),
-                    TextEntry::make('status')->badge(),
+                    TextEntry::make('status')->badge()
+                        ->color(fn (?string $state): string => BadgeColor::connectionStatus($state)),
                     TextEntry::make('expires_at')->dateTime()->placeholder('—'),
                     TextEntry::make('administratie_id')
                         ->label('Division')
@@ -113,14 +116,15 @@ class ConnectionResource extends Resource
                 ->visible(fn (?Connection $record): bool => $record?->provider === Provider::Snelstart)
                 ->columns(2)
                 ->schema([
-                    TextEntry::make('provider')->badge()->color('info'),
+                    TextEntry::make('provider')->badge()->color(Provider::Snelstart->getColor()),
                     TextEntry::make('account.external_id')->label('Account'),
                     TextEntry::make('fingerprint')
                         ->label('Fingerprint (sha256[:12])')
                         ->state(fn (Connection $record): ?string => $record->fingerprint())
                         ->copyable()
                         ->placeholder('—'),
-                    TextEntry::make('status')->badge(),
+                    TextEntry::make('status')->badge()
+                        ->color(fn (?string $state): string => BadgeColor::connectionStatus($state)),
                     TextEntry::make('subscription_id')
                         ->label('Subscription ID')
                         ->placeholder('—'),
@@ -177,11 +181,7 @@ class ConnectionResource extends Resource
                     ->sortable(),
                 TextColumn::make('status')
                     ->badge()
-                    ->colors([
-                        'success' => 'active',
-                        'warning' => 'pending',
-                        'danger' => 'revoked',
-                    ])
+                    ->color(fn (string $state): string => BadgeColor::connectionStatus($state))
                     ->state(fn (Connection $record): string => $record->revoked_at ? 'revoked' : $record->status)
                     ->sortable(),
                 TextColumn::make('fingerprint')

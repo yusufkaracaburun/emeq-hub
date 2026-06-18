@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\InboundWebhookEvents\Schemas;
 
+use App\Enums\Provider;
+use App\Support\Filament\BadgeColor;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -16,12 +18,18 @@ class InboundWebhookEventInfolist
             Section::make('Event')
                 ->columns(2)
                 ->schema([
-                    TextEntry::make('provider')->badge(),
+                    TextEntry::make('provider')->badge()
+                        ->formatStateUsing(fn (?string $state): string => Provider::tryFrom($state ?? '')?->getLabel() ?? ($state ?? '—'))
+                        ->color(fn (?string $state): string => Provider::tryFrom($state ?? '')?->getColor() ?? 'gray'),
                     TextEntry::make('topic')->placeholder('—'),
                     TextEntry::make('action')->placeholder('—'),
-                    TextEntry::make('outcome')->badge(),
-                    TextEntry::make('status')->badge(),
-                    TextEntry::make('fanout_status')->label('Fan-out')->badge()->placeholder('—'),
+                    TextEntry::make('outcome')->badge()
+                        ->color(fn (?string $state): string => BadgeColor::webhookOutcome($state)),
+                    TextEntry::make('status')->badge()
+                        ->color(fn (?int $state): string => BadgeColor::httpStatus($state)),
+                    TextEntry::make('fanout_status')->label('Fan-out')->badge()
+                        ->color(fn (?string $state): string => BadgeColor::fanoutStatus($state))
+                        ->placeholder('—'),
                     TextEntry::make('received_at')->label('Ontvangen')->dateTime(),
                 ]),
 

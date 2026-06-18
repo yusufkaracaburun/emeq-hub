@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\InboundWebhookEvents\Tables;
 
+use App\Enums\Provider;
 use App\Models\Consumer;
+use App\Support\Filament\BadgeColor;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Tables\Columns\TextColumn;
@@ -22,6 +24,8 @@ class InboundWebhookEventsTable
                 TextColumn::make('provider')
                     ->label('Provider')
                     ->badge()
+                    ->formatStateUsing(fn (?string $state): string => Provider::tryFrom($state ?? '')?->getLabel() ?? ($state ?? '—'))
+                    ->color(fn (?string $state): string => Provider::tryFrom($state ?? '')?->getColor() ?? 'gray')
                     ->sortable(),
                 TextColumn::make('topic')
                     ->label('Topic')
@@ -33,32 +37,17 @@ class InboundWebhookEventsTable
                 TextColumn::make('outcome')
                     ->label('Outcome')
                     ->badge()
-                    ->color(fn (?string $state): string => match ($state) {
-                        'processed' => 'success',
-                        'duplicate' => 'gray',
-                        'unknown_tenant' => 'warning',
-                        'malformed', 'invalid_signature', 'misconfigured' => 'danger',
-                        default => 'gray',
-                    })
+                    ->color(fn (?string $state): string => BadgeColor::webhookOutcome($state))
                     ->sortable(),
                 TextColumn::make('status')
                     ->label('Status')
                     ->badge()
-                    ->color(fn (?int $state): string => match (intdiv((int) $state, 100)) {
-                        2 => 'success',
-                        4 => 'warning',
-                        5 => 'danger',
-                        default => 'gray',
-                    })
+                    ->color(fn (?int $state): string => BadgeColor::httpStatus($state))
                     ->sortable(),
                 TextColumn::make('fanout_status')
                     ->label('Fan-out')
                     ->badge()
-                    ->color(fn (?string $state): string => match ($state) {
-                        'dispatched' => 'success',
-                        'skipped_no_callback' => 'warning',
-                        default => 'gray',
-                    })
+                    ->color(fn (?string $state): string => BadgeColor::fanoutStatus($state))
                     ->placeholder('—'),
                 TextColumn::make('consumer.slug')
                     ->label('Consumer')

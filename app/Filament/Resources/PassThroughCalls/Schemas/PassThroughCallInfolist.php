@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Resources\PassThroughCalls\Schemas;
 
 use App\Enums\Provider;
+use App\Support\Filament\BadgeColor;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -17,13 +18,15 @@ class PassThroughCallInfolist
             Section::make('Call')
                 ->columns(2)
                 ->schema([
-                    TextEntry::make('direction')->badge(),
+                    TextEntry::make('direction')->badge()
+                        ->color(fn (?string $state): string => BadgeColor::passThroughDirection($state)),
                     TextEntry::make('provider')->badge()
                         ->formatStateUsing(fn (?string $state): string => Provider::tryFrom($state ?? '')?->getLabel() ?? ($state ?? '—'))
                         ->color(fn (?string $state): string => Provider::tryFrom($state ?? '')?->getColor() ?? 'gray'),
                     TextEntry::make('method')->badge()->color('gray'),
                     TextEntry::make('path')->copyable(),
-                    TextEntry::make('status')->badge(),
+                    TextEntry::make('status')->badge()
+                        ->color(fn (?int $state): string => BadgeColor::httpStatus($state)),
                     TextEntry::make('duration_ms')->label('Duur')->suffix(' ms'),
                     TextEntry::make('token_type')->label('Token-type')->placeholder('—'),
                 ]),

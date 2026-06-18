@@ -37,13 +37,7 @@ final class AccountSubscriptionsRelationManager extends RelationManager
                 TextColumn::make('status')
                     ->label('Status')
                     ->badge()
-                    ->color(fn (SubscriptionStatus $state): string => match ($state) {
-                        SubscriptionStatus::Active => 'success',
-                        SubscriptionStatus::Pending => 'warning',
-                        SubscriptionStatus::Paused => 'info',
-                        SubscriptionStatus::Canceled, SubscriptionStatus::Completed => 'gray',
-                        SubscriptionStatus::Unknown => 'danger',
-                    })
+                    ->color(fn (SubscriptionStatus $state): string => $state->getColor())
                     ->formatStateUsing(fn (SubscriptionStatus $state): string => $state->value),
                 TextColumn::make('amount_value')
                     ->label('Bedrag')

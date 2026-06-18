@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\CashierSubscriptions\Tables;
 
+use App\Support\Filament\BadgeColor;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
@@ -32,14 +33,7 @@ class CashierSubscriptionsTable
                     ->label('Status')
                     ->state(fn (Subscription $record): string => self::deriveStatus($record))
                     ->badge()
-                    ->color(fn (string $state): string => match ($state) {
-                        'active' => 'success',
-                        'trialing' => 'info',
-                        'grace' => 'warning',
-                        'cancelled' => 'danger',
-                        'ended' => 'gray',
-                        default => 'gray',
-                    }),
+                    ->color(fn (string $state): string => BadgeColor::cashierStatus($state)),
                 TextColumn::make('ends_at')
                     ->label('Eindigt op')
                     ->dateTime()

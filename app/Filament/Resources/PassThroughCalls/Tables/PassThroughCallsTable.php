@@ -6,6 +6,7 @@ namespace App\Filament\Resources\PassThroughCalls\Tables;
 
 use App\Enums\Provider;
 use App\Models\Consumer;
+use App\Support\Filament\BadgeColor;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Tables\Columns\TextColumn;
@@ -23,11 +24,7 @@ class PassThroughCallsTable
                 TextColumn::make('direction')
                     ->label('Direction')
                     ->badge()
-                    ->color(fn (?string $state): string => match ($state) {
-                        'inbound' => 'info',
-                        'outbound' => 'success',
-                        default => 'gray',
-                    })
+                    ->color(fn (?string $state): string => BadgeColor::passThroughDirection($state))
                     ->sortable(),
                 TextColumn::make('provider')
                     ->label('Provider')
@@ -46,13 +43,7 @@ class PassThroughCallsTable
                 TextColumn::make('status')
                     ->label('Status')
                     ->badge()
-                    ->color(fn (?int $state): string => match (intdiv((int) $state, 100)) {
-                        2 => 'success',
-                        3 => 'gray',
-                        4 => 'warning',
-                        5 => 'danger',
-                        default => 'gray',
-                    })
+                    ->color(fn (?int $state): string => BadgeColor::httpStatus($state))
                     ->sortable(),
                 TextColumn::make('duration_ms')
                     ->label('Duur')
