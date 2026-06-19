@@ -20,12 +20,16 @@ class NoIndexHeaderTest extends TestCase
             ->assertHeaderMissing('X-Robots-Tag');
     }
 
-    public function test_robots_txt_disallows_all(): void
+    public function test_robots_txt_allows_only_home_and_partners(): void
     {
         $robotsTxt = public_path('robots.txt');
 
         $this->assertFileExists($robotsTxt);
-        $this->assertStringContainsString('User-agent: *', file_get_contents($robotsTxt));
-        $this->assertStringContainsString('Disallow: /', file_get_contents($robotsTxt));
+        $contents = file_get_contents($robotsTxt);
+
+        $this->assertStringContainsString('User-agent: *', $contents);
+        $this->assertStringContainsString('Allow: /$', $contents);
+        $this->assertStringContainsString('Allow: /partners', $contents);
+        $this->assertStringContainsString('Disallow: /', $contents);
     }
 }
