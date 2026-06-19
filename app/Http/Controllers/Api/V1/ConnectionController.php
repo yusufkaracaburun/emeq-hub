@@ -64,6 +64,8 @@ class ConnectionController extends Controller
         $this->guardAbility($request, [
             TokenAbilities::SNELSTART_READ,
             TokenAbilities::SNELSTART_WRITE,
+            TokenAbilities::EXACT_READ,
+            TokenAbilities::EXACT_WRITE,
             TokenAbilities::CONSUMER_MANAGE_ACCOUNTS,
             TokenAbilities::ADMIN,
         ]);
@@ -82,6 +84,7 @@ class ConnectionController extends Controller
         $this->guardAbility($request, [
             TokenAbilities::CONSUMER_MANAGE_ACCOUNTS,
             TokenAbilities::SNELSTART_WRITE,
+            TokenAbilities::EXACT_WRITE,
             TokenAbilities::ADMIN,
         ]);
 

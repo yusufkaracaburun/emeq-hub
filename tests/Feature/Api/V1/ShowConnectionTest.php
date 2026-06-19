@@ -55,6 +55,19 @@ class ShowConnectionTest extends TestCase
             ->assertForbidden();
     }
 
+    public function test_exact_read_token_can_read_own_exact_connection(): void
+    {
+        [$consumer, $token] = $this->consumerWithToken([TokenAbilities::EXACT_READ]);
+        $account = Account::factory()->for($consumer)->create();
+        $connection = Connection::factory()->forExact()->for($account)->create();
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->getJson("/v1/connections/{$connection->id}")
+            ->assertOk()
+            ->assertJsonPath('data.id', $connection->id)
+            ->assertJsonPath('data.provider', 'exact');
+    }
+
     public function test_revoked_connection_is_still_returnable_via_show(): void
     {
         [$consumer, $token] = $this->consumerWithToken([TokenAbilities::SNELSTART_READ]);

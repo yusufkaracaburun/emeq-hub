@@ -67,6 +67,30 @@ class DestroyConnectionTest extends TestCase
             ->assertForbidden();
     }
 
+    public function test_exact_write_token_can_revoke_own_exact_connection(): void
+    {
+        [$consumer, $token] = $this->consumerWithToken([TokenAbilities::EXACT_WRITE]);
+        $account = Account::factory()->for($consumer)->create();
+        $connection = Connection::factory()->forExact()->for($account)->create();
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->deleteJson("/v1/connections/{$connection->id}")
+            ->assertNoContent();
+
+        $this->assertNotNull($connection->fresh()->revoked_at);
+    }
+
+    public function test_exact_read_only_token_cannot_revoke_returns_403(): void
+    {
+        [$consumer, $token] = $this->consumerWithToken([TokenAbilities::EXACT_READ]);
+        $account = Account::factory()->for($consumer)->create();
+        $connection = Connection::factory()->forExact()->for($account)->create();
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->deleteJson("/v1/connections/{$connection->id}")
+            ->assertForbidden();
+    }
+
     public function test_revoked_at_persists_after_delete_call(): void
     {
         [$consumer, $token] = $this->consumerWithToken([TokenAbilities::CONSUMER_MANAGE_ACCOUNTS]);
