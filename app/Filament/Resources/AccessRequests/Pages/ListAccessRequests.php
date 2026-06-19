@@ -17,9 +17,10 @@ class ListAccessRequests extends ListRecords
         return [
             InfoModalAction::make(
                 'Over koppel-aanvragen',
-                'Onboarding-leads vanaf de publieke /koppelen-pagina. Bekijk een aanvraag, '
-                .'onboard de consumer via de OnboardConsumer-wizard (Tenants → Onboard) en markeer de '
-                .'aanvraag daarna afgehandeld. De badge telt het aantal nieuwe aanvragen.',
+                'Onboarding-leads vanaf de publieke /koppelen-pagina. Klik "Onboard" om de '
+                .'onboarding-wizard voorgevuld te openen (naam, slug, app-URL en — bij één gevraagde '
+                .'integratie — de provider); na afronden wordt de aanvraag automatisch aan de nieuwe '
+                .'Consumer gekoppeld en op afgehandeld gezet. De badge telt nieuwe aanvragen.',
             ),
         ];
     }

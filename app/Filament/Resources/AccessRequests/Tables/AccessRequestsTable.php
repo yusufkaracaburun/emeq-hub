@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\AccessRequests\Tables;
 
+use App\Filament\Pages\OnboardConsumer;
 use App\Filament\Resources\AccessRequests\AccessRequestResource;
 use App\Models\AccessRequest;
 use Filament\Actions\Action;
@@ -40,6 +41,9 @@ class AccessRequestsTable
                         default => 'warning',
                     })
                     ->sortable(),
+                TextColumn::make('consumer.slug')
+                    ->label('Consumer')
+                    ->placeholder('—'),
                 TextColumn::make('created_at')
                     ->label('Ontvangen')
                     ->dateTime()
@@ -54,10 +58,16 @@ class AccessRequestsTable
                     ]),
             ])
             ->recordActions([
+                Action::make('onboard')
+                    ->label('Onboard')
+                    ->icon('heroicon-o-sparkles')
+                    ->color('primary')
+                    ->visible(fn (AccessRequest $record): bool => $record->status === 'new')
+                    ->url(fn (AccessRequest $record): string => OnboardConsumer::getUrl(['from_request' => $record->id])),
                 Action::make('handle')
                     ->label('Markeer afgehandeld')
                     ->icon('heroicon-o-check')
-                    ->color('success')
+                    ->color('gray')
                     ->visible(fn (AccessRequest $record): bool => $record->status === 'new')
                     ->requiresConfirmation()
                     ->action(fn (AccessRequest $record) => $record->update(['status' => 'handled'])),

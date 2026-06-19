@@ -7,6 +7,7 @@ namespace App\Models;
 use Database\Factories\AccessRequestFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * Onboarding-lead vanaf de publieke /koppelen-intake. Bewust losgekoppeld van
@@ -26,6 +27,7 @@ class AccessRequest extends Model
         'providers',
         'message',
         'status',
+        'consumer_id',
     ];
 
     /**
@@ -36,5 +38,15 @@ class AccessRequest extends Model
         return [
             'providers' => 'array',
         ];
+    }
+
+    /**
+     * De Consumer die uit deze aanvraag is ge-onboard (null = nog niet afgehandeld).
+     *
+     * @return BelongsTo<Consumer, $this>
+     */
+    public function consumer(): BelongsTo
+    {
+        return $this->belongsTo(Consumer::class);
     }
 }

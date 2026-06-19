@@ -27,6 +27,7 @@ class AccessRequestInfolist
                             'declined' => 'gray',
                             default => 'warning',
                         }),
+                    TextEntry::make('consumer.slug')->label('Ge-onboard als')->placeholder('— nog niet'),
                     TextEntry::make('created_at')->label('Ontvangen')->dateTime(),
                 ]),
 

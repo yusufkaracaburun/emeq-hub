@@ -13,6 +13,7 @@ use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 /**
  * Inbox voor onboarding-leads vanaf de publieke /koppelen-pagina. Read-mostly:
@@ -30,7 +31,7 @@ class AccessRequestResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Koppel-aanvragen';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Beheer';
+    protected static string|\UnitEnum|null $navigationGroup = 'Tenants';
 
     protected static ?int $navigationSort = 3;
 
@@ -69,6 +70,11 @@ class AccessRequestResource extends Resource
     public static function canDelete($record): bool
     {
         return false;
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()->with('consumer');
     }
 
     public static function infolist(Schema $schema): Schema
