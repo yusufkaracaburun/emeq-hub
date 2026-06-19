@@ -11,6 +11,7 @@ import { SectionHeading } from '@/components/marketing/section-heading';
 import { TrustBar } from '@/components/marketing/trust-bar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 import ShowcaseLayout from '@/layouts/showcase-layout';
 import type { ProviderSummary } from '@/types';
 
@@ -126,22 +127,22 @@ export default function Home({ providers }: { providers: ProviderSummary[] }) {
                         <Reveal key={provider.key} delay={i * 0.05}>
                             <Link
                                 href={`/partners/${provider.key}`}
-                                className="group flex h-full items-start gap-4 rounded-2xl border bg-card p-5 transition-all hover:-translate-y-0.5 hover:border-amber-500/50 hover:shadow-lg hover:shadow-amber-500/5"
+                                className="group flex h-full flex-col rounded-2xl border bg-card p-6 transition-all hover:-translate-y-0.5 hover:border-amber-500/50 hover:shadow-lg hover:shadow-amber-500/5"
                             >
-                                <ProviderLogo provider={provider} size="md" />
-                                <div className="min-w-0">
-                                    <div className="flex items-center gap-2">
-                                        <p className="font-semibold">{provider.label}</p>
-                                        <Badge variant="outline" className="text-xs">
-                                            {provider.category}
-                                        </Badge>
-                                    </div>
-                                    <p className="mt-1 text-sm text-muted-foreground">{provider.tagline}</p>
-                                    <span className="mt-3 inline-flex items-center text-sm font-medium text-amber-600 dark:text-amber-400">
-                                        Bekijk integratie
-                                        <ArrowRight className="ml-1 size-4 transition-transform group-hover:translate-x-1" />
-                                    </span>
+                                <div className="flex items-center justify-between">
+                                    <ProviderLogo provider={provider} size="md" />
+                                    <Badge variant="outline" className="text-xs">
+                                        {provider.category}
+                                    </Badge>
                                 </div>
+                                <h3 className={cn('mt-4 font-semibold', provider.logo && 'sr-only')}>{provider.label}</h3>
+                                <p className={cn('text-sm text-muted-foreground', provider.logo ? 'mt-4' : 'mt-1')}>
+                                    {provider.tagline}
+                                </p>
+                                <span className="mt-auto inline-flex items-center pt-4 text-sm font-medium text-amber-600 dark:text-amber-400">
+                                    Bekijk integratie
+                                    <ArrowRight className="ml-1 size-4 transition-transform group-hover:translate-x-1" />
+                                </span>
                             </Link>
                         </Reveal>
                     ))}

@@ -32,8 +32,8 @@ return [
         'label' => 'Exact Online',
         'tagline' => 'Boekhouden — NL/BE',
         'category' => 'Boekhouden',
-        'logo' => null,
-        'brand' => null,
+        'logo' => '/img/partners/exact.svg',
+        'brand' => '#e1141d',
         'summary' => 'Koppel je app aan Exact Online-administraties zonder zelf OAuth2, '
             .'token-refresh en division-routing te bouwen. De Hub regelt de koppeling, '
             .'multi-tenant token-opslag en audit-logging.',
@@ -187,8 +187,8 @@ return [
         'label' => 'Mollie',
         'tagline' => 'Betalingen — NL/EU',
         'category' => 'Betalingen',
-        'logo' => null,
-        'brand' => null,
+        'logo' => '/img/partners/mollie.svg',
+        'brand' => '#000000',
         'summary' => 'Handel Mollie-betalingen, mandaten en subscriptions af via één Connect-koppeling. '
             .'De Hub regelt de OAuth-flow, multi-tenant token-opslag, webhook-fanout en audit-logging.',
         'capabilities' => [
@@ -231,8 +231,8 @@ return [
         'label' => 'SnelStart',
         'tagline' => 'Boekhouden — NL',
         'category' => 'Boekhouden',
-        'logo' => null,
-        'brand' => null,
+        'logo' => '/img/partners/snelstart.svg',
+        'brand' => '#0078C9',
         'summary' => 'Lees en werk SnelStart-administraties bij zonder zelf de B2B-API te implementeren. '
             .'De Hub regelt credential-opslag (encrypted at rest) en audit-logging.',
         'capabilities' => [

@@ -5,6 +5,7 @@ import { ProviderLogo } from '@/components/marketing/provider-logo';
 import { Reveal } from '@/components/marketing/reveal';
 import { TrustBar } from '@/components/marketing/trust-bar';
 import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 import ShowcaseLayout from '@/layouts/showcase-layout';
 import type { ProviderSummary } from '@/types';
 
@@ -38,11 +39,15 @@ export default function PartnersIndex({ providers }: { providers: ProviderSummar
                                 className="group flex h-full flex-col rounded-2xl border bg-card p-6 transition-all hover:-translate-y-0.5 hover:border-amber-500/50 hover:shadow-xl hover:shadow-amber-500/5"
                             >
                                 <div className="flex items-center justify-between">
-                                    <ProviderLogo provider={provider} size="lg" />
+                                    <ProviderLogo provider={provider} size="md" />
                                     <Badge variant="outline">{provider.category}</Badge>
                                 </div>
-                                <h2 className="mt-5 text-lg font-semibold">{provider.label}</h2>
-                                <p className="text-sm text-muted-foreground">{provider.tagline}</p>
+                                <h2 className={cn('mt-5 text-lg font-semibold', provider.logo && 'sr-only')}>
+                                    {provider.label}
+                                </h2>
+                                <p className={cn('text-sm text-muted-foreground', provider.logo && 'mt-5')}>
+                                    {provider.tagline}
+                                </p>
                                 <p className="mt-3 flex-1 text-sm text-muted-foreground">{provider.summary}</p>
                                 <span className="mt-5 inline-flex items-center text-sm font-medium text-amber-600 dark:text-amber-400">
                                     Bekijk integratie
