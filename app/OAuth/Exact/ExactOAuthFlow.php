@@ -3,6 +3,7 @@
 namespace App\OAuth\Exact;
 
 use App\Jobs\Exact\DeleteExactWebhookSubscriptionsJob;
+use App\Jobs\Accounting\SyncExactReferenceJob;
 use App\Jobs\Exact\RegisterExactWebhookSubscriptionsJob;
 use App\Models\Account;
 use App\Models\Connection;
@@ -75,6 +76,10 @@ final class ExactOAuthFlow implements OAuthFlow
         // subscribe-handshake mag de OAuth-callback niet blokkeren). No-op als er
         // geen topics geconfigureerd zijn.
         RegisterExactWebhookSubscriptionsJob::dispatch($connection);
+
+        // Spiegel meteen de boekhoud-referentiedata (grootboek/BTW/dagboeken) zodat de
+        // accounting-sync direct lokaal kan resolven zonder live partner-call.
+        SyncExactReferenceJob::dispatch($connection);
 
         return $connection;
     }
