@@ -13,8 +13,8 @@ class SetNoIndexHeaders
         $response = $next($request);
 
         // De Hub is een backend en blijft standaard noindex. De publieke
-        // /partners-showcase is de enige indexeerbare surface.
-        if (! $request->routeIs('partners.*')) {
+        // homepage + /partners-showcase zijn de enige indexeerbare surfaces.
+        if (! $request->routeIs('home', 'partners.*')) {
             $response->headers->set('X-Robots-Tag', 'noindex, nofollow, noarchive, nosnippet');
         }
 

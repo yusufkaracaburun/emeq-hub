@@ -16,6 +16,10 @@ declare(strict_types=1);
  *   tagline       één regel onder de titel
  *   summary       korte alinea
  *   category      'Boekhouden' | 'Betalingen' | …
+ *   logo          ?string  pad naar officieel SVG-logo (bv. '/img/partners/exact.svg').
+ *                 null = de UI toont een merk-veilige monogram-tegel tot het echte
+ *                 logo in public/img/partners/ staat.
+ *   brand         ?string  hex-accent uit de huisstijl (bv. '#E2001A'). null = amber-fallback.
  *   how_it_works  ?list<string>  uitleg-alinea's over het request-pad (optioneel)
  *   capabilities  list<array{title,description}>
  *   endpoints     ?list<array{method,path,target,description}>  Hub→partner endpoint-kaart (optioneel)
@@ -28,6 +32,8 @@ return [
         'label' => 'Exact Online',
         'tagline' => 'Boekhouden — NL/BE',
         'category' => 'Boekhouden',
+        'logo' => null,
+        'brand' => null,
         'summary' => 'Koppel je app aan Exact Online-administraties zonder zelf OAuth2, '
             .'token-refresh en division-routing te bouwen. De Hub regelt de koppeling, '
             .'multi-tenant token-opslag en audit-logging.',
@@ -181,6 +187,8 @@ return [
         'label' => 'Mollie',
         'tagline' => 'Betalingen — NL/EU',
         'category' => 'Betalingen',
+        'logo' => null,
+        'brand' => null,
         'summary' => 'Handel Mollie-betalingen, mandaten en subscriptions af via één Connect-koppeling. '
             .'De Hub regelt de OAuth-flow, multi-tenant token-opslag, webhook-fanout en audit-logging.',
         'capabilities' => [
@@ -223,6 +231,8 @@ return [
         'label' => 'SnelStart',
         'tagline' => 'Boekhouden — NL',
         'category' => 'Boekhouden',
+        'logo' => null,
+        'brand' => null,
         'summary' => 'Lees en werk SnelStart-administraties bij zonder zelf de B2B-API te implementeren. '
             .'De Hub regelt credential-opslag (encrypted at rest) en audit-logging.',
         'capabilities' => [

@@ -24,7 +24,7 @@ class PartnersShowcaseTest extends TestCase
             ->assertInertia(fn (AssertableInertia $page) => $page
                 ->component('partners/index')
                 ->has('providers', 3, fn (AssertableInertia $provider) => $provider
-                    ->hasAll(['key', 'label', 'tagline', 'category', 'summary'])
+                    ->hasAll(['key', 'label', 'tagline', 'category', 'summary', 'logo', 'brand'])
                 )
             );
     }
@@ -74,7 +74,7 @@ class PartnersShowcaseTest extends TestCase
 
     public function test_non_showcase_routes_stay_noindex(): void
     {
-        $this->get('/')->assertHeader('X-Robots-Tag', 'noindex, nofollow, noarchive, nosnippet');
+        $this->get('/up')->assertHeader('X-Robots-Tag', 'noindex, nofollow, noarchive, nosnippet');
     }
 
     public function test_showcase_does_not_leak_tenant_data(): void

@@ -13,11 +13,11 @@ class NoIndexHeaderTest extends TestCase
             ->assertHeader('X-Robots-Tag', 'noindex, nofollow, noarchive, nosnippet');
     }
 
-    public function test_root_endpoint_has_x_robots_tag_header(): void
+    public function test_home_endpoint_is_indexable(): void
     {
         $this->get('/')
             ->assertOk()
-            ->assertHeader('X-Robots-Tag', 'noindex, nofollow, noarchive, nosnippet');
+            ->assertHeaderMissing('X-Robots-Tag');
     }
 
     public function test_robots_txt_disallows_all(): void

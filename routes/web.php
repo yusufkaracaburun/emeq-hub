@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Dev\ExactOAuthTracerController;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\OAuthLandingController;
 use App\Http\Controllers\PartnersController;
 use App\Models\User;
@@ -9,11 +10,9 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', fn () => response()->json([
-    'name' => config('app.name'),
-    'version' => '0.1.0-dev',
-    'status' => 'ok',
-]));
+// Publieke marketing-homepage (indexeerbaar; zie SetNoIndexHeaders). De
+// health-check leeft op /up.
+Route::get('/', [HomeController::class, 'index'])->name('home');
 
 Route::get('/up', function () {
     return response()->json([

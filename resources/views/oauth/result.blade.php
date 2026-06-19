@@ -64,7 +64,10 @@
         html, body { height: 100%; margin: 0; }
         body {
             font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Inter, sans-serif;
-            background: var(--bg);
+            background-color: var(--bg);
+            background-image:
+                radial-gradient(40rem 40rem at 15% -12%, color-mix(in srgb, var(--primary) 16%, transparent), transparent 60%),
+                radial-gradient(34rem 34rem at 90% 0%, color-mix(in srgb, var(--primary) 9%, transparent), transparent 62%);
             color: var(--text);
             display: flex;
             align-items: center;
@@ -78,9 +81,15 @@
             max-width: 440px;
             background: var(--card);
             border: 1px solid var(--border);
-            border-radius: 16px;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, .08), 0 8px 10px -6px rgba(0, 0, 0, .04);
+            border-radius: 20px;
+            box-shadow: 0 24px 50px -12px rgba(0, 0, 0, .20), 0 8px 16px -8px rgba(0, 0, 0, .08);
             overflow: hidden;
+            animation: rise .5s cubic-bezier(.21, .47, .32, .98) both;
+        }
+        @keyframes rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+        @keyframes pop { from { opacity: 0; transform: scale(.82); } to { opacity: 1; transform: scale(1); } }
+        @media (prefers-reduced-motion: reduce) {
+            .card, .icon { animation: none !important; }
         }
         .head {
             display: flex;
@@ -113,9 +122,16 @@
             margin: 0 auto 20px;
             border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
+            animation: pop .45s cubic-bezier(.34, 1.56, .64, 1) .12s both;
         }
-        .icon.ok { background: color-mix(in srgb, var(--ok) 14%, transparent); color: var(--ok); }
-        .icon.bad { background: color-mix(in srgb, var(--bad) 14%, transparent); color: var(--bad); }
+        .icon.ok {
+            background: color-mix(in srgb, var(--ok) 14%, transparent); color: var(--ok);
+            box-shadow: 0 0 0 6px color-mix(in srgb, var(--ok) 8%, transparent);
+        }
+        .icon.bad {
+            background: color-mix(in srgb, var(--bad) 14%, transparent); color: var(--bad);
+            box-shadow: 0 0 0 6px color-mix(in srgb, var(--bad) 8%, transparent);
+        }
         .icon svg { width: 32px; height: 32px; }
         h1 { font-size: 20px; font-weight: 700; margin: 0 0 8px; letter-spacing: -.01em; }
         .sub { color: var(--muted); font-size: 14px; margin: 0 auto 24px; max-width: 340px; }
@@ -145,15 +161,16 @@
         .btn {
             display: inline-block;
             width: 100%;
-            padding: 11px 18px;
-            background: var(--primary);
+            padding: 12px 18px;
+            background: linear-gradient(180deg, color-mix(in srgb, var(--primary) 92%, white), var(--primary));
             color: var(--primary-text);
             font-size: 14px; font-weight: 600;
             text-decoration: none;
-            border-radius: 10px;
-            transition: filter .15s ease;
+            border-radius: 12px;
+            box-shadow: 0 8px 18px -8px color-mix(in srgb, var(--primary) 70%, transparent);
+            transition: filter .15s ease, transform .15s ease;
         }
-        .btn:hover { filter: brightness(.95); }
+        .btn:hover { filter: brightness(.97); transform: translateY(-1px); }
     </style>
 </head>
 <body>

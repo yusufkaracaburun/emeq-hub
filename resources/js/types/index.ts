@@ -4,6 +4,8 @@ export interface ProviderSummary {
     tagline: string;
     category: string;
     summary: string;
+    logo: string | null;
+    brand: string | null;
 }
 
 export interface Capability {
