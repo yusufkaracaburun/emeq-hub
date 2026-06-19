@@ -111,9 +111,6 @@ class ManageAccountingMappingActionTest extends TestCase
                     ['category' => '_default', 'value' => 'gl-def'],
                     ['category' => 'omzet', 'value' => 'gl-omzet'],
                 ],
-                'relations' => [
-                    ['external_id' => 'ext-1', 'value' => 'cust-1'],
-                ],
                 'journal_sales' => '70',
                 'journal_purchase' => '20',
                 'journal_income' => '71',
@@ -126,7 +123,6 @@ class ManageAccountingMappingActionTest extends TestCase
         $this->assertSame([
             'vat_codes' => ['21' => '4', '9' => '2', '0' => '1'],
             'gl_accounts' => ['_default' => 'gl-def', 'omzet' => 'gl-omzet'],
-            'relations' => ['ext-1' => 'cust-1'],
             'journals' => ['sales' => '70', 'purchase' => '20', 'income' => '71', 'expense' => '21'],
         ], $connection->metadata['accounting_mapping']);
     }

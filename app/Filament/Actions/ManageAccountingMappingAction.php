@@ -6,6 +6,7 @@ namespace App\Filament\Actions;
 
 use App\Accounting\AccountingTargetRegistry;
 use App\Models\Connection;
+use App\Models\ConnectionAccountingRef;
 use App\Services\Exact\ExactReferenceData;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Repeater;
@@ -16,15 +17,15 @@ use Filament\Schemas\Components\Section;
 use Filament\Support\Icons\Heroicon;
 
 /**
- * Beheert de per-Connection boekhoud-mapping (`metadata.accounting_mapping`) die de
- * accounting-sync gebruikt om canonical waarden naar provider-referenties te vertalen
- * (tarief→VATCode, categorie→GLAccount, relatie→GUID, doc-type→dagboek). Alleen
- * zichtbaar voor providers die een AccountingTarget hebben (nu Exact).
+ * Override-pad voor de per-Connection boekhoud-mapping (`metadata.accounting_mapping`):
+ * tarief→VATCode-Code, categorie→GL-Code, doc-type→dagboek-Code. Normaal hoeft niemand
+ * hier iets te doen — de Hub synct + auto-derivet bij connect; dit verfijnt enkel. Alleen
+ * zichtbaar voor providers met een AccountingTarget (nu Exact).
  *
- * De keuzevelden worden gevuld met live Exact-referentiedata (VATCodes, GLAccounts,
- * crm/Accounts, Journals) via ExactReferenceData; lukt die fetch niet (pending
- * Connection, geen division, Exact onbereikbaar) dan valt elk veld terug op vrije
- * tekst-invoer. De opslag-vorm in metadata blijft identiek aan wat de resolver leest.
+ * De mapping draagt enkel stabiele Codes; GL-Code → native GUID resolved de sync lokaal
+ * tegen de mirror. Relaties staan níét in de mapping — ze worden lazy resolve-or-learned
+ * uit de party-data. GL-keuzes komen uit de mirror; VAT/dagboek uit live ExactReferenceData,
+ * met terugval op vrije tekst-invoer.
  */
 final class ManageAccountingMappingAction
 {
@@ -60,8 +61,7 @@ final class ManageAccountingMappingAction
     {
         $reference = new ExactReferenceData($record);
         $vatCodes = $reference->vatCodes();
-        $glAccounts = $reference->glAccounts();
-        $relations = $reference->relations();
+        $glAccounts = self::glOptionsFromMirror($record);
         $journals = $reference->journals();
 
         return [
@@ -72,7 +72,7 @@ final class ManageAccountingMappingAction
                     self::optionField('vat_9', '9%', $vatCodes),
                     self::optionField('vat_0', '0%', $vatCodes),
                 ]),
-            Section::make('Grootboekrekeningen (categorie → GLAccount)')
+            Section::make('Grootboekrekeningen (categorie → GL-Code)')
                 ->schema([
                     Repeater::make('gl_accounts')
                         ->label('')
@@ -82,20 +82,11 @@ final class ManageAccountingMappingAction
                             TextInput::make('category')
                                 ->label('Categorie')
                                 ->helperText('Gebruik "_default" als fallback-rekening voor regels zonder eigen categorie.'),
-                            self::optionField('value', 'GLAccount', $glAccounts),
+                            self::optionField('value', 'GL-Code', $glAccounts),
                         ]),
                 ]),
-            Section::make('Relaties (Account external_id → crm/Account)')
-                ->schema([
-                    Repeater::make('relations')
-                        ->label('')
-                        ->addActionLabel('Relatie toevoegen')
-                        ->columns(2)
-                        ->schema([
-                            TextInput::make('external_id')->label('external_id'),
-                            self::optionField('value', 'crm/Account', $relations),
-                        ]),
-                ]),
+            // Relaties staan niet in de mapping — ze worden lazy resolve-or-learned uit de
+            // party-data van het document (ExactRelationResolver).
             Section::make('Dagboeken (Journal)')
                 ->columns(2)
                 ->schema([
@@ -107,6 +98,25 @@ final class ManageAccountingMappingAction
                         ->helperText('Leeg = inkoopdagboek.'),
                 ]),
         ];
+    }
+
+    /**
+     * GL-keuzelijst uit de gesynchroniseerde mirror ([Code => label]); leeg (nog niet
+     * gesynct) valt terug op vrije invoer. De mapping slaat de Code op, niet de GUID.
+     *
+     * @return array<string, string>
+     */
+    private static function glOptionsFromMirror(Connection $record): array
+    {
+        return ConnectionAccountingRef::query()
+            ->where('connection_id', $record->getKey())
+            ->where('kind', ConnectionAccountingRef::KIND_GL)
+            ->orderBy('code')
+            ->get()
+            ->mapWithKeys(fn (ConnectionAccountingRef $r): array => [
+                $r->code => $r->label !== null && $r->label !== '' ? "{$r->code} — {$r->label}" : $r->code,
+            ])
+            ->all();
     }
 
     /**
@@ -141,7 +151,6 @@ final class ManageAccountingMappingAction
             'vat_9' => $vat['9'] ?? null,
             'vat_0' => $vat['0'] ?? null,
             'gl_accounts' => self::toRows($mapping['gl_accounts'] ?? [], 'category'),
-            'relations' => self::toRows($mapping['relations'] ?? [], 'external_id'),
             'journal_sales' => $journals['sales'] ?? null,
             'journal_purchase' => $journals['purchase'] ?? null,
             'journal_income' => $journals['income'] ?? null,
@@ -162,7 +171,6 @@ final class ManageAccountingMappingAction
                 '0' => $data['vat_0'] ?? null,
             ]),
             'gl_accounts' => self::fromRows($data['gl_accounts'] ?? [], 'category'),
-            'relations' => self::fromRows($data['relations'] ?? [], 'external_id'),
             'journals' => self::scalarMap([
                 'sales' => $data['journal_sales'] ?? null,
                 'purchase' => $data['journal_purchase'] ?? null,
