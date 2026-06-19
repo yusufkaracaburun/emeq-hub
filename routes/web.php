@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AccessRequestController;
 use App\Http\Controllers\Dev\ExactOAuthTracerController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\OAuthLandingController;
@@ -36,6 +37,13 @@ Route::middleware('signed')->group(function (): void {
 // via routeIs('partners.*')); toont alleen statische provider-content, geen tenant-data.
 Route::get('/partners', [PartnersController::class, 'index'])->name('partners.index');
 Route::get('/partners/{provider}', [PartnersController::class, 'show'])->name('partners.show');
+
+// Publieke koppel-intake. Indexeerbaar (uitgezonderd van SetNoIndexHeaders).
+// Geen auth → POST achter throttle + honeypot (zie AccessRequestController).
+Route::get('/koppelen', [AccessRequestController::class, 'create'])->name('koppelen');
+Route::post('/koppelen', [AccessRequestController::class, 'store'])
+    ->middleware('throttle:6,1')
+    ->name('koppelen.store');
 
 // Dev-only routes — STRICT guard. `! app()->isProduction()` is te breed: laat
 // `/admin/quick-login` open op preview/staging-deploys (Laravel Cloud, etc.).

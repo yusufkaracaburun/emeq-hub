@@ -10,6 +10,7 @@ import type { SharedProps } from '@/types';
 const NAV = [
     { label: 'Home', href: '/' },
     { label: 'Integraties', href: '/partners' },
+    { label: 'Koppelen', href: '/koppelen' },
     { label: 'API-docs', href: '/docs/api', external: true },
 ];
 
@@ -58,7 +59,7 @@ export default function ShowcaseLayout({ children }: PropsWithChildren) {
                     <div className="flex items-center gap-1">
                         <ThemeToggle />
                         <Button asChild size="sm" className="hidden sm:inline-flex">
-                            <Link href="/partners">Bekijk integraties</Link>
+                            <Link href="/koppelen">Koppelen</Link>
                         </Button>
                         <Button
                             variant="ghost"

@@ -67,13 +67,13 @@ export default function Home({ providers }: { providers: ProviderSummary[] }) {
                     </p>
                     <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
                         <Button asChild size="lg">
-                            <Link href="/partners">
-                                Bekijk integraties
+                            <Link href="/koppelen">
+                                Koppel je app
                                 <ArrowRight />
                             </Link>
                         </Button>
                         <Button asChild size="lg" variant="outline">
-                            <a href="mailto:support@emeq.nl">Neem contact op</a>
+                            <Link href="/partners">Bekijk integraties</Link>
                         </Button>
                     </div>
                     <TrustBar className="mt-10" />
@@ -153,8 +153,8 @@ export default function Home({ providers }: { providers: ProviderSummary[] }) {
                 <CtaSection
                     title="Klaar om te koppelen?"
                     description="Vraag een Hub-koppeling aan en bouw vandaag nog tegen één API in plaats van drie."
-                    primary={{ label: 'Bekijk integraties', href: '/partners' }}
-                    secondary={{ label: 'Neem contact op', href: 'mailto:support@emeq.nl' }}
+                    primary={{ label: 'Koppel je app', href: '/koppelen' }}
+                    secondary={{ label: 'Bekijk integraties', href: '/partners' }}
                 />
             </section>
         </ShowcaseLayout>
