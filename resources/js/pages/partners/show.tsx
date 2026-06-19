@@ -84,7 +84,7 @@ export default function PartnerShow({ provider }: { provider: ProviderDetail }) 
                         <div className="mt-6 grid gap-5 md:grid-cols-2">
                             {provider.use_cases.map((useCase, i) => (
                                 <Reveal key={useCase.title} delay={i * 0.05}>
-                                    <Card className="h-full transition-colors hover:border-amber-500/40">
+                                    <Card className="h-full shadow-sm shadow-amber-500/5 transition-all hover:-translate-y-0.5 hover:border-amber-500/50 hover:shadow-lg hover:shadow-amber-500/10">
                                         <CardHeader>
                                             <CardTitle className="text-base">{useCase.title}</CardTitle>
                                         </CardHeader>
@@ -167,7 +167,7 @@ export default function PartnerShow({ provider }: { provider: ProviderDetail }) 
                                                         {index + 1}
                                                     </span>
                                                     <div>
-                                                        <p className="font-medium text-foreground">{step.title}</p>
+                                                        <p className="font-semibold text-foreground">{step.title}</p>
                                                         <p className="mt-0.5 text-muted-foreground">{step.description}</p>
                                                     </div>
                                                 </li>

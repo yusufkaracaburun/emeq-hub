@@ -12,7 +12,7 @@ import type { ProviderSummary } from '@/types';
 export default function PartnersIndex({ providers }: { providers: ProviderSummary[] }) {
     return (
         <ShowcaseLayout>
-            <Head title="Integraties" />
+            <Head title="Integraties — Exact, Mollie, SnelStart" />
 
             <HeroShell className="pb-0">
                 <div className="mx-auto max-w-3xl text-center">
@@ -36,7 +36,7 @@ export default function PartnersIndex({ providers }: { providers: ProviderSummar
                         <Reveal key={provider.key} delay={i * 0.06}>
                             <Link
                                 href={`/partners/${provider.key}`}
-                                className="group flex h-full flex-col rounded-2xl border bg-card p-6 transition-all hover:-translate-y-0.5 hover:border-amber-500/50 hover:shadow-xl hover:shadow-amber-500/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                                className="group flex h-full flex-col rounded-2xl border bg-card p-6 shadow-sm shadow-amber-500/5 transition-all hover:-translate-y-0.5 hover:border-amber-500/50 hover:shadow-xl hover:shadow-amber-500/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                             >
                                 <div className="flex items-center justify-between">
                                     <ProviderLogo provider={provider} size="md" />

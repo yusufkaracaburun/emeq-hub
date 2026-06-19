@@ -12,7 +12,7 @@ export function FeatureCard({ icon: Icon, title, children, className }: FeatureC
     return (
         <div
             className={cn(
-                'group relative h-full rounded-2xl border bg-card p-6 transition-all hover:-translate-y-0.5 hover:border-amber-500/50 hover:shadow-lg hover:shadow-amber-500/5',
+                'group relative h-full rounded-2xl border bg-card p-6 shadow-sm shadow-amber-500/5 transition-all hover:-translate-y-0.5 hover:border-amber-500/50 hover:shadow-lg hover:shadow-amber-500/10',
                 className,
             )}
         >
