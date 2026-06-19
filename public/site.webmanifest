@@ -1,0 +1,13 @@
+{
+    "name": "Emeq Hub",
+    "short_name": "Emeq Hub",
+    "description": "Integratieplatform voor Nederlandse boekhoud- en betaal-API's — Exact, Mollie, SnelStart.",
+    "start_url": "/",
+    "display": "standalone",
+    "theme_color": "#f59e0b",
+    "background_color": "#0a0a0a",
+    "icons": [
+        { "src": "/favicon.svg", "type": "image/svg+xml", "sizes": "any", "purpose": "any" },
+        { "src": "/apple-touch-icon.png", "type": "image/png", "sizes": "180x180" }
+    ]
+}
