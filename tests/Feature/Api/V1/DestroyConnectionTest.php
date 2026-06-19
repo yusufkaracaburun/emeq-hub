@@ -2,12 +2,15 @@
 
 namespace Tests\Feature\Api\V1;
 
+use App\Jobs\Exact\DeleteExactWebhookSubscriptionsJob;
 use App\Models\Account;
 use App\Models\Connection;
 use App\Models\Consumer;
 use App\Sanctum\TokenAbilities;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Queue;
+use Laravel\Pennant\Feature;
 use Tests\TestCase;
 
 class DestroyConnectionTest extends TestCase
@@ -67,8 +70,10 @@ class DestroyConnectionTest extends TestCase
             ->assertForbidden();
     }
 
-    public function test_exact_write_token_can_revoke_own_exact_connection(): void
+    public function test_exact_write_token_revoke_tears_down_provider_and_marks_revoked(): void
     {
+        Queue::fake();
+
         [$consumer, $token] = $this->consumerWithToken([TokenAbilities::EXACT_WRITE]);
         $account = Account::factory()->for($consumer)->create();
         $connection = Connection::factory()->forExact()->for($account)->create();
@@ -77,7 +82,36 @@ class DestroyConnectionTest extends TestCase
             ->deleteJson("/v1/connections/{$connection->id}")
             ->assertNoContent();
 
-        $this->assertNotNull($connection->fresh()->revoked_at);
+        // Loskoppelen via de consumer-API moet de Exact-OAuthFlow draaien: de
+        // webhook-subscriptions opzeggen én status op 'revoked' zetten — niet
+        // alleen revoked_at (anders dangling subscriptions bij Exact).
+        Queue::assertPushed(DeleteExactWebhookSubscriptionsJob::class);
+
+        $fresh = $connection->fresh();
+        $this->assertSame('revoked', $fresh->status);
+        $this->assertNotNull($fresh->revoked_at);
+    }
+
+    public function test_disabled_provider_still_revokes_locally_without_teardown(): void
+    {
+        Queue::fake();
+        Feature::define('provider-exact-enabled', fn () => false);
+
+        [$consumer, $token] = $this->consumerWithToken([TokenAbilities::EXACT_WRITE]);
+        $account = Account::factory()->for($consumer)->create();
+        $connection = Connection::factory()->forExact()->for($account)->create();
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->deleteJson("/v1/connections/{$connection->id}")
+            ->assertNoContent();
+
+        // Kill-switch mag deprovisioning niet blokkeren: lokaal revoken, geen
+        // provider-teardown.
+        Queue::assertNotPushed(DeleteExactWebhookSubscriptionsJob::class);
+
+        $fresh = $connection->fresh();
+        $this->assertSame('revoked', $fresh->status);
+        $this->assertNotNull($fresh->revoked_at);
     }
 
     public function test_exact_read_only_token_cannot_revoke_returns_403(): void
