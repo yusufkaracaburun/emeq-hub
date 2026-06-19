@@ -16,7 +16,8 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
- * Inbox voor onboarding-leads vanaf de publieke /koppelen-pagina. Read-mostly:
+ * Inbox voor onboarding-leads vanaf de publieke koppel-formulieren op de
+ * partner-pagina's. Read-mostly:
  * staff bekijkt aanvragen en markeert ze afgehandeld; aanmaken/bewerken gebeurt
  * niet hier (de aanvraag komt van de publieke form, onboarden via de
  * OnboardConsumer-wizard).

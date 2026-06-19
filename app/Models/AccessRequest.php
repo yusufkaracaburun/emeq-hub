@@ -10,7 +10,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
- * Onboarding-lead vanaf de publieke /koppelen-intake. Bewust losgekoppeld van
+ * Onboarding-lead vanaf de publieke koppel-intake (formulier op de
+ * partner-pagina's). Bewust losgekoppeld van
  * het Connection-model: dit is een aanvraag om gekoppeld te worden, geen
  * OAuth-koppeling.
  */

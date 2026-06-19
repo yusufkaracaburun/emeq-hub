@@ -130,7 +130,7 @@ export function AccessRequestForm({ provider }: { provider: { key: string; label
                                 value={form.data.message}
                                 onChange={(e) => form.setData('message', e.target.value)}
                                 aria-invalid={Boolean(form.errors.message)}
-                                className="mt-1.5"
+                                className="mt-1.5 resize-none"
                                 placeholder={`Waar wil je mee koppelen via ${provider.label} en wat is je tijdlijn?`}
                             />
                             <FieldError message={form.errors.message} />

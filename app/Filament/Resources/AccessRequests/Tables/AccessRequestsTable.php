@@ -76,7 +76,7 @@ class AccessRequestsTable
             ->defaultSort('created_at', 'desc')
             ->poll('30s')
             ->emptyStateHeading('Nog geen koppel-aanvragen')
-            ->emptyStateDescription('Aanvragen vanaf de publieke /koppelen-pagina verschijnen hier.')
+            ->emptyStateDescription('Aanvragen vanaf de koppel-formulieren op de partner-pagina\'s verschijnen hier.')
             ->emptyStateIcon('heroicon-o-envelope')
             ->recordUrl(fn (AccessRequest $record): string => AccessRequestResource::getUrl('view', ['record' => $record]));
     }

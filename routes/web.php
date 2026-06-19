@@ -38,9 +38,9 @@ Route::middleware('signed')->group(function (): void {
 Route::get('/partners', [PartnersController::class, 'index'])->name('partners.index');
 Route::get('/partners/{provider}', [PartnersController::class, 'show'])->name('partners.show');
 
-// Publieke koppel-intake. Indexeerbaar (uitgezonderd van SetNoIndexHeaders).
+// Publieke koppel-intake — het formulier leeft op elke partner-pagina
+// (partners/show), preselect op die provider. Geen aparte GET-pagina meer.
 // Geen auth → POST achter throttle + honeypot (zie AccessRequestController).
-Route::get('/koppelen', [AccessRequestController::class, 'create'])->name('koppelen');
 Route::post('/koppelen', [AccessRequestController::class, 'store'])
     ->middleware('throttle:6,1')
     ->name('koppelen.store');

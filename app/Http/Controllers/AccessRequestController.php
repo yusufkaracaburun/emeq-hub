@@ -7,27 +7,17 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreAccessRequestRequest;
 use App\Mail\AccessRequestSubmitted;
 use App\Models\AccessRequest;
-use App\Support\ProviderShowcase;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
-use Inertia\Inertia;
-use Inertia\Response;
 
 /**
- * Publieke /koppelen-intake. Vervangt de handmatige "mail support"-stap door een
- * gestructureerde aanvraag die in access_requests landt; Emeq onboardt daarna via
- * de OnboardConsumer-wizard. Géén auth — wel honeypot + throttle tegen spam.
+ * Publieke koppel-intake. Het formulier staat op elke partner-pagina (preselect
+ * op die provider) en POST hierheen; de aanvraag landt in access_requests en Emeq
+ * onboardt via de OnboardConsumer-wizard. Géén auth — wel honeypot + throttle.
  */
 class AccessRequestController extends Controller
 {
-    public function create(ProviderShowcase $showcase): Response
-    {
-        return Inertia::render('koppelen', [
-            'providers' => $showcase->summaries(),
-        ]);
-    }
-
     public function store(StoreAccessRequestRequest $request): RedirectResponse
     {
         // Honeypot: gevuld = bot. Stille no-op zodat we 'm niet tippen.
@@ -44,6 +34,10 @@ class AccessRequestController extends Controller
             }
         }
 
-        return redirect()->route('koppelen')->with('submitted', true);
+        // Terug naar de partner-pagina waar het formulier staat (preselect-provider
+        // = de eerste/enige gekozen integratie) zodat de success-state daar landt.
+        return redirect()
+            ->route('partners.show', $request->validated('providers')[0])
+            ->with('submitted', true);
     }
 }

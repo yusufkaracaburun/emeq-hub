@@ -1,13 +1,14 @@
 import { Head, Link } from '@inertiajs/react';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { AccessRequestForm } from '@/components/marketing/access-request-form';
 import { CodeBlock } from '@/components/marketing/code-block';
-import { CtaSection } from '@/components/marketing/cta-section';
 import { HeroShell } from '@/components/marketing/hero';
 import { ProviderLogo } from '@/components/marketing/provider-logo';
 import { Reveal } from '@/components/marketing/reveal';
 import { TrustBar } from '@/components/marketing/trust-bar';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import ShowcaseLayout from '@/layouts/showcase-layout';
@@ -63,6 +64,14 @@ export default function PartnerShow({ provider }: { provider: ProviderDetail }) 
                     </div>
                 </div>
                 <p className="mt-6 max-w-3xl text-lg text-muted-foreground">{provider.summary}</p>
+
+                <div className="mt-8">
+                    <Button asChild size="lg">
+                        <a href="#aanvragen">
+                            Koppeling aanvragen <ArrowRight />
+                        </a>
+                    </Button>
+                </div>
             </HeroShell>
 
             <div className="mx-auto max-w-5xl px-4">
@@ -107,15 +116,17 @@ export default function PartnerShow({ provider }: { provider: ProviderDetail }) 
                     </div>
                 </section>
 
-                <section className="border-t py-12">
-                    <TrustBar className="justify-start" />
-                    <div className="mt-10">
-                        <CtaSection
-                            title={`Aan de slag met ${provider.label}?`}
-                            description="Wij regelen de koppeling en de techniek. Vraag een koppeling aan of stel je vraag — we denken met je mee."
-                            primary={{ label: 'Neem contact op', href: 'mailto:support@emeq.nl' }}
-                            secondary={{ label: 'Alle integraties', href: '/partners' }}
-                        />
+                <section id="aanvragen" className="scroll-mt-24 border-t py-12">
+                    <div className="grid gap-10 lg:grid-cols-2 lg:items-start">
+                        <div>
+                            <h2 className="text-2xl font-semibold">Aan de slag met {provider.label}</h2>
+                            <p className="mt-2 max-w-md text-muted-foreground">
+                                Vraag een koppeling aan — wij zetten ze klaar met de juiste rechten. Geen OAuth-app of
+                                token-opslag aan jouw kant; jij bouwt tegen één API.
+                            </p>
+                            <TrustBar className="mt-8 justify-start" />
+                        </div>
+                        <AccessRequestForm provider={{ key: provider.key, label: provider.label }} />
                     </div>
                 </section>
 

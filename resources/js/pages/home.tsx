@@ -67,13 +67,13 @@ export default function Home({ providers }: { providers: ProviderSummary[] }) {
                     </p>
                     <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
                         <Button asChild size="lg">
-                            <Link href="/koppelen">
+                            <Link href="/partners">
                                 Koppel je app
                                 <ArrowRight />
                             </Link>
                         </Button>
                         <Button asChild size="lg" variant="outline">
-                            <Link href="/partners">Bekijk integraties</Link>
+                            <a href="/docs/api">API-docs</a>
                         </Button>
                     </div>
                     <TrustBar className="mt-10" />
@@ -127,7 +127,7 @@ export default function Home({ providers }: { providers: ProviderSummary[] }) {
                         <Reveal key={provider.key} delay={i * 0.05}>
                             <Link
                                 href={`/partners/${provider.key}`}
-                                className="group flex h-full flex-col rounded-2xl border bg-card p-6 transition-all hover:-translate-y-0.5 hover:border-amber-500/50 hover:shadow-lg hover:shadow-amber-500/5"
+                                className="group flex h-full flex-col rounded-2xl border bg-card p-6 transition-all hover:-translate-y-0.5 hover:border-amber-500/50 hover:shadow-lg hover:shadow-amber-500/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                             >
                                 <div className="flex items-center justify-between">
                                     <ProviderLogo provider={provider} size="md" />
@@ -153,8 +153,8 @@ export default function Home({ providers }: { providers: ProviderSummary[] }) {
                 <CtaSection
                     title="Klaar om te koppelen?"
                     description="Vraag een Hub-koppeling aan en bouw vandaag nog tegen één API in plaats van drie."
-                    primary={{ label: 'Koppel je app', href: '/koppelen' }}
-                    secondary={{ label: 'Bekijk integraties', href: '/partners' }}
+                    primary={{ label: 'Koppel je app', href: '/partners' }}
+                    secondary={{ label: 'API-docs', href: '/docs/api' }}
                 />
             </section>
         </ShowcaseLayout>

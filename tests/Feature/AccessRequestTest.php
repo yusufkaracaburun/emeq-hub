@@ -13,7 +13,8 @@ use Inertia\Testing\AssertableInertia;
 use Tests\TestCase;
 
 /**
- * Publieke /koppelen-intake: render, opslag, validatie, honeypot, indexering.
+ * Publieke koppel-intake: het formulier staat op elke partner-pagina (preselect),
+ * POST /koppelen — opslag, validatie, honeypot, redirect-terug, indexering.
  */
 class AccessRequestTest extends TestCase
 {
@@ -34,29 +35,30 @@ class AccessRequestTest extends TestCase
         ], $overrides);
     }
 
-    public function test_koppelen_page_renders_with_providers(): void
+    public function test_partner_page_renders_with_provider(): void
     {
-        $this->get('/koppelen')
+        $this->get('/partners/exact')
             ->assertOk()
             ->assertInertia(fn (AssertableInertia $page) => $page
-                ->component('koppelen')
-                ->has('providers', 3)
+                ->component('partners/show')
+                ->where('provider.key', 'exact')
             );
     }
 
-    public function test_valid_submission_is_stored_and_flashes_success(): void
+    public function test_valid_submission_is_stored_and_redirects_to_partner(): void
     {
         Mail::fake();
 
-        $this->post('/koppelen', $this->validPayload())
-            ->assertRedirect(route('koppelen'))
+        $this->from(route('partners.show', 'exact'))
+            ->post('/koppelen', $this->validPayload(['providers' => ['exact']]))
+            ->assertRedirect(route('partners.show', 'exact'))
             ->assertSessionHas('submitted', true);
 
         $this->assertDatabaseCount('access_requests', 1);
 
         $record = AccessRequest::first();
         $this->assertSame('Naschool BV', $record->company);
-        $this->assertSame(['exact', 'mollie'], $record->providers);
+        $this->assertSame(['exact'], $record->providers);
         $this->assertSame('new', $record->status);
 
         Mail::assertSent(AccessRequestSubmitted::class);
@@ -82,22 +84,23 @@ class AccessRequestTest extends TestCase
     {
         Mail::fake();
 
-        $this->post('/koppelen', $this->validPayload(['website' => 'http://spam.example']))
-            ->assertRedirect(route('koppelen'))
+        $this->from(route('partners.show', 'exact'))
+            ->post('/koppelen', $this->validPayload(['website' => 'http://spam.example']))
+            ->assertRedirect(route('partners.show', 'exact'))
             ->assertSessionHas('submitted', true);
 
         $this->assertDatabaseCount('access_requests', 0);
         Mail::assertNothingSent();
     }
 
-    public function test_koppelen_is_indexable(): void
+    public function test_partner_page_is_indexable(): void
     {
-        $this->get('/koppelen')->assertHeaderMissing('X-Robots-Tag');
+        $this->get('/partners/exact')->assertHeaderMissing('X-Robots-Tag');
     }
 
-    public function test_robots_txt_allows_koppelen(): void
+    public function test_robots_txt_allows_partners(): void
     {
-        $this->assertStringContainsString('Allow: /koppelen', file_get_contents(public_path('robots.txt')));
+        $this->assertStringContainsString('Allow: /partners', file_get_contents(public_path('robots.txt')));
     }
 
     public function test_navigation_badge_counts_new_requests(): void
