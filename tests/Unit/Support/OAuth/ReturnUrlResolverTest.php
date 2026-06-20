@@ -60,4 +60,45 @@ class ReturnUrlResolverTest extends TestCase
         $this->assertNull($this->resolver->resolve($consumer, 'https://evil.test'));
         $this->assertNull($this->resolver->resolve($consumer, null));
     }
+
+    public function test_accepts_tenant_subdomain_of_same_base_domain(): void
+    {
+        // Consumer-app op admin.emeq.nl, tenant-SPA op bob.emeq.nl → toegestaan,
+        // anders landt de tenant na connect op het verkeerde subdomein.
+        $consumer = new Consumer(['app_url' => 'https://admin.emeq.nl']);
+
+        $this->assertSame(
+            'https://bob.emeq.nl/integraties/klaar',
+            $this->resolver->resolve($consumer, 'https://bob.emeq.nl/integraties/klaar'),
+        );
+        $this->assertSame(
+            'https://emeq.nl/x',
+            $this->resolver->resolve($consumer, 'https://emeq.nl/x'),
+        );
+    }
+
+    public function test_rejects_other_consumer_domain(): void
+    {
+        $consumer = new Consumer(['app_url' => 'https://admin.emeq.nl']);
+
+        $this->assertSame(
+            'https://admin.emeq.nl',
+            $this->resolver->resolve($consumer, 'https://admin.planny.nl/steal'),
+        );
+    }
+
+    public function test_rejects_lookalike_suffix_host(): void
+    {
+        $consumer = new Consumer(['app_url' => 'https://admin.emeq.nl']);
+
+        // emeq.nl.evil.com en xemeq.nl mogen niet matchen op het basisdomein.
+        $this->assertSame(
+            'https://admin.emeq.nl',
+            $this->resolver->resolve($consumer, 'https://emeq.nl.evil.com/steal'),
+        );
+        $this->assertSame(
+            'https://admin.emeq.nl',
+            $this->resolver->resolve($consumer, 'https://xemeq.nl/steal'),
+        );
+    }
 }
