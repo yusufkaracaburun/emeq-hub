@@ -140,4 +140,26 @@ class ConsumerTokenActionTest extends TestCase
             ->withArgs(fn (string $key, mixed $value): bool => str_starts_with($key, 'pat-flash-name:') && $value === 'Cache PAT')
             ->once();
     }
+
+    /**
+     * De Kopieer-knop moet werken op http://hub.emeq.test (geen secure context →
+     * navigator.clipboard is undefined). De blade-view moet daarom een
+     * execCommand-fallback renderen, anders doet de knop daar stilletjes niets.
+     */
+    public function test_pat_flash_copy_button_renders_clipboard_fallback(): void
+    {
+        $this->seedRoles();
+        $admin = User::factory()->create();
+        $admin->assignRole('staff');
+        $admin->givePermissionTo('manage-consumers');
+
+        $this->actingAs($admin);
+
+        Cache::put('pat-flash:user:'.$admin->id, '4|plain-token-for-render');
+        Cache::put('pat-flash-name:user:'.$admin->id, 'Render PAT');
+
+        Livewire::test(ListConsumers::class)
+            ->assertSee('fallbackCopy', false)
+            ->assertSee('document.execCommand', false);
+    }
 }

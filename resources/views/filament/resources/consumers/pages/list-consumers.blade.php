@@ -36,10 +36,27 @@ Twee write-paden gebruiken twee verschillende keys:
                 x-data="{
                     copied: false,
                     copy() {
-                        navigator.clipboard.writeText(this.$refs.tokenCode.innerText).then(() => {
-                            this.copied = true;
-                            setTimeout(() => { this.copied = false; }, 2000);
-                        });
+                        const text = this.$refs.tokenCode.innerText;
+                        const ok = () => { this.copied = true; setTimeout(() => { this.copied = false; }, 2000); };
+                        // navigator.clipboard bestaat alleen in een secure context (HTTPS of localhost);
+                        // op http://hub.emeq.test is dat undefined → val terug op execCommand.
+                        if (navigator.clipboard && window.isSecureContext) {
+                            navigator.clipboard.writeText(text).then(ok).catch(() => this.fallbackCopy(text, ok));
+                        } else {
+                            this.fallbackCopy(text, ok);
+                        }
+                    },
+                    fallbackCopy(text, ok) {
+                        const ta = document.createElement('textarea');
+                        ta.value = text;
+                        ta.style.position = 'fixed';
+                        ta.style.top = '0';
+                        ta.style.opacity = '0';
+                        document.body.appendChild(ta);
+                        ta.focus();
+                        ta.select();
+                        try { document.execCommand('copy'); ok(); } catch (e) {}
+                        ta.remove();
                     },
                 }"
                 class="space-y-3"
@@ -77,10 +94,25 @@ Twee write-paden gebruiken twee verschillende keys:
                 x-data="{
                     copied: false,
                     copy() {
-                        navigator.clipboard.writeText(this.$refs.secretCode.innerText).then(() => {
-                            this.copied = true;
-                            setTimeout(() => { this.copied = false; }, 2000);
-                        });
+                        const text = this.$refs.secretCode.innerText;
+                        const ok = () => { this.copied = true; setTimeout(() => { this.copied = false; }, 2000); };
+                        if (navigator.clipboard && window.isSecureContext) {
+                            navigator.clipboard.writeText(text).then(ok).catch(() => this.fallbackCopy(text, ok));
+                        } else {
+                            this.fallbackCopy(text, ok);
+                        }
+                    },
+                    fallbackCopy(text, ok) {
+                        const ta = document.createElement('textarea');
+                        ta.value = text;
+                        ta.style.position = 'fixed';
+                        ta.style.top = '0';
+                        ta.style.opacity = '0';
+                        document.body.appendChild(ta);
+                        ta.focus();
+                        ta.select();
+                        try { document.execCommand('copy'); ok(); } catch (e) {}
+                        ta.remove();
                     },
                 }"
                 class="space-y-3"
