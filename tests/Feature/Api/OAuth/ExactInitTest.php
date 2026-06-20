@@ -115,6 +115,40 @@ class ExactInitTest extends TestCase
         $this->assertSame(1, Connection::where('account_id', $account->id)->where('provider', 'exact')->count());
     }
 
+    public function test_init_derives_return_url_from_browser_origin_without_explicit_param(): void
+    {
+        $consumer = Consumer::factory()->create(['app_url' => 'https://admin.emeq.nl']);
+        $account = $consumer->accounts()->create([
+            'external_id' => 'school1',
+            'display_name' => 'School 1',
+        ]);
+        $token = $consumer->createToken('t', [TokenAbilities::EXACT_WRITE])->plainTextToken;
+
+        // Geen return_url in de body; de browser-Origin (tenant-subdomein) drijft
+        // de terugkeer — consumer hoeft niets aan te passen.
+        $this->withHeaders(['Authorization' => "Bearer {$token}", 'Origin' => 'https://school1.emeq.nl'])
+            ->postJson('/v1/oauth/exact/init', ['account_external_id' => 'school1'])
+            ->assertOk();
+
+        $this->assertSame('https://school1.emeq.nl', $account->connections()->first()->oauth_return_url);
+    }
+
+    public function test_init_ignores_foreign_origin_and_falls_back_to_app_url(): void
+    {
+        $consumer = Consumer::factory()->create(['app_url' => 'https://admin.emeq.nl']);
+        $account = $consumer->accounts()->create([
+            'external_id' => 'school1',
+            'display_name' => 'School 1',
+        ]);
+        $token = $consumer->createToken('t', [TokenAbilities::EXACT_WRITE])->plainTextToken;
+
+        $this->withHeaders(['Authorization' => "Bearer {$token}", 'Origin' => 'https://evil.example'])
+            ->postJson('/v1/oauth/exact/init', ['account_external_id' => 'school1'])
+            ->assertOk();
+
+        $this->assertSame('https://admin.emeq.nl', $account->connections()->first()->oauth_return_url);
+    }
+
     public function test_init_without_ability_returns_403(): void
     {
         $consumer = Consumer::factory()->create();

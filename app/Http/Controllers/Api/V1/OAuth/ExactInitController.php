@@ -47,7 +47,7 @@ class ExactInitController extends Controller
             $account,
             Provider::Exact,
             $state,
-            $this->returnUrls->resolve($consumer, $validated['return_url'] ?? null),
+            $this->returnUrls->resolve($consumer, $validated['return_url'] ?? null, $request->headers->get('Origin')),
         );
 
         // Exact gebruikt géén scopes.

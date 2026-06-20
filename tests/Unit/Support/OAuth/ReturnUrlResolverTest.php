@@ -101,4 +101,36 @@ class ReturnUrlResolverTest extends TestCase
             $this->resolver->resolve($consumer, 'https://xemeq.nl/steal'),
         );
     }
+
+    public function test_uses_browser_origin_when_no_return_url_and_origin_matches_domain(): void
+    {
+        // Consumer stuurt niets mee; de browser-Origin (bob.emeq.nl) drijft de
+        // terugkeer — zo werkt het zonder code-wijziging bij de consumer.
+        $consumer = new Consumer(['app_url' => 'https://admin.emeq.nl']);
+
+        $this->assertSame(
+            'https://bob.emeq.nl',
+            $this->resolver->resolve($consumer, null, 'https://bob.emeq.nl'),
+        );
+    }
+
+    public function test_explicit_return_url_wins_over_origin(): void
+    {
+        $consumer = new Consumer(['app_url' => 'https://admin.emeq.nl']);
+
+        $this->assertSame(
+            'https://bob.emeq.nl/instellingen',
+            $this->resolver->resolve($consumer, 'https://bob.emeq.nl/instellingen', 'https://tbi.emeq.nl'),
+        );
+    }
+
+    public function test_foreign_origin_is_ignored_and_falls_back_to_app_url(): void
+    {
+        $consumer = new Consumer(['app_url' => 'https://admin.emeq.nl']);
+
+        $this->assertSame(
+            'https://admin.emeq.nl',
+            $this->resolver->resolve($consumer, null, 'https://evil.example'),
+        );
+    }
 }

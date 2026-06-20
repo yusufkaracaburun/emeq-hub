@@ -43,7 +43,7 @@ class InitController extends Controller
             $account,
             Provider::Mollie,
             $state,
-            $this->returnUrls->resolve($consumer, $validated['return_url'] ?? null),
+            $this->returnUrls->resolve($consumer, $validated['return_url'] ?? null, $request->headers->get('Origin')),
         );
 
         $scopes = config('services.mollie.connect.scopes');
