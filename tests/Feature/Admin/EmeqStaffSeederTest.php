@@ -50,8 +50,9 @@ class EmeqStaffSeederTest extends TestCase
 
         $this->seed(EmeqStaffSeeder::class);
 
-        $this->assertSame(2, Role::count());
+        $this->assertSame(3, Role::count());
         $this->assertSame(7, Permission::count());
+        $this->assertTrue(Role::where('name', 'boekhouder')->exists());
 
         $bootstrap = User::where('email', 'admin@emeq.test')->first();
         $this->assertNotNull($bootstrap);

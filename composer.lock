@@ -4,8 +4,76 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "9797868e4e46e98c199da945ccf8b387",
+    "content-hash": "244cec0d32907569c451c2f936e6c74f",
     "packages": [
+        {
+            "name": "akaunting/laravel-money",
+            "version": "6.0.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/akaunting/laravel-money.git",
+                "reference": "e301405d6b9c953c6d09ce3432e95e559a91b48f"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/akaunting/laravel-money/zipball/e301405d6b9c953c6d09ce3432e95e559a91b48f",
+                "reference": "e301405d6b9c953c6d09ce3432e95e559a91b48f",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/contracts": "^10.0|^11.0|^12|^13",
+                "illuminate/support": "^10.0|^11.0|^12|^13",
+                "illuminate/validation": "^10.0|^11.0|^12|^13",
+                "illuminate/view": "^10.0|^11.0|^12|^13",
+                "php": "^8.2",
+                "vlucas/phpdotenv": "^5.4.1"
+            },
+            "require-dev": {
+                "orchestra/testbench": "^8.0|^9.1.4|^10|^11",
+                "phpunit/phpunit": "^10.5|^11.5.50|^12.5.8",
+                "vimeo/psalm": "^6.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Akaunting\\Money\\Provider"
+                    ]
+                }
+            },
+            "autoload": {
+                "files": [
+                    "src/helpers.php"
+                ],
+                "psr-4": {
+                    "Akaunting\\Money\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Denis Duliçi",
+                    "email": "info@akaunting.com",
+                    "homepage": "https://akaunting.com",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Currency formatting and conversion package for Laravel",
+            "keywords": [
+                "convert",
+                "currency",
+                "format",
+                "laravel",
+                "money"
+            ],
+            "support": {
+                "source": "https://github.com/akaunting/laravel-money/tree/6.0.3"
+            },
+            "time": "2026-03-24T11:04:40+00:00"
+        },
         {
             "name": "blade-ui-kit/blade-heroicons",
             "version": "2.7.0",
