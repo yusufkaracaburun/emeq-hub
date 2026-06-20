@@ -87,6 +87,34 @@ class ExactInitTest extends TestCase
         $this->assertNotNull($fresh->access_token); // oude tokens behouden tot callback
     }
 
+    public function test_relink_of_revoked_connection_reuses_row_and_clears_revoked_at(): void
+    {
+        $consumer = Consumer::factory()->create();
+        $account = $consumer->accounts()->create([
+            'external_id' => 'school1',
+            'display_name' => 'School 1',
+        ]);
+        $revoked = Connection::factory()->forExact()->create([
+            'account_id' => $account->id,
+            'status' => 'revoked',
+            'revoked_at' => now(),
+        ]);
+        $token = $consumer->createToken('t', [TokenAbilities::EXACT_WRITE])->plainTextToken;
+
+        $reused = $this->withHeader('Authorization', "Bearer {$token}")
+            ->postJson('/v1/oauth/exact/init', ['account_external_id' => 'school1'])
+            ->assertOk()->json('connection_id');
+
+        // Reconnect herbruikt dezelfde row en wist de revoke-markering, anders
+        // blijft de connection na reconnect 'active' mét revoked_at en faalt een
+        // volgende DELETE op de revoked-guard (404).
+        $this->assertSame((string) $revoked->id, $reused);
+        $fresh = $revoked->fresh();
+        $this->assertNull($fresh->revoked_at);
+        $this->assertSame('pending', $fresh->status);
+        $this->assertSame(1, Connection::where('account_id', $account->id)->where('provider', 'exact')->count());
+    }
+
     public function test_init_without_ability_returns_403(): void
     {
         $consumer = Consumer::factory()->create();

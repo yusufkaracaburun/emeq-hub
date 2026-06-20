@@ -81,6 +81,10 @@ class Connection extends Model
             'oauth_state' => $state,
             'oauth_state_expires_at' => now()->addMinutes(30),
             'oauth_return_url' => $returnUrl,
+            // Hergebruik van een eerder losgekoppelde row: de revoke-markering
+            // wissen, anders blijft de connection na reconnect 'active' mét
+            // revoked_at en faalt een volgende DELETE op de revoked-guard (404).
+            'revoked_at' => null,
         ])->save();
 
         return $connection;
