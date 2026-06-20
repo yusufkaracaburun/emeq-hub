@@ -27,9 +27,9 @@ class ManageIntegrationSettings extends Page
 
     protected static string|UnitEnum|null $navigationGroup = 'Beheer';
 
-    protected static ?string $navigationLabel = 'Integratie-instellingen';
+    protected static ?string $navigationLabel = 'Providers';
 
-    protected static ?string $title = 'Integratie-instellingen';
+    protected static ?string $title = 'Providers';
 
     protected string $view = 'filament.pages.manage-integration-settings';
 
@@ -98,6 +98,6 @@ class ManageIntegrationSettings extends Page
         $exact->api_base_url = (string) $data['exact_api_base_url'];
         $exact->save();
 
-        Notification::make()->title('Integratie-instellingen opgeslagen')->success()->send();
+        Notification::make()->title('Providers opgeslagen')->success()->send();
     }
 }
