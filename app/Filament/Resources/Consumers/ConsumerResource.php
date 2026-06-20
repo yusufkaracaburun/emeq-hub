@@ -79,6 +79,13 @@ class ConsumerResource extends Resource
                 TokenAbilities::CONSUMER_MANAGE_ACCOUNTS,
             ],
         ],
+        'integrations' => [
+            'label' => 'Integraties (alle providers koppelen)',
+            'abilities' => [
+                TokenAbilities::INTEGRATIONS_MANAGE,
+                TokenAbilities::CONSUMER_MANAGE_ACCOUNTS,
+            ],
+        ],
         'admin' => [
             'label' => 'Admin',
             'abilities' => [TokenAbilities::ADMIN],

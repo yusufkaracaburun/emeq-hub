@@ -68,6 +68,18 @@ class ShowConnectionTest extends TestCase
             ->assertJsonPath('data.provider', 'exact');
     }
 
+    public function test_integrations_manage_token_can_read_any_connection(): void
+    {
+        [$consumer, $token] = $this->consumerWithToken([TokenAbilities::INTEGRATIONS_MANAGE]);
+        $account = Account::factory()->for($consumer)->create();
+        $connection = Connection::factory()->forMollie()->for($account)->create();
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->getJson("/v1/connections/{$connection->id}")
+            ->assertOk()
+            ->assertJsonPath('data.id', $connection->id);
+    }
+
     public function test_revoked_connection_is_still_returnable_via_show(): void
     {
         [$consumer, $token] = $this->consumerWithToken([TokenAbilities::SNELSTART_READ]);

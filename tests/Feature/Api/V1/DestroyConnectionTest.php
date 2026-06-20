@@ -114,6 +114,19 @@ class DestroyConnectionTest extends TestCase
         $this->assertNotNull($fresh->revoked_at);
     }
 
+    public function test_integrations_manage_token_can_revoke_any_connection(): void
+    {
+        [$consumer, $token] = $this->consumerWithToken([TokenAbilities::INTEGRATIONS_MANAGE]);
+        $account = Account::factory()->for($consumer)->create();
+        $connection = Connection::factory()->forSnelstart()->for($account)->create();
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->deleteJson("/v1/connections/{$connection->id}")
+            ->assertNoContent();
+
+        $this->assertNotNull($connection->fresh()->revoked_at);
+    }
+
     public function test_exact_read_only_token_cannot_revoke_returns_403(): void
     {
         [$consumer, $token] = $this->consumerWithToken([TokenAbilities::EXACT_READ]);

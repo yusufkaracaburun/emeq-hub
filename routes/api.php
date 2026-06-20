@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\V1\Exact\JournalsController as ExactJournalsControl
 use App\Http\Controllers\Api\V1\Exact\PassThroughController as ExactPassThroughController;
 use App\Http\Controllers\Api\V1\Exact\RelationsController as ExactRelationsController;
 use App\Http\Controllers\Api\V1\Exact\VatCodesController as ExactVatCodesController;
+use App\Http\Controllers\Api\V1\IntegrationController;
 use App\Http\Controllers\Api\V1\Mollie\Connect\ClientLinksController as ConnectClientLinksController;
 use App\Http\Controllers\Api\V1\Mollie\Connect\OnboardingController as ConnectOnboardingController;
 use App\Http\Controllers\Api\V1\Mollie\Connect\OrganizationsController as ConnectOrganizationsController;
@@ -26,8 +27,7 @@ use App\Http\Controllers\Api\V1\Mollie\RefundsController;
 use App\Http\Controllers\Api\V1\Mollie\SubscriptionsController;
 use App\Http\Controllers\Api\V1\OAuth\CallbackController;
 use App\Http\Controllers\Api\V1\OAuth\ExactCallbackController;
-use App\Http\Controllers\Api\V1\OAuth\ExactInitController;
-use App\Http\Controllers\Api\V1\OAuth\InitController;
+use App\Http\Controllers\Api\V1\OAuth\ProviderInitController;
 use App\Http\Controllers\Api\V1\PingController;
 use App\Http\Controllers\Api\V1\Snelstart\PassThroughController;
 use Illuminate\Support\Facades\Route;
@@ -49,8 +49,15 @@ Route::middleware('auth:sanctum')->group(function (): void {
     Route::get('/connections/{connection}', [ConnectionController::class, 'show'])->name('api.connections.show');
     Route::delete('/connections/{connection}', [ConnectionController::class, 'destroy'])->name('api.connections.destroy');
 
-    Route::middleware(['ability:mollie:write', 'feature.provider:mollie'])->group(function (): void {
-        Route::post('/oauth/mollie/init', InitController::class)
+    // Discovery + per-account koppel-status van alle providers (voedt de
+    // consumer-connect-kit). Data-driven: nieuwe provider verschijnt vanzelf.
+    Route::get('/integrations', IntegrationController::class)
+        ->middleware('ability:integrations:manage,consumer:manage-accounts,*')
+        ->name('api.integrations.index');
+
+    Route::middleware(['ability:integrations:manage,mollie:write', 'feature.provider:mollie'])->group(function (): void {
+        Route::post('/oauth/mollie/init', ProviderInitController::class)
+            ->defaults('provider', 'mollie')
             ->name('api.oauth.mollie.init');
     });
 
@@ -63,8 +70,9 @@ Route::middleware('auth:sanctum')->group(function (): void {
     // onder de provider-kill-switch (spiegelt het Mollie-blok). Structured
     // resource-routes landen onder de `exact`-prefix vóór de catch-all.
     Route::middleware('feature.provider:exact')->group(function (): void {
-        Route::post('/oauth/exact/init', ExactInitController::class)
-            ->middleware('ability:exact:write')
+        Route::post('/oauth/exact/init', ProviderInitController::class)
+            ->defaults('provider', 'exact')
+            ->middleware('ability:integrations:manage,exact:write')
             ->name('api.oauth.exact.init');
 
         Route::prefix('exact')->middleware('resolve.exact.account')->group(function (): void {
@@ -92,6 +100,15 @@ Route::middleware('auth:sanctum')->group(function (): void {
                 ->name('api.exact.passthrough');
         });
     });
+
+    // Generieke OAuth-init voor élke (toekomstige) OAuth-provider. NA de
+    // specifieke mollie/exact-init-routes (route-precedence) zodat die hun eigen
+    // ability-set houden; de feature-kill-switch zit in de controller via de
+    // OAuthFlowRegistry. Snelstart (geen OAuth-flow) → 404.
+    Route::post('/oauth/{provider}/init', ProviderInitController::class)
+        ->where('provider', '[a-z][a-z0-9_-]*')
+        ->middleware('ability:integrations:manage')
+        ->name('api.oauth.init');
 
     // Provider-agnostische accounting-sync: canonical doc → gekoppeld boekhoudpakket.
     // Account + Connection + provider-gate worden in de controller geresolved

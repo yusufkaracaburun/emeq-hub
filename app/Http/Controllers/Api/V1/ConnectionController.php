@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Http\Concerns\GuardsTokenAbility;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\StoreConnectionRequest;
 use App\Http\Resources\Api\V1\ConnectionResource;
@@ -21,11 +22,14 @@ use Symfony\Component\HttpFoundation\Response;
 #[Group(name: 'Connections', description: 'OAuth-koppelingen tussen Account en provider (Mollie/Snelstart).', weight: 30)]
 class ConnectionController extends Controller
 {
+    use GuardsTokenAbility;
+
     public function __construct(private readonly OAuthFlowRegistry $registry) {}
 
     public function store(StoreConnectionRequest $request): JsonResponse|ConnectionResource
     {
         $this->guardAbility($request, [
+            TokenAbilities::INTEGRATIONS_MANAGE,
             TokenAbilities::CONSUMER_MANAGE_ACCOUNTS,
             TokenAbilities::SNELSTART_WRITE,
             TokenAbilities::ADMIN,
@@ -70,6 +74,7 @@ class ConnectionController extends Controller
             TokenAbilities::SNELSTART_WRITE,
             TokenAbilities::EXACT_READ,
             TokenAbilities::EXACT_WRITE,
+            TokenAbilities::INTEGRATIONS_MANAGE,
             TokenAbilities::CONSUMER_MANAGE_ACCOUNTS,
             TokenAbilities::ADMIN,
         ]);
@@ -86,6 +91,7 @@ class ConnectionController extends Controller
     public function destroy(Request $request, int $connection): JsonResponse|HttpResponse
     {
         $this->guardAbility($request, [
+            TokenAbilities::INTEGRATIONS_MANAGE,
             TokenAbilities::CONSUMER_MANAGE_ACCOUNTS,
             TokenAbilities::SNELSTART_WRITE,
             TokenAbilities::EXACT_WRITE,
@@ -141,16 +147,5 @@ class ConnectionController extends Controller
             'error' => $error,
             'message' => $message,
         ], Response::HTTP_NOT_FOUND);
-    }
-
-    /**
-     * @param  list<string>  $allowed
-     */
-    private function guardAbility(Request $request, array $allowed): void
-    {
-        $token = $request->user()?->currentAccessToken();
-        $has = $token && collect($allowed)->contains(fn (string $ability) => $token->can($ability));
-
-        abort_unless($has, Response::HTTP_FORBIDDEN, 'insufficient_ability');
     }
 }
