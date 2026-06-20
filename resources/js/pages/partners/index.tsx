@@ -57,6 +57,23 @@ export default function PartnersIndex({ providers }: { providers: ProviderSummar
                         </Reveal>
                     ))}
                 </div>
+
+                <Reveal>
+                    <div className="mt-12 rounded-2xl border bg-muted/30 p-6 text-center sm:p-8">
+                        <p className="text-sm font-semibold">Bouw je een koppeling?</p>
+                        <p className="mx-auto mt-1 max-w-xl text-sm text-muted-foreground">
+                            Eén REST-API voor alle providers — discovery, OAuth-connect en status. Nieuwe integraties
+                            verschijnen automatisch, zonder code-wijziging.
+                        </p>
+                        <a
+                            href="/docs/api"
+                            className="mt-4 inline-flex items-center text-sm font-medium text-amber-600 hover:underline dark:text-amber-400"
+                        >
+                            API-documentatie
+                            <ArrowRight className="ml-1 size-4" />
+                        </a>
+                    </div>
+                </Reveal>
             </section>
         </ShowcaseLayout>
     );
