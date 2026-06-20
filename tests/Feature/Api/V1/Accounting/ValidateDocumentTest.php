@@ -5,12 +5,49 @@ namespace Tests\Feature\Api\V1\Accounting;
 use App\Models\Connection;
 use App\Models\Consumer;
 use App\Sanctum\TokenAbilities;
+use Emeq\ExactApi\Http\Request\Read\GetRelations;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Saloon\Http\Faking\MockClient;
+use Saloon\Http\Faking\MockResponse;
 use Tests\TestCase;
 
 class ValidateDocumentTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        config([
+            'services.exact.client_id' => 'app_test_id',
+            'services.exact.client_secret' => 'app_test_secret',
+            'services.exact.redirect_uri' => 'https://hub.test/v1/oauth/exact/callback',
+            'services.exact.auth_base_url' => 'https://start.exactonline.nl',
+            'services.exact.api_base_url' => 'https://start.exactonline.nl',
+        ]);
+
+        // De Exact-enrichment doet een live crm/Accounts-lookup; default: één match.
+        $this->mockRelations([['ID' => 'rel-guid-1', 'Code' => 'C001', 'Name' => 'NL Leverancier BV']]);
+    }
+
+    protected function tearDown(): void
+    {
+        MockClient::destroyGlobal();
+
+        parent::tearDown();
+    }
+
+    /**
+     * @param  list<array<string, string>>  $rows
+     */
+    private function mockRelations(array $rows): void
+    {
+        MockClient::destroyGlobal();
+        MockClient::global([
+            GetRelations::class => MockResponse::make(['d' => ['results' => $rows]], 200),
+        ]);
+    }
 
     /**
      * @return array{0: Consumer}
@@ -27,12 +64,13 @@ class ValidateDocumentTest extends TestCase
             'account_id' => $account->id,
             'status' => 'active',
             'expires_at' => now()->addSeconds(600),
+            'metadata' => ['accounting_mapping' => ['vat_codes' => ['21' => '4']]],
         ]);
 
         return [$consumer];
     }
 
-    public function test_clean_draft_is_valid(): void
+    public function test_clean_draft_is_valid_and_carries_exact_enrichment(): void
     {
         [$consumer] = $this->consumerWithExactConnection();
         $token = $consumer->createToken('t', [TokenAbilities::EXACT_READ])->plainTextToken;
@@ -50,7 +88,8 @@ class ValidateDocumentTest extends TestCase
             ->assertStatus(200)
             ->assertJsonPath('valid', true)
             ->assertJsonPath('summary.errors', 0)
-            ->assertJsonCount(0, 'findings');
+            ->assertJsonFragment(['code' => 'exact.vat_code.matched', 'suggestion' => '4'])
+            ->assertJsonFragment(['code' => 'exact.relation.matched', 'suggestion' => 'rel-guid-1']);
     }
 
     public function test_dirty_draft_returns_findings_and_suggestions(): void
@@ -71,6 +110,40 @@ class ValidateDocumentTest extends TestCase
             ->assertJsonFragment(['code' => 'iban.checksum_invalid'])
             ->assertJsonFragment(['code' => 'vat_treatment.domestic_rate_on_non_eu'])
             ->assertJsonFragment(['code' => 'arithmetic.total_mismatch', 'suggestion' => 121]);
+    }
+
+    public function test_unmapped_vat_rate_is_flagged(): void
+    {
+        [$consumer] = $this->consumerWithExactConnection();
+        $token = $consumer->createToken('t', [TokenAbilities::EXACT_READ])->plainTextToken;
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->withHeader('X-Account-Id', 'school1')
+            ->postJson('/v1/accounting/documents/validate', [
+                'type' => 'purchase_invoice',
+                'party' => ['role' => 'creditor', 'name' => 'NL Leverancier BV', 'vat_number' => 'NL000099998B57'],
+                'lines' => [['description' => 'Laag tarief', 'amount' => 100, 'tax_rate' => 9]],
+            ])
+            ->assertStatus(200)
+            ->assertJsonPath('valid', true) // warning blokkeert niet
+            ->assertJsonFragment(['code' => 'exact.vat_code.unmapped', 'severity' => 'warning']);
+    }
+
+    public function test_new_supplier_when_no_exact_match(): void
+    {
+        [$consumer] = $this->consumerWithExactConnection();
+        $token = $consumer->createToken('t', [TokenAbilities::EXACT_READ])->plainTextToken;
+        $this->mockRelations([]); // geen treffer
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->withHeader('X-Account-Id', 'school1')
+            ->postJson('/v1/accounting/documents/validate', [
+                'type' => 'purchase_invoice',
+                'party' => ['role' => 'creditor', 'name' => 'Onbekende BV', 'vat_number' => 'NL000099998B57'],
+                'lines' => [['description' => 'Dienst', 'amount' => 100, 'tax_rate' => 21]],
+            ])
+            ->assertStatus(200)
+            ->assertJsonFragment(['code' => 'exact.relation.new']);
     }
 
     public function test_without_exact_ability_returns_403(): void

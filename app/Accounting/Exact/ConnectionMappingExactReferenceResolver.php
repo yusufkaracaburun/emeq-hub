@@ -39,9 +39,17 @@ final class ConnectionMappingExactReferenceResolver implements ExactReferenceRes
 
     public function vatCode(float $taxRate, Connection $connection): string
     {
-        $codes = $this->section($connection, 'vat_codes');
+        return $this->vatCodeOrNull($taxRate, $connection)
+            ?? throw $this->missing("BTW-tarief {$this->rateKey($taxRate)}%", 'vat_codes');
+    }
 
-        return $codes[$this->rateKey($taxRate)] ?? throw $this->missing("BTW-tarief {$this->rateKey($taxRate)}%", 'vat_codes');
+    /**
+     * Fail-soft variant voor het validate-rapport: geeft de VATCode of null i.p.v. een
+     * exception zodat een nog-niet-gemapt tarief een finding kan worden i.p.v. een 422.
+     */
+    public function vatCodeOrNull(float $taxRate, Connection $connection): ?string
+    {
+        return $this->section($connection, 'vat_codes')[$this->rateKey($taxRate)] ?? null;
     }
 
     public function glAccountGuid(?string $category, Connection $connection): ?string

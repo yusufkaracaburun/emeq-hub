@@ -6,6 +6,8 @@ namespace App\Http\Controllers\Api\V1\Accounting;
 
 use App\Accounting\AccountingTargetRegistry;
 use App\Accounting\Validation\DocumentInspector;
+use App\Accounting\Validation\Enrichment\ExactReportEnricher;
+use App\Enums\Provider;
 use App\Http\Concerns\GuardsTokenAbility;
 use App\Http\Concerns\ResolvesAccountingConnection;
 use App\Http\Controllers\Controller;
@@ -29,6 +31,7 @@ class ValidateDocumentController extends Controller
     public function __construct(
         private readonly AccountingTargetRegistry $registry,
         private readonly DocumentInspector $inspector,
+        private readonly ExactReportEnricher $exactEnricher,
     ) {}
 
     public function __invoke(ValidateDocumentRequest $request): JsonResponse
@@ -39,7 +42,12 @@ class ValidateDocumentController extends Controller
 
         $this->guardAbility($request, ["{$provider}:read", "{$provider}:write", TokenAbilities::ADMIN]);
 
-        $report = $this->inspector->inspect($request->validated());
+        $payload = $request->validated();
+        $report = $this->inspector->inspect($payload);
+
+        if ($connection->provider === Provider::Exact) {
+            $report = $report->with($this->exactEnricher->enrich($payload, $connection));
+        }
 
         return response()->json($report->toArray());
     }

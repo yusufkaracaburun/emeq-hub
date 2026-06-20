@@ -120,6 +120,54 @@ final class ExactReferenceData
     }
 
     /**
+     * Zoekt één Exact-relatie op BTW-nummer (anders naam). Ambiguïteit-veilig: bij 0 óf
+     * >1 treffer null (niet automatisch kiezen). Read-only; gebruikt door het validate-
+     * rapport om "bestaande relatie" vs "nieuw" te tonen zonder te muteren.
+     *
+     * @return array{id: string, code: string, name: string}|null
+     */
+    public function findRelation(?string $vatNumber, ?string $name): ?array
+    {
+        $filter = $this->relationFilter($vatNumber, $name);
+
+        if ($filter === null) {
+            return null;
+        }
+
+        $rows = $this->fetch(new GetRelations(['$select' => 'ID,Code,Name', '$filter' => $filter, '$top' => '2']));
+
+        if (count($rows) !== 1) {
+            return null;
+        }
+
+        $id = (string) ($rows[0]['ID'] ?? '');
+
+        return $id === '' ? null : [
+            'id' => $id,
+            'code' => trim((string) ($rows[0]['Code'] ?? '')),
+            'name' => (string) ($rows[0]['Name'] ?? ''),
+        ];
+    }
+
+    private function relationFilter(?string $vatNumber, ?string $name): ?string
+    {
+        $vatNumber = trim((string) $vatNumber);
+
+        if ($vatNumber !== '') {
+            return "VATNumber eq '".$this->escapeOData($vatNumber)."'";
+        }
+
+        $name = trim((string) $name);
+
+        return $name !== '' ? "Name eq '".$this->escapeOData($name)."'" : null;
+    }
+
+    private function escapeOData(string $value): string
+    {
+        return str_replace("'", "''", $value);
+    }
+
+    /**
      * @return list<array<string, mixed>>
      */
     private function fetch(SdkRequest $request): array

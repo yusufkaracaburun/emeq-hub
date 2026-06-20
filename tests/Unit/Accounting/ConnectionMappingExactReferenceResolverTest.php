@@ -76,6 +76,16 @@ class ConnectionMappingExactReferenceResolverTest extends TestCase
         $this->assertSame('gl-def', $resolver->glAccountGuid(null, $this->fullMapping()));
     }
 
+    public function test_vat_code_or_null_returns_code_or_null(): void
+    {
+        $resolver = new ConnectionMappingExactReferenceResolver;
+
+        $this->assertSame('4', $resolver->vatCodeOrNull(21, $this->fullMapping()));
+        $this->assertSame('2', $resolver->vatCodeOrNull(9, $this->fullMapping()));
+        $this->assertNull($resolver->vatCodeOrNull(9, $this->connection(['vat_codes' => ['21' => '4']])));
+        $this->assertNull($resolver->vatCodeOrNull(21, $this->connection(null)));
+    }
+
     public function test_throws_when_vat_rate_unmapped(): void
     {
         $resolver = new ConnectionMappingExactReferenceResolver;

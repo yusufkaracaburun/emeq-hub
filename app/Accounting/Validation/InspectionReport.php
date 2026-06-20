@@ -22,6 +22,17 @@ final readonly class InspectionReport
     }
 
     /**
+     * Geeft een nieuw rapport met extra findings erbij (bv. provider-specifieke
+     * enrichment ná de agnostische inspectie). Immutable — de bron blijft ongewijzigd.
+     *
+     * @param  list<Finding>  $findings
+     */
+    public function with(array $findings): self
+    {
+        return new self([...$this->findings, ...$findings]);
+    }
+
+    /**
      * @return array<string, mixed>
      */
     public function toArray(): array
