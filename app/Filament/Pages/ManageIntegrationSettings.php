@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Pages;
 
+use App\Enums\Provider;
 use App\Settings\ExactSettings;
 use BackedEnum;
 use Filament\Forms\Components\TextInput;
@@ -64,25 +65,56 @@ class ManageIntegrationSettings extends Page
                 Tabs::make('Integraties')
                     ->columnSpanFull()
                     ->persistTabInQueryString()
-                    ->tabs([
-                        Tab::make('Exact Online')
-                            ->icon(Heroicon::OutlinedBuildingOffice2)
-                            ->schema([
-                                Section::make()
-                                    ->description('App-credentials uit het Exact App Center. Secrets worden encrypted opgeslagen.')
-                                    ->columns(2)
-                                    ->schema([
-                                        TextInput::make('exact_client_id')->label('Client ID')->maxLength(255),
-                                        TextInput::make('exact_redirect_uri')->label('Redirect URI')->maxLength(255),
-                                        TextInput::make('exact_client_secret')->label('Client secret')->password()->revealable()->maxLength(255),
-                                        TextInput::make('exact_webhook_secret')->label('Webhook secret')->password()->revealable()->maxLength(255),
-                                        TextInput::make('exact_auth_base_url')->label('Auth base URL')->maxLength(255)->placeholder('https://start.exactonline.nl'),
-                                        TextInput::make('exact_api_base_url')->label('API base URL')->maxLength(255)->placeholder('https://start.exactonline.nl'),
-                                    ]),
-                            ]),
-                    ]),
+                    ->tabs($this->providerTabs()),
             ])
             ->statePath('data');
+    }
+
+    /**
+     * Exact heeft een echte settings-tab; de overige providers tonen we vast als
+     * "binnenkort" zodat de roadmap zichtbaar is. Nieuwe Provider-enum-case
+     * verschijnt automatisch als binnenkort-tab tot hij eigen settings krijgt.
+     *
+     * @return list<Tab>
+     */
+    private function providerTabs(): array
+    {
+        $tabs = [$this->exactTab()];
+
+        foreach (Provider::cases() as $provider) {
+            if ($provider === Provider::Exact) {
+                continue;
+            }
+
+            $tabs[] = Tab::make($provider->getLabel())
+                ->icon(Heroicon::OutlinedClock)
+                ->badge('Binnenkort')
+                ->schema([
+                    Section::make('Binnenkort beschikbaar')
+                        ->description("De {$provider->getLabel()}-integratie kun je nog niet in de Hub configureren. We werken eraan."),
+                ]);
+        }
+
+        return $tabs;
+    }
+
+    private function exactTab(): Tab
+    {
+        return Tab::make('Exact Online')
+            ->icon(Heroicon::OutlinedBuildingOffice2)
+            ->schema([
+                Section::make()
+                    ->description('App-credentials uit het Exact App Center. Secrets worden encrypted opgeslagen.')
+                    ->columns(2)
+                    ->schema([
+                        TextInput::make('exact_client_id')->label('Client ID')->maxLength(255),
+                        TextInput::make('exact_redirect_uri')->label('Redirect URI')->maxLength(255),
+                        TextInput::make('exact_client_secret')->label('Client secret')->password()->revealable()->maxLength(255),
+                        TextInput::make('exact_webhook_secret')->label('Webhook secret')->password()->revealable()->maxLength(255),
+                        TextInput::make('exact_auth_base_url')->label('Auth base URL')->maxLength(255)->placeholder('https://start.exactonline.nl'),
+                        TextInput::make('exact_api_base_url')->label('API base URL')->maxLength(255)->placeholder('https://start.exactonline.nl'),
+                    ]),
+            ]);
     }
 
     public function save(): void
