@@ -118,5 +118,47 @@ Alle paden onder `EMEQ_BASE/v1`. Header: `Authorization: Bearer <PAT>`, `Accept:
 - De OAuth `redirect_uri` niet zelf invullen — die is Hub-globaal.
 - Geen `returnUrl` (camelCase); gebruik `return_url` of laat 'm weg.
 
+## Boekhouden — documenten valideren & boeken (optioneel)
+
+Alleen als deze app facturen/bonnetjes naar het gekoppelde boekhoudpakket stuurt.
+Vereist een gekoppelde boekhoud-provider (zie boven) en een PAT met
+**`exact:read` + `exact:write`** — niet gedekt door `integrations:manage`.
+
+Beide endpoints identificeren de tenant via **header** `X-Account-Id: <external_id>`
+(geen query-param). Je proxy moet `X-Account-Id`, `Idempotency-Key` en `Prefer`
+mee-forwarden.
+
+| Doel | Request | Respons |
+|---|---|---|
+| Valideren (dry-run) | `POST /accounting/documents/validate` + `X-Account-Id` | `200` `{ valid, summary, findings[] }` |
+| Boeken | `POST /accounting/documents` + `X-Account-Id` + `Idempotency-Key` | `201` `{ provider, status:"posted", external_id, external_ref }` · async `202` |
+
+Canonical body (snake_case, provider-onafhankelijk):
+```json
+{ "type":"purchase_invoice", "external_id":"factuur-2026-0042", "issue_date":"2026-06-20",
+  "currency":"EUR", "party":{"role":"creditor","name":"Leverancier BV","vat_number":"NL000099998B57","iban":"NL91ABNA0417164300"},
+  "lines":[{"description":"Dienst","amount":100.0,"tax_rate":21,"category":"kantoorkosten"}] }
+```
+`type` ∈ `sales_invoice|purchase_invoice|credit_note|income|expense` · `party.role` ∈ `debtor|creditor` · `amount` = netto, `tax_rate` = %.
+
+Taken:
+
+1. **Valideren vóór boeken.** Stuur het concept naar `…/validate`, toon de `findings`
+   (`severity:error` = rood/blokkeert; `warning`/`info` = informatief), laat de gebruiker
+   bevestigen/corrigeren (`suggestion` per finding). Volledige codes-catalogus: zie de handleiding.
+2. **Boeken** met een stabiele `Idempotency-Key` (= je `external_id`); herhaalde POST is
+   veilig (geen dubbele boeking). Bewaar `external_ref` in je sync-ledger.
+3. **Async (optioneel).** `Prefer: respond-async` → `202 pending`; registreer een
+   `webhook_callback_url` (HMAC met `webhook_callback_secret`) en verwerk het event
+   `accounting.document.synced`. Zonder callback → `400 webhook_required`.
+4. **Fouten.** `403` (ability), `422 mapping_failed` (Connection-mapping onvolledig — de
+   admin lost dit op), `503 provider_disabled`, `5xx` upstream.
+
+Niet doen (boekhouden):
+
+- Geen provider-specifieke velden (Exact-VATCode/GLAccount) zelf invullen — lever
+  canonical; de Hub mapt.
+- `Idempotency-Key` niet weglaten bij boeken.
+
 Lever per stap: gewijzigde bestanden, en een korte demo/test van de volledige
 cyclus tegen `https://hub-dev.emeq.nl`.
