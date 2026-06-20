@@ -98,6 +98,7 @@ class OAuthReturnToConsumerTest extends TestCase
             ->assertOk()
             ->assertSee('Terug naar de app')
             ->assertSee('https://consumer.test/integraties/klaar')
+            ->assertSee('http-equiv="refresh"', false)
             ->assertDontSee('Terug naar Connections');
     }
 
@@ -115,7 +116,8 @@ class OAuthReturnToConsumerTest extends TestCase
         $this->get($url)
             ->assertOk()
             ->assertSee('Terug naar Connections')
-            ->assertDontSee('Terug naar de app');
+            ->assertDontSee('Terug naar de app')
+            ->assertDontSee('http-equiv="refresh"', false);
     }
 
     public function test_failed_landing_links_back_to_consumer_app(): void

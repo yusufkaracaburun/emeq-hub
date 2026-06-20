@@ -36,6 +36,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="noindex, nofollow">
     <title>{{ $success ? 'Verbonden' : 'Koppeling mislukt' }} · emeq hub</title>
+    @if ($success && $isConsumerReturn)
+        {{-- Geslaagde consumer-connect: na een korte bevestiging automatisch
+             terug naar de app (de "Terug naar de app"-knop blijft als fallback). --}}
+        <meta http-equiv="refresh" content="3;url={{ $backUrl }}">
+    @endif
     <style>
         :root {
             --bg: #f9fafb;
@@ -187,7 +192,7 @@
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
                 </div>
                 <h1>Verbonden met {{ $providerLabel }}</h1>
-                <p class="sub">De koppeling is actief. Je kunt dit venster sluiten of teruggaan naar {{ $isConsumerReturn ? 'de app' : 'het paneel' }}.</p>
+                <p class="sub">De koppeling is actief. @if ($isConsumerReturn)Je wordt teruggestuurd naar de app…@else Je kunt dit venster sluiten of teruggaan naar het paneel.@endif</p>
 
                 <div class="details">
                     <div class="r"><span class="k">Status</span><span class="v"><span class="pill">{{ $connection->status }}</span></span></div>
