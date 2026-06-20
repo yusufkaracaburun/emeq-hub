@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\V1\AccountController;
 use App\Http\Controllers\Api\V1\Accounting\DocumentsController as AccountingDocumentsController;
+use App\Http\Controllers\Api\V1\Accounting\ValidateDocumentController as AccountingValidateDocumentController;
 use App\Http\Controllers\Api\V1\AccountSubscriptions\AccountSubscriptionController;
 use App\Http\Controllers\Api\V1\AccountSubscriptions\PauseController;
 use App\Http\Controllers\Api\V1\AccountSubscriptions\ResumeController;
@@ -109,6 +110,11 @@ Route::middleware('auth:sanctum')->group(function (): void {
         ->where('provider', '[a-z][a-z0-9_-]*')
         ->middleware('ability:integrations:manage')
         ->name('api.oauth.init');
+
+    // Dry-run validatie van een geëxtraheerd draft-document ("Scan & herstel"):
+    // read-only, boekt niets, géén idempotency. Geeft findings + suggesties terug.
+    Route::post('/accounting/documents/validate', AccountingValidateDocumentController::class)
+        ->name('api.accounting.documents.validate');
 
     // Provider-agnostische accounting-sync: canonical doc → gekoppeld boekhoudpakket.
     // Account + Connection + provider-gate worden in de controller geresolved
