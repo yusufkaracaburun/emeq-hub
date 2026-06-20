@@ -1,7 +1,7 @@
 APP := http://hub.emeq.test:8092
 
 .DEFAULT_GOAL := help
-.PHONY: help up down restart urls fresh logs shell test ps tunnel
+.PHONY: help up down restart urls fresh seed-books logs shell test ps tunnel
 
 help: ## Toon deze hulp
 	@grep -E '^[a-z-]+:.*##' $(MAKEFILE_LIST) | sort | awk 'BEGIN{FS=":.*## "}{printf "  \033[36m%-10s\033[0m %s\n", $$1, $$2}'
@@ -15,8 +15,11 @@ down: ## Stop de stack (volumes blijven; data behouden)
 
 restart: down up ## Herstart de stack
 
-fresh: ## Verse, geseede DB in de app-container (wist data)
+fresh: ## Verse, geseede DB
 	docker compose exec -T app php artisan migrate:fresh --seed
+
+seed-books: ## (Her)vul het NL-grootboek (boekhouding) zonder data te wissen
+	docker compose exec -T app php artisan db:seed --class=BooksChartSeeder
 
 logs: ## Tail app + worker logs
 	docker compose logs -f app worker
