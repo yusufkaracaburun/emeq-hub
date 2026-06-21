@@ -3,7 +3,9 @@
 namespace App\Books\Models;
 
 use App\Books\Concerns\BelongsToBooksCompany;
+use App\Books\Concerns\HasPayments;
 use App\Books\Enums\InvoiceStatus;
+use BackedEnum;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -16,6 +18,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Invoice extends Model
 {
     use BelongsToBooksCompany;
+    use HasPayments;
 
     protected $table = 'books_invoices';
 
@@ -63,6 +66,16 @@ class Invoice extends Model
     public function isPosted(): bool
     {
         return $this->transaction_id !== null;
+    }
+
+    public function paidStatus(): BackedEnum
+    {
+        return InvoiceStatus::Paid;
+    }
+
+    public function unpaidStatus(): BackedEnum
+    {
+        return InvoiceStatus::Sent;
     }
 
     /**

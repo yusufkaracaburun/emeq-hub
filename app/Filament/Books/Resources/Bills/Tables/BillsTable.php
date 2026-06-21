@@ -7,6 +7,7 @@ namespace App\Filament\Books\Resources\Bills\Tables;
 use App\Books\Enums\BillStatus;
 use App\Books\Models\Bill;
 use App\Books\Services\BillPoster;
+use App\Filament\Books\Support\PaymentActions;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
@@ -54,6 +55,18 @@ class BillsTable
                     ->formatStateUsing(fn (int $state): string => '€ '.number_format($state / 100, 2, ',', '.'))
                     ->alignEnd()
                     ->sortable(),
+
+                TextColumn::make('amount_due')
+                    ->label('Openstaand')
+                    ->state(fn (Bill $record): int => $record->amountDue())
+                    ->badge()
+                    ->color(fn (Bill $record): string => match (true) {
+                        $record->amountDue() === 0 && $record->amountPaid() > 0 => 'success',
+                        $record->isPartiallyPaid() => 'warning',
+                        default => 'gray',
+                    })
+                    ->formatStateUsing(fn (int $state): string => $state === 0 ? 'Betaald' : '€ '.number_format($state / 100, 2, ',', '.'))
+                    ->alignEnd(),
             ])
             ->filters([
                 SelectFilter::make('status')
@@ -88,6 +101,9 @@ class BillsTable
 
                         Notification::make()->title('Boeking ongedaan gemaakt')->success()->send();
                     }),
+
+                PaymentActions::register(),
+                PaymentActions::undo(),
 
                 EditAction::make()->iconButton(),
                 DeleteAction::make()->iconButton(),
