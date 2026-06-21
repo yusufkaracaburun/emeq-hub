@@ -46,15 +46,20 @@ class ProviderInitController extends Controller
 
         $validated = $request->validate([
             'account_external_id' => ['required', 'string'],
+            'display_name' => ['nullable', 'string', 'max:255'],
             'return_url' => ['nullable', 'url'],
         ]);
 
         /** @var Consumer $consumer */
         $consumer = $request->user();
 
-        $account = $consumer->accounts()
-            ->where('external_id', $validated['account_external_id'])
-            ->firstOrFail();
+        // Eén-knop-onboarding: de consumer-app start de koppeling zonder het
+        // Account eerst apart aan te maken. external_id is per-Consumer genamespaced
+        // (firstOrCreate is scoped op $consumer->accounts()), dus geen cross-tenant-leak.
+        $account = $consumer->accounts()->firstOrCreate(
+            ['external_id' => $validated['account_external_id']],
+            ['display_name' => $validated['display_name'] ?? null],
+        );
 
         try {
             $flow = $this->registry->for($providerEnum->value);

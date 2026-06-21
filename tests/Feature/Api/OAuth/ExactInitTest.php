@@ -163,19 +163,47 @@ class ExactInitTest extends TestCase
             ->assertForbidden();
     }
 
-    public function test_init_with_cross_consumer_account_returns_404(): void
+    public function test_init_auto_provisions_missing_account(): void
+    {
+        // Eén-knop-onboarding: de consumer-app start de koppeling zonder het
+        // Account eerst apart te POSTen — init maakt het aan.
+        $consumer = Consumer::factory()->create();
+        $token = $consumer->createToken('t', [TokenAbilities::EXACT_WRITE])->plainTextToken;
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->postJson('/v1/oauth/exact/init', [
+                'account_external_id' => 'new-tenant',
+                'display_name' => 'New Tenant',
+            ])
+            ->assertOk()
+            ->assertJsonStructure(['connection_id', 'redirect_url']);
+
+        $this->assertDatabaseHas('accounts', [
+            'consumer_id' => $consumer->id,
+            'external_id' => 'new-tenant',
+            'display_name' => 'New Tenant',
+        ]);
+    }
+
+    public function test_init_creates_consumer_scoped_account_without_touching_other_consumer(): void
     {
         $consumerA = Consumer::factory()->create();
         $consumerB = Consumer::factory()->create();
-        $consumerB->accounts()->create([
-            'external_id' => 'b-only',
-            'display_name' => 'B-only',
+        $accountB = $consumerB->accounts()->create([
+            'external_id' => 'acme',
+            'display_name' => 'B-acme',
         ]);
 
         $tokenA = $consumerA->createToken('t', [TokenAbilities::EXACT_WRITE])->plainTextToken;
 
         $this->withHeader('Authorization', "Bearer {$tokenA}")
-            ->postJson('/v1/oauth/exact/init', ['account_external_id' => 'b-only'])
-            ->assertNotFound();
+            ->postJson('/v1/oauth/exact/init', ['account_external_id' => 'acme'])
+            ->assertOk();
+
+        // external_id is per-Consumer genamespaced (unique consumer_id+external_id):
+        // A krijgt een eigen 'acme'-account, B's gelijknamige account blijft ongemoeid.
+        $accountA = $consumerA->accounts()->where('external_id', 'acme')->sole();
+        $this->assertNotSame($accountB->id, $accountA->id);
+        $this->assertSame(0, $accountB->connections()->count());
     }
 }
