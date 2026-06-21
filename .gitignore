@@ -46,3 +46,7 @@ Thumbs.db
 **/caddy
 frankenphp
 frankenphp-worker.php
+
+# Skill-installer tooling (lokaal, niet projectcode)
+/.agents/skills
+/skills-lock.json
