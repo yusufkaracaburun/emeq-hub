@@ -46,6 +46,7 @@ class BooksPanelProvider extends PanelProvider
             ->navigationGroups([
                 'Boekhouding',
                 'Verkoop',
+                'Inkoop',
                 'Relaties',
             ])
             ->middleware([
