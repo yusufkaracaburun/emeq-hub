@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Books\Resources\Transactions\Tables;
 
 use App\Books\Enums\TransactionType;
+use App\Filament\Books\Support\PaymentActions;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
@@ -57,6 +58,7 @@ class TransactionsTable
                     ]),
             ])
             ->recordActions([
+                PaymentActions::reconcile(),
                 ViewAction::make()->iconButton(),
             ]);
     }

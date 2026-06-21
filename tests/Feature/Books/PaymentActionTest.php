@@ -2,12 +2,16 @@
 
 namespace Tests\Feature\Books;
 
+use App\Books\Enums\TransactionType;
+use App\Books\Models\Account;
 use App\Books\Models\BankAccount;
 use App\Books\Models\BooksCompany;
 use App\Books\Models\Client;
 use App\Books\Models\Invoice;
+use App\Books\Models\Transaction;
 use App\Books\Services\InvoicePoster;
 use App\Filament\Books\Resources\Invoices\Pages\ListInvoices;
+use App\Filament\Books\Resources\Transactions\Pages\ListTransactions;
 use App\Models\User;
 use Database\Seeders\BooksChartSeeder;
 use Filament\Facades\Filament;
@@ -80,5 +84,27 @@ class PaymentActionTest extends TestCase
         $this->assertFalse($this->invoice->isPaid());
         $this->assertSame(0, $this->invoice->payments()->count());
         $this->assertSame(12100, $this->invoice->amountDue());
+    }
+
+    public function test_reconcile_action_matches_a_bank_transaction_to_an_invoice(): void
+    {
+        $deposit = Transaction::create([
+            'type' => TransactionType::Deposit,
+            'account_id' => Account::where('code', '1300')->value('id'),
+            'bank_account_id' => $this->bankAccountId,
+            'amount' => 12100,
+            'description' => 'Bijschrijving Acme',
+            'posted_at' => now(),
+        ]);
+
+        Livewire::test(ListTransactions::class)
+            ->callTableAction('afletteren', $deposit, data: [
+                'document_id' => $this->invoice->id,
+                'amount' => '121.00',
+            ])
+            ->assertHasNoTableActionErrors();
+
+        $this->assertTrue($this->invoice->refresh()->isPaid());
+        $this->assertSame(0, $deposit->refresh()->unallocatedAmount());
     }
 }

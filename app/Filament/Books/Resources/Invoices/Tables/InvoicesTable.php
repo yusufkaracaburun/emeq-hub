@@ -9,6 +9,7 @@ use App\Books\Models\Invoice;
 use App\Books\Services\InvoicePoster;
 use App\Filament\Books\Support\PaymentActions;
 use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -76,7 +77,8 @@ class InvoicesTable
                         ->all()),
             ])
             ->recordActions([
-                Action::make('boeken')
+                ActionGroup::make([
+                    Action::make('boeken')
                     ->label('Boeken')
                     ->icon(Heroicon::OutlinedCheckCircle)
                     ->color('success')
@@ -105,8 +107,9 @@ class InvoicesTable
                 PaymentActions::register(),
                 PaymentActions::undo(),
 
-                EditAction::make()->iconButton(),
-                DeleteAction::make()->iconButton(),
+                EditAction::make(),
+                DeleteAction::make(),
+                ]),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

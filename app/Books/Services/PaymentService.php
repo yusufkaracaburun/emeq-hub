@@ -68,6 +68,40 @@ class PaymentService
     }
 
     /**
+     * Bank-driven: letter een bestaande bank-Transaction af tegen een open post.
+     * De double-entry staat al (de Transaction is eerder geboekt op 1300/1600) —
+     * dit legt alleen vast wélke post 'm settelt, na de match-validaties.
+     */
+    public function reconcile(Transaction $transaction, Invoice|Bill $document, int $amount): Payment
+    {
+        $isInvoice = $document instanceof Invoice;
+        $expectedType = $isInvoice ? TransactionType::Deposit : TransactionType::Withdrawal;
+        $expectedCode = $isInvoice ? self::RECEIVABLE : self::PAYABLE;
+
+        if ($transaction->type !== $expectedType || $transaction->account?->code !== $expectedCode) {
+            throw new RuntimeException('Deze banktransactie past niet bij dit type open post.');
+        }
+
+        if (! $document->isPosted()) {
+            throw new RuntimeException('Boek de factuur eerst naar het grootboek vóór het afletteren.');
+        }
+
+        if ($amount <= 0) {
+            throw new RuntimeException('Een aflettering moet groter dan nul zijn.');
+        }
+
+        if ($amount > $document->amountDue()) {
+            throw new RuntimeException('Het bedrag is hoger dan het openstaande saldo van de post.');
+        }
+
+        if ($amount > $transaction->unallocatedAmount()) {
+            throw new RuntimeException('Het bedrag is hoger dan het nog niet-afgeletterde deel van de transactie.');
+        }
+
+        return DB::transaction(fn (): Payment => $this->allocate($transaction, $document, $amount));
+    }
+
+    /**
      * Koppel (een deel van) een bestaande bank-Transaction aan een open post.
      * Gedeeld door doc-driven (nieuwe Transaction) en bank-driven afletteren.
      */

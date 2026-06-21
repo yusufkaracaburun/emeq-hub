@@ -59,4 +59,22 @@ class Transaction extends Model
     {
         return $this->hasMany(JournalEntry::class, 'transaction_id');
     }
+
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class, 'transaction_id');
+    }
+
+    public function allocatedAmount(): int
+    {
+        return (int) $this->payments()->sum('amount');
+    }
+
+    /**
+     * Nog niet aan een open post toegewezen deel van deze bank-boeking.
+     */
+    public function unallocatedAmount(): int
+    {
+        return max(0, $this->amount - $this->allocatedAmount());
+    }
 }
