@@ -45,19 +45,18 @@ class DatabaseSeeder extends Seeder
         );
 
         $consumer = Consumer::firstOrCreate(
-            ['slug' => 'naschool'],
-            ['name' => 'Naschool'],
+            ['slug' => 'emeq'],
+            ['name' => 'Emeq'],
         );
 
         $consumer->accounts()->firstOrCreate(
-            ['external_id' => 'school1'],
-            ['display_name' => 'Demo School 1'],
+            ['external_id' => 'emeq_tisol'],
+            ['display_name' => 'Tisol | Emeq'],
         );
 
         $this->seedRbac($testUser);
 
         $this->call(EmeqStaffSeeder::class);
-        $this->call(ExactDevSettingsSeeder::class);
     }
 
     private function seedRbac(User $testUser): void

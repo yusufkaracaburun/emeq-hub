@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('access_requests', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('consumer_id')->nullable()->constrained()->nullOnDelete();
             $table->string('company');
             $table->string('contact_name');
             $table->string('email');

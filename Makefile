@@ -18,8 +18,23 @@ restart: down up ## Herstart de stack
 fresh: ## Verse, geseede DB
 	docker compose exec -T app php artisan migrate:fresh --seed
 
+seed-exact: ## Vul Exact gegevens
+	docker compose exec -T app php artisan db:seed --class=ExactDevSettingsSeeder
+
 seed-books: ## (Her)vul het NL-grootboek (boekhouding) zonder data te wissen
 	docker compose exec -T app php artisan db:seed --class=BooksChartSeeder
+
+seed-relations: ## Vul Relaties
+	docker compose exec -T app php artisan db:seed --class=BooksRelationsSeeder
+
+seed-invoices: ## Vul Facturen
+	docker compose exec -T app php artisan db:seed --class=BooksInvoiceSeeder
+
+seed-bills: ## Vul Inkoop
+	docker compose exec -T app php artisan db:seed --class=BooksBillSeeder
+
+seed-payments: ## Vul Betalingen
+	docker compose exec -T app php artisan db:seed --class=BooksPaymentSeeder
 
 logs: ## Tail app + worker logs
 	docker compose logs -f app worker

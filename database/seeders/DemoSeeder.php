@@ -29,7 +29,7 @@ class DemoSeeder extends Seeder
 {
     use WithoutModelEvents;
 
-    private const DEMO_CONSUMER_SLUGS = ['naschool', 'planny', 'demo-shop'];
+    private const DEMO_CONSUMER_SLUGS = ['emeq', 'planny', 'naschool'];
 
     public function run(): void
     {
@@ -63,9 +63,9 @@ class DemoSeeder extends Seeder
     private function seedConsumers(): array
     {
         $seeds = [
+            ['slug' => 'emeq', 'name' => 'Emeq'],
             ['slug' => 'naschool', 'name' => 'Naschool'],
             ['slug' => 'planny', 'name' => 'Planny'],
-            ['slug' => 'demo-shop', 'name' => 'Demo Shop'],
         ];
 
         $consumers = [];
@@ -109,14 +109,12 @@ class DemoSeeder extends Seeder
     private function seedAccounts(Consumer $consumer): array
     {
         $perConsumer = match ($consumer->slug) {
-            'naschool' => [
-                ['external_id' => 'school1', 'display_name' => 'Basisschool De Vlinder'],
-                ['external_id' => 'school2', 'display_name' => 'CBS Het Anker'],
-                ['external_id' => 'school3', 'display_name' => 'OBS De Regenboog'],
+            'emeq' => [
+                ['external_id' => 'emeq_tisol', 'display_name' => 'Tisol | Emeq'],
+                ['external_id' => 'emeq_bob', 'display_name' => 'Bob | Emeq'],
             ],
             'planny' => [
-                ['external_id' => 'tenant-001', 'display_name' => 'Studio Loft'],
-                ['external_id' => 'tenant-002', 'display_name' => 'Kapper Knip & Kam'],
+                ['external_id' => 'planny_xpress', 'display_name' => 'Xpress | Planny'],
             ],
             default => [
                 ['external_id' => 'merchant-1', 'display_name' => 'Webwinkel Aurelius'],
@@ -187,7 +185,7 @@ class DemoSeeder extends Seeder
         foreach ($consumers as $consumer) {
             DB::table('subscriptions')->insert([
                 'name' => 'main',
-                'plan' => 'naschool-license',
+                'plan' => 'emeq-license',
                 'owner_id' => $consumer->id,
                 'owner_type' => Consumer::class,
                 'quantity' => 1,
