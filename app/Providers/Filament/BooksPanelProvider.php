@@ -34,6 +34,7 @@ class BooksPanelProvider extends PanelProvider
             ->authGuard('web')
             ->brandName('Emeq Boekhouding')
             ->favicon(asset('favicon.ico'))
+            ->viteTheme('resources/css/filament/books/theme.css')
             ->colors([
                 'primary' => Color::Emerald,
             ])

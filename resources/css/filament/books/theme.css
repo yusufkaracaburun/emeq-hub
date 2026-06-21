@@ -1,0 +1,8 @@
+@import '../../../../vendor/filament/filament/resources/css/theme.css';
+
+/* Bron-bestanden voor de Books-panel — nodig omdat de Filament-theme
+   `source(none)` zet (geen auto-detectie). Hierdoor compileren de custom
+   Tailwind-utilities in de Overzichten-page en de books-componenten mee. */
+@source '../../../../app/Filament/Books';
+@source '../../../views/filament/books';
+@source '../../../views/components/books';
