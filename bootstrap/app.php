@@ -9,9 +9,11 @@ use App\Http\Middleware\ResolveExactAccount;
 use App\Http\Middleware\ResolveMollieAccount;
 use App\Http\Middleware\ResolveSnelstartAccount;
 use App\Http\Middleware\SetNoIndexHeaders;
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Laravel\Sanctum\Http\Middleware\CheckAbilities;
 use Laravel\Sanctum\Http\Middleware\CheckForAnyAbility;
@@ -35,6 +37,16 @@ return Application::configure(basePath: dirname(__DIR__))
         // Beperk origin-poort 80 tot Cloudflare-IP-ranges (firewall) of gebruik een
         // Cloudflare Tunnel — anders is at:'*' spoofbaar.
         $middleware->trustProxies(at: '*');
+
+        // De default guest-redirect mikt op de (niet-bestaande) `login`-route en
+        // wordt door de Authenticate-middleware al geëvalueerd vóór de exception
+        // handler — een ongeauthenticeerde `/v1/*`-request zonder
+        // `Accept: application/json` zou zo crashen op `Route [login] not defined`
+        // (500). Voor de API → geen redirect; de handler levert JSON 401.
+        $middleware->redirectGuestsTo(
+            fn (Request $request): ?string => $request->is('v1/*') ? null : route('login'),
+        );
+
         $middleware->append(SetNoIndexHeaders::class);
         $middleware->web(append: [HandleInertiaRequests::class]);
         $middleware->api(prepend: ['throttle:api']);
@@ -51,5 +63,20 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
+        // /v1/* is een pure JSON-API: render élke exception als JSON, ook als de
+        // consumer-proxy geen `Accept: application/json` stuurt. Voorkomt de
+        // `Route [login] not defined`-redirect (500) bij een ontbrekende/ongeldige PAT.
+        $exceptions->shouldRenderJsonWhen(
+            fn (Request $request): bool => $request->is('v1/*') || $request->expectsJson(),
+        );
+
+        $exceptions->render(function (AuthenticationException $e, Request $request) {
+            if ($request->is('v1/*')) {
+                return response()->json(['code' => 'unauthenticated', 'message' => 'Unauthenticated.'], 401);
+            }
+
+            return null;
+        });
+
         Integration::handles($exceptions);
     })->create();
