@@ -4,42 +4,67 @@ namespace Tests\Unit\Accounting;
 
 use App\Accounting\Enums\DocumentType;
 use App\Accounting\Exact\ConnectionMappingExactReferenceResolver;
+use App\Accounting\Exact\ExactRelationResolver;
 use App\Accounting\Exceptions\AccountingMappingException;
 use App\Accounting\Party;
+use App\Models\Account;
 use App\Models\Connection;
+use App\Models\ConnectionAccountingRef;
+use App\Models\Consumer;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class ConnectionMappingExactReferenceResolverTest extends TestCase
 {
+    use RefreshDatabase;
+
+    private function resolver(): ConnectionMappingExactReferenceResolver
+    {
+        return new ConnectionMappingExactReferenceResolver(new ExactRelationResolver);
+    }
+
     /**
      * @param  array<string, mixed>|null  $mapping
      */
     private function connection(?array $mapping): Connection
     {
-        $connection = new Connection;
-        $connection->metadata = $mapping !== null ? ['accounting_mapping' => $mapping] : null;
+        $account = Account::factory()->for(Consumer::factory()->create())->create();
 
-        return $connection;
+        return Connection::factory()->forExact()->for($account)->create([
+            'metadata' => $mapping !== null ? ['accounting_mapping' => $mapping] : null,
+        ]);
     }
 
     private function fullMapping(): Connection
     {
+        // Mapping draagt enkel Codes; GL-Code + relatie resolven via de mirror.
         return $this->connection([
             'vat_codes' => ['21' => '4', '9' => '2', '0' => '1'],
             'gl_accounts' => ['_default' => 'gl-def', 'omzet' => 'gl-omzet'],
-            'relations' => ['ext-1' => 'cust-1'],
             'journals' => ['sales' => '70', 'purchase' => '20', 'general' => '90'],
+        ]);
+    }
+
+    private function seedRef(Connection $connection, string $kind, string $code, string $nativeId): void
+    {
+        ConnectionAccountingRef::query()->create([
+            'connection_id' => $connection->getKey(),
+            'kind' => $kind,
+            'code' => $code,
+            'native_id' => $nativeId,
         ]);
     }
 
     public function test_resolves_mapped_values(): void
     {
-        $resolver = new ConnectionMappingExactReferenceResolver;
+        $resolver = $this->resolver();
         $connection = $this->fullMapping();
+        $this->seedRef($connection, ConnectionAccountingRef::KIND_GL, 'gl-omzet', 'gl-omzet-id');
+        $this->seedRef($connection, ConnectionAccountingRef::KIND_RELATION, 'ext-1', 'cust-1');
 
         $this->assertSame('4', $resolver->vatCode(21, $connection));
         $this->assertSame('2', $resolver->vatCode(9, $connection));
-        $this->assertSame('gl-omzet', $resolver->glAccountGuid('omzet', $connection));
+        $this->assertSame('gl-omzet-id', $resolver->glAccountGuid('omzet', $connection));
         $this->assertSame('cust-1', $resolver->relationGuid(new Party('debtor', 'Acme', externalId: 'ext-1'), $connection));
         $this->assertSame('70', $resolver->journal(DocumentType::SalesInvoice, $connection));
         $this->assertSame('20', $resolver->journal(DocumentType::PurchaseInvoice, $connection));
@@ -47,7 +72,7 @@ class ConnectionMappingExactReferenceResolverTest extends TestCase
 
     public function test_income_expense_use_own_journal_when_configured(): void
     {
-        $resolver = new ConnectionMappingExactReferenceResolver;
+        $resolver = $this->resolver();
         $connection = $this->connection([
             'journals' => ['sales' => '70', 'purchase' => '20', 'income' => '71', 'expense' => '21'],
         ]);
@@ -58,27 +83,37 @@ class ConnectionMappingExactReferenceResolverTest extends TestCase
 
     public function test_income_expense_fall_back_to_sales_purchase_journals(): void
     {
-        $resolver = new ConnectionMappingExactReferenceResolver;
+        $resolver = $this->resolver();
         $connection = $this->connection([
             'journals' => ['sales' => '70', 'purchase' => '20'],
         ]);
 
-        // Geen eigen income/expense-dagboek geconfigureerd → verkoop/inkoop.
         $this->assertSame('70', $resolver->journal(DocumentType::Income, $connection));
         $this->assertSame('20', $resolver->journal(DocumentType::Expense, $connection));
     }
 
-    public function test_gl_account_falls_back_to_default(): void
+    public function test_gl_code_falls_back_to_default_and_resolves_via_mirror(): void
     {
-        $resolver = new ConnectionMappingExactReferenceResolver;
+        $resolver = $this->resolver();
+        $connection = $this->fullMapping();
+        $this->seedRef($connection, ConnectionAccountingRef::KIND_GL, 'gl-def', 'gl-def-id');
 
-        $this->assertSame('gl-def', $resolver->glAccountGuid('onbekende-categorie', $this->fullMapping()));
-        $this->assertSame('gl-def', $resolver->glAccountGuid(null, $this->fullMapping()));
+        $this->assertSame('gl-def-id', $resolver->glAccountGuid('onbekende-categorie', $connection));
+        $this->assertSame('gl-def-id', $resolver->glAccountGuid(null, $connection));
+    }
+
+    public function test_throws_when_gl_code_not_in_mirror(): void
+    {
+        $resolver = $this->resolver();
+
+        // Mapping verwijst naar een Code die niet (meer) in de mirror staat → drift-melding.
+        $this->expectException(AccountingMappingException::class);
+        $resolver->glAccountGuid('omzet', $this->fullMapping());
     }
 
     public function test_vat_code_or_null_returns_code_or_null(): void
     {
-        $resolver = new ConnectionMappingExactReferenceResolver;
+        $resolver = $this->resolver();
 
         $this->assertSame('4', $resolver->vatCodeOrNull(21, $this->fullMapping()));
         $this->assertSame('2', $resolver->vatCodeOrNull(9, $this->fullMapping()));
@@ -88,7 +123,7 @@ class ConnectionMappingExactReferenceResolverTest extends TestCase
 
     public function test_throws_when_vat_rate_unmapped(): void
     {
-        $resolver = new ConnectionMappingExactReferenceResolver;
+        $resolver = $this->resolver();
 
         $this->expectException(AccountingMappingException::class);
         $resolver->vatCode(9, $this->connection(['vat_codes' => ['21' => '4']]));
@@ -96,7 +131,7 @@ class ConnectionMappingExactReferenceResolverTest extends TestCase
 
     public function test_throws_when_mapping_absent(): void
     {
-        $resolver = new ConnectionMappingExactReferenceResolver;
+        $resolver = $this->resolver();
 
         $this->expectException(AccountingMappingException::class);
         $resolver->journal(DocumentType::SalesInvoice, $this->connection(null));

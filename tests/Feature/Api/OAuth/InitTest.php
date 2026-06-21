@@ -78,11 +78,11 @@ class InitTest extends TestCase
             ->assertForbidden();
     }
 
-    public function test_init_with_cross_consumer_account_returns_404(): void
+    public function test_init_creates_consumer_scoped_account_without_touching_other_consumer(): void
     {
         $consumerA = Consumer::factory()->create();
         $consumerB = Consumer::factory()->create();
-        $consumerB->accounts()->create([
+        $accountB = $consumerB->accounts()->create([
             'external_id' => 'b-only',
             'display_name' => 'B-only',
         ]);
@@ -91,6 +91,12 @@ class InitTest extends TestCase
 
         $this->withHeader('Authorization', "Bearer {$tokenA}")
             ->postJson('/v1/oauth/mollie/init', ['account_external_id' => 'b-only'])
-            ->assertNotFound();
+            ->assertOk();
+
+        // external_id is per-Consumer genamespaced: A krijgt een eigen 'b-only'-account,
+        // B's gelijknamige account blijft ongemoeid (geen cross-consumer reuse).
+        $accountA = $consumerA->accounts()->where('external_id', 'b-only')->sole();
+        $this->assertNotSame($accountB->id, $accountA->id);
+        $this->assertSame(0, $accountB->connections()->count());
     }
 }

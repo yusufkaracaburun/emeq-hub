@@ -6,6 +6,7 @@ use App\Accounting\Enums\DocumentType;
 use App\Accounting\Exact\Contracts\ExactReferenceResolver;
 use App\Accounting\Party;
 use App\Models\Connection;
+use App\Models\ConnectionAccountingRef;
 use App\Models\Consumer;
 use App\Sanctum\TokenAbilities;
 use Emeq\ExactApi\Http\Request\Write\CreateDocument;
@@ -223,19 +224,34 @@ class StoreDocumentTest extends TestCase
 
     public function test_uses_connection_metadata_mapping(): void
     {
-        // Geen fake → de echte ConnectionMappingExactReferenceResolver leest metadata.
+        // Geen fake → de echte ConnectionMappingExactReferenceResolver. Mapping draagt enkel
+        // stabiele Codes; GL-Code + relatie resolven lokaal naar native-ID via de mirror.
         MockClient::global([
             CreateSalesEntry::class => MockResponse::make(['d' => ['ID' => 'inv-1']], 201),
         ]);
 
-        [$consumer] = $this->consumerWithExactConnection([
+        [$consumer, $connection] = $this->consumerWithExactConnection([
             'metadata' => ['accounting_mapping' => [
                 'vat_codes' => ['21' => '4'],
                 'gl_accounts' => ['_default' => 'gl-def'],
-                'relations' => ['acme-1' => 'cust-real'],
                 'journals' => ['sales' => '70'],
             ]],
         ]);
+
+        // Mirror: GL-Code → native GUID, en de lazy-geleerde relatie external_id → GUID.
+        ConnectionAccountingRef::query()->create([
+            'connection_id' => $connection->getKey(),
+            'kind' => ConnectionAccountingRef::KIND_GL,
+            'code' => 'gl-def',
+            'native_id' => 'gl-def-guid',
+        ]);
+        ConnectionAccountingRef::query()->create([
+            'connection_id' => $connection->getKey(),
+            'kind' => ConnectionAccountingRef::KIND_RELATION,
+            'code' => 'acme-1',
+            'native_id' => 'cust-real',
+        ]);
+
         $token = $consumer->createToken('t', [TokenAbilities::EXACT_WRITE])->plainTextToken;
 
         $this->withHeader('Authorization', "Bearer {$token}")
@@ -252,7 +268,7 @@ class StoreDocumentTest extends TestCase
             return $body['Customer'] === 'cust-real'
                 && $body['Journal'] === '70'
                 && $body['SalesEntryLines'][0]['VATCode'] === '4'
-                && $body['SalesEntryLines'][0]['GLAccount'] === 'gl-def';
+                && $body['SalesEntryLines'][0]['GLAccount'] === 'gl-def-guid';
         });
     }
 

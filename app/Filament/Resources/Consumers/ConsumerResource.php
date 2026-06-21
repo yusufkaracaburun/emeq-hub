@@ -127,6 +127,11 @@ class ConsumerResource extends Resource
                     ->required()
                     ->maxLength(255)
                     ->unique(ignoreRecord: true),
+                TextInput::make('app_url')
+                    ->label('App-URL')
+                    ->url()
+                    ->maxLength(255)
+                    ->helperText('Waar de eindgebruiker na een OAuth-connect terugkeert (root van de consumer-app). Leeg = terugval op Hub-admin.'),
                 TextInput::make('webhook_callback_url')
                     ->label('Webhook callback-URL')
                     ->url()

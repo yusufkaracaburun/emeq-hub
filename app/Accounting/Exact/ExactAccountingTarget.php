@@ -58,6 +58,8 @@ final class ExactAccountingTarget implements AccountingTarget
         app()->instance(TokenStore::class, new ConnectionTokenStore($connection));
         app()->forgetInstance(Exact::class);
 
+        $this->ensureMapping($connection);
+
         /** @var Exact $exact */
         $exact = app(Exact::class);
         $connector = $exact->connector($division);
@@ -183,6 +185,22 @@ final class ExactAccountingTarget implements AccountingTarget
             DocumentType::PurchaseInvoice => ExactDocumentType::PurchaseInvoice->value,
             DocumentType::Income, DocumentType::Expense => ExactDocumentType::Miscellaneous->value,
         };
+    }
+
+    /**
+     * Zelf-initialiserend: heeft de Connection nog geen mapping (bv. eerste document vóór een
+     * sync), spiegel dan de referentiedata en derive de default-mapping. No-op zodra er een
+     * mapping staat — de reguliere weg vult 'm al bij connect (SyncExactReferenceJob).
+     */
+    private function ensureMapping(Connection $connection): void
+    {
+        if (! empty($connection->metadata['accounting_mapping'])) {
+            return;
+        }
+
+        app(ExactReferenceSync::class)->sync($connection);
+        app(ExactMappingDeriver::class)->deriveAndStore($connection);
+        $connection->refresh();
     }
 
     private function buildRequest(FinancialDocument $document, Connection $connection): SdkRequest

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Exact;
 
 use App\Models\Connection;
+use App\Models\ConnectionAccountingRef;
 use Emeq\ExactApi\Contracts\ExactCredentialResolver;
 use Emeq\ExactApi\Contracts\TokenStore;
 use Emeq\ExactApi\Exact;
@@ -120,9 +121,100 @@ final class ExactReferenceData
     }
 
     /**
-     * Zoekt één Exact-relatie op BTW-nummer (anders naam). Ambiguïteit-veilig: bij 0 óf
-     * >1 treffer null (niet automatisch kiezen). Read-only; gebruikt door het validate-
-     * rapport om "bestaande relatie" vs "nieuw" te tonen zonder te muteren.
+     * Rich mirror-rijen voor de reference-sync: stabiele `code` → provider-native `native_id`.
+     * GL: native_id = de GUID. VAT/journal: native_id = de Code (Exact accepteert die direct
+     * op de boeking); `attrs` draagt kind-specifieke velden (percentage / type).
+     *
+     * @return list<array{kind: string, code: string, native_id: string, label: string, attrs: array<string, mixed>}>
+     */
+    public function mirrorRows(): array
+    {
+        return [...$this->glAccountRows(), ...$this->vatCodeRows(), ...$this->journalRows()];
+    }
+
+    /**
+     * @return list<array{kind: string, code: string, native_id: string, label: string, attrs: array<string, mixed>}>
+     */
+    public function glAccountRows(): array
+    {
+        $out = [];
+
+        foreach ($this->fetch(new GetGlAccounts(['$select' => 'ID,Code,Description'])) as $row) {
+            $code = trim((string) ($row['Code'] ?? ''));
+            $id = (string) ($row['ID'] ?? '');
+
+            if ($code === '' || $id === '') {
+                continue;
+            }
+
+            $out[] = [
+                'kind' => ConnectionAccountingRef::KIND_GL,
+                'code' => $code,
+                'native_id' => $id,
+                'label' => trim((string) ($row['Description'] ?? '')),
+                'attrs' => [],
+            ];
+        }
+
+        return $out;
+    }
+
+    /**
+     * @return list<array{kind: string, code: string, native_id: string, label: string, attrs: array<string, mixed>}>
+     */
+    public function vatCodeRows(): array
+    {
+        $out = [];
+
+        foreach ($this->fetch(new GetVatCodes(['$select' => 'Code,Description,Percentage'])) as $row) {
+            $code = trim((string) ($row['Code'] ?? ''));
+
+            if ($code === '') {
+                continue;
+            }
+
+            $out[] = [
+                'kind' => ConnectionAccountingRef::KIND_VAT,
+                'code' => $code,
+                'native_id' => $code,
+                'label' => trim((string) ($row['Description'] ?? '')),
+                // Exact draagt Percentage als fractie (0.21) → naar heel-percentage (21) voor de mapping-match.
+                'attrs' => ['percentage' => isset($row['Percentage']) ? (float) $row['Percentage'] * 100 : null],
+            ];
+        }
+
+        return $out;
+    }
+
+    /**
+     * @return list<array{kind: string, code: string, native_id: string, label: string, attrs: array<string, mixed>}>
+     */
+    public function journalRows(): array
+    {
+        $out = [];
+
+        foreach ($this->fetch(new GetJournals(['$select' => 'Code,Description,Type'])) as $row) {
+            $code = trim((string) ($row['Code'] ?? ''));
+
+            if ($code === '') {
+                continue;
+            }
+
+            $out[] = [
+                'kind' => ConnectionAccountingRef::KIND_JOURNAL,
+                'code' => $code,
+                'native_id' => $code,
+                'label' => trim((string) ($row['Description'] ?? '')),
+                'attrs' => ['type' => isset($row['Type']) ? (int) $row['Type'] : null],
+            ];
+        }
+
+        return $out;
+    }
+
+    /**
+     * Zoekt één Exact-relatie op een stabiele sleutel (VATNumber, anders exacte Name) voor de
+     * lazy relatie-resolutie. Geeft `{id, code, name}` van de eerste match, of null.
      *
      * @return array{id: string, code: string, name: string}|null
      */
@@ -137,6 +229,7 @@ final class ExactReferenceData
         $rows = $this->fetch(new GetRelations(['$select' => 'ID,Code,Name', '$filter' => $filter, '$top' => '2']));
 
         if (count($rows) !== 1) {
+            // Geen of meerdere matches → niet automatisch kiezen (ambigu).
             return null;
         }
 

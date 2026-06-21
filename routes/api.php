@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\V1\AccountController;
 use App\Http\Controllers\Api\V1\Accounting\DocumentsController as AccountingDocumentsController;
+use App\Http\Controllers\Api\V1\Accounting\MappingController as AccountingMappingController;
 use App\Http\Controllers\Api\V1\Accounting\ValidateDocumentController as AccountingValidateDocumentController;
 use App\Http\Controllers\Api\V1\AccountSubscriptions\AccountSubscriptionController;
 use App\Http\Controllers\Api\V1\AccountSubscriptions\PauseController;
@@ -122,6 +123,17 @@ Route::middleware('auth:sanctum')->group(function (): void {
     Route::post('/accounting/documents', [AccountingDocumentsController::class, 'store'])
         ->middleware('idempotent:required')
         ->name('api.accounting.documents.store');
+
+    // Consumer-beheer van de boekhoud-koppeling: (her)sync de referentie-mirror + de
+    // optionele mapping-override. Account + Connection in de controller geresolved.
+    Route::post('/accounting/sync', [AccountingMappingController::class, 'sync'])
+        ->name('api.accounting.sync');
+    Route::get('/accounting/reference-data', [AccountingMappingController::class, 'referenceData'])
+        ->name('api.accounting.reference-data');
+    Route::get('/accounting/mapping', [AccountingMappingController::class, 'show'])
+        ->name('api.accounting.mapping.show');
+    Route::put('/accounting/mapping', [AccountingMappingController::class, 'update'])
+        ->name('api.accounting.mapping.update');
 
     Route::middleware('ability:billing:read,billing:write,*')->group(function (): void {
         Route::get('/billing/subscription', [SubscriptionController::class, 'show'])

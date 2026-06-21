@@ -9,6 +9,7 @@ use App\Accounting\Exact\Contracts\ExactReferenceResolver;
 use App\Accounting\Exceptions\AccountingMappingException;
 use App\Accounting\Party;
 use App\Models\Connection;
+use App\Models\ConnectionAccountingRef;
 
 /**
  * Leest de per-Connection Exact-mapping uit `connection.metadata.accounting_mapping`
@@ -17,24 +18,26 @@ use App\Models\Connection;
  * ná de Data & Security-review, wanneer live-reads beschikbaar zijn. Ontbreekt een
  * vereiste mapping → expliciete exception i.p.v. een foute boeking.
  *
- * Verwachte metadata-vorm:
+ * De mapping bevat enkel stabiele **Codes** (auto-derived uit de mirror of overschreven):
  *   "accounting_mapping": {
- *     "vat_codes":  { "21": "4", "9": "2", "0": "1" },          // tarief → VATCode
- *     "gl_accounts": { "_default": "<guid>", "omzet": "<guid>" }, // categorie → GLAccount-GUID
- *     "relations":  { "<party.external_id>": "<crm-account-guid>" },
- *     "journals":   { "sales": "70", "purchase": "20", "income": "71", "expense": "21" }
+ *     "vat_codes":  { "21": "3", "9": "1", "0": "0" },          // tarief → VATCode (Code; direct)
+ *     "gl_accounts": { "_default": "<gl-code>", "omzet": "<gl-code>" }, // categorie → GL-Code
+ *     "journals":   { "sales": "80", "purchase": "70" }         // doc-type → dagboek-Code (direct)
  *   }
  *
+ * GL-Code → native GUID en relatie → native GUID resolven lokaal tegen de mirror
+ * (`connection_accounting_refs`) — geen live partner-call op het schrijfpad. Relaties zijn
+ * niet in de mapping opgeslagen maar lazy geleerd door ExactRelationResolver.
  * income/expense vallen terug op sales/purchase als geen eigen dagboek staat.
  */
 final class ConnectionMappingExactReferenceResolver implements ExactReferenceResolver
 {
+    public function __construct(private readonly ExactRelationResolver $relations) {}
+
     public function relationGuid(Party $party, Connection $connection): string
     {
-        $relations = $this->section($connection, 'relations');
-        $guid = $party->externalId !== null ? ($relations[$party->externalId] ?? null) : null;
-
-        return $guid ?? throw $this->missing("relatie '{$party->name}'", 'relations');
+        return $this->relations->resolve($party, $connection)
+            ?? throw $this->missing("relatie '{$party->name}' (geen match op external_id/vat_number/naam)", 'relations');
     }
 
     public function vatCode(float $taxRate, Connection $connection): string
@@ -55,8 +58,28 @@ final class ConnectionMappingExactReferenceResolver implements ExactReferenceRes
     public function glAccountGuid(?string $category, Connection $connection): ?string
     {
         $accounts = $this->section($connection, 'gl_accounts');
+        $code = $accounts[$category ?? '_default'] ?? $accounts['_default'] ?? null;
 
-        return $accounts[$category ?? '_default'] ?? $accounts['_default'] ?? null;
+        if ($code === null) {
+            return null;
+        }
+
+        return $this->mirrorNativeId($connection, ConnectionAccountingRef::KIND_GL, (string) $code)
+            ?? throw new AccountingMappingException("Grootboek-code '{$code}' niet in de mirror — draai POST /v1/accounting/sync.");
+    }
+
+    /**
+     * Resolveert een stabiele Code naar de provider-native identiteit (GUID) via de mirror.
+     */
+    private function mirrorNativeId(Connection $connection, string $kind, string $code): ?string
+    {
+        $native = ConnectionAccountingRef::query()
+            ->where('connection_id', $connection->getKey())
+            ->where('kind', $kind)
+            ->where('code', $code)
+            ->value('native_id');
+
+        return $native !== null ? (string) $native : null;
     }
 
     public function journal(DocumentType $type, Connection $connection): string

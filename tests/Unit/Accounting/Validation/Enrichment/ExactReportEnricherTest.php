@@ -3,6 +3,7 @@
 namespace Tests\Unit\Accounting\Validation\Enrichment;
 
 use App\Accounting\Exact\ConnectionMappingExactReferenceResolver;
+use App\Accounting\Exact\ExactRelationResolver;
 use App\Accounting\Validation\Enrichment\ExactReportEnricher;
 use App\Accounting\Validation\Severity;
 use App\Models\Connection;
@@ -12,7 +13,7 @@ class ExactReportEnricherTest extends TestCase
 {
     private function enricher(): ExactReportEnricher
     {
-        return new ExactReportEnricher(new ConnectionMappingExactReferenceResolver);
+        return new ExactReportEnricher(new ConnectionMappingExactReferenceResolver(new ExactRelationResolver));
     }
 
     /**

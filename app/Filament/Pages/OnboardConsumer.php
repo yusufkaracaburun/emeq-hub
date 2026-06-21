@@ -108,7 +108,7 @@ class OnboardConsumer extends Page
         $prefill = [
             'name' => $accessRequest->company,
             'slug' => Str::slug($accessRequest->company),
-            'webhook_callback_url' => $accessRequest->app_url,
+            'app_url' => $accessRequest->app_url,
         ];
 
         // Eén gevraagde provider → vast voor-selecteren. Bij meerdere laat staf kiezen.
@@ -153,6 +153,11 @@ class OnboardConsumer extends Page
                                 ->validationMessages([
                                     'unique' => 'Deze slug bestaat al — kies een andere.',
                                 ]),
+                            TextInput::make('app_url')
+                                ->label('App-URL')
+                                ->helperText('Waar de eindgebruiker na een OAuth-connect terugkeert (root van de consumer-app).')
+                                ->url()
+                                ->maxLength(255),
                             TextInput::make('webhook_callback_url')
                                 ->label('Webhook callback-URL')
                                 ->helperText('Endpoint waar de Hub partner-events naartoe POSTed. Optioneel — vul later in.')
@@ -319,6 +324,7 @@ class OnboardConsumer extends Page
         return [
             'name' => $data['name'],
             'slug' => $data['slug'],
+            'app_url' => $data['app_url'] ?? null,
             'webhook_callback_url' => $data['webhook_callback_url'] ?? null,
             'webhook_callback_secret' => $webhookSecret,
             'external_id' => $data['external_id'] ?? null,
