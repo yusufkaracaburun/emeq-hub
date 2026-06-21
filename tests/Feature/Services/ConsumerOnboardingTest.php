@@ -84,6 +84,21 @@ class ConsumerOnboardingTest extends TestCase
         $this->assertSame('https://naschool.test/hooks', $result['consumer']->fresh()->webhook_callback_url);
     }
 
+    public function test_onboard_persists_app_url(): void
+    {
+        $service = new ConsumerOnboarding;
+
+        $result = $service->onboard([
+            'name' => 'Naschool',
+            'slug' => 'naschool',
+            'token_name' => 'cli-default',
+            'abilities' => ['*'],
+            'app_url' => 'https://naschool.test',
+        ]);
+
+        $this->assertSame('https://naschool.test', $result['consumer']->fresh()->app_url);
+    }
+
     public function test_onboard_creates_connection_with_encrypted_credentials(): void
     {
         $service = new ConsumerOnboarding;

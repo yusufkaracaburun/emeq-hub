@@ -43,6 +43,7 @@ final readonly class ConsumerOnboarding
             $consumer = Consumer::create([
                 'name' => $data['name'],
                 'slug' => $data['slug'],
+                'app_url' => $data['app_url'] ?? null,
                 'webhook_callback_url' => $data['webhook_callback_url'] ?? null,
                 'webhook_callback_secret' => $data['webhook_callback_secret'] ?? null,
             ]);
