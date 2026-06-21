@@ -4,10 +4,13 @@ declare(strict_types=1);
 
 namespace App\Filament\Books\Pages;
 
+use App\Books\Services\ReportPdfRenderer;
 use App\Books\Services\ReportService;
 use BackedEnum;
+use Filament\Actions\Action;
 use Filament\Pages\Page;
 use Filament\Support\Icons\Heroicon;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use UnitEnum;
 
 /*
@@ -37,6 +40,27 @@ class Overzichten extends Page
     {
         $this->startDate = now()->startOfYear()->toDateString();
         $this->endDate = now()->toDateString();
+    }
+
+    /**
+     * @return array<Action>
+     */
+    protected function getHeaderActions(): array
+    {
+        return [
+            Action::make('pdf')
+                ->label('PDF')
+                ->icon(Heroicon::OutlinedArrowDownTray)
+                ->color('gray')
+                ->action(function (): StreamedResponse {
+                    $renderer = app(ReportPdfRenderer::class);
+
+                    return response()->streamDownload(
+                        fn () => print ($renderer->output($this->startDate, $this->endDate)),
+                        $renderer->filename($this->startDate, $this->endDate),
+                    );
+                }),
+        ];
     }
 
     /**
