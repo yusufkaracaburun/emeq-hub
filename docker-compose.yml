@@ -6,6 +6,7 @@
 # blijft 127.0.0.1:5433/6380 zodat host-tinker/tests blijven werken.
 services:
   app:
+    restart: unless-stopped
     build:
       context: .
       target: dev
@@ -28,6 +29,7 @@ services:
         condition: service_healthy
 
   worker:
+    restart: unless-stopped
     build:
       context: .
       target: dev
@@ -55,6 +57,7 @@ services:
         condition: service_healthy
 
   vite:
+    restart: unless-stopped
     image: node:22-slim
     working_dir: /app
     # npm ci muteert package-lock niet (geen name-churn); conditional = alleen 1e boot.
@@ -68,6 +71,7 @@ services:
       - "5173:5173"
 
   db:
+    restart: unless-stopped
     image: postgres:16-alpine
     environment:
       POSTGRES_DB: "${DB_DATABASE:-emeq_hub}"
@@ -84,6 +88,7 @@ services:
       retries: 20
 
   redis:
+    restart: unless-stopped
     image: redis:7-alpine
     command: ["redis-server", "--appendonly", "yes"]
     ports:
