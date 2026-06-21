@@ -113,7 +113,7 @@ class ConnectionMappingExactReferenceResolverTest extends TestCase
 
     public function test_vat_code_or_null_returns_code_or_null(): void
     {
-        $resolver = new ConnectionMappingExactReferenceResolver;
+        $resolver = $this->resolver();
 
         $this->assertSame('4', $resolver->vatCodeOrNull(21, $this->fullMapping()));
         $this->assertSame('2', $resolver->vatCodeOrNull(9, $this->fullMapping()));
