@@ -20,6 +20,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('company_id')->constrained('books_companies')->cascadeOnDelete();
             $table->foreignId('client_id')->nullable()->constrained('books_clients')->nullOnDelete();
+            $table->foreignId('transaction_id')->nullable()->constrained('books_transactions')->nullOnDelete();
             $table->string('invoice_number')->nullable();
             $table->string('status')->default('draft');
             $table->date('date')->nullable();

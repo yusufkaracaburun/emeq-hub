@@ -22,6 +22,7 @@ class Invoice extends Model
     protected $fillable = [
         'company_id',
         'client_id',
+        'transaction_id',
         'invoice_number',
         'status',
         'date',
@@ -46,9 +47,22 @@ class Invoice extends Model
         return $this->belongsTo(Client::class, 'client_id');
     }
 
+    public function transaction(): BelongsTo
+    {
+        return $this->belongsTo(Transaction::class, 'transaction_id');
+    }
+
     public function lines(): HasMany
     {
         return $this->hasMany(InvoiceLine::class, 'invoice_id');
+    }
+
+    /**
+     * Een factuur is geboekt zodra ze aan een memoriaal-Transaction hangt.
+     */
+    public function isPosted(): bool
+    {
+        return $this->transaction_id !== null;
     }
 
     /**

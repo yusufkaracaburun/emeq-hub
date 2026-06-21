@@ -5,10 +5,16 @@ declare(strict_types=1);
 namespace App\Filament\Books\Resources\Invoices\Tables;
 
 use App\Books\Enums\InvoiceStatus;
+use App\Books\Models\Invoice;
+use App\Books\Services\InvoicePoster;
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Notifications\Notification;
+use Filament\Support\Icons\Heroicon;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -39,6 +45,10 @@ class InvoicesTable
                     ->label('Status')
                     ->badge(),
 
+                IconColumn::make('transaction_id')
+                    ->label('Geboekt')
+                    ->boolean(),
+
                 TextColumn::make('total')
                     ->label('Totaal')
                     ->formatStateUsing(fn (int $state): string => '€ '.number_format($state / 100, 2, ',', '.'))
@@ -53,6 +63,32 @@ class InvoicesTable
                         ->all()),
             ])
             ->recordActions([
+                Action::make('boeken')
+                    ->label('Boeken')
+                    ->icon(Heroicon::OutlinedCheckCircle)
+                    ->color('success')
+                    ->visible(fn (Invoice $record): bool => ! $record->isPosted())
+                    ->requiresConfirmation()
+                    ->modalDescription('Boekt de verkoopboeking (debiteuren / omzet / BTW) naar het grootboek.')
+                    ->action(function (Invoice $record): void {
+                        app(InvoicePoster::class)->post($record);
+
+                        Notification::make()->title('Factuur geboekt')->success()->send();
+                    }),
+
+                Action::make('ontboeken')
+                    ->label('Ontboeken')
+                    ->icon(Heroicon::OutlinedArrowUturnLeft)
+                    ->color('gray')
+                    ->visible(fn (Invoice $record): bool => $record->isPosted())
+                    ->requiresConfirmation()
+                    ->modalDescription('Verwijdert de grootboekboeking weer.')
+                    ->action(function (Invoice $record): void {
+                        app(InvoicePoster::class)->unpost($record);
+
+                        Notification::make()->title('Boeking ongedaan gemaakt')->success()->send();
+                    }),
+
                 EditAction::make()->iconButton(),
                 DeleteAction::make()->iconButton(),
             ])
