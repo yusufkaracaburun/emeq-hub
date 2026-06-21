@@ -6,6 +6,7 @@ namespace App\Filament\Books\Resources\Invoices\Tables;
 
 use App\Books\Enums\InvoiceStatus;
 use App\Books\Models\Invoice;
+use App\Books\Services\InvoicePdfRenderer;
 use App\Books\Services\InvoicePoster;
 use App\Filament\Books\Support\PaymentActions;
 use Filament\Actions\Action;
@@ -20,6 +21,7 @@ use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class InvoicesTable
 {
@@ -79,36 +81,49 @@ class InvoicesTable
             ->recordActions([
                 ActionGroup::make([
                     Action::make('boeken')
-                    ->label('Boeken')
-                    ->icon(Heroicon::OutlinedCheckCircle)
-                    ->color('success')
-                    ->visible(fn (Invoice $record): bool => ! $record->isPosted())
-                    ->requiresConfirmation()
-                    ->modalDescription('Boekt de verkoopboeking (debiteuren / omzet / BTW) naar het grootboek.')
-                    ->action(function (Invoice $record): void {
-                        app(InvoicePoster::class)->post($record);
+                        ->label('Boeken')
+                        ->icon(Heroicon::OutlinedCheckCircle)
+                        ->color('success')
+                        ->visible(fn (Invoice $record): bool => ! $record->isPosted())
+                        ->requiresConfirmation()
+                        ->modalDescription('Boekt de verkoopboeking (debiteuren / omzet / BTW) naar het grootboek.')
+                        ->action(function (Invoice $record): void {
+                            app(InvoicePoster::class)->post($record);
 
-                        Notification::make()->title('Factuur geboekt')->success()->send();
-                    }),
+                            Notification::make()->title('Factuur geboekt')->success()->send();
+                        }),
 
-                Action::make('ontboeken')
-                    ->label('Ontboeken')
-                    ->icon(Heroicon::OutlinedArrowUturnLeft)
-                    ->color('gray')
-                    ->visible(fn (Invoice $record): bool => $record->isPosted())
-                    ->requiresConfirmation()
-                    ->modalDescription('Verwijdert de grootboekboeking weer.')
-                    ->action(function (Invoice $record): void {
-                        app(InvoicePoster::class)->unpost($record);
+                    Action::make('ontboeken')
+                        ->label('Ontboeken')
+                        ->icon(Heroicon::OutlinedArrowUturnLeft)
+                        ->color('gray')
+                        ->visible(fn (Invoice $record): bool => $record->isPosted())
+                        ->requiresConfirmation()
+                        ->modalDescription('Verwijdert de grootboekboeking weer.')
+                        ->action(function (Invoice $record): void {
+                            app(InvoicePoster::class)->unpost($record);
 
-                        Notification::make()->title('Boeking ongedaan gemaakt')->success()->send();
-                    }),
+                            Notification::make()->title('Boeking ongedaan gemaakt')->success()->send();
+                        }),
 
-                PaymentActions::register(),
-                PaymentActions::undo(),
+                    PaymentActions::register(),
+                    PaymentActions::undo(),
 
-                EditAction::make(),
-                DeleteAction::make(),
+                    Action::make('pdf')
+                        ->label('PDF')
+                        ->icon(Heroicon::OutlinedDocumentArrowDown)
+                        ->color('gray')
+                        ->action(function (Invoice $record): StreamedResponse {
+                            $renderer = app(InvoicePdfRenderer::class);
+
+                            return response()->streamDownload(
+                                fn () => print ($renderer->output($record)),
+                                $renderer->filename($record),
+                            );
+                        }),
+
+                    EditAction::make(),
+                    DeleteAction::make(),
                 ]),
             ])
             ->toolbarActions([
