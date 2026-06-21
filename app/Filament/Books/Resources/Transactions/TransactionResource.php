@@ -29,6 +29,10 @@ class TransactionResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedArrowsRightLeft;
 
+    protected static string|\UnitEnum|null $navigationGroup = 'Boekhouding';
+
+    protected static ?int $navigationSort = 2;
+
     protected static ?string $navigationLabel = 'Transacties';
 
     protected static ?string $modelLabel = 'transactie';

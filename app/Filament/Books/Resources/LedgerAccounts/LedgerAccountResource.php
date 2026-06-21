@@ -27,6 +27,10 @@ class LedgerAccountResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBookOpen;
 
+    protected static string|\UnitEnum|null $navigationGroup = 'Boekhouding';
+
+    protected static ?int $navigationSort = 1;
+
     protected static ?string $navigationLabel = 'Grootboek';
 
     protected static ?string $modelLabel = 'grootboekrekening';

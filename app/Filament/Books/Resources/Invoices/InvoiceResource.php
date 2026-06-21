@@ -26,6 +26,8 @@ class InvoiceResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDocumentText;
 
+    protected static string|\UnitEnum|null $navigationGroup = 'Verkoop';
+
     protected static ?string $navigationLabel = 'Facturen';
 
     protected static ?string $modelLabel = 'factuur';

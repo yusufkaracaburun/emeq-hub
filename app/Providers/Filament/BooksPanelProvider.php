@@ -43,6 +43,11 @@ class BooksPanelProvider extends PanelProvider
                 Dashboard::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Books/Widgets'), for: 'App\Filament\Books\Widgets')
+            ->navigationGroups([
+                'Boekhouding',
+                'Verkoop',
+                'Relaties',
+            ])
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
