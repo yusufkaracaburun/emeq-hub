@@ -24,4 +24,15 @@ interface ExactReferenceResolver
     public function glAccountGuid(?string $category, Connection $connection): ?string;
 
     public function journal(DocumentType $type, Connection $connection): string;
+
+    /**
+     * Valideert een kostenplaats-Code tegen de mirror en geeft 'm ongewijzigd terug (Exact
+     * boekt op Code, niet GUID). Null/leeg → null (regel zonder kostenplaats).
+     */
+    public function costCenter(?string $code, Connection $connection): ?string;
+
+    /**
+     * Valideert een kostendrager-Code tegen de mirror en geeft 'm ongewijzigd terug.
+     */
+    public function costUnit(?string $code, Connection $connection): ?string;
 }

@@ -9,6 +9,8 @@ use App\Models\Account;
 use App\Models\Connection;
 use App\Models\ConnectionAccountingRef;
 use App\Models\Consumer;
+use Emeq\ExactApi\Http\Request\Read\GetCostCenters;
+use Emeq\ExactApi\Http\Request\Read\GetCostUnits;
 use Emeq\ExactApi\Http\Request\Read\GetGlAccounts;
 use Emeq\ExactApi\Http\Request\Read\GetJournals;
 use Emeq\ExactApi\Http\Request\Read\GetVatCodes;
@@ -63,6 +65,13 @@ class ExactReferenceSyncTest extends TestCase
                 ['Code' => '80', 'Description' => 'Verkoopboek', 'Type' => 20],
                 ['Code' => '70', 'Description' => 'Inkoopboek', 'Type' => 22],
             ]]], 200),
+            GetCostCenters::class => MockResponse::make(['d' => ['results' => [
+                ['Code' => 'ADMIN', 'Description' => 'Administratie'],
+                ['Code' => 'SALES', 'Description' => 'Verkoop'],
+            ]]], 200),
+            GetCostUnits::class => MockResponse::make(['d' => ['results' => [
+                ['Code' => 'PROJ-X', 'Description' => 'Project X'],
+            ]]], 200),
         ]);
     }
 
@@ -73,7 +82,7 @@ class ExactReferenceSyncTest extends TestCase
 
         $count = app(ExactReferenceSync::class)->sync($connection);
 
-        $this->assertSame(6, $count);
+        $this->assertSame(9, $count);
 
         $gl = ConnectionAccountingRef::query()
             ->where('connection_id', $connection->getKey())
@@ -98,6 +107,22 @@ class ExactReferenceSyncTest extends TestCase
             ->where('code', '80')
             ->firstOrFail();
         $this->assertSame(20, $journal->attrs['type']);
+
+        // Kostenplaats/-drager: native_id = Code (Exact boekt op Code, niet GUID).
+        $costCenter = ConnectionAccountingRef::query()
+            ->where('connection_id', $connection->getKey())
+            ->where('kind', ConnectionAccountingRef::KIND_COST_CENTER)
+            ->where('code', 'ADMIN')
+            ->firstOrFail();
+        $this->assertSame('ADMIN', $costCenter->native_id);
+        $this->assertSame('Administratie', $costCenter->label);
+
+        $costUnit = ConnectionAccountingRef::query()
+            ->where('connection_id', $connection->getKey())
+            ->where('kind', ConnectionAccountingRef::KIND_COST_UNIT)
+            ->where('code', 'PROJ-X')
+            ->firstOrFail();
+        $this->assertSame('PROJ-X', $costUnit->native_id);
     }
 
     public function test_sync_is_idempotent_and_prunes_disappeared_codes(): void

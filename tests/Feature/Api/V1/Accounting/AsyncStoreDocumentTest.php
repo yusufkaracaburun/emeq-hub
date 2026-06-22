@@ -74,6 +74,16 @@ class AsyncStoreDocumentTest extends TestCase
             {
                 return '90';
             }
+
+            public function costCenter(?string $code, Connection $connection): ?string
+            {
+                return $code;
+            }
+
+            public function costUnit(?string $code, Connection $connection): ?string
+            {
+                return $code;
+            }
         });
     }
 

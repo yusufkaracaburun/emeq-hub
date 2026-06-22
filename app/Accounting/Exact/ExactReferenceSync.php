@@ -11,13 +11,14 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Spiegelt de stabiele Exact-referentiedata (grootboek, BTW-codes, dagboeken) van één
- * Connection naar `connection_accounting_refs`. De boeking resolvet daarna code→native_id
- * lokaal tegen deze mirror — geen live partner-call op het schrijfpad.
+ * Spiegelt de stabiele Exact-referentiedata (grootboek, BTW-codes, dagboeken,
+ * kostenplaatsen, kostendragers) van één Connection naar `connection_accounting_refs`. De
+ * boeking resolvet daarna code→native_id lokaal tegen deze mirror — geen live partner-call
+ * op het schrijfpad.
  *
- * Idempotent: upsert op `(connection, kind, code)` + prune van weggevallen gl/vat/journal-rijen
- * (Code verdwenen in Exact → uit de mirror). Relaties (kind=relation) worden lazy bijgevuld door
- * de resolver en hier níét aangeraakt.
+ * Idempotent: upsert op `(connection, kind, code)` + prune van weggevallen
+ * gl/vat/journal/cost_center/cost_unit-rijen (Code verdwenen in Exact → uit de mirror).
+ * Relaties (kind=relation) worden lazy bijgevuld door de resolver en hier níét aangeraakt.
  */
 final class ExactReferenceSync
 {
@@ -53,6 +54,8 @@ final class ExactReferenceSync
                     ConnectionAccountingRef::KIND_GL,
                     ConnectionAccountingRef::KIND_VAT,
                     ConnectionAccountingRef::KIND_JOURNAL,
+                    ConnectionAccountingRef::KIND_COST_CENTER,
+                    ConnectionAccountingRef::KIND_COST_UNIT,
                 ])
                 ->where('synced_at', '<', $now)
                 ->delete();

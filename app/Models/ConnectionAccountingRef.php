@@ -13,7 +13,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * (GL-/dagboek-/BTW-Code of party.external_id) → de provider-native `native_id` (GUID).
  *
  * De boeking resolvet code→native_id lokaal tegen deze mirror (geen live partner-call);
- * de mirror wordt ververst door de reference-sync. `kind` ∈ gl|vat|journal|relation.
+ * de mirror wordt ververst door de reference-sync. `kind` ∈
+ * gl|vat|journal|relation|cost_center|cost_unit.
  */
 #[Fillable([
     'connection_id',
@@ -33,6 +34,10 @@ class ConnectionAccountingRef extends Model
     public const KIND_JOURNAL = 'journal';
 
     public const KIND_RELATION = 'relation';
+
+    public const KIND_COST_CENTER = 'cost_center';
+
+    public const KIND_COST_UNIT = 'cost_unit';
 
     /**
      * @return array<string, string>

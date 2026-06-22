@@ -10,7 +10,9 @@ namespace App\Accounting;
  * met de bron ontstaat; `quantity`/`unitPrice` zijn optioneel/informatief. BTW
  * wordt als tarief (0/9/21) gedragen — geen provider-VATCode; de adapter mapt tarief
  * → de code van de gekoppelde admin. `category` is een vrije grootboek-hint die de
- * adapter naar een GLAccount vertaalt.
+ * adapter naar een GLAccount vertaalt. `costCenter`/`costUnit` zijn optionele
+ * kostenplaats-/kostendrager-Codes (provider-stabiel) die de adapter ongewijzigd op de
+ * boekingsregel zet — geen mapping-laag.
  */
 final readonly class FinancialDocumentLine
 {
@@ -21,6 +23,8 @@ final readonly class FinancialDocumentLine
         public ?float $quantity = null,
         public ?float $unitPrice = null,
         public ?string $category = null,
+        public ?string $costCenter = null,
+        public ?string $costUnit = null,
     ) {}
 
     public function netAmount(): float
@@ -45,6 +49,8 @@ final readonly class FinancialDocumentLine
             quantity: isset($data['quantity']) ? (float) $data['quantity'] : null,
             unitPrice: isset($data['unit_price']) ? (float) $data['unit_price'] : null,
             category: isset($data['category']) ? (string) $data['category'] : null,
+            costCenter: isset($data['cost_center']) ? (string) $data['cost_center'] : null,
+            costUnit: isset($data['cost_unit']) ? (string) $data['cost_unit'] : null,
         );
     }
 }

@@ -68,6 +68,16 @@ class StoreDocumentTest extends TestCase
             {
                 return in_array($type, [DocumentType::PurchaseInvoice, DocumentType::Expense], true) ? '20' : '90';
             }
+
+            public function costCenter(?string $code, Connection $connection): ?string
+            {
+                return $code;
+            }
+
+            public function costUnit(?string $code, Connection $connection): ?string
+            {
+                return $code;
+            }
         });
     }
 
@@ -180,6 +190,56 @@ class StoreDocumentTest extends TestCase
                 && $body['SalesEntryLines'][0]['VATCode'] === '4'
                 && $body['SalesEntryLines'][0]['GLAccount'] === 'gl-guid'
                 && (float) $body['SalesEntryLines'][0]['AmountFC'] === 200.0;
+        });
+    }
+
+    public function test_maps_cost_center_and_unit_onto_the_entry_line(): void
+    {
+        MockClient::global([
+            CreateSalesEntry::class => MockResponse::make(['d' => ['ID' => 'inv-guid-1']], 201),
+        ]);
+        $this->bindFakeReferences();
+
+        [$consumer] = $this->consumerWithExactConnection();
+        $token = $consumer->createToken('t', [TokenAbilities::EXACT_WRITE])->plainTextToken;
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->withHeader('X-Account-Id', 'school1')
+            ->withHeader('Idempotency-Key', (string) Str::uuid())
+            ->postJson('/v1/accounting/documents', $this->salesInvoicePayload([
+                'lines' => [
+                    ['description' => 'Consultancy', 'amount' => 200, 'tax_rate' => 21, 'category' => 'omzet', 'cost_center' => 'ADMIN', 'cost_unit' => 'PROJ-X'],
+                ],
+            ]))
+            ->assertStatus(201);
+
+        MockClient::global()->assertSent(function (CreateSalesEntry $request): bool {
+            $line = $request->body()->all()['SalesEntryLines'][0];
+
+            return $line['CostCenter'] === 'ADMIN' && $line['CostUnit'] === 'PROJ-X';
+        });
+    }
+
+    public function test_omits_cost_center_and_unit_when_absent(): void
+    {
+        MockClient::global([
+            CreateSalesEntry::class => MockResponse::make(['d' => ['ID' => 'inv-guid-1']], 201),
+        ]);
+        $this->bindFakeReferences();
+
+        [$consumer] = $this->consumerWithExactConnection();
+        $token = $consumer->createToken('t', [TokenAbilities::EXACT_WRITE])->plainTextToken;
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->withHeader('X-Account-Id', 'school1')
+            ->withHeader('Idempotency-Key', (string) Str::uuid())
+            ->postJson('/v1/accounting/documents', $this->salesInvoicePayload())
+            ->assertStatus(201);
+
+        MockClient::global()->assertSent(function (CreateSalesEntry $request): bool {
+            $line = $request->body()->all()['SalesEntryLines'][0];
+
+            return ! array_key_exists('CostCenter', $line) && ! array_key_exists('CostUnit', $line);
         });
     }
 

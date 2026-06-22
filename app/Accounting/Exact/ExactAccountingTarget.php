@@ -247,8 +247,9 @@ final class ExactAccountingTarget implements AccountingTarget
 
     /**
      * Geresolvede regels in de neutrale vorm die de SDK-write-requests verwachten.
+     * costCenter/costUnit zijn gevalideerde Codes (of null) — de SDK laat null-velden vallen.
      *
-     * @return list<array{description: ?string, amount: float, vatCode: ?string, glAccount: ?string}>
+     * @return list<array{description: ?string, amount: float, vatCode: ?string, glAccount: ?string, costCenter: ?string, costUnit: ?string}>
      */
     private function lines(FinancialDocument $document, Connection $connection): array
     {
@@ -258,6 +259,8 @@ final class ExactAccountingTarget implements AccountingTarget
                 'amount' => $line->netAmount(),
                 'vatCode' => $this->references->vatCode($line->taxRate, $connection),
                 'glAccount' => $this->references->glAccountGuid($line->category, $connection),
+                'costCenter' => $this->references->costCenter($line->costCenter, $connection),
+                'costUnit' => $this->references->costUnit($line->costUnit, $connection),
             ],
             $document->lines,
         );

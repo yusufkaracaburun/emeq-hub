@@ -136,4 +136,33 @@ class ConnectionMappingExactReferenceResolverTest extends TestCase
         $this->expectException(AccountingMappingException::class);
         $resolver->journal(DocumentType::SalesInvoice, $this->connection(null));
     }
+
+    public function test_cost_center_and_unit_validate_against_mirror_and_pass_code_through(): void
+    {
+        $resolver = $this->resolver();
+        $connection = $this->connection(null);
+        $this->seedRef($connection, ConnectionAccountingRef::KIND_COST_CENTER, 'ADMIN', 'ADMIN');
+        $this->seedRef($connection, ConnectionAccountingRef::KIND_COST_UNIT, 'PROJ-X', 'PROJ-X');
+
+        $this->assertSame('ADMIN', $resolver->costCenter('ADMIN', $connection));
+        $this->assertSame('PROJ-X', $resolver->costUnit('PROJ-X', $connection));
+    }
+
+    public function test_cost_center_and_unit_return_null_when_blank(): void
+    {
+        $resolver = $this->resolver();
+        $connection = $this->connection(null);
+
+        $this->assertNull($resolver->costCenter(null, $connection));
+        $this->assertNull($resolver->costCenter('', $connection));
+        $this->assertNull($resolver->costUnit(null, $connection));
+    }
+
+    public function test_throws_when_cost_center_not_in_mirror(): void
+    {
+        $resolver = $this->resolver();
+
+        $this->expectException(AccountingMappingException::class);
+        $resolver->costCenter('ONBEKEND', $this->connection(null));
+    }
 }

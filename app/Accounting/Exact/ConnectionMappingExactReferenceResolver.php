@@ -68,6 +68,42 @@ final class ConnectionMappingExactReferenceResolver implements ExactReferenceRes
             ?? throw new AccountingMappingException("Grootboek-code '{$code}' niet in de mirror — draai POST /v1/accounting/sync.");
     }
 
+    public function costCenter(?string $code, Connection $connection): ?string
+    {
+        return $this->validatedRefCode(
+            $code,
+            $connection,
+            ConnectionAccountingRef::KIND_COST_CENTER,
+            "Kostenplaats-code '%s' niet in de mirror — draai POST /v1/accounting/sync.",
+        );
+    }
+
+    public function costUnit(?string $code, Connection $connection): ?string
+    {
+        return $this->validatedRefCode(
+            $code,
+            $connection,
+            ConnectionAccountingRef::KIND_COST_UNIT,
+            "Kostendrager-code '%s' niet in de mirror — draai POST /v1/accounting/sync.",
+        );
+    }
+
+    /**
+     * Kostenplaats/-drager dragen de Code direct op de boeking (geen GUID). De mirror dient hier
+     * als validatie: een onbekende Code → fail-fast met duidelijke melding i.p.v. een Exact-400.
+     */
+    private function validatedRefCode(?string $code, Connection $connection, string $kind, string $missing): ?string
+    {
+        $code = trim((string) $code);
+
+        if ($code === '') {
+            return null;
+        }
+
+        return $this->mirrorNativeId($connection, $kind, $code)
+            ?? throw new AccountingMappingException(sprintf($missing, $code));
+    }
+
     /**
      * Resolveert een stabiele Code naar de provider-native identiteit (GUID) via de mirror.
      */

@@ -9,6 +9,8 @@ use App\Models\ConnectionAccountingRef;
 use Emeq\ExactApi\Contracts\ExactCredentialResolver;
 use Emeq\ExactApi\Contracts\TokenStore;
 use Emeq\ExactApi\Exact;
+use Emeq\ExactApi\Http\Request\Read\GetCostCenters;
+use Emeq\ExactApi\Http\Request\Read\GetCostUnits;
 use Emeq\ExactApi\Http\Request\Read\GetGlAccounts;
 use Emeq\ExactApi\Http\Request\Read\GetJournals;
 use Emeq\ExactApi\Http\Request\Read\GetRelations;
@@ -121,6 +123,50 @@ final class ExactReferenceData
     }
 
     /**
+     * Kostenplaatsen: [Code => label]. De Code is de mapping-/boekings-waarde (CostCenter).
+     *
+     * @return array<string, string>
+     */
+    public function costCenters(): array
+    {
+        $out = [];
+
+        foreach ($this->fetch(new GetCostCenters(['$select' => 'Code,Description'])) as $row) {
+            $code = trim((string) ($row['Code'] ?? ''));
+
+            if ($code === '') {
+                continue;
+            }
+
+            $out[$code] = $this->label($code, $row['Description'] ?? null);
+        }
+
+        return $out;
+    }
+
+    /**
+     * Kostendragers: [Code => label]. De Code is de mapping-/boekings-waarde (CostUnit).
+     *
+     * @return array<string, string>
+     */
+    public function costUnits(): array
+    {
+        $out = [];
+
+        foreach ($this->fetch(new GetCostUnits(['$select' => 'Code,Description'])) as $row) {
+            $code = trim((string) ($row['Code'] ?? ''));
+
+            if ($code === '') {
+                continue;
+            }
+
+            $out[$code] = $this->label($code, $row['Description'] ?? null);
+        }
+
+        return $out;
+    }
+
+    /**
      * Rich mirror-rijen voor de reference-sync: stabiele `code` → provider-native `native_id`.
      * GL: native_id = de GUID. VAT/journal: native_id = de Code (Exact accepteert die direct
      * op de boeking); `attrs` draagt kind-specifieke velden (percentage / type).
@@ -129,7 +175,13 @@ final class ExactReferenceData
      */
     public function mirrorRows(): array
     {
-        return [...$this->glAccountRows(), ...$this->vatCodeRows(), ...$this->journalRows()];
+        return [
+            ...$this->glAccountRows(),
+            ...$this->vatCodeRows(),
+            ...$this->journalRows(),
+            ...$this->costCenterRows(),
+            ...$this->costUnitRows(),
+        ];
     }
 
     /**
@@ -206,6 +258,63 @@ final class ExactReferenceData
                 'native_id' => $code,
                 'label' => trim((string) ($row['Description'] ?? '')),
                 'attrs' => ['type' => isset($row['Type']) ? (int) $row['Type'] : null],
+            ];
+        }
+
+        return $out;
+    }
+
+    /**
+     * Kostenplaatsen: native_id = Code (Exact accepteert de Code direct op de boekingsregel,
+     * `Edm.String` — anders dan GLAccount/GUID).
+     *
+     * @return list<array{kind: string, code: string, native_id: string, label: string, attrs: array<string, mixed>}>
+     */
+    public function costCenterRows(): array
+    {
+        $out = [];
+
+        foreach ($this->fetch(new GetCostCenters(['$select' => 'Code,Description'])) as $row) {
+            $code = trim((string) ($row['Code'] ?? ''));
+
+            if ($code === '') {
+                continue;
+            }
+
+            $out[] = [
+                'kind' => ConnectionAccountingRef::KIND_COST_CENTER,
+                'code' => $code,
+                'native_id' => $code,
+                'label' => trim((string) ($row['Description'] ?? '')),
+                'attrs' => [],
+            ];
+        }
+
+        return $out;
+    }
+
+    /**
+     * Kostendragers: native_id = Code (zie costCenterRows).
+     *
+     * @return list<array{kind: string, code: string, native_id: string, label: string, attrs: array<string, mixed>}>
+     */
+    public function costUnitRows(): array
+    {
+        $out = [];
+
+        foreach ($this->fetch(new GetCostUnits(['$select' => 'Code,Description'])) as $row) {
+            $code = trim((string) ($row['Code'] ?? ''));
+
+            if ($code === '') {
+                continue;
+            }
+
+            $out[] = [
+                'kind' => ConnectionAccountingRef::KIND_COST_UNIT,
+                'code' => $code,
+                'native_id' => $code,
+                'label' => trim((string) ($row['Description'] ?? '')),
+                'attrs' => [],
             ];
         }
 

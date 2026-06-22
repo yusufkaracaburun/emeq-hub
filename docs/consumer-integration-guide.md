@@ -274,7 +274,7 @@ de provider:
   "currency": "EUR",
   "party": { "role": "creditor", "name": "Leverancier BV", "vat_number": "NL000099998B57", "iban": "NL91ABNA0417164300", "external_id": "crediteur-99" },
   "lines": [
-    { "description": "Dienst", "amount": 100.00, "tax_rate": 21, "category": "kantoorkosten" }
+    { "description": "Dienst", "amount": 100.00, "tax_rate": 21, "category": "kantoorkosten", "cost_center": "ADMIN", "cost_unit": "PROJ-X" }
   ],
   "attachments": [
     { "filename": "factuur.pdf", "mime_type": "application/pdf", "content": "<base64>" }
@@ -288,6 +288,9 @@ de provider:
   mee: de Hub onthoudt 'm (relatie-mirror) zodat een volgende boeking direct matcht.
 - `lines[].amount` = **netto** regelbedrag (leidend); `tax_rate` = percentage (0/9/21).
   `quantity`/`unit_price` optioneel/informatief; `category` = GL-hint.
+- `lines[].cost_center` / `lines[].cost_unit` (optioneel) = kostenplaats-/kostendrager-**Code**
+  van de gekoppelde administratie (precies zoals die in Exact heet). Onbekende Code →
+  `422` met een duidelijke melding; laat weg als je er geen voert.
 - `external_id` = jouw stabiele document-sleutel (echo't terug — gebruik 'm in je sync-ledger).
 - `currency` default `EUR`; `attachments` optioneel, inline base64 (PDF/PNG/JPEG, ≲ 1 MB/stuk).
 
