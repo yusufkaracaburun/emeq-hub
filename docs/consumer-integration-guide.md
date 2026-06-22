@@ -22,6 +22,7 @@ providers verschijnen vanzelf; je past je code niet aan per provider.
 - [Stap 4 — Terugkomst + status](#stap-4--terugkomst--status)
 - [Stap 5 — Loskoppelen](#stap-5--loskoppelen)
 - [Boekhouden — documenten valideren & boeken](#boekhouden--documenten-valideren--boeken)
+  - [Boekhoud-mapping (zelf-service, optioneel)](#boekhoud-mapping-zelf-service-optioneel)
 - [Valkuilen](#valkuilen)
 
 ## Concepten
@@ -389,6 +390,54 @@ Hub-canonical formaat — buig niets naar Exact). Voor elk boekbaar document:
    external_id. Behandel `422 mapping_failed` als "actie vereist in de Hub-admin",
    niet als retrybare fout. Retry nooit een 5xx zonder dezelfde Idempotency-Key.
 Stuur `party.external_id` consistent mee zodat relaties gecachet worden.
+```
+
+### Boekhoud-mapping (zelf-service, optioneel)
+
+De Hub synct + auto-derivet de mapping al bij connect — **standaard hoef je hier
+niets**. Deze endpoints zijn er voor consumers die de mapping willen tonen/verfijnen
+of relatie-auto-create zelf willen sturen. Alle op header `X-Account-Id` +
+`exact:read` (lezen) / `exact:write` (schrijven).
+
+| Doel | Request | Ability |
+|---|---|---|
+| Mirror (her)synchroniseren + auto-derive | `POST /v1/accounting/sync` | `exact:write` |
+| Beschikbare codes (GL/BTW/dagboek) | `GET /v1/accounting/reference-data` | `exact:read` |
+| Huidige mapping lezen | `GET /v1/accounting/mapping` | `exact:read` |
+| Mapping + auto-create zetten (merge) | `PUT /v1/accounting/mapping` | `exact:write` |
+
+PUT-body — alle velden optioneel, **merge** (bestaande waarden blijven):
+
+```json
+{
+  "vat_codes":   { "21": "3", "9": "1", "0": "0" },
+  "gl_accounts": { "_default": "4000", "omzet": "8000" },
+  "journals":    { "sales": "70", "purchase": "20" },
+  "auto_create_relations": true
+}
+```
+
+- `vat_codes`/`gl_accounts`/`journals` = stabiele **Codes** uit `reference-data`
+  (geen GUIDs — de Hub resolvet die lokaal).
+- `auto_create_relations`: `true` → een onbekende party wordt automatisch als relatie
+  aangemaakt bij het boeken (anders `422`). `false`/weglaten = uit. Deze toggle wordt
+  **gedeeld met de Hub-admin** — wie het laatst schrijft, wint.
+- `GET /v1/accounting/mapping` geeft de hele mapping terug (incl. `auto_create_relations`).
+
+> Merge-only: een bestaande key verwijderen kan niet via PUT — stuur een nieuwe waarde.
+
+**🤖 Agent-prompt**
+
+```text
+Bouw (optioneel) een instellingen-scherm voor de boekhoud-koppeling tegen de emeq
+Hub. Lees de keuzes met `GET /v1/accounting/reference-data` (header `X-Account-Id`)
+en de huidige mapping met `GET /v1/accounting/mapping`. Laat de tenant per BTW-tarief
+een VATCode, per categorie een GL-Code en per dagboek-type een Journal kiezen (alles
+Codes, geen GUIDs) plus een toggle "onbekende relaties automatisch aanmaken". Sla op
+met `PUT /v1/accounting/mapping` (merge), body `{ vat_codes, gl_accounts, journals,
+auto_create_relations }` — stuur alleen de gewijzigde velden. Optioneel een knop
+"hersynchroniseren" → `POST /v1/accounting/sync`. Default hoeft de tenant niets in te
+stellen; de Hub auto-derivet bij connect.
 ```
 
 ## Valkuilen
