@@ -9,6 +9,8 @@ use App\Models\Connection;
 use App\Models\ConnectionAccountingRef;
 use App\Models\Consumer;
 use App\Sanctum\TokenAbilities;
+use Emeq\ExactApi\Http\Request\Read\GetRelations;
+use Emeq\ExactApi\Http\Request\Write\CreateAccount;
 use Emeq\ExactApi\Http\Request\Write\CreateDocument;
 use Emeq\ExactApi\Http\Request\Write\CreateDocumentAttachment;
 use Emeq\ExactApi\Http\Request\Write\CreatePurchaseEntry;
@@ -270,6 +272,107 @@ class StoreDocumentTest extends TestCase
                 && $body['SalesEntryLines'][0]['VATCode'] === '4'
                 && $body['SalesEntryLines'][0]['GLAccount'] === 'gl-def-guid';
         });
+    }
+
+    public function test_auto_creates_relation_when_opt_in_and_no_match(): void
+    {
+        // Geen fake → de echte resolver. Opt-in aan + geen match → relatie wordt in Exact
+        // aangemaakt (crm/Accounts) en geleerd, daarna boekt de verkoopboeking erop.
+        MockClient::global([
+            GetRelations::class => MockResponse::make(['d' => ['results' => []]], 200),
+            CreateAccount::class => MockResponse::make(['d' => ['ID' => 'new-rel-guid']], 201),
+            CreateSalesEntry::class => MockResponse::make(['d' => ['ID' => 'inv-1']], 201),
+        ]);
+
+        [$consumer, $connection] = $this->consumerWithExactConnection([
+            'metadata' => ['accounting_mapping' => [
+                'vat_codes' => ['21' => '4'],
+                'gl_accounts' => ['_default' => 'gl-def'],
+                'journals' => ['sales' => '70'],
+                'auto_create_relations' => true,
+            ]],
+        ]);
+
+        ConnectionAccountingRef::query()->create([
+            'connection_id' => $connection->getKey(),
+            'kind' => ConnectionAccountingRef::KIND_GL,
+            'code' => 'gl-def',
+            'native_id' => 'gl-def-guid',
+        ]);
+
+        $token = $consumer->createToken('t', [TokenAbilities::EXACT_WRITE])->plainTextToken;
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->withHeader('X-Account-Id', 'school1')
+            ->withHeader('Idempotency-Key', (string) Str::uuid())
+            ->postJson('/v1/accounting/documents', $this->salesInvoicePayload([
+                'party' => ['role' => 'debtor', 'name' => 'Nieuwe Klant', 'external_id' => 'nieuw-1'],
+            ]))
+            ->assertStatus(201)
+            ->assertJsonPath('external_ref', 'inv-1');
+
+        MockClient::global()->assertSent(function ($request): bool {
+            if (! $request instanceof CreateAccount) {
+                return false;
+            }
+
+            $body = $request->body()->all();
+
+            return $body['Name'] === 'Nieuwe Klant'
+                && $body['Status'] === 'C'
+                && $body['IsSales'] === true;
+        });
+
+        MockClient::global()->assertSent(fn ($request): bool => $request instanceof CreateSalesEntry && $request->body()->all()['Customer'] === 'new-rel-guid');
+
+        $this->assertDatabaseHas('connection_accounting_refs', [
+            'connection_id' => $connection->getKey(),
+            'kind' => ConnectionAccountingRef::KIND_RELATION,
+            'code' => 'nieuw-1',
+            'native_id' => 'new-rel-guid',
+        ]);
+    }
+
+    public function test_unknown_relation_without_opt_in_returns_422(): void
+    {
+        // Opt-in staat default uit → geen match blijft een 422; er wordt géén relatie aangemaakt.
+        MockClient::global([
+            GetRelations::class => MockResponse::make(['d' => ['results' => []]], 200),
+        ]);
+
+        [$consumer, $connection] = $this->consumerWithExactConnection([
+            'metadata' => ['accounting_mapping' => [
+                'vat_codes' => ['21' => '4'],
+                'gl_accounts' => ['_default' => 'gl-def'],
+                'journals' => ['sales' => '70'],
+            ]],
+        ]);
+
+        ConnectionAccountingRef::query()->create([
+            'connection_id' => $connection->getKey(),
+            'kind' => ConnectionAccountingRef::KIND_GL,
+            'code' => 'gl-def',
+            'native_id' => 'gl-def-guid',
+        ]);
+
+        $token = $consumer->createToken('t', [TokenAbilities::EXACT_WRITE])->plainTextToken;
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->withHeader('X-Account-Id', 'school1')
+            ->withHeader('Idempotency-Key', (string) Str::uuid())
+            ->postJson('/v1/accounting/documents', $this->salesInvoicePayload([
+                'party' => ['role' => 'debtor', 'name' => 'Onbekende Klant', 'external_id' => 'onbekend-1'],
+            ]))
+            ->assertStatus(422)
+            ->assertJsonPath('error', 'mapping_failed');
+
+        MockClient::global()->assertNotSent(CreateAccount::class);
+
+        $this->assertDatabaseMissing('connection_accounting_refs', [
+            'connection_id' => $connection->getKey(),
+            'kind' => ConnectionAccountingRef::KIND_RELATION,
+            'code' => 'onbekend-1',
+        ]);
     }
 
     public function test_line_amount_drives_booking_without_quantity_or_price(): void
