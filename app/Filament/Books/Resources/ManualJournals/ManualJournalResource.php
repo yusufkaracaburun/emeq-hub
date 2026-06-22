@@ -38,7 +38,7 @@ class ManualJournalResource extends Resource
 
     protected static string|\UnitEnum|null $navigationGroup = 'Boekhouding';
 
-    protected static ?int $navigationSort = 3;
+    protected static ?int $navigationSort = 8;
 
     protected static ?string $navigationLabel = 'Memoriaal';
 

@@ -34,9 +34,9 @@ class PassThroughCallResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Pass-through calls';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Integraties';
+    protected static string|\UnitEnum|null $navigationGroup = 'Koppelingen';
 
-    protected static ?int $navigationSort = 2;
+    protected static ?int $navigationSort = 5;
 
     public static function canAccess(): bool
     {

@@ -29,7 +29,7 @@ use Illuminate\Support\Facades\Cache;
 
 class ConsumerResource extends Resource
 {
-    protected static string|\UnitEnum|null $navigationGroup = 'Consumers';
+    protected static string|\UnitEnum|null $navigationGroup = 'Koppelingen';
 
     protected static ?int $navigationSort = 1;
 

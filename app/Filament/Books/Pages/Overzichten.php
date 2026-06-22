@@ -27,7 +27,7 @@ class Overzichten extends Page
 
     protected static string|UnitEnum|null $navigationGroup = 'Boekhouding';
 
-    protected static ?int $navigationSort = 4;
+    protected static ?int $navigationSort = 9;
 
     protected static ?string $navigationLabel = 'Overzichten';
 

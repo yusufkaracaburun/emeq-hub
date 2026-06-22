@@ -27,9 +27,9 @@ use Filament\Tables\Table;
  */
 class AccountResource extends Resource
 {
-    protected static string|\UnitEnum|null $navigationGroup = 'Consumers';
+    protected static string|\UnitEnum|null $navigationGroup = 'Koppelingen';
 
-    protected static ?int $navigationSort = 3;
+    protected static ?int $navigationSort = 2;
 
     protected static ?string $model = Account::class;
 

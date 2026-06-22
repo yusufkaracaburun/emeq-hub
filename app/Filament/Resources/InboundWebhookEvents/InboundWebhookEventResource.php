@@ -33,9 +33,9 @@ class InboundWebhookEventResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Inbound webhook-events';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Integraties';
+    protected static string|\UnitEnum|null $navigationGroup = 'Koppelingen';
 
-    protected static ?int $navigationSort = 3;
+    protected static ?int $navigationSort = 6;
 
     public static function canAccess(): bool
     {

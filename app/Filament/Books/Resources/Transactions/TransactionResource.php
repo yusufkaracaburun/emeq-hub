@@ -37,7 +37,7 @@ class TransactionResource extends Resource
 
     protected static string|\UnitEnum|null $navigationGroup = 'Boekhouding';
 
-    protected static ?int $navigationSort = 2;
+    protected static ?int $navigationSort = 7;
 
     protected static ?string $navigationLabel = 'Transacties';
 

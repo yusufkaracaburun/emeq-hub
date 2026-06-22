@@ -47,7 +47,7 @@ class OnboardConsumer extends Page
 {
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedSparkles;
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Consumers';
+    protected static string|\UnitEnum|null $navigationGroup = 'Koppelingen';
 
     protected static ?int $navigationSort = 2;
 

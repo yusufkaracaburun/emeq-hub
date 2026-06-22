@@ -28,7 +28,7 @@ class VendorResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBuildingStorefront;
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Facturatie';
+    protected static string|\UnitEnum|null $navigationGroup = 'Boekhouding';
 
     protected static ?int $navigationSort = 5;
 

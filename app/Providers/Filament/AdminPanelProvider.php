@@ -42,29 +42,36 @@ class AdminPanelProvider extends PanelProvider
                 'primary' => Color::Amber,
             ])
             ->viteTheme('resources/css/filament/admin/theme.css')
+            // Desktop-sidebar inklapbaar naar een icon-rail; met group-icons (zie navigationGroups)
+            // wordt dat een minimal rail met fly-out dropdowns per groep.
+            ->sidebarCollapsibleOnDesktop()
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
-            // Books-resources/pages leven top-level onder de Facturatie- + Boekhouding-
-            // navgroups; toegang per-resource via GatedToBoekhouding.
+            // Books-resources/pages leven top-level onder de collapsed Boekhouding-
+            // navgroup; toegang per-resource via GatedToBoekhouding.
             ->discoverResources(in: app_path('Filament/Books/Resources'), for: 'App\Filament\Books\Resources')
             ->discoverPages(in: app_path('Filament/Books/Pages'), for: 'App\Filament\Books\Pages')
             ->pages([
                 Dashboard::class,
             ])
-            // Plan 08-04 (D-07): canonical Tenants-tooltip via extraSidebarAttributes — pinned
-            // op de NavigationGroup-API door `vendor/filament/filament/src/Navigation/NavigationGroup.php`
-            // (geen native ->description()-slot in v4.11). De andere 3 navgroups MOETEN expliciet
-            // worden gedeclareerd zodat Filament hun rendering-volgorde respecteert.
+            // Vier navgroups, expliciet gedeclareerd zodat Filament hun volgorde respecteert.
+            // Koppelingen = de hub-chain (Consumer → Account → Connection) + audit; Boekhouding
+            // en Beheer staan collapsed (secundair). Tooltip via extraSidebarAttributes — pinned
+            // op de NavigationGroup-API (geen native ->description()-slot in v4.11).
             ->navigationGroups([
-                NavigationGroup::make('Consumers')
+                NavigationGroup::make('Koppelingen')
+                    ->icon('heroicon-o-link')
                     ->extraSidebarAttributes([
-                        'title' => 'SaaS-apps (Consumer) → hun klanten (Account) → partner-koppelingen (Connection)',
+                        'title' => 'SaaS-apps (Consumer) → Accounts → partner-Connections + audit',
                     ]),
-                NavigationGroup::make('Integraties'),
-                NavigationGroup::make('Abonnementen'),
-                NavigationGroup::make('Facturatie'),
-                NavigationGroup::make('Boekhouding'),
-                NavigationGroup::make('Beheer'),
+                NavigationGroup::make('Abonnementen')
+                    ->icon('heroicon-o-credit-card'),
+                NavigationGroup::make('Boekhouding')
+                    ->icon('heroicon-o-calculator')
+                    ->collapsed(),
+                NavigationGroup::make('Beheer')
+                    ->icon('heroicon-o-cog-6-tooth')
+                    ->collapsed(),
             ])
             // Externe beheer-tools onder "Beheer" — alleen super-admin. Openen in
             // nieuw tabblad (eigen UI's buiten het Filament-paneel).

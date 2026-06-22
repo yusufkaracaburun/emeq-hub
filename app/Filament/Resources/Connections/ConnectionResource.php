@@ -33,9 +33,9 @@ class ConnectionResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedLink;
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Integraties';
+    protected static string|\UnitEnum|null $navigationGroup = 'Koppelingen';
 
-    protected static ?int $navigationSort = 1;
+    protected static ?int $navigationSort = 3;
 
     public static function canAccess(): bool
     {

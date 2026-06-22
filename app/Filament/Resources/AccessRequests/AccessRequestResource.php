@@ -32,7 +32,7 @@ class AccessRequestResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Koppel-aanvragen';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Consumers';
+    protected static string|\UnitEnum|null $navigationGroup = 'Koppelingen';
 
     protected static ?int $navigationSort = 4;
 
