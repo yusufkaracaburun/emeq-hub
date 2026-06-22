@@ -3,7 +3,7 @@
 return [
     /*
      * Single-company boekhouding (emeq zelf). Alle Books-models hangen aan deze
-     * ene company (D1 in .docs/decisions/erpsaas-books-module.md). Het
+     * ene company (D1 in .docs/decisions/books-module.md). Het
      * company_id-kolom + FK's blijven behouden voor een eventuele multi-entity-
      * toekomst, maar worden niet via session/auth geresolved — gewoon deze vaste id.
      */

@@ -8,10 +8,9 @@ use App\Books\Models\Transaction;
 use Illuminate\Support\Facades\DB;
 
 /*
- * Gebalanceerde double-entry-posting voor een Transaction. Afgeleid van
- * ERPSAAS's TransactionService::createJournalEntries + determineAccounts, maar
- * ZONDER de Plaid-bankfeed-categorizer en valuta-conversie (EUR-only, v1) —
- * zie de posting-grens-notitie in .docs/decisions/erpsaas-books-module.md.
+ * Gebalanceerde double-entry-posting voor een Transaction. EUR-only, geen
+ * valuta-conversie of bankfeed-categorizer — zie de posting-grens-notitie in
+ * .docs/decisions/books-module.md.
  *
  * Invariant: elke standaard-boeking levert exact één debet + één credit met
  * hetzelfde bedrag → de boeking is per definitie in balans.

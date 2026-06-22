@@ -11,9 +11,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 /*
- * Grootboekrekening (chart of accounts). Geport uit ERPSAAS; reporting-scopes,
- * saldo-attributes en de bank-reconciliatie-static-finders volgen in latere
- * fases (UI/rapportage). Bedragen leven niet op dit model maar op JournalEntry.
+ * Grootboekrekening (chart of accounts). Bedragen leven niet op dit model maar op
+ * JournalEntry; saldo wordt afgeleid via AccountService.
  */
 class Account extends Model
 {

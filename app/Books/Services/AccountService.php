@@ -8,10 +8,10 @@ use App\Books\Models\Account;
 use App\Books\Models\JournalEntry;
 
 /*
- * Saldo-berekening over de journaalposten. Lean port van ERPSAAS' AccountService:
- * de kern-regel (calculateNetMovementByCategory) is identiek, maar bedragen zijn
- * integer-centen (geen Money-VO) en de query loopt over de books_-tabellen. De
- * invoice/bill/cashflow-/bankrapportages volgen in de rapportage-fase.
+ * Saldo-berekening over de journaalposten. De kern-regel
+ * (calculateNetMovementByCategory) volgt het dubbel-boekhouden-teken per
+ * AccountCategory; bedragen zijn integer-centen (geen Money-VO) en de query loopt
+ * over de books_-tabellen.
  */
 class AccountService
 {

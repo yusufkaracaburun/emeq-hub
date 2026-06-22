@@ -5,11 +5,11 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 /*
- * Books-module kern-domein (Fase 2). Geport uit ERPSAAS, met `books_`-prefix
- * (D2 — ERPSAAS' `accounts` botst met Hub's bestaande `accounts`-tabel) en een
- * vaste single-company FK naar books_companies (D1). Plaid/institutions +
- * created_by/updated_by-audit + currencies-tabel zijn bewust weggelaten in v1.
- * Zie .docs/decisions/erpsaas-books-module.md.
+ * Books-module kern-domein (Fase 2). `books_`-prefix (D2 — `accounts` zou botsen
+ * met Hub's bestaande `accounts`-tabel) en een vaste single-company FK naar
+ * books_companies (D1). Bankfeed/institutions + created_by/updated_by-audit +
+ * currencies-tabel zijn bewust weggelaten in v1.
+ * Zie .docs/decisions/books-module.md.
  */
 return new class extends Migration
 {

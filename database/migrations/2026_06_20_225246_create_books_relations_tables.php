@@ -6,9 +6,9 @@ use Illuminate\Support\Facades\Schema;
 
 /*
  * Relaties van de Books-module: books_clients (debiteuren) + books_vendors
- * (crediteuren). Lean NL-port van ERPSAAS' clients/vendors — inline contact/adres
- * i.p.v. polymorfe Contact/Address, BTW-/KvK-nummer i.p.v. ssn/ein, geen Blamable
- * (consistent met de overige books_-tabellen), EUR-only.
+ * (crediteuren). Lean NL-opzet — inline contact/adres i.p.v. polymorfe
+ * Contact/Address, BTW-/KvK-nummer, geen Blamable (consistent met de overige
+ * books_-tabellen), EUR-only.
  *
  * Een books_client mag optioneel naar een Hub-`Consumer` wijzen (de betalende
  * klant die emeq al kent): reuse zonder de bounded-context-grens te breken. De
