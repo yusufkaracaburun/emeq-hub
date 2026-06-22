@@ -93,4 +93,18 @@ class ExactReportEnricherTest extends TestCase
         $relation = array_values(array_filter($findings, fn ($f) => str_starts_with($f->code, 'exact.relation.')));
         $this->assertSame([], $relation);
     }
+
+    public function test_relation_label_follows_party_role(): void
+    {
+        foreach (['debtor' => 'Afnemer', 'creditor' => 'Leverancier'] as $role => $label) {
+            $findings = $this->enricher()->enrich(
+                ['party' => ['role' => $role, 'name' => 'Acme BV'], 'lines' => []],
+                $this->connection(['21' => '4']),
+            );
+
+            $relation = array_values(array_filter($findings, fn ($f) => $f->code === 'exact.relation.new'));
+            $this->assertCount(1, $relation, "verwacht relation.new-finding voor rol {$role}");
+            $this->assertStringStartsWith($label, $relation[0]->message);
+        }
+    }
 }

@@ -104,6 +104,7 @@ final class ExactReportEnricher
         $party = is_array($payload['party'] ?? null) ? $payload['party'] : [];
         $vatNumber = is_string($party['vat_number'] ?? null) ? $party['vat_number'] : null;
         $name = is_string($party['name'] ?? null) ? $party['name'] : null;
+        $role = is_string($party['role'] ?? null) ? $party['role'] : null;
 
         if ($this->blank($vatNumber) && $this->blank($name)) {
             return [];
@@ -116,12 +117,14 @@ final class ExactReportEnricher
             return [];
         }
 
+        $label = $this->partyLabel($role);
+
         if ($match !== null) {
             return [new Finding(
                 code: 'exact.relation.matched',
                 severity: Severity::Info,
                 path: 'party',
-                message: "Leverancier gevonden als bestaande Exact-relatie '{$match['name']}'.",
+                message: "{$label} gevonden als bestaande Exact-relatie '{$match['name']}'.",
                 current: $name,
                 suggestion: $match['id'],
             )];
@@ -131,10 +134,23 @@ final class ExactReportEnricher
             code: 'exact.relation.new',
             severity: Severity::Info,
             path: 'party',
-            message: 'Leverancier nog niet als eenduidige Exact-relatie gevonden — wordt bij het boeken als nieuw behandeld.',
+            message: "{$label} nog niet als eenduidige Exact-relatie gevonden — wordt bij het boeken als nieuw behandeld.",
             current: $name,
             suggestion: null,
         )];
+    }
+
+    /**
+     * Afnemer (debtor) of leverancier (creditor) — de canonical party-rol bepaalt het
+     * woord; onbekende/ontbrekende rol valt terug op het neutrale "Relatie".
+     */
+    private function partyLabel(?string $role): string
+    {
+        return match ($role) {
+            'debtor' => 'Afnemer',
+            'creditor' => 'Leverancier',
+            default => 'Relatie',
+        };
     }
 
     private function rateLabel(float $rate): string
