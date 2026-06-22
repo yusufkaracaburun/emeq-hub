@@ -1,0 +1,73 @@
+<?php
+
+namespace Tests\Feature\Books;
+
+use App\Books\Models\BooksCompany;
+use App\Books\Models\Client;
+use App\Books\Models\Invoice;
+use App\Books\Services\InvoicePoster;
+use App\Filament\Books\Pages\BtwAangifte;
+use App\Models\User;
+use Database\Seeders\BooksChartSeeder;
+use Filament\Facades\Filament;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Livewire\Livewire;
+use Spatie\Permission\Models\Role;
+use Tests\TestCase;
+
+class BtwAangiftePageTest extends TestCase
+{
+    use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        Filament::setCurrentPanel('admin');
+
+        $company = BooksCompany::create(['name' => 'Emeq']);
+        config(['books.company_id' => $company->id]);
+        $this->seed(BooksChartSeeder::class);
+
+        Role::firstOrCreate(['name' => 'boekhouder']);
+        $boekhouder = User::factory()->create();
+        $boekhouder->assignRole('boekhouder');
+        $this->actingAs($boekhouder);
+
+        // Verkoop 21% binnen het huidige kwartaal (= default-periode van de page).
+        $client = Client::create(['name' => 'Acme BV']);
+        $invoice = Invoice::create(['client_id' => $client->id, 'invoice_number' => '2026-001', 'status' => 'sent', 'date' => now()]);
+        $invoice->lines()->create(['description' => 'Werk', 'quantity' => 1, 'unit_price' => 10000, 'tax_rate' => 21]);
+        app(InvoicePoster::class)->post($invoice->refresh());
+    }
+
+    public function test_page_renders_declaration(): void
+    {
+        Livewire::test(BtwAangifte::class)
+            ->assertOk()
+            ->assertSee('Prestaties binnenland')
+            ->assertSee('Te betalen')
+            ->assertSee('€ 21,00'); // verschuldigde BTW 21% over grondslag €100 (10000 cent)
+    }
+
+    public function test_quarter_default_period(): void
+    {
+        Livewire::test(BtwAangifte::class)
+            ->assertSet('startDate', now()->startOfQuarter()->toDateString())
+            ->assertSet('endDate', now()->endOfQuarter()->toDateString());
+    }
+
+    public function test_pdf_action_streams_download(): void
+    {
+        Livewire::test(BtwAangifte::class)
+            ->callAction('pdf')
+            ->assertOk();
+    }
+
+    public function test_xml_action_streams_download(): void
+    {
+        Livewire::test(BtwAangifte::class)
+            ->callAction('xml')
+            ->assertOk();
+    }
+}
