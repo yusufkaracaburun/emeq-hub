@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Books\Resources\Transactions;
 
+use App\Books\Enums\TransactionType;
 use App\Books\Models\Transaction;
 use App\Filament\Books\BoekhoudingCluster;
 use App\Filament\Books\Concerns\GatedToBoekhouding;
@@ -18,12 +19,14 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 /*
- * Boekingen (deposit/withdrawal) van de Books-module. Een Transaction post bij
- * create via de observer een gebalanceerde grootboek-boeking → daarom immutable:
- * alleen aanmaken + bekijken, géén edit/delete (corrigeren = tegenboeking). De
- * journal-type (memoriaal) komt in een latere fase met een eigen regel-UI.
+ * Kas/bank-boekingen (deposit/withdrawal/transfer) van de Books-module. Een
+ * Transaction post bij create via de observer een gebalanceerde grootboek-boeking
+ * → daarom immutable: alleen aanmaken + bekijken, géén edit/delete (corrigeren =
+ * tegenboeking). Journaalposten (type=journal) horen in het memoriaal-dagboek
+ * (ManualJournalResource) en worden hier uitgescoped.
  */
 class TransactionResource extends Resource
 {
@@ -46,6 +49,11 @@ class TransactionResource extends Resource
     protected static ?string $pluralModelLabel = 'transacties';
 
     protected static ?string $recordTitleAttribute = 'description';
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()->where('type', '!=', TransactionType::Journal);
+    }
 
     public static function form(Schema $schema): Schema
     {
