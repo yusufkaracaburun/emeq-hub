@@ -7,6 +7,7 @@ namespace App\Filament\Books\Resources\Bills;
 use App\Books\Models\Bill;
 use App\Filament\Books\BoekhoudingCluster;
 use App\Filament\Books\Concerns\GatedToBoekhouding;
+use App\Filament\Books\RelationManagers\AttachmentsRelationManager;
 use App\Filament\Books\Resources\Bills\Pages\CreateBill;
 use App\Filament\Books\Resources\Bills\Pages\EditBill;
 use App\Filament\Books\Resources\Bills\Pages\ListBills;
@@ -50,6 +51,13 @@ class BillResource extends Resource
     public static function table(Table $table): Table
     {
         return BillsTable::configure($table);
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            AttachmentsRelationManager::class,
+        ];
     }
 
     public static function getPages(): array

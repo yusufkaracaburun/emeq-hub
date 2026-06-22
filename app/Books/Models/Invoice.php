@@ -3,6 +3,7 @@
 namespace App\Books\Models;
 
 use App\Books\Concerns\BelongsToBooksCompany;
+use App\Books\Concerns\HasAttachments;
 use App\Books\Concerns\HasPayments;
 use App\Books\Enums\InvoiceStatus;
 use BackedEnum;
@@ -18,6 +19,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Invoice extends Model
 {
     use BelongsToBooksCompany;
+    use HasAttachments;
     use HasPayments;
 
     protected $table = 'books_invoices';

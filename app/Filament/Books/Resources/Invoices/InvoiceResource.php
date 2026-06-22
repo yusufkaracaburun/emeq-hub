@@ -7,6 +7,7 @@ namespace App\Filament\Books\Resources\Invoices;
 use App\Books\Models\Invoice;
 use App\Filament\Books\BoekhoudingCluster;
 use App\Filament\Books\Concerns\GatedToBoekhouding;
+use App\Filament\Books\RelationManagers\AttachmentsRelationManager;
 use App\Filament\Books\Resources\Invoices\Pages\CreateInvoice;
 use App\Filament\Books\Resources\Invoices\Pages\EditInvoice;
 use App\Filament\Books\Resources\Invoices\Pages\ListInvoices;
@@ -50,6 +51,13 @@ class InvoiceResource extends Resource
     public static function table(Table $table): Table
     {
         return InvoicesTable::configure($table);
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            AttachmentsRelationManager::class,
+        ];
     }
 
     public static function getPages(): array
