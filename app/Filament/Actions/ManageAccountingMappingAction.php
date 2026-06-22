@@ -12,6 +12,7 @@ use Filament\Actions\Action;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
 use Filament\Schemas\Components\Section;
 use Filament\Support\Icons\Heroicon;
@@ -86,7 +87,14 @@ final class ManageAccountingMappingAction
                         ]),
                 ]),
             // Relaties staan niet in de mapping — ze worden lazy resolve-or-learned uit de
-            // party-data van het document (ExactRelationResolver).
+            // party-data van het document (ExactRelationResolver). De toggle bepaalt of een
+            // ontbrekende relatie automatisch in het boekhoudpakket wordt aangemaakt.
+            Section::make('Relaties')
+                ->schema([
+                    Toggle::make('auto_create_relations')
+                        ->label('Onbekende relaties automatisch aanmaken')
+                        ->helperText('Aan: geen match op btw-nummer/naam → maak de relatie aan in dit boekhoudpakket en onthoud \'m. Uit: de boeking faalt met een duidelijke melding tot de relatie bestaat.'),
+                ]),
             Section::make('Dagboeken (Journal)')
                 ->columns(2)
                 ->schema([
@@ -151,6 +159,7 @@ final class ManageAccountingMappingAction
             'vat_9' => $vat['9'] ?? null,
             'vat_0' => $vat['0'] ?? null,
             'gl_accounts' => self::toRows($mapping['gl_accounts'] ?? [], 'category'),
+            'auto_create_relations' => ($mapping['auto_create_relations'] ?? false) === true,
             'journal_sales' => $journals['sales'] ?? null,
             'journal_purchase' => $journals['purchase'] ?? null,
             'journal_income' => $journals['income'] ?? null,
@@ -164,7 +173,7 @@ final class ManageAccountingMappingAction
      */
     private static function toMapping(array $data): array
     {
-        return [
+        $mapping = [
             'vat_codes' => self::scalarMap([
                 '21' => $data['vat_21'] ?? null,
                 '9' => $data['vat_9'] ?? null,
@@ -178,6 +187,13 @@ final class ManageAccountingMappingAction
                 'expense' => $data['journal_expense'] ?? null,
             ]),
         ];
+
+        // Alleen opslaan als aan — afwezig = uit (de resolver checkt op === true).
+        if (! empty($data['auto_create_relations'])) {
+            $mapping['auto_create_relations'] = true;
+        }
+
+        return $mapping;
     }
 
     /**

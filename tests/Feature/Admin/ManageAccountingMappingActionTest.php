@@ -127,6 +127,50 @@ class ManageAccountingMappingActionTest extends TestCase
         ], $connection->metadata['accounting_mapping']);
     }
 
+    public function test_action_saves_auto_create_relations_toggle(): void
+    {
+        $this->actingAs($this->makeStaffUser());
+        $this->mockExactReference();
+        $connection = $this->makeExactConnection();
+
+        Livewire::test(ListConnections::class)
+            ->callTableAction('accountingMapping', $connection, data: [
+                'vat_21' => '4',
+                'auto_create_relations' => true,
+            ])
+            ->assertHasNoTableActionErrors();
+
+        $connection->refresh();
+
+        $this->assertTrue($connection->metadata['accounting_mapping']['auto_create_relations']);
+    }
+
+    public function test_action_preserves_auto_create_relations_flag_on_resave(): void
+    {
+        // Wipe-guard: het opslaan van de mapping herbouwt accounting_mapping volledig.
+        // De prefill draagt de flag mee zodat een mapping-edit 'm niet wist.
+        $this->actingAs($this->makeStaffUser());
+        $this->mockExactReference();
+        $connection = $this->makeExactConnection([
+            'metadata' => ['accounting_mapping' => [
+                'vat_codes' => ['21' => '4'],
+                'journals' => ['sales' => '70'],
+                'auto_create_relations' => true,
+            ]],
+        ]);
+
+        Livewire::test(ListConnections::class)
+            ->mountTableAction('accountingMapping', $connection)
+            ->assertTableActionDataSet(['auto_create_relations' => true])
+            ->callMountedTableAction()
+            ->assertHasNoTableActionErrors();
+
+        $connection->refresh();
+
+        $this->assertTrue($connection->metadata['accounting_mapping']['auto_create_relations']);
+        $this->assertSame(['21' => '4'], $connection->metadata['accounting_mapping']['vat_codes']);
+    }
+
     public function test_action_prefills_from_existing_metadata(): void
     {
         $this->actingAs($this->makeStaffUser());
