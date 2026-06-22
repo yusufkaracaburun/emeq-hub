@@ -56,6 +56,31 @@ services:
       redis:
         condition: service_healthy
 
+  scheduler:
+    restart: unless-stopped
+    build:
+      context: .
+      target: dev
+    # schedule:work tikt elke minuut `schedule:run`; geen system-cron in de
+    # container nodig. Draait o.a. de terugkerende-facturen-generator
+    # (routes/console.php → books:generate-recurring-invoices, dailyAt 06:00).
+    command: php artisan schedule:work
+    healthcheck:
+      disable: true
+    volumes:
+      - .:/app
+    environment:
+      OCTANE_SERVER: frankenphp
+      DB_HOST: db
+      DB_PORT: 5432
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
   vite:
     restart: unless-stopped
     image: node:22-slim

@@ -35,6 +35,21 @@ services:
       redis:
         condition: service_healthy
 
+  scheduler:
+    image: emeq-hub-app:prod
+    restart: unless-stopped
+    env_file: .env.prod
+    # schedule:work tikt elke minuut `schedule:run`; geen system-cron nodig.
+    # Draait o.a. books:generate-recurring-invoices (dailyAt 06:00).
+    command: php artisan schedule:work
+    depends_on:
+      app:
+        condition: service_started
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
   db:
     image: postgres:16-alpine
     restart: unless-stopped
