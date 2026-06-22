@@ -290,7 +290,9 @@ de provider:
   `quantity`/`unit_price` optioneel/informatief; `category` = GL-hint.
 - `lines[].cost_center` / `lines[].cost_unit` (optioneel) = kostenplaats-/kostendrager-**Code**
   van de gekoppelde administratie (precies zoals die in Exact heet). Onbekende Code →
-  `422` met een duidelijke melding; laat weg als je er geen voert.
+  `422` met een duidelijke melding; laat weg als je er geen voert. Deze Codes komen
+  **niet** uit `/v1/accounting/reference-data` (die geeft alleen GL/VAT/dagboeken) —
+  haal ze rechtstreeks uit je administratie of laat de gebruiker ze invullen.
 - `external_id` = jouw stabiele document-sleutel (echo't terug — gebruik 'm in je sync-ledger).
 - `currency` default `EUR`; `attachments` optioneel, inline base64 (PDF/PNG/JPEG, ≲ 1 MB/stuk).
 
