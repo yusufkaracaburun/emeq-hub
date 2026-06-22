@@ -24,7 +24,7 @@ class LedgerAccountResourceTest extends TestCase
     {
         parent::setUp();
 
-        Filament::setCurrentPanel('books');
+        Filament::setCurrentPanel('admin');
 
         Role::firstOrCreate(['name' => 'boekhouder']);
         $boekhouder = User::factory()->create();

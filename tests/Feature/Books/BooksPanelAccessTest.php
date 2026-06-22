@@ -1,19 +1,37 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Feature\Books;
 
+use App\Books\Models\BooksCompany;
+use App\Filament\Books\Resources\Clients\ClientResource;
+use App\Filament\Resources\Consumers\ConsumerResource;
 use App\Models\User;
 use Filament\Facades\Filament;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
+/*
+ * Boekhouding is een cluster bínnen het admin-paneel (/admin/boekhouding). Eén
+ * paneel, maar functiescheiding blijft: super-admin/boekhouder zien de cluster,
+ * staff niet; boekhouder ziet géén Hub-resources. De toegang per resource loopt
+ * via GatedToBoekhouding (rol) resp. de bestaande Hub-permissions.
+ */
 class BooksPanelAccessTest extends TestCase
 {
     use RefreshDatabase;
 
-    private function seedRoles(): void
+    protected function setUp(): void
     {
+        parent::setUp();
+
+        Filament::setCurrentPanel('admin');
+
+        $company = BooksCompany::create(['name' => 'Emeq']);
+        config(['books.company_id' => $company->id]);
+
         Role::firstOrCreate(['name' => 'super-admin']);
         Role::firstOrCreate(['name' => 'staff']);
         Role::firstOrCreate(['name' => 'boekhouder']);
@@ -21,52 +39,58 @@ class BooksPanelAccessTest extends TestCase
 
     private function userWithRole(string $role): User
     {
-        $this->seedRoles();
         $user = User::factory()->create();
         $user->assignRole($role);
 
         return $user;
     }
 
-    public function test_boekhouder_can_access_books_panel(): void
+    public function test_alle_interne_rollen_komen_het_admin_paneel_in(): void
     {
-        $panel = Filament::getPanel('books');
+        $panel = Filament::getPanel('admin');
 
-        $this->assertTrue($this->userWithRole('boekhouder')->canAccessPanel($panel));
         $this->assertTrue($this->userWithRole('super-admin')->canAccessPanel($panel));
+        $this->assertTrue($this->userWithRole('staff')->canAccessPanel($panel));
+        $this->assertTrue($this->userWithRole('boekhouder')->canAccessPanel($panel));
     }
 
-    public function test_staff_cannot_access_books_panel(): void
-    {
-        $panel = Filament::getPanel('books');
-
-        $this->assertFalse($this->userWithRole('staff')->canAccessPanel($panel));
-    }
-
-    public function test_super_admin_still_cannot_be_locked_out_of_admin_but_staff_can_admin(): void
-    {
-        $admin = Filament::getPanel('admin');
-
-        $this->assertTrue($this->userWithRole('staff')->canAccessPanel($admin));
-        $this->assertFalse($this->userWithRole('boekhouder')->canAccessPanel($admin));
-    }
-
-    public function test_books_dashboard_renders_for_boekhouder(): void
+    public function test_los_boekhoud_paneel_bestaat_niet_meer(): void
     {
         $this->actingAs($this->userWithRole('boekhouder'));
 
-        $this->get('/boekhouding')->assertSuccessful();
+        $this->get('/boekhouding')->assertNotFound();
     }
 
-    public function test_books_dashboard_forbidden_for_staff(): void
+    public function test_boekhouder_bereikt_de_boekhouding_cluster(): void
+    {
+        $this->actingAs($this->userWithRole('boekhouder'));
+
+        $this->get(ClientResource::getUrl('index'))->assertSuccessful();
+    }
+
+    public function test_super_admin_bereikt_de_boekhouding_cluster(): void
+    {
+        $this->actingAs($this->userWithRole('super-admin'));
+
+        $this->get(ClientResource::getUrl('index'))->assertSuccessful();
+    }
+
+    public function test_staff_ziet_de_boekhouding_cluster_niet(): void
     {
         $this->actingAs($this->userWithRole('staff'));
 
-        $this->get('/boekhouding')->assertForbidden();
+        $this->get(ClientResource::getUrl('index'))->assertForbidden();
     }
 
-    public function test_books_dashboard_redirects_guest_to_login(): void
+    public function test_boekhouder_ziet_geen_hub_resources(): void
     {
-        $this->get('/boekhouding')->assertRedirect('/boekhouding/login');
+        $this->actingAs($this->userWithRole('boekhouder'));
+
+        $this->get(ConsumerResource::getUrl('index'))->assertForbidden();
+    }
+
+    public function test_gast_wordt_naar_login_geleid(): void
+    {
+        $this->get('/admin')->assertRedirect('/admin/login');
     }
 }

@@ -41,8 +41,14 @@ class AdminPanelProvider extends PanelProvider
             ->colors([
                 'primary' => Color::Amber,
             ])
+            ->viteTheme('resources/css/filament/admin/theme.css')
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
+            // Books-boekhouding leeft als Boekhouding-cluster (/admin/boekhouding/*)
+            // binnen dit ene paneel; toegang per-resource via GatedToBoekhouding.
+            ->discoverResources(in: app_path('Filament/Books/Resources'), for: 'App\Filament\Books\Resources')
+            ->discoverPages(in: app_path('Filament/Books/Pages'), for: 'App\Filament\Books\Pages')
+            ->discoverClusters(in: app_path('Filament/Books'), for: 'App\Filament\Books')
             ->pages([
                 Dashboard::class,
             ])

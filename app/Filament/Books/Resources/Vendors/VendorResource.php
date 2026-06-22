@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Filament\Books\Resources\Vendors;
 
 use App\Books\Models\Vendor;
+use App\Filament\Books\BoekhoudingCluster;
+use App\Filament\Books\Concerns\GatedToBoekhouding;
 use App\Filament\Books\Resources\Vendors\Pages\CreateVendor;
 use App\Filament\Books\Resources\Vendors\Pages\EditVendor;
 use App\Filament\Books\Resources\Vendors\Pages\ListVendors;
@@ -21,6 +23,10 @@ use Filament\Tables\Table;
  */
 class VendorResource extends Resource
 {
+    use GatedToBoekhouding;
+
+    protected static ?string $cluster = BoekhoudingCluster::class;
+
     protected static ?string $model = Vendor::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBuildingStorefront;

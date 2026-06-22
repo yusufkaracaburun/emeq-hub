@@ -23,6 +23,12 @@ class ConnectionStatsWidget extends StatsOverviewWidget
 
     protected static ?int $sort = 2;
 
+    // Hub-koppelingen — niet voor boekhouder (die ziet enkel de Boekhouding-cluster).
+    public static function canView(): bool
+    {
+        return auth()->user()?->hasAnyRole(['super-admin', 'staff']) ?? false;
+    }
+
     protected function getStats(): array
     {
         $stats = [];

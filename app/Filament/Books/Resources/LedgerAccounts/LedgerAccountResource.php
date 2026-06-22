@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Filament\Books\Resources\LedgerAccounts;
 
 use App\Books\Models\Account;
+use App\Filament\Books\BoekhoudingCluster;
+use App\Filament\Books\Concerns\GatedToBoekhouding;
 use App\Filament\Books\Resources\LedgerAccounts\Pages\CreateLedgerAccount;
 use App\Filament\Books\Resources\LedgerAccounts\Pages\EditLedgerAccount;
 use App\Filament\Books\Resources\LedgerAccounts\Pages\ListLedgerAccounts;
@@ -17,12 +19,17 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 
 /*
- * Grootboek (chart of accounts) van de Books-module. Draait in het `books`-paneel
- * (toegang via User::canAccessPanel('books')). Model = App\Books\Models\Account
- * (de grootboekrekening), niet te verwarren met de Hub's consumer-Account.
+ * Grootboek (chart of accounts) van de Books-module. Onderdeel van de
+ * Boekhouding-cluster (/admin/boekhouding); toegang via GatedToBoekhouding.
+ * Model = App\Books\Models\Account (de grootboekrekening), niet te verwarren
+ * met de Hub's consumer-Account.
  */
 class LedgerAccountResource extends Resource
 {
+    use GatedToBoekhouding;
+
+    protected static ?string $cluster = BoekhoudingCluster::class;
+
     protected static ?string $model = Account::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBookOpen;

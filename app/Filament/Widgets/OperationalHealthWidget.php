@@ -27,6 +27,12 @@ class OperationalHealthWidget extends StatsOverviewWidget
 
     protected static ?int $sort = 1;
 
+    // Hub-operationele health — niet voor boekhouder (die ziet enkel de Boekhouding-cluster).
+    public static function canView(): bool
+    {
+        return auth()->user()?->hasAnyRole(['super-admin', 'staff']) ?? false;
+    }
+
     /**
      * Rauwe triage-tellers — los van de presentatie zodat ze deterministisch
      * getest kunnen worden en de nav-badges op de audit-resources ze hergebruiken.

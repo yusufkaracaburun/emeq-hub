@@ -33,7 +33,7 @@ class TransactionResourceTest extends TestCase
     {
         parent::setUp();
 
-        Filament::setCurrentPanel('books');
+        Filament::setCurrentPanel('admin');
 
         $company = BooksCompany::create(['name' => 'Emeq']);
         config(['books.company_id' => $company->id]);

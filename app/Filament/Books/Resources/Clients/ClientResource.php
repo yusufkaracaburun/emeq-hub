@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Filament\Books\Resources\Clients;
 
 use App\Books\Models\Client;
+use App\Filament\Books\BoekhoudingCluster;
+use App\Filament\Books\Concerns\GatedToBoekhouding;
 use App\Filament\Books\Resources\Clients\Pages\CreateClient;
 use App\Filament\Books\Resources\Clients\Pages\EditClient;
 use App\Filament\Books\Resources\Clients\Pages\ListClients;
@@ -22,6 +24,10 @@ use Filament\Tables\Table;
  */
 class ClientResource extends Resource
 {
+    use GatedToBoekhouding;
+
+    protected static ?string $cluster = BoekhoudingCluster::class;
+
     protected static ?string $model = Client::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUsers;

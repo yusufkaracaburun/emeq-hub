@@ -54,8 +54,9 @@ class EmeqStaffSeeder extends Seeder
         $superAdmin = Role::firstOrCreate(['name' => 'super-admin']);
         $staff = Role::firstOrCreate(['name' => 'staff']);
 
-        // Boekhoud-paneel-rol (eigen bounded context, geen admin-permissions).
-        // Toegang loopt via User::canAccessPanel('books'), niet via permissions.
+        // Boekhoud-rol (eigen bounded context, geen Hub-permissions). Geeft
+        // admin-paneel-toegang maar enkel de Boekhouding-cluster (GatedToBoekhouding),
+        // niet de Hub-resources — die hangen aan de permissions hierboven.
         Role::firstOrCreate(['name' => 'boekhouder']);
 
         foreach (self::SHARED_PERMISSIONS as $perm) {

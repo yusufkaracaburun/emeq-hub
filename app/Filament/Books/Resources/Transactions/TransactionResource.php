@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Filament\Books\Resources\Transactions;
 
 use App\Books\Models\Transaction;
+use App\Filament\Books\BoekhoudingCluster;
+use App\Filament\Books\Concerns\GatedToBoekhouding;
 use App\Filament\Books\Resources\Transactions\Pages\CreateTransaction;
 use App\Filament\Books\Resources\Transactions\Pages\ListTransactions;
 use App\Filament\Books\Resources\Transactions\Pages\ViewTransaction;
@@ -25,6 +27,10 @@ use Filament\Tables\Table;
  */
 class TransactionResource extends Resource
 {
+    use GatedToBoekhouding;
+
+    protected static ?string $cluster = BoekhoudingCluster::class;
+
     protected static ?string $model = Transaction::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedArrowsRightLeft;

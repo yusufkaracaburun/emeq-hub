@@ -35,9 +35,10 @@ class User extends Authenticatable implements FilamentUser
 
     public function canAccessPanel(Panel $panel): bool
     {
+        // Eén paneel. Boekhouder komt binnen voor de Boekhouding-cluster; de
+        // Hub-resources + die cluster gaten zichzelf per-resource (canAccess).
         return match ($panel->getId()) {
-            'admin' => $this->hasAnyRole(['super-admin', 'staff']),
-            'books' => $this->hasAnyRole(['super-admin', 'boekhouder']),
+            'admin' => $this->hasAnyRole(['super-admin', 'staff', 'boekhouder']),
             default => false,
         };
     }

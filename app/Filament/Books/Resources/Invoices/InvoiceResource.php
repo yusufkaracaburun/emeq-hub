@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Filament\Books\Resources\Invoices;
 
 use App\Books\Models\Invoice;
+use App\Filament\Books\BoekhoudingCluster;
+use App\Filament\Books\Concerns\GatedToBoekhouding;
 use App\Filament\Books\Resources\Invoices\Pages\CreateInvoice;
 use App\Filament\Books\Resources\Invoices\Pages\EditInvoice;
 use App\Filament\Books\Resources\Invoices\Pages\ListInvoices;
@@ -22,6 +24,10 @@ use Filament\Tables\Table;
  */
 class InvoiceResource extends Resource
 {
+    use GatedToBoekhouding;
+
+    protected static ?string $cluster = BoekhoudingCluster::class;
+
     protected static ?string $model = Invoice::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDocumentText;

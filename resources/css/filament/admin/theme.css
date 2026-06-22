@@ -1,0 +1,10 @@
+@import '../../../../vendor/filament/filament/resources/css/theme.css';
+
+/* De Filament-theme zet `source(none)` (geen auto-detectie). Wijs de dirs aan
+   waar custom Tailwind-utilities in panel-blades/PHP staan: alle Filament-
+   resources/widgets + de Boekhouding-cluster, de admin render-hook (dev quick-
+   login in AdminPanelProvider), en de Books-views/-componenten. */
+@source '../../../../app/Filament';
+@source '../../../../app/Providers/Filament';
+@source '../../../views/filament';
+@source '../../../views/components';
