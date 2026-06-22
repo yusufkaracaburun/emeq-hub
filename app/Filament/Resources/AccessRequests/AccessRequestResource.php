@@ -32,9 +32,9 @@ class AccessRequestResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Koppel-aanvragen';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Tenants';
+    protected static string|\UnitEnum|null $navigationGroup = 'Consumers';
 
-    protected static ?int $navigationSort = 3;
+    protected static ?int $navigationSort = 4;
 
     public static function canAccess(): bool
     {

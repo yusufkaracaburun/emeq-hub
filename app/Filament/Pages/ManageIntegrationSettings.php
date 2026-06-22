@@ -28,6 +28,8 @@ class ManageIntegrationSettings extends Page
 
     protected static string|UnitEnum|null $navigationGroup = 'Beheer';
 
+    protected static ?int $navigationSort = 2;
+
     protected static ?string $navigationLabel = 'Providers';
 
     protected static ?string $title = 'Providers';

@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Filament\Books\Resources\LedgerAccounts;
 
 use App\Books\Models\Account;
-use App\Filament\Books\BoekhoudingCluster;
 use App\Filament\Books\Concerns\GatedToBoekhouding;
 use App\Filament\Books\Resources\LedgerAccounts\Pages\CreateLedgerAccount;
 use App\Filament\Books\Resources\LedgerAccounts\Pages\EditLedgerAccount;
@@ -27,8 +26,6 @@ use Filament\Tables\Table;
 class LedgerAccountResource extends Resource
 {
     use GatedToBoekhouding;
-
-    protected static ?string $cluster = BoekhoudingCluster::class;
 
     protected static ?string $model = Account::class;
 

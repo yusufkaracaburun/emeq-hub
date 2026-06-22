@@ -14,10 +14,11 @@ use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 /*
- * Boekhouding is een cluster bínnen het admin-paneel (/admin/boekhouding). Eén
- * paneel, maar functiescheiding blijft: super-admin/boekhouder zien de cluster,
- * staff niet; boekhouder ziet géén Hub-resources. De toegang per resource loopt
- * via GatedToBoekhouding (rol) resp. de bestaande Hub-permissions.
+ * Boekhouding leeft top-level in het admin-paneel onder de groepen Facturatie +
+ * Boekhouding (géén aparte cluster meer). Eén paneel, functiescheiding blijft:
+ * super-admin/boekhouder zien de boekhoud-resources, staff niet; boekhouder ziet
+ * géén Hub-resources. Toegang per resource via GatedToBoekhouding (rol) resp. de
+ * bestaande Hub-permissions.
  */
 class BooksPanelAccessTest extends TestCase
 {

@@ -6,7 +6,6 @@ namespace App\Filament\Books\Resources\Transactions;
 
 use App\Books\Enums\TransactionType;
 use App\Books\Models\Transaction;
-use App\Filament\Books\BoekhoudingCluster;
 use App\Filament\Books\Concerns\GatedToBoekhouding;
 use App\Filament\Books\Resources\Transactions\Pages\CreateTransaction;
 use App\Filament\Books\Resources\Transactions\Pages\ListTransactions;
@@ -31,8 +30,6 @@ use Illuminate\Database\Eloquent\Builder;
 class TransactionResource extends Resource
 {
     use GatedToBoekhouding;
-
-    protected static ?string $cluster = BoekhoudingCluster::class;
 
     protected static ?string $model = Transaction::class;
 

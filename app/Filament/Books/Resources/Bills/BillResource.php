@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Filament\Books\Resources\Bills;
 
 use App\Books\Models\Bill;
-use App\Filament\Books\BoekhoudingCluster;
 use App\Filament\Books\Concerns\GatedToBoekhouding;
 use App\Filament\Books\RelationManagers\AttachmentsRelationManager;
 use App\Filament\Books\Resources\Bills\Pages\CreateBill;
@@ -27,13 +26,13 @@ class BillResource extends Resource
 {
     use GatedToBoekhouding;
 
-    protected static ?string $cluster = BoekhoudingCluster::class;
-
     protected static ?string $model = Bill::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDocumentArrowDown;
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Inkoop';
+    protected static string|\UnitEnum|null $navigationGroup = 'Facturatie';
+
+    protected static ?int $navigationSort = 3;
 
     protected static ?string $navigationLabel = 'Inkoopfacturen';
 

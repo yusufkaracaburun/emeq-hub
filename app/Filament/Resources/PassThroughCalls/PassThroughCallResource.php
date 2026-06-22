@@ -36,7 +36,7 @@ class PassThroughCallResource extends Resource
 
     protected static string|\UnitEnum|null $navigationGroup = 'Integraties';
 
-    protected static ?int $navigationSort = 3;
+    protected static ?int $navigationSort = 2;
 
     public static function canAccess(): bool
     {

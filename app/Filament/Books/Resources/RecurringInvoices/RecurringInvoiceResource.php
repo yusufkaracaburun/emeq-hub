@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Filament\Books\Resources\RecurringInvoices;
 
 use App\Books\Models\RecurringInvoice;
-use App\Filament\Books\BoekhoudingCluster;
 use App\Filament\Books\Concerns\GatedToBoekhouding;
 use App\Filament\Books\Resources\RecurringInvoices\Pages\CreateRecurringInvoice;
 use App\Filament\Books\Resources\RecurringInvoices\Pages\EditRecurringInvoice;
@@ -27,13 +26,11 @@ class RecurringInvoiceResource extends Resource
 {
     use GatedToBoekhouding;
 
-    protected static ?string $cluster = BoekhoudingCluster::class;
-
     protected static ?string $model = RecurringInvoice::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedArrowPath;
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Verkoop';
+    protected static string|\UnitEnum|null $navigationGroup = 'Facturatie';
 
     protected static ?int $navigationSort = 2;
 

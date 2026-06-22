@@ -6,7 +6,6 @@ namespace App\Filament\Books\Resources\ManualJournals;
 
 use App\Books\Enums\TransactionType;
 use App\Books\Models\Transaction;
-use App\Filament\Books\BoekhoudingCluster;
 use App\Filament\Books\Concerns\GatedToBoekhouding;
 use App\Filament\Books\Resources\ManualJournals\Pages\CreateManualJournal;
 use App\Filament\Books\Resources\ManualJournals\Pages\ListManualJournals;
@@ -30,8 +29,6 @@ use Illuminate\Database\Eloquent\Builder;
 class ManualJournalResource extends Resource
 {
     use GatedToBoekhouding;
-
-    protected static ?string $cluster = BoekhoudingCluster::class;
 
     protected static ?string $model = Transaction::class;
 

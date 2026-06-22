@@ -44,11 +44,10 @@ class AdminPanelProvider extends PanelProvider
             ->viteTheme('resources/css/filament/admin/theme.css')
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
-            // Books-boekhouding leeft als Boekhouding-cluster (/admin/boekhouding/*)
-            // binnen dit ene paneel; toegang per-resource via GatedToBoekhouding.
+            // Books-resources/pages leven top-level onder de Facturatie- + Boekhouding-
+            // navgroups; toegang per-resource via GatedToBoekhouding.
             ->discoverResources(in: app_path('Filament/Books/Resources'), for: 'App\Filament\Books\Resources')
             ->discoverPages(in: app_path('Filament/Books/Pages'), for: 'App\Filament\Books\Pages')
-            ->discoverClusters(in: app_path('Filament/Books'), for: 'App\Filament\Books')
             ->pages([
                 Dashboard::class,
             ])
@@ -57,12 +56,14 @@ class AdminPanelProvider extends PanelProvider
             // (geen native ->description()-slot in v4.11). De andere 3 navgroups MOETEN expliciet
             // worden gedeclareerd zodat Filament hun rendering-volgorde respecteert.
             ->navigationGroups([
-                NavigationGroup::make('Tenants')
+                NavigationGroup::make('Consumers')
                     ->extraSidebarAttributes([
                         'title' => 'SaaS-apps (Consumer) → hun klanten (Account) → partner-koppelingen (Connection)',
                     ]),
                 NavigationGroup::make('Integraties'),
                 NavigationGroup::make('Abonnementen'),
+                NavigationGroup::make('Facturatie'),
+                NavigationGroup::make('Boekhouding'),
                 NavigationGroup::make('Beheer'),
             ])
             // Externe beheer-tools onder "Beheer" — alleen super-admin. Openen in

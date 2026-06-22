@@ -83,18 +83,18 @@ class AccountInfolistHintTest extends TestCase
         $response->assertSeeText('School A');
     }
 
-    public function test_tenants_navgroup_has_canonical_tooltip(): void
+    public function test_consumers_navgroup_has_canonical_tooltip(): void
     {
         $this->actAsStaff();
 
         $response = $this->get('/admin');
 
         $response->assertOk();
-        // Sidebar-`<li>` voor groep "Tenants" heeft data-group-label="Tenants" + title-attribuut
+        // Sidebar-`<li>` voor groep "Consumers" heeft data-group-label="Consumers" + title-attribuut
         // (extraSidebarAttributes(['title' => ...]) op NavigationGroup). Volgorde-assertie
         // voorkomt false-positive match in body-content.
         $response->assertSeeInOrder([
-            'data-group-label="Tenants"',
+            'data-group-label="Consumers"',
             'SaaS-apps (Consumer) → hun klanten (Account) → partner-koppelingen (Connection)',
         ]);
     }

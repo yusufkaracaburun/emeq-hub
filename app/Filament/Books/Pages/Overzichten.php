@@ -6,7 +6,6 @@ namespace App\Filament\Books\Pages;
 
 use App\Books\Services\ReportPdfRenderer;
 use App\Books\Services\ReportService;
-use App\Filament\Books\BoekhoudingCluster;
 use App\Filament\Books\Concerns\GatedToBoekhouding;
 use BackedEnum;
 use Filament\Actions\Action;
@@ -24,13 +23,11 @@ class Overzichten extends Page
 {
     use GatedToBoekhouding;
 
-    protected static ?string $cluster = BoekhoudingCluster::class;
-
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDocumentChartBar;
 
     protected static string|UnitEnum|null $navigationGroup = 'Boekhouding';
 
-    protected static ?int $navigationSort = 3;
+    protected static ?int $navigationSort = 4;
 
     protected static ?string $navigationLabel = 'Overzichten';
 
