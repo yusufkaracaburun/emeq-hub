@@ -3,6 +3,7 @@
 namespace Tests\Feature\Api\V1\Accounting;
 
 use App\Accounting\Enums\DocumentType;
+use App\Accounting\Enums\TaxTreatment;
 use App\Accounting\Exact\Contracts\ExactReferenceResolver;
 use App\Accounting\Party;
 use App\Models\Connection;
@@ -54,8 +55,12 @@ class StoreDocumentTest extends TestCase
                 return $party->role === 'creditor' ? 'supp-guid' : 'cust-guid';
             }
 
-            public function vatCode(float $taxRate, Connection $connection): string
+            public function vatCode(float $taxRate, TaxTreatment $treatment, Connection $connection): string
             {
+                if ($treatment === TaxTreatment::ReverseCharge) {
+                    return $taxRate >= 21.0 ? '6' : '7';
+                }
+
                 return $taxRate >= 21.0 ? '4' : '2';
             }
 
@@ -217,6 +222,31 @@ class StoreDocumentTest extends TestCase
             $line = $request->body()->all()['SalesEntryLines'][0];
 
             return $line['CostCenter'] === 'ADMIN' && $line['CostUnit'] === 'PROJ-X';
+        });
+    }
+
+    public function test_reverse_charge_line_maps_to_verlegd_vat_code(): void
+    {
+        MockClient::global([
+            CreateSalesEntry::class => MockResponse::make(['d' => ['ID' => 'inv-guid-1']], 201),
+        ]);
+        $this->bindFakeReferences();
+
+        [$consumer] = $this->consumerWithExactConnection();
+        $token = $consumer->createToken('t', [TokenAbilities::EXACT_WRITE])->plainTextToken;
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->withHeader('X-Account-Id', 'school1')
+            ->withHeader('Idempotency-Key', (string) Str::uuid())
+            ->postJson('/v1/accounting/documents', $this->salesInvoicePayload([
+                'lines' => [
+                    ['description' => 'Onderaanneming', 'amount' => 200, 'tax_rate' => 21, 'tax_treatment' => 'reverse_charge', 'category' => 'omzet'],
+                ],
+            ]))
+            ->assertStatus(201);
+
+        MockClient::global()->assertSent(function (CreateSalesEntry $request): bool {
+            return $request->body()->all()['SalesEntryLines'][0]['VATCode'] === '6';
         });
     }
 

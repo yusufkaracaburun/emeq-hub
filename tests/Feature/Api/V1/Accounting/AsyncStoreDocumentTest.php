@@ -6,6 +6,7 @@ namespace Tests\Feature\Api\V1\Accounting;
 
 use App\Accounting\AccountingSyncRunner;
 use App\Accounting\Enums\DocumentType;
+use App\Accounting\Enums\TaxTreatment;
 use App\Accounting\Exact\Contracts\ExactReferenceResolver;
 use App\Accounting\FinancialDocument;
 use App\Accounting\Party;
@@ -60,7 +61,7 @@ class AsyncStoreDocumentTest extends TestCase
                 return $party->role === 'creditor' ? 'supp-guid' : 'cust-guid';
             }
 
-            public function vatCode(float $taxRate, Connection $connection): string
+            public function vatCode(float $taxRate, TaxTreatment $treatment, Connection $connection): string
             {
                 return '4';
             }

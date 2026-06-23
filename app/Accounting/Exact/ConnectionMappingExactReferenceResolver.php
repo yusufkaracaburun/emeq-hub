@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Accounting\Exact;
 
 use App\Accounting\Enums\DocumentType;
+use App\Accounting\Enums\TaxTreatment;
 use App\Accounting\Exact\Contracts\ExactReferenceResolver;
 use App\Accounting\Exceptions\AccountingMappingException;
 use App\Accounting\Party;
@@ -20,10 +21,15 @@ use App\Models\ConnectionAccountingRef;
  *
  * De mapping bevat enkel stabiele **Codes** (auto-derived uit de mirror of overschreven):
  *   "accounting_mapping": {
- *     "vat_codes":  { "21": "3", "9": "1", "0": "0" },          // tarief → VATCode (Code; direct)
+ *     "vat_codes":  { "21": "3", "9": "1", "0": "0",            // standard: tarief → VATCode (plat)
+ *                     "reverse_charge:21": "6", "reverse_charge:9": "7" }, // verlegd: behandeling:tarief → VATCode
  *     "gl_accounts": { "_default": "<gl-code>", "omzet": "<gl-code>" }, // categorie → GL-Code
  *     "journals":   { "sales": "80", "purchase": "70" }         // doc-type → dagboek-Code (direct)
  *   }
+ *
+ * De VATCode-key is behandeling-aware: standard leest de platte `tarief`-key (backward-compat
+ * met bestaande mappings), verlegd leest `reverse_charge:tarief`. Geen fallback van verlegd op
+ * de platte key — een ontbrekende verlegd-mapping moet falen i.p.v. stil de gewone code boeken.
  *
  * GL-Code → native GUID en relatie → native GUID resolven lokaal tegen de mirror
  * (`connection_accounting_refs`) — geen live partner-call op het schrijfpad. Relaties zijn
@@ -40,19 +46,30 @@ final class ConnectionMappingExactReferenceResolver implements ExactReferenceRes
             ?? throw $this->missing("relatie '{$party->name}' (geen match op external_id/vat_number/naam)", 'relations');
     }
 
-    public function vatCode(float $taxRate, Connection $connection): string
+    public function vatCode(float $taxRate, TaxTreatment $treatment, Connection $connection): string
     {
-        return $this->vatCodeOrNull($taxRate, $connection)
-            ?? throw $this->missing("BTW-tarief {$this->rateKey($taxRate)}%", 'vat_codes');
+        return $this->vatCodeOrNull($taxRate, $treatment, $connection)
+            ?? throw $this->missing("BTW-tarief {$this->rateKey($taxRate)}% ({$treatment->value})", 'vat_codes');
     }
 
     /**
      * Fail-soft variant voor het validate-rapport: geeft de VATCode of null i.p.v. een
      * exception zodat een nog-niet-gemapt tarief een finding kan worden i.p.v. een 422.
      */
-    public function vatCodeOrNull(float $taxRate, Connection $connection): ?string
+    public function vatCodeOrNull(float $taxRate, TaxTreatment $treatment, Connection $connection): ?string
     {
-        return $this->section($connection, 'vat_codes')[$this->rateKey($taxRate)] ?? null;
+        return $this->section($connection, 'vat_codes')[$this->vatKey($taxRate, $treatment)] ?? null;
+    }
+
+    /**
+     * Behandeling-aware lookup-key: standard leest de platte `tarief`-key (backward-compat),
+     * verlegd leest `reverse_charge:tarief`. Géén fallback van verlegd op de platte key.
+     */
+    private function vatKey(float $taxRate, TaxTreatment $treatment): string
+    {
+        $rate = $this->rateKey($taxRate);
+
+        return $treatment === TaxTreatment::Standard ? $rate : $treatment->value.':'.$rate;
     }
 
     public function glAccountGuid(?string $category, Connection $connection): ?string

@@ -288,6 +288,10 @@ de provider:
   mee: de Hub onthoudt 'm (relatie-mirror) zodat een volgende boeking direct matcht.
 - `lines[].amount` = **netto** regelbedrag (leidend); `tax_rate` = percentage (0/9/21).
   `quantity`/`unit_price` optioneel/informatief; `category` = GL-hint.
+- `lines[].tax_treatment` (optioneel, default `standard`) = BTW-behandeling. Zet
+  `reverse_charge` voor verlegde BTW (onderaanneming / intra-EU B2B): hetzelfde
+  `tax_rate` mapt dan naar de **verlegd**-VATCode i.p.v. de gewone. Vereist dat de
+  koppeling een verlegd-tarief gemapt heeft (auto-afgeleid bij connect; anders `422`).
 - `lines[].cost_center` / `lines[].cost_unit` (optioneel) = kostenplaats-/kostendrager-**Code**
   van de gekoppelde administratie (precies zoals die in Exact heet). Onbekende Code →
   `422` met een duidelijke melding; laat weg als je er geen voert. Deze Codes komen
@@ -335,7 +339,7 @@ correctie of `null`) — pas een suggestie alleen toe na bevestiging.
 | `iban.normalize` | info | IBAN geldig maar niet genormaliseerd |
 | `vat_number.malformed` | warning | BTW-nummer matcht landpatroon niet |
 | `vat_number.normalize` | info | BTW-nummer geldig maar niet genormaliseerd |
-| `vat_treatment.reverse_charge_expected` | warning | Intra-EU B2B met BTW-nr → 0% (verlegd) verwacht |
+| `vat_treatment.reverse_charge_expected` | warning | Intra-EU B2B met BTW-nr → verlegd verwacht (zet `tax_treatment: reverse_charge`) |
 | `vat_treatment.domestic_rate_on_non_eu` | error | Niet-EU leverancier met binnenlands tarief |
 | `geography.country_mismatch` | warning | Land uit BTW-nr ≠ land uit IBAN |
 | `currency.foreign` | info | Andere valuta dan EUR |

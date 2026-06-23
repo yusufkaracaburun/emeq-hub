@@ -26,6 +26,8 @@ class ExactMappingDeriverTest extends TestCase
             ['kind' => 'vat', 'code' => '4', 'native_id' => '4', 'label' => 'BTW hoog incl', 'attrs' => ['percentage' => 21.0]],
             ['kind' => 'vat', 'code' => '1', 'native_id' => '1', 'label' => 'BTW laag excl', 'attrs' => ['percentage' => 9.0]],
             ['kind' => 'vat', 'code' => '0', 'native_id' => '0', 'label' => 'BTW 0%', 'attrs' => ['percentage' => 0.0]],
+            ['kind' => 'vat', 'code' => '6', 'native_id' => '6', 'label' => 'BTW verlegd hoog', 'attrs' => ['percentage' => 21.0]],
+            ['kind' => 'vat', 'code' => '7', 'native_id' => '7', 'label' => 'BTW verlegd laag', 'attrs' => ['percentage' => 9.0]],
             ['kind' => 'journal', 'code' => '80', 'native_id' => '80', 'label' => 'Verkoopboek', 'attrs' => ['type' => 20]],
             ['kind' => 'journal', 'code' => '70', 'native_id' => '70', 'label' => 'Inkoopboek', 'attrs' => ['type' => 22]],
             ['kind' => 'gl', 'code' => '8000', 'native_id' => 'gl-8000', 'label' => 'Omzet', 'attrs' => []],
@@ -47,8 +49,12 @@ class ExactMappingDeriverTest extends TestCase
 
         $mapping = $connection->fresh()->metadata['accounting_mapping'];
 
-        // BTW op percentage, voorkeur exclusief (code 3, niet de inclusief 4).
-        $this->assertSame(['21' => '3', '9' => '1', '0' => '0'], $mapping['vat_codes']);
+        // BTW op percentage, voorkeur exclusief (code 3, niet de inclusief 4); verlegd
+        // apart afgeleid uit het label naar reverse_charge:tarief (6/7).
+        $this->assertSame(
+            ['21' => '3', '9' => '1', '0' => '0', 'reverse_charge:21' => '6', 'reverse_charge:9' => '7'],
+            $mapping['vat_codes'],
+        );
         // Dagboek op Type: 20 → verkoop, 22 → inkoop.
         $this->assertSame(['sales' => '80', 'purchase' => '70'], $mapping['journals']);
         // GL-default: 8xxx omzet, 4xxx kosten/_default.

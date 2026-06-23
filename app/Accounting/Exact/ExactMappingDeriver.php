@@ -11,7 +11,8 @@ use Illuminate\Support\Collection;
 /**
  * Leidt een verstandige default-mapping af uit de gesynchroniseerde mirror, zodat een
  * consumer direct kan boeken zonder iets te configureren:
- *  - BTW: tarief → VATCode-Code waar `percentage == tarief` (voorkeur: exclusief).
+ *  - BTW (standard): tarief → VATCode-Code waar `percentage == tarief` (voorkeur: exclusief).
+ *  - BTW (verlegd): reverse_charge:tarief → VATCode-Code waar `percentage == tarief` én label "verlegd".
  *  - Dagboek: verkoop → eerste Type-20-dagboek, inkoop → eerste Type-22-dagboek.
  *  - Grootboek: omzet → eerste 8xxx-rekening, kosten/_default → eerste 4xxx-rekening.
  *
@@ -66,6 +67,16 @@ final class ExactMappingDeriver
             $preferred = $matches->first(fn (ConnectionAccountingRef $r) => $this->isPlainExclusive((string) $r->label)) ?? $matches->first();
 
             $out[$rate] = $preferred->code;
+        }
+
+        // Verlegd (reverse charge) — apart gemerkte VATCode per tarief (label bevat "verlegd").
+        foreach (['21', '9'] as $rate) {
+            $verlegd = $vat->first(fn (ConnectionAccountingRef $r) => (float) ($r->attrs['percentage'] ?? -1) === (float) $rate
+                && str_contains(mb_strtolower((string) $r->label), 'verlegd'));
+
+            if ($verlegd !== null) {
+                $out['reverse_charge:'.$rate] = $verlegd->code;
+            }
         }
 
         return $out;

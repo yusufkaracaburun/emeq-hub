@@ -3,6 +3,7 @@
 namespace Tests\Unit\Accounting;
 
 use App\Accounting\Enums\DocumentType;
+use App\Accounting\Enums\TaxTreatment;
 use App\Accounting\Exact\ConnectionMappingExactReferenceResolver;
 use App\Accounting\Exact\ExactRelationResolver;
 use App\Accounting\Exceptions\AccountingMappingException;
@@ -62,8 +63,8 @@ class ConnectionMappingExactReferenceResolverTest extends TestCase
         $this->seedRef($connection, ConnectionAccountingRef::KIND_GL, 'gl-omzet', 'gl-omzet-id');
         $this->seedRef($connection, ConnectionAccountingRef::KIND_RELATION, 'ext-1', 'cust-1');
 
-        $this->assertSame('4', $resolver->vatCode(21, $connection));
-        $this->assertSame('2', $resolver->vatCode(9, $connection));
+        $this->assertSame('4', $resolver->vatCode(21, TaxTreatment::Standard, $connection));
+        $this->assertSame('2', $resolver->vatCode(9, TaxTreatment::Standard, $connection));
         $this->assertSame('gl-omzet-id', $resolver->glAccountGuid('omzet', $connection));
         $this->assertSame('cust-1', $resolver->relationGuid(new Party('debtor', 'Acme', externalId: 'ext-1'), $connection));
         $this->assertSame('70', $resolver->journal(DocumentType::SalesInvoice, $connection));
@@ -115,10 +116,24 @@ class ConnectionMappingExactReferenceResolverTest extends TestCase
     {
         $resolver = $this->resolver();
 
-        $this->assertSame('4', $resolver->vatCodeOrNull(21, $this->fullMapping()));
-        $this->assertSame('2', $resolver->vatCodeOrNull(9, $this->fullMapping()));
-        $this->assertNull($resolver->vatCodeOrNull(9, $this->connection(['vat_codes' => ['21' => '4']])));
-        $this->assertNull($resolver->vatCodeOrNull(21, $this->connection(null)));
+        $this->assertSame('4', $resolver->vatCodeOrNull(21, TaxTreatment::Standard, $this->fullMapping()));
+        $this->assertSame('2', $resolver->vatCodeOrNull(9, TaxTreatment::Standard, $this->fullMapping()));
+        $this->assertNull($resolver->vatCodeOrNull(9, TaxTreatment::Standard, $this->connection(['vat_codes' => ['21' => '4']])));
+        $this->assertNull($resolver->vatCodeOrNull(21, TaxTreatment::Standard, $this->connection(null)));
+    }
+
+    public function test_reverse_charge_uses_composite_key_without_falling_back_to_standard(): void
+    {
+        $resolver = $this->resolver();
+        $connection = $this->connection(['vat_codes' => ['21' => '3', '9' => '1', 'reverse_charge:21' => '6', 'reverse_charge:9' => '7']]);
+
+        // Verlegd leest de behandeling-key, niet de platte tarief-key.
+        $this->assertSame('6', $resolver->vatCode(21, TaxTreatment::ReverseCharge, $connection));
+        $this->assertSame('7', $resolver->vatCode(9, TaxTreatment::ReverseCharge, $connection));
+        $this->assertSame('3', $resolver->vatCode(21, TaxTreatment::Standard, $connection));
+
+        // Geen fallback: een ongemapt verlegd-tarief blijft null i.p.v. de standaard-code.
+        $this->assertNull($resolver->vatCodeOrNull(21, TaxTreatment::ReverseCharge, $this->connection(['vat_codes' => ['21' => '3']])));
     }
 
     public function test_throws_when_vat_rate_unmapped(): void
@@ -126,7 +141,7 @@ class ConnectionMappingExactReferenceResolverTest extends TestCase
         $resolver = $this->resolver();
 
         $this->expectException(AccountingMappingException::class);
-        $resolver->vatCode(9, $this->connection(['vat_codes' => ['21' => '4']]));
+        $resolver->vatCode(9, TaxTreatment::Standard, $this->connection(['vat_codes' => ['21' => '4']]));
     }
 
     public function test_throws_when_mapping_absent(): void

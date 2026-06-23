@@ -257,7 +257,7 @@ final class ExactAccountingTarget implements AccountingTarget
             fn (FinancialDocumentLine $line): array => [
                 'description' => $line->description,
                 'amount' => $line->netAmount(),
-                'vatCode' => $this->references->vatCode($line->taxRate, $connection),
+                'vatCode' => $this->references->vatCode($line->taxRate, $line->taxTreatment, $connection),
                 'glAccount' => $this->references->glAccountGuid($line->category, $connection),
                 'costCenter' => $this->references->costCenter($line->costCenter, $connection),
                 'costUnit' => $this->references->costUnit($line->costUnit, $connection),

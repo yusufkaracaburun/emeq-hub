@@ -73,6 +73,36 @@ class ExactReportEnricherTest extends TestCase
         $this->assertSame(['exact.vat_code.matched', 'exact.vat_code.matched'], array_map(fn ($f) => $f->code, $findings));
     }
 
+    public function test_reverse_charge_line_matches_verlegd_code_and_distinguishes_from_standard(): void
+    {
+        $findings = $this->enricher()->enrich(
+            ['lines' => [
+                ['description' => 'Gewoon', 'amount' => 100, 'tax_rate' => 21],
+                ['description' => 'Verlegd', 'amount' => 100, 'tax_rate' => 21, 'tax_treatment' => 'reverse_charge'],
+            ]],
+            $this->connection(['21' => '3', 'reverse_charge:21' => '6']),
+        );
+
+        // Twee findings: standard 21 → '3' én verlegd 21 → '6' (niet gededupt op enkel tarief).
+        $this->assertCount(2, $findings);
+        $this->assertSame('3', $findings[0]->suggestion);
+        $this->assertSame('exact.vat_code.matched', $findings[1]->code);
+        $this->assertSame('6', $findings[1]->suggestion);
+        $this->assertStringContainsString('verlegd', $findings[1]->message);
+    }
+
+    public function test_unmapped_reverse_charge_does_not_fall_back_to_standard_code(): void
+    {
+        $findings = $this->enricher()->enrich(
+            ['lines' => [['description' => 'Verlegd', 'amount' => 100, 'tax_rate' => 21, 'tax_treatment' => 'reverse_charge']]],
+            $this->connection(['21' => '3']), // alleen standaard gemapt
+        );
+
+        $this->assertCount(1, $findings);
+        $this->assertSame('exact.vat_code.unmapped', $findings[0]->code);
+        $this->assertSame(Severity::Warning, $findings[0]->severity);
+    }
+
     public function test_skips_non_numeric_tax_rate(): void
     {
         $findings = $this->enricher()->enrich(

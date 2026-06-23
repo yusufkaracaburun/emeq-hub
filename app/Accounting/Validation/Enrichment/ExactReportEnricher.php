@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Accounting\Validation\Enrichment;
 
+use App\Accounting\Enums\TaxTreatment;
 use App\Accounting\Exact\ConnectionMappingExactReferenceResolver;
 use App\Accounting\Validation\Finding;
 use App\Accounting\Validation\Severity;
@@ -61,16 +62,17 @@ final class ExactReportEnricher
                 continue; // ongeldige tax_rate flaggen de agnostische validators al
             }
 
-            $key = number_format($rate, 2, '.', '');
+            $treatment = TaxTreatment::tryFrom((string) ($line['tax_treatment'] ?? '')) ?? TaxTreatment::Standard;
+            $key = $treatment->value.'|'.number_format($rate, 2, '.', '');
 
             if (isset($seen[$key])) {
-                continue; // één finding per distinct tarief
+                continue; // één finding per distinct (behandeling, tarief)
             }
 
             $seen[$key] = true;
 
-            $code = $this->resolver->vatCodeOrNull($rate, $connection);
-            $label = $this->rateLabel($rate);
+            $code = $this->resolver->vatCodeOrNull($rate, $treatment, $connection);
+            $label = $this->rateLabel($rate).($treatment === TaxTreatment::ReverseCharge ? '% verlegd' : '%');
             $path = "lines.{$index}.tax_rate";
 
             $findings[] = $code !== null
@@ -78,7 +80,7 @@ final class ExactReportEnricher
                     code: 'exact.vat_code.matched',
                     severity: Severity::Info,
                     path: $path,
-                    message: "Tarief {$label}% komt overeen met Exact-VATCode '{$code}'.",
+                    message: "Tarief {$label} komt overeen met Exact-VATCode '{$code}'.",
                     current: $line['tax_rate'] ?? null,
                     suggestion: $code,
                 )
@@ -86,7 +88,7 @@ final class ExactReportEnricher
                     code: 'exact.vat_code.unmapped',
                     severity: Severity::Warning,
                     path: $path,
-                    message: "Tarief {$label}% is nog niet gekoppeld aan een Exact-VATCode op deze koppeling.",
+                    message: "Tarief {$label} is nog niet gekoppeld aan een Exact-VATCode op deze koppeling.",
                     current: $line['tax_rate'] ?? null,
                     suggestion: null,
                 );
