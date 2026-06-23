@@ -32,8 +32,20 @@ export default defineConfig({
         // op macOS-bind-mounts.
         hmr: { host: 'localhost' },
         watch: {
+            // usePolling = betrouwbare FS-events op macOS-bind-mounts. Polling stat't
+            // élk niet-genegeerd bestand per interval; vendor/ (42k) + storage zonder
+            // ignore = 100% CPU. interval verlaagt de poll-frequentie, ignored sluit
+            // de zware dirs uit. Vite negeert node_modules/.git al by default.
             usePolling: true,
-            ignored: ['**/storage/framework/views/**'],
+            interval: 1000,
+            binaryInterval: 1500,
+            ignored: [
+                '**/vendor/**',
+                '**/storage/**',
+                '**/bootstrap/cache/**',
+                '**/public/build/**',
+                '**/.git/**',
+            ],
         },
     },
 });
