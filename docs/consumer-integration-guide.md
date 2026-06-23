@@ -283,6 +283,9 @@ de provider:
 ```
 
 - `type` ∈ `sales_invoice` · `purchase_invoice` · `credit_note` · `income` · `expense`.
+- `credit_note` wordt als verkoopboeking (debiteur, verkoopdagboek) doorgestuurd — net als
+  `sales_invoice`. De Hub muteert je bedragen **niet** en keert het teken **niet** om: lever
+  zelf negatieve `amount`-waarden aan als je een creditboeking wilt. Wat je stuurt, boekt de Hub.
 - `party.role`: `debtor` (verkoop) of `creditor` (inkoop). `vat_number`/`iban`/`external_id` optioneel.
 - `party.external_id` = jouw stabiele klant-/leverancier-sleutel. Stuur 'm consistent
   mee: de Hub onthoudt 'm (relatie-mirror) zodat een volgende boeking direct matcht.
