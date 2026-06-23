@@ -93,13 +93,14 @@ class ValidateDocumentTest extends TestCase
             ->assertJsonFragment(['code' => 'exact.relation.matched', 'suggestion' => 'rel-guid-1']);
     }
 
-    public function test_invalid_vat_checksum_is_flagged_as_warning(): void
+    public function test_invalid_vat_checksum_blocks_as_error(): void
     {
         [$consumer] = $this->consumerWithExactConnection();
         $token = $consumer->createToken('t', [TokenAbilities::EXACT_READ])->plainTextToken;
 
-        // NL001234567B01 heeft het juiste formaat maar faalt de 11-proef — Exact zou dit
-        // weigeren. De dry-run wáárschuwt vooraf (warning, blokkeert niet).
+        // NL001234567B01 heeft het juiste formaat maar faalt de 11-proef — Exact weigert dit
+        // hard (HTTP 500). De dry-run spiegelt dat als error → valid=false, zodat de consument
+        // niet alsnog gaat boeken en op een 422 stuk loopt.
         $this->withHeader('Authorization', "Bearer {$token}")
             ->withHeader('X-Account-Id', 'school1')
             ->postJson('/v1/accounting/documents/validate', [
@@ -110,8 +111,8 @@ class ValidateDocumentTest extends TestCase
                 'lines' => [['description' => 'Dienst', 'amount' => 100, 'tax_rate' => 21]],
             ])
             ->assertStatus(200)
-            ->assertJsonPath('valid', true) // warning blokkeert niet
-            ->assertJsonFragment(['code' => 'vat_number.checksum', 'severity' => 'warning']);
+            ->assertJsonPath('valid', false) // error blokkeert
+            ->assertJsonFragment(['code' => 'vat_number.checksum', 'severity' => 'error']);
     }
 
     public function test_dirty_draft_returns_findings_and_suggestions(): void
@@ -143,7 +144,7 @@ class ValidateDocumentTest extends TestCase
             ->withHeader('X-Account-Id', 'school1')
             ->postJson('/v1/accounting/documents/validate', [
                 'type' => 'purchase_invoice',
-                'party' => ['role' => 'creditor', 'name' => 'NL Leverancier BV', 'vat_number' => 'NL000099998B57'],
+                'party' => ['role' => 'creditor', 'name' => 'NL Leverancier BV', 'vat_number' => 'NL123456789B01'],
                 'lines' => [['description' => 'Laag tarief', 'amount' => 100, 'tax_rate' => 9]],
             ])
             ->assertStatus(200)
@@ -161,7 +162,7 @@ class ValidateDocumentTest extends TestCase
             ->withHeader('X-Account-Id', 'school1')
             ->postJson('/v1/accounting/documents/validate', [
                 'type' => 'purchase_invoice',
-                'party' => ['role' => 'creditor', 'name' => 'Onbekende BV', 'vat_number' => 'NL000099998B57'],
+                'party' => ['role' => 'creditor', 'name' => 'Onbekende BV', 'vat_number' => 'NL123456789B01'],
                 'lines' => [['description' => 'Dienst', 'amount' => 100, 'tax_rate' => 21]],
             ])
             ->assertStatus(200)

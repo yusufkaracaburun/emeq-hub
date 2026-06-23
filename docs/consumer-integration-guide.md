@@ -333,6 +333,11 @@ X-Account-Id: bob
 daarná. Elke finding draagt `current` (aangeleverd) + `suggestion` (voorgestelde
 correctie of `null`) — pas een suggestie alleen toe na bevestiging.
 
+Een ongeldig NL-btw-nummer (fout formaat of fout controlecijfer/11-proef,
+`vat_number.malformed` / `vat_number.checksum`) is een **`error`** — Exact weigert
+zo'n boeking hard, dus `validate` houdt 'm tegen vóór je POST. Buitenlandse
+EU-formaten blijven `warning`.
+
 | Code | Severity | Betekenis |
 |---|---|---|
 | `arithmetic.amount_not_numeric` | warning | Regelbedrag niet numeriek |

@@ -20,26 +20,29 @@ class VatNumberValidatorTest extends TestCase
         $this->assertSame([], $findings);
     }
 
-    public function test_malformed_nl_vat_number_is_warning(): void
+    public function test_malformed_nl_vat_number_is_error(): void
     {
+        // NL valideert Exact strikt op formaat → harde fout (blokkeert de boeking).
         $findings = (new VatNumberValidator)->validate([
             'party' => ['vat_number' => 'NL123B01'],
         ]);
 
         $this->assertCount(1, $findings);
         $this->assertSame('vat_number.malformed', $findings[0]->code);
+        $this->assertSame(Severity::Error, $findings[0]->severity);
     }
 
-    public function test_invalid_nl_checksum_is_warning(): void
+    public function test_invalid_nl_checksum_is_error(): void
     {
-        // NL001234567B01: juist formaat, maar faalt de 11-proef (som 84) — Exact weigert dit.
+        // NL001234567B01: juist formaat, maar faalt de 11-proef (som 84) — Exact weigert dit
+        // hard (HTTP 500). De dry-run spiegelt dat als Error zodat valid=false.
         $findings = (new VatNumberValidator)->validate([
             'party' => ['name' => 'Bouwbedrijf Noord', 'vat_number' => 'NL001234567B01'],
         ]);
 
         $this->assertCount(1, $findings);
         $this->assertSame('vat_number.checksum', $findings[0]->code);
-        $this->assertSame(Severity::Warning, $findings[0]->severity);
+        $this->assertSame(Severity::Error, $findings[0]->severity);
         $this->assertStringContainsString('Bouwbedrijf Noord', $findings[0]->message);
     }
 

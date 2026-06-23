@@ -49,9 +49,12 @@ final class VatNumberValidator implements DocumentValidator
         }
 
         if (! $this->matchesFormat($country, $normalized)) {
+            // NL valideert Exact strikt op formaat → een misvormd NL-nummer faalt de boeking
+            // deterministisch en is dus een harde fout. Overige EU-formaten houden we advisory
+            // (Exact's gedrag per land minder zeker).
             return [new Finding(
                 code: 'vat_number.malformed',
-                severity: Severity::Warning,
+                severity: $country === 'NL' ? Severity::Error : Severity::Warning,
                 path: 'party.vat_number',
                 message: "BTW-nummer heeft geen geldig {$country}-formaat.",
                 current: $raw,
@@ -60,18 +63,18 @@ final class VatNumberValidator implements DocumentValidator
         }
 
         // NL-controlecijfer (11-proef): Exact weigert nummers die hier doorheen vallen
-        // (HTTP 500 "Ongeldig controlecijfer voor btw-nummer"). Vooraf flaggen scheelt een
-        // gefaalde boeking. Warning, niet error — moderne BTW-id-nummers vallen niet altijd
-        // door de 11-proef, dus advisory, nooit een harde blokkade.
+        // (HTTP 500 "Ongeldig controlecijfer voor btw-nummer") — een boeking met zo'n nummer
+        // kan nooit slagen. Error, niet warning: de dry-run moet Exact's harde weigering
+        // spiegelen zodat de consument het vóór de boeking ziet i.p.v. via een 422.
         if ($country === 'NL' && ! self::passesDutchVatChecksum($normalized)) {
             $name = is_string($party['name'] ?? null) && trim($party['name']) !== '' ? trim($party['name']) : null;
             $subject = $name !== null ? "Het btw-nummer van '{$name}'" : 'Het btw-nummer';
 
             return [new Finding(
                 code: 'vat_number.checksum',
-                severity: Severity::Warning,
+                severity: Severity::Error,
                 path: 'party.vat_number',
-                message: "{$subject} lijkt ongeldig. Controleer of het klopt — een Nederlands btw-nummer heeft de vorm NL + 9 cijfers + B + 2 cijfers (bijvoorbeeld NL123456789B01).",
+                message: "{$subject} is ongeldig (controlecijfer klopt niet). Een Nederlands btw-nummer heeft de vorm NL + 9 cijfers + B + 2 cijfers (bijvoorbeeld NL123456789B01).",
                 current: $raw,
                 suggestion: 'Controleer en corrigeer het btw-nummer van de klant.',
             )];
