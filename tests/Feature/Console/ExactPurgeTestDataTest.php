@@ -1,0 +1,105 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Tests\Feature\Console;
+
+use App\Models\Account;
+use App\Models\Connection;
+use App\Models\Consumer;
+use Emeq\ExactApi\Http\Request\Delete\DeleteAccount;
+use Emeq\ExactApi\Http\Request\Delete\DeletePurchaseEntry;
+use Emeq\ExactApi\Http\Request\Delete\DeleteSalesEntry;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Saloon\Http\Faking\MockClient;
+use Saloon\Http\Faking\MockResponse;
+use Tests\TestCase;
+
+class ExactPurgeTestDataTest extends TestCase
+{
+    use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        config([
+            'services.exact.client_id' => 'app_test_id',
+            'services.exact.client_secret' => 'app_test_secret',
+            'services.exact.redirect_uri' => 'https://hub.test/v1/oauth/exact/callback',
+            'services.exact.auth_base_url' => 'https://start.exactonline.nl',
+            'services.exact.api_base_url' => 'https://start.exactonline.nl',
+        ]);
+    }
+
+    private function exactConnection(): Connection
+    {
+        $consumer = Consumer::factory()->create();
+        $account = Account::factory()->for($consumer)->create();
+
+        return Connection::factory()->forExact()->for($account)->create();
+    }
+
+    /**
+     * @return list<MockResponse>
+     */
+    private function inventoryResponses(): array
+    {
+        return [
+            MockResponse::make(['d' => ['results' => [
+                ['EntryID' => 'se-1', 'EntryNumber' => 26800021, 'YourRef' => 'Emeq · f1'],
+            ]]], 200),
+            MockResponse::make(['d' => ['results' => []]], 200),
+            MockResponse::make(['d' => ['results' => [
+                ['ID' => 'acc-1', 'Code' => '1000007', 'Name' => 'Bouwbedrijf Noord'],
+                ['ID' => 'tax-1', 'Code' => '1000002', 'Name' => 'Belastingdienst Omzetbelasting'],
+            ]]], 200),
+        ];
+    }
+
+    public function test_dry_run_lists_but_deletes_nothing(): void
+    {
+        $mock = MockClient::global($this->inventoryResponses());
+        $connection = $this->exactConnection();
+
+        $this->artisan('exact:purge-test-data', ['connection' => $connection->id])
+            ->expectsOutputToContain('se-1')
+            ->expectsOutputToContain('DRY-RUN')
+            ->assertSuccessful();
+
+        $mock->assertNotSent(DeleteSalesEntry::class);
+        $mock->assertNotSent(DeleteAccount::class);
+    }
+
+    public function test_force_deletes_entries_and_explicit_relations_only(): void
+    {
+        $mock = MockClient::global([
+            ...$this->inventoryResponses(),
+            MockResponse::make([], 204), // delete sales se-1
+            MockResponse::make([], 204), // delete relation acc-1
+        ]);
+        $connection = $this->exactConnection();
+
+        $this->artisan('exact:purge-test-data', [
+            'connection' => $connection->id,
+            '--force' => true,
+            '--relations' => 'acc-1',
+        ])->assertSuccessful();
+
+        $mock->assertSent(DeleteSalesEntry::class);
+        $mock->assertSent(DeleteAccount::class);
+        $mock->assertNotSent(DeletePurchaseEntry::class); // 0 purchase entries
+        // Belastingdienst (tax-1) niet opgegeven → niet verwijderd
+        $mock->assertSent(fn ($request): bool => ! str_contains($request->resolveEndpoint(), 'tax-1'));
+    }
+
+    public function test_fails_for_non_exact_connection(): void
+    {
+        $consumer = Consumer::factory()->create();
+        $account = Account::factory()->for($consumer)->create();
+        $mollie = Connection::factory()->forMollie()->for($account)->create();
+
+        $this->artisan('exact:purge-test-data', ['connection' => $mollie->id])
+            ->assertFailed();
+    }
+}
