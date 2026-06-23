@@ -10,6 +10,7 @@ use App\Accounting\Validation\Finding;
 use App\Accounting\Validation\Severity;
 use App\Accounting\Validation\Support\Money;
 use App\Models\Connection;
+use App\Models\ConnectionAccountingRef;
 use App\Services\Exact\ExactReferenceData;
 use Throwable;
 
@@ -25,6 +26,17 @@ use Throwable;
  */
 final class ExactReportEnricher
 {
+    /**
+     * Per regel-veld de mirror-soort + het label voor de finding-tekst. De veldnaam is
+     * tevens het finding-code-segment (`exact.cost_center.*`, `exact.cost_unit.*`).
+     *
+     * @var array<string, array{kind: string, label: string}>
+     */
+    private const COST_DIMENSIONS = [
+        'cost_center' => ['kind' => ConnectionAccountingRef::KIND_COST_CENTER, 'label' => 'Kostenplaats'],
+        'cost_unit' => ['kind' => ConnectionAccountingRef::KIND_COST_UNIT, 'label' => 'Kostendrager'],
+    ];
+
     public function __construct(
         private readonly ConnectionMappingExactReferenceResolver $resolver,
     ) {}
@@ -38,6 +50,7 @@ final class ExactReportEnricher
         return [
             ...$this->vatCodeFindings($payload, $connection),
             ...$this->relationFindings($payload, $connection),
+            ...$this->costDimensionFindings($payload, $connection),
         ];
     }
 
@@ -143,6 +156,67 @@ final class ExactReportEnricher
     }
 
     /**
+     * Kostenplaats/-drager-Codes (cost_center/cost_unit) dragen direct op de boeking en worden
+     * tegen de Exact-mirror gevalideerd. Dry-run-spiegel van de boeking: een onbekende Code →
+     * `unmapped`-Warning (de boeking zou er met een 422 op weigeren), een bekende → `matched`-Info.
+     * Eén finding per distinct (veld, Code).
+     *
+     * @param  array<string, mixed>  $payload
+     * @return list<Finding>
+     */
+    private function costDimensionFindings(array $payload, Connection $connection): array
+    {
+        $lines = is_array($payload['lines'] ?? null) ? $payload['lines'] : [];
+        $findings = [];
+        $seen = [];
+
+        foreach ($lines as $index => $line) {
+            if (! is_array($line)) {
+                continue;
+            }
+
+            foreach (self::COST_DIMENSIONS as $field => $dimension) {
+                $code = $this->scalarString($line[$field] ?? null);
+
+                if ($code === null) {
+                    continue;
+                }
+
+                $key = $field.'|'.$code;
+
+                if (isset($seen[$key])) {
+                    continue; // één finding per distinct (veld, Code)
+                }
+
+                $seen[$key] = true;
+
+                $exists = $this->resolver->refCodeExists($code, $dimension['kind'], $connection);
+                $path = "lines.{$index}.{$field}";
+
+                $findings[] = $exists
+                    ? new Finding(
+                        code: "exact.{$field}.matched",
+                        severity: Severity::Info,
+                        path: $path,
+                        message: "{$dimension['label']} '{$code}' bestaat in de gekoppelde administratie.",
+                        current: $code,
+                        suggestion: $code,
+                    )
+                    : new Finding(
+                        code: "exact.{$field}.unmapped",
+                        severity: Severity::Warning,
+                        path: $path,
+                        message: "{$dimension['label']} '{$code}' is onbekend in de gekoppelde administratie — de boeking weigert hierop. Synchroniseer de referentiedata of corrigeer de Code.",
+                        current: $code,
+                        suggestion: null,
+                    );
+            }
+        }
+
+        return $findings;
+    }
+
+    /**
      * Afnemer (debtor) of leverancier (creditor) — de canonical party-rol bepaalt het
      * woord; onbekende/ontbrekende rol valt terug op het neutrale "Relatie".
      */
@@ -163,5 +237,19 @@ final class ExactReportEnricher
     private function blank(?string $value): bool
     {
         return $value === null || trim($value) === '';
+    }
+
+    /**
+     * Een scalar (string/int) regel-veld naar een getrimde non-lege string, anders null.
+     */
+    private function scalarString(mixed $value): ?string
+    {
+        if (! is_string($value) && ! is_int($value)) {
+            return null;
+        }
+
+        $value = trim((string) $value);
+
+        return $value === '' ? null : $value;
     }
 }

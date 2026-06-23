@@ -190,6 +190,47 @@ class ManageAccountingMappingActionTest extends TestCase
             ]);
     }
 
+    public function test_action_saves_reverse_charge_vat_codes(): void
+    {
+        $this->actingAs($this->makeStaffUser());
+        $this->mockExactReference();
+        $connection = $this->makeExactConnection();
+
+        Livewire::test(ListConnections::class)
+            ->callTableAction('accountingMapping', $connection, data: [
+                'vat_21' => '3',
+                'reverse_charge_vat_21' => '6',
+                'reverse_charge_vat_9' => '7',
+            ])
+            ->assertHasNoTableActionErrors();
+
+        $connection->refresh();
+
+        // Verlegd boekt op eigen VATCodes (6/7), náást de gewone code — niet eroverheen.
+        $this->assertSame(
+            ['21' => '3', 'reverse_charge:21' => '6', 'reverse_charge:9' => '7'],
+            $connection->metadata['accounting_mapping']['vat_codes'],
+        );
+    }
+
+    public function test_action_prefills_reverse_charge_codes_from_metadata(): void
+    {
+        $this->actingAs($this->makeStaffUser());
+        $this->mockExactReference();
+        $connection = $this->makeExactConnection([
+            'metadata' => ['accounting_mapping' => [
+                'vat_codes' => ['21' => '3', 'reverse_charge:21' => '6'],
+            ]],
+        ]);
+
+        Livewire::test(ListConnections::class)
+            ->mountTableAction('accountingMapping', $connection)
+            ->assertTableActionDataSet([
+                'vat_21' => '3',
+                'reverse_charge_vat_21' => '6',
+            ]);
+    }
+
     public function test_action_saves_selected_vat_code_from_live_reference_data(): void
     {
         $this->actingAs($this->makeStaffUser());

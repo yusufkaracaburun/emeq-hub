@@ -106,6 +106,17 @@ final class ConnectionMappingExactReferenceResolver implements ExactReferenceRes
     }
 
     /**
+     * Fail-soft variant voor het validate-rapport: bestaat de Code in de mirror voor deze soort?
+     * Spiegelt vatCodeOrNull — een onbekende kostenplaats/-drager wordt een finding i.p.v. een 422.
+     */
+    public function refCodeExists(string $code, string $kind, Connection $connection): bool
+    {
+        $code = trim($code);
+
+        return $code !== '' && $this->mirrorNativeId($connection, $kind, $code) !== null;
+    }
+
+    /**
      * Kostenplaats/-drager dragen de Code direct op de boeking (geen GUID). De mirror dient hier
      * als validatie: een onbekende Code → fail-fast met duidelijke melding i.p.v. een Exact-400.
      */
