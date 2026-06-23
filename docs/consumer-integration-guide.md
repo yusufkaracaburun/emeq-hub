@@ -378,8 +378,9 @@ Idempotency-Key: factuur-2026-0042
   als het pakket er één teruggeeft.
 - Asynchroon: stuur `Prefer: respond-async` → direct `202` `{ "status": "pending", "external_id": "…" }`.
   Het eindresultaat komt per webhook (`accounting.document.synced`, HMAC-gesigneerd met je
-  `webhook_callback_secret`) op je `webhook_callback_url`. Async zonder geregistreerde
-  callback → `400 webhook_required`.
+  `webhook_callback_secret`) op je `webhook_callback_url`, met dezelfde body als de
+  synchrone respons (`status` + `external_id` + `external_ref` + `external_number`). Async
+  zonder geregistreerde callback → `400 webhook_required`.
 
 `status` ∈ `posted` / `pending` / `rejected` / `failed`.
 
@@ -411,8 +412,9 @@ Hub-canonical formaat — buig niets naar Exact). Voor elk boekbaar document:
 3. Boek met `POST /v1/accounting/documents`, headers `X-Account-Id: {tenant}` +
    `Idempotency-Key: {external_id}`. Gebruik `Prefer: respond-async` alleen als ik
    een webhook-callback geregistreerd heb.
-4. Verwerk `201 posted`: bewaar `external_ref` in mijn sync-ledger naast mijn
-   external_id. Behandel `422 mapping_failed` als "actie vereist in de Hub-admin",
+4. Verwerk `201 posted`: bewaar `external_ref` (interne GUID) + `external_number`
+   (leesbaar boekstuknummer, toon dít aan de gebruiker) in mijn sync-ledger naast
+   mijn external_id. Behandel `422 mapping_failed` als "actie vereist in de Hub-admin",
    niet als retrybare fout. Retry nooit een 5xx zonder dezelfde Idempotency-Key.
 Stuur `party.external_id` consistent mee zodat relaties gecachet worden.
 ```
