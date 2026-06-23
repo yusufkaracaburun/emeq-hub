@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Books\Resources\Clients\Schemas;
 
+use App\Rules\ValidVatNumber;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -39,6 +40,7 @@ class ClientForm
 
                 TextInput::make('vat_number')
                     ->label('BTW-nummer')
+                    ->rule(new ValidVatNumber)
                     ->maxLength(20),
 
                 TextInput::make('coc_number')

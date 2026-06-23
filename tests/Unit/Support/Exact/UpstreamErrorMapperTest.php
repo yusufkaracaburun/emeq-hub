@@ -60,7 +60,7 @@ class UpstreamErrorMapperTest extends TestCase
         $this->assertSame('exact_rejected', $mapped['short_code']);
         // Schone, partner-neutrale uitleg voor de consument…
         $this->assertStringContainsString('btw-nummer is ongeldig', $mapped['body']['message']);
-        $this->assertStringContainsString('NL123456789B01', $mapped['body']['message']);
+        $this->assertStringContainsString('NL000099998B57', $mapped['body']['message']);
         // …met de rauwe Exact-tekst bewaard voor traceability.
         $this->assertStringContainsString('controlecijfer', $mapped['body']['provider_message']);
     }

@@ -272,7 +272,7 @@ de provider:
   "issue_date": "2026-06-20",
   "due_date": "2026-07-20",
   "currency": "EUR",
-  "party": { "role": "creditor", "name": "Leverancier BV", "vat_number": "NL123456789B01", "iban": "NL91ABNA0417164300", "external_id": "crediteur-99" },
+  "party": { "role": "creditor", "name": "Leverancier BV", "vat_number": "NL000099998B57", "iban": "NL91ABNA0417164300", "external_id": "crediteur-99" },
   "lines": [
     { "description": "Dienst", "amount": 100.00, "tax_rate": 21, "category": "kantoorkosten", "cost_center": "ADMIN", "cost_unit": "PROJ-X" }
   ],

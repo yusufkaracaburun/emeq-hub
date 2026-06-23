@@ -12,9 +12,9 @@ class VatNumberValidatorTest extends TestCase
 {
     public function test_valid_nl_vat_number_produces_no_finding(): void
     {
-        // NL123456789B01 doorstaat de 11-proef (som 165, deelbaar door 11).
+        // NL000099998B57 doorstaat de moderne mod-97-controle (kanoniek voorbeeld).
         $findings = (new VatNumberValidator)->validate([
-            'party' => ['vat_number' => 'NL123456789B01'],
+            'party' => ['vat_number' => 'NL000099998B57'],
         ]);
 
         $this->assertSame([], $findings);
@@ -49,12 +49,12 @@ class VatNumberValidatorTest extends TestCase
     public function test_unnormalized_vat_number_suggests_normalized(): void
     {
         $findings = (new VatNumberValidator)->validate([
-            'party' => ['vat_number' => 'nl 1234 56789 b01'],
+            'party' => ['vat_number' => 'nl 0000 99998 b57'],
         ]);
 
         $this->assertCount(1, $findings);
         $this->assertSame('vat_number.normalize', $findings[0]->code);
-        $this->assertSame('NL123456789B01', $findings[0]->suggestion);
+        $this->assertSame('NL000099998B57', $findings[0]->suggestion);
     }
 
     public function test_non_eu_vat_number_is_skipped(): void

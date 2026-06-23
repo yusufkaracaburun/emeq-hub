@@ -82,7 +82,7 @@ class ValidateDocumentTest extends TestCase
                 'currency' => 'EUR',
                 'subtotal' => 100,
                 'total' => 121,
-                'party' => ['role' => 'creditor', 'name' => 'NL Leverancier BV', 'vat_number' => 'NL123456789B01', 'iban' => 'NL91ABNA0417164300'],
+                'party' => ['role' => 'creditor', 'name' => 'NL Leverancier BV', 'vat_number' => 'NL000099998B57', 'iban' => 'NL91ABNA0417164300'],
                 'lines' => [['description' => 'Dienst', 'amount' => 100, 'tax_rate' => 21]],
             ])
             ->assertStatus(200)
@@ -144,7 +144,7 @@ class ValidateDocumentTest extends TestCase
             ->withHeader('X-Account-Id', 'school1')
             ->postJson('/v1/accounting/documents/validate', [
                 'type' => 'purchase_invoice',
-                'party' => ['role' => 'creditor', 'name' => 'NL Leverancier BV', 'vat_number' => 'NL123456789B01'],
+                'party' => ['role' => 'creditor', 'name' => 'NL Leverancier BV', 'vat_number' => 'NL000099998B57'],
                 'lines' => [['description' => 'Laag tarief', 'amount' => 100, 'tax_rate' => 9]],
             ])
             ->assertStatus(200)
@@ -162,7 +162,7 @@ class ValidateDocumentTest extends TestCase
             ->withHeader('X-Account-Id', 'school1')
             ->postJson('/v1/accounting/documents/validate', [
                 'type' => 'purchase_invoice',
-                'party' => ['role' => 'creditor', 'name' => 'Onbekende BV', 'vat_number' => 'NL123456789B01'],
+                'party' => ['role' => 'creditor', 'name' => 'Onbekende BV', 'vat_number' => 'NL000099998B57'],
                 'lines' => [['description' => 'Dienst', 'amount' => 100, 'tax_rate' => 21]],
             ])
             ->assertStatus(200)

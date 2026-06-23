@@ -152,6 +152,26 @@ class StoreDocumentTest extends TestCase
         ]);
     }
 
+    public function test_invalid_nl_vat_checksum_is_rejected_at_edge_before_exact(): void
+    {
+        // NL123456789B01 is formaat-geldig maar controlecijfer-ongeldig. De edge-guard
+        // (ValidVatNumber op StoreDocumentRequest) weigert 'm met 422 — geen Exact-call,
+        // geen half-aangemaakte relatie. Geen MockClient nodig: validatie faalt vóór de adapter.
+        [$consumer] = $this->consumerWithExactConnection();
+        $token = $consumer->createToken('t', [TokenAbilities::EXACT_WRITE])->plainTextToken;
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->withHeader('X-Account-Id', 'school1')
+            ->withHeader('Idempotency-Key', (string) Str::uuid())
+            ->postJson('/v1/accounting/documents', $this->salesInvoicePayload([
+                'party' => ['role' => 'debtor', 'name' => 'GroenAanleg Zuid', 'vat_number' => 'NL123456789B01'],
+            ]))
+            ->assertStatus(422)
+            ->assertJsonValidationErrors('party.vat_number');
+
+        $this->assertDatabaseCount('pass_through_calls', 0);
+    }
+
     public function test_response_echoes_exact_entry_number_when_present(): void
     {
         // Exact geeft het mensleesbare boekstuknummer (EntryNumber) terug naast de GUID;

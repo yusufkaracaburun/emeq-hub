@@ -210,7 +210,7 @@ final class UpstreamErrorMapper
         if (str_contains($haystack, 'btw-nummer') || str_contains($haystack, 'controlecijfer')) {
             return 'Het btw-nummer is ongeldig. Controleer het en probeer opnieuw — '
                 .'een Nederlands btw-nummer heeft de vorm NL + 9 cijfers + B + 2 cijfers '
-                .'(bijvoorbeeld NL123456789B01).';
+                .'(bijvoorbeeld NL000099998B57).';
         }
 
         return $raw;
