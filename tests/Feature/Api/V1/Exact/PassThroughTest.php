@@ -167,8 +167,10 @@ class PassThroughTest extends TestCase
             ->assertHeader('X-RateLimit-Minutely-Remaining', '9');
     }
 
-    public function test_pass_through_surfaces_exact_server_error_and_audits_5xx(): void
+    public function test_pass_through_maps_functional_5xx_to_422_rejection(): void
     {
+        // Exact geeft 500 met een functionele melding voor permanente afwijzingen — niet
+        // retryable. Map naar 422 zodat de reden niet achter een Cloudflare-502 verdwijnt.
         MockClient::global([
             RawExactRequest::class => MockResponse::make(
                 '{"error":{"message":{"value":"Can\'t delete: used in journal entry"}}}',
@@ -182,14 +184,15 @@ class PassThroughTest extends TestCase
         $this->withHeader('Authorization', "Bearer {$token}")
             ->withHeader('X-Account-Id', 'school1')
             ->deleteJson('/v1/exact/crm/Accounts/guid')
-            ->assertStatus(502)
+            ->assertStatus(422)
+            ->assertJsonPath('error', 'upstream_rejected')
             ->assertJsonPath('message', "Can't delete: used in journal entry")
             ->assertJsonPath('upstream_status', 500);
 
         $this->assertDatabaseHas('pass_through_calls', [
             'provider' => 'exact',
-            'status' => 502,
-            'upstream_error' => 'exact_5xx',
+            'status' => 422,
+            'upstream_error' => 'exact_rejected',
         ]);
     }
 

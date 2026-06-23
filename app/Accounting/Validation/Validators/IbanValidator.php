@@ -37,7 +37,7 @@ final class IbanValidator implements DocumentValidator
                 code: 'iban.checksum_invalid',
                 severity: Severity::Error,
                 path: 'party.iban',
-                message: 'IBAN is ongeldig (faalt de lengte- of mod-97-controle).',
+                message: 'Het IBAN is ongeldig. Controleer het rekeningnummer en probeer opnieuw.',
                 current: $raw,
                 suggestion: null,
             )];

@@ -82,14 +82,42 @@ final class UpstreamErrorMapper
                 ];
             }
 
-            // Andere 5xx dragen vaak Exact's functionele fout in `error.message.value`
-            // (dezelfde melding die de boekhouder in de Exact-UI ziet). Surface die
-            // i.p.v. een generieke "server error".
+            // Een 5xx mét functionele OData-melding (`error.message.value`, dezelfde melding
+            // die de boekhouder in de Exact-UI ziet) is een permanente afwijzing — niet
+            // retryable. Geef 422: een 4xx laat Cloudflare de body ongemoeid, dus de consument
+            // ziet de échte reden i.p.v. een generieke gateway-pagina.
+            $rawMessage = self::extractODataMessage($exception->rawBody);
+
+            if ($rawMessage !== null) {
+                $humanized = self::humanizeExactMessage($rawMessage);
+
+                $body = [
+                    'error' => 'upstream_rejected',
+                    'message' => $humanized,
+                    'upstream_status' => $exception->status,
+                    'upstream_detail' => 'rejected',
+                ];
+
+                // Bewaar de rauwe Exact-tekst voor developer-traceability zodra we 'm
+                // hebben her-formuleerd (anders is `message` zelf al de bron).
+                if ($humanized !== $rawMessage) {
+                    $body['provider_message'] = $rawMessage;
+                }
+
+                return [
+                    'status' => 422,
+                    'body' => $body,
+                    'headers' => [],
+                    'short_code' => 'exact_rejected',
+                ];
+            }
+
+            // Geen functionele melding → infra-/gateway-5xx: echt transient, retryable.
             return [
                 'status' => 502,
                 'body' => [
                     'error' => 'upstream_error',
-                    'message' => self::extractODataMessage($exception->rawBody) ?? 'Upstream returned server error',
+                    'message' => 'Upstream returned server error',
                     'upstream_status' => $exception->status,
                     'upstream_detail' => 'server_error',
                 ],
@@ -166,6 +194,26 @@ final class UpstreamErrorMapper
             'headers' => [],
             'short_code' => 'exact_unknown',
         ];
+    }
+
+    /**
+     * Vertaalt een bekende functionele Exact-melding naar een consument-vriendelijke,
+     * partner-neutrale uitleg (een gebruiker die Exact niet kent moet 'm snappen).
+     * Onbekende meldingen gaan ongewijzigd door — nooit info verbergen; de rauwe tekst
+     * blijft via `provider_message` bewaard wanneer we wél her-formuleren.
+     */
+    private static function humanizeExactMessage(string $raw): string
+    {
+        $haystack = mb_strtolower($raw);
+
+        // Exact keurt het btw-nummer af (ongeldig controlecijfer / verkeerd formaat).
+        if (str_contains($haystack, 'btw-nummer') || str_contains($haystack, 'controlecijfer')) {
+            return 'Het btw-nummer is ongeldig. Controleer het en probeer opnieuw — '
+                .'een Nederlands btw-nummer heeft de vorm NL + 9 cijfers + B + 2 cijfers '
+                .'(bijvoorbeeld NL123456789B01).';
+        }
+
+        return $raw;
     }
 
     /**

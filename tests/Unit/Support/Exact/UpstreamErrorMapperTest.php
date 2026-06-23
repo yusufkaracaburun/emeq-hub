@@ -35,15 +35,34 @@ class UpstreamErrorMapperTest extends TestCase
         $this->assertSame('exact_forbidden', $mapped['short_code']);
     }
 
-    public function test_500_surfaces_exact_odata_message(): void
+    public function test_500_with_functional_message_maps_to_422_rejected(): void
     {
+        // Exact geeft 500 voor functionele afwijzingen — permanent, niet retryable. Map naar
+        // 422 zodat de body (en dus de reden) niet achter een Cloudflare-502 verdwijnt.
         $body = '{"error":{"message":{"value":"Can\'t delete: used in journal entry"}}}';
         $mapped = UpstreamErrorMapper::mapException(ServerException::fromResponse(500, $body));
 
-        $this->assertSame(502, $mapped['status']);
+        $this->assertSame(422, $mapped['status']);
         $this->assertSame("Can't delete: used in journal entry", $mapped['body']['message']);
         $this->assertSame(500, $mapped['body']['upstream_status']);
-        $this->assertSame('exact_5xx', $mapped['short_code']);
+        $this->assertSame('rejected', $mapped['body']['upstream_detail']);
+        $this->assertSame('exact_rejected', $mapped['short_code']);
+        // Geen humanisatie → geen duplicaat-veld; `message` is zelf al de bron.
+        $this->assertArrayNotHasKey('provider_message', $mapped['body']);
+    }
+
+    public function test_500_vat_rejection_is_humanized_with_provider_message(): void
+    {
+        $body = '{"error":{"message":{"value":"Ongeldig controlecijfer voor btw-nummer. Het nummer moet in het volgende formaat worden ingevoerd: NL999999999B99"}}}';
+        $mapped = UpstreamErrorMapper::mapException(ServerException::fromResponse(500, $body));
+
+        $this->assertSame(422, $mapped['status']);
+        $this->assertSame('exact_rejected', $mapped['short_code']);
+        // Schone, partner-neutrale uitleg voor de consument…
+        $this->assertStringContainsString('btw-nummer is ongeldig', $mapped['body']['message']);
+        $this->assertStringContainsString('NL123456789B01', $mapped['body']['message']);
+        // …met de rauwe Exact-tekst bewaard voor traceability.
+        $this->assertStringContainsString('controlecijfer', $mapped['body']['provider_message']);
     }
 
     public function test_500_without_odata_message_falls_back(): void

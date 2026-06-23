@@ -272,7 +272,7 @@ de provider:
   "issue_date": "2026-06-20",
   "due_date": "2026-07-20",
   "currency": "EUR",
-  "party": { "role": "creditor", "name": "Leverancier BV", "vat_number": "NL000099998B57", "iban": "NL91ABNA0417164300", "external_id": "crediteur-99" },
+  "party": { "role": "creditor", "name": "Leverancier BV", "vat_number": "NL123456789B01", "iban": "NL91ABNA0417164300", "external_id": "crediteur-99" },
   "lines": [
     { "description": "Dienst", "amount": 100.00, "tax_rate": 21, "category": "kantoorkosten", "cost_center": "ADMIN", "cost_unit": "PROJ-X" }
   ],
@@ -343,6 +343,7 @@ correctie of `null`) — pas een suggestie alleen toe na bevestiging.
 | `iban.checksum_invalid` | error | IBAN faalt mod-97/lengte |
 | `iban.normalize` | info | IBAN geldig maar niet genormaliseerd |
 | `vat_number.malformed` | warning | BTW-nummer matcht landpatroon niet |
+| `vat_number.checksum` | warning | NL BTW-nummer faalt de 11-proef (controlecijfer) — het pakket weigert dit |
 | `vat_number.normalize` | info | BTW-nummer geldig maar niet genormaliseerd |
 | `vat_treatment.reverse_charge_expected` | warning | Intra-EU B2B met BTW-nr → verlegd verwacht (zet `tax_treatment: reverse_charge`) |
 | `vat_treatment.domestic_rate_on_non_eu` | error | Niet-EU leverancier met binnenlands tarief |
@@ -382,8 +383,11 @@ altijd een nette `party.name` (+ `vat_number` indien bekend) mee.
 
 Foutcodes: `403 insufficient_ability` (PAT mist `{provider}:write`) ·
 `422 mapping_failed` (onvolledige boekhoud-mapping óf onbekende relatie zonder
-auto-create — los op in de Hub-admin) · `503 provider_disabled` · `502/503/504`
-upstream (pakket onbereikbaar/onderhoud/timeout, met `Retry-After` waar relevant).
+auto-create — los op in de Hub-admin) · `422 upstream_rejected` (het pakket wees de
+boeking functioneel af, bv. een ongeldig btw-nummer — **niet retryen**, corrigeer het
+document: `message` is een leesbare uitleg, `provider_message` de rauwe pakket-tekst) ·
+`503 provider_disabled` · `502/503/504` upstream (pakket onbereikbaar/onderhoud/timeout —
+echt transient, mét `Retry-After` waar relevant; **wél** retrybaar).
 Elke fout draagt `{ "status": "failed", "external_id": "…", "error": "…", "message": "…" }`.
 
 **🤖 Agent-prompt**

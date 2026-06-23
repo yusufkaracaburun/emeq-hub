@@ -59,6 +59,24 @@ final class VatNumberValidator implements DocumentValidator
             )];
         }
 
+        // NL-controlecijfer (11-proef): Exact weigert nummers die hier doorheen vallen
+        // (HTTP 500 "Ongeldig controlecijfer voor btw-nummer"). Vooraf flaggen scheelt een
+        // gefaalde boeking. Warning, niet error — moderne BTW-id-nummers vallen niet altijd
+        // door de 11-proef, dus advisory, nooit een harde blokkade.
+        if ($country === 'NL' && ! self::passesDutchVatChecksum($normalized)) {
+            $name = is_string($party['name'] ?? null) && trim($party['name']) !== '' ? trim($party['name']) : null;
+            $subject = $name !== null ? "Het btw-nummer van '{$name}'" : 'Het btw-nummer';
+
+            return [new Finding(
+                code: 'vat_number.checksum',
+                severity: Severity::Warning,
+                path: 'party.vat_number',
+                message: "{$subject} lijkt ongeldig. Controleer of het klopt — een Nederlands btw-nummer heeft de vorm NL + 9 cijfers + B + 2 cijfers (bijvoorbeeld NL123456789B01).",
+                current: $raw,
+                suggestion: 'Controleer en corrigeer het btw-nummer van de klant.',
+            )];
+        }
+
         if ($normalized !== $raw) {
             return [new Finding(
                 code: 'vat_number.normalize',
@@ -78,5 +96,21 @@ final class VatNumberValidator implements DocumentValidator
         $pattern = self::PATTERNS[$country] ?? self::GENERIC;
 
         return preg_match($pattern, $normalized) === 1;
+    }
+
+    /**
+     * Nederlandse 11-proef over de 9 cijfers tussen `NL` en `B`: de som van cijfer × gewicht
+     * (9 t/m 1) moet deelbaar zijn door 11. Aanname: het nummer matcht al `NL\d{9}B\d{2}`.
+     */
+    private static function passesDutchVatChecksum(string $normalized): bool
+    {
+        $digits = substr($normalized, 2, 9);
+
+        $sum = 0;
+        for ($i = 0; $i < 9; $i++) {
+            $sum += (9 - $i) * (int) $digits[$i];
+        }
+
+        return $sum % 11 === 0;
     }
 }

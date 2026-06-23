@@ -82,14 +82,36 @@ class ValidateDocumentTest extends TestCase
                 'currency' => 'EUR',
                 'subtotal' => 100,
                 'total' => 121,
-                'party' => ['role' => 'creditor', 'name' => 'NL Leverancier BV', 'vat_number' => 'NL000099998B57', 'iban' => 'NL91ABNA0417164300'],
+                'party' => ['role' => 'creditor', 'name' => 'NL Leverancier BV', 'vat_number' => 'NL123456789B01', 'iban' => 'NL91ABNA0417164300'],
                 'lines' => [['description' => 'Dienst', 'amount' => 100, 'tax_rate' => 21]],
             ])
             ->assertStatus(200)
             ->assertJsonPath('valid', true)
             ->assertJsonPath('summary.errors', 0)
+            ->assertJsonMissing(['code' => 'vat_number.checksum']) // geldig controlecijfer = geen finding
             ->assertJsonMissing(['code' => 'exact.vat_code.matched']) // gekoppeld tarief = geen ruis-finding
             ->assertJsonFragment(['code' => 'exact.relation.matched', 'suggestion' => 'rel-guid-1']);
+    }
+
+    public function test_invalid_vat_checksum_is_flagged_as_warning(): void
+    {
+        [$consumer] = $this->consumerWithExactConnection();
+        $token = $consumer->createToken('t', [TokenAbilities::EXACT_READ])->plainTextToken;
+
+        // NL001234567B01 heeft het juiste formaat maar faalt de 11-proef — Exact zou dit
+        // weigeren. De dry-run wáárschuwt vooraf (warning, blokkeert niet).
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->withHeader('X-Account-Id', 'school1')
+            ->postJson('/v1/accounting/documents/validate', [
+                'type' => 'purchase_invoice',
+                'subtotal' => 100,
+                'total' => 121,
+                'party' => ['role' => 'creditor', 'name' => 'Bouwbedrijf Noord', 'vat_number' => 'NL001234567B01'],
+                'lines' => [['description' => 'Dienst', 'amount' => 100, 'tax_rate' => 21]],
+            ])
+            ->assertStatus(200)
+            ->assertJsonPath('valid', true) // warning blokkeert niet
+            ->assertJsonFragment(['code' => 'vat_number.checksum', 'severity' => 'warning']);
     }
 
     public function test_dirty_draft_returns_findings_and_suggestions(): void

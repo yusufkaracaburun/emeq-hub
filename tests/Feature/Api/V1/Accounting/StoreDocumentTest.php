@@ -152,6 +152,40 @@ class StoreDocumentTest extends TestCase
         ]);
     }
 
+    public function test_exact_functional_rejection_returns_422_with_clear_message(): void
+    {
+        // Exact weigert functioneel (bv. ongeldig btw-controlecijfer) met een 500 + OData-melding.
+        // De Hub mapt dat naar 422 — permanent, niet retryable — zodat de melding niet achter een
+        // Cloudflare-502 verdwijnt, en herschrijft 'm naar een partner-neutrale uitleg.
+        MockClient::global([
+            CreateSalesEntry::class => MockResponse::make(
+                ['error' => ['message' => ['value' => 'Ongeldig controlecijfer voor btw-nummer.']]],
+                500,
+            ),
+        ]);
+        $this->bindFakeReferences();
+
+        [$consumer] = $this->consumerWithExactConnection();
+        $token = $consumer->createToken('t', [TokenAbilities::EXACT_WRITE])->plainTextToken;
+
+        $response = $this->withHeader('Authorization', "Bearer {$token}")
+            ->withHeader('X-Account-Id', 'school1')
+            ->withHeader('Idempotency-Key', (string) Str::uuid())
+            ->postJson('/v1/accounting/documents', $this->salesInvoicePayload())
+            ->assertStatus(422)
+            ->assertJsonPath('status', 'failed')
+            ->assertJsonPath('error', 'upstream_rejected');
+
+        $this->assertStringContainsString('btw-nummer is ongeldig', $response->json('message'));
+        $this->assertStringContainsString('controlecijfer', $response->json('provider_message'));
+
+        $this->assertDatabaseHas('pass_through_calls', [
+            'provider' => 'exact',
+            'path' => '/v1/accounting/documents',
+            'status' => 422,
+        ]);
+    }
+
     public function test_successful_push_returns_posted_status(): void
     {
         MockClient::global([
