@@ -40,6 +40,33 @@ class MollieConnectOAuthFlowTest extends TestCase
         $this->assertNull($connection->oauth_state);
     }
 
+    public function test_exchange_code_clears_revoked_at_on_reconnect(): void
+    {
+        config(['services.mollie.connect.client_id' => 'app_test_id']);
+        config(['services.mollie.connect.client_secret' => 'app_test_secret']);
+        config(['services.mollie.connect.redirect_uri' => 'https://hub.test/v1/oauth/mollie/callback']);
+
+        Http::fake([
+            'api.mollie.com/oauth2/tokens' => Http::response([
+                'access_token' => 'access_real_xyz',
+                'refresh_token' => 'refresh_real_xyz',
+                'expires_in' => 3600,
+                'scope' => 'payments.read payments.write',
+            ]),
+        ]);
+
+        $connection = Connection::factory()->forMollie()->create([
+            'status' => 'revoked',
+            'revoked_at' => now()->subDay(),
+        ]);
+
+        $this->app->make(MollieConnectOAuthFlow::class)->exchangeCode($connection, 'auth_code_abc');
+
+        $connection->refresh();
+        $this->assertSame('active', $connection->status);
+        $this->assertNull($connection->revoked_at);
+    }
+
     public function test_refresh_token_is_locked_per_connection(): void
     {
         // Lock-pattern uit D-05: tweede aanroep moet wachten op de eerste.

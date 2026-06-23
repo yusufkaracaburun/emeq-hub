@@ -44,6 +44,7 @@ final class MollieConnectOAuthFlow implements OAuthFlow
             'expires_at' => now()->addSeconds((int) $response['expires_in']),
             'scopes' => explode(' ', (string) ($response['scope'] ?? '')),
             'status' => 'active',
+            'revoked_at' => null,
             'oauth_state' => null,
             'oauth_state_expires_at' => null,
         ])->save();

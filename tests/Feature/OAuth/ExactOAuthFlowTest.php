@@ -70,6 +70,36 @@ class ExactOAuthFlowTest extends TestCase
         );
     }
 
+    public function test_exchange_code_clears_revoked_at_on_reconnect(): void
+    {
+        Bus::fake([RegisterExactWebhookSubscriptionsJob::class]);
+
+        Http::fake([
+            'start.exactonline.nl/api/oauth2/token' => Http::response([
+                'access_token' => 'acc_xyz',
+                'token_type' => 'bearer',
+                'expires_in' => '600',
+                'refresh_token' => 'ref_xyz',
+            ]),
+            'start.exactonline.nl/api/v1/current/Me' => Http::response([
+                'd' => ['results' => [['CurrentDivision' => 4471372]]],
+            ]),
+        ]);
+
+        $connection = Connection::factory()->forExact()->create([
+            'status' => 'revoked',
+            'revoked_at' => now()->subDay(),
+            'oauth_state' => 'st',
+            'oauth_state_expires_at' => now()->addMinutes(30),
+        ]);
+
+        $this->app->make(ExactOAuthFlow::class)->exchangeCode($connection, 'auth_code_abc');
+
+        $connection->refresh();
+        $this->assertSame('active', $connection->status);
+        $this->assertNull($connection->revoked_at);
+    }
+
     public function test_get_authorization_url_contains_required_params_without_scope(): void
     {
         $url = $this->app->make(ExactOAuthFlow::class)->getAuthorizationUrl(

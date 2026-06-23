@@ -68,6 +68,7 @@ final class ExactOAuthFlow implements OAuthFlow
             'expires_at' => now()->addSeconds((int) $token['expires_in']),
             'administratie_id' => $this->fetchDivision((string) $token['access_token']),
             'status' => 'active',
+            'revoked_at' => null,
             'oauth_state' => null,
             'oauth_state_expires_at' => null,
         ])->save();

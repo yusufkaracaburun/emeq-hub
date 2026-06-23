@@ -75,7 +75,12 @@ final class SubscriptionController extends Controller
 
     public function destroy(Request $request, int $id): JsonResponse
     {
-        $subscription = Subscription::query()->findOrFail($id);
+        // Admin-allowlist is omni-tenant (D-15): de cancel mag elke Consumer-
+        // subscription raken, maar nooit een ander morph-type dat per ongeluk
+        // dezelfde id deelt.
+        $subscription = Subscription::query()
+            ->whereMorphedTo('owner', Consumer::class)
+            ->findOrFail($id);
 
         try {
             $subscription->cancel();

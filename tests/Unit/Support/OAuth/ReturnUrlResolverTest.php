@@ -102,6 +102,28 @@ class ReturnUrlResolverTest extends TestCase
         );
     }
 
+    public function test_rejects_sibling_on_multi_part_public_suffix(): void
+    {
+        // acme.co.uk en evil.co.uk delen enkel het public-suffix co.uk — geen
+        // basisdomein-match, dus terugval op app_url.
+        $consumer = new Consumer(['app_url' => 'https://acme.co.uk']);
+
+        $this->assertSame(
+            'https://acme.co.uk',
+            $this->resolver->resolve($consumer, 'https://evil.co.uk/steal'),
+        );
+    }
+
+    public function test_accepts_real_subdomain_on_multi_part_public_suffix(): void
+    {
+        $consumer = new Consumer(['app_url' => 'https://acme.co.uk']);
+
+        $this->assertSame(
+            'https://app.acme.co.uk/integraties/klaar',
+            $this->resolver->resolve($consumer, 'https://app.acme.co.uk/integraties/klaar'),
+        );
+    }
+
     public function test_uses_browser_origin_when_no_return_url_and_origin_matches_domain(): void
     {
         // Consumer stuurt niets mee; de browser-Origin (bob.emeq.nl) drijft de

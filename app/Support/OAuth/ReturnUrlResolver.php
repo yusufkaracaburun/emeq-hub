@@ -42,12 +42,30 @@ class ReturnUrlResolver
     }
 
     /**
+     * Gangbare meerdelige public suffixes. Bewust kort gehouden i.p.v. een
+     * volledige PSL-dependency; breid uit als een consumer op zo'n TLD landt.
+     *
+     * @var list<string>
+     */
+    private const MULTI_PART_SUFFIXES = [
+        'co.uk', 'org.uk', 'gov.uk', 'ac.uk', 'me.uk', 'ltd.uk', 'plc.uk', 'net.uk', 'sch.uk',
+        'com.au', 'net.au', 'org.au', 'edu.au', 'gov.au', 'id.au',
+        'co.nz', 'net.nz', 'org.nz', 'govt.nz',
+        'co.za', 'org.za', 'net.za',
+        'com.br', 'net.br', 'org.br',
+        'co.jp', 'or.jp', 'ne.jp', 'go.jp',
+        'co.in', 'net.in', 'org.in', 'gen.in', 'firm.in',
+        'com.mx', 'com.ar', 'com.tr', 'com.sg', 'com.hk', 'com.cn',
+        'co.kr', 'or.kr',
+    ];
+
+    /**
      * De host van $requested mag de app_url-host zijn, of een subdomein van
-     * hetzelfde basisdomein (laatste twee labels) — zo werken multi-tenant
-     * consumers (admin.emeq.nl + bob/tbi/… .emeq.nl) zonder per-tenant
-     * registratie. Geanchord op een leading dot, dus `emeq.nl.evil.com` matcht
-     * niet. Caveat: basisdomein = laatste 2 labels, geen public-suffix-lijst
-     * (co.uk); de consumers draaien op enkelvoudige .nl/.com-domeinen.
+     * hetzelfde registreerbare basisdomein — zo werken multi-tenant consumers
+     * (admin.emeq.nl + bob/tbi/… .emeq.nl) zonder per-tenant registratie.
+     * Geanchord op een leading dot, dus `emeq.nl.evil.com` matcht niet, en het
+     * basisdomein respecteert meerdelige suffixes (`evil.co.uk` matcht niet op
+     * een `acme.co.uk`-consumer).
      */
     private function hostAllowed(string $requested, string $appUrl): bool
     {
@@ -74,6 +92,13 @@ class ReturnUrlResolver
     {
         $labels = explode('.', $host);
 
-        return count($labels) <= 2 ? $host : implode('.', array_slice($labels, -2));
+        if (count($labels) <= 2) {
+            return $host;
+        }
+
+        $lastTwo = implode('.', array_slice($labels, -2));
+        $take = in_array($lastTwo, self::MULTI_PART_SUFFIXES, true) ? 3 : 2;
+
+        return count($labels) <= $take ? $host : implode('.', array_slice($labels, -$take));
     }
 }
