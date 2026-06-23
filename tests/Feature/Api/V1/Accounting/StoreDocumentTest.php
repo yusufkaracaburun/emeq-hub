@@ -15,6 +15,7 @@ use Emeq\ExactApi\Http\Request\Write\CreateAccount;
 use Emeq\ExactApi\Http\Request\Write\CreateDocument;
 use Emeq\ExactApi\Http\Request\Write\CreateDocumentAttachment;
 use Emeq\ExactApi\Http\Request\Write\CreatePurchaseEntry;
+use Emeq\ExactApi\Http\Request\Write\UpdateAccount;
 use Emeq\ExactApi\Http\Request\Write\CreateSalesEntry;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
@@ -737,6 +738,185 @@ class StoreDocumentTest extends TestCase
                 && $body['Journal'] === '20'
                 && $body['PurchaseEntryLines'][0]['VATCode'] === '4';
         });
+    }
+
+    public function test_promotes_existing_customer_relation_to_supplier_for_expense(): void
+    {
+        // Dezelfde firma is al klant (IsSales) maar nog geen leverancier. Een expense
+        // (crediteur) hergebruikt die relatie → de resolver promoveert 'm met
+        // IsSupplier=true vóór de PurchaseEntry. Zonder promotie weigert Exact met
+        // "Ongeldig: Leverancier (Type)".
+        MockClient::global([
+            GetRelations::class => MockResponse::make(['d' => ['results' => [[
+                'ID' => 'cust-guid',
+                'Code' => 'C001',
+                'Name' => 'Bouwbedrijf Noord',
+                'IsSales' => true,
+                'IsSupplier' => false,
+                'Status' => 'C',
+            ]]]], 200),
+            UpdateAccount::class => MockResponse::make([], 204),
+            CreatePurchaseEntry::class => MockResponse::make(['d' => ['ID' => 'exp-1']], 201),
+        ]);
+
+        [$consumer, $connection] = $this->consumerWithExactConnection([
+            'metadata' => ['accounting_mapping' => [
+                'vat_codes' => ['9' => '1'],
+                'gl_accounts' => ['kosten' => 'gl-kosten', '_default' => 'gl-kosten'],
+                'journals' => ['purchase' => '70'],
+            ]],
+        ]);
+
+        ConnectionAccountingRef::query()->create([
+            'connection_id' => $connection->getKey(),
+            'kind' => ConnectionAccountingRef::KIND_GL,
+            'code' => 'gl-kosten',
+            'native_id' => 'gl-kosten-guid',
+        ]);
+
+        $token = $consumer->createToken('t', [TokenAbilities::EXACT_WRITE])->plainTextToken;
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->withHeader('X-Account-Id', 'school1')
+            ->withHeader('Idempotency-Key', (string) Str::uuid())
+            ->postJson('/v1/accounting/documents', $this->salesInvoicePayload([
+                'type' => 'expense',
+                'party' => ['role' => 'creditor', 'name' => 'Bouwbedrijf Noord', 'vat_number' => 'NL001234560B01', 'external_id' => 's1'],
+                'lines' => [
+                    ['description' => 'Betaling leverancier', 'amount' => 400, 'tax_rate' => 9, 'category' => 'kosten'],
+                ],
+            ]))
+            ->assertStatus(201)
+            ->assertJsonPath('external_ref', 'exp-1');
+
+        // Promotie: PUT crm/Accounts(guid) met enkel IsSupplier=true (Status/IsSales onaangeroerd).
+        MockClient::global()->assertSent(function ($request): bool {
+            if (! $request instanceof UpdateAccount) {
+                return false;
+            }
+
+            $body = $request->body()->all();
+
+            return $request->resolveEndpoint() === "/crm/Accounts(guid'cust-guid')"
+                && ($body['IsSupplier'] ?? null) === true
+                && ! array_key_exists('IsSales', $body);
+        });
+
+        // Boeking op de (nu) leverancier-GUID.
+        MockClient::global()->assertSent(fn ($request): bool => $request instanceof CreatePurchaseEntry
+            && $request->body()->all()['Supplier'] === 'cust-guid');
+
+        $this->assertDatabaseHas('connection_accounting_refs', [
+            'connection_id' => $connection->getKey(),
+            'kind' => ConnectionAccountingRef::KIND_RELATION,
+            'code' => 's1',
+            'native_id' => 'cust-guid',
+        ]);
+    }
+
+    public function test_promotes_relation_from_mirror_when_supplier_flag_missing(): void
+    {
+        // Polluted-state: de relatie staat al in de mirror (geleerd bij een eerdere
+        // mislukte poging) maar is nog geen leverancier. Mirror-hit → ensureRole leest
+        // de rol-vlaggen op GUID en promoveert alsnog vóór de boeking.
+        MockClient::global([
+            GetRelations::class => MockResponse::make(['d' => ['results' => [[
+                'ID' => 'cust-guid',
+                'IsSales' => true,
+                'IsSupplier' => false,
+                'Status' => 'C',
+            ]]]], 200),
+            UpdateAccount::class => MockResponse::make([], 204),
+            CreatePurchaseEntry::class => MockResponse::make(['d' => ['ID' => 'exp-1']], 201),
+        ]);
+
+        [$consumer, $connection] = $this->consumerWithExactConnection([
+            'metadata' => ['accounting_mapping' => [
+                'vat_codes' => ['9' => '1'],
+                'gl_accounts' => ['kosten' => 'gl-kosten', '_default' => 'gl-kosten'],
+                'journals' => ['purchase' => '70'],
+            ]],
+        ]);
+
+        ConnectionAccountingRef::query()->create([
+            'connection_id' => $connection->getKey(),
+            'kind' => ConnectionAccountingRef::KIND_GL,
+            'code' => 'gl-kosten',
+            'native_id' => 'gl-kosten-guid',
+        ]);
+        // Al geleerd onder 's1' maar niet gepromote (de mislukte poging leerde 'm wél).
+        ConnectionAccountingRef::query()->create([
+            'connection_id' => $connection->getKey(),
+            'kind' => ConnectionAccountingRef::KIND_RELATION,
+            'code' => 's1',
+            'native_id' => 'cust-guid',
+            'label' => 'Bouwbedrijf Noord',
+        ]);
+
+        $token = $consumer->createToken('t', [TokenAbilities::EXACT_WRITE])->plainTextToken;
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->withHeader('X-Account-Id', 'school1')
+            ->withHeader('Idempotency-Key', (string) Str::uuid())
+            ->postJson('/v1/accounting/documents', $this->salesInvoicePayload([
+                'type' => 'expense',
+                'party' => ['role' => 'creditor', 'name' => 'Bouwbedrijf Noord', 'vat_number' => 'NL001234560B01', 'external_id' => 's1'],
+                'lines' => [
+                    ['description' => 'Betaling leverancier', 'amount' => 400, 'tax_rate' => 9, 'category' => 'kosten'],
+                ],
+            ]))
+            ->assertStatus(201);
+
+        MockClient::global()->assertSent(fn ($request): bool => $request instanceof UpdateAccount
+            && ($request->body()->all()['IsSupplier'] ?? null) === true);
+    }
+
+    public function test_does_not_promote_when_relation_already_supplier(): void
+    {
+        // Relatie is al leverancier → geen overbodige PUT.
+        MockClient::global([
+            GetRelations::class => MockResponse::make(['d' => ['results' => [[
+                'ID' => 'supp-guid',
+                'Code' => 'S001',
+                'Name' => 'Leverancier BV',
+                'IsSales' => false,
+                'IsSupplier' => true,
+                'Status' => null,
+            ]]]], 200),
+            UpdateAccount::class => MockResponse::make([], 204),
+            CreatePurchaseEntry::class => MockResponse::make(['d' => ['ID' => 'exp-1']], 201),
+        ]);
+
+        [$consumer, $connection] = $this->consumerWithExactConnection([
+            'metadata' => ['accounting_mapping' => [
+                'vat_codes' => ['9' => '1'],
+                'gl_accounts' => ['kosten' => 'gl-kosten', '_default' => 'gl-kosten'],
+                'journals' => ['purchase' => '70'],
+            ]],
+        ]);
+
+        ConnectionAccountingRef::query()->create([
+            'connection_id' => $connection->getKey(),
+            'kind' => ConnectionAccountingRef::KIND_GL,
+            'code' => 'gl-kosten',
+            'native_id' => 'gl-kosten-guid',
+        ]);
+
+        $token = $consumer->createToken('t', [TokenAbilities::EXACT_WRITE])->plainTextToken;
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->withHeader('X-Account-Id', 'school1')
+            ->withHeader('Idempotency-Key', (string) Str::uuid())
+            ->postJson('/v1/accounting/documents', $this->salesInvoicePayload([
+                'type' => 'expense',
+                'party' => ['role' => 'creditor', 'name' => 'Leverancier BV', 'vat_number' => 'NL001234560B01', 'external_id' => 's2'],
+                'lines' => [
+                    ['description' => 'Betaling leverancier', 'amount' => 400, 'tax_rate' => 9, 'category' => 'kosten'],
+                ],
+            ]))
+            ->assertStatus(201);
+
+        MockClient::global()->assertNotSent(UpdateAccount::class);
     }
 
     public function test_missing_idempotency_key_returns_400(): void

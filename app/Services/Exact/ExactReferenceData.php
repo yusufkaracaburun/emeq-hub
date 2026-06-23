@@ -323,9 +323,11 @@ final class ExactReferenceData
 
     /**
      * Zoekt één Exact-relatie op een stabiele sleutel (VATNumber, anders exacte Name) voor de
-     * lazy relatie-resolutie. Geeft `{id, code, name}` van de eerste match, of null.
+     * lazy relatie-resolutie. Geeft `{id, code, name, is_sales, is_supplier, status}` van de
+     * eerste match, of null. De rol-vlaggen laten de caller een relatie naar de juiste rol
+     * promoveren (debiteur ↔ crediteur) vóór de boeking.
      *
-     * @return array{id: string, code: string, name: string}|null
+     * @return array{id: string, code: string, name: string, is_sales: bool, is_supplier: bool, status: ?string}|null
      */
     public function findRelation(?string $vatNumber, ?string $name): ?array
     {
@@ -335,7 +337,7 @@ final class ExactReferenceData
             return null;
         }
 
-        $rows = $this->fetch(new GetRelations(['$select' => 'ID,Code,Name', '$filter' => $filter, '$top' => '2']));
+        $rows = $this->fetch(new GetRelations(['$select' => 'ID,Code,Name,IsSales,IsSupplier,Status', '$filter' => $filter, '$top' => '2']));
 
         if (count($rows) !== 1) {
             // Geen of meerdere matches → niet automatisch kiezen (ambigu).
@@ -348,6 +350,42 @@ final class ExactReferenceData
             'id' => $id,
             'code' => trim((string) ($rows[0]['Code'] ?? '')),
             'name' => (string) ($rows[0]['Name'] ?? ''),
+            'is_sales' => (bool) ($rows[0]['IsSales'] ?? false),
+            'is_supplier' => (bool) ($rows[0]['IsSupplier'] ?? false),
+            'status' => isset($rows[0]['Status']) ? (string) $rows[0]['Status'] : null,
+        ];
+    }
+
+    /**
+     * Leest de rol-vlaggen van één relatie op GUID — gebruikt om een uit de mirror
+     * herbruikte relatie naar de juiste rol te promoveren vóór de boeking. Fail-soft:
+     * niet leesbaar → null (de caller slaat de promotie dan over en laat de boeking
+     * zelf de fout opleveren).
+     *
+     * @return array{is_sales: bool, is_supplier: bool, status: ?string}|null
+     */
+    public function relationRoles(string $guid): ?array
+    {
+        $guid = trim($guid);
+
+        if ($guid === '') {
+            return null;
+        }
+
+        $rows = $this->fetch(new GetRelations([
+            '$select' => 'ID,IsSales,IsSupplier,Status',
+            '$filter' => "ID eq guid'".$this->escapeOData($guid)."'",
+            '$top' => '1',
+        ]));
+
+        if ($rows === []) {
+            return null;
+        }
+
+        return [
+            'is_sales' => (bool) ($rows[0]['IsSales'] ?? false),
+            'is_supplier' => (bool) ($rows[0]['IsSupplier'] ?? false),
+            'status' => isset($rows[0]['Status']) ? (string) $rows[0]['Status'] : null,
         ];
     }
 

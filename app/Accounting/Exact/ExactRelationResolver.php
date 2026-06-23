@@ -15,6 +15,7 @@ use Emeq\ExactApi\Contracts\ExactCredentialResolver;
 use Emeq\ExactApi\Contracts\TokenStore;
 use Emeq\ExactApi\Exact;
 use Emeq\ExactApi\Http\Request\Write\CreateAccount;
+use Emeq\ExactApi\Http\Request\Write\UpdateAccount;
 use Emeq\ExactApi\OData\Envelope;
 
 /**
@@ -40,6 +41,8 @@ final class ExactRelationResolver
                 ->first();
 
             if ($hit !== null) {
+                $this->ensureRole($hit->native_id, $party->role, $connection);
+
                 return $hit->native_id;
             }
         }
@@ -47,6 +50,7 @@ final class ExactRelationResolver
         $match = (new ExactReferenceData($connection))->findRelation($party->vatNumber, $party->name);
 
         if ($match !== null) {
+            $this->ensureRole($match['id'], $party->role, $connection, $match);
             $this->learn($connection, $externalId, $match['id'], $match['name']);
 
             return $match['id'];
@@ -115,6 +119,59 @@ final class ExactRelationResolver
         }
 
         return $guid;
+    }
+
+    /**
+     * Zorgt dat de relatie de rol-vlag draagt die de boeking nodig heeft: een crediteur-
+     * boeking eist `IsSupplier`, een debiteur-boeking `IsSales` (+ `Status='C'`). Exact-
+     * relaties mogen beide rollen tegelijk dragen → promoveren i.p.v. dupliceren (dezelfde
+     * firma kan klant én leverancier zijn). Staat de vlag al goed, dan niets. `$known` zijn
+     * de rol-vlaggen uit findRelation; ontbreken ze (mirror-hit), dan leest ensureRole ze
+     * zelf op GUID. Niet leesbaar → overslaan; de boeking levert de fout dan zelf op.
+     *
+     * @param array{is_sales: bool, is_supplier: bool, status: ?string}|null $known
+     */
+    private function ensureRole(string $guid, ?string $role, Connection $connection, ?array $known = null): void
+    {
+        $flags = $known ?? (new ExactReferenceData($connection))->relationRoles($guid);
+
+        if ($flags === null) {
+            return;
+        }
+
+        if ($role === 'creditor') {
+            if (($flags['is_supplier'] ?? false) !== true) {
+                $this->sendUpdate($connection, new UpdateAccount(id: $guid, isSupplier: true));
+            }
+
+            return;
+        }
+
+        if (($flags['is_sales'] ?? false) !== true) {
+            $this->sendUpdate($connection, new UpdateAccount(id: $guid, status: 'C', isSales: true));
+        }
+    }
+
+    private function sendUpdate(Connection $connection, UpdateAccount $request): void
+    {
+        $division = (string) $connection->administratie_id;
+
+        if ($division === '') {
+            return;
+        }
+
+        app()->instance(ExactCredentialResolver::class, new HubExactCredentialResolver($connection));
+        app()->instance(TokenStore::class, new ConnectionTokenStore($connection));
+        app()->forgetInstance(Exact::class);
+
+        /** @var Exact $exact */
+        $exact = app(Exact::class);
+
+        $response = $exact->connector($division)->send($request);
+
+        if ($response->failed()) {
+            $response->throw();
+        }
     }
 
     private function learn(Connection $connection, ?string $externalId, string $guid, string $name): void
