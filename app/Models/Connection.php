@@ -56,6 +56,11 @@ class Connection extends Model
         return $this->hasMany(InboundWebhookEvent::class);
     }
 
+    public function accountingRefs(): HasMany
+    {
+        return $this->hasMany(ConnectionAccountingRef::class);
+    }
+
     /**
      * Reuse-or-create de (account, provider)-connection voor een OAuth-init.
      * Eén rij per (account, provider): voorkomt gestapelde pending-rijen bij
