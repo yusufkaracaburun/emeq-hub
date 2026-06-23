@@ -2,7 +2,7 @@
 
 namespace Tests\Feature\Webhooks;
 
-use App\Jobs\ForwardMollieWebhookToConsumer;
+use App\Jobs\Webhooks\ForwardMollieWebhookToConsumerJob;
 use App\Models\Account;
 use App\Models\Connection;
 use App\Models\Consumer;
@@ -56,7 +56,7 @@ class MollieWebhookSignatureTest extends TestCase
         $this->assertSame(202, $event->status);
         $this->assertNull($event->event_id);
         $this->assertSame($connection->id, $event->connection_id);
-        Bus::assertDispatched(ForwardMollieWebhookToConsumer::class);
+        Bus::assertDispatched(ForwardMollieWebhookToConsumerJob::class);
     }
 
     public function test_tampered_signature_returns_400_and_no_dispatch(): void
@@ -76,7 +76,7 @@ class MollieWebhookSignatureTest extends TestCase
 
         $response->assertStatus(400);
         $response->assertJsonPath('error', 'invalid_signature');
-        Bus::assertNotDispatched(ForwardMollieWebhookToConsumer::class);
+        Bus::assertNotDispatched(ForwardMollieWebhookToConsumerJob::class);
 
         $event = InboundWebhookEvent::query()->latest('id')->first();
         $this->assertNotNull($event);
@@ -100,7 +100,7 @@ class MollieWebhookSignatureTest extends TestCase
 
         $response->assertStatus(400);
         $response->assertJsonPath('error', 'missing_signature');
-        Bus::assertNotDispatched(ForwardMollieWebhookToConsumer::class);
+        Bus::assertNotDispatched(ForwardMollieWebhookToConsumerJob::class);
 
         $event = InboundWebhookEvent::query()->latest('id')->first();
         $this->assertNotNull($event);
@@ -124,7 +124,7 @@ class MollieWebhookSignatureTest extends TestCase
 
         $response->assertStatus(410);
         $response->assertJsonPath('error', 'connection_gone');
-        Bus::assertNotDispatched(ForwardMollieWebhookToConsumer::class);
+        Bus::assertNotDispatched(ForwardMollieWebhookToConsumerJob::class);
 
         $event = InboundWebhookEvent::query()->latest('id')->first();
         $this->assertNotNull($event);
@@ -150,7 +150,7 @@ class MollieWebhookSignatureTest extends TestCase
         );
 
         $response->assertStatus(410);
-        Bus::assertNotDispatched(ForwardMollieWebhookToConsumer::class);
+        Bus::assertNotDispatched(ForwardMollieWebhookToConsumerJob::class);
     }
 
     public function test_payload_without_id_returns_400_missing_id(): void
@@ -172,7 +172,7 @@ class MollieWebhookSignatureTest extends TestCase
 
         $response->assertStatus(400);
         $response->assertJsonPath('error', 'missing_id');
-        Bus::assertNotDispatched(ForwardMollieWebhookToConsumer::class);
+        Bus::assertNotDispatched(ForwardMollieWebhookToConsumerJob::class);
 
         $event = InboundWebhookEvent::query()->latest('id')->first();
         $this->assertNotNull($event);
@@ -201,7 +201,7 @@ class MollieWebhookSignatureTest extends TestCase
 
         $response->assertStatus(500);
         $response->assertJsonPath('error', 'webhook_misconfigured');
-        Bus::assertNotDispatched(ForwardMollieWebhookToConsumer::class);
+        Bus::assertNotDispatched(ForwardMollieWebhookToConsumerJob::class);
 
         $event = InboundWebhookEvent::query()->latest('id')->first();
         $this->assertNotNull($event);
@@ -228,7 +228,7 @@ class MollieWebhookSignatureTest extends TestCase
 
         $response->assertStatus(500);
         $response->assertJsonPath('error', 'webhook_misconfigured');
-        Bus::assertNotDispatched(ForwardMollieWebhookToConsumer::class);
+        Bus::assertNotDispatched(ForwardMollieWebhookToConsumerJob::class);
 
         $event = InboundWebhookEvent::query()->latest('id')->first();
         $this->assertNotNull($event);

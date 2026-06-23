@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Tests\Feature\Api\V1\AccountSubscriptions;
 
 use App\Billing\Account\SubscriptionStatus;
-use App\Jobs\ForwardMollieWebhookToConsumer;
+use App\Jobs\Webhooks\ForwardMollieWebhookToConsumerJob;
 use App\Models\AccountSubscription;
 use Emeq\MollieApi\Webhooks\MollieWebhookSignature;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -195,7 +195,7 @@ class AccountSubscriptionWebhookFlowTest extends TestCase
 
         // State niet aangeraakt — geen Mollie-call, geen fan-out.
         $this->assertSame(SubscriptionStatus::Active, $sub->fresh()->status);
-        Bus::assertNotDispatched(ForwardMollieWebhookToConsumer::class);
+        Bus::assertNotDispatched(ForwardMollieWebhookToConsumerJob::class);
     }
 
     /**

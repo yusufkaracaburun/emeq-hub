@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Jobs;
+namespace App\Jobs\Webhooks;
 
 use App\Enums\Provider;
 use App\Models\Connection;
@@ -19,7 +19,7 @@ use Spatie\WebhookServer\WebhookCall;
  * geconfigureerd hebben (Plan 05a-01 schema). Geen URL → silent skip (geen retry).
  * Spatie's webhook-server doet retry/backoff per zijn config defaults.
  */
-class ForwardMollieWebhookToConsumer implements ShouldQueue
+class ForwardMollieWebhookToConsumerJob implements ShouldQueue
 {
     use Dispatchable;
     use InteractsWithQueue;

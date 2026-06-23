@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Webhooks;
 
 use App\Enums\Provider;
 use App\Http\Controllers\Controller;
-use App\Jobs\ForwardMollieWebhookToConsumer;
+use App\Jobs\Webhooks\ForwardMollieWebhookToConsumerJob;
 use App\Models\Connection;
 use App\Webhooks\InboundWebhookRecorder;
 use App\Webhooks\Mollie\WebhookHandlerResult;
@@ -25,7 +25,7 @@ use Mollie\Api\Exceptions\InvalidSignatureException;
  *  4. WebhookPayloadRouter::routeFor() — id-prefix dispatch
  *  5. Audit via de provider-agnostische InboundWebhookRecorder (metadata-only,
  *     `inbound_webhook_events`) — alleen als result.shouldAudit()
- *  6. ForwardMollieWebhookToConsumer-dispatch (alleen als result.shouldFanOut())
+ *  6. ForwardMollieWebhookToConsumerJob-dispatch (alleen als result.shouldFanOut())
  *  7. 202 Accepted (of 400 op anti-spoof-fail)
  *
  * Géén idempotency-dedup: Mollie vuurt meerdere legitieme webhooks voor dezelfde
@@ -99,7 +99,7 @@ class MollieWebhookController extends Controller
 
         // 7. Fan-out
         if ($result->shouldFanOut()) {
-            ForwardMollieWebhookToConsumer::dispatch($connection, $payload);
+            ForwardMollieWebhookToConsumerJob::dispatch($connection, $payload);
         }
 
         // 8. 202 Accepted
