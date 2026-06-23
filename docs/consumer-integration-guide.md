@@ -348,8 +348,7 @@ correctie of `null`) — pas een suggestie alleen toe na bevestiging.
 | `vat_treatment.domestic_rate_on_non_eu` | error | Niet-EU leverancier met binnenlands tarief |
 | `geography.country_mismatch` | warning | Land uit BTW-nr ≠ land uit IBAN |
 | `currency.foreign` | info | Andere valuta dan EUR |
-| `exact.vat_code.matched` | info | Tarief → Exact-VATCode (`suggestion` = code) |
-| `exact.vat_code.unmapped` | warning | Tarief nog niet gekoppeld aan een Exact-VATCode |
+| `exact.vat_code.unmapped` | warning | Tarief nog niet gekoppeld aan een Exact-VATCode (een gekoppeld tarief levert géén finding) |
 | `exact.relation.matched` | info | Relatie = bestaande Exact-relatie (`suggestion` = GUID) |
 | `exact.relation.new` | info | Relatie nog niet in Exact (wordt automatisch aangemaakt bij boeken als auto-create aan staat, anders `422`) |
 

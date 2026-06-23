@@ -88,7 +88,7 @@ class ValidateDocumentTest extends TestCase
             ->assertStatus(200)
             ->assertJsonPath('valid', true)
             ->assertJsonPath('summary.errors', 0)
-            ->assertJsonFragment(['code' => 'exact.vat_code.matched', 'suggestion' => '4'])
+            ->assertJsonMissing(['code' => 'exact.vat_code.matched']) // gekoppeld tarief = geen ruis-finding
             ->assertJsonFragment(['code' => 'exact.relation.matched', 'suggestion' => 'rel-guid-1']);
     }
 

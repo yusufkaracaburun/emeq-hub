@@ -84,27 +84,22 @@ final class ExactReportEnricher
 
             $seen[$key] = true;
 
-            $code = $this->resolver->vatCodeOrNull($rate, $treatment, $connection);
-            $label = $this->rateLabel($rate).($treatment === TaxTreatment::ReverseCharge ? '% verlegd' : '%');
-            $path = "lines.{$index}.tax_rate";
+            // Een gekoppeld tarief is goed nieuws zonder actie — de interne Exact-VATCode zegt
+            // de consument niets, dus geen finding. Alleen een ontbrekende koppeling is actionable.
+            if ($this->resolver->vatCodeOrNull($rate, $treatment, $connection) !== null) {
+                continue;
+            }
 
-            $findings[] = $code !== null
-                ? new Finding(
-                    code: 'exact.vat_code.matched',
-                    severity: Severity::Info,
-                    path: $path,
-                    message: "Tarief {$label} komt overeen met Exact-VATCode '{$code}'.",
-                    current: $line['tax_rate'] ?? null,
-                    suggestion: $code,
-                )
-                : new Finding(
-                    code: 'exact.vat_code.unmapped',
-                    severity: Severity::Warning,
-                    path: $path,
-                    message: "Tarief {$label} is nog niet gekoppeld aan een Exact-VATCode op deze koppeling.",
-                    current: $line['tax_rate'] ?? null,
-                    suggestion: null,
-                );
+            $label = $this->rateLabel($rate).($treatment === TaxTreatment::ReverseCharge ? '% verlegd' : '%');
+
+            $findings[] = new Finding(
+                code: 'exact.vat_code.unmapped',
+                severity: Severity::Warning,
+                path: "lines.{$index}.tax_rate",
+                message: "Tarief {$label} is nog niet gekoppeld aan een Exact-VATCode op deze koppeling.",
+                current: $line['tax_rate'] ?? null,
+                suggestion: null,
+            );
         }
 
         return $findings;
