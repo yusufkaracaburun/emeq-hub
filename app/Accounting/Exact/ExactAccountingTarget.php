@@ -75,6 +75,7 @@ final class ExactAccountingTarget implements AccountingTarget
         return new AccountingResult(
             status: $response->status(),
             externalRef: $entryId,
+            externalNumber: Envelope::firstEntryNumber($response->json()),
             raw: (array) $response->json(),
             attachments: $this->uploadAttachments($document, $connection, $connector, $entryId, Envelope::documentRef($response->json())),
         );

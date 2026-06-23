@@ -366,8 +366,11 @@ Idempotency-Key: factuur-2026-0042
 
 - **`Idempotency-Key` is verplicht** — bij retry herhaalt de Hub de eerste respons
   i.p.v. dubbel te boeken. Gebruik een stabiele sleutel per document (bv. je `external_id`).
-- Synchroon (default): `201` `{ "provider": "exact", "status": "posted", "external_id": "…", "external_ref": "…" }`.
-  `external_ref` = de document-ID bij het pakket; bewaar 'm.
+- Synchroon (default): `201` `{ "provider": "exact", "status": "posted", "external_id": "…", "external_ref": "…", "external_number": 60001 }`.
+  `external_ref` = de interne document-ID (GUID) bij het pakket; bewaar 'm. `external_number`
+  = het mensleesbare boekstuknummer (bij Exact `EntryNumber`, voor verkoopfacturen het
+  factuurnummer) — toon dát aan je gebruiker i.p.v. de GUID. Optioneel: alleen aanwezig
+  als het pakket er één teruggeeft.
 - Asynchroon: stuur `Prefer: respond-async` → direct `202` `{ "status": "pending", "external_id": "…" }`.
   Het eindresultaat komt per webhook (`accounting.document.synced`, HMAC-gesigneerd met je
   `webhook_callback_secret`) op je `webhook_callback_url`. Async zonder geregistreerde

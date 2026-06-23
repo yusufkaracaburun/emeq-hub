@@ -152,6 +152,45 @@ class StoreDocumentTest extends TestCase
         ]);
     }
 
+    public function test_response_echoes_exact_entry_number_when_present(): void
+    {
+        // Exact geeft het mensleesbare boekstuknummer (EntryNumber) terug naast de GUID;
+        // de Hub echoot dat als external_number zodat de consumer-app niet enkel een UUID toont.
+        MockClient::global([
+            CreateSalesEntry::class => MockResponse::make(['d' => ['ID' => 'inv-guid-1', 'EntryNumber' => 60001]], 201),
+        ]);
+        $this->bindFakeReferences();
+
+        [$consumer] = $this->consumerWithExactConnection();
+        $token = $consumer->createToken('t', [TokenAbilities::EXACT_WRITE])->plainTextToken;
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->withHeader('X-Account-Id', 'school1')
+            ->withHeader('Idempotency-Key', (string) Str::uuid())
+            ->postJson('/v1/accounting/documents', $this->salesInvoicePayload())
+            ->assertStatus(201)
+            ->assertJsonPath('external_ref', 'inv-guid-1')
+            ->assertJsonPath('external_number', 60001);
+    }
+
+    public function test_response_omits_external_number_when_exact_returns_none(): void
+    {
+        MockClient::global([
+            CreateSalesEntry::class => MockResponse::make(['d' => ['ID' => 'inv-guid-1']], 201),
+        ]);
+        $this->bindFakeReferences();
+
+        [$consumer] = $this->consumerWithExactConnection();
+        $token = $consumer->createToken('t', [TokenAbilities::EXACT_WRITE])->plainTextToken;
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->withHeader('X-Account-Id', 'school1')
+            ->withHeader('Idempotency-Key', (string) Str::uuid())
+            ->postJson('/v1/accounting/documents', $this->salesInvoicePayload())
+            ->assertStatus(201)
+            ->assertJsonMissingPath('external_number');
+    }
+
     public function test_exact_functional_rejection_returns_422_with_clear_message(): void
     {
         // Exact weigert functioneel (bv. ongeldig btw-controlecijfer) met een 500 + OData-melding.

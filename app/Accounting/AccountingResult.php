@@ -6,8 +6,9 @@ namespace App\Accounting;
 
 /**
  * Uitkomst van een AccountingTarget::push — de partner-status, de externe
- * referentie (bv. Exact-GUID), de ruwe respons voor audit/debug, en per-bijlage
- * het upload-resultaat (best-effort, los van de leidende boeking).
+ * referentie (bv. Exact-GUID), een optioneel mensleesbaar boekstuknummer, de ruwe
+ * respons voor audit/debug, en per-bijlage het upload-resultaat (best-effort, los
+ * van de leidende boeking).
  */
 final readonly class AccountingResult
 {
@@ -18,6 +19,7 @@ final readonly class AccountingResult
     public function __construct(
         public int $status,
         public ?string $externalRef,
+        public ?int $externalNumber = null,
         public array $raw = [],
         public array $attachments = [],
     ) {}

@@ -41,6 +41,10 @@ final readonly class AccountingSyncRunner
                 'external_ref' => $result->externalRef,
             ];
 
+            if ($result->externalNumber !== null) {
+                $responseBody['external_number'] = $result->externalNumber;
+            }
+
             if ($result->attachments !== []) {
                 $responseBody['attachments'] = $result->attachments;
             }
