@@ -1,19 +1,24 @@
 APP := http://hub.emeq.test:8092
+TUNNEL := emeq-hub-dev
+TUNNEL_LOG := storage/logs/cloudflared.log
 
 .DEFAULT_GOAL := help
-.PHONY: help up down restart urls fresh seed-books logs shell test ps tunnel
+.PHONY: help up down restart urls fresh seed-books logs logs-clean shell test ps tunnel tunnel-up tunnel-stop
 
 help: ## Toon deze hulp
 	@grep -E '^[a-z-]+:.*##' $(MAKEFILE_LIST) | sort | awk 'BEGIN{FS=":.*## "}{printf "  \033[36m%-10s\033[0m %s\n", $$1, $$2}'
 
-up: ## Start de hele stack (app + worker + vite + db + redis) + toon URLs
+up: ## Start de hele stack (app + worker + vite + db + redis) + verse logs/tunnel + toon URLs
 	docker compose up -d
+	@$(MAKE) --no-print-directory logs-clean
+	@$(MAKE) --no-print-directory tunnel-up
 	@$(MAKE) --no-print-directory urls
 
-down: ## Stop de stack (volumes blijven; data behouden)
+down: ## Stop de stack + tunnel (volumes blijven; data behouden)
+	@$(MAKE) --no-print-directory tunnel-stop
 	docker compose down
 
-restart: down up ## Herstart de stack
+restart: down up ## Herstart de stack (+ verse tunnel)
 
 fresh: ## Verse, geseede DB
 	docker compose exec -T app php artisan migrate:fresh --seed
@@ -39,6 +44,9 @@ seed-payments: ## Vul Betalingen
 logs: ## Tail app + worker logs
 	docker compose logs -f app worker
 
+logs-clean: ## Truncate alle lokale logs in storage/logs (gitignored)
+	@for f in storage/logs/*.log; do [ -f "$$f" ] && : > "$$f"; done; echo "  🧹 storage/logs/*.log getruncate"
+
 shell: ## Open een shell in de app-container
 	docker compose exec app sh
 
@@ -48,8 +56,19 @@ test: ## Draai de testsuite in de container
 ps: ## Toon container-status
 	docker compose ps
 
-tunnel: ## Start de stabiele Cloudflare named-tunnel (hub-dev.emeq.nl -> :8092)
-	cloudflared tunnel run emeq-hub-dev
+tunnel-up: ## (Her)start de Cloudflare-tunnel op de ACHTERgrond (kill eerst alle bestaande)
+	@pkill -f "cloudflared tunnel run $(TUNNEL)" 2>/dev/null || true
+	@sleep 1
+	@nohup cloudflared tunnel run $(TUNNEL) > $(TUNNEL_LOG) 2>&1 & \
+		echo "  ☁️  tunnel '$(TUNNEL)' (her)start op de achtergrond -> $(TUNNEL_LOG)"
+
+tunnel-stop: ## Stop alle Cloudflare-tunnels van deze stack
+	@pkill -f "cloudflared tunnel run $(TUNNEL)" 2>/dev/null || true
+
+tunnel: ## Start de tunnel op de VOORgrond (live logs; kill eerst alle bestaande)
+	@pkill -f "cloudflared tunnel run $(TUNNEL)" 2>/dev/null || true
+	@sleep 1
+	cloudflared tunnel run $(TUNNEL)
 
 urls: ## Toon de UI-URLs
 	@printf '\n'
