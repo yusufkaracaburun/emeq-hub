@@ -225,6 +225,49 @@ class StoreDocumentTest extends TestCase
         });
     }
 
+    public function test_defaults_due_date_to_one_month_after_issue_date(): void
+    {
+        MockClient::global([
+            CreateSalesEntry::class => MockResponse::make(['d' => ['ID' => 'inv-guid-1']], 201),
+        ]);
+        $this->bindFakeReferences();
+
+        [$consumer] = $this->consumerWithExactConnection();
+        $token = $consumer->createToken('t', [TokenAbilities::EXACT_WRITE])->plainTextToken;
+
+        // salesInvoicePayload heeft issue_date 2026-06-16 en géén due_date.
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->withHeader('X-Account-Id', 'school1')
+            ->withHeader('Idempotency-Key', (string) Str::uuid())
+            ->postJson('/v1/accounting/documents', $this->salesInvoicePayload())
+            ->assertStatus(201);
+
+        MockClient::global()->assertSent(function (CreateSalesEntry $request): bool {
+            return $request->body()->all()['DueDate'] === '2026-07-16';
+        });
+    }
+
+    public function test_passes_explicit_due_date_to_exact(): void
+    {
+        MockClient::global([
+            CreateSalesEntry::class => MockResponse::make(['d' => ['ID' => 'inv-guid-1']], 201),
+        ]);
+        $this->bindFakeReferences();
+
+        [$consumer] = $this->consumerWithExactConnection();
+        $token = $consumer->createToken('t', [TokenAbilities::EXACT_WRITE])->plainTextToken;
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->withHeader('X-Account-Id', 'school1')
+            ->withHeader('Idempotency-Key', (string) Str::uuid())
+            ->postJson('/v1/accounting/documents', $this->salesInvoicePayload(['due_date' => '2026-08-01']))
+            ->assertStatus(201);
+
+        MockClient::global()->assertSent(function (CreateSalesEntry $request): bool {
+            return $request->body()->all()['DueDate'] === '2026-08-01';
+        });
+    }
+
     public function test_reverse_charge_line_maps_to_verlegd_vat_code(): void
     {
         MockClient::global([

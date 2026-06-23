@@ -37,6 +37,8 @@ final readonly class FinancialDocument
      */
     public static function fromArray(array $data): self
     {
+        $issueDate = CarbonImmutable::parse((string) $data['issue_date']);
+
         return new self(
             type: DocumentType::from((string) $data['type']),
             externalId: (string) $data['external_id'],
@@ -45,8 +47,10 @@ final readonly class FinancialDocument
                 fn (array $line): FinancialDocumentLine => FinancialDocumentLine::fromArray($line),
                 $data['lines'],
             )),
-            issueDate: CarbonImmutable::parse((string) $data['issue_date']),
-            dueDate: isset($data['due_date']) ? CarbonImmutable::parse((string) $data['due_date']) : null,
+            issueDate: $issueDate,
+            // Geen vervaldatum aangeleverd → standaard issue_date + 1 maand (Hub-conventie),
+            // zodat de openstaande post in het boekhoudpakket altijd een vervaldatum krijgt.
+            dueDate: isset($data['due_date']) ? CarbonImmutable::parse((string) $data['due_date']) : $issueDate->addMonth(),
             number: isset($data['number']) ? (string) $data['number'] : null,
             reference: isset($data['reference']) ? (string) $data['reference'] : null,
             currency: isset($data['currency']) ? (string) $data['currency'] : 'EUR',

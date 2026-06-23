@@ -206,6 +206,7 @@ final class ExactAccountingTarget implements AccountingTarget
     private function buildRequest(FinancialDocument $document, Connection $connection): SdkRequest
     {
         $entryDate = $document->issueDate->format('Y-m-d');
+        $dueDate = $document->dueDate?->format('Y-m-d');
         $description = $document->number ?? $document->externalId;
         $yourRef = $this->provenance($document, $connection);
 
@@ -221,6 +222,7 @@ final class ExactAccountingTarget implements AccountingTarget
                 description: $description,
                 lines: $this->lines($document, $connection),
                 yourRef: $yourRef,
+                dueDate: $dueDate,
             ),
             DocumentType::PurchaseInvoice, DocumentType::Expense => new CreatePurchaseEntry(
                 supplier: $this->references->relationGuid($document->party, $connection),
@@ -229,6 +231,7 @@ final class ExactAccountingTarget implements AccountingTarget
                 description: $description,
                 lines: $this->lines($document, $connection),
                 yourRef: $yourRef,
+                dueDate: $dueDate,
             ),
         };
     }

@@ -1427,16 +1427,16 @@
         },
         {
             "name": "emeq/exact-api",
-            "version": "v0.2.9",
+            "version": "v0.2.10",
             "source": {
                 "type": "git",
                 "url": "https://github.com/yusufkaracaburun/emeq-exact-api.git",
-                "reference": "fb7f9e360751899254ecdc86cb3dc31463adfb34"
+                "reference": "79987e801189c7652c36554796af6d65df12fbf3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/yusufkaracaburun/emeq-exact-api/zipball/fb7f9e360751899254ecdc86cb3dc31463adfb34",
-                "reference": "fb7f9e360751899254ecdc86cb3dc31463adfb34",
+                "url": "https://api.github.com/repos/yusufkaracaburun/emeq-exact-api/zipball/79987e801189c7652c36554796af6d65df12fbf3",
+                "reference": "79987e801189c7652c36554796af6d65df12fbf3",
                 "shasum": ""
             },
             "require": {
@@ -1520,10 +1520,10 @@
                 "saloon"
             ],
             "support": {
-                "source": "https://github.com/yusufkaracaburun/emeq-exact-api/tree/v0.2.9",
+                "source": "https://github.com/yusufkaracaburun/emeq-exact-api/tree/v0.2.10",
                 "issues": "https://github.com/yusufkaracaburun/emeq-exact-api/issues"
             },
-            "time": "2026-06-22T20:33:03+00:00"
+            "time": "2026-06-23T06:31:22+00:00"
         },
         {
             "name": "emeq/mollie-api",
