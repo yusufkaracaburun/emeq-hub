@@ -20,4 +20,14 @@ enum TaxTreatment: string
     {
         return array_map(fn (self $t): string => $t->value, self::cases());
     }
+
+    /**
+     * Composite-sleutel voor de `accounting_mapping.vat_codes`-map: standard leest de platte
+     * tarief-sleutel (backward-compat), verlegd `behandeling:tarief`. Eén bron voor het
+     * formaat dat de mapping-deriver schrijft en de reference-resolver leest.
+     */
+    public function vatCodeKey(string $rate): string
+    {
+        return $this === self::Standard ? $rate : $this->value.':'.$rate;
+    }
 }

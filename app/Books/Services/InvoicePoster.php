@@ -8,6 +8,7 @@ use App\Books\Models\Account;
 use App\Books\Models\Invoice;
 use App\Books\Models\JournalEntry;
 use App\Books\Models\Transaction;
+use App\Books\Support\VatLedgerAccounts;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 
@@ -22,13 +23,6 @@ use RuntimeException;
  */
 class InvoicePoster
 {
-    /** @var array<int, array{0: string, 1: ?string}> BTW-tarief => [omzetrekening, af-te-dragen-BTW-rekening] */
-    private const REVENUE_BY_RATE = [
-        21 => ['8000', '1620'],
-        9 => ['8010', '1621'],
-        0 => ['8020', null],
-    ];
-
     private const RECEIVABLE = '1300';
 
     public function post(Invoice $invoice): Transaction
@@ -56,7 +50,7 @@ class InvoicePoster
             $this->entry($transaction, self::RECEIVABLE, JournalEntryType::Debit, $invoice->total, $description);
 
             foreach ($lines->groupBy('tax_rate') as $rate => $group) {
-                [$revenueCode, $vatCode] = self::REVENUE_BY_RATE[(int) $rate]
+                [$revenueCode, $vatCode] = VatLedgerAccounts::forRate((int) $rate)
                     ?? throw new RuntimeException("Geen omzetrekening voor BTW-tarief {$rate}%.");
 
                 $revenue = (int) $group->sum('subtotal');

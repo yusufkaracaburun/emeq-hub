@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Accounting\Exact;
 
+use App\Accounting\Enums\TaxTreatment;
 use App\Models\Connection;
 use App\Models\ConnectionAccountingRef;
 use Illuminate\Support\Collection;
@@ -75,7 +76,7 @@ final class ExactMappingDeriver
                 && str_contains(mb_strtolower((string) $r->label), 'verlegd'));
 
             if ($verlegd !== null) {
-                $out['reverse_charge:'.$rate] = $verlegd->code;
+                $out[TaxTreatment::ReverseCharge->vatCodeKey($rate)] = $verlegd->code;
             }
         }
 

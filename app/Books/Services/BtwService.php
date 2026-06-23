@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Books\Services;
 
 use App\Books\Models\Account;
+use App\Books\Support\VatLedgerAccounts;
 use Illuminate\Support\Carbon;
 
 /*
@@ -20,13 +21,6 @@ use Illuminate\Support\Carbon;
  */
 class BtwService
 {
-    /** @var array<string, array{grondslag: string, btw: ?string}> rubriek => [omzetrekening, af-te-dragen-BTW-rekening] */
-    private const RUBRIEKEN = [
-        '1a' => ['grondslag' => '8000', 'btw' => '1620'], // hoog 21%
-        '1b' => ['grondslag' => '8010', 'btw' => '1621'], // laag 9%
-        '1e' => ['grondslag' => '8020', 'btw' => null],   // 0% / overig
-    ];
-
     private const VOORBELASTING = '1530'; // te vorderen BTW (5b)
 
     public function __construct(private readonly AccountService $accounts) {}
@@ -47,7 +41,7 @@ class BtwService
         $rubrieken = [];
         $verschuldigd = 0;
 
-        foreach (self::RUBRIEKEN as $code => $accounts) {
+        foreach (VatLedgerAccounts::rubrieken() as $code => $accounts) {
             $btw = $accounts['btw'] !== null ? $this->movement($accounts['btw'], $from, $to) : 0;
 
             $rubrieken[$code] = [

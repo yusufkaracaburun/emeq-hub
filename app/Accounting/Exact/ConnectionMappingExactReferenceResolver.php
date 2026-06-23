@@ -67,9 +67,7 @@ final class ConnectionMappingExactReferenceResolver implements ExactReferenceRes
      */
     private function vatKey(float $taxRate, TaxTreatment $treatment): string
     {
-        $rate = $this->rateKey($taxRate);
-
-        return $treatment === TaxTreatment::Standard ? $rate : $treatment->value.':'.$rate;
+        return $treatment->vatCodeKey($this->rateKey($taxRate));
     }
 
     public function glAccountGuid(?string $category, Connection $connection): ?string
