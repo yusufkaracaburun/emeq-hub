@@ -2,7 +2,7 @@
 
 namespace Tests\Unit\Support\Mollie;
 
-use App\Support\Mollie\MollieUpstreamErrorMapper;
+use App\Support\Mollie\UpstreamErrorMapper;
 use Emeq\MollieApi\Exceptions\AuthenticationException;
 use Emeq\MollieApi\Exceptions\MollieException;
 use Emeq\MollieApi\Exceptions\NotFoundException;
@@ -11,11 +11,11 @@ use Emeq\MollieApi\Exceptions\ServerException;
 use Emeq\MollieApi\Exceptions\ValidationException;
 use PHPUnit\Framework\TestCase;
 
-class MollieUpstreamErrorMapperTest extends TestCase
+class UpstreamErrorMapperTest extends TestCase
 {
     public function test_validation_exception_maps_to_422_validation_failed(): void
     {
-        $result = MollieUpstreamErrorMapper::mapException(
+        $result = UpstreamErrorMapper::mapException(
             new ValidationException('amount.value invalid', 'amount.value'),
         );
 
@@ -27,7 +27,7 @@ class MollieUpstreamErrorMapperTest extends TestCase
 
     public function test_authentication_exception_maps_to_502_with_short_code_mollie_auth(): void
     {
-        $result = MollieUpstreamErrorMapper::mapException(new AuthenticationException('401 from Mollie'));
+        $result = UpstreamErrorMapper::mapException(new AuthenticationException('401 from Mollie'));
 
         $this->assertSame(502, $result['status']);
         $this->assertSame('mollie_auth_failed', $result['body']['error']);
@@ -36,7 +36,7 @@ class MollieUpstreamErrorMapperTest extends TestCase
 
     public function test_not_found_exception_maps_to_404_not_found(): void
     {
-        $result = MollieUpstreamErrorMapper::mapException(new NotFoundException('payment not found'));
+        $result = UpstreamErrorMapper::mapException(new NotFoundException('payment not found'));
 
         $this->assertSame(404, $result['status']);
         $this->assertSame('not_found', $result['body']['error']);
@@ -45,7 +45,7 @@ class MollieUpstreamErrorMapperTest extends TestCase
 
     public function test_rate_limit_exception_maps_to_429_rate_limited(): void
     {
-        $result = MollieUpstreamErrorMapper::mapException(new RateLimitException('rate limited'));
+        $result = UpstreamErrorMapper::mapException(new RateLimitException('rate limited'));
 
         $this->assertSame(429, $result['status']);
         $this->assertSame('rate_limited', $result['body']['error']);
@@ -54,7 +54,7 @@ class MollieUpstreamErrorMapperTest extends TestCase
 
     public function test_server_exception_maps_to_502_with_short_code_mollie_5xx(): void
     {
-        $result = MollieUpstreamErrorMapper::mapException(new ServerException('500 from Mollie'));
+        $result = UpstreamErrorMapper::mapException(new ServerException('500 from Mollie'));
 
         $this->assertSame(502, $result['status']);
         $this->assertSame('mollie_unavailable', $result['body']['error']);
@@ -63,7 +63,7 @@ class MollieUpstreamErrorMapperTest extends TestCase
 
     public function test_base_mollie_exception_maps_to_502_mollie_error_unknown(): void
     {
-        $result = MollieUpstreamErrorMapper::mapException(new MollieException('unknown'));
+        $result = UpstreamErrorMapper::mapException(new MollieException('unknown'));
 
         $this->assertSame(502, $result['status']);
         $this->assertSame('mollie_error', $result['body']['error']);
@@ -72,7 +72,7 @@ class MollieUpstreamErrorMapperTest extends TestCase
 
     public function test_unexpected_throwable_maps_to_502_mollie_error_unknown(): void
     {
-        $result = MollieUpstreamErrorMapper::mapException(new \RuntimeException('whoops'));
+        $result = UpstreamErrorMapper::mapException(new \RuntimeException('whoops'));
 
         $this->assertSame(502, $result['status']);
         $this->assertSame('mollie_error', $result['body']['error']);

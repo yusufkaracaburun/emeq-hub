@@ -3,15 +3,15 @@
 namespace Tests\Unit\Mollie;
 
 use App\Exceptions\Mollie\MissingPartnerTokenException;
-use App\Support\Mollie\MollieUpstreamErrorMapper;
+use App\Support\Mollie\UpstreamErrorMapper;
 use Emeq\MollieApi\Exceptions\NotFoundException;
 use PHPUnit\Framework\TestCase;
 
-class MollieUpstreamErrorMapperPartnerTokenTest extends TestCase
+class UpstreamErrorMapperPartnerTokenTest extends TestCase
 {
     public function test_missing_partner_token_maps_to_503_partner_token_missing(): void
     {
-        $result = MollieUpstreamErrorMapper::mapException(new MissingPartnerTokenException);
+        $result = UpstreamErrorMapper::mapException(new MissingPartnerTokenException);
 
         $this->assertSame(503, $result['status']);
         $this->assertSame('partner_token_missing', $result['body']['error']);
@@ -26,7 +26,7 @@ class MollieUpstreamErrorMapperPartnerTokenTest extends TestCase
 
     public function test_existing_not_found_branch_remains_unchanged(): void
     {
-        $result = MollieUpstreamErrorMapper::mapException(new NotFoundException('payment not found'));
+        $result = UpstreamErrorMapper::mapException(new NotFoundException('payment not found'));
 
         $this->assertSame(404, $result['status']);
         $this->assertSame('not_found', $result['body']['error']);

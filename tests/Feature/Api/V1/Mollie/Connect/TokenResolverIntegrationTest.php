@@ -27,7 +27,7 @@ use Tests\TestCase;
  *    AbstractMollieConnectPassThroughController::client()->setAccessToken(...)
  *    op StubMollieConnectClient — captured in $lastUsedAccessToken.
  *  - Missing partner-token → 503 partner_token_missing (via
- *    MollieUpstreamErrorMapper-branch uit Plan 13-01).
+ *    UpstreamErrorMapper-branch uit Plan 13-01).
  *
  * De Phase-5a `Mollie::client()`-call gaat normaal door HubMollieCredentialResolver
  * dat een `new MollieApiClient()` opbouwt + `setAccessToken()` aanroept. In de

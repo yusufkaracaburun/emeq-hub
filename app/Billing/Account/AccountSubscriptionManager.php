@@ -41,7 +41,7 @@ class AccountSubscriptionManager
      *                                       (D-14, T-07-03-01).
      *
      * @throws MollieApiException Plan 07-04 controllers mappen via
-     *                            MollieUpstreamErrorMapper; Hub-row blijft in
+     *                            UpstreamErrorMapper; Hub-row blijft in
      *                            pending als evidence.
      */
     public function create(

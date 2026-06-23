@@ -20,7 +20,7 @@ use Tests\TestCase;
  * Bewijst D-13 Mollie-error-mapping via een echte HTTP-call. Mocked stub
  * gooit per case een Emeq\MollieApi\Exceptions\* die de
  * AbstractMolliePassThroughController-catch (Plan 05a-01) doorgeeft aan
- * MollieUpstreamErrorMapper::mapException().
+ * UpstreamErrorMapper::mapException().
  */
 class MolliePassThroughErrorMappingTest extends TestCase
 {

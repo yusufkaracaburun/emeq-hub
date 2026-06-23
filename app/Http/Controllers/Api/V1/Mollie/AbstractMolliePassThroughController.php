@@ -8,7 +8,7 @@ use App\Models\Account;
 use App\Models\Connection;
 use App\Models\PassThroughCall;
 use App\Sanctum\TokenAbilities;
-use App\Support\Mollie\MollieUpstreamErrorMapper;
+use App\Support\Mollie\UpstreamErrorMapper;
 use Emeq\MollieApi\Facades\Mollie;
 use Illuminate\Http\Request;
 use Mollie\Api\MollieApiClient;
@@ -87,7 +87,7 @@ abstract class AbstractMolliePassThroughController extends Controller
                 $responseBody = json_encode($result, JSON_THROW_ON_ERROR);
             }
         } catch (Throwable $e) {
-            $mapped = MollieUpstreamErrorMapper::mapException($e);
+            $mapped = UpstreamErrorMapper::mapException($e);
             $status = $mapped['status'];
             $responseBody = json_encode($mapped['body'], JSON_THROW_ON_ERROR);
             $extraHeaders = $mapped['headers'];

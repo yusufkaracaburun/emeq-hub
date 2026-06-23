@@ -10,7 +10,7 @@ use App\Http\Controllers\Controller;
 use App\Models\PassThroughCall;
 use App\Mollie\MollieAccessTokenResolver;
 use App\Sanctum\TokenAbilities;
-use App\Support\Mollie\MollieUpstreamErrorMapper;
+use App\Support\Mollie\UpstreamErrorMapper;
 use Emeq\MollieApi\Exceptions\MollieExceptionMapper;
 use Illuminate\Http\Request;
 use Mollie\Api\Exceptions\ApiException as MollieApiException;
@@ -27,7 +27,7 @@ use Throwable;
  * via MollieAccessTokenResolver, wikkelt élke SDK-call via
  * dispatchMollieCall() zodat raw Mollie\Api\Exceptions\ApiException eerst
  * door MollieExceptionMapper::map() naar de Hub-exception-tree wordt
- * genormaliseerd voordat MollieUpstreamErrorMapper het pad kiest, en schrijft
+ * genormaliseerd voordat UpstreamErrorMapper het pad kiest, en schrijft
  * een audit-rij met token_type='partner', connection_id=NULL, account_id=NULL.
  *
  * Beslissingen 13-CONTEXT.md §<decisions>: D-03 (gescheiden hiërarchie),
@@ -84,7 +84,7 @@ abstract class AbstractMollieConnectPassThroughController extends Controller
      * Centrale exception-wrapper rond élke Mollie-SDK-call. Vangt raw
      * \Mollie\Api\Exceptions\ApiException, mapt 'm via MollieExceptionMapper::map()
      * naar de Hub-exception-tree (AuthenticationException, ValidationException,
-     * etc.) en gooit door. Reden: MollieUpstreamErrorMapper matcht uitsluitend
+     * etc.) en gooit door. Reden: UpstreamErrorMapper matcht uitsluitend
      * op de Hub-exception-typen — raw ApiException valt anders door naar de
      * catch-all mollie_unknown (502) i.p.v. de juiste 401→502 mollie_auth_failed-
      * branch (MOLL-05 SC-1).
@@ -148,7 +148,7 @@ abstract class AbstractMollieConnectPassThroughController extends Controller
             $partnerFingerprint = substr(hash('sha256', $this->resolvedPartnerToken), 0, 12);
         } catch (MissingPartnerTokenException) {
             // Partner-token niet geconfigureerd — SDK-call hieronder krijgt een
-            // 503 via MollieUpstreamErrorMapper, audit-rij krijgt NULL fingerprint.
+            // 503 via UpstreamErrorMapper, audit-rij krijgt NULL fingerprint.
             $tokenMissing = true;
         }
 
@@ -171,7 +171,7 @@ abstract class AbstractMollieConnectPassThroughController extends Controller
                 $responseBody = json_encode($result, JSON_THROW_ON_ERROR);
             }
         } catch (Throwable $e) {
-            $mapped = MollieUpstreamErrorMapper::mapException($e);
+            $mapped = UpstreamErrorMapper::mapException($e);
             $status = $mapped['status'];
             $responseBody = json_encode($mapped['body'], JSON_THROW_ON_ERROR);
             $extraHeaders = $mapped['headers'];

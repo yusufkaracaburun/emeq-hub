@@ -21,7 +21,7 @@ use Throwable;
  * 401/403 worden bewust naar 502 cloaked om Mollie-auth-state niet te
  * onthullen aan de Consumer (threat T-05a-06).
  */
-final class MollieUpstreamErrorMapper
+final class UpstreamErrorMapper
 {
     /**
      * @return array{status: int, body: array<string, mixed>, headers: array<string, string>, short_code: ?string}

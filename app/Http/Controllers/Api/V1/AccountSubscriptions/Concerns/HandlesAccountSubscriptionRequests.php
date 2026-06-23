@@ -8,7 +8,7 @@ use App\Billing\Account\Exceptions\InvalidStateTransitionException;
 use App\Enums\Provider;
 use App\Models\AccountSubscription;
 use App\Models\PassThroughCall;
-use App\Support\Mollie\MollieUpstreamErrorMapper;
+use App\Support\Mollie\UpstreamErrorMapper;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -54,13 +54,13 @@ trait HandlesAccountSubscriptionRequests
     }
 
     /**
-     * Mapt Mollie-upstream-exceptions via MollieUpstreamErrorMapper (D-23,
+     * Mapt Mollie-upstream-exceptions via UpstreamErrorMapper (D-23,
      * 5a-pattern). Cloak't 401 → 502 zodat access-token-state niet lekt
      * (T-07-04-05).
      */
     protected function mollieError(Throwable $e): JsonResponse
     {
-        $mapped = MollieUpstreamErrorMapper::mapException($e);
+        $mapped = UpstreamErrorMapper::mapException($e);
 
         return response()->json($mapped['body'], $mapped['status'], $mapped['headers']);
     }
