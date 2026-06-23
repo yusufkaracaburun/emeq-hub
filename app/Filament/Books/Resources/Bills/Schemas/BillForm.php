@@ -7,6 +7,7 @@ namespace App\Filament\Books\Resources\Bills\Schemas;
 use App\Books\Enums\AccountCategory;
 use App\Books\Enums\BillStatus;
 use App\Books\Models\Account;
+use App\Books\Models\Bill;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
@@ -104,7 +105,9 @@ class BillForm
                     ->label('Notities')
                     ->maxLength(1000)
                     ->columnSpanFull(),
-            ]);
+            ])
+            // Geboekte inkoopfactuur is onwijzigbaar (zie Bill::booted()) → form read-only.
+            ->disabled(fn (?Bill $record): bool => (bool) $record?->isPosted());
     }
 
     /**

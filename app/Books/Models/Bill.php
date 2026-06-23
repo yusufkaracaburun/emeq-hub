@@ -6,6 +6,7 @@ use App\Books\Concerns\BelongsToBooksCompany;
 use App\Books\Concerns\HasAttachments;
 use App\Books\Concerns\HasPayments;
 use App\Books\Enums\BillStatus;
+use App\Books\Exceptions\PostedDocumentException;
 use BackedEnum;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -47,6 +48,27 @@ class Bill extends Model
         'tax_total' => 'integer',
         'total' => 'integer',
     ];
+
+    /**
+     * Onwijzigbaarheid van een geboekte inkoopfactuur: zodra ze aan een Transaction hangt,
+     * blokkeer je een (niet-quiet) update of delete — anders divergeert de bill van het
+     * grootboek. De boeking zelf (transaction_id van null → gezet) blijft toegestaan;
+     * payment-status- en totaal-herrekeningen lopen via saveQuietly en omzeilen deze guard.
+     */
+    protected static function booted(): void
+    {
+        static::updating(function (self $bill): void {
+            if ($bill->getOriginal('transaction_id') !== null) {
+                throw PostedDocumentException::immutable();
+            }
+        });
+
+        static::deleting(function (self $bill): void {
+            if ($bill->isPosted()) {
+                throw PostedDocumentException::immutable();
+            }
+        });
+    }
 
     public function vendor(): BelongsTo
     {

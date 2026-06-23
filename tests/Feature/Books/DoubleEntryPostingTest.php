@@ -11,6 +11,7 @@ use App\Books\Models\BankAccount;
 use App\Books\Models\BooksCompany;
 use App\Books\Models\Transaction;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use RuntimeException;
 use Tests\TestCase;
 
 class DoubleEntryPostingTest extends TestCase
@@ -78,6 +79,23 @@ class DoubleEntryPostingTest extends TestCase
         );
         $this->assertSame(10000, $debit->amount);
         $this->assertSame(10000, $credit->amount);
+    }
+
+    public function test_posting_throws_when_a_counter_account_is_missing(): void
+    {
+        $bank = $this->bankAccount();
+
+        $this->expectException(RuntimeException::class);
+
+        // Deposit zonder grootboek-tegenrekening (account_id) → onbalanceerbaar.
+        // Niet stilletjes overslaan: hard falen i.p.v. een transactie zonder boeking.
+        Transaction::create([
+            'bank_account_id' => $bank->id,
+            'type' => TransactionType::Deposit,
+            'amount' => 10000,
+            'posted_at' => now(),
+            'description' => 'Verkoop zonder tegenrekening',
+        ]);
     }
 
     public function test_withdrawal_reverses_debit_and_credit(): void

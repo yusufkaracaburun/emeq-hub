@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Books\Resources\Invoices\Schemas;
 
 use App\Books\Enums\InvoiceStatus;
+use App\Books\Models\Invoice;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
@@ -91,6 +92,8 @@ class InvoiceForm
                     ->label('Notities')
                     ->maxLength(1000)
                     ->columnSpanFull(),
-            ]);
+            ])
+            // Geboekte factuur is onwijzigbaar (zie Invoice::booted()) → form read-only.
+            ->disabled(fn (?Invoice $record): bool => (bool) $record?->isPosted());
     }
 }

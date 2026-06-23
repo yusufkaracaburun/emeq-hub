@@ -4,6 +4,7 @@ namespace Tests\Feature\Books;
 
 use App\Books\Enums\JournalEntryType;
 use App\Books\Enums\TransactionType;
+use App\Books\Exceptions\PostedDocumentException;
 use App\Books\Models\Account;
 use App\Books\Models\Bill;
 use App\Books\Models\JournalEntry;
@@ -47,6 +48,26 @@ class BillPostingTest extends TestCase
     private function sumByCode(string $code): int
     {
         return (int) JournalEntry::whereHas('account', fn ($q) => $q->where('code', $code))->sum('amount');
+    }
+
+    public function test_posted_bill_cannot_be_updated(): void
+    {
+        app(BillPoster::class)->post($this->bill);
+        $this->bill->refresh();
+
+        $this->expectException(PostedDocumentException::class);
+
+        $this->bill->update(['bill_number' => 'gewijzigd']);
+    }
+
+    public function test_posted_bill_cannot_be_deleted(): void
+    {
+        app(BillPoster::class)->post($this->bill);
+        $this->bill->refresh();
+
+        $this->expectException(PostedDocumentException::class);
+
+        $this->bill->delete();
     }
 
     public function test_posting_creates_a_balanced_purchase_entry(): void

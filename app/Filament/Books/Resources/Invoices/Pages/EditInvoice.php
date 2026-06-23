@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Books\Resources\Invoices\Pages;
 
+use App\Books\Models\Invoice;
 use App\Filament\Books\Resources\Invoices\InvoiceResource;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
@@ -15,7 +16,9 @@ class EditInvoice extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            DeleteAction::make(),
+            // Een geboekte factuur kun je niet verwijderen (zou het grootboek wees achterlaten).
+            DeleteAction::make()
+                ->hidden(fn (Invoice $record): bool => $record->isPosted()),
         ];
     }
 }

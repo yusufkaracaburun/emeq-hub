@@ -4,6 +4,7 @@ namespace Tests\Feature\Books;
 
 use App\Books\Enums\JournalEntryType;
 use App\Books\Enums\TransactionType;
+use App\Books\Exceptions\PostedDocumentException;
 use App\Books\Models\Account;
 use App\Books\Models\Client;
 use App\Books\Models\Invoice;
@@ -91,6 +92,33 @@ class InvoicePostingTest extends TestCase
         $this->assertNull($this->invoice->transaction_id);
         $this->assertNull(Transaction::find($transactionId));
         $this->assertSame(0, JournalEntry::where('transaction_id', $transactionId)->count());
+    }
+
+    public function test_posted_invoice_cannot_be_updated(): void
+    {
+        app(InvoicePoster::class)->post($this->invoice);
+        $this->invoice->refresh();
+
+        $this->expectException(PostedDocumentException::class);
+
+        $this->invoice->update(['invoice_number' => 'gewijzigd']);
+    }
+
+    public function test_posted_invoice_cannot_be_deleted(): void
+    {
+        app(InvoicePoster::class)->post($this->invoice);
+        $this->invoice->refresh();
+
+        $this->expectException(PostedDocumentException::class);
+
+        $this->invoice->delete();
+    }
+
+    public function test_unposted_invoice_remains_editable(): void
+    {
+        $this->invoice->update(['invoice_number' => 'gewijzigd']);
+
+        $this->assertSame('gewijzigd', $this->invoice->refresh()->invoice_number);
     }
 
     public function test_posting_moves_the_debiteuren_balance(): void

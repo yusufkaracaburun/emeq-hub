@@ -6,6 +6,7 @@ use App\Books\Enums\JournalEntryType;
 use App\Books\Models\Account;
 use App\Books\Models\Transaction;
 use Illuminate\Support\Facades\DB;
+use RuntimeException;
 
 /*
  * Gebalanceerde double-entry-posting voor een Transaction. EUR-only, geen
@@ -26,7 +27,11 @@ class LedgerPoster
         [$debitAccount, $creditAccount] = $this->determineAccounts($transaction);
 
         if ($debitAccount === null || $creditAccount === null) {
-            return;
+            // Niet stilletjes overslaan: een onopgeloste grootboek-/bankrekening zou een
+            // transactie zonder boeking achterlaten (ongebalanceerd, geen fout). Hard falen.
+            throw new RuntimeException(
+                "Transactie {$transaction->id} kan niet geboekt worden: grootboek- of bankrekening ontbreekt."
+            );
         }
 
         DB::transaction(function () use ($transaction, $debitAccount, $creditAccount): void {
