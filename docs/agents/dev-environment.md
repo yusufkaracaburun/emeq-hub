@@ -34,4 +34,33 @@ When install, test, build, or deploy commands are unclear:
 
 ## Project-specific notes
 
-<!-- Optional: commands from README, CI config, or team conventions -->
+### Lokale dev — eerste keer
+
+```bash
+# 0. Eenmalig: /etc/hosts toevoegen
+echo "127.0.0.1 hub.emeq.test" | sudo tee -a /etc/hosts
+
+# 1. .env van .env.example
+cp .env.example .env
+php artisan key:generate
+
+# 2. Composer-deps op host (voor IDE/grep; container regenereert vendor zelf)
+composer install
+
+# 3. Hele stack omhoog in Docker (app + worker + vite + db + redis)
+docker compose up -d --build
+
+# 4. Migraties draaien in de app-container
+docker compose exec app php artisan migrate
+
+# 5. (Optioneel) SDK clonen in packages/ voor referentie/grep — geen live-edit-link
+mkdir -p packages
+git clone git@github.com:yusufkaracaburun/emeq-snelstart-api.git packages/snelstart-api
+
+# 6. SDK-changes: edit in de SDK-repo zelf, commit + push, daarna in de Hub:
+#    composer update emeq/snelstart-api
+```
+
+Open `http://hub.emeq.test:8092/up` → moet `{"status":"up","database":"ok","redis":"ok"}` teruggeven.
+
+Dev draait in worker-mode met `watch`: PHP-changes zijn na een korte worker-restart zichtbaar (geen rebuild), React via Vite-HMR op `:5173`. Tests in de container: `docker compose exec app php artisan test --compact`.
