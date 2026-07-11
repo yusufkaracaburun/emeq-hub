@@ -15,19 +15,24 @@ use Throwable;
  * base-URLs een statische default). SDK's, OAuthFlows en credential-resolvers
  * blijven ongewijzigd (ze lezen gewoon config()).
  *
- * Guard: vóór de settings-migratie (of in CI zonder DB) bestaat de tabel niet —
- * dan overslaan. Een lege setting valt via ?: terug op de config-default
- * (null voor creds, statische base-URL) — niet op .env.
+ * Guard: vóór de settings-migratie (of zonder bereikbare DB) is er niets te
+ * hydrateren — dan overslaan. Een lege setting valt via ?: terug op de
+ * config-default (null voor creds, statische base-URL) — niet op .env.
+ *
+ * `Schema::hasTable()` staat bewust bínnen de try: die opent zélf een verbinding.
+ * Is er geen database — zoals tijdens `artisan package:discover` in de
+ * Docker-build — dan gooit die regel, en een gooiende provider laat de hele
+ * image-build klappen.
  */
 class SettingsHydrationServiceProvider extends ServiceProvider
 {
     public function boot(): void
     {
-        if (! Schema::hasTable('settings')) {
-            return;
-        }
-
         try {
+            if (! Schema::hasTable('settings')) {
+                return;
+            }
+
             $exact = app(ExactSettings::class);
             config([
                 'services.exact.client_id' => $exact->client_id ?: config('services.exact.client_id'),
