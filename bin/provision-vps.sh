@@ -2,8 +2,9 @@
 # Provisioning voor een verse Ubuntu-LTS-VPS die emeq-hub in prod draait.
 # Getest tegen 26.04 (resolute); werkt op elke LTS die Docker indexeert.
 #
-# Draai als root op de kale server:
-#   ssh root@<ip> 'bash -s' < bin/provision-vps.sh
+# Draai op de kale server, als root of via sudo:
+#   ssh hub 'sudo bash -s' < bin/provision-vps.sh     # OVH-image: user `ubuntu`
+#   ssh root@<ip> 'bash -s' < bin/provision-vps.sh    # image met root-login
 #
 # Idempotent: opnieuw draaien is veilig.
 #
@@ -22,14 +23,25 @@ log()  { printf "\n\033[1;36m==>\033[0m %s\n" "$*"; }
 warn() { printf "\033[1;33m  ⚠ %s\033[0m\n" "$*" >&2; }
 die()  { printf "\n\033[1;31m✖\033[0m %s\n" "$*" >&2; exit 1; }
 
-[[ "$(id -u)" -eq 0 ]] || die "draai dit als root"
+[[ "$(id -u)" -eq 0 ]] || die "draai dit als root (of via sudo)"
 
 # ── 0. Sleutel-check vóór alles ───────────────────────────────────────────────
 # SSH-hardening zet wachtwoord-login en root-login uit. Zonder een werkende
 # publieke sleutel sluit je jezelf buiten en is de enige weg terug OVH's
 # rescue-mode. Dus: eerst bewijzen dat er een sleutel is.
-ROOT_KEYS="/root/.ssh/authorized_keys"
-[[ -s "$ROOT_KEYS" ]] || die "geen sleutel in ${ROOT_KEYS} — voeg er eerst één toe (ssh-copy-id), anders lock je jezelf buiten"
+#
+# Waar die sleutel staat verschilt per image: op OVH's Ubuntu is er geen
+# root-login en zit hij op de sudo-user (`ubuntu`); op een image mét root-login
+# staat hij in /root. Zoek 'm dus bij de gebruiker die dit script aanroept, en
+# val terug op root.
+if [[ -n "${SUDO_USER:-}" && "${SUDO_USER}" != "root" ]]; then
+    SOURCE_KEYS="$(getent passwd "$SUDO_USER" | cut -d: -f6)/.ssh/authorized_keys"
+else
+    SOURCE_KEYS="/root/.ssh/authorized_keys"
+fi
+
+[[ -s "$SOURCE_KEYS" ]] || die "geen sleutel in ${SOURCE_KEYS} — zet er eerst één neer (ssh-copy-id), anders sluit de hardening je buiten"
+log "sleutel-bron: ${SOURCE_KEYS} ($(wc -l < "$SOURCE_KEYS") sleutel(s))"
 
 # ── 1. Basis ──────────────────────────────────────────────────────────────────
 log "apt update + upgrade"
@@ -102,9 +114,9 @@ if ! id -u "$DEPLOY_USER" >/dev/null 2>&1; then
 fi
 usermod -aG docker "$DEPLOY_USER"
 
-log "root-sleutels kopiëren naar ${DEPLOY_USER}"
+log "sleutels kopiëren naar ${DEPLOY_USER} (uit ${SOURCE_KEYS})"
 install -d -m 700 -o "$DEPLOY_USER" -g "$DEPLOY_USER" "/home/${DEPLOY_USER}/.ssh"
-cp "$ROOT_KEYS" "/home/${DEPLOY_USER}/.ssh/authorized_keys"
+cp "$SOURCE_KEYS" "/home/${DEPLOY_USER}/.ssh/authorized_keys"
 chown "${DEPLOY_USER}:${DEPLOY_USER}" "/home/${DEPLOY_USER}/.ssh/authorized_keys"
 chmod 600 "/home/${DEPLOY_USER}/.ssh/authorized_keys"
 
