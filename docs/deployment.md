@@ -77,29 +77,37 @@ applicatie-runtime (PHP 8.4, FrankenPHP, Postgres, Redis) zit in containers en r
 distro niet. Vandaar de langste LTS: deze machine bewaart de `APP_KEY` en die wil je zo
 min mogelijk verhuizen.
 
-Een kale server komt met één commando in de juiste staat:
+Een kale server komt met één commando in de juiste staat. Wélk commando hangt af van
+het image — dat bepaalt of je überhaupt als root naar binnen komt:
 
 ```bash
-ssh-copy-id root@<ip>                                  # sleutel erop, vóór alles
+# OVH's Ubuntu (geen root-login; je logt in als `ubuntu` met sudo)
+ssh-copy-id ubuntu@<ip>                                # sleutel erop, vóór alles
+ssh ubuntu@<ip> 'sudo bash -s' < bin/provision-vps.sh
+
+# Image mét root-login
+ssh-copy-id root@<ip>
 ssh root@<ip> 'bash -s' < bin/provision-vps.sh
 ```
+
+Het script zoekt de sleutel bij de gebruiker die het aanroept (`$SUDO_USER`) en valt
+terug op `/root`. Zit er daar geen sleutel, dan **weigert het te draaien** — het zet
+wachtwoord-login uit, en zonder werkende sleutel is de enige weg terug OVH's
+rescue-mode.
 
 Dat doet: apt-upgrade, `unattended-upgrades` (security-patches), Docker Engine +
 compose-plugin met log-rotatie, een `deploy`-user in de `docker`-groep, de repo clonen
 naar `/home/deploy/emeq-hub`, `ufw` (**alles dicht behalve SSH**), `fail2ban`, en tot
 slot SSH-hardening (key-only, geen root-login, geen wachtwoord). Het sluit af met een
-verificatie-blok dat de effectieve staat afdrukt: docker-versie, `sshd -T`, `ufw status`,
-de fail2ban-jail en de repo-SHA.
+verificatie-blok: het **assert** de effectieve sshd-staat (`sshd -T`, niet alleen "het
+bestand is geschreven" — zie hieronder) en drukt docker-versie, `ufw status`, de
+fail2ban-jail en de repo-SHA af.
 
-> Het script weigert te draaien als er geen sleutel in `/root/.ssh/authorized_keys`
-> staat. Het zet wachtwoord-login uit; zonder werkende sleutel is de enige weg terug
-> OVH's rescue-mode.
-
-### Sluit de root-sessie niet voordat je `deploy` hebt getest
+### Sluit je sessie niet voordat je `deploy` hebt getest
 
 Het script zet root-login en wachtwoord-login uit. Klopt er iets niet aan de
 sleutel-setup van de `deploy`-user, dan merk je dat pas als je opnieuw wilt inloggen —
-en dan is het te laat. Dus, **met de root-sessie nog open**, in een tweede terminal:
+en dan is het te laat. Dus, **met de huidige sessie nog open**, in een tweede terminal:
 
 ```bash
 ssh deploy@<ip> 'whoami && docker ps && sudo -n systemctl --version >/dev/null && echo OK'
@@ -107,19 +115,37 @@ ssh deploy@<ip> 'whoami && docker ps && sudo -n systemctl --version >/dev/null &
 
 Dit test de drie dingen die `deploy` nodig heeft: inloggen met de sleutel, bij de
 Docker-socket kunnen (groepslidmaatschap) en de sudoers-regel. Let op: `sudo -n true`
-werkt hier **niet** — de regel staat alleen `systemctl` en `apt-get` toe, en dat is de
-bedoeling.
+werkt hier **niet** — de regel staat alleen `systemctl` en `apt-get` toe.
 
-- Krijg je `deploy` … `OK` → hardening is goed, root-sessie mag dicht.
-- Krijg je `Permission denied` → **laat de root-sessie open** en herstel:
+- Krijg je `deploy` … `OK` → hardening is goed, de sessie mag dicht.
+- Krijg je `Permission denied` → **laat de sessie open** en herstel:
 
   ```bash
-  rm /etc/ssh/sshd_config.d/99-emeq-hardening.conf
-  systemctl reload ssh.service   # of: systemctl restart ssh.socket
+  sudo rm /etc/ssh/sshd_config.d/00-emeq-hardening.conf
+  sudo systemctl restart ssh.socket || sudo systemctl reload ssh.service
   ```
+
+  De `sudo` is er niet voor de sier: op de OVH-route ben je in die sessie `ubuntu`,
+  niet root.
 
 Werkt beide niet meer, dan rest alleen OVH's rescue-mode (KVM-console in het
 OVH-paneel). Die tweede terminal kost tien seconden.
+
+> **Welk account is je vangnet?** Op de OVH-route blijft `ubuntu` bestaan met zijn
+> sleutel — dat is de weg terug én de enige manier om het script later opnieuw te
+> draaien (`deploy` heeft geen volledige sudo). Op een image mét root-login is root
+> ná de hardening niet meer bereikbaar via SSH: daar is er geen tweede weg naar binnen
+> behalve de KVM-console.
+
+### De drop-in heet `00-`, niet `99-`
+
+OpenSSH hanteert **first-obtained-value-wins** en leest `/etc/ssh/sshd_config.d/*.conf`
+alfabetisch. OVH's image levert `50-cloud-init.conf` met `PasswordAuthentication yes`.
+Een hardening-bestand dat dáárna komt (`99-…`) wordt genegeerd: `sshd -t` slaagt, het
+script meldt succes, en wachtwoord-login staat gewoon nog aan. Vandaar
+`00-emeq-hardening.conf` — en vandaar dat het script na de reload aan `sshd -T` vraagt
+wat er *effectief* geldt en afbreekt als dat niet klopt. Een drop-in wegschrijven is
+geen bewijs dat sshd 'm honoreert.
 
 **Poort 80/443 blijven dicht.** `cloudflared` belt uit naar de Cloudflare-rand — er is
 geen inbound web-poort nodig en het origin-IP blijft verborgen.

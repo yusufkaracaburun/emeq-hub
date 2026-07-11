@@ -25,6 +25,13 @@ die()  { printf "\n\033[1;31m✖\033[0m %s\n" "$*" >&2; exit 1; }
 
 [[ "$(id -u)" -eq 0 ]] || die "draai dit als root (of via sudo)"
 
+# DEPLOY_USER is override-baar en belandt zowel in een unix-account als in een
+# bestandsnaam onder /etc/sudoers.d/. Sudo negeert daar stilzwijgend elk bestand
+# met een punt of een tilde in de naam: `DEPLOY_USER=deploy.v2` levert dan een
+# user zónder sudo-rechten, zonder één foutmelding. Afvangen vóór alles.
+[[ "$DEPLOY_USER" =~ ^[a-z_][a-z0-9_-]*$ ]] \
+    || die "DEPLOY_USER '${DEPLOY_USER}' is geen geldige unix-naam (a-z, 0-9, _ en -; geen punt)"
+
 # ── 0. Sleutel-check vóór alles ───────────────────────────────────────────────
 # SSH-hardening zet wachtwoord-login en root-login uit. Zonder een werkende
 # publieke sleutel sluit je jezelf buiten en is de enige weg terug OVH's
@@ -41,7 +48,13 @@ else
 fi
 
 [[ -s "$SOURCE_KEYS" ]] || die "geen sleutel in ${SOURCE_KEYS} — zet er eerst één neer (ssh-copy-id), anders sluit de hardening je buiten"
-log "sleutel-bron: ${SOURCE_KEYS} ($(wc -l < "$SOURCE_KEYS") sleutel(s))"
+
+# Tellen op inhoud, niet op newlines: `wc -l` telt een sleutel zónder afsluitende
+# newline als 0, en dan meldt precies de regel die vertrouwen moet wekken "0
+# sleutel(s)" terwijl het script vrolijk doorgaat met hardenen.
+KEY_COUNT="$(grep -cvE '^[[:space:]]*(#|$)' "$SOURCE_KEYS" || true)"
+[[ "$KEY_COUNT" -gt 0 ]] || die "${SOURCE_KEYS} bevat geen enkele sleutel (alleen lege regels of comments)"
+log "sleutel-bron: ${SOURCE_KEYS} (${KEY_COUNT} sleutel(s))"
 
 # ── 1. Basis ──────────────────────────────────────────────────────────────────
 log "apt update + upgrade"
@@ -114,16 +127,32 @@ if ! id -u "$DEPLOY_USER" >/dev/null 2>&1; then
 fi
 usermod -aG docker "$DEPLOY_USER"
 
-log "sleutels kopiëren naar ${DEPLOY_USER} (uit ${SOURCE_KEYS})"
+DEPLOY_KEYS="/home/${DEPLOY_USER}/.ssh/authorized_keys"
 install -d -m 700 -o "$DEPLOY_USER" -g "$DEPLOY_USER" "/home/${DEPLOY_USER}/.ssh"
-cp "$SOURCE_KEYS" "/home/${DEPLOY_USER}/.ssh/authorized_keys"
-chown "${DEPLOY_USER}:${DEPLOY_USER}" "/home/${DEPLOY_USER}/.ssh/authorized_keys"
-chmod 600 "/home/${DEPLOY_USER}/.ssh/authorized_keys"
 
-# make prod-* draait docker compose; sudo is verder niet nodig.
-echo "${DEPLOY_USER} ALL=(ALL) NOPASSWD: /usr/bin/systemctl, /usr/bin/apt-get" \
-    > "/etc/sudoers.d/${DEPLOY_USER}"
-chmod 440 "/etc/sudoers.d/${DEPLOY_USER}"
+# Bron en doel kunnen hetzelfde bestand zijn (DEPLOY_USER=ubuntu, of een re-run
+# waarbij de aanroeper de deploy-user zelf is). `cp` faalt daar op, en met `set -e`
+# sterft het script precies vóór de hardening — halve provisioning.
+if [[ "$SOURCE_KEYS" == "$DEPLOY_KEYS" ]]; then
+    log "sleutel-bron ís al ${DEPLOY_USER}'s authorized_keys — niets te kopiëren"
+else
+    log "sleutels kopiëren naar ${DEPLOY_USER} (uit ${SOURCE_KEYS})"
+    install -m 600 -o "$DEPLOY_USER" -g "$DEPLOY_USER" "$SOURCE_KEYS" "$DEPLOY_KEYS"
+fi
+
+# make prod-* draait docker compose; systemctl/apt-get zijn wat er verder nodig is.
+# Dit is geen privilege-grens: `docker`-groep is root-equivalent en apt-get kent
+# --Pre-Invoke-hooks. Het beperkt per ongeluk-schade, niet een aanvaller.
+#
+# Rechtstreeks naar /etc/sudoers.d/ schrijven is niet veilig: een syntaxfout maakt
+# sudo systeembreed onbruikbaar (elk bestand in sudoers.d wordt geparsed), en dat
+# merk je pas ná de hardening. Dus eerst valideren met visudo, dán installeren.
+SUDOERS_TMP="$(mktemp)"
+echo "${DEPLOY_USER} ALL=(ALL) NOPASSWD: /usr/bin/systemctl, /usr/bin/apt-get" > "$SUDOERS_TMP"
+visudo -cqf "$SUDOERS_TMP" \
+    || { rm -f "$SUDOERS_TMP"; die "sudoers-regel voor ${DEPLOY_USER} is ongeldig — niet geïnstalleerd"; }
+install -m 440 -o root -g root "$SUDOERS_TMP" "/etc/sudoers.d/${DEPLOY_USER}"
+rm -f "$SUDOERS_TMP"
 
 # ── 4. Repo ───────────────────────────────────────────────────────────────────
 if [[ -d "${APP_DIR}/.git" ]]; then
@@ -146,10 +175,23 @@ fi
 # een vroeg-stoppende awk/grep stuurt SIGPIPE naar sshd, en met `pipefail` +
 # `set -e` sterft het script daarop. Dat is bovendien een race — het hangt
 # ervan af of de output nog in de pipe-buffer past.
+#
+# En vraag het de júíste bron. Draait sshd socket-geactiveerd, dan komt de
+# luisterpoort van ssh.socket's ListenStream en niet uit sshd_config: `sshd -T`
+# zegt dan 22 terwijl er op iets anders geluisterd wordt. De ufw-regel staat dan
+# op de verkeerde poort — en dat merk je pas bij de vólgende verbinding, want de
+# huidige sessie leeft door. Socket eerst, sshd_config als terugval.
 sshd_effective() { sshd -T 2>/dev/null || true; }
 SSHD_CFG="$(sshd_effective)"
 
-SSH_PORT="$(awk '/^port /{p=$2} END{print p}' <<<"$SSHD_CFG")"
+ssh_socket_port() {
+    systemctl is-active --quiet ssh.socket || return 0
+    systemctl show ssh.socket -p Listen --value 2>/dev/null \
+        | awk '{ n = split($1, a, ":"); if (p == "" && a[n] ~ /^[0-9]+$/) { p = a[n] } } END { print p }'
+}
+
+SSH_PORT="$(ssh_socket_port)"
+[[ -n "$SSH_PORT" ]] || SSH_PORT="$(awk '/^port /{p=$2} END{print p}' <<<"$SSHD_CFG")"
 SSH_PORT="${SSH_PORT:-22}"
 
 log "ufw: alles dicht behalve SSH (poort ${SSH_PORT})"
@@ -240,7 +282,19 @@ printf '  repo        : %s\n' "$(sudo -u "$DEPLOY_USER" git -C "$APP_DIR" log --
 cat <<EOF
 
 ────────────────────────────────────────────────────────────────────────────
- Server klaar. Root-login is nu uit — verbind voortaan als: ${DEPLOY_USER}@<ip>
+ Server klaar. Wachtwoord- en root-login staan nu UIT.
+
+ ⚠ SLUIT DEZE SESSIE NOG NIET. Test eerst, in een tweede terminal, of
+   ${DEPLOY_USER} werkt. Klopt de sleutel-setup niet, dan is deze open sessie
+   je enige weg terug — anders rest OVH's rescue-mode.
+
+     ssh ${DEPLOY_USER}@<ip> 'whoami && docker ps && sudo -n systemctl --version >/dev/null && echo OK'
+
+   Krijg je '${DEPLOY_USER}' … 'OK' → deze sessie mag dicht.
+   Krijg je 'Permission denied' → herstel hier, met de sessie nog open:
+
+     sudo rm ${HARDENING} && sudo systemctl restart ssh.socket 2>/dev/null \\
+       || sudo systemctl reload ssh.service
 
  Volgende stappen (handmatig, want secrets):
 
