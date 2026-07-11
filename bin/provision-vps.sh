@@ -41,8 +41,10 @@ apt-get upgrade -y -qq
 # draait de git-clone als de deploy-user. Op een minimaal image bestaat
 # /etc/sudoers.d niet en klapt dat. Idem tzdata — zonder dat pakket kent
 # timedatectl 'Europe/Amsterdam' niet.
+# `adduser` staat er expliciet bij: het zit níét in elk Ubuntu-image (kaal
+# 26.04 heeft alleen `useradd`), en zonder dat pakket klapt § 3.
 apt-get install -y -qq \
-    ca-certificates curl gnupg git make sudo tzdata openssh-server \
+    ca-certificates curl gnupg git make sudo adduser tzdata openssh-server \
     ufw fail2ban unattended-upgrades
 
 # Cosmetisch. Een falende hostname of timezone mag de provisioning niet

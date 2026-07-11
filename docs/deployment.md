@@ -87,14 +87,55 @@ ssh root@<ip> 'bash -s' < bin/provision-vps.sh
 Dat doet: apt-upgrade, `unattended-upgrades` (security-patches), Docker Engine +
 compose-plugin met log-rotatie, een `deploy`-user in de `docker`-groep, de repo clonen
 naar `/home/deploy/emeq-hub`, `ufw` (**alles dicht behalve SSH**), `fail2ban`, en tot
-slot SSH-hardening (key-only, geen root-login, geen wachtwoord).
+slot SSH-hardening (key-only, geen root-login, geen wachtwoord). Het sluit af met een
+verificatie-blok dat de effectieve staat afdrukt: docker-versie, `sshd -T`, `ufw status`,
+de fail2ban-jail en de repo-SHA.
 
 > Het script weigert te draaien als er geen sleutel in `/root/.ssh/authorized_keys`
 > staat. Het zet wachtwoord-login uit; zonder werkende sleutel is de enige weg terug
 > OVH's rescue-mode.
 
+### Sluit de root-sessie niet voordat je `deploy` hebt getest
+
+Het script zet root-login en wachtwoord-login uit. Klopt er iets niet aan de
+sleutel-setup van de `deploy`-user, dan merk je dat pas als je opnieuw wilt inloggen —
+en dan is het te laat. Dus, **met de root-sessie nog open**, in een tweede terminal:
+
+```bash
+ssh deploy@<ip> 'whoami && docker ps && sudo -n systemctl --version >/dev/null && echo OK'
+```
+
+Dit test de drie dingen die `deploy` nodig heeft: inloggen met de sleutel, bij de
+Docker-socket kunnen (groepslidmaatschap) en de sudoers-regel. Let op: `sudo -n true`
+werkt hier **niet** — de regel staat alleen `systemctl` en `apt-get` toe, en dat is de
+bedoeling.
+
+- Krijg je `deploy` … `OK` → hardening is goed, root-sessie mag dicht.
+- Krijg je `Permission denied` → **laat de root-sessie open** en herstel:
+
+  ```bash
+  rm /etc/ssh/sshd_config.d/99-emeq-hardening.conf
+  systemctl reload ssh.service   # of: systemctl restart ssh.socket
+  ```
+
+Werkt beide niet meer, dan rest alleen OVH's rescue-mode (KVM-console in het
+OVH-paneel). Die tweede terminal kost tien seconden.
+
 **Poort 80/443 blijven dicht.** `cloudflared` belt uit naar de Cloudflare-rand — er is
 geen inbound web-poort nodig en het origin-IP blijft verborgen.
+
+### Ubuntu 26.04: `ssh.service` én `ssh.socket`
+
+26.04's `openssh-server`-postinst enabled beide units, en welke er luistert verschilt per
+image. Dat raakt twee dingen, en het script vangt ze allebei af:
+
+- **Herstart na hardening** — `reload ssh.service` faalt als sshd socket-geactiveerd
+  draait. Het script detecteert de actieve unit in plaats van te gokken.
+- **fail2ban** — Ubuntu's jail matcht op `_SYSTEMD_UNIT=ssh.service`. Onder
+  socket-activatie heten de per-verbinding-units `ssh@<n>-….service` en matcht die regel
+  **niets**: fail2ban bant dan stilzwijgend niemand. Het script schrijft daarom
+  `/etc/fail2ban/jail.d/emeq-sshd.conf` met `journalmatch = _COMM=sshd`, wat in beide
+  modi werkt. Controleer met `fail2ban-client status sshd` → `Journal matches: _COMM=sshd`.
 
 Het script vult **geen** `.env.prod` en start de stack niet: daar gaan secrets in
 (`APP_KEY`, `DB_PASSWORD`, tunnel-token). Dat is de handmatige stap hieronder.
