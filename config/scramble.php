@@ -1,7 +1,5 @@
 <?php
 
-use Dedoc\Scramble\Http\Middleware\RestrictedDocsAccess;
-
 return [
     /*
      * Your API path. By default, all routes starting with this path will be added to the docs.
@@ -127,18 +125,14 @@ return [
      */
     'flatten_deep_query_parameters' => true,
 
+    /*
+     * Publiek. Scramble's RestrictedDocsAccess staat hier bewust niet: het
+     * endpoint-overzicht is geen geheim, de authenticatie (Sanctum-PAT) wel.
+     * Consumers moeten de docs zonder drempel kunnen lezen.
+     */
     'middleware' => [
         'web',
-        RestrictedDocsAccess::class,
     ],
 
     'extensions' => [],
-
-    /*
-     * Access-token voor de docs-UI in non-local environments. Op productie kan een
-     * gebruiker met `?token=<value>` Scramble openen — gate-logica in AppServiceProvider
-     * leest deze waarde. Laat leeg om de docs UI op niet-local environments volledig te
-     * blokkeren. Zie ook `gate('viewApiDocs')` in app/Providers/AppServiceProvider.php.
-     */
-    'access_token' => env('SCRAMBLE_ACCESS_TOKEN'),
 ];

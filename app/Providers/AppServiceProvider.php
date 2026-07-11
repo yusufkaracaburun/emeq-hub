@@ -75,16 +75,6 @@ class AppServiceProvider extends ServiceProvider
         // applicatie-logs (laravel.log), incl. de getAuthorizationUrl-fouten.
         LogViewer::auth(fn (Request $request): bool => $request->user()?->hasRole('super-admin') ?? false);
 
-        Gate::define('viewApiDocs', function (?User $user): bool {
-            $token = config('scramble.access_token');
-
-            if (! $token) {
-                return false;
-            }
-
-            return hash_equals($token, (string) request()->query('token', ''));
-        });
-
         Gate::define('manage-staff', fn (User $user): bool => $user->hasRole('super-admin'));
 
         RateLimiter::for('api', function (Request $request): Limit {

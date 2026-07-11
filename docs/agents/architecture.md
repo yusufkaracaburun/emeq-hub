@@ -97,6 +97,6 @@ SDK-exceptions → Hub-HTTP via mappers; Sentry captured non-mapped. Patronen: 4
 
 - **Auth:** Sanctum-PAT + abilities; webhooks publiek + signature/secret-verified; admin-billing extra `emeq.admin` (config-allowlist + Filament-panel `/admin`).
 - **No-index:** global `SetNoIndexHeaders` (`X-Robots-Tag: noindex, nofollow`).
-- **API-docs:** `dedoc/scramble` op `/docs/api` (Gate `viewApiDocs` + `?token=`).
+- **API-docs:** `dedoc/scramble` op `/docs/api` — publiek, geen gate. Het endpoint-overzicht is geen geheim; de auth (Sanctum-PAT) wel.
 - **Validation:** Form-Requests aan Hub-rand; SDK krijgt al-gevalideerde payloads.
 - **Feature-flags:** Pennant provider kill-switch (`feature.provider:{provider}`), auto-defined op `config('hub-providers')`. Zie `.docs/decisions/feature-flags-pennant-kill-switch.md`.

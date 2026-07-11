@@ -8,18 +8,15 @@ use Tests\TestCase;
  * Bewijst HUB-05 SC-8: Scramble's OpenAPI-spec bevat alle nieuwe /v1-routes
  * die in Phase 5b zijn geland (3 provisioning + 1 catch-all + ping).
  *
- * Scramble's docs-route zit achter `RestrictedDocsAccess`-middleware; in
- * testing-environment is een `?token=`-query nodig die matched met
- * `config('scramble.access_token')` (zie AppServiceProvider's viewApiDocs-Gate).
+ * De docs zijn publiek — geen token, geen gate. Het endpoint-overzicht is geen
+ * geheim; de authenticatie (Sanctum-PAT) is dat wel.
  */
 class ScrambleRouteDiscoveryTest extends TestCase
 {
-    private const TOKEN = 'test-scramble-token';
-
-    protected function setUp(): void
+    public function test_docs_zijn_publiek_bereikbaar_zonder_token(): void
     {
-        parent::setUp();
-        config(['scramble.access_token' => self::TOKEN]);
+        $this->get('/docs/api')->assertOk();
+        $this->getJson('/docs/api.json')->assertOk();
     }
 
     public function test_openapi_spec_contains_post_v1_accounts_route(): void
@@ -262,7 +259,7 @@ class ScrambleRouteDiscoveryTest extends TestCase
      */
     private function fetchSpec(): array
     {
-        $response = $this->getJson('/docs/api.json?token='.self::TOKEN);
+        $response = $this->getJson('/docs/api.json');
         $response->assertOk();
 
         /** @var array<string, mixed> $json */
