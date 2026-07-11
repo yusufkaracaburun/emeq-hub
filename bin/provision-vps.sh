@@ -141,7 +141,15 @@ fi
 # Niet `ufw allow OpenSSH`: dat app-profiel bestaat alleen als openssh-server
 # geïnstalleerd is, en het gokt op poort 22. Vraag sshd zélf op welke poort hij
 # luistert — een verkeerde regel hier betekent buitengesloten.
-SSH_PORT="$(sshd -T 2>/dev/null | awk '/^port /{print $2; exit}')"
+#
+# `sshd -T` één keer in een variabele, en geen `exit`/`-q` in de consumers:
+# een vroeg-stoppende awk/grep stuurt SIGPIPE naar sshd, en met `pipefail` +
+# `set -e` sterft het script daarop. Dat is bovendien een race — het hangt
+# ervan af of de output nog in de pipe-buffer past.
+sshd_effective() { sshd -T 2>/dev/null || true; }
+SSHD_CFG="$(sshd_effective)"
+
+SSH_PORT="$(awk '/^port /{p=$2} END{print p}' <<<"$SSHD_CFG")"
 SSH_PORT="${SSH_PORT:-22}"
 
 log "ufw: alles dicht behalve SSH (poort ${SSH_PORT})"
@@ -169,8 +177,17 @@ systemctl enable --now fail2ban
 systemctl restart fail2ban
 
 # ── 6. SSH-hardening (als laatste — pas als de deploy-user een sleutel heeft) ──
-log "SSH: key-only, geen root-login"
-cat > /etc/ssh/sshd_config.d/99-emeq-hardening.conf <<'SSHCONF'
+#
+# Naam begint met 00 en dat is essentieel. OpenSSH hanteert
+# first-obtained-value-wins en leest de drop-ins alfabetisch. OVH's image levert
+# 50-cloud-init.conf met `PasswordAuthentication yes`; een 99-bestand komt dáár
+# ná en wordt genegeerd. De hardening lijkt dan te slagen terwijl wachtwoord-
+# login gewoon aan blijft staan. Alleen sorteren vóór 50 wint.
+HARDENING="/etc/ssh/sshd_config.d/00-emeq-hardening.conf"
+rm -f /etc/ssh/sshd_config.d/99-emeq-hardening.conf   # eerdere, verliezende versie
+
+log "SSH: key-only, geen root-login (${HARDENING})"
+cat > "$HARDENING" <<'SSHCONF'
 PermitRootLogin no
 PasswordAuthentication no
 KbdInteractiveAuthentication no
@@ -179,7 +196,7 @@ PermitEmptyPasswords no
 X11Forwarding no
 SSHCONF
 
-sshd -t || die "sshd-config invalid — hardening NIET toegepast, herstel /etc/ssh/sshd_config.d/99-emeq-hardening.conf"
+sshd -t || die "sshd-config invalid — herstel of verwijder ${HARDENING}"
 
 # 26.04 levert ssh.service én ssh.socket, en de postinst enabled ze allebei.
 # Welke er luistert verschilt per image, dus: detecteren, niet aannemen.
@@ -197,11 +214,24 @@ else
 fi
 
 # ── 7. Bewijs, geen belofte ───────────────────────────────────────────────────
+#
+# Assert, niet alleen printen. Een drop-in wegschrijven bewijst niet dat sshd
+# 'm honoreert (zie de 50-cloud-init-val hierboven) — dus vraag sshd zelf wat
+# er effectief geldt en stop als dat niet klopt.
+log "hardening verifiëren tegen sshd -T"
+SSHD_CFG="$(sshd_effective)"          # opnieuw ophalen: sshd is net herladen
+for want in "permitrootlogin no" "passwordauthentication no" "permitemptypasswords no"; do
+    if grep -qx "$want" <<<"$SSHD_CFG"; then
+        printf '  ✓ %s\n' "$want"
+    else
+        got="$(grep -E "^${want%% *} " <<<"$SSHD_CFG" || echo '(niet gezet)')"
+        die "hardening NIET effectief — verwacht '${want}', sshd zegt '${got}'. Controleer de drop-in-volgorde in /etc/ssh/sshd_config.d/ (first-obtained-value-wins)."
+    fi
+done
+
 log "verificatie"
 printf '  docker      : %s\n' "$(docker --version)"
 printf '  compose     : %s\n' "$(docker compose version --short)"
-printf '  sshd effect : %s\n' \
-    "$(sshd -T 2>/dev/null | grep -E '^(permitrootlogin|passwordauthentication)' | tr '\n' ' ')"
 printf '  ufw         : %s\n' "$(ufw status | head -1)"
 printf '  fail2ban    : %s\n' \
     "$(fail2ban-client status sshd 2>/dev/null | grep -E 'Currently failed|Journal matches' | tr -s ' \n' ' ' || echo 'jail NIET actief')"
