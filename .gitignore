@@ -2,6 +2,7 @@
 .DS_Store
 .env
 .env.backup
+.env.prod
 .env.production
 .envrc
 .ai-kit-setup
@@ -50,3 +51,6 @@ frankenphp-worker.php
 # Skill-installer tooling (lokaal, niet projectcode)
 /.agents/skills
 /skills-lock.json
+
+# pg_dump-output van `make prod-backup` (staat op de server, nooit in git)
+/backups

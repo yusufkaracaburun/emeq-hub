@@ -2,11 +2,16 @@ APP := http://hub.emeq.test:8092
 TUNNEL := emeq-hub-dev
 TUNNEL_LOG := storage/logs/cloudflared.log
 
+# Prod (draait op de server, niet lokaal) — zie docs/deployment.md.
+PROD := docker compose -f docker-compose.prod.yml --env-file .env.prod
+BACKUP_DIR := backups
+
 .DEFAULT_GOAL := help
-.PHONY: help up down restart urls fresh seed-books logs logs-clean shell test ps tunnel tunnel-up tunnel-stop
+.PHONY: help up down restart urls fresh seed-books logs logs-clean shell test ps tunnel tunnel-up tunnel-stop \
+	prod-deploy prod-logs prod-ps prod-shell prod-backup prod-down
 
 help: ## Toon deze hulp
-	@grep -E '^[a-z-]+:.*##' $(MAKEFILE_LIST) | sort | awk 'BEGIN{FS=":.*## "}{printf "  \033[36m%-10s\033[0m %s\n", $$1, $$2}'
+	@grep -E '^[a-z-]+:.*##' $(MAKEFILE_LIST) | sort | awk 'BEGIN{FS=":.*## "}{printf "  \033[36m%-12s\033[0m %s\n", $$1, $$2}'
 
 up: ## Start de hele stack (app + worker + vite + db + redis) + verse logs/tunnel + toon URLs
 	docker compose up -d
@@ -69,6 +74,40 @@ tunnel: ## Start de tunnel op de VOORgrond (live logs; kill eerst alle bestaande
 	@pkill -f "cloudflared tunnel run $(TUNNEL)" 2>/dev/null || true
 	@sleep 1
 	cloudflared tunnel run $(TUNNEL)
+
+## ---------------------------------------------------------------------------
+## Prod — draai deze targets op de server, in de repo-checkout naast .env.prod.
+## ---------------------------------------------------------------------------
+
+prod-deploy: ## [server] Release: backup → build → migrate → optimize → workers herstarten
+	@test -f .env.prod || { echo "  ✖ .env.prod ontbreekt (kopieer .env.prod.example)"; exit 1; }
+	@$(MAKE) --no-print-directory prod-backup
+	git pull --ff-only
+	$(PROD) up -d --build
+	$(PROD) exec -T app sh -c "php artisan migrate --force && php artisan optimize"
+	@# Worker-mode houdt code in geheugen: horizon/scheduler draaien de oude image
+	@# tot een expliciete restart. Altijd samen met app herstarten.
+	$(PROD) restart app horizon scheduler
+	@$(PROD) exec -T app curl -fsS http://localhost/up && echo "\n  ✅ deploy ok"
+
+prod-backup: ## [server] pg_dump naar backups/ (draait automatisch vóór prod-deploy)
+	@mkdir -p $(BACKUP_DIR)
+	@$(PROD) exec -T db pg_dump -U "$$(grep -E '^DB_USERNAME=' .env.prod | cut -d= -f2)" \
+		-d "$$(grep -E '^DB_DATABASE=' .env.prod | cut -d= -f2)" \
+		| gzip > "$(BACKUP_DIR)/emeq-hub-$$(date +%Y%m%d-%H%M%S).sql.gz"
+	@ls -1t $(BACKUP_DIR)/*.sql.gz | head -1 | xargs -I{} echo "  💾 backup: {}"
+
+prod-logs: ## [server] Tail app + horizon + tunnel
+	$(PROD) logs -f --tail=100 app horizon cloudflared
+
+prod-ps: ## [server] Container-status (health)
+	$(PROD) ps
+
+prod-shell: ## [server] Shell in de app-container
+	$(PROD) exec app sh
+
+prod-down: ## [server] Stop de prod-stack (volumes/data blijven)
+	$(PROD) down
 
 urls: ## Toon de UI-URLs
 	@printf '\n'

@@ -1,11 +1,15 @@
-# Prod-stack — directe deploy op een eigen server, achter Cloudflare.
-#   docker compose -f docker-compose.prod.yml --env-file .env.prod up -d --build
+# Prod-stack — eigen server, achter Cloudflare via een Cloudflare Tunnel.
+#   make prod-deploy          (of: docker compose -f docker-compose.prod.yml --env-file .env.prod up -d --build)
 #
-# Cloudflare termineert TLS; de origin serveert plain HTTP op :80 (geen Let's
-# Encrypt). Wijs Cloudflare naar de server-IP:80, of gebruik een Cloudflare Tunnel
-# (cloudflared) zodat geen poort open hoeft. Firewall :80 bij voorkeur tot CF-ranges.
-# Post-deploy eenmalig: `docker compose -f docker-compose.prod.yml exec app \
-#   sh -c "php artisan migrate --force && php artisan optimize"`.
+# cloudflared bouwt een uitgaande verbinding naar Cloudflare; er hoeft geen poort
+# open te staan en het server-IP blijft verborgen. CF termineert TLS aan de rand en
+# praat versleuteld met de tunnel; de app serveert plain HTTP op :80 binnen het
+# compose-netwerk. Laravel detecteert https via trustProxies (bootstrap/app.php)
+# + APP_URL=https://hub.emeq.nl.
+#
+# Let op: Cloudflare's Bot Fight Mode (free) challenge't server-to-server-verkeer en
+# breekt partner-webhooks. Houd 'm UIT op deze zone — hij kan niet per pad worden
+# uitgezonderd. Zie docs/deployment.md § Cloudflare.
 services:
   app:
     build:
@@ -14,12 +18,32 @@ services:
     image: emeq-hub-app:prod
     restart: unless-stopped
     env_file: .env.prod
+    # Geen publieke poort: verkeer komt via de tunnel. De loopback-bind is er
+    # alleen voor de smoke-test op de server zelf (curl http://127.0.0.1:8090/up).
+    # 8080 bewust vermeden — dat is op meerdere hosts al van een reverse proxy.
     ports:
-      - "80:80"
+      - "127.0.0.1:8090:80"
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost/up"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
     depends_on:
       db:
         condition: service_healthy
       redis:
+        condition: service_healthy
+
+  # Uitgaande connector naar Cloudflare. Token uit het Zero-Trust-dashboard
+  # (Networks → Tunnels → hub-emeq-prod → Install connector) in .env.prod.
+  # Public hostname hub.emeq.nl → service http://app:80.
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TUNNEL_TOKEN}
+    depends_on:
+      app:
         condition: service_healthy
 
   horizon:
