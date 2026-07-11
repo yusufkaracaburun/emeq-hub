@@ -5,6 +5,9 @@
 .env.prod
 .env.production
 .envrc
+# Cloudflare-tunnel-credentials (secret). De ingress-config zelf staat wél in git:
+# docker/cloudflared.yml
+.cloudflared/
 .ai-kit-setup
 .phpactor.json
 .phpunit.result.cache

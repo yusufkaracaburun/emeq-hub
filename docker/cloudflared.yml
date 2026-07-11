@@ -1,0 +1,25 @@
+# Cloudflare Tunnel — ingress voor de prod-stack.
+#
+# Bewust locally-managed (config in git) i.p.v. token/dashboard-managed: zo is de
+# routering reviewbaar in een PR en reproduceerbaar na een ongeluk, in plaats van
+# klikwerk in een dashboard dat niemand terugziet.
+#
+# Het credentials-bestand is een secret en staat NIET in git. Het komt uit
+# `cloudflared tunnel create emeq-hub-prod` (~/.cloudflared/<uuid>.json) en wordt
+# apart naar de server gekopieerd. Zie docs/deployment.md § Tunnel.
+
+tunnel: 2752f22b-797c-4c76-8066-75126f0cf83d
+credentials-file: /etc/cloudflared/credentials.json
+
+# Geen loginfo naar stdout die de docker-logs volpompt; warnings volstaan.
+loglevel: warn
+
+ingress:
+  # De app serveert plain HTTP binnen het compose-netwerk; TLS eindigt op de
+  # Cloudflare-rand. Laravel detecteert https via trustProxies + APP_URL.
+  - hostname: hub.emeq.nl
+    service: http://app:80
+
+  # Alles wat niet matcht krijgt 404 — een catch-all is verplicht, anders weigert
+  # cloudflared te starten.
+  - service: http_status:404

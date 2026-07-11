@@ -35,13 +35,17 @@ services:
       redis:
         condition: service_healthy
 
-  # Uitgaande connector naar Cloudflare. Token uit het Zero-Trust-dashboard
-  # (Networks → Tunnels → hub-emeq-prod → Install connector) in .env.prod.
-  # Public hostname hub.emeq.nl → service http://app:80.
+  # Uitgaande connector naar Cloudflare. Locally-managed: de ingress-regel
+  # (hub.emeq.nl → http://app:80) staat in docker/cloudflared.yml, in git. Het
+  # credentials-bestand is een secret en staat in .cloudflared/ op de server
+  # (gitignored). Zie docs/deployment.md § Tunnel.
   cloudflared:
     image: cloudflare/cloudflared:latest
     restart: unless-stopped
-    command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TUNNEL_TOKEN}
+    command: tunnel --no-autoupdate --config /etc/cloudflared/config.yml run
+    volumes:
+      - ./docker/cloudflared.yml:/etc/cloudflared/config.yml:ro
+      - ./.cloudflared/credentials.json:/etc/cloudflared/credentials.json:ro
     depends_on:
       app:
         condition: service_healthy
