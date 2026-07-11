@@ -65,9 +65,38 @@ bot-heuristiek.
    Het DNS-record (`CNAME` naar de tunnel, proxied) wordt automatisch gezet — een
    bestaand A-record voor `hub.emeq.nl` moet eerst weg.
 
+## Server-provisioning (eenmalig)
+
+Prod draait op een **OVH VPS-3** (6 vCore / 12 GB / 100 GB NVMe) in **Duitsland –
+Limburg**, Ubuntu 24.04 LTS. EU-regio en een ISO 27001-gecertificeerd datacenter zijn
+hier geen detail: het Exact Data & Security-formulier vraagt expliciet naar
+dataopslag-regio, logische toegang en fysieke toegang.
+
+Een kale server komt met één commando in de juiste staat:
+
+```bash
+ssh-copy-id root@<ip>                                  # sleutel erop, vóór alles
+ssh root@<ip> 'bash -s' < bin/provision-vps.sh
+```
+
+Dat doet: apt-upgrade, `unattended-upgrades` (security-patches), Docker Engine +
+compose-plugin met log-rotatie, een `deploy`-user in de `docker`-groep, de repo clonen
+naar `/home/deploy/emeq-hub`, `ufw` (**alles dicht behalve SSH**), `fail2ban`, en tot
+slot SSH-hardening (key-only, geen root-login, geen wachtwoord).
+
+> Het script weigert te draaien als er geen sleutel in `/root/.ssh/authorized_keys`
+> staat. Het zet wachtwoord-login uit; zonder werkende sleutel is de enige weg terug
+> OVH's rescue-mode.
+
+**Poort 80/443 blijven dicht.** `cloudflared` belt uit naar de Cloudflare-rand — er is
+geen inbound web-poort nodig en het origin-IP blijft verborgen.
+
+Het script vult **geen** `.env.prod` en start de stack niet: daar gaan secrets in
+(`APP_KEY`, `DB_PASSWORD`, tunnel-token). Dat is de handmatige stap hieronder.
+
 ## Vereisten (eenmalig)
 
-1. Server met Docker Engine + compose-plugin.
+1. Server geprovisioned (hierboven) — Docker Engine + compose-plugin.
 2. Cloudflare Tunnel aangemaakt (hierboven), Bot Fight Mode uit.
 3. `.env.prod` op de server (van `.env.prod.example`), met ingevuld:
    - `APP_KEY` — `docker compose -f docker-compose.prod.yml run --rm app php artisan key:generate --show`
