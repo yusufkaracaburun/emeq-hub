@@ -103,14 +103,28 @@ Beheer → Integratie-instellingen, en de Exact-tenant koppelen.
 ## Release (terugkerend)
 
 Lokaal werk landt op `master` (feature-/fix-branch → tests groen → ff-merge, zie
-[`agents/workflow.md`](agents/workflow.md)). Daarna op de server, in de checkout:
+[`agents/workflow.md`](agents/workflow.md)). Daarna, op de server in de checkout:
 
 ```bash
 make prod-deploy
 ```
 
-Dat doet: `pg_dump`-backup → `git pull --ff-only` → image herbouwen → `migrate --force`
+Dat doet: `git pull --ff-only` → `pg_dump`-backup → image herbouwen → `migrate --force`
 → `optimize` → **`app` + `horizon` + `scheduler` herstarten** → health-check.
+
+### Zonder git (rsync)
+
+Draait de server niet vanuit git — bijvoorbeeld op een staging-box waar je snel wilt
+itereren — push de working tree er dan lokaal heen en sla de pull-stap over:
+
+```bash
+make prod-rsync PROD_HOST=naschool   # lokaal; excludeert .git, vendor, node_modules, .env*
+ssh naschool 'cd emeq-hub && make prod-up'
+```
+
+`prod-up` is `prod-deploy` zonder de `git pull`. Let op wat je hiermee inlevert: er is
+geen commit-SHA die vertelt wát er draait, en de rollback uit § Rollback (checkout van
+een eerdere SHA) werkt niet. Voor een echte prod-host is de git-route de juiste.
 
 > **Waarom die restart**: worker-mode houdt code in geheugen. `up --build` vervangt de
 > app-container, maar `horizon` en `scheduler` draaien door op de oude image tot een

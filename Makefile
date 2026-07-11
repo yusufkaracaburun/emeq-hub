@@ -6,9 +6,14 @@ TUNNEL_LOG := storage/logs/cloudflared.log
 PROD := docker compose -f docker-compose.prod.yml --env-file .env.prod
 BACKUP_DIR := backups
 
+# Doel voor `prod-rsync` (draait wél lokaal). Overschrijf per host:
+#   make prod-rsync PROD_HOST=hub-vps
+PROD_HOST ?= naschool
+PROD_PATH ?= /home/ubuntu/emeq-hub
+
 .DEFAULT_GOAL := help
 .PHONY: help up down restart urls fresh seed-books logs logs-clean shell test ps tunnel tunnel-up tunnel-stop \
-	prod-deploy prod-logs prod-ps prod-shell prod-backup prod-down
+	prod-deploy prod-up prod-rsync prod-logs prod-ps prod-shell prod-backup prod-down
 
 help: ## Toon deze hulp
 	@grep -E '^[a-z-]+:.*##' $(MAKEFILE_LIST) | sort | awk 'BEGIN{FS=":.*## "}{printf "  \033[36m%-12s\033[0m %s\n", $$1, $$2}'
@@ -79,16 +84,28 @@ tunnel: ## Start de tunnel op de VOORgrond (live logs; kill eerst alle bestaande
 ## Prod — draai deze targets op de server, in de repo-checkout naast .env.prod.
 ## ---------------------------------------------------------------------------
 
-prod-deploy: ## [server] Release: backup → build → migrate → optimize → workers herstarten
+prod-deploy: ## [server] Release vanuit git: pull → prod-up
+	git pull --ff-only
+	@$(MAKE) --no-print-directory prod-up
+
+prod-up: ## [server] Release zonder git (na `prod-rsync`): backup → build → migrate → restart
 	@test -f .env.prod || { echo "  ✖ .env.prod ontbreekt (kopieer .env.prod.example)"; exit 1; }
 	@$(MAKE) --no-print-directory prod-backup
-	git pull --ff-only
 	$(PROD) up -d --build
 	$(PROD) exec -T app sh -c "php artisan migrate --force && php artisan optimize"
 	@# Worker-mode houdt code in geheugen: horizon/scheduler draaien de oude image
 	@# tot een expliciete restart. Altijd samen met app herstarten.
 	$(PROD) restart app horizon scheduler
 	@$(PROD) exec -T app curl -fsS http://localhost/up && echo "\n  ✅ deploy ok"
+
+prod-rsync: ## [lokaal] Push de working tree naar de server (PROD_HOST/PROD_PATH), zonder git
+	rsync -az --delete \
+		--exclude '.git' --exclude 'vendor' --exclude 'node_modules' \
+		--exclude '.env' --exclude '.env.*' --exclude 'backups' \
+		--exclude 'packages' --exclude 'public/build' --exclude 'public/hot' \
+		--exclude 'storage/logs/*' --exclude 'storage/framework/cache/data/*' \
+		./ $(PROD_HOST):$(PROD_PATH)/
+	@echo "  📤 gesynct naar $(PROD_HOST):$(PROD_PATH) — draai daar 'make prod-up'"
 
 prod-backup: ## [server] pg_dump naar backups/ (draait automatisch vóór prod-deploy)
 	@mkdir -p $(BACKUP_DIR)
