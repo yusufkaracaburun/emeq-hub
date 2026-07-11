@@ -24,7 +24,9 @@ services:
     ports:
       - "127.0.0.1:8090:80"
     healthcheck:
-      test: ["CMD", "curl", "-fsS", "http://localhost/up"]
+      # Expliciet op 200 testen: `curl -fsS` faalt alleen op 4xx/5xx en slikt een
+      # 3xx, dus een redirect-lus kwam er als "healthy" doorheen.
+      test: ["CMD-SHELL", "test \"$$(curl -s -o /dev/null -w '%{http_code}' http://localhost/up)\" = 200"]
       interval: 30s
       timeout: 5s
       retries: 3

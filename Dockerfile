@@ -71,11 +71,16 @@ RUN npm run build
 
 # ============================================================================
 # prod — immutable image: code gebakken, deps zonder dev, productie-ini,
-# worker-mode zonder watch. Caddyfile met auto-HTTPS via SERVER_NAME.
+# worker-mode zonder watch. TLS eindigt op de Cloudflare-rand; de origin serveert
+# plain HTTP (auto_https off in docker/Caddyfile).
 # ============================================================================
 FROM base AS prod
 RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
-COPY docker/Caddyfile /etc/caddy/Caddyfile
+# /etc/frankenphp/, niet /etc/caddy/: het entrypoint draait
+# `frankenphp run --config /etc/frankenphp/Caddyfile`. Op de oude plek werd onze
+# config genegeerd en gold de image-default — die doet auto-HTTPS en beantwoordde
+# elke request met een 308 naar https://localhost.
+COPY docker/Caddyfile /etc/frankenphp/Caddyfile
 COPY . /app
 COPY --from=assets /app/public/build /app/public/build
 RUN composer install --no-dev --optimize-autoloader --no-interaction
