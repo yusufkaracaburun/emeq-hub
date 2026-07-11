@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\Consumers;
 
-use App\Filament\Resources\Consumers\Pages\CreateConsumer;
 use App\Filament\Resources\Consumers\Pages\EditConsumer;
 use App\Filament\Resources\Consumers\Pages\ListConsumers;
 use App\Filament\Resources\Consumers\Pages\ViewConsumer;
@@ -195,8 +194,10 @@ class ConsumerResource extends Resource
     public static function getPages(): array
     {
         return [
+            // Geen 'create': een Consumer ontstaat alleen via de onboard-wizard, die
+            // ook de PAT en app_url zet. Een kale create-route leverde een Consumer op
+            // die niets kon koppelen.
             'index' => ListConsumers::route('/'),
-            'create' => CreateConsumer::route('/create'),
             'view' => ViewConsumer::route('/{record}'),
             'edit' => EditConsumer::route('/{record}/edit'),
         ];
