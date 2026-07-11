@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Provisioning voor een verse Ubuntu-24.04-VPS die emeq-hub in prod draait.
+# Provisioning voor een verse Ubuntu-LTS-VPS die emeq-hub in prod draait.
+# Getest tegen 26.04 (resolute); werkt op elke LTS die Docker indexeert.
 #
 # Draai als root op de kale server:
 #   ssh root@<ip> 'bash -s' < bin/provision-vps.sh
@@ -49,12 +50,20 @@ dpkg-reconfigure -f noninteractive unattended-upgrades
 # ── 2. Docker Engine + compose-plugin (officiële repo, niet de apt-versie) ────
 if ! command -v docker >/dev/null 2>&1; then
     log "Docker Engine installeren"
+
+    # Docker's repo indexeert per Ubuntu-codename. Ontbreekt die, dan faalt
+    # `apt-get install docker-ce` met een cryptische 404 op een Packages-index.
+    # Liever hier stoppen met een leesbare melding.
+    CODENAME="$(. /etc/os-release && echo "$VERSION_CODENAME")"
+    curl -fsSI "https://download.docker.com/linux/ubuntu/dists/${CODENAME}/Release" >/dev/null 2>&1 \
+        || die "Docker heeft geen repo voor Ubuntu '${CODENAME}' — kies een LTS die Docker wél indexeert (https://download.docker.com/linux/ubuntu/dists/)"
+
     install -m 0755 -d /etc/apt/keyrings
     curl -fsSL https://download.docker.com/linux/ubuntu/gpg \
         -o /etc/apt/keyrings/docker.asc
     chmod a+r /etc/apt/keyrings/docker.asc
     echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] \
-https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo "$VERSION_CODENAME") stable" \
+https://download.docker.com/linux/ubuntu ${CODENAME} stable" \
         > /etc/apt/sources.list.d/docker.list
     apt-get update -qq
     apt-get install -y -qq \

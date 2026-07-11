@@ -68,9 +68,14 @@ bot-heuristiek.
 ## Server-provisioning (eenmalig)
 
 Prod draait op een **OVH VPS-3** (6 vCore / 12 GB / 100 GB NVMe) in **Duitsland –
-Limburg**, Ubuntu 24.04 LTS. EU-regio en een ISO 27001-gecertificeerd datacenter zijn
-hier geen detail: het Exact Data & Security-formulier vraagt expliciet naar
-dataopslag-regio, logische toegang en fysieke toegang.
+Limburg**, **Ubuntu 26.04 LTS** (support tot 2031). EU-regio en een ISO 27001-
+gecertificeerd datacenter zijn hier geen detail: het Exact Data & Security-formulier
+vraagt expliciet naar dataopslag-regio, logische toegang en fysieke toegang.
+
+De host draait alleen Docker, ufw, fail2ban en unattended-upgrades — de
+applicatie-runtime (PHP 8.4, FrankenPHP, Postgres, Redis) zit in containers en raakt de
+distro niet. Vandaar de langste LTS: deze machine bewaart de `APP_KEY` en die wil je zo
+min mogelijk verhuizen.
 
 Een kale server komt met één commando in de juiste staat:
 
