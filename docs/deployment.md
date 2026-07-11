@@ -57,13 +57,34 @@ bot-heuristiek.
 
 ### Tunnel aanmaken (eenmalig)
 
-1. Zero-Trust-dashboard → **Networks → Tunnels → Create a tunnel** → type `Cloudflared`,
-   naam `hub-emeq-prod`.
-2. Kopieer het **connector-token** (begint met `ey…`) → `.env.prod` als
-   `CLOUDFLARE_TUNNEL_TOKEN`. Dit is een secret.
-3. **Public hostname** toevoegen: `hub.emeq.nl` → service `http://app:80`.
-   Het DNS-record (`CNAME` naar de tunnel, proxied) wordt automatisch gezet — een
-   bestaand A-record voor `hub.emeq.nl` moet eerst weg.
+De tunnel is **locally-managed**: de ingress staat in `docker/cloudflared.yml`, in git —
+niet token/dashboard-managed, want dan leeft de routering in een dashboard, onzichtbaar
+bij review.
+
+```bash
+cloudflared tunnel login                                    # eenmalig, schrijft cert.pem
+cloudflared tunnel create emeq-hub-prod                     # → ~/.cloudflared/<uuid>.json
+cloudflared --config /dev/null tunnel route dns --overwrite-dns <uuid> hub.emeq.nl
+```
+
+Zet het uuid uit stap 2 in `docker/cloudflared.yml` (`tunnel:`) en breng het
+credentials-bestand naar de server — dat is een secret, `.cloudflared/` is gitignored:
+
+```bash
+cat ~/.cloudflared/<uuid>.json \
+  | ssh hub 'sudo -u deploy tee /home/deploy/emeq-hub/.cloudflared/credentials.json >/dev/null'
+ssh hub 'sudo chown 65532:65532 /home/deploy/emeq-hub/.cloudflared/credentials.json'
+```
+
+> **Die `chown` is niet optioneel.** De `cloudflare/cloudflared`-image draait als uid
+> **65532** (nonroot) en kan een `0600`-bestand van `deploy` niet lezen. Gevolg: een
+> restart-loop met `couldn't read tunnel credentials: permission denied`. Eigenaar 65532
+> + mode 0600 houdt het secret dicht én leesbaar voor de connector.
+
+> **`--config /dev/null` evenmin.** Bestaat er een `~/.cloudflared/config.yml` (die van
+> de dev-tunnel), dan laat `tunnel route dns` díé config vóórgaan op het naam-argument
+> en routeert je hostname naar de **verkeerde tunnel** — mét een succesmelding. Geef het
+> uuid expliciet mee en zet de config opzij.
 
 ## Server-provisioning (eenmalig)
 
