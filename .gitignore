@@ -54,3 +54,6 @@ frankenphp-worker.php
 
 # pg_dump-output van `make prod-backup` (staat op de server, nooit in git)
 /backups
+
+# graphify knowledge graph — generated, large, rebuildable with `graphify .`
+/graphify-out

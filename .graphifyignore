@@ -1,0 +1,86 @@
+# Dependencies — matched at ANY depth, not just the root.
+# emeq-hub has vendor/ at the root, a nested vendor/vendor/, and one per package
+# under packages/*/vendor/. A root-only `vendor/` pattern would miss the last two
+# and they would dominate the graph — that is exactly what happened in emeq,
+# where a stray Laravel copy became 72% of all nodes and every query returned
+# PHPUnit internals.
+**/vendor/
+vendor/
+**/node_modules/
+node_modules/
+.pnpm-store/
+
+# Laravel runtime + build artefacts
+storage/framework/
+storage/logs/
+storage/app/public/
+bootstrap/cache/
+public/build/
+public/hot/
+public/storage/
+
+# Build outputs
+dist/
+build/
+.next/
+.vite/
+.turbo/
+.cache/
+out/
+
+# Generated test + report artefacts — output, not architecture
+test-results/
+test-output/
+playwright-report/
+coverage/
+.phpunit.cache/
+
+# IDE / OS
+.idea/
+.vscode/
+.fleet/
+.zed/
+.DS_Store
+
+# Agent / tooling scratch
+.tmp/
+.scratch/
+.agents/worktrees/
+.claude/tdd-guard/
+.playwright-cli/
+.playwright-mcp/
+
+# Locks (no architecture info)
+package-lock.json
+pnpm-lock.yaml
+composer.lock
+yarn.lock
+bun.lockb
+*.lock
+*.lockb
+
+# Binary assets
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.svg
+*.webp
+*.ico
+*.woff
+*.woff2
+*.ttf
+*.eot
+*.mp4
+*.webm
+*.mp3
+*.wav
+*.pdf
+*.zip
+*.tar.gz
+
+# Logs
+*.log
+
+# Graphify self (prevent recursion)
+graphify-out/
