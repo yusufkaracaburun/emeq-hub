@@ -44,6 +44,16 @@ RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 COPY docker/php/dev-overlay.ini "$PHP_INI_DIR/conf.d/zz-dev.ini"
 
 # ============================================================================
+# vendor — composer-deps als losse stage, puur zodat de assets-stage erbij kan.
+# ============================================================================
+FROM base AS vendor
+WORKDIR /app
+COPY composer.json composer.lock ./
+# --no-scripts: package:discover heeft de volledige app nodig, die hier niet staat.
+# --no-autoloader: de prod-stage genereert de autoloader zelf, met de echte source.
+RUN composer install --no-dev --no-scripts --no-autoloader --no-interaction --prefer-dist
+
+# ============================================================================
 # assets — gebouwde frontend voor prod (komt niet in dev; daar draait Vite-HMR).
 # ============================================================================
 FROM node:22-slim AS assets
@@ -51,6 +61,12 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci
 COPY . .
+# resources/css/filament/admin/theme.css importeert
+# ../../../../vendor/filament/filament/resources/css/theme.css. `vendor` staat in
+# .dockerignore, dus zonder deze COPY draait de Vite-build op een lege map en
+# faalt hij op een niet-resolvebare import. Lokaal valt dat niet op — daar staat
+# vendor/ gewoon op schijf.
+COPY --from=vendor /app/vendor ./vendor
 RUN npm run build
 
 # ============================================================================

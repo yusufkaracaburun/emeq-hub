@@ -6,14 +6,20 @@ TUNNEL_LOG := storage/logs/cloudflared.log
 PROD := docker compose -f docker-compose.prod.yml --env-file .env.prod
 BACKUP_DIR := backups
 
-# Doel voor `prod-rsync` (draait wél lokaal). Overschrijf per host:
-#   make prod-rsync PROD_HOST=hub-vps
-PROD_HOST ?= naschool
-PROD_PATH ?= /home/ubuntu/emeq-hub
+# Doel voor `prod-rsync` en `prod-mirror` (die draaien wél lokaal). `hub` is de
+# ssh-alias van de prod-VPS; de app-checkout is eigendom van de `deploy`-user, en
+# /home/deploy is niet leesbaar voor de login-user — vandaar `sudo -u deploy
+# rsync` aan de serverkant. Overschrijf per host: make prod-mirror PROD_HOST=…
+PROD_HOST ?= hub
+PROD_PATH ?= /home/deploy/emeq-hub
+PROD_RSYNC := sudo -u deploy rsync
+
+# Spiegel van de server-checkout. Bevat .env.prod + tunnel-credentials → .gitignore.
+MIRROR_DIR ?= .tmp/server
 
 .DEFAULT_GOAL := help
 .PHONY: help up down restart urls fresh seed-books logs logs-clean shell test ps tunnel tunnel-up tunnel-stop \
-	prod-deploy prod-up prod-rsync prod-logs prod-ps prod-shell prod-backup prod-down
+	prod-deploy prod-up prod-rsync prod-mirror prod-logs prod-ps prod-shell prod-backup prod-down
 
 help: ## Toon deze hulp
 	@grep -E '^[a-z-]+:.*##' $(MAKEFILE_LIST) | sort | awk 'BEGIN{FS=":.*## "}{printf "  \033[36m%-12s\033[0m %s\n", $$1, $$2}'
@@ -100,12 +106,23 @@ prod-up: ## [server] Release zonder git (na `prod-rsync`): backup → build → 
 
 prod-rsync: ## [lokaal] Push de working tree naar de server (PROD_HOST/PROD_PATH), zonder git
 	rsync -az --delete \
+		--rsync-path="$(PROD_RSYNC)" \
 		--exclude '.git' --exclude 'vendor' --exclude 'node_modules' \
 		--exclude '.env' --exclude '.env.*' --exclude 'backups' \
+		--exclude '.cloudflared' --exclude '.tmp' \
 		--exclude 'packages' --exclude 'public/build' --exclude 'public/hot' \
 		--exclude 'storage/logs/*' --exclude 'storage/framework/cache/data/*' \
 		./ $(PROD_HOST):$(PROD_PATH)/
 	@echo "  📤 gesynct naar $(PROD_HOST):$(PROD_PATH) — draai daar 'make prod-up'"
+
+prod-mirror: ## [lokaal] Haal de server-checkout op naar $(MIRROR_DIR) (incl. secrets!)
+	@mkdir -p $(MIRROR_DIR)
+	rsync -az --delete \
+		--rsync-path="$(PROD_RSYNC)" \
+		--exclude 'vendor/' --exclude 'node_modules/' \
+		$(PROD_HOST):$(PROD_PATH)/ $(MIRROR_DIR)/
+	@echo "  📥 gespiegeld: $(PROD_HOST):$(PROD_PATH) → $(MIRROR_DIR)"
+	@echo "  ⚠  bevat .env.prod (APP_KEY!) en .cloudflared/credentials.json — niet delen, niet committen"
 
 prod-backup: ## [server] pg_dump naar backups/ (draait automatisch vóór prod-deploy)
 	@mkdir -p $(BACKUP_DIR)

@@ -8,6 +8,9 @@
 # Cloudflare-tunnel-credentials (secret). De ingress-config zelf staat wél in git:
 # docker/cloudflared.yml
 .cloudflared/
+# Scratch/spiegel van de prod-server. Bevat .env.prod en tunnel-credentials —
+# nooit committen.
+.tmp/
 .ai-kit-setup
 .phpactor.json
 .phpunit.result.cache
