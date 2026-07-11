@@ -109,6 +109,12 @@ prod-rsync: ## [lokaal] Push de working tree naar de server (PROD_HOST/PROD_PATH
 
 prod-backup: ## [server] pg_dump naar backups/ (draait automatisch vóór prod-deploy)
 	@mkdir -p $(BACKUP_DIR)
+	@# Bij de eerste deploy draait er nog geen db-container en is er niets te
+	@# dumpen. Zonder deze guard sterft `prod-up` op zijn eigen backup-stap.
+	@if [ -z "$$($(PROD) ps -q db 2>/dev/null)" ]; then \
+		echo "  ⏭  geen draaiende db — eerste deploy, backup overgeslagen"; \
+		exit 0; \
+	fi
 	@$(PROD) exec -T db pg_dump -U "$$(grep -E '^DB_USERNAME=' .env.prod | cut -d= -f2)" \
 		-d "$$(grep -E '^DB_DATABASE=' .env.prod | cut -d= -f2)" \
 		| gzip > "$(BACKUP_DIR)/emeq-hub-$$(date +%Y%m%d-%H%M%S).sql.gz"
