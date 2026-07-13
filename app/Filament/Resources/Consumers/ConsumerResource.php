@@ -230,6 +230,7 @@ class ConsumerResource extends Resource
     {
         return [
             RelationManagers\AccountsRelationManager::class,
+            RelationManagers\TokensRelationManager::class,
         ];
     }
 
