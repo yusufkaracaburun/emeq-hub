@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Admin;
 
-use App\Enums\Provider;
 use App\Filament\Pages\OnboardConsumer;
 use App\Filament\Resources\Consumers\ConsumerResource;
 use App\Filament\Resources\Consumers\Pages\ListConsumers;
@@ -21,15 +20,13 @@ use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 /**
- * Plan 08-02 — OnboardConsumer Filament-page met 4-staps Wizard.
+ * OnboardConsumer — Filament-wizard die een Consumer + PAT aanmaakt.
  *
  * Dekt:
  *  - RBAC: canAccess() + page-route 403 zonder manage-consumers
- *  - Page render: Wizard + 4 step-titels uit UI-SPEC §S1
- *  - Stap 3 descriptor-driven provider-keuze (Mollie + Snelstart)
- *  - Stap 3 branch-content (Mollie helper-text + Snelstart 3 credential-velden)
+ *  - Page render: twee stappen, géén Account/Connection
  *  - Header-action in ListConsumers (Onboarden) + visibility-gate
- *  - Happy-path submit → ConsumerOnboarding service → DB-rijen + Cache-flash
+ *  - Happy-path submit → ConsumerOnboarding → Consumer + PAT, en verder niets
  *  - No-secret-leak invariant: plain PAT + plain webhook_callback_secret eenmalig
  */
 class OnboardConsumerTest extends TestCase
@@ -94,37 +91,21 @@ class OnboardConsumerTest extends TestCase
     }
 
     // ============================================================
-    // Task 1 Test 2: Page rendert 4 step-titels
+    // Page rendert twee stappen
     // ============================================================
 
-    public function test_onboard_page_renders_wizard_with_four_step_titles(): void
+    public function test_onboard_page_renders_two_step_wizard(): void
     {
         $this->actAsStaffWithPermission();
 
         $response = $this->get(OnboardConsumer::getUrl());
 
         $response->assertOk();
-        // Canonical NL-copy uit UI-SPEC §S1 regel 137-140
         $response->assertSeeText('Consumer');
-        $response->assertSeeText('Eerste Account');
-        $response->assertSeeText('Eerste Connection');
         $response->assertSeeText('PAT uitgeven');
-    }
-
-    // ============================================================
-    // Task 1 Test 5: Stap 3 descriptor-driven (Mollie + Snelstart options)
-    // ============================================================
-
-    public function test_step_three_provider_options_come_from_descriptor(): void
-    {
-        $this->actAsStaffWithPermission();
-
-        $response = $this->get(OnboardConsumer::getUrl());
-
-        $response->assertOk();
-        // Beide providers uit config/hub-providers.php moeten als radio-option verschijnen
-        $response->assertSee('mollie', false);
-        $response->assertSee('snelstart', false);
+        // Account en Connection horen niet in de admin-wizard: die ontstaan bij de Consumer.
+        $response->assertDontSeeText('Eerste Account');
+        $response->assertDontSeeText('Eerste Connection');
     }
 
     // ============================================================
@@ -154,7 +135,8 @@ class OnboardConsumerTest extends TestCase
     }
 
     // ============================================================
-    // Task 2 Test 5: Happy-path submit creëert Consumer + Account + Connection + PAT
+    // Happy path: de wizard maakt een Consumer + PAT, en verder niets. Accounts en
+    // Connections ontstaan runtime bij de Consumer (oauth/init resp. de OAuth-flow).
     // ============================================================
 
     public function test_happy_path_provisions_all_artifacts(): void
@@ -167,14 +149,6 @@ class OnboardConsumerTest extends TestCase
                 'slug' => 'naschool-test',
                 'webhook_callback_url' => 'https://naschool.test/webhooks/hub',
                 'webhook_callback_secret' => 'plain-webhook-secret-from-staff',
-                'external_id' => 'school1',
-                'display_name' => 'School A',
-                'connection' => [
-                    'provider' => 'snelstart',
-                    'client_key' => 'test-client-key',
-                    'subscription_key' => 'test-subscription-key',
-                    'subscription_id' => 'test-subscription-id',
-                ],
                 'pat' => [
                     'preset' => 'admin',
                     'token_name' => 'naschool-onboard',
@@ -186,15 +160,11 @@ class OnboardConsumerTest extends TestCase
         $consumer = Consumer::where('slug', 'naschool-test')->first();
         $this->assertNotNull($consumer, 'Consumer-rij moet bestaan na happy-path submit');
         $this->assertSame('Naschool Test', $consumer->name);
-        $this->assertSame(1, $consumer->accounts()->count());
 
-        $account = $consumer->accounts()->first();
-        $this->assertSame('school1', $account->external_id);
-        $this->assertSame('School A', $account->display_name);
-
-        $connection = $account->connections()->first();
-        $this->assertNotNull($connection, 'Snelstart Connection-rij moet bestaan');
-        $this->assertSame(Provider::Snelstart, $connection->provider);
+        // De admin kent de external_id van een eindklant niet en kan geen OAuth-tokens
+        // invullen — de wizard hoort hier dus niets te hebben aangemaakt.
+        $this->assertSame(0, $consumer->accounts()->count(), 'Wizard mag geen Account aanmaken');
+        $this->assertSame(0, $consumer->connections()->count(), 'Wizard mag geen Connection aanmaken');
 
         $this->assertSame(1, $consumer->tokens()->count());
         $token = $consumer->tokens()->first();
@@ -216,14 +186,6 @@ class OnboardConsumerTest extends TestCase
             ->fillForm([
                 'name' => 'Naschool Two',
                 'slug' => 'naschool-two',
-                'external_id' => 'school2',
-                'display_name' => 'School B',
-                'connection' => [
-                    'provider' => 'snelstart',
-                    'client_key' => 'k2',
-                    'subscription_key' => 's2',
-                    'subscription_id' => 'id2',
-                ],
                 'pat' => [
                     'preset' => 'mollie-read',
                     'token_name' => 'token-two',
@@ -263,14 +225,6 @@ class OnboardConsumerTest extends TestCase
                 'name' => 'Naschool Three',
                 'slug' => 'naschool-three',
                 'webhook_callback_secret' => 'staff-supplied-secret-XYZ',
-                'external_id' => 'school3',
-                'display_name' => 'School C',
-                'connection' => [
-                    'provider' => 'snelstart',
-                    'client_key' => 'k3',
-                    'subscription_key' => 's3',
-                    'subscription_id' => 'id3',
-                ],
                 'pat' => [
                     'preset' => 'mollie-read',
                     'token_name' => 'token-three',
@@ -312,14 +266,6 @@ class OnboardConsumerTest extends TestCase
             ->fillForm([
                 'name' => 'Naschool Flash',
                 'slug' => 'naschool-flash',
-                'external_id' => 'school-flash',
-                'display_name' => 'School Flash',
-                'connection' => [
-                    'provider' => 'snelstart',
-                    'client_key' => 'k',
-                    'subscription_key' => 's',
-                    'subscription_id' => 'id',
-                ],
                 'pat' => [
                     'preset' => 'admin',
                     'token_name' => 'flash-token',
@@ -357,14 +303,6 @@ class OnboardConsumerTest extends TestCase
                 'name' => 'Naschool Secret',
                 'slug' => 'naschool-secret',
                 'webhook_callback_secret' => 'plain-secret-ABC',
-                'external_id' => 'school-secret',
-                'display_name' => 'School Secret',
-                'connection' => [
-                    'provider' => 'snelstart',
-                    'client_key' => 'k',
-                    'subscription_key' => 's',
-                    'subscription_id' => 'id',
-                ],
                 'pat' => [
                     'preset' => 'mollie-read',
                     'token_name' => 'secret-token',
@@ -407,14 +345,6 @@ class OnboardConsumerTest extends TestCase
             ->fillForm([
                 'name' => 'Naschool Bad',
                 'slug' => 'naschool-bad',
-                'external_id' => 'school-bad',
-                'display_name' => 'School Bad',
-                'connection' => [
-                    'provider' => 'snelstart',
-                    'client_key' => 'k',
-                    'subscription_key' => 's',
-                    'subscription_id' => 'id',
-                ],
                 'pat' => [
                     'preset' => 'admin',
                     'token_name' => 'bad-token',
@@ -432,31 +362,5 @@ class OnboardConsumerTest extends TestCase
                 ->body('Onbekende abilities: snelstart:demolish-universe')
                 ->danger()
         );
-    }
-
-    // ============================================================
-    // WR-06: server-side guard als buildConnectionPayload() null retourneert.
-    //
-    // Filament's Radio::required()-validatie weert dit pad af in de normale
-    // wizard-flow. De source-guard is defense-in-depth voor edge-cases:
-    // Filament-v4 wizard step-skipping bugs, Action::execute() buiten de
-    // form-flow, of een toekomstige schema-wijziging die provider optioneel
-    // maakt. Daarom geen end-to-end test (Filament zou hem blocken vóór de
-    // guard) maar wel een direct-invariant test op de helper-methode-output.
-    // ============================================================
-
-    public function test_build_connection_payload_returns_null_for_missing_provider(): void
-    {
-        // Reflection-test op de private helper die submit() gebruikt. Bewijst
-        // dat de guard-conditie (`null === buildConnectionPayload(...)`) ooit
-        // triggert bij empty input — de submit-side van die guard zit één
-        // method-boundary verder maar is via inspection direct controleerbaar
-        // in OnboardConsumer::submit().
-        $reflection = new \ReflectionClass(OnboardConsumer::class);
-        $method = $reflection->getMethod('buildConnectionPayload');
-        $method->setAccessible(true);
-
-        $this->assertNull($method->invoke(null, []));
-        $this->assertNull($method->invoke(null, ['provider' => null]));
     }
 }

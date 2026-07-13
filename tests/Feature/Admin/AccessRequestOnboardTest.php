@@ -80,9 +80,6 @@ class AccessRequestOnboardTest extends TestCase
             ->fillForm([
                 'name' => 'Koppel BV',
                 'slug' => 'koppel-bv',
-                'external_id' => 'klant1',
-                'display_name' => 'Klant 1',
-                'connection' => $this->snelstartConnection('1'),
                 'pat' => [
                     'preset' => 'snelstart-write',
                     'token_name' => 'koppel-onboard',
@@ -107,9 +104,6 @@ class AccessRequestOnboardTest extends TestCase
             ->fillForm([
                 'name' => 'Los BV',
                 'slug' => 'los-bv',
-                'external_id' => 'klant2',
-                'display_name' => 'Klant 2',
-                'connection' => $this->snelstartConnection('2'),
                 'pat' => [
                     'preset' => 'snelstart-write',
                     'token_name' => 'los-onboard',

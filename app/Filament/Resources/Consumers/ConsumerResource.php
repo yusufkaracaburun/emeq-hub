@@ -15,7 +15,7 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\CheckboxList;
-use Filament\Forms\Components\Radio;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
@@ -35,57 +35,99 @@ class ConsumerResource extends Resource
     public const ISSUE_PAT_ACTION = 'issuePat';
 
     /**
-     * Preset-shape per D-03: slug-keyed map met label + abilities.
+     * Preset-shape per D-03: slug-keyed map met group + label + abilities.
      * Unie van alle preset-abilities + PAT_CUSTOM_ONLY MOET TokenAbilities::all() afdekken
      * (regressie-vangnet via PatAbilityPresetsTest).
      *
-     * @var array<string, array{label: string, abilities: list<string>}>
+     * `koppelen + read/write` bestaat omdat dát de normale consumer-token is: eerst de
+     * OAuth-flow starten (integrations:manage), daarna calls doen. Zonder die preset moest
+     * je voor het meest voorkomende geval naar Custom.
+     *
+     * @var array<string, array{group: string, label: string, abilities: list<string>}>
      */
     public const PAT_PRESETS = [
-        'mollie-read' => [
-            'label' => 'Mollie read-only',
-            'abilities' => [TokenAbilities::MOLLIE_READ],
-        ],
-        'mollie-write' => [
-            'label' => 'Mollie read+write',
-            'abilities' => [
-                TokenAbilities::MOLLIE_READ,
-                TokenAbilities::MOLLIE_WRITE,
-                TokenAbilities::CONSUMER_MANAGE_ACCOUNTS,
-            ],
-        ],
-        'snelstart-read' => [
-            'label' => 'Snelstart read-only',
-            'abilities' => [TokenAbilities::SNELSTART_READ],
-        ],
-        'snelstart-write' => [
-            'label' => 'Snelstart read+write',
-            'abilities' => [
-                TokenAbilities::SNELSTART_READ,
-                TokenAbilities::SNELSTART_WRITE,
-                TokenAbilities::CONSUMER_MANAGE_ACCOUNTS,
-            ],
-        ],
         'exact-read' => [
-            'label' => 'Exact Online read-only',
+            'group' => 'Exact Online',
+            'label' => 'Read-only',
             'abilities' => [TokenAbilities::EXACT_READ],
         ],
         'exact-write' => [
-            'label' => 'Exact Online read+write',
+            'group' => 'Exact Online',
+            'label' => 'Read + write',
             'abilities' => [
                 TokenAbilities::EXACT_READ,
                 TokenAbilities::EXACT_WRITE,
                 TokenAbilities::CONSUMER_MANAGE_ACCOUNTS,
             ],
         ],
+        'exact-connect' => [
+            'group' => 'Exact Online',
+            'label' => 'Koppelen + read/write',
+            'abilities' => [
+                TokenAbilities::INTEGRATIONS_MANAGE,
+                TokenAbilities::EXACT_READ,
+                TokenAbilities::EXACT_WRITE,
+                TokenAbilities::CONSUMER_MANAGE_ACCOUNTS,
+            ],
+        ],
+        'mollie-read' => [
+            'group' => 'Mollie',
+            'label' => 'Read-only',
+            'abilities' => [TokenAbilities::MOLLIE_READ],
+        ],
+        'mollie-write' => [
+            'group' => 'Mollie',
+            'label' => 'Read + write',
+            'abilities' => [
+                TokenAbilities::MOLLIE_READ,
+                TokenAbilities::MOLLIE_WRITE,
+                TokenAbilities::CONSUMER_MANAGE_ACCOUNTS,
+            ],
+        ],
+        'mollie-connect' => [
+            'group' => 'Mollie',
+            'label' => 'Koppelen + read/write',
+            'abilities' => [
+                TokenAbilities::INTEGRATIONS_MANAGE,
+                TokenAbilities::MOLLIE_READ,
+                TokenAbilities::MOLLIE_WRITE,
+                TokenAbilities::CONSUMER_MANAGE_ACCOUNTS,
+            ],
+        ],
+        'snelstart-read' => [
+            'group' => 'Snelstart',
+            'label' => 'Read-only',
+            'abilities' => [TokenAbilities::SNELSTART_READ],
+        ],
+        'snelstart-write' => [
+            'group' => 'Snelstart',
+            'label' => 'Read + write',
+            'abilities' => [
+                TokenAbilities::SNELSTART_READ,
+                TokenAbilities::SNELSTART_WRITE,
+                TokenAbilities::CONSUMER_MANAGE_ACCOUNTS,
+            ],
+        ],
+        'snelstart-connect' => [
+            'group' => 'Snelstart',
+            'label' => 'Koppelen + read/write',
+            'abilities' => [
+                TokenAbilities::INTEGRATIONS_MANAGE,
+                TokenAbilities::SNELSTART_READ,
+                TokenAbilities::SNELSTART_WRITE,
+                TokenAbilities::CONSUMER_MANAGE_ACCOUNTS,
+            ],
+        ],
         'integrations' => [
-            'label' => 'Integraties (alle providers koppelen)',
+            'group' => 'Overig',
+            'label' => 'Alleen koppelen (alle providers)',
             'abilities' => [
                 TokenAbilities::INTEGRATIONS_MANAGE,
                 TokenAbilities::CONSUMER_MANAGE_ACCOUNTS,
             ],
         ],
         'admin' => [
+            'group' => 'Overig',
             'label' => 'Admin',
             'abilities' => [TokenAbilities::ADMIN],
         ],
@@ -219,10 +261,10 @@ class ConsumerResource extends Resource
                     ->label('Token name')
                     ->required()
                     ->maxLength(255),
-                Radio::make('preset')
+                Select::make('preset')
                     ->label('Preset')
-                    ->options(self::presetRadioOptions())
-                    ->default('mollie-read')
+                    ->options(self::presetOptions())
+                    ->native(false)
                     ->required()
                     ->live(),
                 CheckboxList::make('abilities')
@@ -253,15 +295,18 @@ class ConsumerResource extends Resource
     }
 
     /**
-     * @return array<string, string>
+     * Gegroepeerd per provider — de vlakke lijst liet je zoeken tussen negen opties
+     * die per ability geordend waren in plaats van per taak.
+     *
+     * @return array<string, array<string, string>>
      */
-    private static function presetRadioOptions(): array
+    public static function presetOptions(): array
     {
         $options = [];
         foreach (self::PAT_PRESETS as $slug => $entry) {
-            $options[$slug] = $entry['label'];
+            $options[$entry['group']][$slug] = $entry['label'];
         }
-        $options['custom'] = 'Custom...';
+        $options['Overig']['custom'] = 'Custom…';
 
         return $options;
     }

@@ -4,20 +4,16 @@ declare(strict_types=1);
 
 namespace App\Filament\Pages;
 
-use App\Enums\Provider;
 use App\Filament\Resources\Consumers\ConsumerResource;
 use App\Models\AccessRequest;
 use App\Sanctum\TokenAbilities;
 use App\Services\ConsumerOnboarding;
-use App\Support\ProviderCredentialDescriptor;
 use BackedEnum;
 use Filament\Forms\Components\CheckboxList;
-use Filament\Forms\Components\Radio;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
-use Filament\Schemas\Components\Group;
-use Filament\Schemas\Components\Text;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Wizard;
 use Filament\Schemas\Components\Wizard\Step;
@@ -29,19 +25,18 @@ use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
 
 /**
- * Plan 08-02 — Filament Consumer-onboard-wizard (D-04, UI-SPEC S1).
+ * Filament-wizard die een Consumer + PAT aanmaakt, atomisch via
+ * App\Services\ConsumerOnboarding.
  *
- * Standalone Filament Page met 4-staps Wizard die de Phase-3 onboarding-flow
- * (Consumer → Account → Connection → PAT) atomisch uitvoert via de
- * App\Services\ConsumerOnboarding-service (PLAN 08-01).
+ * Alleen Consumer + PAT: dat is alles wat de admin kán weten. Accounts en
+ * Connections ontstaan runtime bij de Consumer — een Account via
+ * `POST /v1/oauth/{provider}/init` (firstOrCreate op een external_id die alleen de
+ * Consumer kent), een Connection pas nadat de eindgebruiker de OAuth-flow heeft
+ * doorlopen. Key-based providers (Snelstart) gaan via `POST /v1/connections`.
  *
- * No-secret-leak invariant: plain PAT + plain webhook_callback_secret worden
- * via Cache-flash naar de ListConsumers-redirect-target geflashed; never bewaard
- * als public property of in wire:snapshot.
- *
- * Stap 3 is descriptor-driven via ProviderCredentialDescriptor::all() —
- * een nieuwe provider toevoegen vereist alleen een config-row, geen code-edit
- * in deze wizard.
+ * No-secret-leak invariant: plain PAT + plain webhook_callback_secret worden via
+ * Cache-flash naar de ListConsumers-redirect-target geflashed; nooit bewaard als
+ * public property of in wire:snapshot.
  */
 class OnboardConsumer extends Page
 {
@@ -101,22 +96,15 @@ class OnboardConsumer extends Page
         Notification::make()
             ->title('Aanvraag van '.$accessRequest->company)
             ->body('Gevraagde integraties: '.(implode(', ', $providers) ?: '—')
-                .'. Stap 3 zet één Connection klaar — extra providers voeg je later toe op de Account.')
+                .'. Kies een PAT-preset die daarbij past; de koppeling zelf legt de Consumer.')
             ->info()
             ->send();
 
-        $prefill = [
+        return [
             'name' => $accessRequest->company,
             'slug' => Str::slug($accessRequest->company),
             'app_url' => $accessRequest->app_url,
         ];
-
-        // Eén gevraagde provider → vast voor-selecteren. Bij meerdere laat staf kiezen.
-        if (count($providers) === 1) {
-            $prefill['connection'] = ['provider' => $providers[0]];
-        }
-
-        return $prefill;
     }
 
     public static function canAccess(): bool
@@ -170,58 +158,20 @@ class OnboardConsumer extends Page
                                 ->revealable()
                                 ->maxLength(255),
                         ]),
-                    Step::make('Eerste Account')
-                        ->description('Een klant van deze Consumer (bv. een school).')
-                        ->schema([
-                            TextInput::make('external_id')
-                                ->label('Externe ID')
-                                ->helperText('De identifier die deze Consumer voor deze klant gebruikt (bv. school1).')
-                                ->required()
-                                ->maxLength(255),
-                            TextInput::make('display_name')
-                                ->label('Weergavenaam')
-                                ->placeholder('School A')
-                                ->required()
-                                ->maxLength(255),
-                        ]),
-                    Step::make('Eerste Connection')
-                        ->description('De partner-koppeling voor deze Account.')
-                        ->schema([
-                            Radio::make('connection.provider')
-                                ->label('Provider')
-                                ->options(self::providerOptions())
-                                ->live()
-                                ->required(),
-                            // Snelstart-branch: 3 credential-velden (descriptor-driven, key-based provider)
-                            Group::make([
-                                TextInput::make('connection.client_key')
-                                    ->label('Client key')
-                                    ->password()
-                                    ->revealable()
-                                    ->required()
-                                    ->helperText('Door SnelStart uitgegeven aan de eindklant. Tokens worden encrypted opgeslagen.'),
-                                TextInput::make('connection.subscription_key')
-                                    ->label('Subscription key')
-                                    ->password()
-                                    ->revealable()
-                                    ->required(),
-                                TextInput::make('connection.subscription_id')
-                                    ->label('Subscription ID')
-                                    ->required(),
-                            ])->visible(fn (Get $get): bool => $get('connection.provider') === Provider::Snelstart->value),
-                            // Mollie-branch: alleen helper-text. OAuth-roundtrip gebeurt na wizard-completion
-                            // via StartOAuthFlowAction op de Account-detailpagina (D-04 UX-split, zie PLAN 08-02).
-                            Group::make([
-                                Text::make('Start Mollie OAuth-koppeling — je wordt naar Mollie gestuurd. Na goedkeuring keer je terug in deze wizard.'),
-                            ])->visible(fn (Get $get): bool => $get('connection.provider') === Provider::Mollie->value),
-                        ]),
+                    // Géén Account- of Connection-stap. Die ontstaan runtime, bij de
+                    // Consumer: een Account wordt geprovisioneerd door
+                    // `POST /v1/oauth/{provider}/init` (firstOrCreate op de external_id die
+                    // alleen de Consumer kent), en een Connection pas als de eindgebruiker
+                    // de OAuth-flow doorloopt. Key-based providers (Snelstart) gaan via
+                    // `POST /v1/connections`. Een admin die dit vooraf invult, zet een lege
+                    // huls neer die de echte flow daarna toch overschrijft.
                     Step::make('PAT uitgeven')
                         ->description('Het token wordt eenmalig getoond. Bewaar het direct.')
                         ->schema([
-                            Radio::make('pat.preset')
+                            Select::make('pat.preset')
                                 ->label('Preset')
-                                ->options(self::patPresetOptions())
-                                ->default('admin')
+                                ->options(ConsumerResource::presetOptions())
+                                ->native(false)
                                 ->required()
                                 ->live(),
                             CheckboxList::make('pat.abilities')
@@ -248,25 +198,8 @@ class OnboardConsumer extends Page
     {
         $data = $this->form->getState();
 
-        $connectionPayload = self::buildConnectionPayload($data['connection'] ?? []);
-
-        // WR-06: server-side guard. Filament's Wizard valideert
-        // Radio::make('connection.provider')->required() in de UI-flow, maar als
-        // die validatie wordt overgeslagen (Filament-v4 step-skipping edge-case,
-        // Action::execute() buiten form-flow, future schema-change) zou de wizard
-        // anders silent een Consumer + Account zonder Connection neerzetten.
-        if ($connectionPayload === null) {
-            Notification::make()
-                ->title('Stap 3 onvolledig')
-                ->body('Kies een provider voor de eerste Connection.')
-                ->danger()
-                ->send();
-
-            return;
-        }
-
         [$webhookSecret, $webhookSecretAutoGenerated] = self::resolveWebhookSecret($data);
-        $payload = self::buildOnboardPayload($data, $connectionPayload, $webhookSecret);
+        $payload = self::buildOnboardPayload($data, $webhookSecret);
 
         $result = self::onboardOrNotify($payload);
         if ($result === null) {
@@ -311,12 +244,11 @@ class OnboardConsumer extends Page
 
     /**
      * @param  array<string, mixed>  $data
-     * @param  array<string, mixed>  $connectionPayload
      * @return array<string, mixed>
      */
-    private static function buildOnboardPayload(array $data, array $connectionPayload, string $webhookSecret): array
+    private static function buildOnboardPayload(array $data, string $webhookSecret): array
     {
-        $preset = $data['pat']['preset'] ?? 'admin';
+        $preset = $data['pat']['preset'] ?? 'custom';
         $abilities = $preset === 'custom'
             ? array_values($data['pat']['abilities'] ?? [])
             : (ConsumerResource::PAT_PRESETS[$preset]['abilities'] ?? []);
@@ -327,9 +259,6 @@ class OnboardConsumer extends Page
             'app_url' => $data['app_url'] ?? null,
             'webhook_callback_url' => $data['webhook_callback_url'] ?? null,
             'webhook_callback_secret' => $webhookSecret,
-            'external_id' => $data['external_id'] ?? null,
-            'display_name' => $data['display_name'] ?? null,
-            'connection' => $connectionPayload,
             'token_name' => $data['pat']['token_name'],
             'abilities' => $abilities,
         ];
@@ -395,69 +324,6 @@ class OnboardConsumer extends Page
         if ($webhookSecretAutoGenerated || ! empty($data['webhook_callback_secret'])) {
             Cache::put("webhook-secret-flash:user:{$userId}", $webhookSecret, now()->addSeconds(60));
         }
-    }
-
-    /**
-     * Descriptor-driven provider-keuze (Stap 3). Nieuwe provider = nieuwe config-row.
-     *
-     * @return array<string, string>
-     */
-    private static function providerOptions(): array
-    {
-        $options = [];
-        foreach (ProviderCredentialDescriptor::all() as $descriptor) {
-            $options[$descriptor->key] = ucfirst($descriptor->key);
-        }
-
-        return $options;
-    }
-
-    /**
-     * Bouw de Connection-payload voor ConsumerOnboarding::onboard().
-     *
-     * Snelstart → status='active' met 3 encrypted credential-velden.
-     * Mollie    → pending stub zonder access_token; OAuth gebeurt later via
-     *             StartOAuthFlowAction::forAccount() (PLAN 08-03, UX-split per D-04).
-     *
-     * @param  array<string, mixed>  $connection
-     * @return array<string, mixed>|null
-     */
-    private static function buildConnectionPayload(array $connection): ?array
-    {
-        $provider = $connection['provider'] ?? null;
-        if ($provider === null) {
-            return null;
-        }
-
-        if ($provider === Provider::Snelstart->value) {
-            return [
-                'provider' => Provider::Snelstart->value,
-                'status' => 'active',
-                'client_key' => $connection['client_key'] ?? null,
-                'subscription_key' => $connection['subscription_key'] ?? null,
-                'subscription_id' => $connection['subscription_id'] ?? null,
-            ];
-        }
-
-        // Mollie pending stub — OAuth-state komt later via StartOAuthFlowAction.
-        return [
-            'provider' => $provider,
-            'status' => 'pending',
-        ];
-    }
-
-    /**
-     * @return array<string, string>
-     */
-    private static function patPresetOptions(): array
-    {
-        $options = [];
-        foreach (ConsumerResource::PAT_PRESETS as $slug => $entry) {
-            $options[$slug] = $entry['label'];
-        }
-        $options['custom'] = 'Custom...';
-
-        return $options;
     }
 
     /**
