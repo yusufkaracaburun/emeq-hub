@@ -57,6 +57,14 @@ services:
     restart: unless-stopped
     env_file: .env.prod
     command: php artisan horizon
+    # De base-image (FrankenPHP) levert een curl-healthcheck op :2019/metrics — die
+    # host draait hier geen Caddy, dus vervangen door een echte liveness-probe.
+    healthcheck:
+      test: ["CMD-SHELL", "php artisan horizon:status | grep -q 'is running'"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
     depends_on:
       app:
         condition: service_started
@@ -72,6 +80,14 @@ services:
     # schedule:work tikt elke minuut `schedule:run`; geen system-cron nodig.
     # Draait o.a. books:generate-recurring-invoices (dailyAt 06:00).
     command: php artisan schedule:work
+    # schedule:work heeft geen status-commando en de image mist pgrep; check dat de
+    # artisan-stack boot (crash van de PID-1-loop → container-restart, niet stil dood).
+    healthcheck:
+      test: ["CMD-SHELL", "php artisan schedule:list > /dev/null 2>&1"]
+      interval: 60s
+      timeout: 15s
+      retries: 3
+      start_period: 30s
     depends_on:
       app:
         condition: service_started
