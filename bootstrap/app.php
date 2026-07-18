@@ -8,6 +8,7 @@ use App\Http\Middleware\RequireCashierWebhookSecret;
 use App\Http\Middleware\ResolveExactAccount;
 use App\Http\Middleware\ResolveMollieAccount;
 use App\Http\Middleware\ResolveSnelstartAccount;
+use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\SetNoIndexHeaders;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Application;
@@ -47,6 +48,7 @@ return Application::configure(basePath: dirname(__DIR__))
             fn (Request $request): ?string => $request->is('v1/*') ? null : route('login'),
         );
 
+        $middleware->append(SecurityHeaders::class);
         $middleware->append(SetNoIndexHeaders::class);
         $middleware->web(append: [HandleInertiaRequests::class]);
         $middleware->api(prepend: ['throttle:api']);
