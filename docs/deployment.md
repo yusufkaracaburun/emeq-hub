@@ -278,10 +278,11 @@ gunzip -c backups/emeq-hub-<timestamp>.sql.gz \
       psql -U emeq_hub -d emeq_hub
 ```
 
-> `backups/` staat op de server-schijf. Er is nog **geen off-site kopie** ([#49](https://github.com/yusufkaracaburun/emeq-hub/issues/49)):
-> een dump op dezelfde disk als het `pgdata`-volume overleeft geen schijfstoring. Zet er
-> een off-site kopie naast (OVH Automated Backup, of encrypted rsync/S3 naar OVH Object
-> Storage) zodra de bestemming belegd is.
+> **Off-site**: **OVH Automated Backup** (VPS-optie) levert de block-level off-site kopie —
+> de DR-laag als de server-schijf sneuvelt. De lokale `pg_dump` (14 d-rotatie) blijft ernaast
+> als schone, portable, app-consistente logische backup. De twee vullen elkaar aan: snapshot
+> = volledige-disk-DR, `pg_dump` = point-in-time restore van alleen de database
+> ([#49](https://github.com/yusufkaracaburun/emeq-hub/issues/49)).
 
 ## Rollback
 
