@@ -6,6 +6,7 @@ use Database\Factories\PassThroughCallFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\MassPrunable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -34,7 +35,24 @@ class PassThroughCall extends Model
     /** @use HasFactory<PassThroughCallFactory> */
     use HasFactory;
 
+    use MassPrunable;
+
     public $timestamps = false;
+
+    /**
+     * Rijen ouder dan het retentie-venster (config `hub.retention.pass_through_days`).
+     * 0 = pruning uit → match niets.
+     */
+    public function prunable(): Builder
+    {
+        $days = (int) config('hub.retention.pass_through_days', 90);
+
+        if ($days <= 0) {
+            return static::query()->whereRaw('1 = 0');
+        }
+
+        return static::query()->where('created_at', '<=', now()->subDays($days));
+    }
 
     public function scopeInbound(Builder $query): Builder
     {

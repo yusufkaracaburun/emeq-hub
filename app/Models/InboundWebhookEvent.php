@@ -6,7 +6,9 @@ namespace App\Models;
 
 use Database\Factories\InboundWebhookEventFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\MassPrunable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -37,7 +39,24 @@ class InboundWebhookEvent extends Model
     /** @use HasFactory<InboundWebhookEventFactory> */
     use HasFactory;
 
+    use MassPrunable;
+
     public $timestamps = false;
+
+    /**
+     * Rijen ouder dan het retentie-venster (config `hub.retention.webhook_days`).
+     * 0 = pruning uit → match niets.
+     */
+    public function prunable(): Builder
+    {
+        $days = (int) config('hub.retention.webhook_days', 90);
+
+        if ($days <= 0) {
+            return static::query()->whereRaw('1 = 0');
+        }
+
+        return static::query()->where('received_at', '<=', now()->subDays($days));
+    }
 
     protected function casts(): array
     {
