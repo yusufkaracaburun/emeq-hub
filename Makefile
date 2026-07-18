@@ -135,6 +135,8 @@ prod-backup: ## [server] pg_dump naar backups/ (draait automatisch vóór prod-d
 	@$(PROD) exec -T db pg_dump -U "$$(grep -E '^DB_USERNAME=' .env.prod | cut -d= -f2)" \
 		-d "$$(grep -E '^DB_DATABASE=' .env.prod | cut -d= -f2)" \
 		| gzip > "$(BACKUP_DIR)/emeq-hub-$$(date +%Y%m%d-%H%M%S).sql.gz"
+	@# Rotatie: dumps ouder dan 14 dagen weg — backups/ groeide anders onbegrensd (#49).
+	@find $(BACKUP_DIR) -name 'emeq-hub-*.sql.gz' -mtime +14 -delete 2>/dev/null || true
 	@ls -1t $(BACKUP_DIR)/*.sql.gz | head -1 | xargs -I{} echo "  💾 backup: {}"
 
 prod-logs: ## [server] Tail app + horizon + tunnel

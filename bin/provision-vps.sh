@@ -83,6 +83,28 @@ timedatectl set-timezone Europe/Amsterdam || warn "timezone niet gezet (niet fat
 log "unattended-upgrades aan (security-only)"
 dpkg-reconfigure -f noninteractive unattended-upgrades
 
+# ── 1b. Swap ──────────────────────────────────────────────────────────────────
+# 12 GB RAM zonder swap: een geheugenpiek (Octane-worker, migratie, build) laat de
+# OOM-killer willekeurig processen slopen i.p.v. uit te wijken naar disk. 4 GB swap
+# als vangnet + lage swappiness (RAM-first, swap pas onder echte druk).
+SWAPFILE="/swapfile"
+if swapon --show=NAME --noheadings 2>/dev/null | grep -qx "$SWAPFILE"; then
+    log "swap al actief — overslaan"
+else
+    if [[ ! -e "$SWAPFILE" ]]; then
+        log "swapfile aanmaken (4 GB)"
+        fallocate -l 4G "$SWAPFILE" || dd if=/dev/zero of="$SWAPFILE" bs=1M count=4096 status=none
+        chmod 600 "$SWAPFILE"
+        mkswap "$SWAPFILE" >/dev/null
+    fi
+    swapon "$SWAPFILE"
+    grep -qxF "${SWAPFILE} none swap sw 0 0" /etc/fstab || echo "${SWAPFILE} none swap sw 0 0" >> /etc/fstab
+fi
+if [[ "$(cat /proc/sys/vm/swappiness)" != "10" ]]; then
+    echo 'vm.swappiness=10' > /etc/sysctl.d/99-emeq-swappiness.conf
+    sysctl -q -w vm.swappiness=10
+fi
+
 # ── 2. Docker Engine + compose-plugin (officiële repo, niet de apt-versie) ────
 if ! command -v docker >/dev/null 2>&1; then
     log "Docker Engine installeren"
@@ -194,11 +216,13 @@ SSH_PORT="$(ssh_socket_port)"
 [[ -n "$SSH_PORT" ]] || SSH_PORT="$(awk '/^port /{p=$2} END{print p}' <<<"$SSHD_CFG")"
 SSH_PORT="${SSH_PORT:-22}"
 
-log "ufw: alles dicht behalve SSH (poort ${SSH_PORT})"
+log "ufw: alles dicht behalve SSH (poort ${SSH_PORT}, rate-limited)"
 ufw --force reset >/dev/null
 ufw default deny incoming
 ufw default allow outgoing
-ufw allow "${SSH_PORT}/tcp" comment 'SSH'
+# `limit` i.p.v. `allow`: ufw's ingebouwde rate-limit blokkeert een bron-IP dat 6+
+# connecties in 30s opent. Vult fail2ban aan als eerste laag tegen SSH-brute-force.
+ufw limit "${SSH_PORT}/tcp" comment 'SSH (rate-limited)'
 ufw --force enable
 ufw status verbose
 
@@ -217,6 +241,39 @@ bantime = 1h
 JAIL
 systemctl enable --now fail2ban
 systemctl restart fail2ban
+
+# ── 5b. Dagelijkse backup-timer ───────────────────────────────────────────────
+# `make prod-backup` draait nu alleen vóór een deploy — dagen zonder deploy = geen
+# dump. Een systemd-timer draait 'm elke nacht als de deploy-user (docker-groep).
+# ConditionPathExists: sla stil over zolang .env.prod nog niet bestaat (vóór de
+# eerste deploy), i.p.v. een falende run te loggen. Off-site kopie = aparte stap.
+log "backup-timer (dagelijks 04:00, als ${DEPLOY_USER})"
+cat > /etc/systemd/system/emeq-backup.service <<SERVICE
+[Unit]
+Description=emeq-hub Postgres-backup (pg_dump)
+After=docker.service
+Requires=docker.service
+ConditionPathExists=${APP_DIR}/.env.prod
+
+[Service]
+Type=oneshot
+User=${DEPLOY_USER}
+WorkingDirectory=${APP_DIR}
+ExecStart=/usr/bin/make prod-backup
+SERVICE
+cat > /etc/systemd/system/emeq-backup.timer <<'TIMER'
+[Unit]
+Description=Dagelijkse emeq-hub-backup
+
+[Timer]
+OnCalendar=*-*-* 04:00:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target
+TIMER
+systemctl daemon-reload
+systemctl enable --now emeq-backup.timer
 
 # ── 6. SSH-hardening (als laatste — pas als de deploy-user een sleutel heeft) ──
 #
@@ -275,6 +332,8 @@ log "verificatie"
 printf '  docker      : %s\n' "$(docker --version)"
 printf '  compose     : %s\n' "$(docker compose version --short)"
 printf '  ufw         : %s\n' "$(ufw status | head -1)"
+printf '  swap        : %s\n' "$(swapon --show=SIZE --noheadings 2>/dev/null | head -1 || echo 'geen')"
+printf '  backup-timer: %s\n' "$(systemctl is-enabled emeq-backup.timer 2>/dev/null || echo 'niet actief')"
 printf '  fail2ban    : %s\n' \
     "$(fail2ban-client status sshd 2>/dev/null | grep -E 'Currently failed|Journal matches' | tr -s ' \n' ' ' || echo 'jail NIET actief')"
 printf '  repo        : %s\n' "$(sudo -u "$DEPLOY_USER" git -C "$APP_DIR" log --oneline -1)"
