@@ -107,9 +107,11 @@ Plus: rechtsgrond, bewaartermijnen, verwijderbeleid, intrekken van toestemming (
 revoken via `OAuthFlow::revoke()`), sub-verwerkers (Cloudflare, OVH, de partner-API's), en
 expliciet dat de Hub **verwerker** is en niet verwerkingsverantwoordelijke.
 
-**Let op — bewaartermijnen zijn nu ongedefinieerd.** `pass_through_calls` en
-`inbound_webhook_events` groeien onbeperkt. Je kunt geen bewaartermijn publiceren die je
-niet handhaaft, dus daar hoort een opruim-command bij.
+**Bewaartermijnen — mechanisme staat, beleid nog vast te leggen.** `pass_through_calls` en
+`inbound_webhook_events` zijn nu `MassPrunable`: een dagelijkse `model:prune` verwijdert
+rijen ouder dan het venster in `config/hub.php` (default **90 dagen**, env-overridebaar).
+Wat #41 nog moet doen: het definitieve bewaartermijn-getal + de publieke beleidstekst
+(rechtsgrond, verwijderverzoek).
 
 → [#41](https://github.com/yusufkaracaburun/emeq-hub/issues/41)
 

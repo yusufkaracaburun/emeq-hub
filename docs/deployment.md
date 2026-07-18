@@ -116,13 +116,15 @@ terug op `/root`. Zit er daar geen sleutel, dan **weigert het te draaien** — h
 wachtwoord-login uit, en zonder werkende sleutel is de enige weg terug OVH's
 rescue-mode.
 
-Dat doet: apt-upgrade, `unattended-upgrades` (security-patches), Docker Engine +
-compose-plugin met log-rotatie, een `deploy`-user in de `docker`-groep, de repo clonen
-naar `/home/deploy/emeq-hub`, `ufw` (**alles dicht behalve SSH**), `fail2ban`, en tot
-slot SSH-hardening (key-only, geen root-login, geen wachtwoord). Het sluit af met een
-verificatie-blok: het **assert** de effectieve sshd-staat (`sshd -T`, niet alleen "het
-bestand is geschreven" — zie hieronder) en drukt docker-versie, `ufw status`, de
-fail2ban-jail en de repo-SHA af.
+Dat doet: apt-upgrade, `unattended-upgrades` (security-patches), een 4 GB **swapfile**
+(`vm.swappiness=10`, vangnet tegen OOM), Docker Engine + compose-plugin met log-rotatie,
+een `deploy`-user in de `docker`-groep, de repo clonen naar `/home/deploy/emeq-hub`, `ufw`
+(**alles dicht behalve SSH**, `limit` = rate-limited tegen brute-force), `fail2ban`, een
+**dagelijkse backup-timer** (systemd, 04:00), en tot slot SSH-hardening (key-only, geen
+root-login, geen wachtwoord). Het sluit af met een verificatie-blok: het **assert** de
+effectieve sshd-staat (`sshd -T`, niet alleen "het bestand is geschreven" — zie hieronder)
+en drukt docker-versie, `ufw status`, swap, de backup-timer, de fail2ban-jail en de
+repo-SHA af.
 
 ### Sluit je sessie niet voordat je `deploy` hebt getest
 
@@ -260,7 +262,9 @@ een eerdere SHA) werkt niet. Voor een echte prod-host is de git-route de juiste.
 
 ## Backup & restore
 
-`make prod-deploy` maakt automatisch een dump vóór elke release. Handmatig:
+`make prod-deploy` maakt automatisch een dump vóór elke release. Een **systemd-timer**
+(`emeq-backup.timer`, geprovisioned) draait `prod-backup` bovendien elke nacht om 04:00,
+los van deploys. Dumps ouder dan **14 dagen** worden geroteerd. Handmatig:
 
 ```bash
 make prod-backup            # → backups/emeq-hub-<timestamp>.sql.gz (gitignored)
@@ -274,8 +278,10 @@ gunzip -c backups/emeq-hub-<timestamp>.sql.gz \
       psql -U emeq_hub -d emeq_hub
 ```
 
-> `backups/` staat op de server-schijf. Zet er een off-site kopie naast (rsync/S3) —
-> een dump op dezelfde disk als het `pgdata`-volume overleeft geen schijfstoring.
+> `backups/` staat op de server-schijf. Er is nog **geen off-site kopie** ([#49](https://github.com/yusufkaracaburun/emeq-hub/issues/49)):
+> een dump op dezelfde disk als het `pgdata`-volume overleeft geen schijfstoring. Zet er
+> een off-site kopie naast (OVH Automated Backup, of encrypted rsync/S3 naar OVH Object
+> Storage) zodra de bestemming belegd is.
 
 ## Rollback
 
