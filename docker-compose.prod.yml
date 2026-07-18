@@ -17,6 +17,12 @@ services:
       target: prod
     image: emeq-hub-app:prod
     restart: unless-stopped
+    # Resource-plafonds (12 GB / 6 vCore-box): begrenst een lekkende Octane-worker
+    # zodat db/redis niet mee-OOM'en. Ceilings, geen reserveringen.
+    mem_limit: 3g
+    cpus: 3.0
+    security_opt:
+      - no-new-privileges:true
     env_file: .env.prod
     # Geen publieke poort: verkeer komt via de tunnel. De loopback-bind is er
     # alleen voor de smoke-test op de server zelf (curl http://127.0.0.1:8090/up).
@@ -42,8 +48,12 @@ services:
   # credentials-bestand is een secret en staat in .cloudflared/ op de server
   # (gitignored). Zie docs/deployment.md § Tunnel.
   cloudflared:
-    image: cloudflare/cloudflared:latest
+    image: cloudflare/cloudflared:2026.7.1
     restart: unless-stopped
+    mem_limit: 256m
+    cpus: 0.5
+    security_opt:
+      - no-new-privileges:true
     command: tunnel --no-autoupdate --config /etc/cloudflared/config.yml run
     volumes:
       - ./docker/cloudflared.yml:/etc/cloudflared/config.yml:ro
@@ -55,6 +65,10 @@ services:
   horizon:
     image: emeq-hub-app:prod
     restart: unless-stopped
+    mem_limit: 2g
+    cpus: 2.0
+    security_opt:
+      - no-new-privileges:true
     env_file: .env.prod
     command: php artisan horizon
     # De base-image (FrankenPHP) levert een curl-healthcheck op :2019/metrics — die
@@ -76,6 +90,10 @@ services:
   scheduler:
     image: emeq-hub-app:prod
     restart: unless-stopped
+    mem_limit: 512m
+    cpus: 0.5
+    security_opt:
+      - no-new-privileges:true
     env_file: .env.prod
     # schedule:work tikt elke minuut `schedule:run`; geen system-cron nodig.
     # Draait o.a. books:generate-recurring-invoices (dailyAt 06:00).
@@ -99,6 +117,10 @@ services:
   db:
     image: postgres:16-alpine
     restart: unless-stopped
+    mem_limit: 3g
+    cpus: 2.0
+    security_opt:
+      - no-new-privileges:true
     environment:
       POSTGRES_DB: "${DB_DATABASE}"
       POSTGRES_USER: "${DB_USERNAME}"
@@ -114,6 +136,10 @@ services:
   redis:
     image: redis:7-alpine
     restart: unless-stopped
+    mem_limit: 1g
+    cpus: 1.0
+    security_opt:
+      - no-new-privileges:true
     command: ["redis-server", "--appendonly", "yes"]
     volumes:
       - redisdata:/data
