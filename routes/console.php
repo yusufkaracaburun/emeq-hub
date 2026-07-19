@@ -25,3 +25,11 @@ Schedule::command('sanctum:prune-expired', ['--hours' => 24])->dailyAt('03:10');
 Schedule::command('oauth:prune-pending')->dailyAt('03:15');
 // Vult de Horizon-metrics-grafiek; trim_snapshots ruimt oude af.
 Schedule::command('horizon:snapshot')->everyFiveMinutes();
+
+// Encrypted + gemonitorde DB-backup (spatie/laravel-backup) naar de lokale
+// `backups`-disk; off-site via de OVH Automated Backup-snapshot. Retentie +
+// health-check in config/backup.php. De pre-deploy pg_dump blijft als
+// dependency-vrije pre-migratie-safety.
+Schedule::command('backup:clean')->dailyAt('01:30');
+Schedule::command('backup:run --only-db')->dailyAt('01:45');
+Schedule::command('backup:monitor')->dailyAt('02:00');

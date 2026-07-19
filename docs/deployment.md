@@ -262,15 +262,36 @@ een eerdere SHA) werkt niet. Voor een echte prod-host is de git-route de juiste.
 
 ## Backup & restore
 
-`make prod-deploy` maakt automatisch een dump vóór elke release. Een **systemd-timer**
-(`emeq-backup.timer`, geprovisioned) draait `prod-backup` bovendien elke nacht om 04:00,
-los van deploys. Dumps ouder dan **14 dagen** worden geroteerd. Handmatig:
+Drie lagen:
+
+1. **Geplande dagelijkse backup** — `spatie/laravel-backup` draait via de Laravel scheduler
+   een `pg_dump` naar de lokale `backups`-disk, **AES-256-versleuteld** (env
+   `BACKUP_ARCHIVE_PASSWORD` — leeg = onversleuteld), met getrapte retentie (7 d alles →
+   dagelijks → wekelijks → maandelijks) en een dagelijkse `backup:monitor` health-check.
+   Config: `config/backup.php`; planning: `routes/console.php`.
+2. **Rauwe `pg_dump` (dependency-vrij)** — `make prod-backup` draait automatisch vóór elke
+   deploy én nachtelijk via de systemd-timer `emeq-backup.timer` (04:00, 14 d-rotatie). Draait
+   ongeacht app-health — ook als het app/scheduler-image stuk is. De belt naast spatie.
+3. **Off-site DR** — **OVH Automated Backup** (VPS-optie) maakt de block-level off-site kopie
+   als de server-schijf sneuvelt.
+
+Handmatig:
 
 ```bash
-make prod-backup            # → backups/emeq-hub-<timestamp>.sql.gz (gitignored)
+docker compose -f docker-compose.prod.yml --env-file .env.prod exec -T app php artisan backup:run --only-db
+make prod-backup            # rauwe pg_dump → backups/emeq-hub-<timestamp>.sql.gz (gitignored)
 ```
 
-Restore:
+Restore uit een spatie-zip:
+
+```bash
+# encrypted zip uitpakken (vraagt BACKUP_ARCHIVE_PASSWORD) → sql terugzetten
+unzip -P "$BACKUP_ARCHIVE_PASSWORD" backups/emeq-hub/<timestamp>.zip -d /tmp/restore
+docker compose -f docker-compose.prod.yml --env-file .env.prod exec -T db \
+    psql -U emeq_hub -d emeq_hub < /tmp/restore/db-dumps/*.sql
+```
+
+Restore uit een rauwe pre-deploy dump:
 
 ```bash
 gunzip -c backups/emeq-hub-<timestamp>.sql.gz \
@@ -278,11 +299,9 @@ gunzip -c backups/emeq-hub-<timestamp>.sql.gz \
       psql -U emeq_hub -d emeq_hub
 ```
 
-> **Off-site**: **OVH Automated Backup** (VPS-optie) levert de block-level off-site kopie —
-> de DR-laag als de server-schijf sneuvelt. De lokale `pg_dump` (14 d-rotatie) blijft ernaast
-> als schone, portable, app-consistente logische backup. De twee vullen elkaar aan: snapshot
-> = volledige-disk-DR, `pg_dump` = point-in-time restore van alleen de database
-> ([#49](https://github.com/yusufkaracaburun/emeq-hub/issues/49)).
+> [#49](https://github.com/yusufkaracaburun/emeq-hub/issues/49): de drie lagen dekken
+> verschillende failure-modes — snapshot = volledige-disk-DR, spatie/pg_dump = point-in-time
+> logische restore van alleen de database.
 
 ## Rollback
 

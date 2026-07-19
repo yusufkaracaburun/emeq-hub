@@ -38,6 +38,15 @@ return [
             'report' => false,
         ],
 
+        // Doel voor spatie/laravel-backup. Herbruikt de bestaande `backups/`-dir
+        // (gitignored, rsync-excluded, gedekt door de OVH Automated Backup-snapshot).
+        'backups' => [
+            'driver' => 'local',
+            'root' => base_path('backups'),
+            'throw' => false,
+            'report' => false,
+        ],
+
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),
