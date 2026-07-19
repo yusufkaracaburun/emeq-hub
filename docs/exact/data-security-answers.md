@@ -5,7 +5,8 @@
 > Neem dit mee als Exact doorvraagt.
 >
 > **Status**: vraag 1 (privacybeleid), 3 (consent), 5 (test/release-proces) en 8
-> (vulnerability) zijn nu met "ja" te beantwoorden. Open: vraag 12 (ISO 27001-verklaring OVH).
+> (vulnerability) zijn nu met "ja" te beantwoorden. Open: vraag 12 (ISO 27001-verklaring OVH,
+> opgevraagd via ticket CS16314299).
 > Epic: [#36](https://github.com/yusufkaracaburun/emeq-hub/issues/36).
 > **Laatst bijgewerkt**: 2026-07-20.
 
@@ -271,11 +272,16 @@ Verwijs naar de verklaring bij vraag 12.
 **Antwoord: 🟡 JA, indirect.**
 
 Emeq zelf is niet ISO 27001-gecertificeerd. De hostingprovider (OVH) is dat wel voor de
-datacenters en infrastructuur waarop de Hub draait.
+datacenters en infrastructuur waarop de Hub draait — bevestigd bij de certificerende
+instantie **LNE** (Laboratoire national de métrologie et d'essais): OVH Groupe, Roubaix,
+certificaat **37387-5**. Achtergrond: <https://www.ovhcloud.com/en/compliance/iso-27001-27017-27018/>.
 
-**Actie**: download de actuele ISO 27001-verklaring van OVH en houd 'm bij de hand. Formuleer
-het antwoord zonder te suggereren dat Emeq zelf gecertificeerd is — dat is precies het soort
-overdrijving waar een reviewer op afrekent.
+**Status**: de actuele ISO 27001-verklaring (met de scope die de eigen VPS dekt) is bij OVH
+opgevraagd via support-ticket **CS16314299** (2026-07-20). Zodra OVH de PDF levert, komt die
+als bijlage bij deze vraag.
+
+Formuleer het antwoord zonder te suggereren dat Emeq zelf gecertificeerd is — de certificering
+is die van OVH als hostingprovider.
 
 ---
 
