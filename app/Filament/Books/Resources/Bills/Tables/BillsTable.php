@@ -79,36 +79,36 @@ class BillsTable
             ->recordActions([
                 ActionGroup::make([
                     Action::make('boeken')
-                    ->label('Boeken')
-                    ->icon(Heroicon::OutlinedCheckCircle)
-                    ->color('success')
-                    ->visible(fn (Bill $record): bool => ! $record->isPosted())
-                    ->requiresConfirmation()
-                    ->modalDescription('Boekt de inkoopboeking (kosten / te vorderen BTW / crediteuren) naar het grootboek.')
-                    ->action(function (Bill $record): void {
-                        app(BillPoster::class)->post($record);
+                        ->label('Boeken')
+                        ->icon(Heroicon::OutlinedCheckCircle)
+                        ->color('success')
+                        ->visible(fn (Bill $record): bool => ! $record->isPosted())
+                        ->requiresConfirmation()
+                        ->modalDescription('Boekt de inkoopboeking (kosten / te vorderen BTW / crediteuren) naar het grootboek.')
+                        ->action(function (Bill $record): void {
+                            app(BillPoster::class)->post($record);
 
-                        Notification::make()->title('Inkoopfactuur geboekt')->success()->send();
-                    }),
+                            Notification::make()->title('Inkoopfactuur geboekt')->success()->send();
+                        }),
 
-                Action::make('ontboeken')
-                    ->label('Ontboeken')
-                    ->icon(Heroicon::OutlinedArrowUturnLeft)
-                    ->color('gray')
-                    ->visible(fn (Bill $record): bool => $record->isPosted())
-                    ->requiresConfirmation()
-                    ->modalDescription('Verwijdert de grootboekboeking weer.')
-                    ->action(function (Bill $record): void {
-                        app(BillPoster::class)->unpost($record);
+                    Action::make('ontboeken')
+                        ->label('Ontboeken')
+                        ->icon(Heroicon::OutlinedArrowUturnLeft)
+                        ->color('gray')
+                        ->visible(fn (Bill $record): bool => $record->isPosted())
+                        ->requiresConfirmation()
+                        ->modalDescription('Verwijdert de grootboekboeking weer.')
+                        ->action(function (Bill $record): void {
+                            app(BillPoster::class)->unpost($record);
 
-                        Notification::make()->title('Boeking ongedaan gemaakt')->success()->send();
-                    }),
+                            Notification::make()->title('Boeking ongedaan gemaakt')->success()->send();
+                        }),
 
-                PaymentActions::register(),
-                PaymentActions::undo(),
+                    PaymentActions::register(),
+                    PaymentActions::undo(),
 
-                EditAction::make(),
-                DeleteAction::make(),
+                    EditAction::make(),
+                    DeleteAction::make(),
                 ]),
             ])
             ->toolbarActions([

@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Console;
 
+use App\Console\Commands\HubConsumerCreate;
 use App\Models\Consumer;
 use App\Services\ConsumerOnboarding;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -98,7 +99,7 @@ class HubConsumerCreateTest extends TestCase
         $resolved = $this->app->make(ConsumerOnboarding::class);
         $this->assertInstanceOf(ConsumerOnboarding::class, $resolved);
 
-        $reflection = new \ReflectionMethod(\App\Console\Commands\HubConsumerCreate::class, 'handle');
+        $reflection = new \ReflectionMethod(HubConsumerCreate::class, 'handle');
         $params = $reflection->getParameters();
         $this->assertCount(1, $params, 'handle() neemt nu een ConsumerOnboarding parameter');
         $this->assertSame(

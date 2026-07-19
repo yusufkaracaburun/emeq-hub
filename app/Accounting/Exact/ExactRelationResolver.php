@@ -129,7 +129,7 @@ final class ExactRelationResolver
      * de rol-vlaggen uit findRelation; ontbreken ze (mirror-hit), dan leest ensureRole ze
      * zelf op GUID. Niet leesbaar → overslaan; de boeking levert de fout dan zelf op.
      *
-     * @param array{is_sales: bool, is_supplier: bool, status: ?string}|null $known
+     * @param  array{is_sales: bool, is_supplier: bool, status: ?string}|null  $known
      */
     private function ensureRole(string $guid, ?string $role, Connection $connection, ?array $known = null): void
     {

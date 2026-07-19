@@ -2,8 +2,8 @@
 
 namespace App\OAuth\Exact;
 
-use App\Jobs\Exact\DeleteExactWebhookSubscriptionsJob;
 use App\Jobs\Accounting\SyncExactReferenceJob;
+use App\Jobs\Exact\DeleteExactWebhookSubscriptionsJob;
 use App\Jobs\Exact\RegisterExactWebhookSubscriptionsJob;
 use App\Models\Account;
 use App\Models\Connection;
