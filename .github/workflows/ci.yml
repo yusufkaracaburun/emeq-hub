@@ -47,6 +47,17 @@ jobs:
         env:
           COMPOSER_AUTH: '{"github-oauth":{"github.com":"${{ secrets.GITHUB_TOKEN }}"}}'
 
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Build frontend assets
+        run: |
+          npm ci
+          npm run build
+
       - name: Prepare environment
         run: |
           cp .env.example .env
