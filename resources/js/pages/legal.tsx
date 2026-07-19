@@ -2,15 +2,16 @@ import { Head } from '@inertiajs/react';
 import { cn } from '@/lib/utils';
 import ShowcaseLayout from '@/layouts/showcase-layout';
 
-interface PrivacyProps {
+interface LegalProps {
+    title: string;
     html: string;
     updatedAt: string;
 }
 
-export default function Privacy({ html, updatedAt }: PrivacyProps) {
+export default function Legal({ title, html, updatedAt }: LegalProps) {
     return (
         <ShowcaseLayout>
-            <Head title="Privacyverklaring" />
+            <Head title={title} />
 
             <section className="mx-auto max-w-3xl px-4 py-16 sm:py-24">
                 {updatedAt && (

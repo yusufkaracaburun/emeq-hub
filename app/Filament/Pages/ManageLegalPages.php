@@ -47,6 +47,7 @@ class ManageLegalPages extends Page
 
         $this->form->fill([
             'privacy_statement' => $legal->privacy_statement,
+            'terms_statement' => $legal->terms_statement,
         ]);
     }
 
@@ -62,6 +63,14 @@ class ManageLegalPages extends Page
                             ->required()
                             ->columnSpanFull(),
                     ]),
+                Section::make('Algemene voorwaarden')
+                    ->description('Publiek zichtbaar op /voorwaarden. Markdown; wordt server-side naar HTML gerenderd.')
+                    ->schema([
+                        MarkdownEditor::make('terms_statement')
+                            ->label('Algemene voorwaarden (markdown)')
+                            ->required()
+                            ->columnSpanFull(),
+                    ]),
             ])
             ->statePath('data');
     }
@@ -69,10 +78,13 @@ class ManageLegalPages extends Page
     public function save(): void
     {
         $data = $this->form->getState();
+        $today = Carbon::now()->toDateString();
 
         $legal = app(LegalSettings::class);
         $legal->privacy_statement = (string) $data['privacy_statement'];
-        $legal->privacy_updated_at = Carbon::now()->toDateString();
+        $legal->privacy_updated_at = $today;
+        $legal->terms_statement = (string) $data['terms_statement'];
+        $legal->terms_updated_at = $today;
         $legal->save();
 
         Notification::make()->title('Juridische teksten opgeslagen')->success()->send();

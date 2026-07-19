@@ -39,13 +39,14 @@ class ManageLegalPagesTest extends TestCase
         $this->assertFalse(ManageLegalPages::canAccess());
     }
 
-    public function test_save_persists_privacy_statement_and_stamps_date(): void
+    public function test_save_persists_both_texts_and_stamps_dates(): void
     {
         $this->actingAs($this->userWithRole('super-admin'));
 
         Livewire::test(ManageLegalPages::class)
             ->fillForm([
                 'privacy_statement' => '# Nieuwe verklaring',
+                'terms_statement' => '# Nieuwe voorwaarden',
             ])
             ->call('save')
             ->assertHasNoFormErrors();
@@ -54,6 +55,8 @@ class ManageLegalPagesTest extends TestCase
         $legal = app(LegalSettings::class);
 
         $this->assertSame('# Nieuwe verklaring', $legal->privacy_statement);
+        $this->assertSame('# Nieuwe voorwaarden', $legal->terms_statement);
         $this->assertSame(now()->toDateString(), $legal->privacy_updated_at);
+        $this->assertSame(now()->toDateString(), $legal->terms_updated_at);
     }
 }

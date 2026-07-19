@@ -105,9 +105,9 @@ export default function ShowcaseLayout({ children }: PropsWithChildren) {
                         <Link href="/privacy" className="transition-colors hover:text-foreground">
                             Privacy
                         </Link>
-                        <a href="https://emeq.nl/algemene-voorwaarden/" className="transition-colors hover:text-foreground">
+                        <Link href="/voorwaarden" className="transition-colors hover:text-foreground">
                             Voorwaarden
-                        </a>
+                        </Link>
                         <a href="mailto:support@emeq.nl" className="transition-colors hover:text-foreground">
                             Support
                         </a>

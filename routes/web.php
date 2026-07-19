@@ -3,9 +3,9 @@
 use App\Http\Controllers\AccessRequestController;
 use App\Http\Controllers\Dev\ExactOAuthTracerController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\LegalController;
 use App\Http\Controllers\OAuthLandingController;
 use App\Http\Controllers\PartnersController;
-use App\Http\Controllers\PrivacyController;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -39,9 +39,10 @@ Route::middleware('signed')->group(function (): void {
 Route::get('/partners', [PartnersController::class, 'index'])->name('partners.index');
 Route::get('/partners/{provider}', [PartnersController::class, 'show'])->name('partners.show');
 
-// Publieke privacyverklaring. Tekst beheerd in de admin (ManageLegalPages),
+// Publieke juridische pagina's. Teksten beheerd in de admin (ManageLegalPages),
 // server-side gerenderd. Indexeerbaar (zie SetNoIndexHeaders).
-Route::get('/privacy', [PrivacyController::class, 'show'])->name('privacy');
+Route::get('/privacy', [LegalController::class, 'privacy'])->name('privacy');
+Route::get('/voorwaarden', [LegalController::class, 'terms'])->name('terms');
 
 // Publieke koppel-intake — het formulier leeft op elke partner-pagina
 // (partners/show), preselect op die provider. Geen aparte GET-pagina meer.
