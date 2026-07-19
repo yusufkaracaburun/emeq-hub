@@ -24,6 +24,12 @@ services:
     security_opt:
       - no-new-privileges:true
     env_file: .env.prod
+    # spatie/laravel-backup schrijft naar /app/backups; het prod-image bakt de
+    # code in (geen source-mount), dus zonder dit bind-mount landt de dump in de
+    # ephemeral container en is 'ie weg bij redeploy. Deelt de host-`backups/`-dir
+    # met `make prod-backup` (gitignored, rsync-excluded, OVH-snapshot-gedekt).
+    volumes:
+      - ./backups:/app/backups
     # Geen publieke poort: verkeer komt via de tunnel. De loopback-bind is er
     # alleen voor de smoke-test op de server zelf (curl http://127.0.0.1:8090/up).
     # 8080 bewust vermeden — dat is op meerdere hosts al van een reverse proxy.
@@ -96,7 +102,10 @@ services:
       - no-new-privileges:true
     env_file: .env.prod
     # schedule:work tikt elke minuut `schedule:run`; geen system-cron nodig.
-    # Draait o.a. books:generate-recurring-invoices (dailyAt 06:00).
+    # Draait o.a. books:generate-recurring-invoices (dailyAt 06:00) en de
+    # dagelijkse spatie-backup — die moet naar de persistente host-`backups/`-dir.
+    volumes:
+      - ./backups:/app/backups
     command: php artisan schedule:work
     # schedule:work heeft geen status-commando en de image mist pgrep; check dat de
     # artisan-stack boot (crash van de PID-1-loop → container-restart, niet stil dood).
