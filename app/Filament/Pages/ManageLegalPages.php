@@ -1,0 +1,80 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Filament\Pages;
+
+use App\Settings\LegalSettings;
+use BackedEnum;
+use Filament\Forms\Components\MarkdownEditor;
+use Filament\Notifications\Notification;
+use Filament\Pages\Page;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
+use Illuminate\Support\Carbon;
+use UnitEnum;
+
+/**
+ * Beheer de publieke juridische teksten (privacyverklaring) als markdown.
+ * De /privacy-pagina rendert het resultaat server-side. super-admin-only.
+ */
+class ManageLegalPages extends Page
+{
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDocumentText;
+
+    protected static string|UnitEnum|null $navigationGroup = 'Beheer';
+
+    protected static ?int $navigationSort = 3;
+
+    protected static ?string $navigationLabel = 'Juridische teksten';
+
+    protected static ?string $title = 'Juridische teksten';
+
+    protected string $view = 'filament.pages.manage-legal-pages';
+
+    /** @var array<string, mixed> */
+    public array $data = [];
+
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->hasRole('super-admin') ?? false;
+    }
+
+    public function mount(): void
+    {
+        $legal = app(LegalSettings::class);
+
+        $this->form->fill([
+            'privacy_statement' => $legal->privacy_statement,
+        ]);
+    }
+
+    public function form(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                Section::make('Privacyverklaring')
+                    ->description('Publiek zichtbaar op /privacy. Markdown; wordt server-side naar HTML gerenderd.')
+                    ->schema([
+                        MarkdownEditor::make('privacy_statement')
+                            ->label('Privacyverklaring (markdown)')
+                            ->required()
+                            ->columnSpanFull(),
+                    ]),
+            ])
+            ->statePath('data');
+    }
+
+    public function save(): void
+    {
+        $data = $this->form->getState();
+
+        $legal = app(LegalSettings::class);
+        $legal->privacy_statement = (string) $data['privacy_statement'];
+        $legal->privacy_updated_at = Carbon::now()->toDateString();
+        $legal->save();
+
+        Notification::make()->title('Juridische teksten opgeslagen')->success()->send();
+    }
+}

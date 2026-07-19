@@ -102,9 +102,9 @@ export default function ShowcaseLayout({ children }: PropsWithChildren) {
                         <Boxes className="size-4 text-amber-500" />© {new Date().getFullYear()} {appName} — integratieplatform voor NL boekhoud- en betaal-API's.
                     </p>
                     <div className="flex gap-4">
-                        <a href="https://emeq.nl/privacy-policy/" className="transition-colors hover:text-foreground">
+                        <Link href="/privacy" className="transition-colors hover:text-foreground">
                             Privacy
-                        </a>
+                        </Link>
                         <a href="https://emeq.nl/algemene-voorwaarden/" className="transition-colors hover:text-foreground">
                             Voorwaarden
                         </a>
