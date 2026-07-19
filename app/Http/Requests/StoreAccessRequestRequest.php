@@ -29,6 +29,7 @@ class StoreAccessRequestRequest extends FormRequest
             'providers' => ['required', 'array', 'min:1'],
             'providers.*' => ['string', Rule::in($providers)],
             'message' => ['nullable', 'string', 'max:2000'],
+            'privacy_accepted' => ['accepted'],
             // 'website' is een honeypot — niet hier valideren (zou bots tippen),
             // de controller behandelt een gevuld honeypot-veld als stille no-op.
         ];
@@ -47,6 +48,7 @@ class StoreAccessRequestRequest extends FormRequest
             'app_url.url' => 'Vul een geldige URL in (incl. https://).',
             'providers.required' => 'Kies minstens één integratie.',
             'providers.min' => 'Kies minstens één integratie.',
+            'privacy_accepted.accepted' => 'Ga akkoord met het privacybeleid om verder te gaan.',
         ];
     }
 }

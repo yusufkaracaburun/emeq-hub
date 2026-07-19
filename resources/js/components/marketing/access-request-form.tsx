@@ -31,6 +31,7 @@ export function AccessRequestForm({ provider }: { provider: { key: string; label
         app_url: '',
         providers: [provider.key],
         message: '',
+        privacy_accepted: false,
         website: '', // honeypot — moet leeg blijven
     });
 
@@ -147,6 +148,27 @@ export function AccessRequestForm({ provider }: { provider: { key: string; label
                                 value={form.data.website}
                                 onChange={(e) => form.setData('website', e.target.value)}
                             />
+                        </div>
+
+                        <div>
+                            <label htmlFor="privacy_accepted" className="flex items-start gap-3 text-sm text-muted-foreground">
+                                <input
+                                    id="privacy_accepted"
+                                    type="checkbox"
+                                    checked={form.data.privacy_accepted}
+                                    onChange={(e) => form.setData('privacy_accepted', e.target.checked)}
+                                    aria-invalid={Boolean(form.errors.privacy_accepted)}
+                                    className="mt-0.5 size-4 shrink-0 rounded border-input accent-amber-500"
+                                />
+                                <span>
+                                    Ik ga akkoord met het{' '}
+                                    <a href="/privacy" target="_blank" rel="noopener noreferrer" className="font-medium text-amber-600 underline hover:text-amber-500">
+                                        privacybeleid
+                                    </a>
+                                    .
+                                </span>
+                            </label>
+                            <FieldError message={form.errors.privacy_accepted} />
                         </div>
 
                         <Button type="submit" size="lg" className="w-full" disabled={form.processing}>

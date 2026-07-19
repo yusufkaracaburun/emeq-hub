@@ -23,7 +23,7 @@ bedrijfsgegevens verwerkt bij het koppelen van boekhoud- en betaal-API's
 (Exact Online, Mollie, SnelStart en toekomstige partners).
 
 **Verwerker:** Emeq B.V., Tokyostraat 17, 1175 RB Lijnden. KvK 84148691,
-BTW NL863113114B01. Contact: info@emeq.nl.
+BTW NL863113114B01. Contact: support@emeq.nl.
 
 ## 1. Onze rol
 
@@ -128,7 +128,7 @@ indienen bij de **Autoriteit Persoonsgegevens** (autoriteitpersoonsgegevens.nl).
 ## 12. Contact
 
 Vragen over deze verklaring of over gegevensbescherming? Mail naar
-**info@emeq.nl**.
+**support@emeq.nl**.
 MARKDOWN;
     }
 
@@ -152,7 +152,7 @@ MARKDOWN;
 ## Artikel 2 — Identiteit van Emeq
 
 Emeq B.V., Tokyostraat 17, 1175 RB Lijnden. KvK 84148691, BTW NL863113114B01.
-Contact: info@emeq.nl.
+Contact: support@emeq.nl.
 
 ## Artikel 3 — Toepasselijkheid
 
@@ -239,7 +239,7 @@ de Afnemer.
 ## Artikel 16 — Klachtenprocedure
 
 Klachten dienen binnen twee maanden na het ontstaan gemotiveerd bij Emeq te
-worden gemeld via info@emeq.nl. Emeq reageert binnen een redelijke termijn.
+worden gemeld via support@emeq.nl. Emeq reageert binnen een redelijke termijn.
 
 ## Artikel 17 — Wijziging van de voorwaarden
 

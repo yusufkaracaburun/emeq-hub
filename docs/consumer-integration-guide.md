@@ -200,6 +200,18 @@ bewaar de teruggegeven `connection_id`. Handel `404`/`503`/`403` af met een nett
 melding.
 ```
 
+### Privacy-akkoord (verplicht)
+
+`POST /v1/oauth/{provider}/init` is server-to-server: er is **geen door de Hub
+gerenderde consent-pagina** in deze flow. Jij (de Consumer) bent daarom
+verantwoordelijk voor het verkrijgen van het akkoord van de eindgebruiker op het
+Hub-privacybeleid (<https://hub.emeq.nl/privacy>) **vóór** je de koppeling start —
+bijvoorbeeld met een verplichte checkbox in je eigen koppel-UI. Dit akkoord is
+contractueel geborgd via de verwerkersovereenkomst tussen Emeq en jou.
+
+De browser-flow op de Hub zelf (`/koppelen`-intake) heeft een eigen verplichte
+consent-checkbox; die geldt alleen voor dat pad.
+
 ## Stap 4 — Terugkomst + status
 
 Na consent toont de Hub een bevestigingspagina en **redirect automatisch (±3s)**

@@ -27,6 +27,7 @@ class AccessRequest extends Model
         'app_url',
         'providers',
         'message',
+        'privacy_accepted_at',
         'status',
         'consumer_id',
     ];
@@ -38,6 +39,7 @@ class AccessRequest extends Model
     {
         return [
             'providers' => 'array',
+            'privacy_accepted_at' => 'datetime',
         ];
     }
 

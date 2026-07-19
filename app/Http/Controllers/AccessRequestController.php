@@ -22,7 +22,11 @@ class AccessRequestController extends Controller
     {
         // Honeypot: gevuld = bot. Stille no-op zodat we 'm niet tippen.
         if (! $request->filled('website')) {
-            $accessRequest = AccessRequest::create($request->validated());
+            // `privacy_accepted` is gevalideerd op `accepted` maar niet fillable;
+            // we leggen het akkoord vast als tijdstip.
+            $accessRequest = AccessRequest::create($request->validated() + [
+                'privacy_accepted_at' => now(),
+            ]);
 
             // Melding naar Emeq is best-effort: een mail-misconfig mag de
             // aanvraag nooit laten falen.

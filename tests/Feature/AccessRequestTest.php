@@ -32,6 +32,7 @@ class AccessRequestTest extends TestCase
             'app_url' => 'https://app.naschool.test',
             'providers' => ['exact', 'mollie'],
             'message' => 'We willen koppelen voor facturatie.',
+            'privacy_accepted' => true,
         ], $overrides);
     }
 
@@ -60,8 +61,20 @@ class AccessRequestTest extends TestCase
         $this->assertSame('Naschool BV', $record->company);
         $this->assertSame(['exact'], $record->providers);
         $this->assertSame('new', $record->status);
+        $this->assertNotNull($record->privacy_accepted_at);
 
         Mail::assertSent(AccessRequestSubmitted::class);
+    }
+
+    public function test_submission_without_privacy_consent_is_rejected(): void
+    {
+        Mail::fake();
+
+        $this->post('/koppelen', $this->validPayload(['privacy_accepted' => false]))
+            ->assertSessionHasErrors('privacy_accepted');
+
+        $this->assertDatabaseCount('access_requests', 0);
+        Mail::assertNothingSent();
     }
 
     public function test_invalid_submission_fails_validation(): void

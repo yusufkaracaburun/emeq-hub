@@ -4,9 +4,10 @@
 > wat je invult, waaróm dat het antwoord is, en welk bestand in deze repo dat bewijst.
 > Neem dit mee als Exact doorvraagt.
 >
-> **Status**: concept — drie vragen kunnen nog niet met "ja" beantwoord worden.
+> **Status**: vraag 1 (privacybeleid), 3 (consent), 5 (test/release-proces) en 8
+> (vulnerability) zijn nu met "ja" te beantwoorden. Open: vraag 12 (ISO 27001-verklaring OVH).
 > Epic: [#36](https://github.com/yusufkaracaburun/emeq-hub/issues/36).
-> **Laatst bijgewerkt**: 2026-07-11.
+> **Laatst bijgewerkt**: 2026-07-20.
 
 ## Wanneer heb je deze review nodig?
 
@@ -90,28 +91,20 @@ mee bij Lezen-vs-Beheren, en wees eerlijk als Exact ernaar vraagt.
 > doel; de bewaartermijn(en) en het beleid m.b.t. verwijdering; hoe gebruikers hun toestemming
 > kunnen intrekken en hoe zij een verzoek tot verwijdering kunnen indienen?
 
-**Antwoord vandaag: 🔴 NEE.** Dit bestaat niet.
+**Antwoord: 🟢 JA — live op https://hub.emeq.nl/privacy.**
 
-**Wat nodig is** — een publieke pagina op `hub.emeq.nl` die per entiteit beschrijft wat er
-wordt verwerkt:
+De privacyverklaring is publiek, indexeerbaar en DB-beheerd (admin → Beheer → Juridische
+teksten, markdown). Ze beschrijft: welke gegevens (koppelingstokens **encrypted at rest**,
+pass-through niet bewaard, audit-metadata), doel + rechtsgrond, bewaartermijnen (**90 dagen**
+audit-metadata; tokens tot ontkoppeling), verwijderbeleid + verzoek tot verwijdering,
+intrekken van toestemming (= Connection ontkoppelen), sub-verwerkers (OVH, Cloudflare,
+Nightwatch) en expliciet dat de Hub **verwerker** is. Bedrijfsgegevens ingevuld (Emeq B.V.,
+Tokyostraat 17, 1175 RB Lijnden, KvK 84148691, BTW NL863113114B01).
 
-| Entiteit | Wat er in staat |
-|---|---|
-| `Consumer` | de SaaS-app die de Hub gebruikt (naam, callback-URL, app-URL) |
-| `Account` | eindgebruiker bij die Consumer (`consumer_id` + `external_id`) |
-| `Connection` | de OAuth-koppeling: **encrypted** tokens, scopes, expiry |
-| `PassThroughCall` | audit-log van elke Consumer → Hub → Partner-call |
-| `InboundWebhookEvent` | **metadata-only** audit van partner-webhooks (bewust géén payload) |
-
-Plus: rechtsgrond, bewaartermijnen, verwijderbeleid, intrekken van toestemming (= Connection
-revoken via `OAuthFlow::revoke()`), sub-verwerkers (Cloudflare, OVH, de partner-API's), en
-expliciet dat de Hub **verwerker** is en niet verwerkingsverantwoordelijke.
-
-**Bewaartermijnen — mechanisme staat, beleid nog vast te leggen.** `pass_through_calls` en
-`inbound_webhook_events` zijn nu `MassPrunable`: een dagelijkse `model:prune` verwijdert
-rijen ouder dan het venster in `config/hub.php` (default **90 dagen**, env-overridebaar).
-Wat #41 nog moet doen: het definitieve bewaartermijn-getal + de publieke beleidstekst
-(rechtsgrond, verwijderverzoek).
+Bron: `App\Support\LegalDefaults::privacyStatement()`, `LegalController`,
+`resources/js/pages/legal.tsx`. Retentie-mechanisme: `MassPrunable` op `PassThroughCall` +
+`InboundWebhookEvent`, dagelijkse `model:prune`, venster in `config/hub.php` (default 90 dagen,
+env-overridebaar).
 
 → [#41](https://github.com/yusufkaracaburun/emeq-hub/issues/41)
 
@@ -134,20 +127,18 @@ revoket de tokens bij Exact én zet de Connection op `revoked`.
 
 > Vraagt uw app gebruikers of ze met uw privacybeleid akkoord gaan?
 
-**Antwoord vandaag: 🔴 NEE.**
+**Antwoord: 🟢 JA — twee paden, beide geborgd.**
 
-De OAuth-init (`/v1/oauth/{provider}/init`) en de publieke `/koppelen`-intake vragen nergens
-om akkoord.
-
-**Nuance die je in het antwoord moet maken**: er zijn twee paden.
-
-1. **Browser-flow** (gebruiker koppelt zelf via de Hub) → hier hoort een checkbox met link
-   naar het privacybeleid.
+1. **Browser-flow** (gebruiker koppelt zelf via de Hub) → de publieke `/koppelen`-intake
+   heeft een **verplichte consent-checkbox** met link naar `/privacy`; zonder akkoord geen
+   submit (`accepted`-validatie). Het akkoord wordt vastgelegd als tijdstip
+   (`access_requests.privacy_accepted_at`). Bron: `AccessRequestForm`,
+   `StoreAccessRequestRequest`, `AccessRequestController`.
 2. **Server-to-server** (een Consumer start `/init` namens een Account) → daar is geen
-   browser en dus geen checkbox. Het akkoord hoort dan bij de **Consumer**, contractueel
-   geborgd via de verwerkersovereenkomst en vastgelegd in de consumer-integratiegids.
+   browser en dus geen checkbox. Het akkoord ligt bij de **Consumer**, contractueel geborgd
+   via de verwerkersovereenkomst en beschreven in de consumer-integratiegids.
 
-Schrijf beide op. Doe niet alsof er één pad is.
+Beide expliciet — geen doen-alsof-één-pad.
 
 → [#42](https://github.com/yusufkaracaburun/emeq-hub/issues/42)
 
@@ -311,15 +302,15 @@ Al ingevuld in het formulier: Yusuf Karacaburun · 0624392795 · info@emeq.nl.
 
 ## Wat er nog tussen jou en "Submit" staat
 
-| # | Blokker | Issue |
-|---|---|---|
-| 1 | App staat op `hub-dev.emeq.nl`, moet `hub.emeq.nl` | [#38](https://github.com/yusufkaracaburun/emeq-hub/issues/38) |
-| 2 | Privacybeleid bestaat niet (vraag 1) | [#41](https://github.com/yusufkaracaburun/emeq-hub/issues/41) |
-| 3 | Geen consent in de connect-flow (vraag 3) | [#42](https://github.com/yusufkaracaburun/emeq-hub/issues/42) |
-| 4 | 27 composer-advisories, 2 high (vraag 8) | [#43](https://github.com/yusufkaracaburun/emeq-hub/issues/43) |
-| 5 | Geen CI (vraag 5) | [#44](https://github.com/yusufkaracaburun/emeq-hub/issues/44) |
-| 6 | VPS + tunnel (vraag 9–12) | [#37](https://github.com/yusufkaracaburun/emeq-hub/issues/37) |
-| 7 | Vier ⓘ-scopes verifiëren | [#39](https://github.com/yusufkaracaburun/emeq-hub/issues/39) |
+| # | Blokker | Issue | Status |
+|---|---|---|---|
+| 1 | App staat op `hub-dev.emeq.nl`, moet `hub.emeq.nl` | [#38](https://github.com/yusufkaracaburun/emeq-hub/issues/38) | open |
+| 2 | Privacybeleid (vraag 1) | [#41](https://github.com/yusufkaracaburun/emeq-hub/issues/41) | ✅ live |
+| 3 | Consent in de connect-flow (vraag 3) | [#42](https://github.com/yusufkaracaburun/emeq-hub/issues/42) | ✅ |
+| 4 | 30 composer-advisories, 4 high (vraag 8) | [#43](https://github.com/yusufkaracaburun/emeq-hub/issues/43) | ✅ |
+| 5 | CI (vraag 5) | [#44](https://github.com/yusufkaracaburun/emeq-hub/issues/44) | ✅ |
+| 6 | VPS + tunnel (vraag 9–12) | [#37](https://github.com/yusufkaracaburun/emeq-hub/issues/37) | ✅ live |
+| 7 | Vier ⓘ-scopes verifiëren | [#39](https://github.com/yusufkaracaburun/emeq-hub/issues/39) | open |
 
 Werk ze af, werk dit document bij, en submit dan pas. Een afgewezen review kost meer tijd dan
 het dichttrekken van deze zeven.
