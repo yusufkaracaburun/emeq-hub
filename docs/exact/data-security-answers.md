@@ -4,11 +4,13 @@
 > wat je invult, waaróm dat het antwoord is, en welk bestand in deze repo dat bewijst.
 > Neem dit mee als Exact doorvraagt.
 >
-> **Status**: vraag 1 (privacybeleid), 3 (consent), 5 (test/release-proces) en 8
-> (vulnerability) zijn nu met "ja" te beantwoorden. Open: vraag 12 (ISO 27001-verklaring OVH,
-> opgevraagd via ticket CS16314299).
+> **Status**: alle 12 D&S-vragen staan op "ja" — vraag 5 (CI live) en 8 (`composer audit`
+> schoon) zijn sinds 2026-07-21 groen. Enige open punt: vraag 12 (ISO 27001-verklaring OVH,
+> opgevraagd via ticket CS16314299) mag als "verklaring volgt" ingediend worden. Buiten de
+> review resteren twee portaal-acties: app-host `hub-dev` → `hub.emeq.nl` ([#38](https://github.com/yusufkaracaburun/emeq-hub/issues/38))
+> en de scope-matrix verifiëren tegen de info-iconen ([#39](https://github.com/yusufkaracaburun/emeq-hub/issues/39)).
 > Epic: [#36](https://github.com/yusufkaracaburun/emeq-hub/issues/36).
-> **Laatst bijgewerkt**: 2026-07-20.
+> **Laatst bijgewerkt**: 2026-07-21.
 
 ## Inhoud
 
@@ -48,14 +50,14 @@ De Hub bestaat om het tweede te doen. Dus deze review is de poort.
 > Omschrijf in maximaal 140 karakters het doel van je app en hoe je app de gegevens van
 > Exact Online verwerkt.
 
-**Nederlands** (concept — 139 tekens):
+**Nederlands** (concept — 128 tekens):
 
 ```
 Boekt verkoop- en inkoopfacturen uit gekoppelde SaaS-apps automatisch in Exact Online,
 en houdt relaties en grootboek synchroon.
 ```
 
-**Engels** (concept — 137 tekens):
+**Engels** (concept — 129 tekens):
 
 ```
 Posts sales and purchase invoices from connected SaaS apps into Exact Online, and keeps
@@ -197,15 +199,18 @@ Beide expliciet — geen doen-alsof-één-pad.
 > Heeft u een proces geïmplementeerd waarbij wijzigingen aan de app/dienst eerst worden
 > gevalideerd en getest voordat ze worden doorgevoerd?
 
-**Antwoord: 🟡 JA — maar maak het verifieerbaar vóór je submit.**
+**Antwoord: 🟢 JA — afgedwongen poort, met run-history.**
 
-**Vandaag**: ~950 geautomatiseerde tests (PHPUnit). Werkwijze is feature-branch → tests groen
-→ fast-forward-merge naar `master` → deploy. Een `branch-guard`-hook blokkeert directe edits
-op `master`. Code-style wordt afgedwongen met Pint.
+Elke push draait een GitHub Actions-workflow (`.github/workflows/ci.yml`) die vier stappen als
+faalpoort uitvoert vóórdat een wijziging naar productie kan: **Pint** (`--test`, code-style),
+**~950 PHPUnit-tests**, **`composer audit`** (dependency-vulnerabilities) en **ShellCheck** op
+de provisioning-scripts. Faalt één stap, dan is de run rood en gaat de merge niet door.
 
-**Het gat**: er is **geen CI**. Het is handmatige discipline, niet een afgedwongen poort. Dat
-is precies wat deze vraag uitvraagt. Met een GitHub Actions-workflow wordt het antwoord
-"ja, en hier is de run-history".
+Daarbovenop de werkwijze: feature-branch → groen → fast-forward-merge naar `master` → deploy,
+met een `branch-guard`-hook die directe edits op `master` blokkeert. Het is nu een proces met
+zichtbare run-history, geen handmatige belofte.
+
+**Bewijs**: `.github/workflows/ci.yml`; run-history op GitHub Actions.
 
 → [#44](https://github.com/yusufkaracaburun/emeq-hub/issues/44)
 
@@ -241,15 +246,16 @@ is precies wat deze vraag uitvraagt. Met een GitHub Actions-workflow wordt het a
 > Evalueert u uw app/dienst regelmatig om kwetsbaarheden te identificeren, te analyseren en te
 > verhelpen?
 
-**Antwoord vandaag: 🔴 NEE — niet eerlijk met "ja" te beantwoorden.**
+**Antwoord: 🟢 JA — proces, niet belofte.**
 
-`composer audit` bestaat en draait, maar meldt op dit moment **27 advisories, waarvan 2 high**
-([#33](https://github.com/yusufkaracaburun/emeq-hub/issues/33)). Een "ja" invullen terwijl die
-openstaan is precies het soort antwoord waar een reviewer op doorvraagt.
+`composer audit` meldt nu **"No security vulnerability advisories found"**: de eerder open 30
+advisories (4 high) zijn getrieerd — gepatcht, of onderbouwd genegeerd in `composer.json`
+([#33](https://github.com/yusufkaracaburun/emeq-hub/issues/33)). De audit draait niet alleen
+ad-hoc: hij staat als **faalstap in CI** (`.github/workflows/ci.yml`), dus elke push wordt
+opnieuw tegen de advisory-database gehouden en een nieuw lek breekt de build.
 
-**Wat je nodig hebt vóór "ja"**: de 2 high dicht, de rest getrieerd (gepatcht óf onderbouwd
-genegeerd in `composer.json`), en `composer audit` als faalstap in CI — dán is het een proces
-in plaats van een belofte.
+**Bewijs**: `composer audit` (lokaal schoon), `.github/workflows/ci.yml` stap "Composer security
+audit", ignore-lijst met motivatie in `composer.json`.
 
 → [#43](https://github.com/yusufkaracaburun/emeq-hub/issues/43)
 
@@ -279,8 +285,10 @@ in plaats van een belofte.
 - Secrets: `.env.prod` met `chmod 600`, gitignored, nooit in de image gebakken.
 - Database + Redis: geen gepubliceerde poorten, alleen bereikbaar binnen het compose-netwerk.
 
-**Wees eerlijk over de backups** — die staan nu op dezelfde schijf
-([#49](https://github.com/yusufkaracaburun/emeq-hub/issues/49)).
+**Backups**: de prod-database-dumps zijn nu **encrypted at rest** en worden **off-site**
+weggeschreven (niet langer alleen op de server-schijf), scheduled via de `scheduler`-service
+([#49](https://github.com/yusufkaracaburun/emeq-hub/issues/49) — afgerond). Wie bij de dumps
+kan valt daarmee onder dezelfde logische-toegangscontrole als de rest van de host.
 
 → [#37](https://github.com/yusufkaracaburun/emeq-hub/issues/37)
 
@@ -324,8 +332,14 @@ is die van OVH als hostingprovider.
 | **Consumer-apps** (emeq-app, planny, naschool) | de Hub forwardt partner-webhooks en API-antwoorden terug naar de SaaS-app die de koppeling gebruikt | financiële mutaties, relatie- en grootboekgegevens — uitsluitend van de eigen Account van die Consumer |
 | **Cloudflare** | TLS-terminatie, DDoS-mitigatie, tunnel | verkeer in transit; geen opslag |
 | **OVH** | hosting van applicatie en database (EU) | alle opgeslagen gegevens (zie vraag 9–12) |
+| **Nightwatch** (Laravel) | applicatie-monitoring en foutrapportage | performance- en fout-telemetrie, gesampled (`NIGHTWATCH_REQUEST_SAMPLE_RATE`) |
+| **Exact Online** | de gekoppelde partner-API zelf — bron én bestemming van de boekingen | verkoop-/inkoopmutaties, relaties, grootboek van de gekoppelde administratie |
 
 Vul aan met de andere partner-API's zodra die live gaan (Mollie, Snelstart, Moneybird).
+
+> ⚠️ **Nightwatch-redactie verifiëren vóór submit.** Er is nog geen `config/nightwatch.php`
+> met een expliciet redactiebeleid; controleer of exception-context of query-bindings met
+> partner-/persoonsgegevens naar Nightwatch kunnen lekken en scherp dat aan als dat zo is.
 
 ---
 
