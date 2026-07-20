@@ -132,14 +132,28 @@ fi
 
 # Zonder rotatie vreet één spammy container de 100 GB disk op en valt Postgres
 # om op ENOSPC.
+#
+# `systemctl restart docker` bounce't álle containers (app, horizon, scheduler, db,
+# redis). Op een re-run tegen een levende box mag dat niet gebeuren als daemon.json
+# ongewijzigd is — dus alleen herschrijven + herstarten bij een echte content-change.
 log "docker log-rotatie"
-cat > /etc/docker/daemon.json <<'JSON'
+DAEMON_JSON="/etc/docker/daemon.json"
+DAEMON_TMP="$(mktemp)"
+cat > "$DAEMON_TMP" <<'JSON'
 {
   "log-driver": "json-file",
   "log-opts": { "max-size": "10m", "max-file": "3" }
 }
 JSON
-systemctl restart docker
+if [[ -f "$DAEMON_JSON" ]] && cmp -s "$DAEMON_TMP" "$DAEMON_JSON"; then
+    rm -f "$DAEMON_TMP"
+    log "daemon.json ongewijzigd — docker niet herstart"
+else
+    install -m 644 "$DAEMON_TMP" "$DAEMON_JSON"
+    rm -f "$DAEMON_TMP"
+    log "daemon.json bijgewerkt — docker herstarten"
+    systemctl restart docker
+fi
 systemctl enable docker
 
 # ── 3. Deploy-user ────────────────────────────────────────────────────────────
@@ -158,8 +172,16 @@ install -d -m 700 -o "$DEPLOY_USER" -g "$DEPLOY_USER" "/home/${DEPLOY_USER}/.ssh
 if [[ "$SOURCE_KEYS" == "$DEPLOY_KEYS" ]]; then
     log "sleutel-bron ís al ${DEPLOY_USER}'s authorized_keys — niets te kopiëren"
 else
-    log "sleutels kopiëren naar ${DEPLOY_USER} (uit ${SOURCE_KEYS})"
-    install -m 600 -o "$DEPLOY_USER" -g "$DEPLOY_USER" "$SOURCE_KEYS" "$DEPLOY_KEYS"
+    # Appenden + dedupen i.p.v. overschrijven: een later toegevoegde sleutel (CI,
+    # tweede beheerder) mag bij een re-run niet verdwijnen. Bestaande regels eerst,
+    # dan de bron; comment-/lege regels eruit; dedupe op exacte regel (volgorde-behoud).
+    log "sleutels mergen naar ${DEPLOY_USER} (uit ${SOURCE_KEYS}, append + dedupe)"
+    MERGED_KEYS="$(mktemp)"
+    { [[ -f "$DEPLOY_KEYS" ]] && cat "$DEPLOY_KEYS"; cat "$SOURCE_KEYS"; } \
+        | grep -vE '^[[:space:]]*(#|$)' \
+        | awk '!seen[$0]++' > "$MERGED_KEYS"
+    install -m 600 -o "$DEPLOY_USER" -g "$DEPLOY_USER" "$MERGED_KEYS" "$DEPLOY_KEYS"
+    rm -f "$MERGED_KEYS"
 fi
 
 # make prod-* draait docker compose; systemctl/apt-get zijn wat er verder nodig is.
@@ -217,7 +239,10 @@ SSH_PORT="$(ssh_socket_port)"
 SSH_PORT="${SSH_PORT:-22}"
 
 log "ufw: alles dicht behalve SSH (poort ${SSH_PORT}, rate-limited)"
-ufw --force reset >/dev/null
+# Géén `ufw --force reset`: dat wist stilzwijgend operator-regels (bv. een tijdelijke
+# allow die iemand ná de provisioning toevoegde). De defaults + SSH-limit zijn zelf
+# idempotent — ufw dedupet een identieke regel bij een re-run — dus laat bestaande
+# regels staan i.p.v. de tabel te legen.
 ufw default deny incoming
 ufw default allow outgoing
 # `limit` i.p.v. `allow`: ufw's ingebouwde rate-limit blokkeert een bron-IP dat 6+
