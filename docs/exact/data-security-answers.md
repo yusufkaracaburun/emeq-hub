@@ -51,6 +51,13 @@ minimale scopes zijn een sterk verhaal in de review, en Exact handhaaft ze serve
 
 Afgeleid uit `vendor/emeq/exact-api/src/` en `app/`. Niet gegokt.
 
+> **Gehandhaafd in code.** Deze resource-lijst leeft als
+> `config('hub-providers.exact.allowed_paths')` en wordt afgedwongen op de generieke
+> pass-through (`App\Support\Exact\ExactPathWhitelist`): een consumer die een pad
+> buiten deze lijst aanroept krijgt `403 path_not_allowed` i.p.v. door te forwarden.
+> Dit dicht het "logische toegang"-gat (vraag 10) — de technische API-oppervlakte
+> valt nu samen met de gedeclareerde scopes. Lege lijst = kill-switch (whitelist uit).
+
 | Exact-resource | Verbs | In te vullen scope | Zeker? |
 |---|---|---|---|
 | `crm/Accounts` | GET · POST · PUT | Crm → **accounts = Beheren** | ✅ |

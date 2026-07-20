@@ -299,4 +299,53 @@ class PassThroughTest extends TestCase
             ->assertStatus(409)
             ->assertJson(['error' => 'connection_incomplete']);
     }
+
+    public function test_pass_through_blocks_path_outside_whitelist(): void
+    {
+        [$consumer] = $this->consumerWithExactConnection();
+        $token = $consumer->createToken('t', [TokenAbilities::EXACT_READ])->plainTextToken;
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->withHeader('X-Account-Id', 'school1')
+            ->getJson('/v1/exact/subscription/Subscriptions')
+            ->assertStatus(403)
+            ->assertJson(['error' => 'path_not_allowed']);
+
+        $this->assertDatabaseMissing('pass_through_calls', [
+            'provider' => 'exact',
+            'path' => '/subscription/Subscriptions',
+        ]);
+    }
+
+    public function test_pass_through_allows_whitelisted_path_with_odata_key(): void
+    {
+        MockClient::global([
+            RawExactRequest::class => MockResponse::make(['d' => ['results' => []]], 200),
+        ]);
+
+        [$consumer] = $this->consumerWithExactConnection();
+        $token = $consumer->createToken('t', [TokenAbilities::EXACT_READ])->plainTextToken;
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->withHeader('X-Account-Id', 'school1')
+            ->getJson("/v1/exact/crm/Accounts(guid'abc-123')")
+            ->assertOk();
+    }
+
+    public function test_pass_through_kill_switch_allows_any_path_when_whitelist_empty(): void
+    {
+        config(['hub-providers.exact.allowed_paths' => []]);
+
+        MockClient::global([
+            RawExactRequest::class => MockResponse::make(['d' => ['results' => []]], 200),
+        ]);
+
+        [$consumer] = $this->consumerWithExactConnection();
+        $token = $consumer->createToken('t', [TokenAbilities::EXACT_READ])->plainTextToken;
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->withHeader('X-Account-Id', 'school1')
+            ->getJson('/v1/exact/subscription/Subscriptions')
+            ->assertOk();
+    }
 }

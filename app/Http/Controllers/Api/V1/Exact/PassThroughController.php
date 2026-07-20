@@ -7,10 +7,12 @@ use App\Models\Account;
 use App\Models\Connection;
 use App\Sanctum\TokenAbilities;
 use App\Support\Exact\ExactForwarder;
+use App\Support\Exact\ExactPathWhitelist;
 use App\Support\Exact\HeaderForwarder;
 use Dedoc\Scramble\Attributes\Group;
 use Emeq\ExactApi\Http\Request\RawExactRequest;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Saloon\Enums\Method;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -29,7 +31,10 @@ class PassThroughController extends Controller
 {
     private const ALLOWED_METHODS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'];
 
-    public function __construct(private readonly ExactForwarder $forwarder) {}
+    public function __construct(
+        private readonly ExactForwarder $forwarder,
+        private readonly ExactPathWhitelist $whitelist,
+    ) {}
 
     public function __invoke(Request $request, string $path): Response
     {
@@ -73,6 +78,19 @@ class PassThroughController extends Controller
         $account = $request->attributes->get('exact_account');
         /** @var Connection $connection */
         $connection = $request->attributes->get('exact_connection');
+
+        if (! $this->whitelist->allows($path)) {
+            Log::warning('exact.passthrough.path_blocked', [
+                'consumer_id' => $account->consumer_id ?? null,
+                'method' => $method,
+                'path' => $path,
+            ]);
+
+            return response()->json([
+                'error' => 'path_not_allowed',
+                'message' => 'Dit Exact-pad valt buiten de toegestane resources van de Hub.',
+            ], Response::HTTP_FORBIDDEN);
+        }
 
         return $this->forwarder->forward($request, $account, $connection, new RawExactRequest(
             method: Method::from($method),

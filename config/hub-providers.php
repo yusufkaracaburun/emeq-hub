@@ -22,6 +22,10 @@ declare(strict_types=1);
  * error_budget: optioneel per-provider — pass-through-circuit-breaker (enabled,
  *   threshold, window-seconden). Alleen Exact heeft een gedeelde error-key-limiet
  *   die een breaker rechtvaardigt; gelezen door App\Support\Exact\ExactErrorBudget.
+ * allowed_paths: optioneel — whitelist van OData-resource-paden die de generieke
+ *   pass-through mag benaderen (App\Support\Exact\ExactPathWhitelist). Spiegelt de
+ *   App-Center-scope-matrix (docs/exact/data-security-answers.md). Lege lijst =
+ *   whitelist uit (alles door) → kill-switch bij een consumer-breuk.
  */
 return [
     'mollie' => [
@@ -42,6 +46,19 @@ return [
             'enabled' => true,
             'threshold' => 6,   // trip ruim onder Exact's 10/uur/endpoint
             'window' => 3600,   // seconden — rollend uur-venster vanaf de eerste fout
+        ],
+        'allowed_paths' => [
+            'crm/Accounts',
+            'financial/GLAccounts',
+            'financial/Journals',
+            'financial/CostCenters',
+            'financial/CostUnits',
+            'vat/VATCodes',
+            'salesentry/SalesEntries',
+            'purchaseentry/PurchaseEntries',
+            'documents/Documents',
+            'documents/DocumentAttachments',
+            'webhooks/WebhookSubscriptions',
         ],
     ],
 ];
