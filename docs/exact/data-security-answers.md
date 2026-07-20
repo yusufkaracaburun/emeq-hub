@@ -10,6 +10,28 @@
 > Epic: [#36](https://github.com/yusufkaracaburun/emeq-hub/issues/36).
 > **Laatst bijgewerkt**: 2026-07-20.
 
+## Inhoud
+
+- [Wanneer heb je deze review nodig?](#wanneer-heb-je-deze-review-nodig)
+- [1. Doel (max 140 tekens, NL + ENG)](#1-doel-max-140-tekens-nl--eng)
+- [2. Scopes](#2-scopes)
+- [3. Beoordeling van gegevensbescherming en beveiliging](#3-beoordeling-van-gegevensbescherming-en-beveiliging)
+  - [Vraag 1 — Openbaar privacybeleid](#vraag-1--openbaar-privacybeleid)
+  - [Vraag 2 — Expliciete toestemming voor verzamelen en gebruiken](#vraag-2--expliciete-toestemming-voor-verzamelen-en-gebruiken)
+  - [Vraag 3 — Akkoord met het privacybeleid](#vraag-3--akkoord-met-het-privacybeleid)
+  - [Vraag 4 — Encryptie tegen ongeoorloofde toegang](#vraag-4--encryptie-tegen-ongeoorloofde-toegang)
+  - [Vraag 5 — Wijzigingen gevalideerd en getest vóór doorvoeren](#vraag-5--wijzigingen-gevalideerd-en-getest-vóór-doorvoeren)
+  - [Vraag 6 — Wijzigingsgeschiedenis](#vraag-6--wijzigingsgeschiedenis)
+  - [Vraag 7 — Best practices voor beveiligd coderen (OWASP)](#vraag-7--best-practices-voor-beveiligd-coderen-owasp)
+  - [Vraag 8 — Regelmatige vulnerability-evaluatie](#vraag-8--regelmatige-vulnerability-evaluatie)
+  - [Vraag 9 — Data in eigen of cloud datacenter](#vraag-9--data-in-eigen-of-cloud-datacenter)
+  - [Vraag 10 — Logische toegang alleen voor bevoegden](#vraag-10--logische-toegang-alleen-voor-bevoegden)
+  - [Vraag 11 — Fysieke toegang alleen voor bevoegden](#vraag-11--fysieke-toegang-alleen-voor-bevoegden)
+  - [Vraag 12 — Verklaring van derden (ISO 27001, ISAE 3402, SOC 1/2)](#vraag-12--verklaring-van-derden-iso-27001-isae-3402-soc-12)
+- [4. Automatische koppelingen met derden](#4-automatische-koppelingen-met-derden)
+- [5. Contactgegevens](#5-contactgegevens)
+- [Wat er nog tussen jou en "Submit" staat](#wat-er-nog-tussen-jou-en-submit-staat)
+
 ## Wanneer heb je deze review nodig?
 
 | Je wilt… | Nodig |
