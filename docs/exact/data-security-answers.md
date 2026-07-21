@@ -106,11 +106,15 @@ heel Accountancy · Communication → mailboxes.
 > `salesentry`, `purchaseentry` en de webhook-topics is onzeker — Exact's functionele
 > scope-namen komen niet 1-op-1 overeen met de REST-paden. Zie [#39](https://github.com/yusufkaracaburun/emeq-hub/issues/39).
 
-**Over de DELETE-calls**: `crm/Accounts`, `salesentry/SalesEntries` en
-`purchaseentry/PurchaseEntries` hebben DELETE-implementaties in de SDK, maar die worden
-uitsluitend aangeroepen door `app/Console/Commands/Exact/PurgeTestData.php` — een
-test-data-opruimcommando. Geen enkele productie-flow verwijdert iets bij Exact. Weeg dat
-mee bij Lezen-vs-Beheren, en wees eerlijk als Exact ernaar vraagt.
+**Over de DELETE-calls**: de generieke pass-through **weigert DELETE hard** —
+`PassThroughController::ALLOWED_METHODS` bevat alleen `GET/POST/PUT/PATCH`, dus een
+`DELETE /v1/exact/{path}` krijgt `405 method_not_allowed` en bereikt Exact nooit. De Hub kan
+via de consumer-API dus technisch geen data bij Exact verwijderen — "wij verwijderen niet in
+productie" is daarmee afgedwongen, geen belofte. `crm/Accounts`, `salesentry/SalesEntries` en
+`purchaseentry/PurchaseEntries` hebben nog wél DELETE-implementaties in de SDK, maar die worden
+uitsluitend aangeroepen door `app/Console/Commands/Exact/PurgeTestData.php` (operator-only
+test-opruiming via de connector, buiten de pass-through om). Bewijs:
+`tests/Feature/Api/V1/Exact/PassThroughTest.php::test_pass_through_blocks_delete_method_with_405`.
 
 ---
 

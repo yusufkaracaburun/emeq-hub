@@ -29,7 +29,10 @@ use Symfony\Component\HttpFoundation\Response;
 #[Group(name: 'Exact', description: 'Generieke Exact Online REST-pass-through (`/exact/{path}`) met de OAuth-tokens van de gekoppelde Account; division in het pad. Named resource-endpoints staan onder hun eigen `Exact · …`-groep.', weight: 60)]
 class PassThroughController extends Controller
 {
-    private const ALLOWED_METHODS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'];
+    // Geen DELETE: de Hub verwijdert geen data bij Exact via de pass-through
+    // (least-privilege / D&S vraag 2). Test-opruiming loopt via de connector
+    // rechtstreeks (PurgeTestData), niet via deze route.
+    private const ALLOWED_METHODS = ['GET', 'POST', 'PUT', 'PATCH'];
 
     public function __construct(
         private readonly ExactForwarder $forwarder,

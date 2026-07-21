@@ -173,7 +173,7 @@ class PassThroughTest extends TestCase
         // retryable. Map naar 422 zodat de reden niet achter een Cloudflare-502 verdwijnt.
         MockClient::global([
             RawExactRequest::class => MockResponse::make(
-                '{"error":{"message":{"value":"Can\'t delete: used in journal entry"}}}',
+                '{"error":{"message":{"value":"Invalid combination of GLAccount and Journal"}}}',
                 500,
             ),
         ]);
@@ -183,16 +183,35 @@ class PassThroughTest extends TestCase
 
         $this->withHeader('Authorization', "Bearer {$token}")
             ->withHeader('X-Account-Id', 'school1')
-            ->deleteJson('/v1/exact/crm/Accounts/guid')
+            ->postJson('/v1/exact/salesentry/SalesEntries', ['Journal' => '70'])
             ->assertStatus(422)
             ->assertJsonPath('error', 'upstream_rejected')
-            ->assertJsonPath('message', "Can't delete: used in journal entry")
+            ->assertJsonPath('message', 'Invalid combination of GLAccount and Journal')
             ->assertJsonPath('upstream_status', 500);
 
         $this->assertDatabaseHas('pass_through_calls', [
             'provider' => 'exact',
             'status' => 422,
             'upstream_error' => 'exact_rejected',
+        ]);
+    }
+
+    public function test_pass_through_blocks_delete_method_with_405(): void
+    {
+        // De Hub verwijdert geen data bij Exact via de pass-through — least-privilege
+        // (D&S vraag 2). DELETE wordt geweigerd vóór de forward; niks bereikt Exact.
+        [$consumer] = $this->consumerWithExactConnection();
+        $token = $consumer->createToken('t', [TokenAbilities::EXACT_WRITE])->plainTextToken;
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->withHeader('X-Account-Id', 'school1')
+            ->deleteJson("/v1/exact/crm/Accounts(guid'abc-123')")
+            ->assertStatus(405)
+            ->assertJson(['error' => 'method_not_allowed']);
+
+        $this->assertDatabaseMissing('pass_through_calls', [
+            'provider' => 'exact',
+            'method' => 'DELETE',
         ]);
     }
 
