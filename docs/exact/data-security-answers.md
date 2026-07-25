@@ -4,13 +4,12 @@
 > wat je invult, waaróm dat het antwoord is, en welk bestand in deze repo dat bewijst.
 > Neem dit mee als Exact doorvraagt.
 >
-> **Status**: alle 12 D&S-vragen staan op "ja" — vraag 5 (CI live) en 8 (`composer audit`
-> schoon) zijn sinds 2026-07-21 groen. Enige open punt: vraag 12 (ISO 27001-verklaring OVH,
-> opgevraagd via ticket CS16314299) mag als "verklaring volgt" ingediend worden. Buiten de
-> review resteren twee portaal-acties: app-host `hub-dev` → `hub.emeq.nl` ([#38](https://github.com/yusufkaracaburun/emeq-hub/issues/38))
-> en de scope-matrix verifiëren tegen de info-iconen ([#39](https://github.com/yusufkaracaburun/emeq-hub/issues/39)).
+> **Status**: alle 12 D&S-vragen staan op "ja", inclusief vraag 12 — de OVH ISO 27001-
+> verklaring (cert 37383-7) + ISAE 3000 Datacenter zijn op 2026-07-23 ontvangen en klaar om
+> bij te voegen. App-host is omgezet naar `hub.emeq.nl` ([#38](https://github.com/yusufkaracaburun/emeq-hub/issues/38) — dicht). Wat resteert is
+> puur portaal-werk: de scope-matrix invullen/verifiëren ([#39](https://github.com/yusufkaracaburun/emeq-hub/issues/39)) en dan submitten ([#50](https://github.com/yusufkaracaburun/emeq-hub/issues/50)).
 > Epic: [#36](https://github.com/yusufkaracaburun/emeq-hub/issues/36).
-> **Laatst bijgewerkt**: 2026-07-21.
+> **Laatst bijgewerkt**: 2026-07-25.
 
 ## Inhoud
 
@@ -302,27 +301,40 @@ kan valt daarmee onder dezelfde logische-toegangscontrole als de rest van de hos
 > hebben?
 
 **Antwoord: 🟢 JA** — via de hostingprovider (OVH). Fysieke toegangscontrole tot het
-datacenter is onderdeel van hun dienstverlening en valt onder hun ISO 27001-certificering.
-Verwijs naar de verklaring bij vraag 12.
+datacenter valt onder OVH's ISO 27001-certificering (cert 37383-7) én is expliciet
+getoetst in de **ISAE 3000 / CSA C5 Type II Datacenter**-verklaring die bij vraag 12 is
+bijgevoegd. Beide zijn OVH-attestaties, niet die van Emeq.
 
 ### Vraag 12 — Verklaring van derden (ISO 27001, ISAE 3402, SOC 1/2)
 
 > Hebt u een verklaring van derden beschikbaar, zoals ISO 27001, ISO 27002, ISAE 3402, SOC 1
 > of SOC 2?
 
-**Antwoord: 🟡 JA, indirect.**
+**Antwoord: 🟢 JA, indirect — verklaring bijgevoegd.**
 
 Emeq zelf is niet ISO 27001-gecertificeerd. De hostingprovider (OVH) is dat wel voor de
-datacenters en infrastructuur waarop de Hub draait — bevestigd bij de certificerende
-instantie **LNE** (Laboratoire national de métrologie et d'essais): OVH Groupe, Roubaix,
-certificaat **37387-5**. Achtergrond: <https://www.ovhcloud.com/en/compliance/iso-27001-27017-27018/>.
+cloud-diensten en datacenters waarop de Hub draait. De actuele verklaring is bij OVH
+opgevraagd (support-ticket **CS16314299**, 2026-07-20) en op 2026-07-23 ontvangen.
 
-**Status**: de actuele ISO 27001-verklaring (met de scope die de eigen VPS dekt) is bij OVH
-opgevraagd via support-ticket **CS16314299** (2026-07-20). Zodra OVH de PDF levert, komt die
-als bijlage bij deze vraag.
+**Bijgevoegde documenten:**
 
-Formuleer het antwoord zonder te suggereren dat Emeq zelf gecertificeerd is — de certificering
-is die van OVH als hostingprovider.
+| Document | Wat het dekt |
+|---|---|
+| **ISO/IEC 27001:2022-certificaat 37383-7** (OVH Groupe, Roubaix) | ISMS voor *"design, development and security activities for cloud service offerings"* — VPS valt onder dit cloud-aanbod. Geldig **12-02-2026 t/m 03-02-2027**. Certificerende instantie BYCYB, COFRAC-geaccrediteerd (nr. 4-0660), LNE-merk. Annex rév. 7 lijst de OVH-datacenters, incl. **Limburg (DE)**. |
+| **ISAE 3000 / CSA C5 Type II — Datacenter** | fysieke + logische datacenter-controls (onderbouwt vraag 10 en 11). |
+| SOC 2 / CSA C5 — Public Cloud (Part 1+2) | ⚠️ dekt OVH **Public Cloud**, niet de VPS-productlijn. Meegestuurd voor volledigheid, niet als hoofdbewijs. |
+
+**Waar de Hub draait**: OVH VPS-3, region **Frankfurt (DE)** / OpenStack-zone `os-de2`
+(OVH's Duitse datacenter-operatie). De ISO-scope is *offering-based* ("cloud service
+offerings"), dus de VPS valt onder cert 37383-7 ongeacht de exacte site; de Duitse OVH-DC
+(**Limburg**) staat als "OVH DC" in de annex.
+
+> ℹ️ In de annex staat "Frankfurt (DE)" als *Bureau* (kantoor) en "Limburg (DE)" als *OVH DC* —
+> OVH's Duitse DC is Limburg, "Frankfurt" is de commerciële region-naam. Als Exact naar de
+> exacte fysieke locatie vraagt: dat is de OVH-DC Limburg. Desgewenst bij OVH bevestigen.
+
+Formuleer zonder te suggereren dat Emeq zelf gecertificeerd is — de certificering is die van
+OVH als hostingprovider.
 
 ---
 
@@ -357,13 +369,15 @@ Al ingevuld in het formulier: Yusuf Karacaburun · 0624392795 · info@emeq.nl.
 
 | # | Blokker | Issue | Status |
 |---|---|---|---|
-| 1 | App staat op `hub-dev.emeq.nl`, moet `hub.emeq.nl` | [#38](https://github.com/yusufkaracaburun/emeq-hub/issues/38) | open |
+| 1 | App-host `hub-dev` → `hub.emeq.nl` | [#38](https://github.com/yusufkaracaburun/emeq-hub/issues/38) | ✅ dicht |
 | 2 | Privacybeleid (vraag 1) | [#41](https://github.com/yusufkaracaburun/emeq-hub/issues/41) | ✅ live |
 | 3 | Consent in de connect-flow (vraag 3) | [#42](https://github.com/yusufkaracaburun/emeq-hub/issues/42) | ✅ |
 | 4 | 30 composer-advisories, 4 high (vraag 8) | [#43](https://github.com/yusufkaracaburun/emeq-hub/issues/43) | ✅ |
 | 5 | CI (vraag 5) | [#44](https://github.com/yusufkaracaburun/emeq-hub/issues/44) | ✅ |
 | 6 | VPS + tunnel (vraag 9–12) | [#37](https://github.com/yusufkaracaburun/emeq-hub/issues/37) | ✅ live |
-| 7 | Vier ⓘ-scopes verifiëren | [#39](https://github.com/yusufkaracaburun/emeq-hub/issues/39) | open |
+| 7 | OVH ISO 27001 + ISAE 3000 (vraag 12) | ticket CS16314299 | ✅ ontvangen 2026-07-23 |
+| 8 | Scope-matrix invullen + 4 ⓘ-scopes verifiëren | [#39](https://github.com/yusufkaracaburun/emeq-hub/issues/39) | ⬜ open |
+| 9 | Submit for review | [#50](https://github.com/yusufkaracaburun/emeq-hub/issues/50) | ⬜ laatste actie |
 
-Werk ze af, werk dit document bij, en submit dan pas. Een afgewezen review kost meer tijd dan
-het dichttrekken van deze zeven.
+Alleen rij 8 en 9 resteren — beide portaal-werk. Vul de scopes in, submit, en voeg de drie
+OVH-PDF's toe bij vraag 12. Een afgewezen review kost meer tijd dan het netjes afronden hiervan.
