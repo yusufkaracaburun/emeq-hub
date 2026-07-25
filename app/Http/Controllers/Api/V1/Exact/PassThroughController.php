@@ -47,7 +47,8 @@ class PassThroughController extends Controller
             return response()->json([
                 'error' => 'method_not_allowed',
                 'message' => 'HTTP method niet toegestaan op pass-through-route.',
-            ], Response::HTTP_METHOD_NOT_ALLOWED);
+            ], Response::HTTP_METHOD_NOT_ALLOWED)
+                ->header('Allow', implode(', ', self::ALLOWED_METHODS));
         }
 
         $required = $method === 'GET'

@@ -207,7 +207,8 @@ class PassThroughTest extends TestCase
             ->withHeader('X-Account-Id', 'school1')
             ->deleteJson("/v1/exact/crm/Accounts(guid'abc-123')")
             ->assertStatus(405)
-            ->assertJson(['error' => 'method_not_allowed']);
+            ->assertJson(['error' => 'method_not_allowed'])
+            ->assertHeader('Allow', 'GET, POST, PUT, PATCH');
 
         $this->assertDatabaseMissing('pass_through_calls', [
             'provider' => 'exact',

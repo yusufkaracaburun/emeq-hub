@@ -102,7 +102,8 @@ class PassThroughResolutionTest extends TestCase
                 'HTTP_X_ACCOUNT_ID' => 'school-A',
             ]
         )
-            ->assertStatus(405);
+            ->assertStatus(405)
+            ->assertHeader('Allow', 'GET, POST, PATCH, DELETE');
     }
 
     public function test_unauthenticated_request_returns_401(): void
