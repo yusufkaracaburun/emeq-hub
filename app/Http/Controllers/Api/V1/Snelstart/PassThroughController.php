@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1\Snelstart;
 
 use App\Enums\Provider;
+use App\Http\Controllers\Api\V1\Concerns\GuardsPassThroughRequest;
 use App\Http\Controllers\Controller;
 use App\Models\Account;
 use App\Models\Connection;
@@ -21,46 +22,33 @@ use Throwable;
 #[Group(name: 'Snelstart', description: 'Snelstart OData-calls met de clientKey + subscriptionKey van de gekoppelde Account.', weight: 60)]
 class PassThroughController extends Controller
 {
+    use GuardsPassThroughRequest;
+
     private const ALLOWED_METHODS = ['GET', 'POST', 'PATCH', 'DELETE'];
+
+    private const BODY_METHODS = ['POST', 'PATCH'];
 
     public function __invoke(Request $request, string $path): Response
     {
         $method = strtoupper($request->method());
 
-        if (! in_array($method, self::ALLOWED_METHODS, true)) {
-            return response()->json([
-                'error' => 'method_not_allowed',
-                'message' => 'HTTP method niet toegestaan op pass-through-route.',
-            ], Response::HTTP_METHOD_NOT_ALLOWED)
-                ->header('Allow', implode(', ', self::ALLOWED_METHODS));
+        if ($response = $this->guardMethodAllowed($method, self::ALLOWED_METHODS)) {
+            return $response;
         }
 
         $required = $method === 'GET'
             ? [TokenAbilities::SNELSTART_READ, TokenAbilities::SNELSTART_WRITE, TokenAbilities::ADMIN]
             : [TokenAbilities::SNELSTART_WRITE, TokenAbilities::ADMIN];
 
-        $token = $request->user()?->currentAccessToken();
-        $hasAbility = $token !== null && collect($required)->contains(fn (string $ability) => $token->can($ability));
-
-        if (! $hasAbility) {
-            return response()->json([
-                'error' => 'insufficient_ability',
-                'message' => 'Token mist vereiste ability voor deze methode.',
-            ], Response::HTTP_FORBIDDEN);
+        if ($response = $this->guardTokenAbility($request, $required)) {
+            return $response;
         }
 
-        if (in_array($method, ['POST', 'PATCH'], true)) {
-            $contentType = strtolower((string) $request->header('Content-Type', ''));
-            if (! str_starts_with($contentType, 'application/json')) {
-                return response()->json([
-                    'error' => 'unsupported_content_type',
-                    'message' => 'Pass-through accepteert alleen application/json voor POST/PATCH.',
-                ], Response::HTTP_UNSUPPORTED_MEDIA_TYPE);
-            }
-            $body = $request->json()->all();
-        } else {
-            $body = null;
+        if ($response = $this->guardJsonContentType($request, $method, self::BODY_METHODS)) {
+            return $response;
         }
+
+        $body = in_array($method, self::BODY_METHODS, true) ? $request->json()->all() : null;
 
         $endpoint = '/'.ltrim($path, '/');
         $query = $request->query();
