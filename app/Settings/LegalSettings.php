@@ -21,6 +21,10 @@ class LegalSettings extends Settings
 
     public string $terms_updated_at;
 
+    public string $dpa_statement;
+
+    public string $dpa_updated_at;
+
     public static function group(): string
     {
         return 'legal';

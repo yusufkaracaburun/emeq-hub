@@ -40,10 +40,22 @@ class LegalPagesTest extends TestCase
             );
     }
 
-    public function test_both_pages_are_indexable(): void
+    public function test_processor_agreement_renders_as_processor(): void
+    {
+        $this->get('/verwerkersovereenkomst')
+            ->assertOk()
+            ->assertInertia(fn (AssertableInertia $page) => $page
+                ->component('legal')
+                ->where('title', 'Verwerkersovereenkomst')
+                ->where('html', fn (string $html) => str_contains($html, 'Verwerkersovereenkomst') && str_contains($html, 'verwerker') && str_contains($html, 'KvK 84148691'))
+            );
+    }
+
+    public function test_all_legal_pages_are_indexable(): void
     {
         $this->get('/privacy')->assertHeaderMissing('X-Robots-Tag');
         $this->get('/voorwaarden')->assertHeaderMissing('X-Robots-Tag');
+        $this->get('/verwerkersovereenkomst')->assertHeaderMissing('X-Robots-Tag');
     }
 
     public function test_markdown_strips_raw_html(): void

@@ -28,6 +28,11 @@ class LegalController extends Controller
         return $this->render('Algemene voorwaarden', $legal->terms_statement, $legal->terms_updated_at);
     }
 
+    public function processorAgreement(LegalSettings $legal): Response
+    {
+        return $this->render('Verwerkersovereenkomst', $legal->dpa_statement, $legal->dpa_updated_at);
+    }
+
     private function render(string $title, string $markdown, string $updatedAt): Response
     {
         return Inertia::render('legal', [

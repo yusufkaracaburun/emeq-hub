@@ -253,4 +253,112 @@ toepassing. Geschillen worden voorgelegd aan de bevoegde rechter in het
 arrondissement waar Emeq is gevestigd.
 MARKDOWN;
     }
+
+    public static function processorAgreement(): string
+    {
+        return <<<'MARKDOWN'
+# Verwerkersovereenkomst — Emeq Hub
+
+Deze verwerkersovereenkomst is onderdeel van de dienstverlening van **Emeq Hub**
+("de Hub") en geldt voor elke Consumer die op de Hub aansluit. Zij legt vast hoe
+Emeq als **verwerker** omgaat met persoonsgegevens die via het platform worden
+verwerkt, in lijn met de AVG. Voor de gegevensbescherming van de publieke pagina's
+geldt daarnaast de [privacyverklaring](/privacy).
+
+**Verwerker:** Emeq B.V., Tokyostraat 17, 1175 RB Lijnden. KvK 84148691,
+BTW NL863113114B01. Contact: support@emeq.nl.
+
+## 1. Rollen
+
+De Consumer (de "Afnemer") is **verwerkingsverantwoordelijke** en bepaalt welke
+gegevens via het platform worden verwerkt. Emeq treedt op als **verwerker** en
+verwerkt uitsluitend volgens de gedocumenteerde instructies van de Afnemer.
+
+## 2. Verwerkingsdoeleinden
+
+Emeq verwerkt persoonsgegevens alleen voor zover nodig om koppelingen op te
+zetten, API-verkeer tussen de Afnemer en de partner-API's te routeren en de
+dienst te beveiligen en te ondersteunen. Verwerking voor eigen doeleinden,
+profilering, advertenties of doorverkoop vindt niet plaats.
+
+## 3. Categorieën gegevens en betrokkenen
+
+- **Koppelingsgegevens** — OAuth-tokens, clientkeys en subscription-keys,
+  **versleuteld opgeslagen**.
+- **Doorgegeven partnergegevens (pass-through)** — boekhoud- en betaalgegevens
+  die de Hub tussen Afnemer en partner-API doorzet; **niet blijvend opgeslagen**.
+- **Audit-metadata** — methode, endpoint, statuscode, duur en tijdstip per call;
+  géén payloads of persoonsgegevens uit de inhoud.
+
+Betrokkenen zijn de eindgebruikers van de Afnemer wiens administratie gekoppeld
+wordt.
+
+## 4. Beveiligingsmaatregelen
+
+- Tokens en secrets **versleuteld opgeslagen** (AES via de Laravel-encryptielaag).
+- In logs uitsluitend **fingerprints**, nooit rauwe tokens of secrets.
+- Een **eigen webhook-secret** per koppeling; geen gedeelde secret.
+- Al het verkeer over **TLS**.
+- **Strikte multi-tenant-scheiding**: elke koppeling hoort bij precies één account
+  bij precies één Afnemer; cross-tenant-toegang is technisch afgedwongen.
+- Toegang tot de productieomgeving beperkt tot geautoriseerd personeel.
+
+## 5. Subverwerkers
+
+Emeq schakelt de volgende sub-verwerkers in:
+
+| Sub-verwerker | Doel | Locatie |
+|---|---|---|
+| OVH | Hosting van de applicatie en database | EU |
+| Cloudflare | Netwerk, CDN en beveiligde tunnel naar de server | EU-verwerking |
+| Laravel Nightwatch | Applicatie-monitoring en foutopsporing | EU/VS afhankelijk van plan |
+
+Sub-verwerkers voldoen aan dezelfde beveiligingseisen; wijzigingen kondigt Emeq
+vooraf aan. De partner-API's zelf (Exact Online, Mollie, SnelStart) zijn geen
+sub-verwerkers maar zelfstandige partijen waarmee de eindgebruiker een eigen
+relatie heeft.
+
+## 6. Doorgifte buiten de EER
+
+De gegevens worden binnen de Europese Economische Ruimte verwerkt. Waar een
+sub-verwerker gegevens buiten de EER zou verwerken, gebeurt dat onder passende
+waarborgen (zoals de EU-modelcontractbepalingen).
+
+## 7. Datalekken
+
+Bij een datalek dat persoonsgegevens raakt, informeert Emeq de Afnemer **zonder
+onredelijke vertraging**, met alle informatie die de Afnemer nodig heeft om aan
+de meldplicht te voldoen.
+
+## 8. Bijstand en rechten van betrokkenen
+
+Emeq verleent redelijke medewerking bij verzoeken van betrokkenen (inzage,
+rectificatie, verwijdering, beperking, bezwaar, dataportabiliteit). Omdat de
+Afnemer verwerkingsverantwoordelijke is, lopen deze verzoeken in beginsel via de
+Afnemer.
+
+## 9. Bewaren, teruggave en verwijdering
+
+- **Koppelingstokens** — verwijderd zodra de koppeling wordt ontkoppeld.
+- **Audit-metadata** — standaard **90 dagen**, daarna automatisch verwijderd.
+- **Doorgegeven partnergegevens** — niet bewaard (pass-through).
+
+Na beëindiging van de dienstverlening worden de persoonsgegevens op verzoek
+geretourneerd of verwijderd.
+
+## 10. Controle
+
+De Afnemer mag de naleving van deze overeenkomst redelijkerwijs controleren, na
+voorafgaande aankondiging en zonder de dienstverlening onnodig te verstoren.
+
+## 11. Ondertekend exemplaar
+
+Een ondertekenbare versie van deze verwerkersovereenkomst is op verzoek
+beschikbaar via **support@emeq.nl**.
+
+## 12. Contact
+
+Vragen over deze verwerkersovereenkomst? Mail naar **support@emeq.nl**.
+MARKDOWN;
+    }
 }

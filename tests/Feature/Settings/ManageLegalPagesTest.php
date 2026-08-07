@@ -47,6 +47,7 @@ class ManageLegalPagesTest extends TestCase
             ->fillForm([
                 'privacy_statement' => '# Nieuwe verklaring',
                 'terms_statement' => '# Nieuwe voorwaarden',
+                'dpa_statement' => '# Nieuwe verwerkersovereenkomst',
             ])
             ->call('save')
             ->assertHasNoFormErrors();
@@ -56,7 +57,9 @@ class ManageLegalPagesTest extends TestCase
 
         $this->assertSame('# Nieuwe verklaring', $legal->privacy_statement);
         $this->assertSame('# Nieuwe voorwaarden', $legal->terms_statement);
+        $this->assertSame('# Nieuwe verwerkersovereenkomst', $legal->dpa_statement);
         $this->assertSame(now()->toDateString(), $legal->privacy_updated_at);
         $this->assertSame(now()->toDateString(), $legal->terms_updated_at);
+        $this->assertSame(now()->toDateString(), $legal->dpa_updated_at);
     }
 }

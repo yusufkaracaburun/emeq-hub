@@ -48,6 +48,7 @@ class ManageLegalPages extends Page
         $this->form->fill([
             'privacy_statement' => $legal->privacy_statement,
             'terms_statement' => $legal->terms_statement,
+            'dpa_statement' => $legal->dpa_statement,
         ]);
     }
 
@@ -71,6 +72,14 @@ class ManageLegalPages extends Page
                             ->required()
                             ->columnSpanFull(),
                     ]),
+                Section::make('Verwerkersovereenkomst')
+                    ->description('Publiek zichtbaar op /verwerkersovereenkomst. Markdown; wordt server-side naar HTML gerenderd.')
+                    ->schema([
+                        MarkdownEditor::make('dpa_statement')
+                            ->label('Verwerkersovereenkomst (markdown)')
+                            ->required()
+                            ->columnSpanFull(),
+                    ]),
             ])
             ->statePath('data');
     }
@@ -85,6 +94,8 @@ class ManageLegalPages extends Page
         $legal->privacy_updated_at = $today;
         $legal->terms_statement = (string) $data['terms_statement'];
         $legal->terms_updated_at = $today;
+        $legal->dpa_statement = (string) $data['dpa_statement'];
+        $legal->dpa_updated_at = $today;
         $legal->save();
 
         Notification::make()->title('Juridische teksten opgeslagen')->success()->send();

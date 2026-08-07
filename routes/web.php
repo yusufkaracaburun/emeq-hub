@@ -43,6 +43,7 @@ Route::get('/partners/{provider}', [PartnersController::class, 'show'])->name('p
 // server-side gerenderd. Indexeerbaar (zie SetNoIndexHeaders).
 Route::get('/privacy', [LegalController::class, 'privacy'])->name('privacy');
 Route::get('/voorwaarden', [LegalController::class, 'terms'])->name('terms');
+Route::get('/verwerkersovereenkomst', [LegalController::class, 'processorAgreement'])->name('processor-agreement');
 
 // Publieke koppel-intake — het formulier leeft op elke partner-pagina
 // (partners/show), preselect op die provider. Geen aparte GET-pagina meer.
