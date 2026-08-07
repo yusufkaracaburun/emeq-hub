@@ -173,6 +173,10 @@ revoket de tokens bij Exact én zet de Connection op `revoked`.
    browser en dus geen checkbox. Het akkoord ligt bij de **Consumer**, contractueel geborgd
    via de verwerkersovereenkomst en beschreven in de consumer-integratiegids.
 
+De verwerkersovereenkomst is sinds 2026-08-07 ook publiek gepubliceerd op
+`/verwerkersovereenkomst` (live op https://hub.emeq.nl/verwerkersovereenkomst) —
+DB-beheerde markdown via dezelfde pijplijn als `/privacy` en `/voorwaarden`.
+
 Beide expliciet — geen doen-alsof-één-pad.
 
 → [#42](https://github.com/yusufkaracaburun/emeq-hub/issues/42)
