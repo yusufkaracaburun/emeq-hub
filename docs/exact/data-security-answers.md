@@ -132,8 +132,8 @@ De privacyverklaring is publiek, indexeerbaar en DB-beheerd (admin → Beheer �
 teksten, markdown). Ze beschrijft: welke gegevens (koppelingstokens **encrypted at rest**,
 pass-through niet bewaard, audit-metadata), doel + rechtsgrond, bewaartermijnen (**90 dagen**
 audit-metadata; tokens tot ontkoppeling), verwijderbeleid + verzoek tot verwijdering,
-intrekken van toestemming (= Connection ontkoppelen), sub-verwerkers (OVH, Cloudflare,
-Nightwatch) en expliciet dat de Hub **verwerker** is. Bedrijfsgegevens ingevuld (Emeq B.V.,
+intrekken van toestemming (= Connection ontkoppelen), sub-verwerkers (OVH, Cloudflare)
+en expliciet dat de Hub **verwerker** is. Bedrijfsgegevens ingevuld (Emeq B.V.,
 Tokyostraat 17, 1175 RB Lijnden, KvK 84148691, BTW NL863113114B01).
 
 Bron: `App\Support\LegalDefaults::privacyStatement()`, `LegalController`,
@@ -352,14 +352,9 @@ OVH als hostingprovider.
 | **Consumer-apps** (emeq-app, planny, naschool) | de Hub forwardt partner-webhooks en API-antwoorden terug naar de SaaS-app die de koppeling gebruikt | financiële mutaties, relatie- en grootboekgegevens — uitsluitend van de eigen Account van die Consumer |
 | **Cloudflare** | TLS-terminatie, DDoS-mitigatie, tunnel | verkeer in transit; geen opslag |
 | **OVH** | hosting van applicatie en database (EU) | alle opgeslagen gegevens (zie vraag 9–12) |
-| **Nightwatch** (Laravel) | applicatie-monitoring en foutrapportage | performance- en fout-telemetrie, gesampled (`NIGHTWATCH_REQUEST_SAMPLE_RATE`) |
 | **Exact Online** | de gekoppelde partner-API zelf — bron én bestemming van de boekingen | verkoop-/inkoopmutaties, relaties, grootboek van de gekoppelde administratie |
 
 Vul aan met de andere partner-API's zodra die live gaan (Mollie, Snelstart, Moneybird).
-
-> ⚠️ **Nightwatch-redactie verifiëren vóór submit.** Er is nog geen `config/nightwatch.php`
-> met een expliciet redactiebeleid; controleer of exception-context of query-bindings met
-> partner-/persoonsgegevens naar Nightwatch kunnen lekken en scherp dat aan als dat zo is.
 
 ---
 

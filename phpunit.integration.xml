@@ -33,7 +33,6 @@
         <env name="SESSION_DRIVER" value="array"/>
         <env name="PULSE_ENABLED" value="false"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
-        <env name="NIGHTWATCH_ENABLED" value="false"/>
         <!-- CASHIER_MOLLIE_KEY + MOLLIE_KEY + CASHIER_WEBHOOK_SECRET worden uit
              .env gelezen. IntegrationTestCase::setUp() skipt bij missing of
              non-test-prefixed key. -->
