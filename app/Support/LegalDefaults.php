@@ -19,8 +19,7 @@ final class LegalDefaults
 # Privacyverklaring — Emeq Hub
 
 Deze verklaring beschrijft hoe **Emeq Hub** ("de Hub") persoonsgegevens en
-bedrijfsgegevens verwerkt bij het koppelen van boekhoud- en betaal-API's
-(Exact Online, Mollie, SnelStart en toekomstige partners).
+bedrijfsgegevens verwerkt bij het koppelen van boekhoud- en betaal-API's.
 
 **Verwerker:** Emeq B.V., Tokyostraat 17, 1175 RB Lijnden. KvK 84148691,
 BTW NL863113114B01. Contact: support@emeq.nl.
@@ -90,11 +89,9 @@ Wij schakelen de volgende sub-verwerkers in:
 |---|---|---|
 | OVH | Hosting van de applicatie en database | EU |
 | Cloudflare | Netwerk, CDN en beveiligde tunnel naar de server | EU-verwerking |
-| Laravel Nightwatch | Applicatie-monitoring en foutopsporing | EU/VS afhankelijk van plan |
 
-De partner-API's zelf (Exact Online, Mollie, SnelStart) zijn geen
-sub-verwerkers van Emeq maar zelfstandige partijen waarmee de eindgebruiker een
-eigen relatie heeft.
+De partner-API's zelf zijn geen sub-verwerkers van Emeq maar zelfstandige
+partijen waarmee de eindgebruiker een eigen relatie heeft.
 
 ## 7. Doorgifte buiten de EER
 
@@ -141,8 +138,7 @@ MARKDOWN;
 
 - **Emeq**: Emeq B.V., de aanbieder van de Hub.
 - **Hub / de Dienst**: het integratieplatform Emeq Hub dat koppelingen met
-  boekhoud- en betaal-API's (Exact Online, Mollie, SnelStart en toekomstige
-  partners) aanbiedt.
+  boekhoud- en betaal-API's aanbiedt.
 - **Consumer / Afnemer**: de (rechts)persoon die via een eigen applicatie op de
   Hub aansluit.
 - **Eindgebruiker**: de klant van de Consumer wiens administratie via de Hub
@@ -311,12 +307,10 @@ Emeq schakelt de volgende sub-verwerkers in:
 |---|---|---|
 | OVH | Hosting van de applicatie en database | EU |
 | Cloudflare | Netwerk, CDN en beveiligde tunnel naar de server | EU-verwerking |
-| Laravel Nightwatch | Applicatie-monitoring en foutopsporing | EU/VS afhankelijk van plan |
 
 Sub-verwerkers voldoen aan dezelfde beveiligingseisen; wijzigingen kondigt Emeq
-vooraf aan. De partner-API's zelf (Exact Online, Mollie, SnelStart) zijn geen
-sub-verwerkers maar zelfstandige partijen waarmee de eindgebruiker een eigen
-relatie heeft.
+vooraf aan. De partner-API's zelf zijn geen sub-verwerkers maar zelfstandige
+partijen waarmee de eindgebruiker een eigen relatie heeft.
 
 ## 6. Doorgifte buiten de EER
 
