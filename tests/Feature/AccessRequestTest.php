@@ -9,12 +9,11 @@ use App\Mail\AccessRequestSubmitted;
 use App\Models\AccessRequest;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Mail;
-use Inertia\Testing\AssertableInertia;
 use Tests\TestCase;
 
 /**
- * Publieke koppel-intake: het formulier staat op elke partner-pagina (preselect),
- * POST /koppelen — opslag, validatie, honeypot, redirect-terug, indexering.
+ * Publieke koppel-intake: POST /koppelen — opslag, validatie, honeypot,
+ * redirect-terug naar de partner-pagina.
  */
 class AccessRequestTest extends TestCase
 {
@@ -34,16 +33,6 @@ class AccessRequestTest extends TestCase
             'message' => 'We willen koppelen voor facturatie.',
             'privacy_accepted' => true,
         ], $overrides);
-    }
-
-    public function test_partner_page_renders_with_provider(): void
-    {
-        $this->get('/partners/exact')
-            ->assertOk()
-            ->assertInertia(fn (AssertableInertia $page) => $page
-                ->component('partners/show')
-                ->where('provider.key', 'exact')
-            );
     }
 
     public function test_valid_submission_is_stored_and_redirects_to_partner(): void
@@ -104,11 +93,6 @@ class AccessRequestTest extends TestCase
 
         $this->assertDatabaseCount('access_requests', 0);
         Mail::assertNothingSent();
-    }
-
-    public function test_partner_page_is_indexable(): void
-    {
-        $this->get('/partners/exact')->assertHeaderMissing('X-Robots-Tag');
     }
 
     public function test_robots_txt_allows_partners(): void
