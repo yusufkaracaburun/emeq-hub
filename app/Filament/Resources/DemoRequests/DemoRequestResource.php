@@ -1,0 +1,90 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Filament\Resources\DemoRequests;
+
+use App\Filament\Resources\DemoRequests\Pages\ListDemoRequests;
+use App\Filament\Resources\DemoRequests\Pages\ViewDemoRequest;
+use App\Filament\Resources\DemoRequests\Schemas\DemoRequestInfolist;
+use App\Filament\Resources\DemoRequests\Tables\DemoRequestsTable;
+use App\Models\DemoRequest;
+use BackedEnum;
+use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
+use Filament\Tables\Table;
+
+/**
+ * Inbox voor demo-aanvragen vanaf de publieke /demo-pagina. Read-mostly: staff
+ * bekijkt de aanvraag, plant de demo buiten de Hub en markeert 'm afgehandeld.
+ * Anders dan bij een koppel-aanvraag volgt hier geen onboarding-wizard.
+ */
+class DemoRequestResource extends Resource
+{
+    protected static ?string $model = DemoRequest::class;
+
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-calendar-days';
+
+    protected static ?string $modelLabel = 'Demo-aanvraag';
+
+    protected static ?string $pluralModelLabel = 'Demo-aanvragen';
+
+    protected static string|\UnitEnum|null $navigationGroup = 'Koppelingen';
+
+    protected static ?int $navigationSort = 5;
+
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->can('manage-consumers') ?? false;
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return static::canAccess();
+    }
+
+    public static function getNavigationBadge(): ?string
+    {
+        $count = DemoRequest::query()->where('status', 'new')->count();
+
+        return $count > 0 ? (string) $count : null;
+    }
+
+    public static function getNavigationBadgeColor(): ?string
+    {
+        return 'warning';
+    }
+
+    public static function canCreate(): bool
+    {
+        return false;
+    }
+
+    public static function canEdit($record): bool
+    {
+        return false;
+    }
+
+    public static function canDelete($record): bool
+    {
+        return false;
+    }
+
+    public static function infolist(Schema $schema): Schema
+    {
+        return DemoRequestInfolist::configure($schema);
+    }
+
+    public static function table(Table $table): Table
+    {
+        return DemoRequestsTable::configure($table);
+    }
+
+    public static function getPages(): array
+    {
+        return [
+            'index' => ListDemoRequests::route('/'),
+            'view' => ViewDemoRequest::route('/{record}'),
+        ];
+    }
+}

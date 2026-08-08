@@ -115,4 +115,18 @@ return [
         'name' => env('MAIL_FROM_NAME', env('APP_NAME', 'Laravel')),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Meldingsadres
+    |--------------------------------------------------------------------------
+    |
+    | Postvak waar interne meldingen heen gaan — leads uit de publieke
+    | formulieren. Bewust los van `from.address`: de afzender moet op het bij
+    | de mailprovider geverifieerde domein zitten, de ontvanger is een postvak
+    | dat een mens leest. Die twee vallen zelden samen.
+    |
+    */
+
+    'notify_address' => env('MAIL_NOTIFY_ADDRESS', 'info@emeq.nl'),
+
 ];

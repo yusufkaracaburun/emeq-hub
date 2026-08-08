@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreDemoRequestRequest;
 use App\Mail\DemoRequestSubmitted;
+use App\Models\DemoRequest;
 use App\Support\Seo\Schema;
 use App\Support\Seo\SeoMeta;
 use Illuminate\Http\RedirectResponse;
@@ -15,9 +16,9 @@ use Inertia\Inertia;
 use Inertia\Response;
 
 /**
- * Publieke demo-aanvraag. Mail-only, geen persistentie: de aanvraag gaat als
- * melding naar Emeq en de lead volgt via e-mail. Faalt de mail, dan loggen we
- * de payload op error-niveau zodat de lead niet stilletjes verdwijnt.
+ * Publieke demo-aanvraag. De lead landt in demo_requests en is zichtbaar in de
+ * admin; de melding per e-mail komt daar bovenop. Eerder was het mail-only, en
+ * met de log-mailer verdween zo'n aanvraag spoorloos.
  * Géén auth — wel honeypot + throttle.
  */
 class DemoRequestController extends Controller
@@ -41,13 +42,20 @@ class DemoRequestController extends Controller
     {
         // Honeypot: gevuld = bot. Stille no-op zodat we 'm niet tippen.
         if (! $request->filled('website')) {
+            // `privacy_accepted` is gevalideerd op `accepted` maar niet fillable;
+            // we leggen het akkoord vast als tijdstip.
+            $demoRequest = DemoRequest::create($request->safe()->except('privacy_accepted') + [
+                'privacy_accepted_at' => now(),
+            ]);
+
+            // De lead staat nu in de database; de melding is een gemak. Faalt
+            // die, dan is er niets verloren — vandaar best-effort.
             try {
-                Mail::to(config('mail.from.address', 'support@emeq.nl'))
-                    ->send(new DemoRequestSubmitted($request->validated()));
+                Mail::to(config('mail.notify_address'))->send(new DemoRequestSubmitted($demoRequest));
             } catch (\Throwable $e) {
-                Log::error('Demo-aanvraag melding niet verzonden — lead alleen in deze log', [
+                Log::warning('Demo-aanvraag melding niet verzonden', [
                     'error' => $e->getMessage(),
-                    'demo_request' => $request->validated(),
+                    'demo_request_id' => $demoRequest->id,
                 ]);
             }
         }

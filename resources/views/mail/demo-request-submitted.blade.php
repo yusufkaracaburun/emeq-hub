@@ -3,16 +3,17 @@
 
 Er is een nieuwe aanvraag binnengekomen via de publieke /demo-pagina.
 
-- **Bedrijf:** {{ $demoRequest['company'] }}
-- **Contact:** {{ $demoRequest['contact_name'] }}
-- **E-mail:** {{ $demoRequest['email'] }}
-- **Voorkeursmoment:** {{ $demoRequest['preferred_slot'] }}
+- **Bedrijf:** {{ $demoRequest->company }}
+- **Contact:** {{ $demoRequest->contact_name }}
+- **E-mail:** {{ $demoRequest->email }}
+- **Voorkeursmoment:** {{ $demoRequest->preferred_slot }}
 
-@if (! empty($demoRequest['message']))
+@if (filled($demoRequest->message))
 **Bericht:**
 
-{{ $demoRequest['message'] }}
+{{ $demoRequest->message }}
 @endif
 
-Plan de demo in en bevestig per e-mail aan de aanvrager.
+Plan de demo in en bevestig per e-mail aan de aanvrager. Beantwoorden van deze
+melding gaat rechtstreeks naar {{ $demoRequest->email }}.
 </x-mail::message>

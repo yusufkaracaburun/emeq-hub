@@ -52,8 +52,7 @@ class AccessRequestController extends Controller
             // Melding naar Emeq is best-effort: een mail-misconfig mag de
             // aanvraag nooit laten falen.
             try {
-                Mail::to(config('mail.from.address', 'support@emeq.nl'))
-                    ->send(new AccessRequestSubmitted($accessRequest));
+                Mail::to(config('mail.notify_address'))->send(new AccessRequestSubmitted($accessRequest));
             } catch (\Throwable $e) {
                 Log::warning('Access-request melding niet verzonden', ['error' => $e->getMessage()]);
             }

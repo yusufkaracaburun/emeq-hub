@@ -25,6 +25,7 @@
         "mollie/mollie-api-php": "^3.11",
         "opcodesio/log-viewer": "^3.24",
         "predis/predis": "^3.4",
+        "resend/resend-php": "^1.7",
         "sentry/sentry-laravel": "^4.25",
         "spatie/array-to-xml": "^3.4",
         "spatie/laravel-backup": "^10.3",

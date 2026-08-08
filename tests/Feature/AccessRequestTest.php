@@ -64,7 +64,7 @@ class AccessRequestTest extends TestCase
         $this->assertSame('new', $record->status);
         $this->assertNotNull($record->privacy_accepted_at);
 
-        Mail::assertSent(AccessRequestSubmitted::class);
+        Mail::assertQueued(AccessRequestSubmitted::class);
     }
 
     public function test_submission_without_privacy_consent_is_rejected(): void
@@ -75,7 +75,7 @@ class AccessRequestTest extends TestCase
             ->assertSessionHasErrors('privacy_accepted');
 
         $this->assertDatabaseCount('access_requests', 0);
-        Mail::assertNothingSent();
+        Mail::assertNothingOutgoing();
     }
 
     public function test_invalid_submission_fails_validation(): void
@@ -104,7 +104,7 @@ class AccessRequestTest extends TestCase
             ->assertSessionHas('submitted', true);
 
         $this->assertDatabaseCount('access_requests', 0);
-        Mail::assertNothingSent();
+        Mail::assertNothingOutgoing();
     }
 
     public function test_robots_txt_does_not_block_partners(): void
