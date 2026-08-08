@@ -20,7 +20,7 @@ const steps = [
 
 export function HowItWorks() {
     return (
-        <section id="hoe-het-werkt" className="bg-card px-6 py-24 lg:px-section-x lg:py-section-x">
+        <section id="hoe-het-werkt" className="bg-card px-page py-24 lg:py-section-x">
             <Reveal className="flex max-w-[760px] flex-col gap-4">
                 <Eyebrow>02 — Zo werkt het</Eyebrow>
                 <h2 className="text-xl font-bold tracking-[-1px] text-foreground md:text-3xl">

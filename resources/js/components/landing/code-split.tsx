@@ -12,7 +12,7 @@ const auditRows = [
 
 export function CodeSplit() {
     return (
-        <section className="px-6 py-24 lg:px-section-x lg:py-section-x">
+        <section className="px-page py-24 lg:py-section-x">
             <Reveal className="flex max-w-[820px] flex-col gap-4">
                 <Eyebrow>03 — Audit &amp; transparantie</Eyebrow>
                 <h2 className="text-xl font-bold tracking-[-1px] text-foreground md:text-3xl">

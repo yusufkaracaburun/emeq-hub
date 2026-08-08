@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils';
 
 export function FinalCta() {
     return (
-        <section className="relative overflow-hidden border-t border-border bg-brand-subtle px-6 py-24 lg:px-section-x lg:py-32">
+        <section className="relative overflow-hidden border-t border-border bg-brand-subtle px-page py-24 lg:py-32">
             <ConnectPattern />
 
             <Reveal className="relative mx-auto flex max-w-[640px] flex-col items-center gap-6 text-center">

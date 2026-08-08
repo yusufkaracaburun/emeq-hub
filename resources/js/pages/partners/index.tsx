@@ -2,11 +2,12 @@ import { Link } from '@inertiajs/react';
 import { MotionConfig } from 'framer-motion';
 import { useMemo, useState } from 'react';
 import { Footer } from '@/components/landing/footer';
+import { IntakeStepList, intakeSteps } from '@/components/landing/intake-steps';
+import { KoppelForm } from '@/components/landing/koppel-form';
 import { Nav } from '@/components/landing/nav';
 import { Reveal, RevealGroup, RevealItem } from '@/components/motion';
 import { Seo } from '@/components/seo';
 import { Breadcrumbs } from '@/components/ui/breadcrumbs';
-import { buttonVariants } from '@/components/ui/button';
 import { TextGlyph } from '@/components/ui/glyphs';
 import { type ProviderSummary, type SeoMeta } from '@/lib/types';
 import { cn } from '@/lib/utils';
@@ -29,7 +30,7 @@ export default function PartnersIndex({ providers, seo }: PartnersIndexProps) {
         <MotionConfig reducedMotion="user">
             <Seo seo={seo} />
             <Nav />
-            <main className="relative overflow-hidden px-6 pb-24 pt-10 lg:px-section-x lg:pt-12">
+            <main className="relative overflow-hidden px-page pb-24 pt-10 lg:pt-12">
                 <div
                     aria-hidden
                     className="pointer-events-none absolute inset-x-0 top-0 h-[360px] opacity-30 [background-image:radial-gradient(circle,#17171720_1px,transparent_1px)] [background-size:24px_24px] [mask-image:linear-gradient(to_bottom,black,transparent_85%)]"
@@ -76,12 +77,24 @@ export default function PartnersIndex({ providers, seo }: PartnersIndexProps) {
                         ))}
                     </RevealGroup>
 
-                    <Reveal className="flex flex-col items-center gap-6 text-center">
-                        <h2 className="text-2xl font-bold tracking-[-1px] text-foreground">Klaar om te koppelen?</h2>
-                        <Link href="/koppelen" className={cn(buttonVariants({ variant: 'primary', size: 'md' }), 'group')}>
-                            Start met koppelen
-                            <TextGlyph glyph="→" className="transition-transform duration-150 group-hover:translate-x-0.5" />
-                        </Link>
+                    <Reveal id="koppelen" className="rounded-xl bg-brand-subtle p-6 md:p-12">
+                        <div className="grid gap-10 lg:grid-cols-[1fr_520px] lg:gap-12">
+                            <div className="flex flex-col gap-4">
+                                <h2 className="text-xl font-bold leading-[1.2] tracking-[-0.5px] text-foreground">
+                                    Klaar om te koppelen?
+                                </h2>
+                                <p className="text-base leading-[1.6] text-muted-foreground">
+                                    Vertel kort wat je wilt koppelen. Wij regelen de omgeving, het token en de onboarding.
+                                </p>
+                                <div className="mt-2">
+                                    <IntakeStepList steps={intakeSteps} />
+                                </div>
+                            </div>
+
+                            <div className="h-fit rounded-lg border border-border bg-card px-8 py-9 shadow-card">
+                                <KoppelForm providers={providers.map(({ key, label }) => ({ key, label }))} />
+                            </div>
+                        </div>
                     </Reveal>
                 </div>
             </main>

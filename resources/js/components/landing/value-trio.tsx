@@ -25,7 +25,7 @@ const columns = [
 
 export function ValueTrio() {
     return (
-        <section id="waarom" className="px-6 py-24 lg:px-section-x lg:py-section-x">
+        <section id="waarom" className="px-page py-24 lg:py-section-x">
             <Reveal className="flex max-w-[760px] flex-col gap-4">
                 <Eyebrow>01 — Waarom Emeq Hub</Eyebrow>
                 <h2 className="text-xl font-bold tracking-[-1px] text-foreground md:text-3xl">

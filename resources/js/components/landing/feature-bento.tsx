@@ -49,7 +49,7 @@ const rowTwo: Cell[] = [
 
 export function FeatureBento() {
     return (
-        <section id="platform" className="px-6 py-24 lg:px-section-x lg:py-section-x">
+        <section id="platform" className="px-page py-24 lg:py-section-x">
             <Reveal className="flex max-w-[820px] flex-col gap-4">
                 <Eyebrow>04 — Platform</Eyebrow>
                 <h2 className="text-xl font-bold tracking-[-1px] text-foreground md:text-3xl">

@@ -1,5 +1,6 @@
 import { Link } from '@inertiajs/react';
 import { motion } from 'framer-motion';
+import { useEffect, useRef, useState } from 'react';
 import { EASE } from '@/components/motion';
 import { CardGlyph, DocGlyph, TextGlyph } from '@/components/ui/glyphs';
 import { buttonVariants } from '@/components/ui/button';
@@ -13,7 +14,7 @@ const enter = (delay: number) => ({
 
 export function Hero() {
     return (
-        <section className="relative overflow-hidden px-6 pb-24 pt-16 lg:px-section-x lg:pt-[96px]">
+        <section className="relative overflow-hidden px-page pb-24 pt-16 lg:pt-[96px]">
             {/* Dotgrid — nauwelijks zichtbaar, alleen in de hero */}
             <div
                 aria-hidden
@@ -58,7 +59,7 @@ export function Hero() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6, delay: 0.2, ease: EASE }}
-                    className="relative flex-1 lg:max-w-[552px] lg:self-start"
+                    className="relative flex-1 lg:max-w-[720px] lg:self-start"
                 >
                     <HubDiagram />
                 </motion.div>
@@ -72,10 +73,46 @@ export function Hero() {
  * Twee vaste geometrieën (342×256 en 552×284) die de canvas-frames 1:1 volgen;
  * vaste maten houden de lijnen en nodes intern uitgelijnd op elke viewport.
  */
+/**
+ * Schaalt een vaste diagram-geometrie mee met de containerbreedte. De inhoud
+ * blijft intern pixel-vast (lijnen en nodes uitgelijnd); alleen de transform
+ * verandert, dus alles blijft vector-scherp.
+ */
+function Scaled({ baseW, baseH, className, children }: { baseW: number; baseH: number; className?: string; children: React.ReactNode }) {
+    const ref = useRef<HTMLDivElement>(null);
+    const [scale, setScale] = useState(1);
+
+    useEffect(() => {
+        const el = ref.current;
+        if (!el) {
+            return;
+        }
+        const observer = new ResizeObserver(([entry]) => {
+            const width = entry.contentRect.width;
+            if (width > 0) {
+                setScale(width / baseW);
+            }
+        });
+        observer.observe(el);
+        return () => observer.disconnect();
+    }, [baseW]);
+
+    return (
+        <div ref={ref} className={cn('w-full', className)} style={{ height: baseH * scale }}>
+            <div
+                className="relative"
+                style={{ width: baseW, height: baseH, transform: `scale(${scale})`, transformOrigin: 'top left' }}
+            >
+                {children}
+            </div>
+        </div>
+    );
+}
+
 function HubDiagram() {
     return (
         <>
-            <div className="relative mx-auto h-[256px] w-[342px] lg:hidden">
+            <Scaled baseW={342} baseH={256} className="lg:hidden">
                 <motion.svg
                     aria-hidden
                     viewBox="0 0 342 256"
@@ -106,9 +143,9 @@ function HubDiagram() {
                 <DiagramCard delay={0.85} className="right-0 top-[184px] h-10 w-[92px]">
                     <span className="font-mono text-[10px] text-muted-foreground">+ meer</span>
                 </DiagramCard>
-            </div>
+            </Scaled>
 
-            <div className="relative hidden h-[284px] w-[552px] lg:block">
+            <Scaled baseW={552} baseH={284} className="hidden lg:block">
                 <motion.svg
                     aria-hidden
                     viewBox="0 0 552 284"
@@ -140,7 +177,7 @@ function HubDiagram() {
                 <DiagramCard delay={0.85} className="right-0 top-52 h-12 w-[124px]">
                     <span className="font-mono text-[11px] text-muted-foreground">+ meer partners</span>
                 </DiagramCard>
-            </div>
+            </Scaled>
         </>
     );
 }

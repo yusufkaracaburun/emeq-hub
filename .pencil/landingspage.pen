@@ -22063,67 +22063,647 @@
             },
             {
               "type": "frame",
-              "id": "FmZQB",
-              "name": "Closing CTA",
+              "id": "znR8b",
+              "name": "Koppelen",
               "width": "fill_container",
-              "layout": "vertical",
-              "gap": "$space-lg",
-              "alignItems": "center",
+              "fill": "$brand-subtle",
+              "cornerRadius": "$radius-xl",
+              "gap": "$space-3xl",
+              "padding": "$space-3xl",
               "children": [
                 {
-                  "type": "text",
-                  "id": "CVN3m",
-                  "name": "H",
-                  "fill": "$foreground",
-                  "content": "Klaar om te koppelen?",
-                  "lineHeight": 1.05,
-                  "fontFamily": "$font-heading",
-                  "fontSize": "$text-2xl",
-                  "fontWeight": "700",
-                  "letterSpacing": -1
-                },
-                {
                   "type": "frame",
-                  "id": "xJB4X",
-                  "name": "Primary",
-                  "fill": "$primary",
-                  "cornerRadius": "$radius-md",
-                  "effect": {
-                    "type": "shadow",
-                    "shadowType": "outer",
-                    "color": "$shadow-3",
-                    "offset": {
-                      "x": 0,
-                      "y": 1
-                    },
-                    "blur": 3
-                  },
-                  "gap": "$space-xs",
-                  "padding": [
-                    13,
-                    22
-                  ],
-                  "alignItems": "center",
+                  "id": "KIZUy",
+                  "name": "Uitleg",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": "$space-md",
                   "children": [
                     {
                       "type": "text",
-                      "id": "kvpB3",
-                      "name": "l",
-                      "fill": "$primary-foreground",
-                      "content": "Start met koppelen",
-                      "fontFamily": "$font-body",
-                      "fontSize": "$text-md",
-                      "fontWeight": "600"
+                      "id": "kD6hr",
+                      "name": "H",
+                      "fill": "$foreground",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Klaar om te koppelen?",
+                      "lineHeight": 1.2,
+                      "fontFamily": "$font-heading",
+                      "fontSize": "$text-xl",
+                      "fontWeight": "700",
+                      "letterSpacing": -1
                     },
                     {
                       "type": "text",
-                      "id": "mdyS4",
-                      "name": "Glyph →",
-                      "fill": "$primary-foreground",
-                      "content": "→",
+                      "id": "hTd7R",
+                      "name": "Sub",
+                      "fill": "$muted-foreground",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Vertel kort wat je wilt koppelen. Wij regelen de omgeving, het token en de onboarding.",
+                      "lineHeight": 1.6,
                       "fontFamily": "$font-body",
-                      "fontSize": 16,
-                      "fontWeight": "500"
+                      "fontSize": "$text-base",
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "vx0tN",
+                      "name": "Wat er gebeurt",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "padding": [
+                        8,
+                        0,
+                        0,
+                        0
+                      ],
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "VJ6dv",
+                          "name": "Wij nemen contact op",
+                          "width": "fill_container",
+                          "stroke": "$border",
+                          "strokeWidth": {
+                            "top": 1,
+                            "bottom": 1
+                          },
+                          "strokeLinejoin": "round",
+                          "gap": "$space-md",
+                          "padding": [
+                            18,
+                            0
+                          ],
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "z0RC9n",
+                              "name": "ix",
+                              "fill": "$brand",
+                              "content": "01",
+                              "fontFamily": "$font-data",
+                              "fontSize": "$text-xs2",
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "frame",
+                              "id": "aPX74",
+                              "name": "c",
+                              "width": "fill_container",
+                              "layout": "vertical",
+                              "gap": "$space-xxs",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "DKMeY",
+                                  "name": "t",
+                                  "fill": "$foreground",
+                                  "content": "We brengen je integratievraag scherp",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": "$text-base",
+                                  "fontWeight": "600"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "I03At",
+                                  "name": "d",
+                                  "fill": "$muted-foreground",
+                                  "textGrowth": "fixed-width",
+                                  "width": "fill_container",
+                                  "content": "Een korte intake over systemen, data en gewenste uitkomst.",
+                                  "lineHeight": 1.6,
+                                  "fontFamily": "$font-body",
+                                  "fontSize": "$text-sm",
+                                  "fontWeight": "normal"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "tthED",
+                          "name": "Omgeving & token klaar",
+                          "width": "fill_container",
+                          "stroke": "$border",
+                          "strokeWidth": {
+                            "bottom": 1
+                          },
+                          "strokeLinejoin": "round",
+                          "gap": "$space-md",
+                          "padding": [
+                            18,
+                            0
+                          ],
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "n63ySL",
+                              "name": "ix",
+                              "fill": "$brand",
+                              "content": "02",
+                              "fontFamily": "$font-data",
+                              "fontSize": "$text-xs2",
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "frame",
+                              "id": "x9RyG4",
+                              "name": "c",
+                              "width": "fill_container",
+                              "layout": "vertical",
+                              "gap": "$space-xxs",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "qjb0x",
+                                  "name": "t",
+                                  "fill": "$foreground",
+                                  "content": "Je omgeving staat klaar",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": "$text-base",
+                                  "fontWeight": "600"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "zHkvl",
+                                  "name": "d",
+                                  "fill": "$muted-foreground",
+                                  "textGrowth": "fixed-width",
+                                  "width": "fill_container",
+                                  "content": "Je ontvangt een veilige omgeving, API-token en heldere onboarding.",
+                                  "lineHeight": 1.6,
+                                  "fontFamily": "$font-body",
+                                  "fontSize": "$text-sm",
+                                  "fontWeight": "normal"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "uGBT9",
+                          "name": "Eerste koppeling live",
+                          "width": "fill_container",
+                          "stroke": "$border",
+                          "strokeWidth": {
+                            "bottom": 1
+                          },
+                          "strokeLinejoin": "round",
+                          "gap": "$space-md",
+                          "padding": [
+                            18,
+                            0
+                          ],
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "ZaBY9",
+                              "name": "ix",
+                              "fill": "$brand",
+                              "content": "03",
+                              "fontFamily": "$font-data",
+                              "fontSize": "$text-xs2",
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "frame",
+                              "id": "kQkQc",
+                              "name": "c",
+                              "width": "fill_container",
+                              "layout": "vertical",
+                              "gap": "$space-xxs",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "ZtDmC",
+                                  "name": "t",
+                                  "fill": "$foreground",
+                                  "content": "Je eerste integratie gaat live",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": "$text-base",
+                                  "fontWeight": "600"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "X9C1i",
+                                  "name": "d",
+                                  "fill": "$muted-foreground",
+                                  "textGrowth": "fixed-width",
+                                  "width": "fill_container",
+                                  "content": "Samen zetten we de eerste koppeling om in resultaat.",
+                                  "lineHeight": 1.6,
+                                  "fontFamily": "$font-body",
+                                  "fontSize": "$text-sm",
+                                  "fontWeight": "normal"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "UpzY7",
+                  "name": "Form Card",
+                  "width": 520,
+                  "fill": "$card",
+                  "cornerRadius": "$radius-lg",
+                  "stroke": "$border",
+                  "strokeWidth": 1,
+                  "effect": {
+                    "type": "shadow",
+                    "shadowType": "outer",
+                    "color": "$shadow-4",
+                    "offset": {
+                      "x": 0,
+                      "y": 6
+                    },
+                    "blur": 24,
+                    "spread": -6
+                  },
+                  "layout": "vertical",
+                  "gap": "$space-md",
+                  "padding": [
+                    36,
+                    32
+                  ],
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "wBqy1",
+                      "name": "FormTitle",
+                      "fill": "$foreground",
+                      "content": "Start je integratie-aanvraag",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-lg",
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "eDK9v",
+                      "name": "Naam",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": "$space-xs",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "bX9EC",
+                          "name": "lbl",
+                          "fill": "$foreground",
+                          "content": "Naam *",
+                          "fontFamily": "$font-body",
+                          "fontSize": "$text-xs2",
+                          "fontWeight": "500"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "qP1xe",
+                          "name": "input",
+                          "width": "fill_container",
+                          "fill": "$background",
+                          "cornerRadius": "$radius-sm",
+                          "stroke": "$input",
+                          "strokeWidth": 1,
+                          "padding": [
+                            12,
+                            14
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "bSm74",
+                              "name": "ph",
+                              "fill": "$muted-foreground",
+                              "content": "Je volledige naam",
+                              "fontFamily": "$font-body",
+                              "fontSize": "$text-sm",
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "YQL46",
+                      "name": "Werk-e-mail",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": "$space-xs",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "dKAD6",
+                          "name": "lbl",
+                          "fill": "$foreground",
+                          "content": "Werk-e-mail *",
+                          "fontFamily": "$font-body",
+                          "fontSize": "$text-xs2",
+                          "fontWeight": "500"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "NWhAq",
+                          "name": "input",
+                          "width": "fill_container",
+                          "fill": "$background",
+                          "cornerRadius": "$radius-sm",
+                          "stroke": "$input",
+                          "strokeWidth": 1,
+                          "padding": [
+                            12,
+                            14
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "pECPB",
+                              "name": "ph",
+                              "fill": "$muted-foreground",
+                              "content": "naam@bedrijf.nl",
+                              "fontFamily": "$font-data",
+                              "fontSize": "$text-sm",
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "Z4d6qx",
+                      "name": "Bedrijf",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": "$space-xs",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "GYsn4",
+                          "name": "lbl",
+                          "fill": "$foreground",
+                          "content": "Bedrijf *",
+                          "fontFamily": "$font-body",
+                          "fontSize": "$text-xs2",
+                          "fontWeight": "500"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "TQ8V7",
+                          "name": "input",
+                          "width": "fill_container",
+                          "fill": "$background",
+                          "cornerRadius": "$radius-sm",
+                          "stroke": "$input",
+                          "strokeWidth": 1,
+                          "padding": [
+                            12,
+                            14
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "LrZfI",
+                              "name": "ph",
+                              "fill": "$muted-foreground",
+                              "content": "Bedrijfsnaam",
+                              "fontFamily": "$font-body",
+                              "fontSize": "$text-sm",
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "P5tr5",
+                      "name": "Wat wil je koppelen?",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": "$space-xs",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "DE6Ug",
+                          "name": "lbl",
+                          "fill": "$foreground",
+                          "content": "Wat wil je koppelen? *",
+                          "fontFamily": "$font-body",
+                          "fontSize": "$text-xs2",
+                          "fontWeight": "500"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "Fwy1h",
+                          "name": "input",
+                          "width": "fill_container",
+                          "fill": "$background",
+                          "cornerRadius": "$radius-sm",
+                          "stroke": "$input",
+                          "strokeWidth": 1,
+                          "padding": [
+                            12,
+                            14
+                          ],
+                          "justifyContent": "space_between",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "vgCEd",
+                              "name": "ph",
+                              "fill": "$muted-foreground",
+                              "content": "Kies een categorie",
+                              "fontFamily": "$font-body",
+                              "fontSize": "$text-sm",
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "text",
+                              "id": "mJ0zi",
+                              "name": "Glyph ▾",
+                              "fill": "$muted-foreground",
+                              "content": "▾",
+                              "fontFamily": "$font-body",
+                              "fontSize": 14
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "ibzkA",
+                      "name": "Toelichting",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": "$space-xs",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "G9IrDa",
+                          "name": "lbl",
+                          "fill": "$foreground",
+                          "content": "Toelichting (optioneel)",
+                          "fontFamily": "$font-body",
+                          "fontSize": "$text-xs2",
+                          "fontWeight": "500"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "L2xEk",
+                          "name": "input",
+                          "width": "fill_container",
+                          "height": 96,
+                          "fill": "$background",
+                          "cornerRadius": "$radius-sm",
+                          "stroke": "$input",
+                          "strokeWidth": 1,
+                          "padding": [
+                            12,
+                            14
+                          ],
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "srxNF",
+                              "name": "ph",
+                              "fill": "$muted-foreground",
+                              "content": "Welke systemen, datastromen of processen wil je verbinden?",
+                              "fontFamily": "$font-body",
+                              "fontSize": "$text-sm",
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "DvF4u",
+                      "name": "Privacy",
+                      "width": "fill_container",
+                      "gap": "$space-xs",
+                      "children": [
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": "$radius-xs",
+                          "id": "OAKwD",
+                          "name": "Checkbox",
+                          "fill": "$background",
+                          "width": 16,
+                          "height": 16,
+                          "stroke": "$input",
+                          "strokeWidth": 1
+                        },
+                        {
+                          "type": "frame",
+                          "id": "iiYiJ",
+                          "name": "t",
+                          "gap": 4,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "ZOxU0",
+                              "name": "a",
+                              "fill": "$muted-foreground",
+                              "content": "Ik ga akkoord met het",
+                              "fontFamily": "$font-body",
+                              "fontSize": "$text-sm",
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "text",
+                              "id": "P7bI4Y",
+                              "name": "link",
+                              "fill": "$foreground",
+                              "content": "privacybeleid",
+                              "fontFamily": "$font-body",
+                              "fontSize": "$text-sm",
+                              "fontWeight": "500"
+                            },
+                            {
+                              "type": "text",
+                              "id": "O7oMIn",
+                              "name": "b",
+                              "fill": "$muted-foreground",
+                              "content": ". *",
+                              "fontFamily": "$font-body",
+                              "fontSize": "$text-sm",
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "bPtqQ",
+                      "name": "Submit",
+                      "width": "fill_container",
+                      "fill": "$primary",
+                      "cornerRadius": "$radius-md",
+                      "effect": {
+                        "type": "shadow",
+                        "shadowType": "outer",
+                        "color": "$shadow-3",
+                        "offset": {
+                          "x": 0,
+                          "y": 1
+                        },
+                        "blur": 3
+                      },
+                      "gap": "$space-xs",
+                      "padding": [
+                        13,
+                        22
+                      ],
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "Cz2JO",
+                          "name": "l",
+                          "fill": "$primary-foreground",
+                          "content": "Start mijn aanvraag",
+                          "fontFamily": "$font-body",
+                          "fontSize": "$text-md",
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "text",
+                          "id": "nZU3p",
+                          "name": "Glyph →",
+                          "fill": "$primary-foreground",
+                          "content": "→",
+                          "fontFamily": "$font-body",
+                          "fontSize": 16,
+                          "fontWeight": "500"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "Si94H",
+                      "name": "Note",
+                      "fill": "$muted-foreground",
+                      "content": "Persoonlijk contact binnen één werkdag · vrijblijvend",
+                      "fontFamily": "$font-data",
+                      "fontSize": "$text-2xs",
+                      "fontWeight": "normal"
                     }
                   ]
                 }
@@ -25752,69 +26332,658 @@
             },
             {
               "type": "frame",
-              "id": "p7LXSI",
-              "name": "Closing CTA",
+              "id": "rgeDQ",
+              "name": "Koppelen",
               "width": "fill_container",
+              "fill": "$brand-subtle",
+              "cornerRadius": "$radius-xl",
               "layout": "vertical",
-              "gap": "$space-md",
-              "alignItems": "center",
+              "gap": "$space-lg",
+              "padding": [
+                "$space-xl",
+                "$space-lg"
+              ],
               "children": [
                 {
                   "type": "text",
-                  "id": "Mt0hr",
+                  "id": "jkQ5J",
                   "name": "H",
                   "fill": "$foreground",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
                   "content": "Klaar om te koppelen?",
-                  "lineHeight": 1.05,
-                  "textAlign": "center",
+                  "lineHeight": 1.2,
                   "fontFamily": "$font-heading",
                   "fontSize": "$text-xl",
                   "fontWeight": "700",
                   "letterSpacing": -1
                 },
                 {
+                  "type": "text",
+                  "id": "Vb7sR",
+                  "name": "Sub",
+                  "fill": "$muted-foreground",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Vertel kort wat je wilt koppelen. Wij regelen de omgeving, het token en de onboarding.",
+                  "lineHeight": 1.6,
+                  "fontFamily": "$font-body",
+                  "fontSize": "$text-base",
+                  "fontWeight": "normal"
+                },
+                {
                   "type": "frame",
-                  "id": "jpN3z",
-                  "name": "Primary",
-                  "fill": "$primary",
-                  "cornerRadius": "$radius-md",
+                  "id": "I6Ecpv",
+                  "name": "Wat er gebeurt",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "padding": [
+                    8,
+                    0,
+                    0,
+                    0
+                  ],
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "pUpjP",
+                      "name": "Wij nemen contact op",
+                      "width": "fill_container",
+                      "stroke": "$border",
+                      "strokeWidth": {
+                        "top": 1,
+                        "bottom": 1
+                      },
+                      "strokeLinejoin": "round",
+                      "gap": "$space-md",
+                      "padding": [
+                        18,
+                        0
+                      ],
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "okFcI",
+                          "name": "ix",
+                          "fill": "$brand",
+                          "content": "01",
+                          "fontFamily": "$font-data",
+                          "fontSize": "$text-xs2",
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "fdE5l",
+                          "name": "c",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": "$space-xxs",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "pvFvv",
+                              "name": "t",
+                              "fill": "$foreground",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "We brengen je integratievraag scherp",
+                              "fontFamily": "$font-body",
+                              "fontSize": "$text-base",
+                              "fontWeight": "600"
+                            },
+                            {
+                              "type": "text",
+                              "id": "fklbW",
+                              "name": "d",
+                              "fill": "$muted-foreground",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "Een korte intake over systemen, data en gewenste uitkomst.",
+                              "lineHeight": 1.6,
+                              "fontFamily": "$font-body",
+                              "fontSize": "$text-sm",
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "yEXJE",
+                      "name": "Omgeving & token klaar",
+                      "width": "fill_container",
+                      "stroke": "$border",
+                      "strokeWidth": {
+                        "bottom": 1
+                      },
+                      "strokeLinejoin": "round",
+                      "gap": "$space-md",
+                      "padding": [
+                        18,
+                        0
+                      ],
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "V1o0X3",
+                          "name": "ix",
+                          "fill": "$brand",
+                          "content": "02",
+                          "fontFamily": "$font-data",
+                          "fontSize": "$text-xs2",
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "yDs73",
+                          "name": "c",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": "$space-xxs",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "jcA7a",
+                              "name": "t",
+                              "fill": "$foreground",
+                              "content": "Je omgeving staat klaar",
+                              "fontFamily": "$font-body",
+                              "fontSize": "$text-base",
+                              "fontWeight": "600"
+                            },
+                            {
+                              "type": "text",
+                              "id": "L17Cd",
+                              "name": "d",
+                              "fill": "$muted-foreground",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "Je ontvangt een veilige omgeving, API-token en heldere onboarding.",
+                              "lineHeight": 1.6,
+                              "fontFamily": "$font-body",
+                              "fontSize": "$text-sm",
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "suULj",
+                      "name": "Eerste koppeling live",
+                      "width": "fill_container",
+                      "stroke": "$border",
+                      "strokeWidth": {
+                        "bottom": 1
+                      },
+                      "strokeLinejoin": "round",
+                      "gap": "$space-md",
+                      "padding": [
+                        18,
+                        0
+                      ],
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "cfldo",
+                          "name": "ix",
+                          "fill": "$brand",
+                          "content": "03",
+                          "fontFamily": "$font-data",
+                          "fontSize": "$text-xs2",
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "o1cUDi",
+                          "name": "c",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": "$space-xxs",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "eA01j",
+                              "name": "t",
+                              "fill": "$foreground",
+                              "content": "Je eerste integratie gaat live",
+                              "fontFamily": "$font-body",
+                              "fontSize": "$text-base",
+                              "fontWeight": "600"
+                            },
+                            {
+                              "type": "text",
+                              "id": "TTwcS",
+                              "name": "d",
+                              "fill": "$muted-foreground",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "Samen zetten we de eerste koppeling om in resultaat.",
+                              "lineHeight": 1.6,
+                              "fontFamily": "$font-body",
+                              "fontSize": "$text-sm",
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "JKAHe",
+                  "name": "Form Card",
+                  "width": "fill_container",
+                  "fill": "$card",
+                  "cornerRadius": "$radius-lg",
+                  "stroke": "$border",
+                  "strokeWidth": 1,
                   "effect": {
                     "type": "shadow",
                     "shadowType": "outer",
-                    "color": "$shadow-3",
+                    "color": "$shadow-4",
                     "offset": {
                       "x": 0,
-                      "y": 1
+                      "y": 6
                     },
-                    "blur": 3
+                    "blur": 24,
+                    "spread": -6
                   },
-                  "gap": "$space-xs",
+                  "layout": "vertical",
+                  "gap": "$space-md",
                   "padding": [
-                    13,
-                    22
+                    24,
+                    20
                   ],
-                  "justifyContent": "center",
-                  "alignItems": "center",
                   "children": [
                     {
                       "type": "text",
-                      "id": "esa0j",
-                      "name": "l",
-                      "fill": "$primary-foreground",
-                      "content": "Start met koppelen",
+                      "id": "DyrJL",
+                      "name": "FormTitle",
+                      "fill": "$foreground",
+                      "content": "Start je integratie-aanvraag",
                       "fontFamily": "$font-body",
-                      "fontSize": "$text-md",
+                      "fontSize": "$text-lg",
                       "fontWeight": "600"
                     },
                     {
+                      "type": "frame",
+                      "id": "o8PhkN",
+                      "name": "Naam",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": "$space-xs",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "scx4d",
+                          "name": "lbl",
+                          "fill": "$foreground",
+                          "content": "Naam *",
+                          "fontFamily": "$font-body",
+                          "fontSize": "$text-xs2",
+                          "fontWeight": "500"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "ZBew5",
+                          "name": "input",
+                          "width": "fill_container",
+                          "fill": "$background",
+                          "cornerRadius": "$radius-sm",
+                          "stroke": "$input",
+                          "strokeWidth": 1,
+                          "padding": [
+                            12,
+                            14
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "s5119Y",
+                              "name": "ph",
+                              "fill": "$muted-foreground",
+                              "content": "Je volledige naam",
+                              "fontFamily": "$font-body",
+                              "fontSize": "$text-sm",
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "J0qPUv",
+                      "name": "Werk-e-mail",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": "$space-xs",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "YDxrD",
+                          "name": "lbl",
+                          "fill": "$foreground",
+                          "content": "Werk-e-mail *",
+                          "fontFamily": "$font-body",
+                          "fontSize": "$text-xs2",
+                          "fontWeight": "500"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "vz3we",
+                          "name": "input",
+                          "width": "fill_container",
+                          "fill": "$background",
+                          "cornerRadius": "$radius-sm",
+                          "stroke": "$input",
+                          "strokeWidth": 1,
+                          "padding": [
+                            12,
+                            14
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "EpMTC",
+                              "name": "ph",
+                              "fill": "$muted-foreground",
+                              "content": "naam@bedrijf.nl",
+                              "fontFamily": "$font-data",
+                              "fontSize": "$text-sm",
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "k1MrY",
+                      "name": "Bedrijf",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": "$space-xs",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "nXtWZ",
+                          "name": "lbl",
+                          "fill": "$foreground",
+                          "content": "Bedrijf *",
+                          "fontFamily": "$font-body",
+                          "fontSize": "$text-xs2",
+                          "fontWeight": "500"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "B1ghv",
+                          "name": "input",
+                          "width": "fill_container",
+                          "fill": "$background",
+                          "cornerRadius": "$radius-sm",
+                          "stroke": "$input",
+                          "strokeWidth": 1,
+                          "padding": [
+                            12,
+                            14
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "KroAK",
+                              "name": "ph",
+                              "fill": "$muted-foreground",
+                              "content": "Bedrijfsnaam",
+                              "fontFamily": "$font-body",
+                              "fontSize": "$text-sm",
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "RrYg0",
+                      "name": "Wat wil je koppelen?",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": "$space-xs",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "z9BQH",
+                          "name": "lbl",
+                          "fill": "$foreground",
+                          "content": "Wat wil je koppelen? *",
+                          "fontFamily": "$font-body",
+                          "fontSize": "$text-xs2",
+                          "fontWeight": "500"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "IK2Nx",
+                          "name": "input",
+                          "width": "fill_container",
+                          "fill": "$background",
+                          "cornerRadius": "$radius-sm",
+                          "stroke": "$input",
+                          "strokeWidth": 1,
+                          "padding": [
+                            12,
+                            14
+                          ],
+                          "justifyContent": "space_between",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "OoTQS",
+                              "name": "ph",
+                              "fill": "$muted-foreground",
+                              "content": "Kies een categorie",
+                              "fontFamily": "$font-body",
+                              "fontSize": "$text-sm",
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "text",
+                              "id": "RqWpN",
+                              "name": "Glyph ▾",
+                              "fill": "$muted-foreground",
+                              "content": "▾",
+                              "fontFamily": "$font-body",
+                              "fontSize": 14
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "B489H8",
+                      "name": "Toelichting",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": "$space-xs",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "rueGI",
+                          "name": "lbl",
+                          "fill": "$foreground",
+                          "content": "Toelichting (optioneel)",
+                          "fontFamily": "$font-body",
+                          "fontSize": "$text-xs2",
+                          "fontWeight": "500"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "eLYKu",
+                          "name": "input",
+                          "width": "fill_container",
+                          "height": 96,
+                          "fill": "$background",
+                          "cornerRadius": "$radius-sm",
+                          "stroke": "$input",
+                          "strokeWidth": 1,
+                          "padding": [
+                            12,
+                            14
+                          ],
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "ARxVl",
+                              "name": "ph",
+                              "fill": "$muted-foreground",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "Welke systemen, datastromen of processen wil je verbinden?",
+                              "fontFamily": "$font-body",
+                              "fontSize": "$text-sm",
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "bzvwu",
+                      "name": "Privacy",
+                      "width": "fill_container",
+                      "gap": "$space-xs",
+                      "children": [
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": "$radius-xs",
+                          "id": "U4pYg",
+                          "name": "Checkbox",
+                          "fill": "$background",
+                          "width": 16,
+                          "height": 16,
+                          "stroke": "$input",
+                          "strokeWidth": 1
+                        },
+                        {
+                          "type": "frame",
+                          "id": "zcm1O",
+                          "name": "t",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 2,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "Q9SHFM",
+                              "name": "a",
+                              "fill": "$muted-foreground",
+                              "content": "Ik ga akkoord met het",
+                              "fontFamily": "$font-body",
+                              "fontSize": "$text-sm",
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "frame",
+                              "id": "PVNWw",
+                              "name": "line2",
+                              "gap": 4,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "QrLKb",
+                                  "name": "link",
+                                  "fill": "$foreground",
+                                  "content": "privacybeleid",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": "$text-sm",
+                                  "fontWeight": "500"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "kWTwP",
+                                  "name": "b",
+                                  "fill": "$muted-foreground",
+                                  "content": ". *",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": "$text-sm",
+                                  "fontWeight": "normal"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "TAVhO",
+                      "name": "Submit",
+                      "width": "fill_container",
+                      "fill": "$primary",
+                      "cornerRadius": "$radius-md",
+                      "effect": {
+                        "type": "shadow",
+                        "shadowType": "outer",
+                        "color": "$shadow-3",
+                        "offset": {
+                          "x": 0,
+                          "y": 1
+                        },
+                        "blur": 3
+                      },
+                      "gap": "$space-xs",
+                      "padding": [
+                        13,
+                        22
+                      ],
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "tpzLf",
+                          "name": "l",
+                          "fill": "$primary-foreground",
+                          "content": "Start mijn aanvraag",
+                          "fontFamily": "$font-body",
+                          "fontSize": "$text-md",
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "text",
+                          "id": "Ri9zq",
+                          "name": "Glyph →",
+                          "fill": "$primary-foreground",
+                          "content": "→",
+                          "fontFamily": "$font-body",
+                          "fontSize": 16,
+                          "fontWeight": "500"
+                        }
+                      ]
+                    },
+                    {
                       "type": "text",
-                      "id": "KEpry",
-                      "name": "Glyph →",
-                      "fill": "$primary-foreground",
-                      "content": "→",
-                      "fontFamily": "$font-body",
-                      "fontSize": 16,
-                      "fontWeight": "500"
+                      "id": "KIO2W",
+                      "name": "Note",
+                      "fill": "$muted-foreground",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Persoonlijk contact binnen één werkdag · vrijblijvend",
+                      "textAlign": "center",
+                      "fontFamily": "$font-data",
+                      "fontSize": "$text-2xs",
+                      "fontWeight": "normal"
                     }
                   ]
                 }

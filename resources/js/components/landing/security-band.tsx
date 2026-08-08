@@ -17,7 +17,7 @@ const badges = [
 
 export function SecurityBand() {
     return (
-        <section className="border-y border-border bg-card px-6 py-20 lg:px-section-x lg:py-24">
+        <section className="border-y border-border bg-card px-page py-20 lg:py-24">
             <div className="mx-auto flex max-w-[720px] flex-col items-center gap-10 text-center">
                 <Reveal className="flex flex-col items-center gap-4">
                     <p className="font-mono text-xs uppercase tracking-[1.5px] text-muted-foreground">

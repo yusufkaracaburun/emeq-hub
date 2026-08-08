@@ -30,7 +30,7 @@ export function Nav() {
                 scrolled ? 'border-border' : 'border-transparent',
             )}
         >
-            <div className="flex items-center justify-between px-6 py-[18px] lg:px-section-x">
+            <div className="flex items-center justify-between px-page py-[18px]">
                 <div className="flex items-center gap-10">
                     <Link href="/" className="flex items-center gap-2" aria-label="hub home">
                         <img src="/img/logo.png" alt="" aria-hidden className="h-[18px] w-auto" />

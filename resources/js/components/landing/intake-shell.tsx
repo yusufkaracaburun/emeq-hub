@@ -25,7 +25,7 @@ export function IntakeShell({ eyebrow, title, intro, steps, children }: IntakeSh
     return (
         <>
             <Nav />
-            <main className="relative overflow-hidden px-6 pb-24 pt-16 lg:px-section-x lg:pb-[112px] lg:pt-[88px]">
+            <main className="relative overflow-hidden px-page pb-24 pt-16 lg:pb-[112px] lg:pt-[88px]">
                 <div
                     aria-hidden
                     className="pointer-events-none absolute inset-x-0 top-0 h-[360px] opacity-30 [background-image:radial-gradient(circle,#17171720_1px,transparent_1px)] [background-size:24px_24px] [mask-image:linear-gradient(to_bottom,black,transparent_85%)]"

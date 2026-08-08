@@ -94,3 +94,12 @@
         @apply bg-background font-sans text-foreground antialiased;
     }
 }
+
+/*
+ * Pagina-goot: centreert de content op max 1200px (= het 1440-design met
+ * 120px zijmarge) terwijl sectie-achtergronden full-bleed blijven. Onder
+ * 1248px valt hij terug op de vaste 24px-marge.
+ */
+@utility px-page {
+    padding-inline: max(--spacing(6), calc((100% - 1200px) / 2));
+}

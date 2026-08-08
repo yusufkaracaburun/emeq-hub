@@ -17,7 +17,7 @@ const products = [
 /** Eénregelige footer voor de intake-pagina's (/koppelen en /demo) — volgt de compacte Footer uit die design-frames. */
 export function SimpleFooter() {
     return (
-        <footer className="flex flex-col gap-4 border-t border-border px-6 py-7 text-xs2 text-muted-foreground md:flex-row md:items-center md:justify-between md:gap-6 lg:px-section-x">
+        <footer className="flex flex-col gap-4 border-t border-border px-page py-7 text-xs2 text-muted-foreground md:flex-row md:items-center md:justify-between md:gap-6">
             <p>© 2026 emeq</p>
             <nav className="flex flex-wrap gap-6">
                 {links.map((link) => (
@@ -36,7 +36,7 @@ export function SimpleFooter() {
 
 export function Footer() {
     return (
-        <footer className="border-t border-border bg-background px-6 pb-10 pt-14 lg:px-section-x">
+        <footer className="border-t border-border bg-background px-page pb-10 pt-14">
             <div className="flex flex-col items-start gap-10 md:flex-row md:justify-between md:gap-12">
                 <div className="flex flex-col gap-2">
                     <div className="flex items-center gap-2">
