@@ -167,19 +167,38 @@ class PublicSeoTest extends TestCase
 
         // De legal-pagina's waren hiervóór geblokkeerd terwijl de middleware ze
         // indexeerbaar verklaarde — precies de drift die dit bestand bewaakt.
-        $this->assertStringNotContainsString("\nDisallow: /\n", $body);
+        $this->assertStringNotContainsString(
+            "\nDisallow: /\n",
+            substr($body, 0, (int) strpos($body, 'User-agent: GPTBot')),
+        );
 
-        // Alleen de crawlers die naar de bron linken.
+        // Rechtsvoorbehoud voor tekst- en datamining (EU 2019/790 art. 4).
+        $this->assertStringContainsString('Content-Signal: search=yes,ai-train=no,use=reference', $body);
+
+        // Crawlers die naar de bron linken: zelfde surface als iedereen.
         foreach (['OAI-SearchBot', 'PerplexityBot', 'Claude-SearchBot'] as $agent) {
             $this->assertStringContainsString('User-agent: '.$agent, $body);
         }
+    }
 
-        // Trainings-crawlers horen hier niet: Cloudflare weert die zone-breed,
-        // en ze hier tóch noemen levert twee groepen voor dezelfde user-agent
-        // op — een tegenstrijdig bestand zonder effect.
-        foreach (['GPTBot', 'ClaudeBot', 'Google-Extended', 'CCBot'] as $agent) {
-            $this->assertStringNotContainsString('User-agent: '.$agent, $body);
+    public function test_robots_denies_training_crawlers_everything(): void
+    {
+        $this->app['env'] = 'production';
+
+        $body = $this->get('/robots.txt')->assertOk()->getContent();
+
+        foreach (['GPTBot', 'ClaudeBot', 'Google-Extended', 'CCBot', 'Bytespider'] as $agent) {
+            $this->assertStringContainsString('User-agent: '.$agent, $body);
         }
+
+        // De trainings-groep sluit af met een kale Disallow: / — die regel mag
+        // alleen dáár staan, niet in de groep voor iedereen.
+        $training = substr($body, (int) strpos($body, 'User-agent: GPTBot'));
+        $this->assertStringContainsString("\nDisallow: /\n", $training);
+        $this->assertStringNotContainsString(
+            "\nDisallow: /\n",
+            substr($body, 0, (int) strpos($body, 'User-agent: GPTBot')),
+        );
     }
 
     public function test_robots_closes_everything_outside_production(): void
