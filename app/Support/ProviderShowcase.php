@@ -14,7 +14,7 @@ class ProviderShowcase
     /**
      * Korte samenvattingen voor grid + logo-cloud.
      *
-     * @return list<array{key:string,label:string,tagline:string,category:string,summary:string,logo:?string,brand:?string}>
+     * @return list<array{key:string,label:string,tagline:string,category:string,summary:string,logo:?string,brand:?string,live:bool}>
      */
     public function summaries(): array
     {
@@ -27,6 +27,7 @@ class ProviderShowcase
                 'summary' => $data['summary'],
                 'logo' => $data['logo'] ?? null,
                 'brand' => $data['brand'] ?? null,
+                'live' => $data['live'] ?? false,
             ])
             ->values()
             ->all();

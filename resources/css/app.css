@@ -1,0 +1,96 @@
+@import 'tailwindcss';
+
+@source '../views/app.blade.php';
+@source '../js/**/*.{ts,tsx}';
+
+/*
+ * Design-tokens — 1:1 uit .pencil/landingspage.pen (GetVariables).
+ * Wijzig eerst het design, dan hier; dit bestand volgt het canvas.
+ */
+@theme {
+    /* Kleuren */
+    --color-background: #fafafa;
+    --color-foreground: #171717;
+    --color-card: #ffffff;
+    --color-card-foreground: #171717;
+    --color-muted: #f5f5f5;
+    --color-muted-foreground: #666666;
+    --color-border: #ebebeb;
+    --color-input: #ebebeb;
+    --color-accent: #f5f5f5;
+    --color-accent-foreground: #171717;
+    --color-brand: #a23696;
+    --color-brand-deep: #7d2873;
+    --color-brand-soft: #f7e7f4;
+    --color-brand-subtle: #faf3f9;
+    --color-brand-foreground: #ffffff;
+    --color-primary: #171717;
+    --color-primary-foreground: #ffffff;
+    --color-secondary: #f5f5f5;
+    --color-success: #15803d;
+    --color-success-soft: #dcfce7;
+    --color-error: #ee0000;
+    --color-error-deep: #c50000;
+    --color-error-soft: #f7d4d6;
+    --color-warning: #f5a623;
+    --color-info: #0070f3;
+    --color-link: #0070f3;
+    --color-ring: #a23696;
+    --color-overlay: #00000040;
+
+    /* Type-scale (overschrijft Tailwind-defaults bewust: dit ís de schaal) */
+    --text-2xs: 11px;
+    --text-2xs--line-height: 1.4;
+    --text-xs: 12px;
+    --text-xs--line-height: 1.4;
+    --text-xs2: 13px;
+    --text-xs2--line-height: 1.4;
+    --text-sm: 14px;
+    --text-sm--line-height: 1.6;
+    --text-md: 15px;
+    --text-md--line-height: 1.6;
+    --text-base: 16px;
+    --text-base--line-height: 1.6;
+    --text-lg: 18px;
+    --text-lg--line-height: 1.4;
+    --text-xl: 24px;
+    --text-xl--line-height: 1.05;
+    --text-2xl: 30px;
+    --text-2xl--line-height: 1.05;
+    --text-3xl: 38px;
+    --text-3xl--line-height: 1.05;
+    --text-display: 48px;
+    --text-display--line-height: 1.05;
+
+    /* Spacing buiten het standaard 4pt-grid */
+    --spacing-tight: 6px;
+    --spacing-section-x: 120px;
+
+    /* Radius */
+    --radius-xs: 4px;
+    --radius-sm: 6px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-xl: 16px;
+    --radius-2xl: 24px;
+    --radius-pill: 100px;
+
+    /* Fonts */
+    --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+
+    /* Schaduwen — de enige twee die het design kent */
+    --shadow-btn: 0 1px 3px #0000000f;
+    --shadow-card: 0 6px 24px -6px #00000014;
+}
+
+@layer base {
+    html,
+    body {
+        height: 100%;
+    }
+
+    body {
+        @apply bg-background font-sans text-foreground antialiased;
+    }
+}

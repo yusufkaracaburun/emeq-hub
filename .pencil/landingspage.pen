@@ -7,7 +7,6 @@
       "x": 2150,
       "y": 0,
       "name": "Mobile 390 · Menu open (Light)",
-      "theme": {},
       "clip": true,
       "width": 390,
       "height": 844,
@@ -344,7 +343,6 @@
       "x": 0,
       "y": 0,
       "name": "emeq-hub · Desktop 1440 · Light",
-      "theme": {},
       "clip": true,
       "width": 1440,
       "fill": "$background",
@@ -3360,7 +3358,7 @@
                 {
                   "type": "frame",
                   "id": "C1iN0",
-                  "name": "Pass-through REST",
+                  "name": "Elk partner-endpoint, één route",
                   "width": "fill_container",
                   "fill": "$brand-subtle",
                   "cornerRadius": "$radius-lg",
@@ -3424,7 +3422,7 @@
                       "fill": "$foreground",
                       "textGrowth": "fixed-width",
                       "width": "fill_container",
-                      "content": "Pass-through REST",
+                      "content": "Elk partner-endpoint, één route",
                       "fontFamily": "$font-body",
                       "fontSize": "$text-lg",
                       "fontWeight": "600"
@@ -3649,7 +3647,7 @@
                 {
                   "type": "frame",
                   "id": "y2ypFP",
-                  "name": "Feature-flags & kill-switch",
+                  "name": "Direct aan of uit",
                   "width": 380,
                   "fill": "$card",
                   "cornerRadius": "$radius-lg",
@@ -3713,7 +3711,7 @@
                       "fill": "$foreground",
                       "textGrowth": "fixed-width",
                       "width": "fill_container",
-                      "content": "Feature-flags & kill-switch",
+                      "content": "Direct aan of uit, per omgeving",
                       "fontFamily": "$font-body",
                       "fontSize": "$text-lg",
                       "fontWeight": "600"
@@ -3745,7 +3743,7 @@
                 {
                   "type": "frame",
                   "id": "j0xcen",
-                  "name": "Idempotency",
+                  "name": "Nooit dubbel geboekt",
                   "width": "fill_container",
                   "fill": "$card",
                   "cornerRadius": "$radius-lg",
@@ -3809,7 +3807,7 @@
                       "fill": "$foreground",
                       "textGrowth": "fixed-width",
                       "width": "fill_container",
-                      "content": "Idempotency",
+                      "content": "Nooit dubbel geboekt",
                       "fontFamily": "$font-body",
                       "fontSize": "$text-lg",
                       "fontWeight": "600"
@@ -3832,7 +3830,7 @@
                 {
                   "type": "frame",
                   "id": "jf8Yk",
-                  "name": "Accounting-sync",
+                  "name": "Eén datamodel",
                   "width": "fill_container",
                   "fill": "$card",
                   "cornerRadius": "$radius-lg",
@@ -3896,7 +3894,7 @@
                       "fill": "$foreground",
                       "textGrowth": "fixed-width",
                       "width": "fill_container",
-                      "content": "Canonieke data-sync",
+                      "content": "Eén datamodel, elke partner",
                       "fontFamily": "$font-body",
                       "fontSize": "$text-lg",
                       "fontWeight": "600"
@@ -3919,7 +3917,7 @@
                 {
                   "type": "frame",
                   "id": "pEbyu",
-                  "name": "Inbound-webhook-audit",
+                  "name": "Elke webhook traceerbaar",
                   "width": "fill_container",
                   "fill": "$card",
                   "cornerRadius": "$radius-lg",
@@ -3983,7 +3981,7 @@
                       "fill": "$foreground",
                       "textGrowth": "fixed-width",
                       "width": "fill_container",
-                      "content": "Webhook-audit",
+                      "content": "Elke webhook traceerbaar",
                       "fontFamily": "$font-body",
                       "fontSize": "$text-lg",
                       "fontWeight": "600"
@@ -4240,7 +4238,6 @@
               "width": "fill_container",
               "gap": "$space-3xl",
               "justifyContent": "space_between",
-              "alignItems": "center",
               "children": [
                 {
                   "type": "frame",
@@ -4294,15 +4291,35 @@
                   "type": "frame",
                   "id": "gkzFo",
                   "name": "Links",
-                  "gap": "$space-lg",
-                  "alignItems": "center",
+                  "layout": "vertical",
+                  "gap": "$space-sm",
                   "children": [
+                    {
+                      "type": "text",
+                      "id": "CqiHh",
+                      "name": "Partners",
+                      "fill": "$muted-foreground",
+                      "content": "Partners",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-sm",
+                      "fontWeight": "500"
+                    },
                     {
                       "type": "text",
                       "id": "Q01CK",
                       "name": "Privacy",
                       "fill": "$muted-foreground",
                       "content": "Privacy",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-sm",
+                      "fontWeight": "500"
+                    },
+                    {
+                      "type": "text",
+                      "id": "U35yOV",
+                      "name": "Voorwaarden",
+                      "fill": "$muted-foreground",
+                      "content": "Voorwaarden",
                       "fontFamily": "$font-body",
                       "fontSize": "$text-sm",
                       "fontWeight": "500"
@@ -4326,6 +4343,102 @@
                       "fontFamily": "$font-body",
                       "fontSize": "$text-sm",
                       "fontWeight": "500"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "U1QcR",
+                  "name": "Ook van Emeq",
+                  "layout": "vertical",
+                  "gap": "$space-sm",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "E7h97a",
+                      "name": "Koltitel",
+                      "fill": "$muted-foreground",
+                      "content": "Ook van Emeq",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-sm",
+                      "fontWeight": "500",
+                      "letterSpacing": 0.5
+                    },
+                    {
+                      "type": "frame",
+                      "id": "f8cHy5",
+                      "name": "Emeq",
+                      "layout": "vertical",
+                      "gap": "$space-xxs",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "ax8Fm",
+                          "name": "Naam",
+                          "gap": "$space-tight",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "qH8Pl",
+                              "name": "n",
+                              "fill": "$foreground",
+                              "content": "Emeq",
+                              "fontFamily": "$font-body",
+                              "fontSize": "$text-sm",
+                              "fontWeight": "500"
+                            },
+                            {
+                              "type": "icon",
+                              "id": "R7Glv",
+                              "name": "ext",
+                              "width": 12,
+                              "height": 12,
+                              "icon": "arrow-up-right",
+                              "library": "lucide",
+                              "fill": "$muted-foreground"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "Jt6RQ",
+                      "name": "Planny",
+                      "layout": "vertical",
+                      "gap": "$space-xxs",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "zFEKY",
+                          "name": "Naam",
+                          "gap": "$space-tight",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "JKUQ6",
+                              "name": "n",
+                              "fill": "$foreground",
+                              "content": "Planny",
+                              "fontFamily": "$font-body",
+                              "fontSize": "$text-sm",
+                              "fontWeight": "500"
+                            },
+                            {
+                              "type": "icon",
+                              "id": "grEDB",
+                              "name": "ext",
+                              "width": 12,
+                              "height": 12,
+                              "icon": "arrow-up-right",
+                              "library": "lucide",
+                              "fill": "$muted-foreground"
+                            }
+                          ]
+                        }
+                      ]
                     }
                   ]
                 }
@@ -4369,6 +4482,33 @@
                   "children": [
                     {
                       "type": "frame",
+                      "id": "KKh4C",
+                      "name": "ISO 27001",
+                      "cornerRadius": "$radius-xs",
+                      "stroke": "$border",
+                      "strokeWidth": 1,
+                      "padding": "$space-tight",
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "rectangle",
+                          "id": "m28MR8",
+                          "name": "ISO 27001 Logo",
+                          "opacity": 0.7,
+                          "fill": {
+                            "type": "image",
+                            "enabled": true,
+                            "url": "iso27001.png",
+                            "mode": "fit"
+                          },
+                          "width": 18,
+                          "height": 18
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
                       "id": "RzRDy",
                       "name": "GDPR",
                       "cornerRadius": "$radius-xs",
@@ -4408,7 +4548,6 @@
       "x": 1640,
       "y": 0,
       "name": "emeq-hub · Mobile 390 (Light)",
-      "theme": {},
       "clip": true,
       "width": 390,
       "fill": "$background",
@@ -6963,11 +7102,12 @@
                   "children": [
                     {
                       "type": "frame",
-                      "id": "QST2t",
+                      "id": "gzaA2",
                       "name": "ISO 27001",
                       "fill": "$muted",
                       "cornerRadius": "$radius-pill",
                       "stroke": "$border",
+                      "strokeWidth": 1,
                       "gap": "$space-xs",
                       "padding": [
                         10,
@@ -6977,7 +7117,7 @@
                       "children": [
                         {
                           "type": "rectangle",
-                          "id": "b4GEZ7",
+                          "id": "lzzXn",
                           "name": "Mark",
                           "opacity": 0.7,
                           "fill": {
@@ -6991,7 +7131,7 @@
                         },
                         {
                           "type": "text",
-                          "id": "rR6eJ",
+                          "id": "u3O596",
                           "name": "Label",
                           "fill": "$foreground",
                           "content": "ISO 27001-hosting",
@@ -7165,7 +7305,7 @@
                   "id": "KovO3",
                   "name": "Eyebrow",
                   "fill": "$muted-foreground",
-                  "content": "06 · PLATFORM",
+                  "content": "04 — PLATFORM",
                   "fontFamily": "$font-caption",
                   "fontSize": "$text-2xs",
                   "fontWeight": "normal",
@@ -7175,6 +7315,7 @@
                   "type": "frame",
                   "id": "TGZ2F",
                   "name": "H2",
+                  "width": "fill_container",
                   "gap": "$space-xs",
                   "alignItems": "center",
                   "children": [
@@ -7183,19 +7324,9 @@
                       "id": "gBloV",
                       "name": "a",
                       "fill": "$foreground",
-                      "content": "Meer dan een",
-                      "lineHeight": 1.05,
-                      "fontFamily": "$font-heading",
-                      "fontSize": "$text-2xl",
-                      "fontWeight": "700",
-                      "letterSpacing": -1
-                    },
-                    {
-                      "type": "text",
-                      "id": "nUd7a",
-                      "name": "w-accent",
-                      "fill": "$brand",
-                      "content": "proxy.",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Alles voor integraties die wél meegroeien.",
                       "lineHeight": 1.05,
                       "fontFamily": "$font-heading",
                       "fontSize": "$text-2xl",
@@ -7241,7 +7372,7 @@
                           "id": "b79j7",
                           "name": "idx",
                           "fill": "$muted-foreground",
-                          "content": "01",
+                          "content": "F01",
                           "fontFamily": "$font-data",
                           "fontSize": "$text-xs2",
                           "fontWeight": "600"
@@ -7261,11 +7392,21 @@
                           "id": "ggbfE",
                           "name": "Label",
                           "fill": "$foreground",
-                          "content": "Pass-through REST",
+                          "content": "Elk partner-endpoint, één route",
                           "fontFamily": "$font-data",
                           "fontSize": "$text-sm",
                           "fontWeight": "600",
                           "letterSpacing": 0.3
+                        },
+                        {
+                          "type": "text",
+                          "id": "a7huzx",
+                          "name": "Tag",
+                          "fill": "$muted-foreground",
+                          "content": "/v1/{provider}/{path}",
+                          "fontFamily": "$font-data",
+                          "fontSize": "$text-2xs",
+                          "fontWeight": "normal"
                         },
                         {
                           "type": "text",
@@ -7274,20 +7415,10 @@
                           "fill": "$muted-foreground",
                           "textGrowth": "fixed-width",
                           "width": "fill_container",
-                          "content": "Gebruik ieder partner-endpoint via één vaste route — met audit en inzicht standaard inbegrepen.",
+                          "content": "Gebruik ieder partner-endpoint via één vaste route. emeq kiest de juiste koppeling, voegt credentials toe en geeft status en headers transparant terug.",
                           "lineHeight": 1.6,
                           "fontFamily": "$font-body",
                           "fontSize": "$text-sm",
-                          "fontWeight": "normal"
-                        },
-                        {
-                          "type": "text",
-                          "id": "QQYa1",
-                          "name": "Hover",
-                          "fill": "$muted-foreground",
-                          "content": "→ hover: 150ms ease-out",
-                          "fontFamily": "$font-data",
-                          "fontSize": "$text-2xs",
                           "fontWeight": "normal"
                         }
                       ]
@@ -7322,7 +7453,7 @@
                           "id": "jGb9J",
                           "name": "idx",
                           "fill": "$muted-foreground",
-                          "content": "02",
+                          "content": "F02",
                           "fontFamily": "$font-data",
                           "fontSize": "$text-xs2",
                           "fontWeight": "600"
@@ -7342,11 +7473,21 @@
                           "id": "fba9N",
                           "name": "Label",
                           "fill": "$foreground",
-                          "content": "Feature-flags & kill-switch",
+                          "content": "Direct aan of uit, per omgeving",
                           "fontFamily": "$font-data",
                           "fontSize": "$text-sm",
                           "fontWeight": "600",
                           "letterSpacing": 0.3
+                        },
+                        {
+                          "type": "text",
+                          "id": "rZnmF",
+                          "name": "Tag",
+                          "fill": "$muted-foreground",
+                          "content": "kill-switch",
+                          "fontFamily": "$font-data",
+                          "fontSize": "$text-2xs",
+                          "fontWeight": "normal"
                         },
                         {
                           "type": "text",
@@ -7393,7 +7534,7 @@
                           "id": "D0hlsX",
                           "name": "idx",
                           "fill": "$muted-foreground",
-                          "content": "03",
+                          "content": "F03",
                           "fontFamily": "$font-data",
                           "fontSize": "$text-xs2",
                           "fontWeight": "600"
@@ -7413,11 +7554,21 @@
                           "id": "EdSAx",
                           "name": "Label",
                           "fill": "$foreground",
-                          "content": "Idempotency",
+                          "content": "Nooit dubbel geboekt",
                           "fontFamily": "$font-data",
                           "fontSize": "$text-sm",
                           "fontWeight": "600",
                           "letterSpacing": 0.3
+                        },
+                        {
+                          "type": "text",
+                          "id": "qSaVn",
+                          "name": "Tag",
+                          "fill": "$muted-foreground",
+                          "content": "Idempotency-Key",
+                          "fontFamily": "$font-data",
+                          "fontSize": "$text-2xs",
+                          "fontWeight": "normal"
                         },
                         {
                           "type": "text",
@@ -7464,7 +7615,7 @@
                           "id": "upPzJ",
                           "name": "idx",
                           "fill": "$muted-foreground",
-                          "content": "04",
+                          "content": "F04",
                           "fontFamily": "$font-data",
                           "fontSize": "$text-xs2",
                           "fontWeight": "600"
@@ -7484,11 +7635,21 @@
                           "id": "bfRoV",
                           "name": "Label",
                           "fill": "$foreground",
-                          "content": "Canonieke data-sync",
+                          "content": "Eén datamodel, elke partner",
                           "fontFamily": "$font-data",
                           "fontSize": "$text-sm",
                           "fontWeight": "600",
                           "letterSpacing": 0.3
+                        },
+                        {
+                          "type": "text",
+                          "id": "Y84Y3Y",
+                          "name": "Tag",
+                          "fill": "$muted-foreground",
+                          "content": "canoniek → partner",
+                          "fontFamily": "$font-data",
+                          "fontSize": "$text-2xs",
+                          "fontWeight": "normal"
                         },
                         {
                           "type": "text",
@@ -7510,7 +7671,7 @@
                 {
                   "type": "frame",
                   "id": "qJDoU",
-                  "name": "Inbound-webhook-audit",
+                  "name": "Webhook-audit",
                   "width": "fill_container",
                   "stroke": "$border",
                   "strokeWidth": {
@@ -7535,7 +7696,7 @@
                           "id": "c9tJj",
                           "name": "idx",
                           "fill": "$muted-foreground",
-                          "content": "05",
+                          "content": "F05",
                           "fontFamily": "$font-data",
                           "fontSize": "$text-xs2",
                           "fontWeight": "600"
@@ -7555,11 +7716,21 @@
                           "id": "h7uJm",
                           "name": "Label",
                           "fill": "$foreground",
-                          "content": "Inbound-webhook-audit",
+                          "content": "Elke webhook traceerbaar",
                           "fontFamily": "$font-data",
                           "fontSize": "$text-sm",
                           "fontWeight": "600",
                           "letterSpacing": 0.3
+                        },
+                        {
+                          "type": "text",
+                          "id": "u3HDi",
+                          "name": "Tag",
+                          "fill": "$muted-foreground",
+                          "content": "partner → hub",
+                          "fontFamily": "$font-data",
+                          "fontSize": "$text-2xs",
+                          "fontWeight": "normal"
                         },
                         {
                           "type": "text",
@@ -7839,10 +8010,30 @@
               "children": [
                 {
                   "type": "text",
+                  "id": "BSXxy",
+                  "name": "Partners",
+                  "fill": "$foreground",
+                  "content": "Partners",
+                  "fontFamily": "$font-body",
+                  "fontSize": "$text-sm",
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
                   "id": "lIgWH",
                   "name": "Privacy",
                   "fill": "$foreground",
                   "content": "Privacy",
+                  "fontFamily": "$font-body",
+                  "fontSize": "$text-sm",
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "IPpGB",
+                  "name": "Voorwaarden",
+                  "fill": "$foreground",
+                  "content": "Voorwaarden",
                   "fontFamily": "$font-body",
                   "fontSize": "$text-sm",
                   "fontWeight": "normal"
@@ -7866,6 +8057,102 @@
                   "fontFamily": "$font-body",
                   "fontSize": "$text-sm",
                   "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "f5nJis",
+              "name": "Ook van Emeq",
+              "layout": "vertical",
+              "gap": "$space-sm",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "f5vrWJ",
+                  "name": "Koltitel",
+                  "fill": "$muted-foreground",
+                  "content": "Ook van Emeq",
+                  "fontFamily": "$font-body",
+                  "fontSize": "$text-sm",
+                  "fontWeight": "500",
+                  "letterSpacing": 0.5
+                },
+                {
+                  "type": "frame",
+                  "id": "iUepu",
+                  "name": "Emeq",
+                  "layout": "vertical",
+                  "gap": "$space-xxs",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "YZeib",
+                      "name": "Naam",
+                      "gap": "$space-tight",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "yxXP1",
+                          "name": "n",
+                          "fill": "$foreground",
+                          "content": "Emeq",
+                          "fontFamily": "$font-body",
+                          "fontSize": "$text-sm",
+                          "fontWeight": "500"
+                        },
+                        {
+                          "type": "icon",
+                          "id": "tS7XX",
+                          "name": "ext",
+                          "width": 12,
+                          "height": 12,
+                          "icon": "arrow-up-right",
+                          "library": "lucide",
+                          "fill": "$muted-foreground"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "g5ATR",
+                  "name": "Planny",
+                  "layout": "vertical",
+                  "gap": "$space-xxs",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "RBdCm",
+                      "name": "Naam",
+                      "gap": "$space-tight",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "WZ0cm",
+                          "name": "n",
+                          "fill": "$foreground",
+                          "content": "Planny",
+                          "fontFamily": "$font-body",
+                          "fontSize": "$text-sm",
+                          "fontWeight": "500"
+                        },
+                        {
+                          "type": "icon",
+                          "id": "aZj5d",
+                          "name": "ext",
+                          "width": 12,
+                          "height": 12,
+                          "icon": "arrow-up-right",
+                          "library": "lucide",
+                          "fill": "$muted-foreground"
+                        }
+                      ]
+                    }
+                  ]
                 }
               ]
             },
@@ -7908,6 +8195,33 @@
                   "children": [
                     {
                       "type": "frame",
+                      "id": "h3thRn",
+                      "name": "ISO 27001",
+                      "cornerRadius": "$radius-sm",
+                      "stroke": "$border",
+                      "strokeWidth": 1,
+                      "padding": "$space-tight",
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "rectangle",
+                          "id": "erY9L",
+                          "name": "ISO 27001 Logo",
+                          "opacity": 0.7,
+                          "fill": {
+                            "type": "image",
+                            "enabled": true,
+                            "url": "iso27001.png",
+                            "mode": "fit"
+                          },
+                          "width": 18,
+                          "height": 18
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
                       "id": "NGdpN",
                       "name": "GDPR",
                       "cornerRadius": "$radius-sm",
@@ -7946,7 +8260,6 @@
       "x": 0,
       "y": 5800,
       "name": "Pagina · Start met koppelen · Light",
-      "theme": {},
       "clip": true,
       "width": 1440,
       "fill": "$background",
@@ -7954,13 +8267,12 @@
       "children": [
         {
           "type": "frame",
-          "id": "oyxzq",
+          "id": "X7shtz",
           "name": "Nav",
           "width": "fill_container",
+          "fill": "$background",
           "stroke": "$border",
-          "strokeWidth": {
-            "bottom": 1
-          },
+          "strokeAlignment": "inner",
           "strokeLinejoin": "round",
           "padding": [
             18,
@@ -7971,14 +8283,14 @@
           "children": [
             {
               "type": "frame",
-              "id": "H7Ysh",
-              "name": "Left",
-              "gap": "$space-lg",
+              "id": "fk4wR",
+              "name": "Nav Left",
+              "gap": "$space-2xl",
               "alignItems": "center",
               "children": [
                 {
                   "type": "frame",
-                  "id": "PmSZc",
+                  "id": "WWzR5",
                   "name": "Logo",
                   "gap": "$space-xs",
                   "alignItems": "center",
@@ -7986,7 +8298,7 @@
                     {
                       "type": "rectangle",
                       "cornerRadius": "$radius-xs",
-                      "id": "kPhSk",
+                      "id": "r0cfg",
                       "name": "Mark",
                       "fill": "$brand",
                       "width": 14,
@@ -7994,27 +8306,111 @@
                     },
                     {
                       "type": "text",
-                      "id": "t7tTJ",
+                      "id": "phGn0",
                       "name": "Wordmark",
                       "fill": "$foreground",
                       "content": "emeq",
-                      "lineHeight": 1.05,
                       "fontFamily": "$font-heading",
                       "fontSize": "$text-xl",
                       "fontWeight": "700",
-                      "letterSpacing": -1
+                      "letterSpacing": -0.5
                     }
                   ]
                 },
                 {
-                  "type": "text",
-                  "id": "hkl19",
-                  "name": "Terug",
-                  "fill": "$muted-foreground",
-                  "content": "← Terug",
-                  "fontFamily": "$font-body",
-                  "fontSize": "$text-sm",
-                  "fontWeight": "500"
+                  "type": "frame",
+                  "id": "D7ybU",
+                  "name": "Nav Links",
+                  "gap": "$space-lg",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "L1mmA",
+                      "name": "Waarom",
+                      "fill": "$muted-foreground",
+                      "content": "Waarom",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-sm",
+                      "fontWeight": "500"
+                    },
+                    {
+                      "type": "text",
+                      "id": "p8L5tH",
+                      "name": "Zo werkt het",
+                      "fill": "$muted-foreground",
+                      "content": "Zo werkt het",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-sm",
+                      "fontWeight": "500"
+                    },
+                    {
+                      "type": "text",
+                      "id": "Z54LpL",
+                      "name": "Platform",
+                      "fill": "$muted-foreground",
+                      "content": "Platform",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-sm",
+                      "fontWeight": "500"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "Ghfk9",
+              "name": "Nav Right",
+              "gap": "$space-md",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "PFcMG",
+                  "name": "Demo Btn",
+                  "cornerRadius": "$radius-md",
+                  "padding": [
+                    9,
+                    16
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "Nk5hS",
+                      "name": "Label",
+                      "fill": "$foreground",
+                      "content": "Demo aanvragen",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-sm",
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "dI9El",
+                  "name": "Koppelen Btn",
+                  "fill": "$primary",
+                  "cornerRadius": "$radius-md",
+                  "padding": [
+                    9,
+                    16
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "XBIs2",
+                      "name": "Label",
+                      "fill": "$primary-foreground",
+                      "content": "Koppelen",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-sm",
+                      "fontWeight": "600"
+                    }
+                  ]
                 }
               ]
             }
@@ -8749,10 +9145,30 @@
               "children": [
                 {
                   "type": "text",
+                  "id": "A450E",
+                  "name": "Partners",
+                  "fill": "$muted-foreground",
+                  "content": "Partners",
+                  "fontFamily": "$font-body",
+                  "fontSize": "$text-xs2",
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
                   "id": "WY1AI",
                   "name": "Privacy",
                   "fill": "$muted-foreground",
                   "content": "Privacy",
+                  "fontFamily": "$font-body",
+                  "fontSize": "$text-xs2",
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "XeUA7",
+                  "name": "Voorwaarden",
+                  "fill": "$muted-foreground",
+                  "content": "Voorwaarden",
                   "fontFamily": "$font-body",
                   "fontSize": "$text-xs2",
                   "fontWeight": "normal"
@@ -8789,7 +9205,6 @@
       "x": 1640,
       "y": 5800,
       "name": "Pagina · Demo aanvragen · Light",
-      "theme": {},
       "clip": true,
       "width": 1440,
       "fill": "$background",
@@ -8797,13 +9212,12 @@
       "children": [
         {
           "type": "frame",
-          "id": "GybLJ",
+          "id": "yfhFp",
           "name": "Nav",
           "width": "fill_container",
+          "fill": "$background",
           "stroke": "$border",
-          "strokeWidth": {
-            "bottom": 1
-          },
+          "strokeAlignment": "inner",
           "strokeLinejoin": "round",
           "padding": [
             18,
@@ -8814,14 +9228,14 @@
           "children": [
             {
               "type": "frame",
-              "id": "U2uuIj",
-              "name": "Left",
-              "gap": "$space-lg",
+              "id": "M52KTr",
+              "name": "Nav Left",
+              "gap": "$space-2xl",
               "alignItems": "center",
               "children": [
                 {
                   "type": "frame",
-                  "id": "b7IM8",
+                  "id": "G7bqvv",
                   "name": "Logo",
                   "gap": "$space-xs",
                   "alignItems": "center",
@@ -8829,7 +9243,7 @@
                     {
                       "type": "rectangle",
                       "cornerRadius": "$radius-xs",
-                      "id": "WOJlv",
+                      "id": "V6ggn",
                       "name": "Mark",
                       "fill": "$brand",
                       "width": 14,
@@ -8837,27 +9251,111 @@
                     },
                     {
                       "type": "text",
-                      "id": "XsF1h",
+                      "id": "Bmjhu",
                       "name": "Wordmark",
                       "fill": "$foreground",
                       "content": "emeq",
-                      "lineHeight": 1.05,
                       "fontFamily": "$font-heading",
                       "fontSize": "$text-xl",
                       "fontWeight": "700",
-                      "letterSpacing": -1
+                      "letterSpacing": -0.5
                     }
                   ]
                 },
                 {
-                  "type": "text",
-                  "id": "R8YCw",
-                  "name": "Terug",
-                  "fill": "$muted-foreground",
-                  "content": "← Terug",
-                  "fontFamily": "$font-body",
-                  "fontSize": "$text-sm",
-                  "fontWeight": "500"
+                  "type": "frame",
+                  "id": "z2Hc8k",
+                  "name": "Nav Links",
+                  "gap": "$space-lg",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "soSSW",
+                      "name": "Waarom",
+                      "fill": "$muted-foreground",
+                      "content": "Waarom",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-sm",
+                      "fontWeight": "500"
+                    },
+                    {
+                      "type": "text",
+                      "id": "f2fySm",
+                      "name": "Zo werkt het",
+                      "fill": "$muted-foreground",
+                      "content": "Zo werkt het",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-sm",
+                      "fontWeight": "500"
+                    },
+                    {
+                      "type": "text",
+                      "id": "InPmV",
+                      "name": "Platform",
+                      "fill": "$muted-foreground",
+                      "content": "Platform",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-sm",
+                      "fontWeight": "500"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "I3wWYO",
+              "name": "Nav Right",
+              "gap": "$space-md",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "nCaRX",
+                  "name": "Demo Btn",
+                  "cornerRadius": "$radius-md",
+                  "padding": [
+                    9,
+                    16
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "FU5rM",
+                      "name": "Label",
+                      "fill": "$foreground",
+                      "content": "Demo aanvragen",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-sm",
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "BZkWg",
+                  "name": "Koppelen Btn",
+                  "fill": "$primary",
+                  "cornerRadius": "$radius-md",
+                  "padding": [
+                    9,
+                    16
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "y4VQX",
+                      "name": "Label",
+                      "fill": "$primary-foreground",
+                      "content": "Koppelen",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-sm",
+                      "fontWeight": "600"
+                    }
+                  ]
                 }
               ]
             }
@@ -9595,10 +10093,30 @@
               "children": [
                 {
                   "type": "text",
+                  "id": "sOZnF",
+                  "name": "Partners",
+                  "fill": "$muted-foreground",
+                  "content": "Partners",
+                  "fontFamily": "$font-body",
+                  "fontSize": "$text-xs2",
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
                   "id": "b1r3dt",
                   "name": "Privacy",
                   "fill": "$muted-foreground",
                   "content": "Privacy",
+                  "fontFamily": "$font-body",
+                  "fontSize": "$text-xs2",
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "HJcLH",
+                  "name": "Voorwaarden",
+                  "fill": "$muted-foreground",
+                  "content": "Voorwaarden",
                   "fontFamily": "$font-body",
                   "fontSize": "$text-xs2",
                   "fontWeight": "normal"
@@ -9635,7 +10153,6 @@
       "x": 4920,
       "y": 5800,
       "name": "Pagina · Privacy · Light",
-      "theme": {},
       "clip": true,
       "width": 1440,
       "fill": "$background",
@@ -9643,13 +10160,12 @@
       "children": [
         {
           "type": "frame",
-          "id": "e9bXX",
+          "id": "JCzca",
           "name": "Nav",
           "width": "fill_container",
+          "fill": "$background",
           "stroke": "$border",
-          "strokeWidth": {
-            "bottom": 1
-          },
+          "strokeAlignment": "inner",
           "strokeLinejoin": "round",
           "padding": [
             18,
@@ -9660,51 +10176,76 @@
           "children": [
             {
               "type": "frame",
-              "id": "cXfFR",
+              "id": "BXSdf",
               "name": "Nav Left",
-              "gap": "$space-sm",
+              "gap": "$space-2xl",
               "alignItems": "center",
               "children": [
                 {
-                  "type": "rectangle",
-                  "id": "zOJeD",
-                  "name": "Mark",
-                  "fill": "$brand",
-                  "width": 9,
-                  "height": 9
-                },
-                {
-                  "type": "text",
-                  "id": "pcRTY",
-                  "name": "Wordmark",
-                  "fill": "$foreground",
-                  "content": "emeq",
-                  "lineHeight": 1.05,
-                  "fontFamily": "$font-heading",
-                  "fontSize": "$text-xl",
-                  "fontWeight": "700",
-                  "letterSpacing": -1
+                  "type": "frame",
+                  "id": "u7PUk",
+                  "name": "Logo",
+                  "gap": "$space-xs",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "rectangle",
+                      "cornerRadius": "$radius-xs",
+                      "id": "XooS6",
+                      "name": "Mark",
+                      "fill": "$brand",
+                      "width": 14,
+                      "height": 14
+                    },
+                    {
+                      "type": "text",
+                      "id": "bXQtu",
+                      "name": "Wordmark",
+                      "fill": "$foreground",
+                      "content": "emeq",
+                      "fontFamily": "$font-heading",
+                      "fontSize": "$text-xl",
+                      "fontWeight": "700",
+                      "letterSpacing": -0.5
+                    }
+                  ]
                 },
                 {
                   "type": "frame",
-                  "id": "kunpi",
-                  "name": "Back Wrap",
-                  "padding": [
-                    0,
-                    0,
-                    0,
-                    20
-                  ],
+                  "id": "jvTTm",
+                  "name": "Nav Links",
+                  "gap": "$space-lg",
+                  "alignItems": "center",
                   "children": [
                     {
                       "type": "text",
-                      "id": "wuam4",
-                      "name": "Terug",
+                      "id": "Eo5dt",
+                      "name": "Waarom",
                       "fill": "$muted-foreground",
-                      "content": "← Terug",
+                      "content": "Waarom",
                       "fontFamily": "$font-body",
                       "fontSize": "$text-sm",
-                      "fontWeight": "normal"
+                      "fontWeight": "500"
+                    },
+                    {
+                      "type": "text",
+                      "id": "Kz2A5",
+                      "name": "Zo werkt het",
+                      "fill": "$muted-foreground",
+                      "content": "Zo werkt het",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-sm",
+                      "fontWeight": "500"
+                    },
+                    {
+                      "type": "text",
+                      "id": "d2XIAI",
+                      "name": "Platform",
+                      "fill": "$muted-foreground",
+                      "content": "Platform",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-sm",
+                      "fontWeight": "500"
                     }
                   ]
                 }
@@ -9712,25 +10253,57 @@
             },
             {
               "type": "frame",
-              "id": "rBC7J",
-              "name": "Koppelen Button",
-              "fill": "$primary",
-              "cornerRadius": "$radius-md",
-              "padding": [
-                9,
-                16
-              ],
+              "id": "iYrJw",
+              "name": "Nav Right",
+              "gap": "$space-md",
               "alignItems": "center",
               "children": [
                 {
-                  "type": "text",
-                  "id": "aEGOf",
-                  "name": "Label",
-                  "fill": "$primary-foreground",
-                  "content": "Koppelen",
-                  "fontFamily": "$font-body",
-                  "fontSize": "$text-sm",
-                  "fontWeight": "600"
+                  "type": "frame",
+                  "id": "h6NVoU",
+                  "name": "Demo Btn",
+                  "cornerRadius": "$radius-md",
+                  "padding": [
+                    9,
+                    16
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "CfXhk",
+                      "name": "Label",
+                      "fill": "$foreground",
+                      "content": "Demo aanvragen",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-sm",
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "M6Pmsp",
+                  "name": "Koppelen Btn",
+                  "fill": "$primary",
+                  "cornerRadius": "$radius-md",
+                  "padding": [
+                    9,
+                    16
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "P7qIaI",
+                      "name": "Label",
+                      "fill": "$primary-foreground",
+                      "content": "Koppelen",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-sm",
+                      "fontWeight": "600"
+                    }
+                  ]
                 }
               ]
             }
@@ -10601,10 +11174,30 @@
               "children": [
                 {
                   "type": "text",
+                  "id": "CF5xl",
+                  "name": "Partners",
+                  "fill": "$muted-foreground",
+                  "content": "Partners",
+                  "fontFamily": "$font-body",
+                  "fontSize": "$text-xs2",
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
                   "id": "iwghu",
                   "name": "Privacy",
                   "fill": "$muted-foreground",
                   "content": "Privacy",
+                  "fontFamily": "$font-body",
+                  "fontSize": "$text-xs2",
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "X7nY6U",
+                  "name": "Voorwaarden",
+                  "fill": "$muted-foreground",
+                  "content": "Voorwaarden",
                   "fontFamily": "$font-body",
                   "fontSize": "$text-xs2",
                   "fontWeight": "normal"
@@ -10661,7 +11254,6 @@
       "x": 6560,
       "y": 5800,
       "name": "Pagina · Verwerkersovereenkomst · Light",
-      "theme": {},
       "clip": true,
       "width": 1440,
       "fill": "$background",
@@ -10669,13 +11261,12 @@
       "children": [
         {
           "type": "frame",
-          "id": "t5Z2oT",
+          "id": "XdRDI",
           "name": "Nav",
           "width": "fill_container",
+          "fill": "$background",
           "stroke": "$border",
-          "strokeWidth": {
-            "bottom": 1
-          },
+          "strokeAlignment": "inner",
           "strokeLinejoin": "round",
           "padding": [
             18,
@@ -10686,51 +11277,76 @@
           "children": [
             {
               "type": "frame",
-              "id": "S5w08",
+              "id": "Z0VmvR",
               "name": "Nav Left",
-              "gap": "$space-sm",
+              "gap": "$space-2xl",
               "alignItems": "center",
               "children": [
                 {
-                  "type": "rectangle",
-                  "id": "u2awXk",
-                  "name": "Mark",
-                  "fill": "$brand",
-                  "width": 9,
-                  "height": 9
-                },
-                {
-                  "type": "text",
-                  "id": "m8G9T",
-                  "name": "Wordmark",
-                  "fill": "$foreground",
-                  "content": "emeq",
-                  "lineHeight": 1.05,
-                  "fontFamily": "$font-heading",
-                  "fontSize": "$text-xl",
-                  "fontWeight": "700",
-                  "letterSpacing": -1
+                  "type": "frame",
+                  "id": "eMKp3",
+                  "name": "Logo",
+                  "gap": "$space-xs",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "rectangle",
+                      "cornerRadius": "$radius-xs",
+                      "id": "P9dK0e",
+                      "name": "Mark",
+                      "fill": "$brand",
+                      "width": 14,
+                      "height": 14
+                    },
+                    {
+                      "type": "text",
+                      "id": "KUdr0",
+                      "name": "Wordmark",
+                      "fill": "$foreground",
+                      "content": "emeq",
+                      "fontFamily": "$font-heading",
+                      "fontSize": "$text-xl",
+                      "fontWeight": "700",
+                      "letterSpacing": -0.5
+                    }
+                  ]
                 },
                 {
                   "type": "frame",
-                  "id": "aimdU",
-                  "name": "Back Wrap",
-                  "padding": [
-                    0,
-                    0,
-                    0,
-                    20
-                  ],
+                  "id": "p4nMko",
+                  "name": "Nav Links",
+                  "gap": "$space-lg",
+                  "alignItems": "center",
                   "children": [
                     {
                       "type": "text",
-                      "id": "G2ejSB",
-                      "name": "Terug",
+                      "id": "drZVd",
+                      "name": "Waarom",
                       "fill": "$muted-foreground",
-                      "content": "← Terug",
+                      "content": "Waarom",
                       "fontFamily": "$font-body",
                       "fontSize": "$text-sm",
-                      "fontWeight": "normal"
+                      "fontWeight": "500"
+                    },
+                    {
+                      "type": "text",
+                      "id": "tIqOM",
+                      "name": "Zo werkt het",
+                      "fill": "$muted-foreground",
+                      "content": "Zo werkt het",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-sm",
+                      "fontWeight": "500"
+                    },
+                    {
+                      "type": "text",
+                      "id": "MP4KD",
+                      "name": "Platform",
+                      "fill": "$muted-foreground",
+                      "content": "Platform",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-sm",
+                      "fontWeight": "500"
                     }
                   ]
                 }
@@ -10738,25 +11354,57 @@
             },
             {
               "type": "frame",
-              "id": "F6tSgc",
-              "name": "Koppelen Button",
-              "fill": "$primary",
-              "cornerRadius": "$radius-md",
-              "padding": [
-                9,
-                16
-              ],
+              "id": "SeHIx",
+              "name": "Nav Right",
+              "gap": "$space-md",
               "alignItems": "center",
               "children": [
                 {
-                  "type": "text",
-                  "id": "rhsX0",
-                  "name": "Label",
-                  "fill": "$primary-foreground",
-                  "content": "Koppelen",
-                  "fontFamily": "$font-body",
-                  "fontSize": "$text-sm",
-                  "fontWeight": "600"
+                  "type": "frame",
+                  "id": "r00KFh",
+                  "name": "Demo Btn",
+                  "cornerRadius": "$radius-md",
+                  "padding": [
+                    9,
+                    16
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "yZrmN",
+                      "name": "Label",
+                      "fill": "$foreground",
+                      "content": "Demo aanvragen",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-sm",
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "f25who",
+                  "name": "Koppelen Btn",
+                  "fill": "$primary",
+                  "cornerRadius": "$radius-md",
+                  "padding": [
+                    9,
+                    16
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "mfrk5",
+                      "name": "Label",
+                      "fill": "$primary-foreground",
+                      "content": "Koppelen",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-sm",
+                      "fontWeight": "600"
+                    }
+                  ]
                 }
               ]
             }
@@ -11685,10 +12333,30 @@
               "children": [
                 {
                   "type": "text",
+                  "id": "Ad828",
+                  "name": "Partners",
+                  "fill": "$muted-foreground",
+                  "content": "Partners",
+                  "fontFamily": "$font-body",
+                  "fontSize": "$text-xs2",
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
                   "id": "liObU",
                   "name": "Privacy",
                   "fill": "$muted-foreground",
                   "content": "Privacy",
+                  "fontFamily": "$font-body",
+                  "fontSize": "$text-xs2",
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "iGNez",
+                  "name": "Voorwaarden",
+                  "fill": "$muted-foreground",
+                  "content": "Voorwaarden",
                   "fontFamily": "$font-body",
                   "fontSize": "$text-xs2",
                   "fontWeight": "normal"
@@ -11745,7 +12413,6 @@
       "x": 3280,
       "y": 5800,
       "name": "Pagina · Support · Light",
-      "theme": {},
       "clip": true,
       "width": 1440,
       "fill": "$background",
@@ -11753,13 +12420,12 @@
       "children": [
         {
           "type": "frame",
-          "id": "X8zfXd",
+          "id": "WHmWL",
           "name": "Nav",
           "width": "fill_container",
+          "fill": "$background",
           "stroke": "$border",
-          "strokeWidth": {
-            "bottom": 1
-          },
+          "strokeAlignment": "inner",
           "strokeLinejoin": "round",
           "padding": [
             18,
@@ -11770,14 +12436,14 @@
           "children": [
             {
               "type": "frame",
-              "id": "rgLaQ",
+              "id": "LKjMz",
               "name": "Nav Left",
-              "gap": "$space-lg",
+              "gap": "$space-2xl",
               "alignItems": "center",
               "children": [
                 {
                   "type": "frame",
-                  "id": "aNYmw",
+                  "id": "W3aAT",
                   "name": "Logo",
                   "gap": "$space-xs",
                   "alignItems": "center",
@@ -11785,7 +12451,7 @@
                     {
                       "type": "rectangle",
                       "cornerRadius": "$radius-xs",
-                      "id": "b7Jfl",
+                      "id": "HC206",
                       "name": "Mark",
                       "fill": "$brand",
                       "width": 14,
@@ -11793,51 +12459,111 @@
                     },
                     {
                       "type": "text",
-                      "id": "xNami",
+                      "id": "cazoe",
                       "name": "Wordmark",
                       "fill": "$foreground",
                       "content": "emeq",
-                      "lineHeight": 1.05,
                       "fontFamily": "$font-heading",
                       "fontSize": "$text-xl",
                       "fontWeight": "700",
-                      "letterSpacing": -1
+                      "letterSpacing": -0.5
                     }
                   ]
                 },
                 {
-                  "type": "text",
-                  "id": "PgF9w",
-                  "name": "Terug",
-                  "fill": "$muted-foreground",
-                  "content": "← Terug",
-                  "fontFamily": "$font-body",
-                  "fontSize": "$text-sm",
-                  "fontWeight": "500"
+                  "type": "frame",
+                  "id": "ezrfQ",
+                  "name": "Nav Links",
+                  "gap": "$space-lg",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "ofQKQ",
+                      "name": "Waarom",
+                      "fill": "$muted-foreground",
+                      "content": "Waarom",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-sm",
+                      "fontWeight": "500"
+                    },
+                    {
+                      "type": "text",
+                      "id": "kDPBU",
+                      "name": "Zo werkt het",
+                      "fill": "$muted-foreground",
+                      "content": "Zo werkt het",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-sm",
+                      "fontWeight": "500"
+                    },
+                    {
+                      "type": "text",
+                      "id": "Xt0EL",
+                      "name": "Platform",
+                      "fill": "$muted-foreground",
+                      "content": "Platform",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-sm",
+                      "fontWeight": "500"
+                    }
+                  ]
                 }
               ]
             },
             {
               "type": "frame",
-              "id": "t3ODWZ",
-              "name": "Koppelen Button",
-              "fill": "$primary",
-              "cornerRadius": "$radius-md",
-              "padding": [
-                9,
-                16
-              ],
+              "id": "Ns643",
+              "name": "Nav Right",
+              "gap": "$space-md",
               "alignItems": "center",
               "children": [
                 {
-                  "type": "text",
-                  "id": "gR1b0",
-                  "name": "l",
-                  "fill": "$primary-foreground",
-                  "content": "Koppelen",
-                  "fontFamily": "$font-body",
-                  "fontSize": "$text-sm",
-                  "fontWeight": "600"
+                  "type": "frame",
+                  "id": "cZpM0",
+                  "name": "Demo Btn",
+                  "cornerRadius": "$radius-md",
+                  "padding": [
+                    9,
+                    16
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "hky6A",
+                      "name": "Label",
+                      "fill": "$foreground",
+                      "content": "Demo aanvragen",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-sm",
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "WaRzn",
+                  "name": "Koppelen Btn",
+                  "fill": "$primary",
+                  "cornerRadius": "$radius-md",
+                  "padding": [
+                    9,
+                    16
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "fuMIQ",
+                      "name": "Label",
+                      "fill": "$primary-foreground",
+                      "content": "Koppelen",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-sm",
+                      "fontWeight": "600"
+                    }
+                  ]
                 }
               ]
             }
@@ -11990,74 +12716,6 @@
                           "fontSize": "$text-2xs",
                           "fontWeight": "normal",
                           "letterSpacing": 1.5
-                        }
-                      ]
-                    },
-                    {
-                      "type": "frame",
-                      "id": "f18hhh",
-                      "name": "Status",
-                      "width": "fill_container",
-                      "fill": "$card",
-                      "cornerRadius": "$radius-lg",
-                      "stroke": "$border",
-                      "strokeWidth": 1,
-                      "layout": "vertical",
-                      "gap": "$space-xs",
-                      "padding": [
-                        28,
-                        26
-                      ],
-                      "children": [
-                        {
-                          "type": "text",
-                          "id": "EHJAH",
-                          "name": "t",
-                          "fill": "$foreground",
-                          "content": "Status",
-                          "fontFamily": "$font-body",
-                          "fontSize": "$text-lg",
-                          "fontWeight": "600"
-                        },
-                        {
-                          "type": "frame",
-                          "id": "xTC5o",
-                          "name": "st",
-                          "gap": "$space-xs",
-                          "alignItems": "center",
-                          "children": [
-                            {
-                              "type": "ellipse",
-                              "id": "TjweG",
-                              "name": "d",
-                              "fill": "$success",
-                              "width": 8,
-                              "height": 8
-                            },
-                            {
-                              "type": "text",
-                              "id": "ZsW8K",
-                              "name": "l",
-                              "fill": "$success",
-                              "content": "Alle systemen operationeel",
-                              "fontFamily": "$font-data",
-                              "fontSize": "$text-sm",
-                              "fontWeight": "normal"
-                            }
-                          ]
-                        },
-                        {
-                          "type": "text",
-                          "id": "I6lmD",
-                          "name": "d2",
-                          "fill": "$muted-foreground",
-                          "textGrowth": "fixed-width",
-                          "width": "fill_container",
-                          "content": "Actuele beschikbaarheid van de API en webhooks.",
-                          "lineHeight": 1.6,
-                          "fontFamily": "$font-body",
-                          "fontSize": "$text-sm",
-                          "fontWeight": "normal"
                         }
                       ]
                     }
@@ -12311,10 +12969,30 @@
               "children": [
                 {
                   "type": "text",
+                  "id": "y4j9xf",
+                  "name": "Partners",
+                  "fill": "$muted-foreground",
+                  "content": "Partners",
+                  "fontFamily": "$font-body",
+                  "fontSize": "$text-xs2",
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
                   "id": "zx5ke",
                   "name": "Privacy",
                   "fill": "$muted-foreground",
                   "content": "Privacy",
+                  "fontFamily": "$font-body",
+                  "fontSize": "$text-xs2",
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "A0T8Ba",
+                  "name": "Voorwaarden",
+                  "fill": "$muted-foreground",
+                  "content": "Voorwaarden",
                   "fontFamily": "$font-body",
                   "fontSize": "$text-xs2",
                   "fontWeight": "normal"
@@ -12351,7 +13029,6 @@
       "x": 0,
       "y": 9600,
       "name": "Mobiel · Start met koppelen · Light",
-      "theme": {},
       "clip": true,
       "width": 390,
       "fill": "$background",
@@ -12359,13 +13036,15 @@
       "children": [
         {
           "type": "frame",
-          "id": "pZ1uP",
-          "name": "Nav",
+          "id": "g1Nff",
+          "name": "Top Bar",
           "width": "fill_container",
+          "fill": "$background",
           "stroke": "$border",
           "strokeWidth": {
             "bottom": 1
           },
+          "strokeAlignment": "inner",
           "strokeLinejoin": "round",
           "padding": [
             14,
@@ -12375,50 +13054,83 @@
           "alignItems": "center",
           "children": [
             {
+              "type": "text",
+              "id": "q70ii",
+              "name": "Wordmark",
+              "fill": "$foreground",
+              "content": "emeq",
+              "fontFamily": "$font-heading",
+              "fontSize": "$text-xl",
+              "fontWeight": "700",
+              "letterSpacing": -0.5
+            },
+            {
               "type": "frame",
-              "id": "GxLW7",
-              "name": "Left",
-              "gap": "$space-lg",
+              "id": "n7OPja",
+              "name": "Right",
+              "gap": "$space-md",
               "alignItems": "center",
               "children": [
                 {
                   "type": "frame",
-                  "id": "A92kD",
-                  "name": "Logo",
-                  "gap": "$space-xs",
-                  "alignItems": "center",
+                  "id": "MoNv9",
+                  "name": "Menu",
+                  "layout": "vertical",
+                  "gap": "$space-xxs",
+                  "padding": [
+                    6,
+                    2
+                  ],
+                  "alignItems": "end",
                   "children": [
                     {
                       "type": "rectangle",
-                      "cornerRadius": "$radius-xs",
-                      "id": "MYvdQ",
-                      "name": "Mark",
-                      "fill": "$brand",
-                      "width": 14,
-                      "height": 14
+                      "id": "i4Esiq",
+                      "name": "bar",
+                      "fill": "$foreground",
+                      "width": 16,
+                      "height": 1.5
                     },
                     {
-                      "type": "text",
-                      "id": "w7mGJE",
-                      "name": "Wordmark",
+                      "type": "rectangle",
+                      "id": "gzruA",
+                      "name": "bar",
                       "fill": "$foreground",
-                      "content": "emeq",
-                      "fontFamily": "$font-heading",
-                      "fontSize": "$text-lg",
-                      "fontWeight": "700",
-                      "letterSpacing": -0.5
+                      "width": 16,
+                      "height": 1.5
+                    },
+                    {
+                      "type": "rectangle",
+                      "id": "N8Z2JX",
+                      "name": "bar",
+                      "fill": "$foreground",
+                      "width": 10,
+                      "height": 1.5
                     }
                   ]
                 },
                 {
-                  "type": "text",
-                  "id": "hWJec",
-                  "name": "Terug",
-                  "fill": "$muted-foreground",
-                  "content": "← Terug",
-                  "fontFamily": "$font-body",
-                  "fontSize": "$text-sm",
-                  "fontWeight": "500"
+                  "type": "frame",
+                  "id": "X593Wr",
+                  "name": "Koppelen Btn",
+                  "fill": "$primary",
+                  "cornerRadius": "$radius-md",
+                  "padding": [
+                    9,
+                    16
+                  ],
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "Q2GKi",
+                      "name": "Label",
+                      "fill": "$primary-foreground",
+                      "content": "Koppelen",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-sm",
+                      "fontWeight": "600"
+                    }
+                  ]
                 }
               ]
             }
@@ -13146,14 +13858,37 @@
               "type": "frame",
               "id": "vc9Gi",
               "name": "Links",
-              "gap": "$space-lg",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": "$space-xs",
+              "alignItems": "center",
               "children": [
+                {
+                  "type": "text",
+                  "id": "yTtfr",
+                  "name": "Partners",
+                  "fill": "$muted-foreground",
+                  "content": "Partners",
+                  "fontFamily": "$font-body",
+                  "fontSize": "$text-xs2",
+                  "fontWeight": "normal"
+                },
                 {
                   "type": "text",
                   "id": "RWogc",
                   "name": "Privacy",
                   "fill": "$muted-foreground",
                   "content": "Privacy",
+                  "fontFamily": "$font-body",
+                  "fontSize": "$text-xs2",
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "jWJDS",
+                  "name": "Voorwaarden",
+                  "fill": "$muted-foreground",
+                  "content": "Voorwaarden",
                   "fontFamily": "$font-body",
                   "fontSize": "$text-xs2",
                   "fontWeight": "normal"
@@ -13190,7 +13925,6 @@
       "x": 590,
       "y": 9600,
       "name": "Mobiel · Demo aanvragen · Light",
-      "theme": {},
       "clip": true,
       "width": 390,
       "fill": "$background",
@@ -13198,13 +13932,15 @@
       "children": [
         {
           "type": "frame",
-          "id": "mH4Vb",
-          "name": "Nav",
+          "id": "wzQvA",
+          "name": "Top Bar",
           "width": "fill_container",
+          "fill": "$background",
           "stroke": "$border",
           "strokeWidth": {
             "bottom": 1
           },
+          "strokeAlignment": "inner",
           "strokeLinejoin": "round",
           "padding": [
             14,
@@ -13214,50 +13950,83 @@
           "alignItems": "center",
           "children": [
             {
+              "type": "text",
+              "id": "AOlEP",
+              "name": "Wordmark",
+              "fill": "$foreground",
+              "content": "emeq",
+              "fontFamily": "$font-heading",
+              "fontSize": "$text-xl",
+              "fontWeight": "700",
+              "letterSpacing": -0.5
+            },
+            {
               "type": "frame",
-              "id": "p6fIAr",
-              "name": "Left",
-              "gap": "$space-lg",
+              "id": "XTOs0",
+              "name": "Right",
+              "gap": "$space-md",
               "alignItems": "center",
               "children": [
                 {
                   "type": "frame",
-                  "id": "TQwAB",
-                  "name": "Logo",
-                  "gap": "$space-xs",
-                  "alignItems": "center",
+                  "id": "QCJOP",
+                  "name": "Menu",
+                  "layout": "vertical",
+                  "gap": "$space-xxs",
+                  "padding": [
+                    6,
+                    2
+                  ],
+                  "alignItems": "end",
                   "children": [
                     {
                       "type": "rectangle",
-                      "cornerRadius": "$radius-xs",
-                      "id": "A36fU",
-                      "name": "Mark",
-                      "fill": "$brand",
-                      "width": 14,
-                      "height": 14
+                      "id": "KuL1j",
+                      "name": "bar",
+                      "fill": "$foreground",
+                      "width": 16,
+                      "height": 1.5
                     },
                     {
-                      "type": "text",
-                      "id": "y4WGTj",
-                      "name": "Wordmark",
+                      "type": "rectangle",
+                      "id": "RpVpn",
+                      "name": "bar",
                       "fill": "$foreground",
-                      "content": "emeq",
-                      "fontFamily": "$font-heading",
-                      "fontSize": "$text-lg",
-                      "fontWeight": "700",
-                      "letterSpacing": -0.5
+                      "width": 16,
+                      "height": 1.5
+                    },
+                    {
+                      "type": "rectangle",
+                      "id": "i18m7",
+                      "name": "bar",
+                      "fill": "$foreground",
+                      "width": 10,
+                      "height": 1.5
                     }
                   ]
                 },
                 {
-                  "type": "text",
-                  "id": "X69mv",
-                  "name": "Terug",
-                  "fill": "$muted-foreground",
-                  "content": "← Terug",
-                  "fontFamily": "$font-body",
-                  "fontSize": "$text-sm",
-                  "fontWeight": "500"
+                  "type": "frame",
+                  "id": "FrPmF",
+                  "name": "Koppelen Btn",
+                  "fill": "$primary",
+                  "cornerRadius": "$radius-md",
+                  "padding": [
+                    9,
+                    16
+                  ],
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "q9UukE",
+                      "name": "Label",
+                      "fill": "$primary-foreground",
+                      "content": "Koppelen",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-sm",
+                      "fontWeight": "600"
+                    }
+                  ]
                 }
               ]
             }
@@ -13985,14 +14754,37 @@
               "type": "frame",
               "id": "AIO7W",
               "name": "Links",
-              "gap": "$space-lg",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": "$space-xs",
+              "alignItems": "center",
               "children": [
+                {
+                  "type": "text",
+                  "id": "GfLEs",
+                  "name": "Partners",
+                  "fill": "$muted-foreground",
+                  "content": "Partners",
+                  "fontFamily": "$font-body",
+                  "fontSize": "$text-xs2",
+                  "fontWeight": "normal"
+                },
                 {
                   "type": "text",
                   "id": "EkgWN",
                   "name": "Privacy",
                   "fill": "$muted-foreground",
                   "content": "Privacy",
+                  "fontFamily": "$font-body",
+                  "fontSize": "$text-xs2",
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "TjxJ5",
+                  "name": "Voorwaarden",
+                  "fill": "$muted-foreground",
+                  "content": "Voorwaarden",
                   "fontFamily": "$font-body",
                   "fontSize": "$text-xs2",
                   "fontWeight": "normal"
@@ -14029,7 +14821,6 @@
       "x": 1770,
       "y": 9600,
       "name": "Mobiel · Privacy · Light",
-      "theme": {},
       "clip": true,
       "width": 390,
       "fill": "$background",
@@ -14037,13 +14828,15 @@
       "children": [
         {
           "type": "frame",
-          "id": "KKaTS",
-          "name": "Nav",
+          "id": "DHdyu",
+          "name": "Top Bar",
           "width": "fill_container",
+          "fill": "$background",
           "stroke": "$border",
           "strokeWidth": {
             "bottom": 1
           },
+          "strokeAlignment": "inner",
           "strokeLinejoin": "round",
           "padding": [
             14,
@@ -14053,78 +14846,83 @@
           "alignItems": "center",
           "children": [
             {
+              "type": "text",
+              "id": "Hrdla",
+              "name": "Wordmark",
+              "fill": "$foreground",
+              "content": "emeq",
+              "fontFamily": "$font-heading",
+              "fontSize": "$text-xl",
+              "fontWeight": "700",
+              "letterSpacing": -0.5
+            },
+            {
               "type": "frame",
-              "id": "qlKnq",
-              "name": "Nav Left",
-              "gap": "$space-sm",
+              "id": "FFecG",
+              "name": "Right",
+              "gap": "$space-md",
               "alignItems": "center",
               "children": [
                 {
-                  "type": "rectangle",
-                  "id": "A1d3n",
-                  "name": "Mark",
-                  "fill": "$brand",
-                  "width": 9,
-                  "height": 9
-                },
-                {
-                  "type": "text",
-                  "id": "s3niA0",
-                  "name": "Wordmark",
-                  "fill": "$foreground",
-                  "content": "emeq",
-                  "lineHeight": 1.05,
-                  "fontFamily": "$font-heading",
-                  "fontSize": "$text-xl",
-                  "fontWeight": "700",
-                  "letterSpacing": -1
+                  "type": "frame",
+                  "id": "Bc1O6",
+                  "name": "Menu",
+                  "layout": "vertical",
+                  "gap": "$space-xxs",
+                  "padding": [
+                    6,
+                    2
+                  ],
+                  "alignItems": "end",
+                  "children": [
+                    {
+                      "type": "rectangle",
+                      "id": "C3vKt",
+                      "name": "bar",
+                      "fill": "$foreground",
+                      "width": 16,
+                      "height": 1.5
+                    },
+                    {
+                      "type": "rectangle",
+                      "id": "X6NyqQ",
+                      "name": "bar",
+                      "fill": "$foreground",
+                      "width": 16,
+                      "height": 1.5
+                    },
+                    {
+                      "type": "rectangle",
+                      "id": "QIpWl",
+                      "name": "bar",
+                      "fill": "$foreground",
+                      "width": 10,
+                      "height": 1.5
+                    }
+                  ]
                 },
                 {
                   "type": "frame",
-                  "id": "yKKEX",
-                  "name": "Back Wrap",
+                  "id": "Z7bxd",
+                  "name": "Koppelen Btn",
+                  "fill": "$primary",
+                  "cornerRadius": "$radius-md",
                   "padding": [
-                    0,
-                    0,
-                    0,
-                    20
+                    9,
+                    16
                   ],
                   "children": [
                     {
                       "type": "text",
-                      "id": "N2PHe9",
-                      "name": "Terug",
-                      "fill": "$muted-foreground",
-                      "content": "← Terug",
+                      "id": "C6prWs",
+                      "name": "Label",
+                      "fill": "$primary-foreground",
+                      "content": "Koppelen",
                       "fontFamily": "$font-body",
                       "fontSize": "$text-sm",
-                      "fontWeight": "normal"
+                      "fontWeight": "600"
                     }
                   ]
-                }
-              ]
-            },
-            {
-              "type": "frame",
-              "id": "OSMqQ",
-              "name": "Koppelen Button",
-              "fill": "$primary",
-              "cornerRadius": "$radius-md",
-              "padding": [
-                9,
-                16
-              ],
-              "alignItems": "center",
-              "children": [
-                {
-                  "type": "text",
-                  "id": "x7V0VS",
-                  "name": "Label",
-                  "fill": "$primary-foreground",
-                  "content": "Koppelen",
-                  "fontFamily": "$font-body",
-                  "fontSize": "$text-sm",
-                  "fontWeight": "600"
                 }
               ]
             }
@@ -15015,15 +15813,37 @@
               "type": "frame",
               "id": "f42p1",
               "name": "Footer Links",
+              "width": "fill_container",
+              "layout": "vertical",
               "gap": "$space-xs",
               "alignItems": "center",
               "children": [
+                {
+                  "type": "text",
+                  "id": "uC9Uo",
+                  "name": "Partners",
+                  "fill": "$muted-foreground",
+                  "content": "Partners",
+                  "fontFamily": "$font-body",
+                  "fontSize": "$text-xs2",
+                  "fontWeight": "normal"
+                },
                 {
                   "type": "text",
                   "id": "EqRRV",
                   "name": "Privacy",
                   "fill": "$muted-foreground",
                   "content": "Privacy",
+                  "fontFamily": "$font-body",
+                  "fontSize": "$text-xs2",
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "OrpmS",
+                  "name": "Voorwaarden",
+                  "fill": "$muted-foreground",
+                  "content": "Voorwaarden",
                   "fontFamily": "$font-body",
                   "fontSize": "$text-xs2",
                   "fontWeight": "normal"
@@ -15080,7 +15900,6 @@
       "x": 2360,
       "y": 9600,
       "name": "Mobiel · Verwerkersovereenkomst · Light",
-      "theme": {},
       "clip": true,
       "width": 390,
       "fill": "$background",
@@ -15088,13 +15907,15 @@
       "children": [
         {
           "type": "frame",
-          "id": "o7N1l0",
-          "name": "Nav",
+          "id": "g8tvM",
+          "name": "Top Bar",
           "width": "fill_container",
+          "fill": "$background",
           "stroke": "$border",
           "strokeWidth": {
             "bottom": 1
           },
+          "strokeAlignment": "inner",
           "strokeLinejoin": "round",
           "padding": [
             14,
@@ -15104,78 +15925,83 @@
           "alignItems": "center",
           "children": [
             {
+              "type": "text",
+              "id": "CKW4W",
+              "name": "Wordmark",
+              "fill": "$foreground",
+              "content": "emeq",
+              "fontFamily": "$font-heading",
+              "fontSize": "$text-xl",
+              "fontWeight": "700",
+              "letterSpacing": -0.5
+            },
+            {
               "type": "frame",
-              "id": "r3VqQ",
-              "name": "Nav Left",
-              "gap": "$space-sm",
+              "id": "mlPc1",
+              "name": "Right",
+              "gap": "$space-md",
               "alignItems": "center",
               "children": [
                 {
-                  "type": "rectangle",
-                  "id": "TiH2h",
-                  "name": "Mark",
-                  "fill": "$brand",
-                  "width": 9,
-                  "height": 9
-                },
-                {
-                  "type": "text",
-                  "id": "tFugD",
-                  "name": "Wordmark",
-                  "fill": "$foreground",
-                  "content": "emeq",
-                  "lineHeight": 1.05,
-                  "fontFamily": "$font-heading",
-                  "fontSize": "$text-xl",
-                  "fontWeight": "700",
-                  "letterSpacing": -1
+                  "type": "frame",
+                  "id": "Qi9ut",
+                  "name": "Menu",
+                  "layout": "vertical",
+                  "gap": "$space-xxs",
+                  "padding": [
+                    6,
+                    2
+                  ],
+                  "alignItems": "end",
+                  "children": [
+                    {
+                      "type": "rectangle",
+                      "id": "qeqoM",
+                      "name": "bar",
+                      "fill": "$foreground",
+                      "width": 16,
+                      "height": 1.5
+                    },
+                    {
+                      "type": "rectangle",
+                      "id": "jNZYV",
+                      "name": "bar",
+                      "fill": "$foreground",
+                      "width": 16,
+                      "height": 1.5
+                    },
+                    {
+                      "type": "rectangle",
+                      "id": "yZzRP",
+                      "name": "bar",
+                      "fill": "$foreground",
+                      "width": 10,
+                      "height": 1.5
+                    }
+                  ]
                 },
                 {
                   "type": "frame",
-                  "id": "KEKw8",
-                  "name": "Back Wrap",
+                  "id": "t6gc2t",
+                  "name": "Koppelen Btn",
+                  "fill": "$primary",
+                  "cornerRadius": "$radius-md",
                   "padding": [
-                    0,
-                    0,
-                    0,
-                    20
+                    9,
+                    16
                   ],
                   "children": [
                     {
                       "type": "text",
-                      "id": "xtrNV",
-                      "name": "Terug",
-                      "fill": "$muted-foreground",
-                      "content": "← Terug",
+                      "id": "HFeBd",
+                      "name": "Label",
+                      "fill": "$primary-foreground",
+                      "content": "Koppelen",
                       "fontFamily": "$font-body",
                       "fontSize": "$text-sm",
-                      "fontWeight": "normal"
+                      "fontWeight": "600"
                     }
                   ]
-                }
-              ]
-            },
-            {
-              "type": "frame",
-              "id": "wxDHy",
-              "name": "Koppelen Button",
-              "fill": "$primary",
-              "cornerRadius": "$radius-md",
-              "padding": [
-                9,
-                16
-              ],
-              "alignItems": "center",
-              "children": [
-                {
-                  "type": "text",
-                  "id": "hjZgh",
-                  "name": "Label",
-                  "fill": "$primary-foreground",
-                  "content": "Koppelen",
-                  "fontFamily": "$font-body",
-                  "fontSize": "$text-sm",
-                  "fontWeight": "600"
                 }
               ]
             }
@@ -16124,15 +16950,37 @@
               "type": "frame",
               "id": "aAOh6",
               "name": "Footer Links",
+              "width": "fill_container",
+              "layout": "vertical",
               "gap": "$space-xs",
               "alignItems": "center",
               "children": [
+                {
+                  "type": "text",
+                  "id": "qoFOt",
+                  "name": "Partners",
+                  "fill": "$muted-foreground",
+                  "content": "Partners",
+                  "fontFamily": "$font-body",
+                  "fontSize": "$text-xs2",
+                  "fontWeight": "normal"
+                },
                 {
                   "type": "text",
                   "id": "OaHqk",
                   "name": "Privacy",
                   "fill": "$muted-foreground",
                   "content": "Privacy",
+                  "fontFamily": "$font-body",
+                  "fontSize": "$text-xs2",
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "Iav8f",
+                  "name": "Voorwaarden",
+                  "fill": "$muted-foreground",
+                  "content": "Voorwaarden",
                   "fontFamily": "$font-body",
                   "fontSize": "$text-xs2",
                   "fontWeight": "normal"
@@ -16189,7 +17037,6 @@
       "x": 1180,
       "y": 9600,
       "name": "Mobiel · Support · Light",
-      "theme": {},
       "clip": true,
       "width": 390,
       "fill": "$background",
@@ -16197,13 +17044,15 @@
       "children": [
         {
           "type": "frame",
-          "id": "PG1ld",
-          "name": "Nav",
+          "id": "xrW0B",
+          "name": "Top Bar",
           "width": "fill_container",
+          "fill": "$background",
           "stroke": "$border",
           "strokeWidth": {
             "bottom": 1
           },
+          "strokeAlignment": "inner",
           "strokeLinejoin": "round",
           "padding": [
             14,
@@ -16213,75 +17062,83 @@
           "alignItems": "center",
           "children": [
             {
+              "type": "text",
+              "id": "aSl4z",
+              "name": "Wordmark",
+              "fill": "$foreground",
+              "content": "emeq",
+              "fontFamily": "$font-heading",
+              "fontSize": "$text-xl",
+              "fontWeight": "700",
+              "letterSpacing": -0.5
+            },
+            {
               "type": "frame",
-              "id": "oRD59",
-              "name": "Nav Left",
-              "gap": "$space-lg",
+              "id": "i7t3r8",
+              "name": "Right",
+              "gap": "$space-md",
               "alignItems": "center",
               "children": [
                 {
                   "type": "frame",
-                  "id": "P0PKj",
-                  "name": "Logo",
-                  "gap": "$space-xs",
-                  "alignItems": "center",
+                  "id": "v7YkN9",
+                  "name": "Menu",
+                  "layout": "vertical",
+                  "gap": "$space-xxs",
+                  "padding": [
+                    6,
+                    2
+                  ],
+                  "alignItems": "end",
                   "children": [
                     {
                       "type": "rectangle",
-                      "cornerRadius": "$radius-xs",
-                      "id": "nFH5V",
-                      "name": "Mark",
-                      "fill": "$brand",
-                      "width": 14,
-                      "height": 14
+                      "id": "PTMXM",
+                      "name": "bar",
+                      "fill": "$foreground",
+                      "width": 16,
+                      "height": 1.5
                     },
                     {
-                      "type": "text",
-                      "id": "eyC6J",
-                      "name": "Wordmark",
+                      "type": "rectangle",
+                      "id": "grGVJ",
+                      "name": "bar",
                       "fill": "$foreground",
-                      "content": "emeq",
-                      "lineHeight": 1.05,
-                      "fontFamily": "$font-heading",
-                      "fontSize": "$text-xl",
-                      "fontWeight": "700",
-                      "letterSpacing": -1
+                      "width": 16,
+                      "height": 1.5
+                    },
+                    {
+                      "type": "rectangle",
+                      "id": "WHzL9",
+                      "name": "bar",
+                      "fill": "$foreground",
+                      "width": 10,
+                      "height": 1.5
                     }
                   ]
                 },
                 {
-                  "type": "text",
-                  "id": "RyVx9",
-                  "name": "Terug",
-                  "fill": "$muted-foreground",
-                  "content": "← Terug",
-                  "fontFamily": "$font-body",
-                  "fontSize": "$text-sm",
-                  "fontWeight": "500"
-                }
-              ]
-            },
-            {
-              "type": "frame",
-              "id": "fuis9",
-              "name": "Koppelen Button",
-              "fill": "$primary",
-              "cornerRadius": "$radius-md",
-              "padding": [
-                9,
-                16
-              ],
-              "alignItems": "center",
-              "children": [
-                {
-                  "type": "text",
-                  "id": "V1KHd",
-                  "name": "l",
-                  "fill": "$primary-foreground",
-                  "content": "Koppelen",
-                  "fontFamily": "$font-body",
-                  "fontSize": "$text-sm",
-                  "fontWeight": "600"
+                  "type": "frame",
+                  "id": "cSTIf",
+                  "name": "Koppelen Btn",
+                  "fill": "$primary",
+                  "cornerRadius": "$radius-md",
+                  "padding": [
+                    9,
+                    16
+                  ],
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "SSBzp",
+                      "name": "Label",
+                      "fill": "$primary-foreground",
+                      "content": "Koppelen",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-sm",
+                      "fontWeight": "600"
+                    }
+                  ]
                 }
               ]
             }
@@ -16433,74 +17290,6 @@
                           "fontSize": "$text-2xs",
                           "fontWeight": "normal",
                           "letterSpacing": 1.5
-                        }
-                      ]
-                    },
-                    {
-                      "type": "frame",
-                      "id": "C0KAnp",
-                      "name": "Status",
-                      "width": "fill_container",
-                      "fill": "$card",
-                      "cornerRadius": "$radius-lg",
-                      "stroke": "$border",
-                      "strokeWidth": 1,
-                      "layout": "vertical",
-                      "gap": "$space-xs",
-                      "padding": [
-                        28,
-                        26
-                      ],
-                      "children": [
-                        {
-                          "type": "text",
-                          "id": "N67gSC",
-                          "name": "t",
-                          "fill": "$foreground",
-                          "content": "Status",
-                          "fontFamily": "$font-body",
-                          "fontSize": "$text-lg",
-                          "fontWeight": "600"
-                        },
-                        {
-                          "type": "frame",
-                          "id": "tRY4d",
-                          "name": "st",
-                          "gap": "$space-xs",
-                          "alignItems": "center",
-                          "children": [
-                            {
-                              "type": "ellipse",
-                              "id": "yVa0v",
-                              "name": "d",
-                              "fill": "$success",
-                              "width": 8,
-                              "height": 8
-                            },
-                            {
-                              "type": "text",
-                              "id": "NpyWB",
-                              "name": "l",
-                              "fill": "$success",
-                              "content": "Alle systemen operationeel",
-                              "fontFamily": "$font-data",
-                              "fontSize": "$text-sm",
-                              "fontWeight": "normal"
-                            }
-                          ]
-                        },
-                        {
-                          "type": "text",
-                          "id": "e2JogE",
-                          "name": "d2",
-                          "fill": "$muted-foreground",
-                          "textGrowth": "fixed-width",
-                          "width": "fill_container",
-                          "content": "Actuele beschikbaarheid van de API en webhooks.",
-                          "lineHeight": 1.6,
-                          "fontFamily": "$font-body",
-                          "fontSize": "$text-sm",
-                          "fontWeight": "normal"
                         }
                       ]
                     }
@@ -16750,15 +17539,37 @@
               "type": "frame",
               "id": "u2o9Zt",
               "name": "Footer Links",
-              "gap": "$space-lg",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": "$space-xs",
               "alignItems": "center",
               "children": [
+                {
+                  "type": "text",
+                  "id": "dKBuy",
+                  "name": "Partners",
+                  "fill": "$muted-foreground",
+                  "content": "Partners",
+                  "fontFamily": "$font-body",
+                  "fontSize": "$text-xs2",
+                  "fontWeight": "normal"
+                },
                 {
                   "type": "text",
                   "id": "idAFg",
                   "name": "Privacy",
                   "fill": "$muted-foreground",
                   "content": "Privacy",
+                  "fontFamily": "$font-body",
+                  "fontSize": "$text-xs2",
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "GkUx9",
+                  "name": "Voorwaarden",
+                  "fill": "$muted-foreground",
+                  "content": "Voorwaarden",
                   "fontFamily": "$font-body",
                   "fontSize": "$text-xs2",
                   "fontWeight": "normal"
@@ -16795,7 +17606,6 @@
       "x": 8200,
       "y": 5800,
       "name": "Pagina · Voorwaarden · Light",
-      "theme": {},
       "clip": true,
       "width": 1440,
       "fill": "$background",
@@ -16803,13 +17613,12 @@
       "children": [
         {
           "type": "frame",
-          "id": "BvveU",
+          "id": "d3hze5",
           "name": "Nav",
           "width": "fill_container",
+          "fill": "$background",
           "stroke": "$border",
-          "strokeWidth": {
-            "bottom": 1
-          },
+          "strokeAlignment": "inner",
           "strokeLinejoin": "round",
           "padding": [
             18,
@@ -16820,51 +17629,76 @@
           "children": [
             {
               "type": "frame",
-              "id": "O2Sg5",
+              "id": "nB9og",
               "name": "Nav Left",
-              "gap": "$space-sm",
+              "gap": "$space-2xl",
               "alignItems": "center",
               "children": [
                 {
-                  "type": "rectangle",
-                  "id": "sKxOt",
-                  "name": "Mark",
-                  "fill": "$brand",
-                  "width": 9,
-                  "height": 9
-                },
-                {
-                  "type": "text",
-                  "id": "e2oKXO",
-                  "name": "Wordmark",
-                  "fill": "$foreground",
-                  "content": "emeq",
-                  "lineHeight": 1.05,
-                  "fontFamily": "$font-heading",
-                  "fontSize": "$text-xl",
-                  "fontWeight": "700",
-                  "letterSpacing": -1
+                  "type": "frame",
+                  "id": "lTOnm",
+                  "name": "Logo",
+                  "gap": "$space-xs",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "rectangle",
+                      "cornerRadius": "$radius-xs",
+                      "id": "B6fsD",
+                      "name": "Mark",
+                      "fill": "$brand",
+                      "width": 14,
+                      "height": 14
+                    },
+                    {
+                      "type": "text",
+                      "id": "Jgvqe",
+                      "name": "Wordmark",
+                      "fill": "$foreground",
+                      "content": "emeq",
+                      "fontFamily": "$font-heading",
+                      "fontSize": "$text-xl",
+                      "fontWeight": "700",
+                      "letterSpacing": -0.5
+                    }
+                  ]
                 },
                 {
                   "type": "frame",
-                  "id": "uIF94",
-                  "name": "Back Wrap",
-                  "padding": [
-                    0,
-                    0,
-                    0,
-                    20
-                  ],
+                  "id": "vQpMQ",
+                  "name": "Nav Links",
+                  "gap": "$space-lg",
+                  "alignItems": "center",
                   "children": [
                     {
                       "type": "text",
-                      "id": "wBoap",
-                      "name": "Terug",
+                      "id": "uhgb5",
+                      "name": "Waarom",
                       "fill": "$muted-foreground",
-                      "content": "← Terug",
+                      "content": "Waarom",
                       "fontFamily": "$font-body",
                       "fontSize": "$text-sm",
-                      "fontWeight": "normal"
+                      "fontWeight": "500"
+                    },
+                    {
+                      "type": "text",
+                      "id": "TYT2f",
+                      "name": "Zo werkt het",
+                      "fill": "$muted-foreground",
+                      "content": "Zo werkt het",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-sm",
+                      "fontWeight": "500"
+                    },
+                    {
+                      "type": "text",
+                      "id": "uIvvb",
+                      "name": "Platform",
+                      "fill": "$muted-foreground",
+                      "content": "Platform",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-sm",
+                      "fontWeight": "500"
                     }
                   ]
                 }
@@ -16872,25 +17706,57 @@
             },
             {
               "type": "frame",
-              "id": "dpy9F",
-              "name": "Koppelen Button",
-              "fill": "$primary",
-              "cornerRadius": "$radius-md",
-              "padding": [
-                9,
-                16
-              ],
+              "id": "kVdH4",
+              "name": "Nav Right",
+              "gap": "$space-md",
               "alignItems": "center",
               "children": [
                 {
-                  "type": "text",
-                  "id": "vzhEI",
-                  "name": "Label",
-                  "fill": "$primary-foreground",
-                  "content": "Koppelen",
-                  "fontFamily": "$font-body",
-                  "fontSize": "$text-sm",
-                  "fontWeight": "600"
+                  "type": "frame",
+                  "id": "nzW5b",
+                  "name": "Demo Btn",
+                  "cornerRadius": "$radius-md",
+                  "padding": [
+                    9,
+                    16
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "E95Ta",
+                      "name": "Label",
+                      "fill": "$foreground",
+                      "content": "Demo aanvragen",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-sm",
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "P5uwln",
+                  "name": "Koppelen Btn",
+                  "fill": "$primary",
+                  "cornerRadius": "$radius-md",
+                  "padding": [
+                    9,
+                    16
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "Ps7sG",
+                      "name": "Label",
+                      "fill": "$primary-foreground",
+                      "content": "Koppelen",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-sm",
+                      "fontWeight": "600"
+                    }
+                  ]
                 }
               ]
             }
@@ -18121,10 +18987,30 @@
               "children": [
                 {
                   "type": "text",
+                  "id": "mgiDj",
+                  "name": "Partners",
+                  "fill": "$muted-foreground",
+                  "content": "Partners",
+                  "fontFamily": "$font-body",
+                  "fontSize": "$text-xs2",
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
                   "id": "kmSGN",
                   "name": "Privacy",
                   "fill": "$muted-foreground",
                   "content": "Privacy",
+                  "fontFamily": "$font-body",
+                  "fontSize": "$text-xs2",
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "i5iplm",
+                  "name": "Voorwaarden",
+                  "fill": "$muted-foreground",
+                  "content": "Voorwaarden",
                   "fontFamily": "$font-body",
                   "fontSize": "$text-xs2",
                   "fontWeight": "normal"
@@ -18181,7 +19067,6 @@
       "x": 2950,
       "y": 9600,
       "name": "Mobiel · Voorwaarden · Light",
-      "theme": {},
       "clip": true,
       "width": 390,
       "fill": "$background",
@@ -18189,13 +19074,15 @@
       "children": [
         {
           "type": "frame",
-          "id": "wZaPC",
-          "name": "Nav",
+          "id": "OIhMJ",
+          "name": "Top Bar",
           "width": "fill_container",
+          "fill": "$background",
           "stroke": "$border",
           "strokeWidth": {
             "bottom": 1
           },
+          "strokeAlignment": "inner",
           "strokeLinejoin": "round",
           "padding": [
             14,
@@ -18205,78 +19092,83 @@
           "alignItems": "center",
           "children": [
             {
+              "type": "text",
+              "id": "A4gSE",
+              "name": "Wordmark",
+              "fill": "$foreground",
+              "content": "emeq",
+              "fontFamily": "$font-heading",
+              "fontSize": "$text-xl",
+              "fontWeight": "700",
+              "letterSpacing": -0.5
+            },
+            {
               "type": "frame",
-              "id": "lU1on",
-              "name": "Nav Left",
-              "gap": "$space-sm",
+              "id": "uKzbX",
+              "name": "Right",
+              "gap": "$space-md",
               "alignItems": "center",
               "children": [
                 {
-                  "type": "rectangle",
-                  "id": "wOj4r",
-                  "name": "Mark",
-                  "fill": "$brand",
-                  "width": 9,
-                  "height": 9
-                },
-                {
-                  "type": "text",
-                  "id": "Dn9sT",
-                  "name": "Wordmark",
-                  "fill": "$foreground",
-                  "content": "emeq",
-                  "lineHeight": 1.05,
-                  "fontFamily": "$font-heading",
-                  "fontSize": "$text-xl",
-                  "fontWeight": "700",
-                  "letterSpacing": -1
+                  "type": "frame",
+                  "id": "jShpr",
+                  "name": "Menu",
+                  "layout": "vertical",
+                  "gap": "$space-xxs",
+                  "padding": [
+                    6,
+                    2
+                  ],
+                  "alignItems": "end",
+                  "children": [
+                    {
+                      "type": "rectangle",
+                      "id": "bg7Dg",
+                      "name": "bar",
+                      "fill": "$foreground",
+                      "width": 16,
+                      "height": 1.5
+                    },
+                    {
+                      "type": "rectangle",
+                      "id": "f68mOU",
+                      "name": "bar",
+                      "fill": "$foreground",
+                      "width": 16,
+                      "height": 1.5
+                    },
+                    {
+                      "type": "rectangle",
+                      "id": "w8oBd",
+                      "name": "bar",
+                      "fill": "$foreground",
+                      "width": 10,
+                      "height": 1.5
+                    }
+                  ]
                 },
                 {
                   "type": "frame",
-                  "id": "yEzr3",
-                  "name": "Back Wrap",
+                  "id": "C2oiQJ",
+                  "name": "Koppelen Btn",
+                  "fill": "$primary",
+                  "cornerRadius": "$radius-md",
                   "padding": [
-                    0,
-                    0,
-                    0,
-                    20
+                    9,
+                    16
                   ],
                   "children": [
                     {
                       "type": "text",
-                      "id": "m8yWjK",
-                      "name": "Terug",
-                      "fill": "$muted-foreground",
-                      "content": "← Terug",
+                      "id": "Fmt17",
+                      "name": "Label",
+                      "fill": "$primary-foreground",
+                      "content": "Koppelen",
                       "fontFamily": "$font-body",
                       "fontSize": "$text-sm",
-                      "fontWeight": "normal"
+                      "fontWeight": "600"
                     }
                   ]
-                }
-              ]
-            },
-            {
-              "type": "frame",
-              "id": "RpOJt",
-              "name": "Koppelen Button",
-              "fill": "$primary",
-              "cornerRadius": "$radius-md",
-              "padding": [
-                9,
-                16
-              ],
-              "alignItems": "center",
-              "children": [
-                {
-                  "type": "text",
-                  "id": "m8M6wD",
-                  "name": "Label",
-                  "fill": "$primary-foreground",
-                  "content": "Koppelen",
-                  "fontFamily": "$font-body",
-                  "fontSize": "$text-sm",
-                  "fontWeight": "600"
                 }
               ]
             }
@@ -19539,15 +20431,37 @@
               "type": "frame",
               "id": "x22eiR",
               "name": "Footer Links",
+              "width": "fill_container",
+              "layout": "vertical",
               "gap": "$space-xs",
               "alignItems": "center",
               "children": [
+                {
+                  "type": "text",
+                  "id": "h8M4A",
+                  "name": "Partners",
+                  "fill": "$muted-foreground",
+                  "content": "Partners",
+                  "fontFamily": "$font-body",
+                  "fontSize": "$text-xs2",
+                  "fontWeight": "normal"
+                },
                 {
                   "type": "text",
                   "id": "iWFEX",
                   "name": "Privacy",
                   "fill": "$muted-foreground",
                   "content": "Privacy",
+                  "fontFamily": "$font-body",
+                  "fontSize": "$text-xs2",
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "VmbAj",
+                  "name": "Voorwaarden",
+                  "fill": "$muted-foreground",
+                  "content": "Voorwaarden",
                   "fontFamily": "$font-body",
                   "fontSize": "$text-xs2",
                   "fontWeight": "normal"
@@ -19625,7 +20539,6 @@
       "x": 9860,
       "y": 5800,
       "name": "Pagina · Partners · Light",
-      "theme": {},
       "clip": true,
       "width": 1440,
       "fill": "$background",
@@ -19633,13 +20546,12 @@
       "children": [
         {
           "type": "frame",
-          "id": "Zid7E",
+          "id": "aD70j",
           "name": "Nav",
           "width": "fill_container",
+          "fill": "$background",
           "stroke": "$border",
-          "strokeWidth": {
-            "bottom": 1
-          },
+          "strokeAlignment": "inner",
           "strokeLinejoin": "round",
           "padding": [
             18,
@@ -19650,14 +20562,14 @@
           "children": [
             {
               "type": "frame",
-              "id": "drCoB",
+              "id": "WH6Do",
               "name": "Nav Left",
-              "gap": "$space-lg",
+              "gap": "$space-2xl",
               "alignItems": "center",
               "children": [
                 {
                   "type": "frame",
-                  "id": "IEseR",
+                  "id": "SAeX4",
                   "name": "Logo",
                   "gap": "$space-xs",
                   "alignItems": "center",
@@ -19665,7 +20577,7 @@
                     {
                       "type": "rectangle",
                       "cornerRadius": "$radius-xs",
-                      "id": "RoXP9",
+                      "id": "e9tLqH",
                       "name": "Mark",
                       "fill": "$brand",
                       "width": 14,
@@ -19673,51 +20585,111 @@
                     },
                     {
                       "type": "text",
-                      "id": "l2CCfe",
+                      "id": "mJCs8",
                       "name": "Wordmark",
                       "fill": "$foreground",
                       "content": "emeq",
-                      "lineHeight": 1.05,
                       "fontFamily": "$font-heading",
                       "fontSize": "$text-xl",
                       "fontWeight": "700",
-                      "letterSpacing": -1
+                      "letterSpacing": -0.5
                     }
                   ]
                 },
                 {
-                  "type": "text",
-                  "id": "U9qhe",
-                  "name": "Terug",
-                  "fill": "$muted-foreground",
-                  "content": "← Terug",
-                  "fontFamily": "$font-body",
-                  "fontSize": "$text-sm",
-                  "fontWeight": "500"
+                  "type": "frame",
+                  "id": "v5V6V7",
+                  "name": "Nav Links",
+                  "gap": "$space-lg",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "p7TWb",
+                      "name": "Waarom",
+                      "fill": "$muted-foreground",
+                      "content": "Waarom",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-sm",
+                      "fontWeight": "500"
+                    },
+                    {
+                      "type": "text",
+                      "id": "z8k6D",
+                      "name": "Zo werkt het",
+                      "fill": "$muted-foreground",
+                      "content": "Zo werkt het",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-sm",
+                      "fontWeight": "500"
+                    },
+                    {
+                      "type": "text",
+                      "id": "OLmVb",
+                      "name": "Platform",
+                      "fill": "$muted-foreground",
+                      "content": "Platform",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-sm",
+                      "fontWeight": "500"
+                    }
+                  ]
                 }
               ]
             },
             {
               "type": "frame",
-              "id": "g2zZ0u",
-              "name": "Koppelen Button",
-              "fill": "$primary",
-              "cornerRadius": "$radius-md",
-              "padding": [
-                9,
-                16
-              ],
+              "id": "BFDeR",
+              "name": "Nav Right",
+              "gap": "$space-md",
               "alignItems": "center",
               "children": [
                 {
-                  "type": "text",
-                  "id": "Wx2Uy",
-                  "name": "l",
-                  "fill": "$primary-foreground",
-                  "content": "Koppelen",
-                  "fontFamily": "$font-body",
-                  "fontSize": "$text-sm",
-                  "fontWeight": "600"
+                  "type": "frame",
+                  "id": "zNLRL",
+                  "name": "Demo Btn",
+                  "cornerRadius": "$radius-md",
+                  "padding": [
+                    9,
+                    16
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "w4ze4",
+                      "name": "Label",
+                      "fill": "$foreground",
+                      "content": "Demo aanvragen",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-sm",
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "e2sTr",
+                  "name": "Koppelen Btn",
+                  "fill": "$primary",
+                  "cornerRadius": "$radius-md",
+                  "padding": [
+                    9,
+                    16
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "nSuec",
+                      "name": "Label",
+                      "fill": "$primary-foreground",
+                      "content": "Koppelen",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-sm",
+                      "fontWeight": "600"
+                    }
+                  ]
                 }
               ]
             }
@@ -19907,7 +20879,8 @@
                           "fill": "$muted-foreground",
                           "content": "Boekhouden",
                           "fontFamily": "$font-body",
-                          "fontSize": "$text-sm"
+                          "fontSize": "$text-sm",
+                          "fontWeight": "normal"
                         }
                       ]
                     },
@@ -19930,7 +20903,8 @@
                           "fill": "$muted-foreground",
                           "content": "Betalen",
                           "fontFamily": "$font-body",
-                          "fontSize": "$text-sm"
+                          "fontSize": "$text-sm",
+                          "fontWeight": "normal"
                         }
                       ]
                     },
@@ -19953,7 +20927,8 @@
                           "fill": "$muted-foreground",
                           "content": "CRM",
                           "fontFamily": "$font-body",
-                          "fontSize": "$text-sm"
+                          "fontSize": "$text-sm",
+                          "fontWeight": "normal"
                         }
                       ]
                     },
@@ -19976,7 +20951,8 @@
                           "fill": "$muted-foreground",
                           "content": "E-commerce",
                           "fontFamily": "$font-body",
-                          "fontSize": "$text-sm"
+                          "fontSize": "$text-sm",
+                          "fontWeight": "normal"
                         }
                       ]
                     }
@@ -20244,10 +21220,30 @@
               "children": [
                 {
                   "type": "text",
+                  "id": "P4i25",
+                  "name": "Partners",
+                  "fill": "$muted-foreground",
+                  "content": "Partners",
+                  "fontFamily": "$font-body",
+                  "fontSize": "$text-xs2",
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
                   "id": "M0tAlK",
                   "name": "Privacy",
                   "fill": "$muted-foreground",
                   "content": "Privacy",
+                  "fontFamily": "$font-body",
+                  "fontSize": "$text-xs2",
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "IETXs",
+                  "name": "Voorwaarden",
+                  "fill": "$muted-foreground",
+                  "content": "Voorwaarden",
                   "fontFamily": "$font-body",
                   "fontSize": "$text-xs2",
                   "fontWeight": "normal"
@@ -20284,7 +21280,6 @@
       "x": 11520,
       "y": 5800,
       "name": "Partner Detail · Blueprint (Exact)",
-      "theme": {},
       "clip": true,
       "width": 1440,
       "fill": "$background",
@@ -20292,13 +21287,12 @@
       "children": [
         {
           "type": "frame",
-          "id": "Bycsi",
+          "id": "aCY1k",
           "name": "Nav",
           "width": "fill_container",
+          "fill": "$background",
           "stroke": "$border",
-          "strokeWidth": {
-            "bottom": 1
-          },
+          "strokeAlignment": "inner",
           "strokeLinejoin": "round",
           "padding": [
             18,
@@ -20309,14 +21303,14 @@
           "children": [
             {
               "type": "frame",
-              "id": "dho7c",
+              "id": "z2pn9Q",
               "name": "Nav Left",
-              "gap": "$space-lg",
+              "gap": "$space-2xl",
               "alignItems": "center",
               "children": [
                 {
                   "type": "frame",
-                  "id": "N01nC",
+                  "id": "kLkCz",
                   "name": "Logo",
                   "gap": "$space-xs",
                   "alignItems": "center",
@@ -20324,7 +21318,7 @@
                     {
                       "type": "rectangle",
                       "cornerRadius": "$radius-xs",
-                      "id": "jWd1G",
+                      "id": "nBVXP",
                       "name": "Mark",
                       "fill": "$brand",
                       "width": 14,
@@ -20332,51 +21326,111 @@
                     },
                     {
                       "type": "text",
-                      "id": "jYZqW",
+                      "id": "VzbuH",
                       "name": "Wordmark",
                       "fill": "$foreground",
                       "content": "emeq",
-                      "lineHeight": 1.05,
                       "fontFamily": "$font-heading",
                       "fontSize": "$text-xl",
                       "fontWeight": "700",
-                      "letterSpacing": -1
+                      "letterSpacing": -0.5
                     }
                   ]
                 },
                 {
-                  "type": "text",
-                  "id": "qT4qL",
-                  "name": "Terug",
-                  "fill": "$muted-foreground",
-                  "content": "← Terug",
-                  "fontFamily": "$font-body",
-                  "fontSize": "$text-sm",
-                  "fontWeight": "500"
+                  "type": "frame",
+                  "id": "IN89N",
+                  "name": "Nav Links",
+                  "gap": "$space-lg",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "x5IViN",
+                      "name": "Waarom",
+                      "fill": "$muted-foreground",
+                      "content": "Waarom",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-sm",
+                      "fontWeight": "500"
+                    },
+                    {
+                      "type": "text",
+                      "id": "cGx7n",
+                      "name": "Zo werkt het",
+                      "fill": "$muted-foreground",
+                      "content": "Zo werkt het",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-sm",
+                      "fontWeight": "500"
+                    },
+                    {
+                      "type": "text",
+                      "id": "uAKhY",
+                      "name": "Platform",
+                      "fill": "$muted-foreground",
+                      "content": "Platform",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-sm",
+                      "fontWeight": "500"
+                    }
+                  ]
                 }
               ]
             },
             {
               "type": "frame",
-              "id": "d83EP0",
-              "name": "Koppelen Button",
-              "fill": "$primary",
-              "cornerRadius": "$radius-md",
-              "padding": [
-                9,
-                16
-              ],
+              "id": "vllZE",
+              "name": "Nav Right",
+              "gap": "$space-md",
               "alignItems": "center",
               "children": [
                 {
-                  "type": "text",
-                  "id": "dtQKA",
-                  "name": "l",
-                  "fill": "$primary-foreground",
-                  "content": "Koppelen",
-                  "fontFamily": "$font-body",
-                  "fontSize": "$text-sm",
-                  "fontWeight": "600"
+                  "type": "frame",
+                  "id": "ZJ7Q7",
+                  "name": "Demo Btn",
+                  "cornerRadius": "$radius-md",
+                  "padding": [
+                    9,
+                    16
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "HKSeD",
+                      "name": "Label",
+                      "fill": "$foreground",
+                      "content": "Demo aanvragen",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-sm",
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "NYCpt",
+                  "name": "Koppelen Btn",
+                  "fill": "$primary",
+                  "cornerRadius": "$radius-md",
+                  "padding": [
+                    9,
+                    16
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "bU913",
+                      "name": "Label",
+                      "fill": "$primary-foreground",
+                      "content": "Koppelen",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-sm",
+                      "fontWeight": "600"
+                    }
+                  ]
                 }
               ]
             }
@@ -20599,6 +21653,104 @@
                           "fontFamily": "$font-body",
                           "fontSize": "$text-md",
                           "fontWeight": "600"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "EMR48",
+                  "name": "Resources",
+                  "width": "fill_container",
+                  "gap": "$space-lg",
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "xbLzs",
+                      "name": "exact.com",
+                      "gap": "$space-tight",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "RzRp0",
+                          "name": "i",
+                          "width": 14,
+                          "height": 14,
+                          "icon": "external-link",
+                          "library": "lucide",
+                          "fill": "$muted-foreground"
+                        },
+                        {
+                          "type": "text",
+                          "id": "iHQad",
+                          "name": "l",
+                          "fill": "$muted-foreground",
+                          "content": "exact.com",
+                          "fontFamily": "$font-data",
+                          "fontSize": "$text-xs2",
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "C9BekE",
+                      "name": "Developer-docs",
+                      "gap": "$space-tight",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "MSrIK",
+                          "name": "i",
+                          "width": 14,
+                          "height": 14,
+                          "icon": "external-link",
+                          "library": "lucide",
+                          "fill": "$muted-foreground"
+                        },
+                        {
+                          "type": "text",
+                          "id": "iUN9v",
+                          "name": "l",
+                          "fill": "$muted-foreground",
+                          "content": "Developer-docs",
+                          "fontFamily": "$font-data",
+                          "fontSize": "$text-xs2",
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "U3Ajc",
+                      "name": "Exact-support",
+                      "gap": "$space-tight",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "ZIbwa",
+                          "name": "i",
+                          "width": 14,
+                          "height": 14,
+                          "icon": "external-link",
+                          "library": "lucide",
+                          "fill": "$muted-foreground"
+                        },
+                        {
+                          "type": "text",
+                          "id": "abE2u",
+                          "name": "l",
+                          "fill": "$muted-foreground",
+                          "content": "Exact-support",
+                          "fontFamily": "$font-data",
+                          "fontSize": "$text-xs2",
+                          "fontWeight": "normal"
                         }
                       ]
                     }
@@ -21009,10 +22161,30 @@
               "children": [
                 {
                   "type": "text",
+                  "id": "byvqc",
+                  "name": "Partners",
+                  "fill": "$muted-foreground",
+                  "content": "Partners",
+                  "fontFamily": "$font-body",
+                  "fontSize": "$text-xs2",
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
                   "id": "o7U3Ia",
                   "name": "Privacy",
                   "fill": "$muted-foreground",
                   "content": "Privacy",
+                  "fontFamily": "$font-body",
+                  "fontSize": "$text-xs2",
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "aoLkz",
+                  "name": "Voorwaarden",
+                  "fill": "$muted-foreground",
+                  "content": "Voorwaarden",
                   "fontFamily": "$font-body",
                   "fontSize": "$text-xs2",
                   "fontWeight": "normal"
@@ -21172,7 +22344,6 @@
       "x": 3540,
       "y": 9600,
       "name": "Mobiel · Partners · Light",
-      "theme": {},
       "clip": true,
       "width": 390,
       "fill": "$background",
@@ -21180,13 +22351,15 @@
       "children": [
         {
           "type": "frame",
-          "id": "WXs3M",
-          "name": "Nav",
+          "id": "SaoXi",
+          "name": "Top Bar",
           "width": "fill_container",
+          "fill": "$background",
           "stroke": "$border",
           "strokeWidth": {
             "bottom": 1
           },
+          "strokeAlignment": "inner",
           "strokeLinejoin": "round",
           "padding": [
             14,
@@ -21196,75 +22369,83 @@
           "alignItems": "center",
           "children": [
             {
+              "type": "text",
+              "id": "bYjZI",
+              "name": "Wordmark",
+              "fill": "$foreground",
+              "content": "emeq",
+              "fontFamily": "$font-heading",
+              "fontSize": "$text-xl",
+              "fontWeight": "700",
+              "letterSpacing": -0.5
+            },
+            {
               "type": "frame",
-              "id": "mkNxt",
-              "name": "Nav Left",
-              "gap": "$space-lg",
+              "id": "xcZ8L",
+              "name": "Right",
+              "gap": "$space-md",
               "alignItems": "center",
               "children": [
                 {
                   "type": "frame",
-                  "id": "xDoDM",
-                  "name": "Logo",
-                  "gap": "$space-xs",
-                  "alignItems": "center",
+                  "id": "l76kF2",
+                  "name": "Menu",
+                  "layout": "vertical",
+                  "gap": "$space-xxs",
+                  "padding": [
+                    6,
+                    2
+                  ],
+                  "alignItems": "end",
                   "children": [
                     {
                       "type": "rectangle",
-                      "cornerRadius": "$radius-xs",
-                      "id": "BdLQZ",
-                      "name": "Mark",
-                      "fill": "$brand",
-                      "width": 14,
-                      "height": 14
+                      "id": "YoaNR",
+                      "name": "bar",
+                      "fill": "$foreground",
+                      "width": 16,
+                      "height": 1.5
                     },
                     {
-                      "type": "text",
-                      "id": "GR23F",
-                      "name": "Wordmark",
+                      "type": "rectangle",
+                      "id": "Qm8ek",
+                      "name": "bar",
                       "fill": "$foreground",
-                      "content": "emeq",
-                      "lineHeight": 1.05,
-                      "fontFamily": "$font-heading",
-                      "fontSize": "$text-xl",
-                      "fontWeight": "700",
-                      "letterSpacing": -1
+                      "width": 16,
+                      "height": 1.5
+                    },
+                    {
+                      "type": "rectangle",
+                      "id": "WoQur",
+                      "name": "bar",
+                      "fill": "$foreground",
+                      "width": 10,
+                      "height": 1.5
                     }
                   ]
                 },
                 {
-                  "type": "text",
-                  "id": "RXWip",
-                  "name": "Terug",
-                  "fill": "$muted-foreground",
-                  "content": "← Terug",
-                  "fontFamily": "$font-body",
-                  "fontSize": "$text-sm",
-                  "fontWeight": "500"
-                }
-              ]
-            },
-            {
-              "type": "frame",
-              "id": "CxKRE",
-              "name": "Koppelen Button",
-              "fill": "$primary",
-              "cornerRadius": "$radius-md",
-              "padding": [
-                9,
-                16
-              ],
-              "alignItems": "center",
-              "children": [
-                {
-                  "type": "text",
-                  "id": "KL2D5",
-                  "name": "l",
-                  "fill": "$primary-foreground",
-                  "content": "Koppelen",
-                  "fontFamily": "$font-body",
-                  "fontSize": "$text-sm",
-                  "fontWeight": "600"
+                  "type": "frame",
+                  "id": "Q2wEg5",
+                  "name": "Koppelen Btn",
+                  "fill": "$primary",
+                  "cornerRadius": "$radius-md",
+                  "padding": [
+                    9,
+                    16
+                  ],
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "Upqq9",
+                      "name": "Label",
+                      "fill": "$primary-foreground",
+                      "content": "Koppelen",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-sm",
+                      "fontWeight": "600"
+                    }
+                  ]
                 }
               ]
             }
@@ -21462,7 +22643,8 @@
                               "fill": "$muted-foreground",
                               "content": "Boekhouden",
                               "fontFamily": "$font-body",
-                              "fontSize": "$text-xs2"
+                              "fontSize": "$text-xs2",
+                              "fontWeight": "normal"
                             }
                           ]
                         },
@@ -21485,7 +22667,8 @@
                               "fill": "$muted-foreground",
                               "content": "Betalen",
                               "fontFamily": "$font-body",
-                              "fontSize": "$text-xs2"
+                              "fontSize": "$text-xs2",
+                              "fontWeight": "normal"
                             }
                           ]
                         }
@@ -21519,7 +22702,8 @@
                               "fill": "$muted-foreground",
                               "content": "CRM",
                               "fontFamily": "$font-body",
-                              "fontSize": "$text-xs2"
+                              "fontSize": "$text-xs2",
+                              "fontWeight": "normal"
                             }
                           ]
                         },
@@ -21542,7 +22726,8 @@
                               "fill": "$muted-foreground",
                               "content": "E-commerce",
                               "fontFamily": "$font-body",
-                              "fontSize": "$text-xs2"
+                              "fontSize": "$text-xs2",
+                              "fontWeight": "normal"
                             }
                           ]
                         }
@@ -21790,15 +22975,37 @@
               "type": "frame",
               "id": "v1swNK",
               "name": "Footer Links",
-              "gap": "$space-lg",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": "$space-xs",
               "alignItems": "center",
               "children": [
+                {
+                  "type": "text",
+                  "id": "Q2LzPe",
+                  "name": "Partners",
+                  "fill": "$muted-foreground",
+                  "content": "Partners",
+                  "fontFamily": "$font-body",
+                  "fontSize": "$text-xs2",
+                  "fontWeight": "normal"
+                },
                 {
                   "type": "text",
                   "id": "HxZrj",
                   "name": "Privacy",
                   "fill": "$muted-foreground",
                   "content": "Privacy",
+                  "fontFamily": "$font-body",
+                  "fontSize": "$text-xs2",
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "NucxK",
+                  "name": "Voorwaarden",
+                  "fill": "$muted-foreground",
+                  "content": "Voorwaarden",
                   "fontFamily": "$font-body",
                   "fontSize": "$text-xs2",
                   "fontWeight": "normal"
@@ -21835,7 +23042,6 @@
       "x": 4130,
       "y": 9600,
       "name": "Mobiel · Partners · Exact · Light",
-      "theme": {},
       "clip": true,
       "width": 390,
       "fill": "$background",
@@ -21843,13 +23049,15 @@
       "children": [
         {
           "type": "frame",
-          "id": "kZas1",
-          "name": "Nav",
+          "id": "q3mE4V",
+          "name": "Top Bar",
           "width": "fill_container",
+          "fill": "$background",
           "stroke": "$border",
           "strokeWidth": {
             "bottom": 1
           },
+          "strokeAlignment": "inner",
           "strokeLinejoin": "round",
           "padding": [
             14,
@@ -21859,75 +23067,83 @@
           "alignItems": "center",
           "children": [
             {
+              "type": "text",
+              "id": "nNBYZ",
+              "name": "Wordmark",
+              "fill": "$foreground",
+              "content": "emeq",
+              "fontFamily": "$font-heading",
+              "fontSize": "$text-xl",
+              "fontWeight": "700",
+              "letterSpacing": -0.5
+            },
+            {
               "type": "frame",
-              "id": "u6WGi",
-              "name": "Nav Left",
-              "gap": "$space-lg",
+              "id": "GZcI1",
+              "name": "Right",
+              "gap": "$space-md",
               "alignItems": "center",
               "children": [
                 {
                   "type": "frame",
-                  "id": "FSK5i",
-                  "name": "Logo",
-                  "gap": "$space-xs",
-                  "alignItems": "center",
+                  "id": "uWb8G",
+                  "name": "Menu",
+                  "layout": "vertical",
+                  "gap": "$space-xxs",
+                  "padding": [
+                    6,
+                    2
+                  ],
+                  "alignItems": "end",
                   "children": [
                     {
                       "type": "rectangle",
-                      "cornerRadius": "$radius-xs",
-                      "id": "bdw92",
-                      "name": "Mark",
-                      "fill": "$brand",
-                      "width": 14,
-                      "height": 14
+                      "id": "c12mw",
+                      "name": "bar",
+                      "fill": "$foreground",
+                      "width": 16,
+                      "height": 1.5
                     },
                     {
-                      "type": "text",
-                      "id": "i6kM5",
-                      "name": "Wordmark",
+                      "type": "rectangle",
+                      "id": "wgsYJ",
+                      "name": "bar",
                       "fill": "$foreground",
-                      "content": "emeq",
-                      "lineHeight": 1.05,
-                      "fontFamily": "$font-heading",
-                      "fontSize": "$text-xl",
-                      "fontWeight": "700",
-                      "letterSpacing": -1
+                      "width": 16,
+                      "height": 1.5
+                    },
+                    {
+                      "type": "rectangle",
+                      "id": "rsmlY",
+                      "name": "bar",
+                      "fill": "$foreground",
+                      "width": 10,
+                      "height": 1.5
                     }
                   ]
                 },
                 {
-                  "type": "text",
-                  "id": "tFCQa",
-                  "name": "Terug",
-                  "fill": "$muted-foreground",
-                  "content": "← Terug",
-                  "fontFamily": "$font-body",
-                  "fontSize": "$text-sm",
-                  "fontWeight": "500"
-                }
-              ]
-            },
-            {
-              "type": "frame",
-              "id": "t3X3T3",
-              "name": "Koppelen Button",
-              "fill": "$primary",
-              "cornerRadius": "$radius-md",
-              "padding": [
-                9,
-                16
-              ],
-              "alignItems": "center",
-              "children": [
-                {
-                  "type": "text",
-                  "id": "XXQUu",
-                  "name": "l",
-                  "fill": "$primary-foreground",
-                  "content": "Koppelen",
-                  "fontFamily": "$font-body",
-                  "fontSize": "$text-sm",
-                  "fontWeight": "600"
+                  "type": "frame",
+                  "id": "mobrg",
+                  "name": "Koppelen Btn",
+                  "fill": "$primary",
+                  "cornerRadius": "$radius-md",
+                  "padding": [
+                    9,
+                    16
+                  ],
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "oSexq",
+                      "name": "Label",
+                      "fill": "$primary-foreground",
+                      "content": "Koppelen",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-sm",
+                      "fontWeight": "600"
+                    }
+                  ]
                 }
               ]
             }
@@ -22154,6 +23370,105 @@
                           "fontFamily": "$font-body",
                           "fontSize": "$text-md",
                           "fontWeight": "600"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "EPXps",
+                  "name": "Resources",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": "$space-sm",
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "Yn7bw",
+                      "name": "exact.com",
+                      "gap": "$space-tight",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "IllGD",
+                          "name": "i",
+                          "width": 14,
+                          "height": 14,
+                          "icon": "external-link",
+                          "library": "lucide",
+                          "fill": "$muted-foreground"
+                        },
+                        {
+                          "type": "text",
+                          "id": "B04o3",
+                          "name": "l",
+                          "fill": "$muted-foreground",
+                          "content": "exact.com",
+                          "fontFamily": "$font-data",
+                          "fontSize": "$text-xs2",
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "uOjQC",
+                      "name": "Developer-docs",
+                      "gap": "$space-tight",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "siKtc",
+                          "name": "i",
+                          "width": 14,
+                          "height": 14,
+                          "icon": "external-link",
+                          "library": "lucide",
+                          "fill": "$muted-foreground"
+                        },
+                        {
+                          "type": "text",
+                          "id": "dxWag",
+                          "name": "l",
+                          "fill": "$muted-foreground",
+                          "content": "Developer-docs",
+                          "fontFamily": "$font-data",
+                          "fontSize": "$text-xs2",
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "j0mELu",
+                      "name": "Exact-support",
+                      "gap": "$space-tight",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "BcjCh",
+                          "name": "i",
+                          "width": 14,
+                          "height": 14,
+                          "icon": "external-link",
+                          "library": "lucide",
+                          "fill": "$muted-foreground"
+                        },
+                        {
+                          "type": "text",
+                          "id": "EwLnM",
+                          "name": "l",
+                          "fill": "$muted-foreground",
+                          "content": "Exact-support",
+                          "fontFamily": "$font-data",
+                          "fontSize": "$text-xs2",
+                          "fontWeight": "normal"
                         }
                       ]
                     }
@@ -22544,15 +23859,37 @@
               "type": "frame",
               "id": "p0kfCz",
               "name": "Footer Links",
-              "gap": "$space-lg",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": "$space-xs",
               "alignItems": "center",
               "children": [
+                {
+                  "type": "text",
+                  "id": "W4ldQ",
+                  "name": "Partners",
+                  "fill": "$muted-foreground",
+                  "content": "Partners",
+                  "fontFamily": "$font-body",
+                  "fontSize": "$text-xs2",
+                  "fontWeight": "normal"
+                },
                 {
                   "type": "text",
                   "id": "R0cxG",
                   "name": "Privacy",
                   "fill": "$muted-foreground",
                   "content": "Privacy",
+                  "fontFamily": "$font-body",
+                  "fontSize": "$text-xs2",
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "v3LWu",
+                  "name": "Voorwaarden",
+                  "fill": "$muted-foreground",
+                  "content": "Voorwaarden",
                   "fontFamily": "$font-body",
                   "fontSize": "$text-xs2",
                   "fontWeight": "normal"

@@ -1,0 +1,116 @@
+import { Reveal, RevealGroup, RevealItem } from '@/components/motion';
+import { Eyebrow } from '@/components/ui/eyebrow';
+import { cn } from '@/lib/utils';
+
+interface Cell {
+    index: string;
+    tag: string;
+    title: string;
+    body: string;
+    hero?: boolean;
+}
+
+const rowOne: Cell[] = [
+    {
+        index: 'F01',
+        tag: '/v1/{provider}/{path}',
+        title: 'Elk partner-endpoint, één route',
+        body: 'Gebruik ieder partner-endpoint via één vaste route. emeq kiest de juiste koppeling, voegt credentials toe en geeft status en headers transparant terug.',
+        hero: true,
+    },
+    {
+        index: 'F02',
+        tag: 'kill-switch',
+        title: 'Direct aan of uit, per omgeving',
+        body: 'Schakel koppelingen per omgeving direct in of uit. Zonder release, zonder vertraging.',
+    },
+];
+
+const rowTwo: Cell[] = [
+    {
+        index: 'F03',
+        tag: 'Idempotency-Key',
+        title: 'Nooit dubbel geboekt',
+        body: 'Voorkom dubbele boekingen bij retries. Idempotency is platformbreed ingebouwd.',
+    },
+    {
+        index: 'F04',
+        tag: 'canoniek → partner',
+        title: 'Eén datamodel, elke partner',
+        body: 'Vertaal data automatisch tussen jouw model en dat van elke aangesloten partner.',
+    },
+    {
+        index: 'F05',
+        tag: 'partner → hub',
+        title: 'Elke webhook traceerbaar',
+        body: 'Leg elke inkomende webhook gestructureerd vast voor snellere incidentanalyse en betere support.',
+    },
+];
+
+export function FeatureBento() {
+    return (
+        <section id="platform" className="px-6 py-24 lg:px-section-x lg:py-section-x">
+            <Reveal className="flex max-w-[820px] flex-col gap-4">
+                <Eyebrow>04 — Platform</Eyebrow>
+                <h2 className="text-xl font-bold tracking-[-1px] text-foreground md:text-3xl">
+                    Alles voor integraties die wél meegroeien.
+                </h2>
+            </Reveal>
+
+            <RevealGroup className="mt-12 flex flex-col gap-6">
+                <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
+                    {rowOne.map((cell) => (
+                        <BentoCell key={cell.index} cell={cell} />
+                    ))}
+                </div>
+                <div className="grid gap-6 md:grid-cols-3">
+                    {rowTwo.map((cell) => (
+                        <BentoCell key={cell.index} cell={cell} />
+                    ))}
+                </div>
+            </RevealGroup>
+        </section>
+    );
+}
+
+function BentoCell({ cell }: { cell: Cell }) {
+    return (
+        <RevealItem
+            className={cn(
+                'flex flex-col gap-4 rounded-lg border border-border p-8 transition-colors duration-150 hover:border-brand',
+                cell.hero ? 'bg-brand-subtle' : 'bg-card',
+            )}
+        >
+            <div className="flex items-center justify-between gap-4">
+                <span className="font-mono text-xs tracking-[1px] text-muted-foreground">{cell.index}</span>
+                <span className="rounded-xs bg-muted px-2.5 py-1 font-mono text-xs text-muted-foreground">{cell.tag}</span>
+            </div>
+            <h3 className="text-lg font-semibold text-foreground">{cell.title}</h3>
+            <p className="text-md leading-[1.6] text-muted-foreground">{cell.body}</p>
+            {cell.hero && <Schematic />}
+        </RevealItem>
+    );
+}
+
+/** CONSUMER ··· emeq HUB ··· PARTNER API — het pass-through-verhaal in één regel. */
+function Schematic() {
+    return (
+        <div className="mt-2 hidden items-center gap-2 border-t border-border pt-6 font-mono text-2xs tracking-[0.5px] sm:flex">
+            <span className="shrink-0 border border-border bg-background px-3.5 py-2 text-muted-foreground">CONSUMER</span>
+            <Dots />
+            <span className="shrink-0 border border-brand bg-brand-soft px-3.5 py-2 text-brand">emeq HUB</span>
+            <Dots />
+            <span className="shrink-0 border border-border bg-background px-3.5 py-2 text-muted-foreground">PARTNER API</span>
+        </div>
+    );
+}
+
+function Dots() {
+    return (
+        <span aria-hidden className="flex flex-1 items-center justify-center gap-1.5">
+            {Array.from({ length: 5 }, (_, i) => (
+                <span key={i} className="size-[3px] rounded-pill bg-border" />
+            ))}
+        </span>
+    );
+}

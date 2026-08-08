@@ -20,12 +20,19 @@ declare(strict_types=1);
  *                 null = de UI toont een merk-veilige monogram-tegel tot het echte
  *                 logo in public/img/partners/ staat.
  *   brand         ?string  hex-accent uit de huisstijl (bv. '#E2001A'). null = amber-fallback.
+ *   live          ?bool    true = productie-klaar; alleen deze partners staan in de
+ *                 "Nu live met"-strip op de homepage. Ontbreekt = false.
  *   how_it_works  ?list<string>  uitleg-alinea's over het request-pad (optioneel)
  *   capabilities  list<array{title,description}>
  *   endpoints     ?list<array{method,path,target,description}>  Hub→partner endpoint-kaart (optioneel)
  *   connect_steps list<string>
  *   example_curl  ?string  (null = geen snippet)
- *   docs_url      ?string
+ *   docs_url      ?string  officiële API-/developer-documentatie van de partner
+ *   meta_description ?string  ~155 tekens voor de zoekresultaat-snippet.
+ *                 Ontbreekt = summary afgekapt, wat midden in een woord kan
+ *                 eindigen. Voor live providers dus invullen.
+ *   website_url   ?string  officiële partner-website
+ *   support_url   ?string  officieel support-portaal van de partner
  */
 return [
     'exact' => [
@@ -34,9 +41,12 @@ return [
         'category' => 'Boekhouden',
         'logo' => '/img/partners/exact.svg',
         'brand' => '#e1141d',
+        'live' => true,
         'summary' => 'Koppel je app aan Exact Online-administraties zonder zelf OAuth2, '
             .'token-refresh en division-routing te bouwen. De Hub regelt de koppeling, '
             .'multi-tenant token-opslag en audit-logging.',
+        'meta_description' => 'Koppel je app aan Exact Online zonder zelf OAuth2, token-refresh en '
+            .'division-routing te bouwen. De Hub regelt koppeling, tokenopslag en audit-logging.',
         'how_it_works' => [
             'Je app authentiseert met een Bearer-token (Personal Access Token) en geeft per call mee '
                 .'om welke eindgebruiker het gaat via de header X-Account-Id. De Hub leidt daaruit de juiste '
@@ -180,7 +190,11 @@ return [
               -H "Content-Type: application/json" \
               -d '{"account_external_id":"school1"}'
             CURL,
-        'docs_url' => null,
+        // De REST-API-resourcelijst, niet de algemene kennisbank — dit veld is de
+        // developer-doc-link; support_url dekt de kennisbank al.
+        'docs_url' => 'https://start.exactonline.nl/docs/HlpRestAPIResources.aspx',
+        'website_url' => 'https://www.exact.com/nl',
+        'support_url' => 'https://support.exactonline.com',
     ],
 
     'mollie' => [
@@ -191,6 +205,8 @@ return [
         'brand' => '#000000',
         'summary' => 'Handel Mollie-betalingen, mandaten en subscriptions af via één Connect-koppeling. '
             .'De Hub regelt de OAuth-flow, multi-tenant token-opslag, webhook-fanout en audit-logging.',
+        'meta_description' => 'Handel Mollie-betalingen, mandaten en subscriptions af via één '
+            .'Connect-koppeling. De Hub regelt OAuth, tokenopslag, webhook-fanout en audit-logging.',
         'capabilities' => [
             [
                 'title' => 'OAuth Connect-broker',
@@ -224,7 +240,11 @@ return [
               -H "Content-Type: application/json" \
               -d '{"account_external_id":"school1","amount":{"currency":"EUR","value":"10.00"},"description":"Order #12"}'
             CURL,
-        'docs_url' => null,
+        'docs_url' => 'https://docs.mollie.com',
+        'website_url' => 'https://www.mollie.com/nl',
+        // help.mollie.com blokkeert geautomatiseerde requests (403) — niet als
+        // publieke link opnemen zolang we 'm niet kunnen verifiëren.
+        'support_url' => null,
     ],
 
     'snelstart' => [
@@ -235,6 +255,8 @@ return [
         'brand' => '#0078C9',
         'summary' => 'Lees en werk SnelStart-administraties bij zonder zelf de B2B-API te implementeren. '
             .'De Hub regelt credential-opslag (encrypted at rest) en audit-logging.',
+        'meta_description' => 'Lees en werk SnelStart-administraties bij zonder zelf de B2B-API te '
+            .'implementeren. De Hub regelt credential-opslag en audit-logging.',
         'capabilities' => [
             [
                 'title' => 'Key-based koppeling',
@@ -258,6 +280,10 @@ return [
               -H "Content-Type: application/json" \
               -d '{"account_external_id":"school1","provider":"snelstart","client_key":"…","subscription_key":"…","subscription_id":"…"}'
             CURL,
+        // Geen publiek verifieerbare developer-docs of kennisbank-URL gevonden
+        // (b2bapi.snelstart.nl → 404, kennisbank.snelstart.nl → geen DNS).
         'docs_url' => null,
+        'website_url' => 'https://www.snelstart.nl',
+        'support_url' => null,
     ],
 ];

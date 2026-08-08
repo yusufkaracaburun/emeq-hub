@@ -1,11 +1,16 @@
 <?php
 
 use App\Http\Controllers\AccessRequestController;
+use App\Http\Controllers\DemoRequestController;
 use App\Http\Controllers\Dev\ExactOAuthTracerController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LegalController;
+use App\Http\Controllers\LlmsController;
 use App\Http\Controllers\OAuthLandingController;
 use App\Http\Controllers\PartnersController;
+use App\Http\Controllers\RobotsController;
+use App\Http\Controllers\SitemapController;
+use App\Http\Controllers\SupportController;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -45,12 +50,32 @@ Route::get('/privacy', [LegalController::class, 'privacy'])->name('privacy');
 Route::get('/voorwaarden', [LegalController::class, 'terms'])->name('terms');
 Route::get('/verwerkersovereenkomst', [LegalController::class, 'processorAgreement'])->name('processor-agreement');
 
-// Publieke koppel-intake — het formulier leeft op elke partner-pagina
-// (partners/show), preselect op die provider. Geen aparte GET-pagina meer.
-// Geen auth → POST achter throttle + honeypot (zie AccessRequestController).
+// Publieke support-pagina — statische content (e-mail, FAQ) uit het
+// landingspage-design; geen tenant-data. Controller i.p.v. Route::inertia
+// omdat de pagina server-side SEO-meta + FAQ-structured-data meekrijgt.
+Route::get('/support', SupportController::class)->name('support');
+
+// Crawler-bestanden als route, niet als statisch bestand in public/: ze worden
+// afgeleid van PublicPages + de showcase-config en groeien zo mee met nieuwe
+// providers. Een statische public/robots.txt zou hier bovendien vóór komen.
+Route::get('/sitemap.xml', SitemapController::class)->name('sitemap');
+Route::get('/robots.txt', RobotsController::class)->name('robots');
+Route::get('/llms.txt', LlmsController::class)->name('llms');
+
+// Publieke koppel-intake — eigen pagina (landingspage-design "Start met
+// koppelen") + hetzelfde formulier op elke partner-pagina, preselect op die
+// provider. Geen auth → POST achter throttle + honeypot (zie AccessRequestController).
+Route::get('/koppelen', [AccessRequestController::class, 'create'])->name('koppelen');
 Route::post('/koppelen', [AccessRequestController::class, 'store'])
     ->middleware('throttle:6,1')
     ->name('koppelen.store');
+
+// Publieke demo-aanvraag (landingspage-design "Demo aanvragen") — mail-only,
+// geen persistentie. Zelfde honeypot + throttle-opzet als de koppel-intake.
+Route::get('/demo', [DemoRequestController::class, 'create'])->name('demo');
+Route::post('/demo', [DemoRequestController::class, 'store'])
+    ->middleware('throttle:6,1')
+    ->name('demo.store');
 
 // Dev-only routes — STRICT guard. `! app()->isProduction()` is te breed: laat
 // `/admin/quick-login` open op preview/staging-deploys. Whitelist alleen

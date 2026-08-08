@@ -109,6 +109,7 @@ Snelle pointers — één regel per subsysteem; de volledige versie (alle gotcha
 - **Webhooks** — Exact: `POST /webhooks/exact`, HMAC-signature (uppercase hex!), subscriptions in de OAuth-lifecycle, live-gotchas (Cloudflare Bot Fight, CallbackURL-domein) in subsystems.md. Alle inkomende partner→Hub-webhooks ge-audit via `InboundWebhookRecorder` → `inbound_webhook_events`, metadata-only (AVG).
 - **OAuth-flow** — `/v1/oauth/{provider}/init` auto-provisiont het Account (`firstOrCreate`, PAT-ability `integrations:manage`); return-to-consumer via `ReturnUrlResolver` + `consumers.app_url` (open-redirect-guard).
 - **`/v1/*` error-contract** — alle fouten JSON (ook zonder Accept-header); ontbrekende PAT → `401 {code:"unauthenticated"}`, geen login-redirect.
+- **Publieke SEO/GEO-surface** — `App\Support\PublicPages` is de enige bron voor "wat is indexeerbaar" (gedeeld door `SetNoIndexHeaders`, sitemap en robots.txt); per-pagina meta + JSON-LD worden server-side gebouwd in `App\Support\Seo\{SeoMeta,Schema}` en als Inertia-prop gerenderd door `<Seo>`. Crawler-bestanden zijn routes, geen bestanden in `public/`. Inertia-SSR is verplicht voor die surface: zonder SSR zien crawlers zonder JS een lege body. Lokaal: `make ssr` (stopt Vite-HMR), prod: eigen `ssr`-service.
 
 De gedetailleerde laag-/componentkaart staat in `docs/agents/architecture.md`.
 
@@ -147,7 +148,7 @@ composer audit                              # zie ignored advisories in composer
 ### Routes
 
 ```
-routes/web.php       smoke: GET /, GET /up; publiek /oauth/{connected/{connection},failed} (signed OAuth-landing) + /partners (Inertia-showcase, indexeerbaar)
+routes/web.php       GET /up; publiek /oauth/{connected/{connection},failed} (signed OAuth-landing) + de indexeerbare marketing-surface: / · /partners{,/{provider}} · /koppelen · /demo · /support · /privacy · /voorwaarden · /verwerkersovereenkomst, plus de crawler-bestanden /sitemap.xml · /robots.txt · /llms.txt
 routes/console.php   artisan-only commands (inspire)
 routes/api.php       /v1/* — consumer-API (Bearer Sanctum + throttle:api)
 routes/webhooks.php  /webhooks/{provider}/{...} + /cashier/webhook* — publiek, signature-verified

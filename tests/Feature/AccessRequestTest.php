@@ -7,8 +7,10 @@ namespace Tests\Feature;
 use App\Filament\Resources\AccessRequests\AccessRequestResource;
 use App\Mail\AccessRequestSubmitted;
 use App\Models\AccessRequest;
+use App\Support\PublicPages;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Mail;
+use Inertia\Testing\AssertableInertia;
 use Tests\TestCase;
 
 /**
@@ -33,6 +35,16 @@ class AccessRequestTest extends TestCase
             'message' => 'We willen koppelen voor facturatie.',
             'privacy_accepted' => true,
         ], $overrides);
+    }
+
+    public function test_koppelen_page_renders_with_providers(): void
+    {
+        $this->get('/koppelen')
+            ->assertOk()
+            ->assertInertia(fn (AssertableInertia $page) => $page
+                ->component('koppelen')
+                ->has('providers')
+                ->has('seo'));
     }
 
     public function test_valid_submission_is_stored_and_redirects_to_partner(): void
@@ -95,9 +107,16 @@ class AccessRequestTest extends TestCase
         Mail::assertNothingSent();
     }
 
-    public function test_robots_txt_allows_partners(): void
+    public function test_robots_txt_does_not_block_partners(): void
     {
-        $this->assertStringContainsString('Allow: /partners', file_get_contents(public_path('robots.txt')));
+        // robots.txt is een route (RobotsController), geen statisch bestand
+        // meer. Buiten productie is alles dicht; het productie-contract is
+        // "alles wat niet in DISALLOWED_PATHS staat is toegestaan".
+        $this->get('/robots.txt')
+            ->assertOk()
+            ->assertSee('Disallow: /');
+
+        $this->assertNotContains('/partners', PublicPages::DISALLOWED_PATHS);
     }
 
     public function test_navigation_badge_counts_new_requests(): void

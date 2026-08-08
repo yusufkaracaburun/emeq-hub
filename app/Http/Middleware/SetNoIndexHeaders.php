@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Support\PublicPages;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -12,9 +13,13 @@ class SetNoIndexHeaders
     {
         $response = $next($request);
 
-        // De Hub is een backend en blijft standaard noindex. De publieke
-        // homepage en /partners-showcase zijn de indexeerbare surfaces.
-        if (! $request->routeIs('home', 'partners.*', 'privacy', 'terms', 'processor-agreement')) {
+        // De Hub is een backend en blijft standaard noindex; alleen de publieke
+        // marketing-surface is indexeerbaar (PublicPages = enige bron, gedeeld
+        // met robots.txt en de sitemap). Buiten productie staat alles dicht —
+        // de dev-tunnel draait op een publiek bereikbaar domein.
+        $indexable = app()->isProduction() && $request->routeIs(...PublicPages::INDEXABLE_ROUTES);
+
+        if (! $indexable) {
             $response->headers->set('X-Robots-Tag', 'noindex, nofollow, noarchive, nosnippet');
         }
 
