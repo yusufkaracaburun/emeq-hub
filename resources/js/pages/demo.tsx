@@ -37,7 +37,8 @@ export default function Demo({ slots, seo }: DemoProps) {
                 eyebrow="Demo"
                 title={
                     <>
-                        Zie hoe je <span className="text-brand">sneller integreert.</span>
+                        Zie hoe je <br />
+                        <span className="text-brand">sneller integreert.</span>
                     </>
                 }
                 intro="In 30 minuten zie je hoe emeq je koppelingen versnelt: van eerste API-call tot audit-inzicht, afgestemd op jouw use-case."
@@ -184,7 +185,7 @@ function DemoForm({ slots }: { slots: string[] }) {
                 Plan mijn demo
                 <ArrowRight aria-hidden className="size-4 transition-transform duration-150 group-hover:translate-x-0.5" />
             </Button>
-            <p className="text-center font-mono text-2xs text-muted-foreground">
+            <p className="font-mono text-2xs text-muted-foreground">
                 30 minuten · online · afgestemd op jouw integratievraag
             </p>
         </form>

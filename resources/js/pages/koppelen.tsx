@@ -32,7 +32,8 @@ export default function Koppelen({ providers, seo }: KoppelenProps) {
                 eyebrow="Aan de slag"
                 title={
                     <>
-                        Start met <span className="text-brand">groeien.</span>
+                        Start met <br />
+                        <span className="text-brand">groeien.</span>
                     </>
                 }
                 intro="Vertel ons welke software je wilt koppelen. We denken mee over de slimste route en zorgen dat je snel kunt starten."

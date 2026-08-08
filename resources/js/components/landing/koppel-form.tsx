@@ -171,7 +171,7 @@ export function KoppelForm({ providers, preselect }: KoppelFormProps) {
                 Start mijn aanvraag
                 <ArrowRight aria-hidden className="size-4 transition-transform duration-150 group-hover:translate-x-0.5" />
             </Button>
-            <p className="text-center font-mono text-2xs text-muted-foreground">
+            <p className="font-mono text-2xs text-muted-foreground">
                 Persoonlijk contact binnen één werkdag · vrijblijvend
             </p>
         </form>
