@@ -30354,6 +30354,2252 @@
           ]
         }
       ]
+    },
+    {
+      "type": "frame",
+      "id": "sV8bm",
+      "x": 0,
+      "y": 14439,
+      "name": "Exact / Stop Confirm · Desktop",
+      "clip": true,
+      "width": 1440,
+      "height": 900,
+      "fill": "$background",
+      "layout": "vertical",
+      "children": [
+        {
+          "type": "frame",
+          "id": "T5xpUJ",
+          "name": "Nav",
+          "width": "fill_container",
+          "fill": "$background",
+          "stroke": "$border",
+          "strokeAlignment": "inner",
+          "strokeLinejoin": "round",
+          "padding": [
+            18,
+            "$space-section-x"
+          ],
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "H2K1pq",
+              "name": "Nav Left",
+              "gap": "$space-2xl",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "oVtSz",
+                  "name": "Logo",
+                  "gap": "$space-xs",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "rectangle",
+                      "id": "dQsZa",
+                      "name": "Mark",
+                      "fill": {
+                        "type": "image",
+                        "enabled": true,
+                        "url": "logo.png",
+                        "mode": "fit"
+                      },
+                      "width": 14,
+                      "height": 14
+                    },
+                    {
+                      "type": "text",
+                      "id": "JWsD6",
+                      "name": "Wordmark",
+                      "fill": "$foreground",
+                      "content": "hub",
+                      "fontFamily": "$font-heading",
+                      "fontSize": "$text-xl",
+                      "fontWeight": "700",
+                      "letterSpacing": -0.5
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "d0w1zU",
+                  "name": "Nav Links",
+                  "gap": "$space-lg",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "lwWsq",
+                      "name": "Waarom",
+                      "fill": "$muted-foreground",
+                      "content": "Waarom",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-sm",
+                      "fontWeight": "500"
+                    },
+                    {
+                      "type": "text",
+                      "id": "PttFh",
+                      "name": "Zo werkt het",
+                      "fill": "$muted-foreground",
+                      "content": "Zo werkt het",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-sm",
+                      "fontWeight": "500"
+                    },
+                    {
+                      "type": "text",
+                      "id": "bjfBq",
+                      "name": "Platform",
+                      "fill": "$muted-foreground",
+                      "content": "Platform",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-sm",
+                      "fontWeight": "500"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "rHwHX",
+              "name": "Nav Right",
+              "gap": "$space-md",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "Yz4Tj",
+                  "name": "Demo Btn",
+                  "cornerRadius": "$radius-md",
+                  "padding": [
+                    9,
+                    16
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "Rm7WE",
+                      "name": "Label",
+                      "fill": "$foreground",
+                      "content": "Demo aanvragen",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-sm",
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "iviro",
+                  "name": "Koppelen Btn",
+                  "fill": "$primary",
+                  "cornerRadius": "$radius-md",
+                  "padding": [
+                    9,
+                    16
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "rC3Ud",
+                      "name": "Label",
+                      "fill": "$primary-foreground",
+                      "content": "Koppelen",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-sm",
+                      "fontWeight": "600"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "F2Bx5y",
+          "name": "Content",
+          "width": "fill_container",
+          "height": "fill_container",
+          "layout": "vertical",
+          "justifyContent": "center",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "rectangle",
+              "id": "n09jd",
+              "layoutPosition": "absolute",
+              "x": 0,
+              "y": 0,
+              "name": "Header Pattern",
+              "opacity": 0.3,
+              "fill": {
+                "type": "shader",
+                "enabled": true,
+                "url": "dotgrid.glsl",
+                "uniforms": {
+                  "u_cell": 34,
+                  "u_color": "#a23696",
+                  "u_opacity": 0.08,
+                  "u_fade": 0.6
+                }
+              },
+              "width": 1440,
+              "height": 360
+            },
+            {
+              "type": "frame",
+              "id": "Jj1vs",
+              "name": "Column",
+              "width": 640,
+              "layout": "vertical",
+              "gap": "$space-lg",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "Q169O",
+                  "name": "Brand Signal",
+                  "gap": "$space-xs",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "rectangle",
+                      "id": "MXWoB",
+                      "name": "Mark",
+                      "fill": {
+                        "type": "image",
+                        "enabled": true,
+                        "url": "logo.png",
+                        "mode": "fit"
+                      },
+                      "width": 16,
+                      "height": 16
+                    },
+                    {
+                      "type": "text",
+                      "id": "S7j5i",
+                      "name": "Wordmark",
+                      "fill": "$foreground",
+                      "content": "emeq hub",
+                      "fontFamily": "$font-heading",
+                      "fontSize": "$text-sm",
+                      "fontWeight": "700",
+                      "letterSpacing": -0.3
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "hBa0a",
+                  "name": "Header",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": "$space-md",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "XmYv5",
+                      "name": "Eyebrow",
+                      "fill": "$brand",
+                      "content": "KOPPELING BEËINDIGEN",
+                      "fontFamily": "$font-caption",
+                      "fontSize": "$text-xs",
+                      "fontWeight": "normal",
+                      "letterSpacing": 1.5
+                    },
+                    {
+                      "type": "text",
+                      "id": "liUwW",
+                      "name": "H1",
+                      "fill": "$foreground",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Emeq Hub ontkoppelen van Exact Online?",
+                      "lineHeight": 1.08,
+                      "textAlign": "center",
+                      "fontFamily": "$font-heading",
+                      "fontSize": "$text-display",
+                      "fontWeight": "700",
+                      "letterSpacing": -2
+                    },
+                    {
+                      "type": "text",
+                      "id": "RdmRf",
+                      "name": "Sub",
+                      "fill": "$muted-foreground",
+                      "textGrowth": "fixed-width",
+                      "width": 520,
+                      "content": "Je Exact-administratie wordt losgekoppeld. Lopende tokens worden ingetrokken. Boekingen die al in Exact staan blijven staan.",
+                      "lineHeight": 1.6,
+                      "textAlign": "center",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-base",
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "quT3l",
+                  "name": "CTA Row",
+                  "gap": "$space-sm",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "neNsp",
+                      "name": "Primary CTA",
+                      "fill": "$primary",
+                      "cornerRadius": "$radius-md",
+                      "padding": [
+                        12,
+                        24
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "eq7s2",
+                          "name": "Label",
+                          "fill": "$primary-foreground",
+                          "content": "Ontkoppelen",
+                          "fontFamily": "$font-body",
+                          "fontSize": "$text-sm",
+                          "fontWeight": "600"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "z3tLgt",
+                      "name": "Secondary CTA",
+                      "fill": "$card",
+                      "cornerRadius": "$radius-md",
+                      "stroke": "$border",
+                      "strokeWidth": 1,
+                      "strokeAlignment": "inner",
+                      "padding": [
+                        12,
+                        24
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "Ka0zE",
+                          "name": "Label",
+                          "fill": "$foreground",
+                          "content": "Toch behouden",
+                          "fontFamily": "$font-body",
+                          "fontSize": "$text-sm",
+                          "fontWeight": "600"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "Yip9U",
+                  "name": "Hint",
+                  "fill": "$muted-foreground",
+                  "content": "Dit kun je later opnieuw autoriseren via je app of het App Center.",
+                  "fontFamily": "$font-caption",
+                  "fontSize": "$text-xs2",
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "CTcfx",
+          "name": "Footer",
+          "width": "fill_container",
+          "stroke": "$border",
+          "strokeWidth": {
+            "top": 1
+          },
+          "strokeLinejoin": "round",
+          "padding": [
+            28,
+            "$space-section-x"
+          ],
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "tTaEq",
+              "name": "Copyright",
+              "fill": "$muted-foreground",
+              "content": "© 2026 emeq",
+              "fontFamily": "$font-body",
+              "fontSize": "$text-xs2",
+              "fontWeight": "normal"
+            },
+            {
+              "type": "frame",
+              "id": "H4DPpv",
+              "name": "Footer Links",
+              "gap": "$space-xs",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "Z86PU",
+                  "name": "Partners",
+                  "fill": "$muted-foreground",
+                  "content": "Partners",
+                  "fontFamily": "$font-body",
+                  "fontSize": "$text-xs2",
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "FbrOr",
+                  "name": "Privacy",
+                  "fill": "$muted-foreground",
+                  "content": "Privacy",
+                  "fontFamily": "$font-body",
+                  "fontSize": "$text-xs2",
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "AMWqc",
+                  "name": "Voorwaarden",
+                  "fill": "$muted-foreground",
+                  "content": "Voorwaarden",
+                  "fontFamily": "$font-body",
+                  "fontSize": "$text-xs2",
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "Sepmd",
+                  "name": "Sep",
+                  "fill": "$muted-foreground",
+                  "content": "·",
+                  "fontFamily": "$font-body",
+                  "fontSize": "$text-xs2",
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "Q36hW",
+                  "name": "Verwerkersovereenkomst",
+                  "fill": "$muted-foreground",
+                  "content": "Verwerkersovereenkomst",
+                  "fontFamily": "$font-body",
+                  "fontSize": "$text-xs2",
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "CuSc7",
+                  "name": "Sep",
+                  "fill": "$muted-foreground",
+                  "content": "·",
+                  "fontFamily": "$font-body",
+                  "fontSize": "$text-xs2",
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "QY5dO",
+                  "name": "Support",
+                  "fill": "$muted-foreground",
+                  "content": "Support",
+                  "fontFamily": "$font-body",
+                  "fontSize": "$text-xs2",
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "SrGRq",
+      "x": 1560,
+      "y": 14439,
+      "name": "Exact / Stop Done · Desktop",
+      "clip": true,
+      "width": 1440,
+      "height": 900,
+      "fill": "$background",
+      "layout": "vertical",
+      "children": [
+        {
+          "type": "frame",
+          "id": "f2wkvC",
+          "name": "Nav",
+          "width": "fill_container",
+          "fill": "$background",
+          "stroke": "$border",
+          "strokeAlignment": "inner",
+          "strokeLinejoin": "round",
+          "padding": [
+            18,
+            "$space-section-x"
+          ],
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "rXxDQ",
+              "name": "Nav Left",
+              "gap": "$space-2xl",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "lcIGy",
+                  "name": "Logo",
+                  "gap": "$space-xs",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "rectangle",
+                      "id": "K2rmOl",
+                      "name": "Mark",
+                      "fill": {
+                        "type": "image",
+                        "enabled": true,
+                        "url": "logo.png",
+                        "mode": "fit"
+                      },
+                      "width": 14,
+                      "height": 14
+                    },
+                    {
+                      "type": "text",
+                      "id": "CXahm",
+                      "name": "Wordmark",
+                      "fill": "$foreground",
+                      "content": "hub",
+                      "fontFamily": "$font-heading",
+                      "fontSize": "$text-xl",
+                      "fontWeight": "700",
+                      "letterSpacing": -0.5
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "KiSZA",
+                  "name": "Nav Links",
+                  "gap": "$space-lg",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "nkwFu",
+                      "name": "Waarom",
+                      "fill": "$muted-foreground",
+                      "content": "Waarom",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-sm",
+                      "fontWeight": "500"
+                    },
+                    {
+                      "type": "text",
+                      "id": "V8q3O",
+                      "name": "Zo werkt het",
+                      "fill": "$muted-foreground",
+                      "content": "Zo werkt het",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-sm",
+                      "fontWeight": "500"
+                    },
+                    {
+                      "type": "text",
+                      "id": "fM7Jy",
+                      "name": "Platform",
+                      "fill": "$muted-foreground",
+                      "content": "Platform",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-sm",
+                      "fontWeight": "500"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "iovzq",
+              "name": "Nav Right",
+              "gap": "$space-md",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "yToQl",
+                  "name": "Demo Btn",
+                  "cornerRadius": "$radius-md",
+                  "padding": [
+                    9,
+                    16
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "LzKYx",
+                      "name": "Label",
+                      "fill": "$foreground",
+                      "content": "Demo aanvragen",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-sm",
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "oCTdH",
+                  "name": "Koppelen Btn",
+                  "fill": "$primary",
+                  "cornerRadius": "$radius-md",
+                  "padding": [
+                    9,
+                    16
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "RCiPr",
+                      "name": "Label",
+                      "fill": "$primary-foreground",
+                      "content": "Koppelen",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-sm",
+                      "fontWeight": "600"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "FVfV6",
+          "name": "Content",
+          "width": "fill_container",
+          "height": "fill_container",
+          "layout": "vertical",
+          "justifyContent": "center",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "rectangle",
+              "id": "I4i3gQ",
+              "layoutPosition": "absolute",
+              "x": 0,
+              "y": 0,
+              "name": "Header Pattern",
+              "opacity": 0.3,
+              "fill": {
+                "type": "shader",
+                "enabled": true,
+                "url": "dotgrid.glsl",
+                "uniforms": {
+                  "u_cell": 34,
+                  "u_color": "#a23696",
+                  "u_opacity": 0.08,
+                  "u_fade": 0.6
+                }
+              },
+              "width": 1440,
+              "height": 360
+            },
+            {
+              "type": "frame",
+              "id": "IKYAF",
+              "name": "Column",
+              "width": 640,
+              "layout": "vertical",
+              "gap": "$space-lg",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "oWuKC",
+                  "name": "State Badge",
+                  "width": 44,
+                  "height": 44,
+                  "fill": "$success-soft",
+                  "cornerRadius": "$radius-full",
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "InTcg",
+                      "name": "Badge Icon",
+                      "width": 22,
+                      "height": 22,
+                      "icon": "check",
+                      "library": "lucide",
+                      "fill": "$success"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "bHNb4",
+                  "name": "Header",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": "$space-md",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "yHPv5",
+                      "name": "Eyebrow",
+                      "fill": "$muted-foreground",
+                      "content": "KOPPELING BEËINDIGD",
+                      "fontFamily": "$font-caption",
+                      "fontSize": "$text-xs",
+                      "fontWeight": "normal",
+                      "letterSpacing": 1.5
+                    },
+                    {
+                      "type": "text",
+                      "id": "UDOCs",
+                      "name": "H1",
+                      "fill": "$foreground",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Geen toegang meer",
+                      "lineHeight": 1.08,
+                      "textAlign": "center",
+                      "fontFamily": "$font-heading",
+                      "fontSize": "$text-display",
+                      "fontWeight": "700",
+                      "letterSpacing": -2
+                    },
+                    {
+                      "type": "text",
+                      "id": "dOLIn",
+                      "name": "Sub",
+                      "fill": "$muted-foreground",
+                      "textGrowth": "fixed-width",
+                      "width": 520,
+                      "content": "Emeq Hub heeft geen toegang meer tot deze Exact-administratie.",
+                      "lineHeight": 1.6,
+                      "textAlign": "center",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-base",
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "zXVav",
+                  "name": "CTA Row",
+                  "gap": "$space-sm",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "Ldf3p",
+                      "name": "Primary CTA",
+                      "fill": "$primary",
+                      "cornerRadius": "$radius-md",
+                      "padding": [
+                        12,
+                        24
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "CIG4m",
+                          "name": "Label",
+                          "fill": "$primary-foreground",
+                          "content": "Terug naar Emeq Hub",
+                          "fontFamily": "$font-body",
+                          "fontSize": "$text-sm",
+                          "fontWeight": "600"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "V1GoQr",
+                      "name": "Secondary CTA",
+                      "fill": "$card",
+                      "cornerRadius": "$radius-md",
+                      "stroke": "$border",
+                      "strokeWidth": 1,
+                      "strokeAlignment": "inner",
+                      "padding": [
+                        12,
+                        24
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "z2LYw7",
+                          "name": "Label",
+                          "fill": "$foreground",
+                          "content": "Support",
+                          "fontFamily": "$font-body",
+                          "fontSize": "$text-sm",
+                          "fontWeight": "600"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "jORV1",
+                  "name": "Hint",
+                  "fill": "$muted-foreground",
+                  "content": "Opnieuw koppelen kan altijd via het Exact App Center.",
+                  "fontFamily": "$font-caption",
+                  "fontSize": "$text-xs2",
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "k3jWX",
+          "name": "Footer",
+          "width": "fill_container",
+          "stroke": "$border",
+          "strokeWidth": {
+            "top": 1
+          },
+          "strokeLinejoin": "round",
+          "padding": [
+            28,
+            "$space-section-x"
+          ],
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "Nlroz",
+              "name": "Copyright",
+              "fill": "$muted-foreground",
+              "content": "© 2026 emeq",
+              "fontFamily": "$font-body",
+              "fontSize": "$text-xs2",
+              "fontWeight": "normal"
+            },
+            {
+              "type": "frame",
+              "id": "XDiaP",
+              "name": "Footer Links",
+              "gap": "$space-xs",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "bP2dl",
+                  "name": "Partners",
+                  "fill": "$muted-foreground",
+                  "content": "Partners",
+                  "fontFamily": "$font-body",
+                  "fontSize": "$text-xs2",
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "oHsnt",
+                  "name": "Privacy",
+                  "fill": "$muted-foreground",
+                  "content": "Privacy",
+                  "fontFamily": "$font-body",
+                  "fontSize": "$text-xs2",
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "rgfIB",
+                  "name": "Voorwaarden",
+                  "fill": "$muted-foreground",
+                  "content": "Voorwaarden",
+                  "fontFamily": "$font-body",
+                  "fontSize": "$text-xs2",
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "mrMQg",
+                  "name": "Sep",
+                  "fill": "$muted-foreground",
+                  "content": "·",
+                  "fontFamily": "$font-body",
+                  "fontSize": "$text-xs2",
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "uVmeS",
+                  "name": "Verwerkersovereenkomst",
+                  "fill": "$muted-foreground",
+                  "content": "Verwerkersovereenkomst",
+                  "fontFamily": "$font-body",
+                  "fontSize": "$text-xs2",
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "HBzdU",
+                  "name": "Sep",
+                  "fill": "$muted-foreground",
+                  "content": "·",
+                  "fontFamily": "$font-body",
+                  "fontSize": "$text-xs2",
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "T5gBY",
+                  "name": "Support",
+                  "fill": "$muted-foreground",
+                  "content": "Support",
+                  "fontFamily": "$font-body",
+                  "fontSize": "$text-xs2",
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "a8p6fc",
+      "x": 3120,
+      "y": 14439,
+      "name": "Exact / Stop Soft · Desktop",
+      "clip": true,
+      "width": 1440,
+      "height": 900,
+      "fill": "$background",
+      "layout": "vertical",
+      "children": [
+        {
+          "type": "frame",
+          "id": "WpLkd",
+          "name": "Nav",
+          "width": "fill_container",
+          "fill": "$background",
+          "stroke": "$border",
+          "strokeAlignment": "inner",
+          "strokeLinejoin": "round",
+          "padding": [
+            18,
+            "$space-section-x"
+          ],
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "XlAPV",
+              "name": "Nav Left",
+              "gap": "$space-2xl",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "JiZBA",
+                  "name": "Logo",
+                  "gap": "$space-xs",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "rectangle",
+                      "id": "b5xn4",
+                      "name": "Mark",
+                      "fill": {
+                        "type": "image",
+                        "enabled": true,
+                        "url": "logo.png",
+                        "mode": "fit"
+                      },
+                      "width": 14,
+                      "height": 14
+                    },
+                    {
+                      "type": "text",
+                      "id": "ojJSL",
+                      "name": "Wordmark",
+                      "fill": "$foreground",
+                      "content": "hub",
+                      "fontFamily": "$font-heading",
+                      "fontSize": "$text-xl",
+                      "fontWeight": "700",
+                      "letterSpacing": -0.5
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "eSzoJ",
+                  "name": "Nav Links",
+                  "gap": "$space-lg",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "cgJFa",
+                      "name": "Waarom",
+                      "fill": "$muted-foreground",
+                      "content": "Waarom",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-sm",
+                      "fontWeight": "500"
+                    },
+                    {
+                      "type": "text",
+                      "id": "ichZ0",
+                      "name": "Zo werkt het",
+                      "fill": "$muted-foreground",
+                      "content": "Zo werkt het",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-sm",
+                      "fontWeight": "500"
+                    },
+                    {
+                      "type": "text",
+                      "id": "pUTID",
+                      "name": "Platform",
+                      "fill": "$muted-foreground",
+                      "content": "Platform",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-sm",
+                      "fontWeight": "500"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "OSJpt",
+              "name": "Nav Right",
+              "gap": "$space-md",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "vJYvK",
+                  "name": "Demo Btn",
+                  "cornerRadius": "$radius-md",
+                  "padding": [
+                    9,
+                    16
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "FxXlo",
+                      "name": "Label",
+                      "fill": "$foreground",
+                      "content": "Demo aanvragen",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-sm",
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "gRkMX",
+                  "name": "Koppelen Btn",
+                  "fill": "$primary",
+                  "cornerRadius": "$radius-md",
+                  "padding": [
+                    9,
+                    16
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "SUlvt",
+                      "name": "Label",
+                      "fill": "$primary-foreground",
+                      "content": "Koppelen",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-sm",
+                      "fontWeight": "600"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "GRSvb",
+          "name": "Content",
+          "width": "fill_container",
+          "height": "fill_container",
+          "layout": "vertical",
+          "justifyContent": "center",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "rectangle",
+              "id": "j3orS",
+              "layoutPosition": "absolute",
+              "x": 0,
+              "y": 0,
+              "name": "Header Pattern",
+              "opacity": 0.3,
+              "fill": {
+                "type": "shader",
+                "enabled": true,
+                "url": "dotgrid.glsl",
+                "uniforms": {
+                  "u_cell": 34,
+                  "u_color": "#a23696",
+                  "u_opacity": 0.08,
+                  "u_fade": 0.6
+                }
+              },
+              "width": 1440,
+              "height": 360
+            },
+            {
+              "type": "frame",
+              "id": "i0CLHn",
+              "name": "Column",
+              "width": 640,
+              "layout": "vertical",
+              "gap": "$space-lg",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "n9wO5J",
+                  "name": "State Badge",
+                  "width": 44,
+                  "height": 44,
+                  "fill": "$muted",
+                  "cornerRadius": "$radius-full",
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "MdmHc",
+                      "name": "Badge Icon",
+                      "width": 22,
+                      "height": 22,
+                      "icon": "unplug",
+                      "library": "lucide",
+                      "fill": "$muted-foreground"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "P5MQLR",
+                  "name": "Header",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": "$space-md",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "X8D9s",
+                      "name": "Eyebrow",
+                      "fill": "$muted-foreground",
+                      "content": "KOPPELING BEËINDIGEN",
+                      "fontFamily": "$font-caption",
+                      "fontSize": "$text-xs",
+                      "fontWeight": "normal",
+                      "letterSpacing": 1.5
+                    },
+                    {
+                      "type": "text",
+                      "id": "ZWQU8",
+                      "name": "H1",
+                      "fill": "$foreground",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Geen actieve koppeling gevonden",
+                      "lineHeight": 1.08,
+                      "textAlign": "center",
+                      "fontFamily": "$font-heading",
+                      "fontSize": "$text-display",
+                      "fontWeight": "700",
+                      "letterSpacing": -2
+                    },
+                    {
+                      "type": "text",
+                      "id": "XwT9E",
+                      "name": "Sub",
+                      "fill": "$muted-foreground",
+                      "textGrowth": "fixed-width",
+                      "width": 520,
+                      "content": "Er is geen Emeq Hub-koppeling gekoppeld aan dit Exact-account, of die is al beëindigd. Twijfel je? Neem contact op.",
+                      "lineHeight": 1.6,
+                      "textAlign": "center",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-base",
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "sj7Fi",
+                  "name": "CTA Row",
+                  "gap": "$space-sm",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "PNwDt",
+                      "name": "Primary CTA",
+                      "fill": "$primary",
+                      "cornerRadius": "$radius-md",
+                      "padding": [
+                        12,
+                        24
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "pvrcL",
+                          "name": "Label",
+                          "fill": "$primary-foreground",
+                          "content": "Naar Emeq Hub",
+                          "fontFamily": "$font-body",
+                          "fontSize": "$text-sm",
+                          "fontWeight": "600"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "K4kQj",
+                      "name": "Secondary CTA",
+                      "fill": "$card",
+                      "cornerRadius": "$radius-md",
+                      "stroke": "$border",
+                      "strokeWidth": 1,
+                      "strokeAlignment": "inner",
+                      "padding": [
+                        12,
+                        24
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "utvyJ",
+                          "name": "Label",
+                          "fill": "$foreground",
+                          "content": "Support",
+                          "fontFamily": "$font-body",
+                          "fontSize": "$text-sm",
+                          "fontWeight": "600"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "xCXsF",
+                  "name": "Hint",
+                  "fill": "$muted-foreground",
+                  "content": "Support bereik je via de supportpagina of info@emeq.nl.",
+                  "fontFamily": "$font-caption",
+                  "fontSize": "$text-xs2",
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "u1010",
+          "name": "Footer",
+          "width": "fill_container",
+          "stroke": "$border",
+          "strokeWidth": {
+            "top": 1
+          },
+          "strokeLinejoin": "round",
+          "padding": [
+            28,
+            "$space-section-x"
+          ],
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "T2cjZp",
+              "name": "Copyright",
+              "fill": "$muted-foreground",
+              "content": "© 2026 emeq",
+              "fontFamily": "$font-body",
+              "fontSize": "$text-xs2",
+              "fontWeight": "normal"
+            },
+            {
+              "type": "frame",
+              "id": "v5BywP",
+              "name": "Footer Links",
+              "gap": "$space-xs",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "L4LTGt",
+                  "name": "Partners",
+                  "fill": "$muted-foreground",
+                  "content": "Partners",
+                  "fontFamily": "$font-body",
+                  "fontSize": "$text-xs2",
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "Q5VOsl",
+                  "name": "Privacy",
+                  "fill": "$muted-foreground",
+                  "content": "Privacy",
+                  "fontFamily": "$font-body",
+                  "fontSize": "$text-xs2",
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "LhUQi",
+                  "name": "Voorwaarden",
+                  "fill": "$muted-foreground",
+                  "content": "Voorwaarden",
+                  "fontFamily": "$font-body",
+                  "fontSize": "$text-xs2",
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "AOpJ8",
+                  "name": "Sep",
+                  "fill": "$muted-foreground",
+                  "content": "·",
+                  "fontFamily": "$font-body",
+                  "fontSize": "$text-xs2",
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "WsojD",
+                  "name": "Verwerkersovereenkomst",
+                  "fill": "$muted-foreground",
+                  "content": "Verwerkersovereenkomst",
+                  "fontFamily": "$font-body",
+                  "fontSize": "$text-xs2",
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "QPADl",
+                  "name": "Sep",
+                  "fill": "$muted-foreground",
+                  "content": "·",
+                  "fontFamily": "$font-body",
+                  "fontSize": "$text-xs2",
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "TENox",
+                  "name": "Support",
+                  "fill": "$muted-foreground",
+                  "content": "Support",
+                  "fontFamily": "$font-body",
+                  "fontSize": "$text-xs2",
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "OV7TA",
+      "x": 0,
+      "y": 15499,
+      "name": "Exact / Stop Confirm · Mobile",
+      "clip": true,
+      "width": 390,
+      "height": 844,
+      "fill": "$background",
+      "layout": "vertical",
+      "children": [
+        {
+          "type": "frame",
+          "id": "IbyYV",
+          "name": "Top Bar",
+          "width": "fill_container",
+          "fill": "$background",
+          "stroke": "$border",
+          "strokeWidth": {
+            "bottom": 1
+          },
+          "strokeAlignment": "inner",
+          "strokeLinejoin": "round",
+          "padding": [
+            14,
+            20
+          ],
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "xXPNl",
+              "name": "Wordmark",
+              "fill": "$foreground",
+              "content": "hub",
+              "fontFamily": "$font-heading",
+              "fontSize": "$text-xl",
+              "fontWeight": "700",
+              "letterSpacing": -0.5
+            },
+            {
+              "type": "frame",
+              "id": "Gr9GZ",
+              "name": "Right",
+              "gap": "$space-md",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "WZy82",
+                  "name": "Menu",
+                  "layout": "vertical",
+                  "gap": "$space-xxs",
+                  "padding": [
+                    6,
+                    2
+                  ],
+                  "alignItems": "end",
+                  "children": [
+                    {
+                      "type": "rectangle",
+                      "id": "SBLB4",
+                      "name": "bar",
+                      "fill": "$foreground",
+                      "width": 16,
+                      "height": 1.5
+                    },
+                    {
+                      "type": "rectangle",
+                      "id": "c4chRM",
+                      "name": "bar",
+                      "fill": "$foreground",
+                      "width": 16,
+                      "height": 1.5
+                    },
+                    {
+                      "type": "rectangle",
+                      "id": "sfxCA",
+                      "name": "bar",
+                      "fill": "$foreground",
+                      "width": 10,
+                      "height": 1.5
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "Puplh",
+                  "name": "Koppelen Btn",
+                  "fill": "$primary",
+                  "cornerRadius": "$radius-md",
+                  "padding": [
+                    9,
+                    16
+                  ],
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "o6Iq9k",
+                      "name": "Label",
+                      "fill": "$primary-foreground",
+                      "content": "Koppelen",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-sm",
+                      "fontWeight": "600"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "OyBB4",
+          "name": "Content",
+          "width": "fill_container",
+          "height": "fill_container",
+          "layout": "vertical",
+          "padding": [
+            0,
+            24
+          ],
+          "justifyContent": "center",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "rectangle",
+              "id": "CGGpW",
+              "layoutPosition": "absolute",
+              "x": 0,
+              "y": 0,
+              "name": "Header Pattern",
+              "opacity": 0.3,
+              "fill": {
+                "type": "shader",
+                "enabled": true,
+                "url": "dotgrid.glsl",
+                "uniforms": {
+                  "u_cell": 34,
+                  "u_color": "#a23696",
+                  "u_opacity": 0.08,
+                  "u_fade": 0.6
+                }
+              },
+              "width": 390,
+              "height": 300
+            },
+            {
+              "type": "frame",
+              "id": "RQq8T",
+              "name": "Column",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": "$space-lg",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "yGuJm",
+                  "name": "Brand Signal",
+                  "gap": "$space-xs",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "rectangle",
+                      "id": "kVJme",
+                      "name": "Mark",
+                      "fill": {
+                        "type": "image",
+                        "enabled": true,
+                        "url": "logo.png",
+                        "mode": "fit"
+                      },
+                      "width": 16,
+                      "height": 16
+                    },
+                    {
+                      "type": "text",
+                      "id": "f6HG5",
+                      "name": "Wordmark",
+                      "fill": "$foreground",
+                      "content": "emeq hub",
+                      "fontFamily": "$font-heading",
+                      "fontSize": "$text-sm",
+                      "fontWeight": "700",
+                      "letterSpacing": -0.3
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "hUkwP",
+                  "name": "Header",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": "$space-sm",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "Exv7t",
+                      "name": "Eyebrow",
+                      "fill": "$brand",
+                      "content": "KOPPELING BEËINDIGEN",
+                      "fontFamily": "$font-caption",
+                      "fontSize": "$text-2xs",
+                      "fontWeight": "normal",
+                      "letterSpacing": 1.5
+                    },
+                    {
+                      "type": "text",
+                      "id": "Vhgel",
+                      "name": "H1",
+                      "fill": "$foreground",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Emeq Hub ontkoppelen van Exact Online?",
+                      "lineHeight": 1.12,
+                      "textAlign": "center",
+                      "fontFamily": "$font-heading",
+                      "fontSize": "$text-2xl",
+                      "fontWeight": "700",
+                      "letterSpacing": -1
+                    },
+                    {
+                      "type": "text",
+                      "id": "K6rwG",
+                      "name": "Sub",
+                      "fill": "$muted-foreground",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Je Exact-administratie wordt losgekoppeld. Lopende tokens worden ingetrokken. Boekingen die al in Exact staan blijven staan.",
+                      "lineHeight": 1.6,
+                      "textAlign": "center",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-md",
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "F9KHZX",
+                  "name": "CTA Stack",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": "$space-sm",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "XLsGj",
+                      "name": "Primary CTA",
+                      "width": "fill_container",
+                      "fill": "$primary",
+                      "cornerRadius": "$radius-md",
+                      "padding": [
+                        13,
+                        24
+                      ],
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "s6R8X",
+                          "name": "Label",
+                          "fill": "$primary-foreground",
+                          "content": "Ontkoppelen",
+                          "fontFamily": "$font-body",
+                          "fontSize": "$text-sm",
+                          "fontWeight": "600"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "cfquL",
+                      "name": "Secondary CTA",
+                      "width": "fill_container",
+                      "fill": "$card",
+                      "cornerRadius": "$radius-md",
+                      "stroke": "$border",
+                      "strokeWidth": 1,
+                      "strokeAlignment": "inner",
+                      "padding": [
+                        13,
+                        24
+                      ],
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "czXdY",
+                          "name": "Label",
+                          "fill": "$foreground",
+                          "content": "Toch behouden",
+                          "fontFamily": "$font-body",
+                          "fontSize": "$text-sm",
+                          "fontWeight": "600"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "aUMl3",
+                  "name": "Hint",
+                  "fill": "$muted-foreground",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Dit kun je later opnieuw autoriseren via je app of het App Center.",
+                  "lineHeight": 1.5,
+                  "textAlign": "center",
+                  "fontFamily": "$font-caption",
+                  "fontSize": "$text-2xs",
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "CaWRI",
+          "name": "Footer",
+          "width": "fill_container",
+          "stroke": "$border",
+          "strokeWidth": {
+            "top": 1
+          },
+          "strokeLinejoin": "round",
+          "layout": "vertical",
+          "gap": "$space-sm",
+          "padding": [
+            24,
+            20
+          ],
+          "justifyContent": "space_between",
+          "children": [
+            {
+              "type": "text",
+              "id": "d0OYC",
+              "name": "Copy",
+              "fill": "$muted-foreground",
+              "content": "© 2026 emeq",
+              "fontFamily": "$font-body",
+              "fontSize": "$text-xs2",
+              "fontWeight": "normal"
+            },
+            {
+              "type": "frame",
+              "id": "H1uJg",
+              "name": "Links",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": "$space-xs",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "Dn9lV",
+                  "name": "Partners",
+                  "fill": "$muted-foreground",
+                  "content": "Partners",
+                  "fontFamily": "$font-body",
+                  "fontSize": "$text-xs2",
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "CGMWR",
+                  "name": "Privacy",
+                  "fill": "$muted-foreground",
+                  "content": "Privacy",
+                  "fontFamily": "$font-body",
+                  "fontSize": "$text-xs2",
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "uHQOz",
+                  "name": "Voorwaarden",
+                  "fill": "$muted-foreground",
+                  "content": "Voorwaarden",
+                  "fontFamily": "$font-body",
+                  "fontSize": "$text-xs2",
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "WNnvA",
+                  "name": "Verwerkersovereenkomst",
+                  "fill": "$muted-foreground",
+                  "content": "Verwerkersovereenkomst",
+                  "fontFamily": "$font-body",
+                  "fontSize": "$text-xs2",
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "O0luL",
+                  "name": "Support",
+                  "fill": "$muted-foreground",
+                  "content": "Support",
+                  "fontFamily": "$font-body",
+                  "fontSize": "$text-xs2",
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "oGKJk",
+      "x": 470,
+      "y": 15499,
+      "name": "Exact / Stop Done · Mobile",
+      "clip": true,
+      "width": 390,
+      "height": 844,
+      "fill": "$background",
+      "layout": "vertical",
+      "children": [
+        {
+          "type": "frame",
+          "id": "zQiKB",
+          "name": "Top Bar",
+          "width": "fill_container",
+          "fill": "$background",
+          "stroke": "$border",
+          "strokeWidth": {
+            "bottom": 1
+          },
+          "strokeAlignment": "inner",
+          "strokeLinejoin": "round",
+          "padding": [
+            14,
+            20
+          ],
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "fuT2x",
+              "name": "Wordmark",
+              "fill": "$foreground",
+              "content": "hub",
+              "fontFamily": "$font-heading",
+              "fontSize": "$text-xl",
+              "fontWeight": "700",
+              "letterSpacing": -0.5
+            },
+            {
+              "type": "frame",
+              "id": "R9TiY",
+              "name": "Right",
+              "gap": "$space-md",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "uB1wi",
+                  "name": "Menu",
+                  "layout": "vertical",
+                  "gap": "$space-xxs",
+                  "padding": [
+                    6,
+                    2
+                  ],
+                  "alignItems": "end",
+                  "children": [
+                    {
+                      "type": "rectangle",
+                      "id": "pROcm",
+                      "name": "bar",
+                      "fill": "$foreground",
+                      "width": 16,
+                      "height": 1.5
+                    },
+                    {
+                      "type": "rectangle",
+                      "id": "YjBs7",
+                      "name": "bar",
+                      "fill": "$foreground",
+                      "width": 16,
+                      "height": 1.5
+                    },
+                    {
+                      "type": "rectangle",
+                      "id": "PkpQz",
+                      "name": "bar",
+                      "fill": "$foreground",
+                      "width": 10,
+                      "height": 1.5
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "DA9h7",
+                  "name": "Koppelen Btn",
+                  "fill": "$primary",
+                  "cornerRadius": "$radius-md",
+                  "padding": [
+                    9,
+                    16
+                  ],
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "O88xA",
+                      "name": "Label",
+                      "fill": "$primary-foreground",
+                      "content": "Koppelen",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-sm",
+                      "fontWeight": "600"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "v9ipFz",
+          "name": "Content",
+          "width": "fill_container",
+          "height": "fill_container",
+          "layout": "vertical",
+          "padding": [
+            0,
+            24
+          ],
+          "justifyContent": "center",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "rectangle",
+              "id": "qSR3t",
+              "layoutPosition": "absolute",
+              "x": 0,
+              "y": 0,
+              "name": "Header Pattern",
+              "opacity": 0.3,
+              "fill": {
+                "type": "shader",
+                "enabled": true,
+                "url": "dotgrid.glsl",
+                "uniforms": {
+                  "u_cell": 34,
+                  "u_color": "#a23696",
+                  "u_opacity": 0.08,
+                  "u_fade": 0.6
+                }
+              },
+              "width": 390,
+              "height": 300
+            },
+            {
+              "type": "frame",
+              "id": "U1rUA0",
+              "name": "Column",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": "$space-lg",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "oRsmr",
+                  "name": "State Badge",
+                  "width": 44,
+                  "height": 44,
+                  "fill": "$success-soft",
+                  "cornerRadius": "$radius-full",
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "s1crK1",
+                      "name": "Badge Icon",
+                      "width": 22,
+                      "height": 22,
+                      "icon": "check",
+                      "library": "lucide",
+                      "fill": "$success"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "jMNtW",
+                  "name": "Header",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": "$space-sm",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "qFSi6",
+                      "name": "Eyebrow",
+                      "fill": "$muted-foreground",
+                      "content": "KOPPELING BEËINDIGD",
+                      "fontFamily": "$font-caption",
+                      "fontSize": "$text-2xs",
+                      "fontWeight": "normal",
+                      "letterSpacing": 1.5
+                    },
+                    {
+                      "type": "text",
+                      "id": "SQmiX",
+                      "name": "H1",
+                      "fill": "$foreground",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Geen toegang meer",
+                      "lineHeight": 1.12,
+                      "textAlign": "center",
+                      "fontFamily": "$font-heading",
+                      "fontSize": "$text-2xl",
+                      "fontWeight": "700",
+                      "letterSpacing": -1
+                    },
+                    {
+                      "type": "text",
+                      "id": "YAjFC",
+                      "name": "Sub",
+                      "fill": "$muted-foreground",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Emeq Hub heeft geen toegang meer tot deze Exact-administratie.",
+                      "lineHeight": 1.6,
+                      "textAlign": "center",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-md",
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "hfb5c",
+                  "name": "CTA Stack",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": "$space-sm",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "NCWej",
+                      "name": "Primary CTA",
+                      "width": "fill_container",
+                      "fill": "$primary",
+                      "cornerRadius": "$radius-md",
+                      "padding": [
+                        13,
+                        24
+                      ],
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "DZDJ7",
+                          "name": "Label",
+                          "fill": "$primary-foreground",
+                          "content": "Terug naar Emeq Hub",
+                          "fontFamily": "$font-body",
+                          "fontSize": "$text-sm",
+                          "fontWeight": "600"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "bVK32",
+                      "name": "Secondary CTA",
+                      "width": "fill_container",
+                      "fill": "$card",
+                      "cornerRadius": "$radius-md",
+                      "stroke": "$border",
+                      "strokeWidth": 1,
+                      "strokeAlignment": "inner",
+                      "padding": [
+                        13,
+                        24
+                      ],
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "R5MA7I",
+                          "name": "Label",
+                          "fill": "$foreground",
+                          "content": "Support",
+                          "fontFamily": "$font-body",
+                          "fontSize": "$text-sm",
+                          "fontWeight": "600"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "SL4hW",
+                  "name": "Hint",
+                  "fill": "$muted-foreground",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Opnieuw koppelen kan altijd via het Exact App Center.",
+                  "lineHeight": 1.5,
+                  "textAlign": "center",
+                  "fontFamily": "$font-caption",
+                  "fontSize": "$text-2xs",
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "S5xgY5",
+          "name": "Footer",
+          "width": "fill_container",
+          "stroke": "$border",
+          "strokeWidth": {
+            "top": 1
+          },
+          "strokeLinejoin": "round",
+          "layout": "vertical",
+          "gap": "$space-sm",
+          "padding": [
+            24,
+            20
+          ],
+          "justifyContent": "space_between",
+          "children": [
+            {
+              "type": "text",
+              "id": "lMcaw",
+              "name": "Copy",
+              "fill": "$muted-foreground",
+              "content": "© 2026 emeq",
+              "fontFamily": "$font-body",
+              "fontSize": "$text-xs2",
+              "fontWeight": "normal"
+            },
+            {
+              "type": "frame",
+              "id": "qChzh",
+              "name": "Links",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": "$space-xs",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "gT9ow",
+                  "name": "Partners",
+                  "fill": "$muted-foreground",
+                  "content": "Partners",
+                  "fontFamily": "$font-body",
+                  "fontSize": "$text-xs2",
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "GxMS6",
+                  "name": "Privacy",
+                  "fill": "$muted-foreground",
+                  "content": "Privacy",
+                  "fontFamily": "$font-body",
+                  "fontSize": "$text-xs2",
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "kb9Yp",
+                  "name": "Voorwaarden",
+                  "fill": "$muted-foreground",
+                  "content": "Voorwaarden",
+                  "fontFamily": "$font-body",
+                  "fontSize": "$text-xs2",
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "zUI14",
+                  "name": "Verwerkersovereenkomst",
+                  "fill": "$muted-foreground",
+                  "content": "Verwerkersovereenkomst",
+                  "fontFamily": "$font-body",
+                  "fontSize": "$text-xs2",
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "ZtzKu",
+                  "name": "Support",
+                  "fill": "$muted-foreground",
+                  "content": "Support",
+                  "fontFamily": "$font-body",
+                  "fontSize": "$text-xs2",
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "note",
+      "id": "LOJkj",
+      "x": 1000,
+      "y": 15499,
+      "name": "App Center URI's",
+      "width": 560,
+      "height": 0,
+      "content": "App Center URI's (prod):\nMeer informatie / Probeer nu / Starten\n  → https://hub.emeq.nl/partners/exact\nNiet meer gebruiken (Deprovisioning URL)\n  → https://hub.emeq.nl/exact/stop\n  Exact append: ?Country=&Language=&UserId=\n  ← dit design (Confirm / Done / Soft)"
     }
   ],
   "variables": {
