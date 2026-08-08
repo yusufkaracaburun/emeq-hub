@@ -67,6 +67,10 @@ class LegalController extends Controller
     ): Response {
         $url = route($routeName);
 
+        // Het design nummert secties zelf (CSS-counter in de kantlijn); handmatige
+        // nummers in ##-koppen zouden dubbel tellen.
+        $markdown = (string) preg_replace('/^##\s+\d+[.)]\s*/m', '## ', $markdown);
+
         return Inertia::render('legal', [
             'title' => $title,
             'html' => Str::markdown($markdown, [
