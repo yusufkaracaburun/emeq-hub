@@ -18,6 +18,11 @@ export interface ProviderDetail {
     logo: string | null;
     brand: string | null;
     live?: boolean;
+    headline?: string;
+    intro?: string;
+    features?: { icon: string; title: string; description: string }[];
+    steps?: { title: string; description: string }[];
+    connect_pitch?: string;
     how_it_works?: string[];
     use_cases?: { title: string; value: string }[];
     capabilities: { title: string; description: string }[];

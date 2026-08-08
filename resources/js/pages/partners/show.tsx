@@ -1,103 +1,121 @@
 import { Link } from '@inertiajs/react';
 import { MotionConfig } from 'framer-motion';
-import { ArrowRight, ChevronRight, ExternalLink, FileText, ListChecks, RefreshCw, Send } from 'lucide-react';
-import { Footer } from '@/components/landing/footer';
-import { KoppelForm } from '@/components/landing/koppel-form';
+import {
+    ArrowRight,
+    BookOpen,
+    ExternalLink,
+    FileText,
+    ListChecks,
+    Percent,
+    Receipt,
+    RefreshCw,
+    Send,
+    Users,
+    Webhook,
+    type LucideIcon,
+} from 'lucide-react';
+import { SimpleFooter } from '@/components/landing/footer';
 import { Nav } from '@/components/landing/nav';
 import { Reveal, RevealGroup, RevealItem } from '@/components/motion';
 import { Seo } from '@/components/seo';
-import { Eyebrow } from '@/components/ui/eyebrow';
 import { buttonVariants } from '@/components/ui/button';
+import { Eyebrow } from '@/components/ui/eyebrow';
 import { FeatureCard } from '@/components/ui/feature-card';
-import { type ProviderDetail, type ProviderSummary, type SeoMeta } from '@/lib/types';
+import { type ProviderDetail, type SeoMeta } from '@/lib/types';
 import { cn } from '@/lib/utils';
 
 interface PartnersShowProps {
     provider: ProviderDetail;
-    providers: ProviderSummary[];
     seo: SeoMeta;
 }
 
-const useCaseIcons = [RefreshCw, ListChecks, FileText, Send];
+/** Lucide-iconen die de showcase-config (features[].icon) mag noemen. */
+const featureIcons: Record<string, LucideIcon> = {
+    'file-text': FileText,
+    receipt: Receipt,
+    users: Users,
+    'book-open': BookOpen,
+    percent: Percent,
+    webhook: Webhook,
+    'refresh-cw': RefreshCw,
+    'list-checks': ListChecks,
+    send: Send,
+};
 
-export default function PartnersShow({ provider, providers, seo }: PartnersShowProps) {
+export default function PartnersShow({ provider, seo }: PartnersShowProps) {
+    const features =
+        provider.features ??
+        provider.use_cases?.map((useCase) => ({ icon: 'list-checks', title: useCase.title, description: useCase.value })) ??
+        [];
+    const steps =
+        provider.steps ?? provider.how_it_works?.map((paragraph) => ({ title: '', description: paragraph })) ?? [];
+
     return (
         <MotionConfig reducedMotion="user">
             <Seo seo={seo} />
             <Nav />
-            <main>
-                <Breadcrumbs label={provider.label} />
-                <ProviderHero provider={provider} />
-                {provider.use_cases && provider.use_cases.length > 0 && <UseCases provider={provider} />}
-                {provider.how_it_works && provider.how_it_works.length > 0 && <HowItWorks provider={provider} />}
-                {provider.endpoints && provider.endpoints.length > 0 && <Endpoints provider={provider} />}
-                <ConnectSection provider={provider} providers={providers} />
-            </main>
-            <Footer />
-        </MotionConfig>
-    );
-}
+            <main className="relative overflow-hidden px-6 pb-24 pt-16 lg:px-section-x lg:pt-20">
+                <div
+                    aria-hidden
+                    className="pointer-events-none absolute inset-x-0 top-0 h-[360px] opacity-30 [background-image:radial-gradient(circle,#17171720_1px,transparent_1px)] [background-size:24px_24px] [mask-image:linear-gradient(to_bottom,black,transparent_85%)]"
+                />
 
-/** Zichtbare tegenhanger van de BreadcrumbList-structured-data (PartnersController). */
-function Breadcrumbs({ label }: { label: string }) {
-    return (
-        <nav aria-label="Kruimelpad" className="px-6 pt-8 lg:px-section-x">
-            <ol className="mx-auto flex max-w-[1160px] items-center gap-1.5 font-mono text-2xs text-muted-foreground">
-                <li>
-                    <Link href="/" className="transition-colors duration-150 hover:text-foreground">
-                        Home
-                    </Link>
-                </li>
-                <ChevronRight aria-hidden className="size-3" />
-                <li>
-                    <Link href="/partners" className="transition-colors duration-150 hover:text-foreground">
-                        Integraties
-                    </Link>
-                </li>
-                <ChevronRight aria-hidden className="size-3" />
-                <li aria-current="page" className="text-foreground">
-                    {label}
-                </li>
-            </ol>
-        </nav>
+                <div className="relative flex flex-col gap-16">
+                    <ProviderHero provider={provider} />
+                    {features.length > 0 && <Features provider={provider} features={features} />}
+                    {steps.length > 0 && <HowItWorks provider={provider} steps={steps} />}
+                    <ConnectCta provider={provider} />
+                </div>
+            </main>
+            <SimpleFooter />
+        </MotionConfig>
     );
 }
 
 function ProviderHero({ provider }: { provider: ProviderDetail }) {
     return (
-        <section className="px-6 pb-20 pt-10 lg:px-section-x">
-            <Reveal className="mx-auto flex max-w-[760px] flex-col items-center gap-6 text-center">
-                <div className="flex items-center gap-3.5">
-                    {provider.logo && <img src={provider.logo} alt="" className="h-8" />}
-                    <span
-                        className={cn(
-                            'inline-flex items-center gap-1.5 rounded-pill px-2.5 py-1 font-mono text-2xs uppercase tracking-[1.5px]',
-                            provider.live ? 'bg-success-soft text-success' : 'bg-muted text-muted-foreground',
-                        )}
+        <Reveal className="mx-auto flex max-w-[840px] flex-col items-center gap-6 text-center">
+            <Eyebrow>Integratie · {provider.category}</Eyebrow>
+
+            <div className="flex items-center gap-4">
+                {provider.logo && <img src={provider.logo} alt={provider.label} className="h-11" />}
+                <span
+                    className={cn(
+                        'inline-flex items-center gap-1.5 rounded-pill px-3 py-[5px] font-mono text-2xs font-bold uppercase tracking-[1.5px]',
+                        provider.live ? 'bg-success-soft text-success' : 'bg-muted text-muted-foreground',
+                    )}
+                >
+                    {provider.live && <span aria-hidden className="size-1.5 rounded-pill bg-success" />}
+                    {provider.live ? 'Live' : 'Binnenkort'}
+                </span>
+            </div>
+
+            <h1 className="text-2xl font-bold leading-[1.05] tracking-[-1px] text-foreground md:text-display md:tracking-[-2px]">
+                {provider.headline ?? `${provider.label} koppelen via één API`}
+            </h1>
+            <p className="max-w-[660px] text-lg leading-[1.6] text-muted-foreground">
+                {provider.intro ?? provider.summary}
+            </p>
+
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+                <Link href="/koppelen" className={cn(buttonVariants({ variant: 'primary', size: 'md' }), 'group')}>
+                    Start met {provider.label}
+                    <ArrowRight aria-hidden className="size-4 transition-transform duration-150 group-hover:translate-x-0.5" />
+                </Link>
+                {provider.docs_url && (
+                    <a
+                        href={provider.docs_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={buttonVariants({ variant: 'outline', size: 'md' })}
                     >
-                        {provider.live && <span aria-hidden className="size-1.5 rounded-pill bg-success" />}
-                        {provider.live ? 'Live' : 'Binnenkort'}
-                    </span>
-                </div>
-
-                <h1 className="text-2xl font-bold tracking-[-1px] text-foreground md:text-3xl">
-                    {provider.label} koppelen via één API
-                </h1>
-                <p className="max-w-[640px] text-base leading-[1.6] text-muted-foreground">{provider.summary}</p>
-
-                <div className="flex flex-col gap-3.5 sm:flex-row sm:items-center">
-                    <a href="#koppelen" className={cn(buttonVariants({ variant: 'primary', size: 'md' }), 'group')}>
-                        Start met {provider.label}
-                        <ArrowRight aria-hidden className="size-4 transition-transform duration-150 group-hover:translate-x-0.5" />
+                        Bekijk de docs
                     </a>
-                    <a href="#zo-werkt-het" className={buttonVariants({ variant: 'outline', size: 'md' })}>
-                        Bekijk de werking
-                    </a>
-                </div>
+                )}
+            </div>
 
-                <ResourceLinks provider={provider} />
-            </Reveal>
-        </section>
+            <ResourceLinks provider={provider} />
+        </Reveal>
     );
 }
 
@@ -114,7 +132,7 @@ function ResourceLinks({ provider }: { provider: ProviderDetail }) {
     }
 
     return (
-        <div className="flex flex-col items-center gap-3 sm:flex-row sm:gap-6">
+        <div className="mt-2 flex flex-col items-center gap-3 sm:flex-row sm:gap-6">
             {resources.map((resource) => (
                 <a
                     key={resource.label}
@@ -131,24 +149,30 @@ function ResourceLinks({ provider }: { provider: ProviderDetail }) {
     );
 }
 
-function UseCases({ provider }: { provider: ProviderDetail }) {
+function Features({
+    provider,
+    features,
+}: {
+    provider: ProviderDetail;
+    features: { icon: string; title: string; description: string }[];
+}) {
     return (
-        <section className="border-t border-border bg-card px-6 py-20 lg:px-section-x">
-            <Reveal className="mx-auto flex max-w-[760px] flex-col items-center gap-4 text-center">
+        <section className="flex flex-col gap-8">
+            <Reveal className="mx-auto flex max-w-[760px] flex-col items-center gap-3 text-center">
                 <Eyebrow>Mogelijkheden</Eyebrow>
                 <h2 className="text-xl font-bold tracking-[-1px] text-foreground md:text-2xl">
                     Wat je met {provider.label} automatiseert
                 </h2>
             </Reveal>
 
-            <RevealGroup className="mx-auto mt-12 grid max-w-[1160px] gap-6 md:grid-cols-2">
-                {provider.use_cases!.map((useCase, index) => {
-                    const Icon = useCaseIcons[index % useCaseIcons.length];
+            <RevealGroup className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                {features.map((feature) => {
+                    const Icon = featureIcons[feature.icon] ?? ListChecks;
 
                     return (
-                        <RevealItem key={useCase.title}>
-                            <FeatureCard icon={<Icon />} title={useCase.title} className="h-full">
-                                {useCase.value}
+                        <RevealItem key={feature.title}>
+                            <FeatureCard icon={<Icon />} title={feature.title} className="h-full">
+                                {feature.description}
                             </FeatureCard>
                         </RevealItem>
                     );
@@ -158,18 +182,24 @@ function UseCases({ provider }: { provider: ProviderDetail }) {
     );
 }
 
-function HowItWorks({ provider }: { provider: ProviderDetail }) {
+function HowItWorks({
+    provider,
+    steps,
+}: {
+    provider: ProviderDetail;
+    steps: { title: string; description: string }[];
+}) {
     return (
-        <section id="zo-werkt-het" className="px-6 py-20 lg:px-section-x">
-            <Reveal className="mx-auto flex max-w-[760px] flex-col items-center gap-4 text-center">
-                <Eyebrow>Onder de motorkap</Eyebrow>
+        <section id="zo-werkt-het" className="flex flex-col gap-8">
+            <Reveal className="mx-auto flex max-w-[760px] flex-col items-center gap-3 text-center">
+                <Eyebrow>Zo werkt het</Eyebrow>
                 <h2 className="text-xl font-bold tracking-[-1px] text-foreground md:text-2xl">
                     Live met {provider.label} in drie stappen
                 </h2>
             </Reveal>
 
-            <RevealGroup className="mx-auto mt-12 grid max-w-[1160px] gap-10 lg:grid-cols-3">
-                {provider.how_it_works!.map((paragraph, index) => (
+            <RevealGroup className="grid gap-10 lg:grid-cols-3 lg:gap-6">
+                {steps.map((step, index) => (
                     <RevealItem key={index} className="flex flex-col gap-4">
                         <span
                             aria-hidden
@@ -177,7 +207,8 @@ function HowItWorks({ provider }: { provider: ProviderDetail }) {
                         >
                             {index + 1}
                         </span>
-                        <p className="text-sm leading-[1.6] text-muted-foreground">{paragraph}</p>
+                        {step.title && <h3 className="text-lg font-semibold text-foreground">{step.title}</h3>}
+                        <p className="text-sm leading-[1.6] text-muted-foreground">{step.description}</p>
                     </RevealItem>
                 ))}
             </RevealGroup>
@@ -185,78 +216,20 @@ function HowItWorks({ provider }: { provider: ProviderDetail }) {
     );
 }
 
-function Endpoints({ provider }: { provider: ProviderDetail }) {
+function ConnectCta({ provider }: { provider: ProviderDetail }) {
     return (
-        <section className="border-t border-border bg-card px-6 py-20 lg:px-section-x">
-            <Reveal className="mx-auto flex max-w-[760px] flex-col items-center gap-4 text-center">
-                <Eyebrow>Voor developers</Eyebrow>
-                <h2 className="text-xl font-bold tracking-[-1px] text-foreground md:text-2xl">Endpoint-kaart</h2>
-            </Reveal>
-
-            <Reveal delay={0.1} className="mx-auto mt-12 max-w-[1160px] overflow-hidden rounded-lg border border-border bg-background">
-                <div className="hidden grid-cols-[90px_minmax(0,1.2fr)_minmax(0,1.6fr)] gap-3 border-b border-border bg-muted px-5 py-2.5 font-mono text-2xs uppercase tracking-[1.5px] text-muted-foreground md:grid">
-                    <span>Methode</span>
-                    <span>Pad</span>
-                    <span>Wat het doet</span>
-                </div>
-                {provider.endpoints!.map((endpoint) => (
-                    <div
-                        key={`${endpoint.method}-${endpoint.path}`}
-                        className="grid gap-1.5 border-b border-border px-5 py-3.5 font-mono text-xs2 last:border-b-0 md:grid-cols-[90px_minmax(0,1.2fr)_minmax(0,1.6fr)] md:gap-3"
-                    >
-                        <span className="font-medium text-brand">{endpoint.method}</span>
-                        <span className="break-all text-foreground">{endpoint.path}</span>
-                        <span className="font-sans text-sm text-muted-foreground">{endpoint.description}</span>
-                    </div>
-                ))}
-            </Reveal>
-
-            {provider.example_curl && (
-                <Reveal delay={0.15} className="mx-auto mt-6 max-w-[1160px] overflow-hidden rounded-lg border border-border bg-background">
-                    <div className="flex items-center gap-3.5 border-b border-border bg-muted px-4 py-[13px]">
-                        <div aria-hidden className="flex items-center gap-2">
-                            <span className="size-2.5 rounded-pill bg-border" />
-                            <span className="size-2.5 rounded-pill bg-border" />
-                            <span className="size-2.5 rounded-pill bg-border" />
-                        </div>
-                        <span className="font-mono text-xs text-muted-foreground">voorbeeld.sh</span>
-                    </div>
-                    <pre className="overflow-x-auto p-6 font-mono text-xs2 leading-[1.6] text-foreground">
-                        {provider.example_curl}
-                    </pre>
-                </Reveal>
-            )}
-        </section>
-    );
-}
-
-function ConnectSection({ provider, providers }: { provider: ProviderDetail; providers: ProviderSummary[] }) {
-    return (
-        <section id="koppelen" className="border-t border-border bg-brand-subtle px-6 py-20 lg:px-section-x lg:py-24">
-            <div className="mx-auto grid max-w-[1160px] gap-12 lg:grid-cols-[1fr_520px] lg:gap-16">
-                <Reveal className="flex flex-col gap-5">
-                    <Eyebrow>Start vandaag</Eyebrow>
-                    <h2 className="text-xl font-bold tracking-[-1px] text-foreground md:text-2xl">
-                        Klaar om <span className="text-brand">{provider.label}</span> te koppelen?
-                    </h2>
-                    <p className="max-w-[480px] text-base leading-[1.6] text-muted-foreground">
-                        Vraag een koppeling aan en we richten je toegang in: een API-token, de juiste abilities en een
-                        korte onboarding. Binnen één werkdag persoonlijk contact — vrijblijvend.
-                    </p>
-                    <ul className="flex flex-col gap-2.5">
-                        {provider.connect_steps.map((step, index) => (
-                            <li key={index} className="flex items-start gap-3 text-sm leading-[1.6] text-muted-foreground">
-                                <span className="mt-0.5 font-mono text-xs2 text-brand">{`0${index + 1}`}</span>
-                                <span className="break-words font-mono text-xs2">{step}</span>
-                            </li>
-                        ))}
-                    </ul>
-                </Reveal>
-
-                <Reveal delay={0.1} className="rounded-xl border border-border bg-card p-7 shadow-card lg:p-8">
-                    <KoppelForm providers={providers.map(({ key, label }) => ({ key, label }))} preselect={provider.key} />
-                </Reveal>
-            </div>
-        </section>
+        <Reveal className="flex flex-col items-center gap-6 rounded-2xl bg-brand-subtle px-8 py-[60px] text-center lg:px-16">
+            <h2 className="text-xl font-bold tracking-[-1px] text-foreground md:text-2xl">
+                Klaar om {provider.label} te koppelen?
+            </h2>
+            <p className="max-w-[520px] text-base leading-[1.6] text-muted-foreground">
+                {provider.connect_pitch ??
+                    'Vraag een koppeling aan en we richten je toegang in — binnen één werkdag persoonlijk contact.'}
+            </p>
+            <Link href="/koppelen" className={cn(buttonVariants({ variant: 'primary', size: 'lg' }), 'group')}>
+                Start met {provider.label}
+                <ArrowRight aria-hidden className="size-4 transition-transform duration-150 group-hover:translate-x-0.5" />
+            </Link>
+        </Reveal>
     );
 }

@@ -42,9 +42,26 @@ return [
         'logo' => '/img/partners/exact.svg',
         'brand' => '#e1141d',
         'live' => true,
-        'summary' => 'Koppel je app aan Exact Online-administraties zonder zelf OAuth2, '
-            .'token-refresh en division-routing te bouwen. De Hub regelt de koppeling, '
-            .'multi-tenant token-opslag en audit-logging.',
+        'summary' => 'Verwerk verkoop- en inkoopboekingen, relaties en grootboekgegevens '
+            .'betrouwbaar en realtime.',
+        'headline' => 'Exact Online, realtime gekoppeld',
+        'intro' => 'Synchroniseer verkoop- en inkoopboekingen, relaties en grootboekgegevens '
+            .'via één API. emeq beheert OAuth, tokens en audit; jouw team bouwt door.',
+        'features' => [
+            ['icon' => 'file-text', 'title' => 'Verkoopfacturen', 'description' => 'Boek verkoopfacturen direct als SalesEntry in Exact.'],
+            ['icon' => 'receipt', 'title' => 'Inkoopfacturen', 'description' => 'Inkoopboekingen als PurchaseEntry, inclusief bijlagen.'],
+            ['icon' => 'users', 'title' => 'Relaties', 'description' => 'Debiteuren en crediteuren automatisch resolve-or-learn.'],
+            ['icon' => 'book-open', 'title' => 'Grootboek & kostenplaats', 'description' => 'GL-accounts, kostenplaatsen en kostendragers.'],
+            ['icon' => 'percent', 'title' => 'Verlegde btw', 'description' => 'VAT-codes voor verlegde btw worden automatisch gemapt.'],
+            ['icon' => 'webhook', 'title' => 'Webhooks & audit', 'description' => 'Realtime events en een volledige, immutable audit-trail.'],
+        ],
+        'steps' => [
+            ['title' => 'Koppel via OAuth', 'description' => 'Eén klik — de gebruiker autoriseert Exact Online.'],
+            ['title' => 'emeq host de tokens', 'description' => 'Token-lifecycle, refresh en webhooks regelen wij.'],
+            ['title' => 'Eén REST-API', 'description' => 'POST /v1/accounting/documents. Klaar.'],
+        ],
+        'connect_pitch' => 'Maak je financiële integratie schaalbaar. Wij regelen de infrastructuur; '
+            .'jij levert de workflow.',
         'meta_description' => 'Koppel je app aan Exact Online zonder zelf OAuth2, token-refresh en '
             .'division-routing te bouwen. De Hub regelt koppeling, tokenopslag en audit-logging.',
         'how_it_works' => [
