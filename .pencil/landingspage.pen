@@ -1259,11 +1259,10 @@
                   "type": "rectangle",
                   "id": "oxlNv",
                   "name": "Exact Online Logo",
-                  "opacity": 0.75,
                   "fill": {
                     "type": "image",
                     "enabled": true,
-                    "url": "exact-gray.png",
+                    "url": "exact.png",
                     "mode": "fit"
                   },
                   "width": 120,
@@ -5621,11 +5620,10 @@
                       "type": "rectangle",
                       "id": "E8TD2",
                       "name": "Exact Online Logo",
-                      "opacity": 0.75,
                       "fill": {
                         "type": "image",
                         "enabled": true,
-                        "url": "exact-gray.png",
+                        "url": "exact.png",
                         "mode": "fit"
                       },
                       "width": 85,
