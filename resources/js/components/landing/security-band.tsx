@@ -11,15 +11,15 @@ const badges = [
         icon: <img src="/img/badges/gdpr.png" alt="" aria-hidden className="size-5 opacity-70" />,
         label: 'GDPR',
     },
-    { icon: <Lock aria-hidden className="size-4 text-muted-foreground" />, label: 'Tokens encrypted at rest' },
-    { icon: <KeyRound aria-hidden className="size-4 text-muted-foreground" />, label: 'Per-Connection secrets' },
+    { icon: <Lock aria-hidden className="size-5 text-muted-foreground" />, label: 'Tokens encrypted at rest' },
+    { icon: <KeyRound aria-hidden className="size-5 text-muted-foreground" />, label: 'Per-Connection secrets' },
 ];
 
 export function SecurityBand() {
     return (
         <section className="border-y border-border bg-card px-6 py-20 lg:px-section-x lg:py-24">
-            <div className="mx-auto flex max-w-[720px] flex-col items-center gap-9 text-center">
-                <Reveal className="flex flex-col items-center gap-3.5">
+            <div className="mx-auto flex max-w-[720px] flex-col items-center gap-10 text-center">
+                <Reveal className="flex flex-col items-center gap-4">
                     <p className="font-mono text-xs uppercase tracking-[1.5px] text-muted-foreground">
                         Security &amp; compliance
                     </p>
@@ -29,7 +29,7 @@ export function SecurityBand() {
                     </p>
                 </Reveal>
 
-                <RevealGroup className="flex flex-wrap items-center justify-center gap-3.5">
+                <RevealGroup className="flex flex-wrap items-center justify-center gap-4">
                     {badges.map((badge) => (
                         <RevealItem key={badge.label}>
                             <Pill icon={badge.icon} className="border border-border">

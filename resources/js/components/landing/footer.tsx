@@ -1,4 +1,3 @@
-import { Link } from '@inertiajs/react';
 import { ArrowUpRight } from 'lucide-react';
 
 const links = [
@@ -10,53 +9,79 @@ const links = [
 ];
 
 const products = [
-    { name: 'Emeq', domain: 'emeq.nl', href: 'https://emeq.nl', description: 'Software-studio achter de Hub.' },
-    { name: 'Planny', domain: 'planny.nl', href: 'https://planny.nl', description: 'Planning en roosters voor teams.' },
+    { name: 'Emeq', href: 'https://emeq.nl' },
+    { name: 'Planny', href: 'https://planny.nl' },
 ];
+
+/** Eénregelige footer voor de intake-pagina's (/koppelen en /demo) — volgt de compacte Footer uit die design-frames. */
+export function SimpleFooter() {
+    return (
+        <footer className="flex flex-col gap-4 border-t border-border px-6 py-7 text-xs2 text-muted-foreground md:flex-row md:items-center md:justify-between md:gap-6 lg:px-section-x">
+            <p>© 2026 emeq</p>
+            <nav className="flex flex-wrap gap-6">
+                {links.map((link) => (
+                    <a
+                        key={link.label}
+                        href={link.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="transition-colors duration-150 hover:text-foreground"
+                    >
+                        {link.label}
+                    </a>
+                ))}
+            </nav>
+        </footer>
+    );
+}
 
 export function Footer() {
     return (
         <footer className="border-t border-border bg-background px-6 pb-10 pt-14 lg:px-section-x">
             <div className="flex flex-col items-start gap-10 md:flex-row md:justify-between md:gap-12">
-                <div className="flex max-w-[320px] flex-col gap-2.5">
-                    <div className="flex items-center gap-2.5">
-                        <span aria-hidden className="size-3.5 rounded-[3px] bg-brand" />
-                        <span className="text-[22px] font-bold tracking-[-0.5px] text-foreground">emeq</span>
+                <div className="flex flex-col gap-2">
+                    <div className="flex items-center gap-2">
+                        <span aria-hidden className="size-3.5 rounded-xs bg-brand" />
+                        <span className="text-[24px] font-bold tracking-[-0.5px] text-foreground">emeq</span>
                     </div>
                     <p className="text-sm text-muted-foreground">De integratie-API voor software die wil doorgroeien.</p>
                 </div>
 
                 <nav className="flex flex-col items-start gap-3">
                     {links.map((link) => (
-                        <Link
+                        <a
                             key={link.label}
                             href={link.href}
+                            target="_blank"
+                            rel="noopener noreferrer"
                             className="text-sm font-medium text-muted-foreground transition-colors duration-150 hover:text-foreground"
                         >
                             {link.label}
-                        </Link>
+                        </a>
                     ))}
                 </nav>
 
-                <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-3">
                     <p className="text-sm font-medium tracking-[0.5px] text-muted-foreground">Ook van Emeq</p>
                     {products.map((product) => (
-                        <a key={product.name} href={product.href} className="group flex flex-col gap-1">
-                            <span className="flex items-center gap-1.5 text-sm font-medium text-foreground">
-                                {product.name}
-                                <ArrowUpRight
-                                    aria-hidden
-                                    className="size-3 text-muted-foreground transition-colors duration-150 group-hover:text-foreground"
-                                />
-                            </span>
-                            <span className="font-mono text-xs text-muted-foreground">{product.domain}</span>
-                            <span className="text-xs2 text-muted-foreground">{product.description}</span>
+                        <a
+                            key={product.name}
+                            href={product.href}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="group flex items-center gap-1.5 text-sm font-medium text-foreground"
+                        >
+                            {product.name}
+                            <ArrowUpRight
+                                aria-hidden
+                                className="size-3 text-muted-foreground transition-colors duration-150 group-hover:text-foreground"
+                            />
                         </a>
                     ))}
                 </div>
             </div>
 
-            <div className="mt-7 flex items-center justify-between border-t border-border pt-6">
+            <div className="mt-6 flex items-center justify-between border-t border-border pt-6">
                 <p className="font-mono text-xs text-muted-foreground">© 2026 emeq. Alle rechten voorbehouden.</p>
                 <div className="flex items-center gap-2">
                     <span className="flex items-center justify-center rounded-xs border border-border p-1.5">

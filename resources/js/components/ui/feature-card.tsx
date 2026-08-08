@@ -14,13 +14,13 @@ function FeatureCard({ className, icon, title, children, ...props }: FeatureCard
     return (
         <div
             className={cn(
-                'flex min-h-[148px] flex-col gap-2.5 rounded-lg border border-border bg-card p-6',
+                'flex min-h-[148px] flex-col gap-2 rounded-lg border border-border bg-card p-6',
                 'transition-colors duration-150 hover:border-brand hover:bg-muted',
                 className,
             )}
             {...props}
         >
-            <div className="flex items-center gap-2.5">
+            <div className="flex items-center gap-2">
                 <span aria-hidden className="text-muted-foreground [&>svg]:size-[18px]">
                     {icon}
                 </span>

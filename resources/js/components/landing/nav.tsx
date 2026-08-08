@@ -32,11 +32,11 @@ export function Nav() {
         >
             <div className="flex items-center justify-between px-6 py-[18px] lg:px-section-x">
                 <div className="flex items-center gap-10">
-                    <Link href="/" className="flex items-center gap-2.5" aria-label="emeq home">
-                        <span aria-hidden className="size-3.5 rounded-[3px] bg-brand" />
-                        <span className="text-[22px] font-bold tracking-[-0.5px] text-foreground">emeq</span>
+                    <Link href="/" className="flex items-center gap-2" aria-label="emeq home">
+                        <span aria-hidden className="size-3.5 rounded-xs bg-brand" />
+                        <span className="text-[24px] font-bold tracking-[-0.5px] text-foreground">emeq</span>
                     </Link>
-                    <nav className="hidden items-center gap-7 md:flex">
+                    <nav className="hidden items-center gap-6 md:flex">
                         {links.map((link) => (
                             <a
                                 key={link.label}
@@ -49,7 +49,7 @@ export function Nav() {
                     </nav>
                 </div>
 
-                <div className="hidden items-center gap-3.5 md:flex">
+                <div className="hidden items-center gap-4 md:flex">
                     <Link href="/demo" className={buttonVariants({ variant: 'ghost', size: 'sm' })}>
                         Demo aanvragen
                     </Link>
@@ -77,25 +77,28 @@ export function Nav() {
                         transition={{ duration: 0.2, ease: 'easeOut' }}
                         className="overflow-hidden border-t border-border bg-background md:hidden"
                     >
-                        <div className="flex flex-col gap-1 px-6 py-4">
+                        <div className="flex flex-col px-6 pb-8 pt-10">
                             {links.map((link, index) => (
                                 <a
                                     key={link.label}
                                     href={link.href}
                                     onClick={() => setOpen(false)}
-                                    className="flex items-baseline gap-3 border-b border-border py-4 text-xl font-bold tracking-[-1px] text-foreground"
+                                    className="flex items-baseline gap-4 border-b border-border py-[22px] text-2xl font-bold tracking-[-1px] text-foreground"
                                 >
-                                    <span className="font-mono text-2xs text-muted-foreground">{`0${index + 1}`}</span>
+                                    <span className="font-mono text-xs2 font-normal text-muted-foreground">{`0${index + 1}`}</span>
                                     {link.label}
                                 </a>
                             ))}
-                            <div className="flex flex-col gap-3 pt-5">
-                                <Link href="/koppelen" className={buttonVariants({ variant: 'primary', size: 'md' })}>
-                                    Start met koppelen
-                                </Link>
-                                <Link href="/demo" className={buttonVariants({ variant: 'outline', size: 'md' })}>
-                                    Demo aanvragen
-                                </Link>
+                            <div className="flex flex-col gap-6 pt-8">
+                                <div className="flex flex-col gap-3">
+                                    <Link href="/koppelen" className={buttonVariants({ variant: 'primary', size: 'md' })}>
+                                        Start met koppelen
+                                    </Link>
+                                    <Link href="/demo" className={buttonVariants({ variant: 'outline', size: 'md' })}>
+                                        Demo aanvragen
+                                    </Link>
+                                </div>
+                                <p className="font-mono text-2xs text-muted-foreground">© 2026 emeq</p>
                             </div>
                         </div>
                     </motion.nav>

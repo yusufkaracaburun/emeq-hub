@@ -39,16 +39,16 @@ export function CodeSplit() {
 function PassthroughWindow() {
     return (
         <div className="overflow-hidden rounded-lg border border-border bg-card shadow-card">
-            <div className="flex items-center gap-3.5 border-b border-border bg-muted px-4 py-[13px]">
+            <div className="flex items-center gap-4 border-b border-border bg-muted px-4 py-[13px]">
                 <div aria-hidden className="flex items-center gap-2">
-                    <span className="size-2.5 rounded-pill bg-border" />
-                    <span className="size-2.5 rounded-pill bg-border" />
-                    <span className="size-2.5 rounded-pill bg-border" />
+                    <span className="size-3 rounded-pill bg-border" />
+                    <span className="size-3 rounded-pill bg-border" />
+                    <span className="size-3 rounded-pill bg-border" />
                 </div>
                 <span className="font-mono text-xs text-muted-foreground">passthrough.http</span>
             </div>
 
-            <div className="flex flex-col gap-[7px] p-6 font-mono text-xs2">
+            <div className="flex flex-col gap-2 p-[22px] font-mono text-xs2">
                 <p>
                     <span className="text-brand">GET</span>
                     <span className="text-foreground"> /v1/{'{provider}'}/resources</span>
@@ -72,10 +72,9 @@ function PassthroughWindow() {
 function AuditView() {
     return (
         <div className="overflow-hidden rounded-lg border border-border bg-card">
-            <div className="flex items-center gap-2.5 border-b border-border bg-muted px-[18px] py-[15px] font-mono text-xs">
+            <div className="flex items-center gap-2 border-b border-border bg-muted px-[18px] py-[15px] font-mono text-xs2">
                 <span aria-hidden className="size-2 rounded-pill bg-success" />
-                <span className="text-foreground">audit-log</span>
-                <span className="text-success">· live</span>
+                <span className="text-foreground">audit-log · live</span>
             </div>
 
             <div className="grid grid-cols-[1fr_1fr_78px_56px] gap-3 border-b border-border px-[18px] py-2.5 font-mono text-2xs uppercase tracking-[1.5px] text-muted-foreground">
@@ -94,7 +93,7 @@ function AuditView() {
                     <span className="truncate text-muted-foreground">{row.topic}</span>
                     <span
                         className={cn(
-                            'inline-flex w-fit items-center gap-[5px] rounded-xs px-2 py-[3px] text-2xs',
+                            'inline-flex w-fit items-center gap-1 rounded-xs px-2 py-[3px] text-2xs',
                             row.ok ? 'bg-success-soft text-success' : 'bg-error-soft text-error',
                         )}
                     >

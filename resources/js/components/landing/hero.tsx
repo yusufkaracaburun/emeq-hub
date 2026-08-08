@@ -21,14 +21,14 @@ export function Hero() {
             />
 
             <div className="relative flex flex-col gap-14 lg:flex-row lg:gap-12">
-                <div className="flex max-w-[600px] flex-col gap-7">
+                <div className="flex max-w-[600px] flex-col gap-6">
                     <motion.p {...enter(0)} className="font-mono text-xs2 uppercase tracking-[1.5px] text-muted-foreground">
                         Unified API · Integratieplatform
                     </motion.p>
 
                     <motion.h1
                         {...enter(0.08)}
-                        className="text-2xl font-bold tracking-[-1px] text-foreground md:text-display md:tracking-[-2px]"
+                        className="text-2xl font-bold tracking-[-1px] text-foreground md:text-display md:leading-[1.13] md:tracking-[-2px]"
                     >
                         Integreer <span className="text-brand">zonder grenzen.</span>
                         <br />
@@ -42,12 +42,12 @@ export function Hero() {
                         integratielaag; jij focust op product, klanten en groei.
                     </motion.p>
 
-                    <motion.div {...enter(0.24)} className="flex flex-col gap-3.5 sm:flex-row sm:items-center">
+                    <motion.div {...enter(0.24)} className="flex flex-col gap-4 sm:flex-row sm:items-center">
                         <Link href="/koppelen" className={cn(buttonVariants({ variant: 'primary', size: 'lg' }), 'group')}>
                             Start met koppelen
                             <ArrowRight aria-hidden className="size-4 transition-transform duration-150 group-hover:translate-x-0.5" />
                         </Link>
-                        <Link href="/demo" className={cn(buttonVariants({ variant: 'ghost', size: 'lg' }), 'group')}>
+                        <Link href="/demo" className={cn(buttonVariants({ variant: 'ghost', size: 'lg' }), 'group gap-1.5 px-2')}>
                             Demo aanvragen
                             <ArrowRight aria-hidden className="size-[15px] transition-transform duration-150 group-hover:translate-x-0.5" />
                         </Link>
@@ -71,16 +71,16 @@ export function Hero() {
 function CodeWindow() {
     return (
         <div className="overflow-hidden rounded-lg border border-border bg-card shadow-card">
-            <div className="flex items-center gap-3.5 border-b border-border bg-muted px-4 py-[13px]">
+            <div className="flex items-center gap-4 border-b border-border bg-muted px-4 py-[13px]">
                 <div aria-hidden className="flex items-center gap-2">
-                    <span className="size-2.5 rounded-pill bg-border" />
-                    <span className="size-2.5 rounded-pill bg-border" />
-                    <span className="size-2.5 rounded-pill bg-border" />
+                    <span className="size-3 rounded-pill bg-border" />
+                    <span className="size-3 rounded-pill bg-border" />
+                    <span className="size-3 rounded-pill bg-border" />
                 </div>
                 <span className="font-mono text-xs text-muted-foreground">request.http</span>
             </div>
 
-            <div className="flex flex-col gap-[7px] p-6 font-mono text-xs2">
+            <div className="flex flex-col gap-2 p-[22px] font-mono text-xs2">
                 <p>
                     <span className="text-brand">POST</span>
                     <span className="text-foreground"> /v1/{'{provider}'}/resources</span>
@@ -98,7 +98,7 @@ function CodeWindow() {
                 <p className="text-muted-foreground">{'}'}</p>
             </div>
 
-            <div className="flex items-center gap-2.5 border-t border-border px-6 py-3 font-mono text-xs">
+            <div className="flex items-center gap-2 border-t border-border px-[22px] py-3 font-mono text-xs">
                 <span aria-hidden className="size-2 rounded-pill bg-success" />
                 <span className="text-success">200 OK</span>
                 <span className="text-muted-foreground">· doorgestuurd · 142 ms</span>
@@ -114,7 +114,7 @@ function WebhookToast() {
             initial={{ opacity: 0, y: 10, scale: 0.96 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ delay: 1.1, type: 'spring', stiffness: 320, damping: 24 }}
-            className="absolute -left-3 bottom-6 flex flex-col gap-[5px] rounded-md border border-border bg-card px-4 py-3 shadow-card lg:-left-10"
+            className="absolute -left-3 bottom-6 flex flex-col gap-1 rounded-md border border-border bg-card px-4 py-3 shadow-[0_8px_28px_-8px_#0000001a] lg:-left-10"
         >
             <p className="flex items-center gap-2 font-mono text-xs font-medium text-foreground">
                 <span aria-hidden className="size-[7px] rounded-pill bg-success" />

@@ -77,7 +77,7 @@ function BentoCell({ cell }: { cell: Cell }) {
     return (
         <RevealItem
             className={cn(
-                'flex flex-col gap-4 rounded-lg border border-border p-8 transition-colors duration-150 hover:border-brand',
+                'flex flex-col gap-4 rounded-lg border border-border px-[30px] py-8 transition-colors duration-150 hover:border-brand',
                 cell.hero ? 'bg-brand-subtle' : 'bg-card',
             )}
         >
@@ -95,12 +95,12 @@ function BentoCell({ cell }: { cell: Cell }) {
 /** CONSUMER ··· emeq HUB ··· PARTNER API — het pass-through-verhaal in één regel. */
 function Schematic() {
     return (
-        <div className="mt-2 hidden items-center gap-2 border-t border-border pt-6 font-mono text-2xs tracking-[0.5px] sm:flex">
-            <span className="shrink-0 border border-border bg-background px-3.5 py-2 text-muted-foreground">CONSUMER</span>
+        <div className="hidden items-center border-t border-border pt-[22px] font-mono text-2xs tracking-[0.5px] sm:flex">
+            <span className="shrink-0 border border-border bg-background px-3.5 py-[9px] text-muted-foreground">CONSUMER</span>
             <Dots />
-            <span className="shrink-0 border border-brand bg-brand-soft px-3.5 py-2 text-brand">emeq HUB</span>
+            <span className="shrink-0 border border-brand bg-brand-soft px-3.5 py-[9px] text-brand">emeq HUB</span>
             <Dots />
-            <span className="shrink-0 border border-border bg-background px-3.5 py-2 text-muted-foreground">PARTNER API</span>
+            <span className="shrink-0 border border-border bg-background px-3.5 py-[9px] text-muted-foreground">PARTNER API</span>
         </div>
     );
 }

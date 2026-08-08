@@ -9,7 +9,7 @@ export function FinalCta() {
         <section className="relative overflow-hidden border-t border-border bg-brand-subtle px-6 py-24 lg:px-section-x lg:py-32">
             <ConnectPattern />
 
-            <Reveal className="relative mx-auto flex max-w-[640px] flex-col items-center gap-7 text-center">
+            <Reveal className="relative mx-auto flex max-w-[640px] flex-col items-center gap-6 text-center">
                 <p className="font-mono text-xs2 uppercase tracking-[1.5px] text-muted-foreground">Start vandaag</p>
                 <h2 className="text-xl font-bold tracking-[-1px] text-foreground md:text-display md:tracking-[-2px]">
                     Klaar om <span className="text-brand">sneller te integreren?</span>
@@ -17,12 +17,12 @@ export function FinalCta() {
                 <p className="max-w-[560px] text-lg leading-[1.6] text-muted-foreground">
                     Maak van koppelingen een groeiversneller in plaats van een ontwikkelproject. Start vandaag met emeq.
                 </p>
-                <div className="flex flex-col gap-3.5 sm:flex-row sm:items-center">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
                     <Link href="/koppelen" className={cn(buttonVariants({ variant: 'primary', size: 'lg' }), 'group')}>
                         Start met koppelen
                         <ArrowRight aria-hidden className="size-4 transition-transform duration-150 group-hover:translate-x-0.5" />
                     </Link>
-                    <Link href="/demo" className={cn(buttonVariants({ variant: 'ghost', size: 'lg' }), 'group')}>
+                    <Link href="/demo" className={cn(buttonVariants({ variant: 'ghost', size: 'lg' }), 'group gap-1.5 px-2')}>
                         Demo aanvragen
                         <ArrowRight aria-hidden className="size-[15px] transition-transform duration-150 group-hover:translate-x-0.5" />
                     </Link>

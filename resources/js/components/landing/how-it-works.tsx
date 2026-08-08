@@ -28,16 +28,16 @@ export function HowItWorks() {
                 </h2>
             </Reveal>
 
-            <RevealGroup className="mt-14 flex flex-col gap-10 lg:flex-row lg:items-start lg:gap-0">
+            <RevealGroup className="mt-12 flex flex-col gap-10 lg:flex-row lg:items-start lg:gap-0">
                 {steps.map((step, index) => (
                     <Fragment key={step.title}>
                         {index > 0 && (
-                            <div aria-hidden className="hidden w-16 shrink-0 items-center justify-center self-start pt-3 lg:flex">
+                            <div aria-hidden className="hidden w-16 shrink-0 items-center justify-center self-start pt-[18px] lg:flex">
                                 <ChevronRight className="size-6 text-border" />
                             </div>
                         )}
-                        <RevealItem className="flex flex-1 flex-col gap-3.5">
-                            <div className="flex items-center gap-3.5">
+                        <RevealItem className="flex flex-1 flex-col gap-4">
+                            <div className="flex items-center gap-4">
                                 <span aria-hidden className="text-display font-bold tracking-[-2px] text-border">
                                     {`0${index + 1}`}
                                 </span>
