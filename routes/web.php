@@ -3,6 +3,7 @@
 use App\Http\Controllers\AccessRequestController;
 use App\Http\Controllers\DemoRequestController;
 use App\Http\Controllers\Dev\ExactOAuthTracerController;
+use App\Http\Controllers\ExactDeprovisionController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LegalController;
 use App\Http\Controllers\LlmsController;
@@ -38,6 +39,17 @@ Route::middleware('signed')->group(function (): void {
     Route::get('/oauth/failed', [OAuthLandingController::class, 'failed'])
         ->name('oauth.failed');
 });
+
+// Exact App Center Seamless-deprovisioning ("Niet meer gebruiken"): Exact
+// redirect de gebruiker naar deze URL met ?Country=&Language=&UserId=. Publiek
+// en noindex (niet in PublicPages); de POST komt van onze eigen confirm-pagina
+// (sessie + CSRF), niet van Exact. Registreer /exact/stop als Deprovisioning
+// URL in het App Center.
+Route::get('/exact/stop', [ExactDeprovisionController::class, 'confirm'])->name('exact.stop');
+Route::post('/exact/stop', [ExactDeprovisionController::class, 'destroy'])
+    ->middleware('throttle:6,1')
+    ->name('exact.stop.destroy');
+Route::get('/exact/stop/klaar', [ExactDeprovisionController::class, 'done'])->name('exact.stop.done');
 
 // Publieke integraties-showcase. Indexeerbaar (uitgezonderd van SetNoIndexHeaders
 // via routeIs('partners.*')); toont alleen statische provider-content, geen tenant-data.

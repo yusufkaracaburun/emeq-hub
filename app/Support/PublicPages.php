@@ -40,6 +40,7 @@ class PublicPages
         '/webhooks/',
         '/cashier/',
         '/oauth/',
+        '/exact/',
         '/dev/',
         '/docs/',
         '/horizon',

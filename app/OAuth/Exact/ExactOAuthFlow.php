@@ -62,11 +62,22 @@ final class ExactOAuthFlow implements OAuthFlow
             'client_secret' => $this->config->get('services.exact.client_secret'),
         ])->throw()->json();
 
+        $me = $this->fetchMe((string) $token['access_token']);
+
+        // Seamless-deprovisioning ("Niet meer gebruiken") stuurt alléén een
+        // UserId mee; het UserID uit /Me is de sleutel waarmee /exact/stop de
+        // connection terugvindt. Merge zodat bestaande metadata blijft staan.
+        $metadata = $connection->metadata ?? [];
+        if ($me['user_id'] !== null) {
+            $metadata['exact_user_id'] = $me['user_id'];
+        }
+
         $connection->fill([
             'access_token' => $token['access_token'],
             'refresh_token' => $token['refresh_token'],
             'expires_at' => now()->addSeconds((int) $token['expires_in']),
-            'administratie_id' => $this->fetchDivision((string) $token['access_token']),
+            'administratie_id' => $me['division'],
+            'metadata' => $metadata,
             'status' => 'active',
             'revoked_at' => null,
             'oauth_state' => null,
@@ -138,18 +149,30 @@ final class ExactOAuthFlow implements OAuthFlow
         $connection->update(['status' => 'revoked', 'revoked_at' => now()]);
     }
 
-    private function fetchDivision(string $accessToken): ?string
+    /**
+     * Eén /Me-call levert zowel de division (pass-through-default) als het
+     * UserID (deprovision-matching) — apart fetchen zou een tweede live call
+     * in de OAuth-callback betekenen.
+     *
+     * @return array{division: ?string, user_id: ?string}
+     */
+    private function fetchMe(string $accessToken): array
     {
         $response = $this->http->withToken($accessToken)->acceptJson()
             ->get($this->apiBaseUrl().'/api/v1/current/Me');
 
         if ($response->failed()) {
-            return null;
+            return ['division' => null, 'user_id' => null];
         }
 
-        $division = Envelope::results($response->json())[0]['CurrentDivision'] ?? null;
+        $me = Envelope::results($response->json())[0] ?? [];
+        $division = $me['CurrentDivision'] ?? null;
+        $userId = $me['UserID'] ?? null;
 
-        return $division !== null ? (string) $division : null;
+        return [
+            'division' => $division !== null ? (string) $division : null,
+            'user_id' => $userId !== null ? (string) $userId : null,
+        ];
     }
 
     private function tokenUrl(): string

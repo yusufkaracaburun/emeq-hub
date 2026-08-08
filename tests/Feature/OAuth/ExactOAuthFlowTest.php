@@ -41,7 +41,10 @@ class ExactOAuthFlowTest extends TestCase
                 'refresh_token' => 'ref_xyz',
             ]),
             'start.exactonline.nl/api/v1/current/Me' => Http::response([
-                'd' => ['results' => [['CurrentDivision' => 4471372]]],
+                'd' => ['results' => [[
+                    'CurrentDivision' => 4471372,
+                    'UserID' => 'd3b3f9a1-9c2e-4b7a-8f7e-2f4a1b6c9d0e',
+                ]]],
             ]),
         ]);
 
@@ -62,6 +65,8 @@ class ExactOAuthFlowTest extends TestCase
         $this->assertSame('acc_xyz', $connection->access_token);
         $this->assertSame('ref_xyz', $connection->refresh_token);
         $this->assertSame('4471372', $connection->administratie_id);
+        // Deprovision-sleutel: /exact/stop matcht op dit UserID (Seamless).
+        $this->assertSame('d3b3f9a1-9c2e-4b7a-8f7e-2f4a1b6c9d0e', $connection->metadata['exact_user_id'] ?? null);
         $this->assertNull($connection->oauth_state);
 
         Bus::assertDispatched(
