@@ -100,8 +100,10 @@ prod-up: ## [server] Release zonder git (na `prod-rsync`): backup → build → 
 	$(PROD) up -d --build
 	$(PROD) exec -T app sh -c "php artisan migrate --force && php artisan optimize"
 	@# Worker-mode houdt code in geheugen: horizon/scheduler draaien de oude image
-	@# tot een expliciete restart. Altijd samen met app herstarten.
-	$(PROD) restart app horizon scheduler
+	@# tot een expliciete restart. Altijd samen met app herstarten. `ssr` hoort
+	@# in dezelfde lijst: dat proces laadt de SSR-bundel één keer bij boot, dus
+	@# zonder restart serveert het na een deploy nog de vorige build.
+	$(PROD) restart app horizon scheduler ssr
 	@$(PROD) exec -T app curl -fsS http://localhost/up && echo "\n  ✅ deploy ok"
 
 prod-rsync: ## [lokaal] Push de working tree naar de server (PROD_HOST/PROD_PATH), zonder git
