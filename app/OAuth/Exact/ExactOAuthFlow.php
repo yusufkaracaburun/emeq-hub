@@ -150,6 +150,29 @@ final class ExactOAuthFlow implements OAuthFlow
     }
 
     /**
+     * Vult `metadata.exact_user_id` alsnog voor koppelingen die vóór de
+     * deprovision-flow zijn gelegd — zonder die sleutel vindt /exact/stop de
+     * connection niet terug en blijft "Niet meer gebruiken" zonder effect.
+     */
+    public function syncUserId(Connection $connection): bool
+    {
+        $connection = $this->refreshToken($connection);
+
+        $userId = $this->fetchMe((string) $connection->access_token)['user_id'];
+
+        if ($userId === null) {
+            return false;
+        }
+
+        $metadata = $connection->metadata ?? [];
+        $metadata['exact_user_id'] = $userId;
+
+        $connection->update(['metadata' => $metadata]);
+
+        return true;
+    }
+
+    /**
      * Eén /Me-call levert zowel de division (pass-through-default) als het
      * UserID (deprovision-matching) — apart fetchen zou een tweede live call
      * in de OAuth-callback betekenen.
