@@ -112,4 +112,9 @@ RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 COPY docker/Caddyfile /etc/frankenphp/Caddyfile
 COPY . /app
 COPY --from=assets /app/public/build /app/public/build
+# De SSR-bundel draait in de `ssr`-service, maar Inertia's
+# `ensure_bundle_exists`-check kijkt in de app-container: ontbreekt het bestand
+# daar, dan slaat de app SSR stil over en krijgen crawlers een lege body.
+# bootstrap/ssr staat in .gitignore, dus `COPY . /app` hierboven pakt 'm niet.
+COPY --from=assets /app/bootstrap/ssr /app/bootstrap/ssr
 RUN composer install --no-dev --optimize-autoloader --no-interaction
