@@ -22,11 +22,32 @@ services:
       DB_PORT: 5432
       REDIS_HOST: redis
       REDIS_PORT: 6379
+      # SSR staat lokaal standaard uit: de SSR-bundel is een build-artefact en
+      # loopt achter op Vite-HMR. Aanzetten om server-gerenderde HTML te
+      # controleren → `make ssr`.
+      INERTIA_SSR_ENABLED: "${INERTIA_SSR_ENABLED:-false}"
+      INERTIA_SSR_URL: http://ssr:13714
     depends_on:
       db:
         condition: service_healthy
       redis:
         condition: service_healthy
+
+  # Inertia SSR-server. Profile `ssr` → draait niet mee met een gewone
+  # `docker compose up`; zie `make ssr`.
+  ssr:
+    profiles: ["ssr"]
+    restart: unless-stopped
+    image: node:22-slim
+    working_dir: /app
+    command: sh -c "[ -d node_modules/.bin ] || npm ci; node bootstrap/ssr/ssr.js"
+    volumes:
+      - .:/app
+      # Eigen node_modules, net als de vite-service: host-(darwin)binaries
+      # werken niet in de linux-container.
+      - /app/node_modules
+    ports:
+      - "13714:13714"
 
   worker:
     restart: unless-stopped

@@ -25,6 +25,7 @@
 /node_modules
 /.dev
 .playwright-cli/
+/bootstrap/ssr
 /public/build
 /public/fonts-manifest.dev.json
 /public/hot

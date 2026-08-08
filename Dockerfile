@@ -82,6 +82,23 @@ COPY --from=vendor /app/vendor ./vendor
 RUN npm run build
 
 # ============================================================================
+# ssr — Node-runtime voor de Inertia SSR-server. Zonder deze laag serveert de
+# app een lege body: crawlers die geen JS uitvoeren (GPTBot, ClaudeBot,
+# PerplexityBot, link-unfurlers) zien dan geen content.
+#
+# Vite externaliseert de runtime-deps in de SSR-bundel, dus node_modules moet
+# mee — maar alleen de productie-deps (`--omit=dev` scheelt vite/typescript/
+# playwright in het image).
+# ============================================================================
+FROM node:22-slim AS ssr
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --omit=dev
+COPY --from=assets /app/bootstrap/ssr ./bootstrap/ssr
+EXPOSE 13714
+CMD ["node", "bootstrap/ssr/ssr.js"]
+
+# ============================================================================
 # prod — immutable image: code gebakken, deps zonder dev, productie-ini,
 # worker-mode zonder watch. TLS eindigt op de Cloudflare-rand; de origin serveert
 # plain HTTP (auto_https off in docker/Caddyfile).

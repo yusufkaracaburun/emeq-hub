@@ -24,6 +24,12 @@ services:
     security_opt:
       - no-new-privileges:true
     env_file: .env.prod
+    environment:
+      # SSR draait als eigen service; de app praat er over het compose-netwerk
+      # mee. Staat hier en niet in .env.prod omdat het een compose-topologie-
+      # detail is, geen deployment-secret.
+      INERTIA_SSR_ENABLED: "true"
+      INERTIA_SSR_URL: http://ssr:13714
     # spatie/laravel-backup schrijft naar /app/backups; het prod-image bakt de
     # code in (geen source-mount), dus zonder dit bind-mount landt de dump in de
     # ephemeral container en is 'ie weg bij redeploy. Deelt de host-`backups/`-dir
@@ -48,6 +54,32 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      # Geen service_healthy: valt SSR weg, dan rendert Inertia client-side
+      # door. Wachten zou de app onnodig blokkeren.
+      ssr:
+        condition: service_started
+
+  # Inertia SSR-server (Node). Zonder deze service serveert de publieke surface
+  # een lege body aan crawlers die geen JavaScript uitvoeren — GPTBot,
+  # ClaudeBot, PerplexityBot en de link-unfurlers van Slack/LinkedIn. Valt hij
+  # om, dan degradeert Inertia naar client-side rendering: de site blijft
+  # werken voor bezoekers, alleen de crawler-HTML is dan leeg.
+  ssr:
+    build:
+      context: .
+      target: ssr
+    image: emeq-hub-ssr:prod
+    restart: unless-stopped
+    mem_limit: 512m
+    cpus: 1.0
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:13714/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
 
   # Uitgaande connector naar Cloudflare. Locally-managed: de ingress-regel
   # (hub.emeq.nl → http://app:80) staat in docker/cloudflared.yml, in git. Het

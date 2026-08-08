@@ -162,3 +162,26 @@ urls: ## Toon de UI-URLs
 	@printf '  %-24s %s\n'                'Vite HMR'             'http://localhost:5173'
 	@printf '  %-24s %s\n'                'pgAdmin (DB-UI)'      'http://localhost:8091'
 	@printf '\n  \033[2mApp boot duurt ~enkele seconden na up.\033[0m\n\n'
+
+# Inertia routeert SSR via de Vite-dev-server zodra `public/hot` bestaat, en die
+# URL (localhost:5173) is vanuit de app-container niet bereikbaar. Een
+# SSR-preview zet Vite daarom stil en draait op gebouwde assets — precies wat
+# prod doet.
+ssr: ## Draai de publieke site server-rendered (crawler-view; stopt Vite-HMR)
+	docker compose exec -T vite npm run build
+	docker compose stop vite
+	@rm -f public/hot
+	INERTIA_SSR_ENABLED=true docker compose --profile ssr up -d ssr app
+	@sleep 6
+	@$(MAKE) --no-print-directory ssr-check
+
+ssr-check: ## Controleer of de publieke HTML server-gerenderd is (crawler-view)
+	@if curl -s $(APP)/ | grep -q 'Integreer'; then \
+		echo "OK — hero-copy staat in de HTML; crawlers zonder JS zien de content."; \
+	else \
+		echo "FOUT — lege body. Draait de ssr-service? (make ssr)"; exit 1; \
+	fi
+
+ssr-off: ## Terug naar normale dev-modus (Vite-HMR, geen SSR)
+	-docker compose --profile ssr stop ssr
+	docker compose up -d app vite

@@ -8,11 +8,31 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
     plugins: [
         laravel({
-            input: ['resources/css/filament/admin/theme.css'],
+            input: [
+                'resources/css/app.css',
+                'resources/js/app.tsx',
+                'resources/css/filament/admin/theme.css',
+            ],
+            ssr: 'resources/js/ssr.tsx',
             refresh: true,
+            // Self-hosted via de fonts-plugin — dit zijn de families die
+            // resources/css/app.css declareert. Een externe stylesheet naar
+            // fonts.bunny.net zou render-blocking zijn en een derde partij in het
+            // kritieke pad zetten.
             fonts: [
-                bunny('Instrument Sans', {
-                    weights: [400, 500, 600],
+                // preload staat uit. De default preload't élke subset-variant —
+                // 38 onvoorwaardelijke font-downloads, waarvan het merendeel
+                // cyrillisch/grieks/vietnamees is en op een NL-site nooit
+                // rendert. De `subsets`-optie filtert dat bij deze provider niet
+                // weg. De @font-face-regels staan inline in de head (1,5 kB
+                // gzip), dus de browser ontdekt ze zonder extra roundtrip.
+                bunny('Inter', {
+                    weights: [400, 500, 600, 700],
+                    preload: false,
+                }),
+                bunny('IBM Plex Mono', {
+                    weights: [400, 500],
+                    preload: false,
                 }),
             ],
         }),
