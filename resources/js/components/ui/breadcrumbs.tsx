@@ -1,6 +1,6 @@
 import { Link } from '@inertiajs/react';
-import { ChevronRight } from 'lucide-react';
 import { Fragment } from 'react';
+import { TextGlyph } from '@/components/ui/glyphs';
 
 interface Crumb {
     label: string;
@@ -16,7 +16,7 @@ function Breadcrumbs({ items }: { items: Crumb[] }) {
 
                 return (
                     <Fragment key={item.label}>
-                        {index > 0 && <ChevronRight aria-hidden className="size-3 shrink-0 text-muted-foreground" />}
+                        {index > 0 && <TextGlyph glyph="›" className="shrink-0 text-sm text-muted-foreground" />}
                         {item.href && !last ? (
                             <Link
                                 href={item.href}

@@ -1,7 +1,7 @@
 import { Link } from '@inertiajs/react';
-import { ArrowRight } from 'lucide-react';
 import { Reveal } from '@/components/motion';
 import { buttonVariants } from '@/components/ui/button';
+import { TextGlyph } from '@/components/ui/glyphs';
 import { cn } from '@/lib/utils';
 
 const categories = [
@@ -35,7 +35,7 @@ export function IntegrationsTeaser() {
 
                 <Link href="/koppelen" className={cn(buttonVariants({ variant: 'primary', size: 'lg' }), 'group shrink-0')}>
                     Start met koppelen
-                    <ArrowRight aria-hidden className="size-4 transition-transform duration-150 group-hover:translate-x-0.5" />
+                    <TextGlyph glyph="→" className="transition-transform duration-150 group-hover:translate-x-0.5" />
                 </Link>
             </Reveal>
         </section>

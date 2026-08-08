@@ -1,5 +1,5 @@
 import { Link } from '@inertiajs/react';
-import { ArrowUpRight } from 'lucide-react';
+import { TextGlyph } from '@/components/ui/glyphs';
 
 const links = [
     { label: 'Partners', href: '/partners' },
@@ -67,9 +67,9 @@ export function Footer() {
                             className="group flex items-center gap-1.5 text-sm font-medium text-foreground"
                         >
                             {product.name}
-                            <ArrowUpRight
-                                aria-hidden
-                                className="size-3 text-muted-foreground transition-colors duration-150 group-hover:text-foreground"
+                            <TextGlyph
+                                glyph="↗"
+                                className="text-xs text-muted-foreground transition-colors duration-150 group-hover:text-foreground"
                             />
                         </a>
                     ))}

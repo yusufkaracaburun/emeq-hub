@@ -1,7 +1,7 @@
 import { Link } from '@inertiajs/react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Menu, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { TextGlyph } from '@/components/ui/glyphs';
 import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -64,7 +64,14 @@ export function Nav() {
                     aria-label={open ? 'Menu sluiten' : 'Menu openen'}
                     onClick={() => setOpen((v) => !v)}
                 >
-                    {open ? <X className="size-5" /> : <Menu className="size-5" />}
+                    {open ? (
+                        <TextGlyph glyph="✕" className="text-[18px]" />
+                    ) : (
+                        <span aria-hidden className="flex flex-col gap-[5px]">
+                            <span className="h-[1.5px] w-[18px] rounded-pill bg-current" />
+                            <span className="h-[1.5px] w-[18px] rounded-pill bg-current" />
+                        </span>
+                    )}
                 </button>
             </div>
 

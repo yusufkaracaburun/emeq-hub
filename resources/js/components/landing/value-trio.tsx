@@ -1,23 +1,23 @@
-import { GitMerge, KeyRound, Webhook } from 'lucide-react';
 import { Reveal, RevealGroup, RevealItem } from '@/components/motion';
+import { BroadcastGlyph, KeyGlyph, MergeGlyph } from '@/components/ui/glyphs';
 import { Eyebrow } from '@/components/ui/eyebrow';
 
 const columns = [
     {
         index: '01',
-        icon: GitMerge,
+        icon: MergeGlyph,
         title: 'Eén API. Elke partner.',
         body: 'Integreer één keer met het uniforme API-contract van emeq. Nieuwe partners voeg je toe zonder je productlogica opnieuw te ontwerpen.',
     },
     {
         index: '02',
-        icon: KeyRound,
+        icon: KeyGlyph,
         title: 'OAuth en tokens? Al geregeld.',
         body: 'emeq beheert OAuth-flows, bewaart credentials versleuteld en ververst tokens automatisch. Minder onderhoud, minder storingen.',
     },
     {
         index: '03',
-        icon: Webhook,
+        icon: BroadcastGlyph,
         title: 'Volledige grip op elke koppeling.',
         body: 'Van webhooks tot audit-trails en tenant-scheiding: je ziet wat er gebeurt en houdt controle op schaal.',
     },

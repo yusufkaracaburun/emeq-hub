@@ -1,7 +1,7 @@
 import { Link, useForm, usePage } from '@inertiajs/react';
-import { ArrowRight, ChevronDown, CircleAlert, CircleCheck } from 'lucide-react';
 import { type FormEvent } from 'react';
 import { Button } from '@/components/ui/button';
+import { AlertGlyph, CheckCircleGlyph, TextGlyph } from '@/components/ui/glyphs';
 import { type ProviderSummary, type SharedProps } from '@/lib/types';
 import { cn } from '@/lib/utils';
 
@@ -32,7 +32,7 @@ export function KoppelForm({ providers, preselect }: KoppelFormProps) {
     if (flash.submitted) {
         return (
             <div className="flex flex-col items-center gap-3 rounded-md border border-border bg-background px-7 py-8 text-center">
-                <CircleCheck aria-hidden className="size-8 text-success" />
+                <CheckCircleGlyph />
                 <p className="text-lg font-semibold text-foreground">Aanvraag verzonden</p>
                 <p className="max-w-[380px] text-sm leading-[1.6] text-muted-foreground">
                     We nemen binnen één werkdag contact met je op. Je ontvangt een bevestiging per e-mail.
@@ -102,9 +102,9 @@ export function KoppelForm({ providers, preselect }: KoppelFormProps) {
                             </option>
                         ))}
                     </select>
-                    <ChevronDown
-                        aria-hidden
-                        className="pointer-events-none absolute right-3.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+                    <TextGlyph
+                        glyph="▾"
+                        className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-sm text-muted-foreground"
                     />
                 </div>
             </Field>
@@ -150,7 +150,7 @@ export function KoppelForm({ providers, preselect }: KoppelFormProps) {
 
             <Button type="submit" size="md" disabled={form.processing} className="group mt-1 w-full">
                 Start mijn aanvraag
-                <ArrowRight aria-hidden className="size-4 transition-transform duration-150 group-hover:translate-x-0.5" />
+                <TextGlyph glyph="→" className="transition-transform duration-150 group-hover:translate-x-0.5" />
             </Button>
             <p className="font-mono text-2xs text-muted-foreground">
                 Persoonlijk contact binnen één werkdag · vrijblijvend
@@ -172,7 +172,7 @@ function Field({ label, error, children }: { label: string; error?: string; chil
 function FieldError({ message }: { message: string }) {
     return (
         <p className="flex items-center gap-1.5 text-xs2 text-error">
-            <CircleAlert aria-hidden className="size-3.5" />
+            <AlertGlyph className="shrink-0" />
             {message}
         </p>
     );

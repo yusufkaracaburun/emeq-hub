@@ -1,10 +1,10 @@
-import { Lock } from 'lucide-react';
 import { type ReactNode } from 'react';
 import { SimpleFooter } from '@/components/landing/footer';
 import { IntakeStepList, type IntakeStep } from '@/components/landing/intake-steps';
 import { Nav } from '@/components/landing/nav';
 import { Reveal } from '@/components/motion';
 import { Eyebrow } from '@/components/ui/eyebrow';
+import { PadlockGlyph } from '@/components/ui/glyphs';
 import { Pill } from '@/components/ui/pill';
 
 interface IntakeShellProps {
@@ -51,7 +51,7 @@ export function IntakeShell({ eyebrow, title, intro, steps, children }: IntakeSh
                                 GDPR
                             </Pill>
                             <Pill
-                                icon={<Lock aria-hidden className="size-5 text-muted-foreground" />}
+                                icon={<PadlockGlyph className="size-5 text-muted-foreground" />}
                                 className="border border-border"
                             >
                                 Tokens encrypted at rest

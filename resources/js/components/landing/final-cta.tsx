@@ -1,7 +1,7 @@
 import { Link } from '@inertiajs/react';
-import { ArrowRight } from 'lucide-react';
 import { Reveal } from '@/components/motion';
 import { buttonVariants } from '@/components/ui/button';
+import { TextGlyph } from '@/components/ui/glyphs';
 import { cn } from '@/lib/utils';
 
 export function FinalCta() {
@@ -20,11 +20,11 @@ export function FinalCta() {
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
                     <Link href="/koppelen" className={cn(buttonVariants({ variant: 'primary', size: 'lg' }), 'group')}>
                         Start met koppelen
-                        <ArrowRight aria-hidden className="size-4 transition-transform duration-150 group-hover:translate-x-0.5" />
+                        <TextGlyph glyph="→" className="transition-transform duration-150 group-hover:translate-x-0.5" />
                     </Link>
                     <Link href="/demo" className={cn(buttonVariants({ variant: 'ghost', size: 'lg' }), 'group gap-1.5 px-2')}>
                         Demo aanvragen
-                        <ArrowRight aria-hidden className="size-[15px] transition-transform duration-150 group-hover:translate-x-0.5" />
+                        <TextGlyph glyph="→" className="text-[15px] transition-transform duration-150 group-hover:translate-x-0.5" />
                     </Link>
                 </div>
             </Reveal>

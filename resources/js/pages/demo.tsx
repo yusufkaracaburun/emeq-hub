@@ -1,11 +1,11 @@
 import { Link, useForm, usePage } from '@inertiajs/react';
 import { MotionConfig } from 'framer-motion';
-import { ArrowRight, CircleAlert, CircleCheck } from 'lucide-react';
 import { type FormEvent } from 'react';
 import { IntakeShell } from '@/components/landing/intake-shell';
 import { Field, FieldError, inputClasses, TextInput } from '@/components/landing/koppel-form';
 import { Seo } from '@/components/seo';
 import { Button } from '@/components/ui/button';
+import { CheckCircleGlyph, TextGlyph } from '@/components/ui/glyphs';
 import { type SeoMeta, type SharedProps } from '@/lib/types';
 import { cn } from '@/lib/utils';
 
@@ -71,7 +71,7 @@ function DemoForm({ slots }: { slots: string[] }) {
     if (flash.submitted) {
         return (
             <div className="flex flex-col items-center gap-3 rounded-md border border-border bg-background px-7 py-8 text-center">
-                <CircleCheck aria-hidden className="size-8 text-success" />
+                <CheckCircleGlyph />
                 <p className="text-lg font-semibold text-foreground">Aanvraag verzonden</p>
                 <p className="max-w-[380px] text-sm leading-[1.6] text-muted-foreground">
                     We plannen je demo binnen één werkdag in. Je ontvangt een bevestiging per e-mail.
@@ -183,7 +183,7 @@ function DemoForm({ slots }: { slots: string[] }) {
 
             <Button type="submit" size="md" disabled={form.processing} className="group mt-1 w-full">
                 Plan mijn demo
-                <ArrowRight aria-hidden className="size-4 transition-transform duration-150 group-hover:translate-x-0.5" />
+                <TextGlyph glyph="→" className="transition-transform duration-150 group-hover:translate-x-0.5" />
             </Button>
             <p className="font-mono text-2xs text-muted-foreground">
                 30 minuten · online · afgestemd op jouw integratievraag

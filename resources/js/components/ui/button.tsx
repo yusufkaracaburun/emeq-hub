@@ -1,6 +1,6 @@
 import { cva, type VariantProps } from 'class-variance-authority';
-import { ArrowRight } from 'lucide-react';
 import { type ComponentProps } from 'react';
+import { TextGlyph } from '@/components/ui/glyphs';
 import { cn } from '@/lib/utils';
 
 /**
@@ -40,7 +40,7 @@ function Button({ className, variant, size, withArrow = false, children, ...prop
     return (
         <button className={cn(buttonVariants({ variant, size }), className)} {...props}>
             {children}
-            {withArrow && <ArrowRight aria-hidden className="size-4 transition-transform duration-150 group-hover:translate-x-0.5" />}
+            {withArrow && <TextGlyph glyph="→" className="transition-transform duration-150 group-hover:translate-x-0.5" />}
         </button>
     );
 }

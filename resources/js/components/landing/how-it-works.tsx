@@ -1,7 +1,7 @@
-import { ChevronRight } from 'lucide-react';
 import { Fragment } from 'react';
 import { Reveal, RevealGroup, RevealItem } from '@/components/motion';
 import { Eyebrow } from '@/components/ui/eyebrow';
+import { TextGlyph } from '@/components/ui/glyphs';
 
 const steps = [
     {
@@ -33,7 +33,7 @@ export function HowItWorks() {
                     <Fragment key={step.title}>
                         {index > 0 && (
                             <div aria-hidden className="hidden w-16 shrink-0 items-center justify-center self-start pt-[18px] lg:flex">
-                                <ChevronRight className="size-6 text-border" />
+                                <TextGlyph glyph="›" className="text-2xl text-border" />
                             </div>
                         )}
                         <RevealItem className="flex flex-1 flex-col gap-4">

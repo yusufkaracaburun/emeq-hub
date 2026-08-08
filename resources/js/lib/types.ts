@@ -20,7 +20,7 @@ export interface ProviderDetail {
     live?: boolean;
     headline?: string;
     intro?: string;
-    features?: { icon: string; title: string; description: string }[];
+    features?: { icon: string; tag?: string; title: string; description: string }[];
     steps?: { title: string; description: string }[];
     connect_pitch?: string;
     capabilities: { title: string; description: string }[];

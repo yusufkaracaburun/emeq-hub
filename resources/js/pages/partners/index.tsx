@@ -1,6 +1,5 @@
 import { Link } from '@inertiajs/react';
 import { MotionConfig } from 'framer-motion';
-import { ArrowRight } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { Footer } from '@/components/landing/footer';
 import { Nav } from '@/components/landing/nav';
@@ -8,6 +7,7 @@ import { Reveal, RevealGroup, RevealItem } from '@/components/motion';
 import { Seo } from '@/components/seo';
 import { Breadcrumbs } from '@/components/ui/breadcrumbs';
 import { buttonVariants } from '@/components/ui/button';
+import { TextGlyph } from '@/components/ui/glyphs';
 import { type ProviderSummary, type SeoMeta } from '@/lib/types';
 import { cn } from '@/lib/utils';
 
@@ -80,7 +80,7 @@ export default function PartnersIndex({ providers, seo }: PartnersIndexProps) {
                         <h2 className="text-2xl font-bold tracking-[-1px] text-foreground">Ontdek Exact Online</h2>
                         <Link href="/koppelen" className={cn(buttonVariants({ variant: 'primary', size: 'md' }), 'group')}>
                             Start met koppelen
-                            <ArrowRight aria-hidden className="size-4 transition-transform duration-150 group-hover:translate-x-0.5" />
+                            <TextGlyph glyph="→" className="transition-transform duration-150 group-hover:translate-x-0.5" />
                         </Link>
                     </Reveal>
                 </div>
@@ -119,7 +119,7 @@ function ProviderCard({ provider }: { provider: ProviderSummary }) {
                     className="group mt-1 inline-flex items-center gap-1.5 text-sm font-semibold text-brand"
                 >
                     Bekijk integratie
-                    <ArrowRight aria-hidden className="size-[15px] transition-transform duration-150 group-hover:translate-x-0.5" />
+                    <TextGlyph glyph="→" className="text-[15px] transition-transform duration-150 group-hover:translate-x-0.5" />
                 </Link>
             )}
         </RevealItem>

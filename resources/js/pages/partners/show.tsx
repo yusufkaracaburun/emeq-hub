@@ -1,16 +1,5 @@
 import { MotionConfig } from 'framer-motion';
-import {
-    ArrowRight,
-    BookOpen,
-    ExternalLink,
-    FileText,
-    ListChecks,
-    Percent,
-    Receipt,
-    Users,
-    Webhook,
-    type LucideIcon,
-} from 'lucide-react';
+import { type ReactNode } from 'react';
 import { SimpleFooter } from '@/components/landing/footer';
 import { IntakeStepList, intakeSteps } from '@/components/landing/intake-steps';
 import { KoppelForm } from '@/components/landing/koppel-form';
@@ -20,6 +9,15 @@ import { Seo } from '@/components/seo';
 import { buttonVariants } from '@/components/ui/button';
 import { Eyebrow } from '@/components/ui/eyebrow';
 import { FeatureCard } from '@/components/ui/feature-card';
+import {
+    BroadcastGlyph,
+    DocGlyph,
+    DocStampGlyph,
+    GridGlyph,
+    PctGlyph,
+    TextGlyph,
+    UsersGlyph,
+} from '@/components/ui/glyphs';
 import { type ProviderDetail, type ProviderSummary, type SeoMeta } from '@/lib/types';
 import { cn } from '@/lib/utils';
 
@@ -29,15 +27,14 @@ interface PartnersShowProps {
     seo: SeoMeta;
 }
 
-/** Lucide-iconen die de showcase-config (features[].icon) mag noemen. */
-const featureIcons: Record<string, LucideIcon> = {
-    'file-text': FileText,
-    receipt: Receipt,
-    users: Users,
-    'book-open': BookOpen,
-    percent: Percent,
-    webhook: Webhook,
-    'list-checks': ListChecks,
+/** Bespoke glyphs die de showcase-config (features[].icon) mag noemen. */
+const featureGlyphs: Record<string, ReactNode> = {
+    'file-text': <DocGlyph />,
+    receipt: <DocStampGlyph />,
+    users: <UsersGlyph />,
+    'book-open': <GridGlyph />,
+    percent: <PctGlyph />,
+    webhook: <BroadcastGlyph className="size-[18px]" dotClassName="text-brand" />,
 };
 
 export default function PartnersShow({ provider, providers, seo }: PartnersShowProps) {
@@ -94,7 +91,7 @@ function ProviderHero({ provider }: { provider: ProviderDetail }) {
             <div className="flex w-full flex-col gap-4 sm:w-auto sm:flex-row sm:items-center">
                 <a href="#koppelen" className={cn(buttonVariants({ variant: 'primary', size: 'md' }), 'group')}>
                     Start met {provider.label}
-                    <ArrowRight aria-hidden className="size-4 transition-transform duration-150 group-hover:translate-x-0.5" />
+                    <TextGlyph glyph="→" className="transition-transform duration-150 group-hover:translate-x-0.5" />
                 </a>
                 {provider.docs_url && (
                     <a
@@ -135,7 +132,7 @@ function ResourceLinks({ provider }: { provider: ProviderDetail }) {
                     rel="noopener noreferrer"
                     className="flex items-center gap-1.5 font-mono text-xs2 text-muted-foreground transition-colors duration-150 hover:text-foreground"
                 >
-                    <ExternalLink aria-hidden className="size-3.5" />
+                    <TextGlyph glyph="↗" />
                     {resource.label}
                 </a>
             ))}
@@ -148,7 +145,7 @@ function Features({
     features,
 }: {
     provider: ProviderDetail;
-    features: { icon: string; title: string; description: string }[];
+    features: { icon: string; tag?: string; title: string; description: string }[];
 }) {
     return (
         <section className="flex flex-col gap-8">
@@ -160,17 +157,18 @@ function Features({
             </Reveal>
 
             <RevealGroup className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {features.map((feature) => {
-                    const Icon = featureIcons[feature.icon] ?? ListChecks;
-
-                    return (
-                        <RevealItem key={feature.title}>
-                            <FeatureCard icon={<Icon />} title={feature.title} className="h-full">
-                                {feature.description}
-                            </FeatureCard>
-                        </RevealItem>
-                    );
-                })}
+                {features.map((feature) => (
+                    <RevealItem key={feature.title}>
+                        <FeatureCard
+                            glyph={featureGlyphs[feature.icon] ?? <GridGlyph />}
+                            tag={feature.tag}
+                            title={feature.title}
+                            className="h-full"
+                        >
+                            {feature.description}
+                        </FeatureCard>
+                    </RevealItem>
+                ))}
             </RevealGroup>
         </section>
     );

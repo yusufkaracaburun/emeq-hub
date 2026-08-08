@@ -1,5 +1,5 @@
-import { KeyRound, Lock } from 'lucide-react';
 import { Reveal, RevealGroup, RevealItem } from '@/components/motion';
+import { KeyGlyph, PadlockGlyph } from '@/components/ui/glyphs';
 import { Pill } from '@/components/ui/pill';
 
 const badges = [
@@ -11,8 +11,8 @@ const badges = [
         icon: <img src="/img/badges/gdpr.png" alt="" aria-hidden className="size-5 opacity-70" />,
         label: 'GDPR',
     },
-    { icon: <Lock aria-hidden className="size-5 text-muted-foreground" />, label: 'Tokens encrypted at rest' },
-    { icon: <KeyRound aria-hidden className="size-5 text-muted-foreground" />, label: 'Per-Connection secrets' },
+    { icon: <PadlockGlyph className="size-5 text-muted-foreground" />, label: 'Tokens encrypted at rest' },
+    { icon: <KeyGlyph className="size-5 text-muted-foreground" />, label: 'Per-Connection secrets' },
 ];
 
 export function SecurityBand() {

@@ -47,12 +47,12 @@ return [
         'intro' => 'Synchroniseer verkoop- en inkoopboekingen, relaties en grootboekgegevens '
             .'via één API. emeq beheert OAuth, tokens en audit; jouw team bouwt door.',
         'features' => [
-            ['icon' => 'file-text', 'title' => 'Verkoopfacturen', 'description' => 'Boek verkoopfacturen direct als SalesEntry in Exact.'],
-            ['icon' => 'receipt', 'title' => 'Inkoopfacturen', 'description' => 'Inkoopboekingen als PurchaseEntry, inclusief bijlagen.'],
-            ['icon' => 'users', 'title' => 'Relaties', 'description' => 'Debiteuren en crediteuren automatisch resolve-or-learn.'],
-            ['icon' => 'book-open', 'title' => 'Grootboek & kostenplaats', 'description' => 'GL-accounts, kostenplaatsen en kostendragers.'],
-            ['icon' => 'percent', 'title' => 'Verlegde btw', 'description' => 'VAT-codes voor verlegde btw worden automatisch gemapt.'],
-            ['icon' => 'webhook', 'title' => 'Webhooks & audit', 'description' => 'Realtime events en een volledige, immutable audit-trail.'],
+            ['icon' => 'file-text', 'tag' => 'SalesEntry', 'title' => 'Verkoopfacturen', 'description' => 'Boek verkoopfacturen direct als SalesEntry in Exact.'],
+            ['icon' => 'receipt', 'tag' => 'PurchaseEntry', 'title' => 'Inkoopfacturen', 'description' => 'Inkoopboekingen als PurchaseEntry, inclusief bijlagen.'],
+            ['icon' => 'users', 'tag' => 'Accounts', 'title' => 'Relaties', 'description' => 'Debiteuren en crediteuren automatisch resolve-or-learn.'],
+            ['icon' => 'book-open', 'tag' => 'GLAccounts', 'title' => 'Grootboek & kostenplaats', 'description' => 'GL-accounts, kostenplaatsen en kostendragers.'],
+            ['icon' => 'percent', 'tag' => 'VATCodes', 'title' => 'Verlegde btw', 'description' => 'VAT-codes voor verlegde btw worden automatisch gemapt.'],
+            ['icon' => 'webhook', 'tag' => 'Webhooks', 'title' => 'Webhooks & audit', 'description' => 'Realtime events en een volledige, immutable audit-trail.'],
         ],
         'steps' => [
             ['title' => 'Koppel via OAuth', 'description' => 'Eén klik — de gebruiker autoriseert Exact Online.'],
