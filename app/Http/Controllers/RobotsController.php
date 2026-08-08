@@ -18,9 +18,19 @@ use Illuminate\Http\Response;
 class RobotsController extends Controller
 {
     /**
-     * AI-crawlers die de publieke pagina's expliciet mógen lezen. Zonder deze
-     * regels gedragen sommige zich alsof er geen toestemming is; en het maakt
-     * de keuze reviewbaar in plaats van impliciet.
+     * AI-crawlers die de publieke pagina's expliciet mógen lezen: uitsluitend
+     * de bots die een lópend antwoord samenstellen en daarbij naar de bron
+     * linken. Die leveren verkeer op.
+     *
+     * Trainings-crawlers (GPTBot, ClaudeBot, Google-Extended,
+     * Applebot-Extended, meta-externalagent, Amazonbot, CCBot, Bytespider)
+     * staan hier bewust NIET. Cloudflare blokkeert die zone-breed via zijn
+     * Managed robots.txt, dat vóór dit blok wordt geïnjecteerd. Zou je ze hier
+     * toch noemen, dan bevat het bestand twee groepen voor dezelfde
+     * user-agent; die worden samengevoegd (RFC 9309) en Cloudflare's
+     * `Disallow: /` wint alsnog — je houdt er alleen een tegenstrijdig bestand
+     * aan over. Wil je ze wél toelaten, zet dan eerst Cloudflare's managed
+     * robots.txt uit; dit blok is dan de enige bron.
      *
      * Let op: Google-Extended stuurt Gemini-grounding, niet AI Overviews —
      * die volgt de gewone Googlebot-regels hierboven.
@@ -28,19 +38,12 @@ class RobotsController extends Controller
      * @var list<string>
      */
     private const AI_CRAWLERS = [
-        'GPTBot',
         'OAI-SearchBot',
         'ChatGPT-User',
-        'ClaudeBot',
         'Claude-User',
         'Claude-SearchBot',
         'PerplexityBot',
         'Perplexity-User',
-        'Google-Extended',
-        'Applebot-Extended',
-        'meta-externalagent',
-        'Amazonbot',
-        'CCBot',
     ];
 
     public function __invoke(): Response
@@ -69,7 +72,8 @@ class RobotsController extends Controller
             'User-agent: *',
             ...$disallow,
             '',
-            '# AI-/LLM-crawlers — zelfde surface, expliciet toegestaan.',
+            '# AI-crawlers die naar de bron linken — zelfde surface, expliciet',
+            '# toegestaan. Trainings-crawlers worden aan de Cloudflare-rand geweerd.',
             ...array_map(fn (string $agent): string => 'User-agent: '.$agent, self::AI_CRAWLERS),
             ...$disallow,
             '',

@@ -169,8 +169,16 @@ class PublicSeoTest extends TestCase
         // indexeerbaar verklaarde — precies de drift die dit bestand bewaakt.
         $this->assertStringNotContainsString("\nDisallow: /\n", $body);
 
-        foreach (['GPTBot', 'ClaudeBot', 'PerplexityBot', 'Google-Extended'] as $agent) {
+        // Alleen de crawlers die naar de bron linken.
+        foreach (['OAI-SearchBot', 'PerplexityBot', 'Claude-SearchBot'] as $agent) {
             $this->assertStringContainsString('User-agent: '.$agent, $body);
+        }
+
+        // Trainings-crawlers horen hier niet: Cloudflare weert die zone-breed,
+        // en ze hier tóch noemen levert twee groepen voor dezelfde user-agent
+        // op — een tegenstrijdig bestand zonder effect.
+        foreach (['GPTBot', 'ClaudeBot', 'Google-Extended', 'CCBot'] as $agent) {
+            $this->assertStringNotContainsString('User-agent: '.$agent, $body);
         }
     }
 
