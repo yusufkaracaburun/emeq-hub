@@ -1,7 +1,7 @@
 import { Reveal } from '@/components/motion';
 import { type ProviderSummary } from '@/lib/types';
 
-/** Compacte logo-strip: caption + gedempte (grijswaarden) partnerlogo's. */
+/** Compacte logo-strip: caption + partnerlogo's in hun eigen merkkleur. */
 export function PartnerStrip({ providers }: { providers: ProviderSummary[] }) {
     const withLogo = providers.filter((p) => p.live && p.logo !== null);
 
@@ -18,7 +18,7 @@ export function PartnerStrip({ providers }: { providers: ProviderSummary[] }) {
                         key={provider.key}
                         src={provider.logo!}
                         alt={provider.label}
-                        className="h-[26px] opacity-75 grayscale"
+                        className="h-[26px]"
                     />
                 ))}
             </Reveal>
