@@ -6,6 +6,7 @@ import { KoppelForm } from '@/components/landing/koppel-form';
 import { Nav } from '@/components/landing/nav';
 import { Reveal, RevealGroup, RevealItem } from '@/components/motion';
 import { Seo } from '@/components/seo';
+import { Breadcrumbs } from '@/components/ui/breadcrumbs';
 import { buttonVariants } from '@/components/ui/button';
 import { Eyebrow } from '@/components/ui/eyebrow';
 import { FeatureCard } from '@/components/ui/feature-card';
@@ -52,6 +53,15 @@ export default function PartnersShow({ provider, providers, seo }: PartnersShowP
                 />
 
                 <div className="relative flex flex-col gap-16">
+                    <Reveal>
+                        <Breadcrumbs
+                            items={[
+                                { label: 'Home', href: '/' },
+                                { label: 'Integraties', href: '/partners' },
+                                { label: provider.label },
+                            ]}
+                        />
+                    </Reveal>
                     <ProviderHero provider={provider} />
                     {features.length > 0 && <Features provider={provider} features={features} />}
                     {steps.length > 0 && <HowItWorks provider={provider} steps={steps} />}

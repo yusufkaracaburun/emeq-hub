@@ -39,10 +39,14 @@
               "children": [
                 {
                   "type": "rectangle",
-                  "cornerRadius": "$radius-xs",
                   "id": "a6mlj",
                   "name": "Mark",
-                  "fill": "$brand",
+                  "fill": {
+                    "type": "image",
+                    "enabled": true,
+                    "url": "logo.png",
+                    "mode": "fit"
+                  },
                   "width": 12,
                   "height": 12
                 },
@@ -379,10 +383,14 @@
                   "children": [
                     {
                       "type": "rectangle",
-                      "cornerRadius": "$radius-xs",
                       "id": "o2bdC",
                       "name": "Mark",
-                      "fill": "$brand",
+                      "fill": {
+                        "type": "image",
+                        "enabled": true,
+                        "url": "logo.png",
+                        "mode": "fit"
+                      },
                       "width": 14,
                       "height": 14
                     },
@@ -672,7 +680,7 @@
                       "fill": "$muted-foreground",
                       "textGrowth": "fixed-width",
                       "width": "fill_container",
-                      "content": "Bouw productintegraties zonder maanden werk aan OAuth, tokenbeheer en webhooks. emeq is jouw integratielaag; jij focust op product, klanten en groei.",
+                      "content": "Bouw productintegraties zonder maanden werk aan OAuth, tokenbeheer en webhooks. Emeq Hub is jouw integratielaag; jij focust op product, klanten en groei.",
                       "lineHeight": 1.6,
                       "fontFamily": "$font-body",
                       "fontSize": "$text-lg",
@@ -778,392 +786,427 @@
                   "children": [
                     {
                       "type": "frame",
-                      "id": "u8MTTJ",
-                      "name": "Code Window",
-                      "clip": true,
-                      "width": "fill_container",
-                      "fill": "$card",
-                      "cornerRadius": "$radius-lg",
-                      "stroke": "$border",
-                      "strokeWidth": 1,
-                      "effect": {
-                        "type": "shadow",
-                        "shadowType": "outer",
-                        "color": "$shadow-4",
-                        "offset": {
-                          "x": 0,
-                          "y": 6
-                        },
-                        "blur": 24,
-                        "spread": -6
-                      },
-                      "layout": "vertical",
+                      "id": "YPwgv",
+                      "name": "Hub Diagram",
+                      "width": 552,
+                      "height": 284,
+                      "layout": "none",
                       "children": [
                         {
-                          "type": "frame",
-                          "id": "v04Nhq",
-                          "name": "Titlebar",
-                          "width": "fill_container",
-                          "fill": "$muted",
-                          "stroke": "$border",
-                          "strokeWidth": {
-                            "bottom": 1
-                          },
-                          "strokeLinejoin": "round",
-                          "gap": "$space-md",
-                          "padding": [
-                            13,
-                            16
+                          "type": "ellipse",
+                          "id": "LuroR",
+                          "x": 174,
+                          "y": 40,
+                          "name": "Ring 2",
+                          "width": 204,
+                          "height": 204,
+                          "stroke": "#ebebeb",
+                          "strokeWidth": 1
+                        },
+                        {
+                          "type": "ellipse",
+                          "id": "V8R21e",
+                          "x": 210,
+                          "y": 76,
+                          "name": "Ring 1",
+                          "width": 132,
+                          "height": 132,
+                          "stroke": "#e3e3e3",
+                          "strokeWidth": 1
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "VUbDc",
+                          "x": 148,
+                          "y": 141,
+                          "name": "Line Left",
+                          "fill": "#dddddd",
+                          "width": 80,
+                          "height": 1.5
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "rsTdp",
+                          "x": 324,
+                          "y": 141,
+                          "name": "Line Mid",
+                          "fill": "#dddddd",
+                          "width": 96,
+                          "height": 1.5
+                        },
+                        {
+                          "type": "path",
+                          "id": "Z14tk",
+                          "x": 324,
+                          "y": 60,
+                          "name": "Line Top",
+                          "geometry": "M0 82c40 0 56-82 96-82",
+                          "viewBox": [
+                            0,
+                            0,
+                            96,
+                            82
                           ],
-                          "alignItems": "center",
-                          "children": [
-                            {
-                              "type": "frame",
-                              "id": "YbE06",
-                              "name": "Dots",
-                              "gap": "$space-xs",
-                              "alignItems": "center",
-                              "children": [
-                                {
-                                  "type": "ellipse",
-                                  "id": "aAtVh",
-                                  "name": "dot",
-                                  "fill": "$border",
-                                  "width": 12,
-                                  "height": 12
-                                },
-                                {
-                                  "type": "ellipse",
-                                  "id": "zwlYm",
-                                  "name": "dot",
-                                  "fill": "$border",
-                                  "width": 12,
-                                  "height": 12
-                                },
-                                {
-                                  "type": "ellipse",
-                                  "id": "JHidI",
-                                  "name": "dot",
-                                  "fill": "$border",
-                                  "width": 12,
-                                  "height": 12
-                                }
-                              ]
-                            },
-                            {
-                              "type": "text",
-                              "id": "A3IJtY",
-                              "name": "File",
-                              "fill": "$muted-foreground",
-                              "content": "request.http",
-                              "fontFamily": "$font-caption",
-                              "fontSize": "$text-xs",
-                              "fontWeight": "normal"
-                            }
-                          ]
+                          "width": 96,
+                          "height": 82,
+                          "stroke": "#dddddd",
+                          "strokeWidth": 1.5
+                        },
+                        {
+                          "type": "path",
+                          "id": "r8Tye",
+                          "x": 324,
+                          "y": 142,
+                          "name": "Line Bottom",
+                          "geometry": "M0 0c40 0 56 82 96 82",
+                          "viewBox": [
+                            0,
+                            0,
+                            96,
+                            82
+                          ],
+                          "width": 96,
+                          "height": 82,
+                          "stroke": "#dddddd",
+                          "strokeWidth": 1.5
+                        },
+                        {
+                          "type": "ellipse",
+                          "id": "L9O423",
+                          "x": 145,
+                          "y": 139,
+                          "name": "Dot L",
+                          "fill": "#c9c9c9",
+                          "width": 5,
+                          "height": 5
+                        },
+                        {
+                          "type": "ellipse",
+                          "id": "Rub9E",
+                          "x": 186,
+                          "y": 139.5,
+                          "name": "Dot Flow",
+                          "fill": "$brand",
+                          "width": 4.5,
+                          "height": 4.5
                         },
                         {
                           "type": "frame",
-                          "id": "gxazk",
-                          "name": "Code Body",
-                          "width": "fill_container",
-                          "layout": "vertical",
-                          "gap": "$space-xs",
-                          "padding": 22,
-                          "children": [
-                            {
-                              "type": "frame",
-                              "id": "KUs4Y",
-                              "name": "req",
-                              "alignItems": "center",
-                              "children": [
-                                {
-                                  "type": "text",
-                                  "id": "f7v5Re",
-                                  "name": "t",
-                                  "fill": "$brand",
-                                  "content": "POST",
-                                  "fontFamily": "$font-data",
-                                  "fontSize": "$text-xs2",
-                                  "fontWeight": "600"
-                                },
-                                {
-                                  "type": "text",
-                                  "id": "V7pto",
-                                  "name": "t",
-                                  "fill": "$foreground",
-                                  "content": "  /v1/{provider}/resources",
-                                  "fontFamily": "$font-data",
-                                  "fontSize": "$text-xs2",
-                                  "fontWeight": "normal"
-                                }
-                              ]
-                            },
-                            {
-                              "type": "frame",
-                              "id": "Z3fKU",
-                              "name": "auth",
-                              "alignItems": "center",
-                              "children": [
-                                {
-                                  "type": "text",
-                                  "id": "q8DkB",
-                                  "name": "t",
-                                  "fill": "$muted-foreground",
-                                  "content": "Authorization: ",
-                                  "fontFamily": "$font-data",
-                                  "fontSize": "$text-xs2",
-                                  "fontWeight": "normal"
-                                },
-                                {
-                                  "type": "text",
-                                  "id": "C84YnG",
-                                  "name": "t",
-                                  "fill": "$foreground",
-                                  "content": "Bearer ",
-                                  "fontFamily": "$font-data",
-                                  "fontSize": "$text-xs2",
-                                  "fontWeight": "normal"
-                                },
-                                {
-                                  "type": "text",
-                                  "id": "AZ6HE",
-                                  "name": "t",
-                                  "fill": "$muted-foreground",
-                                  "content": "••••••••",
-                                  "fontFamily": "$font-data",
-                                  "fontSize": "$text-xs2",
-                                  "fontWeight": "normal"
-                                }
-                              ]
-                            },
-                            {
-                              "type": "frame",
-                              "id": "WOmL0",
-                              "name": "gap1",
-                              "width": "fill_container",
-                              "height": 8,
-                              "alignItems": "center"
-                            },
-                            {
-                              "type": "frame",
-                              "id": "FRWkm",
-                              "name": "open",
-                              "alignItems": "center",
-                              "children": [
-                                {
-                                  "type": "text",
-                                  "id": "WLHvu",
-                                  "name": "t",
-                                  "fill": "$muted-foreground",
-                                  "content": "{",
-                                  "fontFamily": "$font-data",
-                                  "fontSize": "$text-xs2",
-                                  "fontWeight": "normal"
-                                }
-                              ]
-                            },
-                            {
-                              "type": "frame",
-                              "id": "wyANz",
-                              "name": "conn",
-                              "alignItems": "center",
-                              "children": [
-                                {
-                                  "type": "text",
-                                  "id": "X9zwb",
-                                  "name": "t",
-                                  "fill": "$muted-foreground",
-                                  "content": "  \"connection_id\": ",
-                                  "fontFamily": "$font-data",
-                                  "fontSize": "$text-xs2",
-                                  "fontWeight": "normal"
-                                },
-                                {
-                                  "type": "text",
-                                  "id": "PMmJq",
-                                  "name": "t",
-                                  "fill": "$foreground",
-                                  "content": "\"conn_7fK2…\"",
-                                  "fontFamily": "$font-data",
-                                  "fontSize": "$text-xs2",
-                                  "fontWeight": "normal"
-                                },
-                                {
-                                  "type": "text",
-                                  "id": "NPc6d",
-                                  "name": "t",
-                                  "fill": "$muted-foreground",
-                                  "content": ",",
-                                  "fontFamily": "$font-data",
-                                  "fontSize": "$text-xs2",
-                                  "fontWeight": "normal"
-                                }
-                              ]
-                            },
-                            {
-                              "type": "frame",
-                              "id": "PMgwg",
-                              "name": "lines",
-                              "alignItems": "center",
-                              "children": [
-                                {
-                                  "type": "text",
-                                  "id": "VsNx6",
-                                  "name": "t",
-                                  "fill": "$muted-foreground",
-                                  "content": "  \"payload\": ",
-                                  "fontFamily": "$font-data",
-                                  "fontSize": "$text-xs2",
-                                  "fontWeight": "normal"
-                                },
-                                {
-                                  "type": "text",
-                                  "id": "MZ4Qq",
-                                  "name": "t",
-                                  "fill": "$foreground",
-                                  "content": "{ … }",
-                                  "fontFamily": "$font-data",
-                                  "fontSize": "$text-xs2",
-                                  "fontWeight": "normal"
-                                }
-                              ]
-                            },
-                            {
-                              "type": "frame",
-                              "id": "kc7th",
-                              "name": "close",
-                              "alignItems": "center",
-                              "children": [
-                                {
-                                  "type": "text",
-                                  "id": "ufqRJ",
-                                  "name": "t",
-                                  "fill": "$muted-foreground",
-                                  "content": "}",
-                                  "fontFamily": "$font-data",
-                                  "fontSize": "$text-xs2",
-                                  "fontWeight": "normal"
-                                }
-                              ]
-                            }
-                          ]
-                        },
-                        {
-                          "type": "frame",
-                          "id": "Wbgog",
-                          "name": "Status",
-                          "width": "fill_container",
+                          "id": "W5DqYo",
+                          "x": 8,
+                          "y": 112,
+                          "name": "Consumer Node",
+                          "width": 140,
+                          "height": 60,
                           "fill": "$card",
+                          "cornerRadius": 10,
                           "stroke": "$border",
-                          "strokeWidth": {
-                            "top": 1
+                          "strokeWidth": 1,
+                          "effect": {
+                            "type": "shadow",
+                            "shadowType": "outer",
+                            "color": "$shadow-3",
+                            "offset": {
+                              "x": 0,
+                              "y": 2
+                            },
+                            "blur": 8,
+                            "spread": -2
                           },
-                          "strokeLinejoin": "round",
-                          "gap": "$space-xs",
-                          "padding": [
-                            12,
-                            22
-                          ],
+                          "layout": "vertical",
+                          "gap": 3,
+                          "justifyContent": "center",
                           "alignItems": "center",
                           "children": [
                             {
-                              "type": "ellipse",
-                              "id": "HXlbI",
-                              "name": "ok",
-                              "fill": "$success",
-                              "width": 8,
-                              "height": 8
+                              "type": "text",
+                              "id": "eTXiY",
+                              "name": "Naam",
+                              "fill": "$foreground",
+                              "content": "Jouw software",
+                              "fontFamily": "$font-body",
+                              "fontSize": 13,
+                              "fontWeight": "600"
                             },
                             {
                               "type": "text",
-                              "id": "ErydC",
-                              "name": "code",
-                              "fill": "$success",
-                              "content": "200 OK",
-                              "fontFamily": "$font-data",
-                              "fontSize": "$text-xs",
-                              "fontWeight": "normal"
-                            },
-                            {
-                              "type": "text",
-                              "id": "T8bi6",
-                              "name": "meta",
+                              "id": "bZmMc",
+                              "name": "Sub",
                               "fill": "$muted-foreground",
-                              "content": "· doorgestuurd · 142 ms",
+                              "content": "REST · JSON",
                               "fontFamily": "$font-data",
-                              "fontSize": "$text-xs",
+                              "fontSize": 10,
                               "fontWeight": "normal"
                             }
                           ]
-                        }
-                      ]
-                    },
-                    {
-                      "type": "frame",
-                      "id": "aAIGW",
-                      "layoutPosition": "absolute",
-                      "x": -40,
-                      "y": 216,
-                      "name": "Webhook Toast",
-                      "fill": "$card",
-                      "cornerRadius": "$radius-md",
-                      "stroke": "$border",
-                      "strokeWidth": 1,
-                      "effect": {
-                        "type": "shadow",
-                        "shadowType": "outer",
-                        "color": "$shadow-5",
-                        "offset": {
-                          "x": 0,
-                          "y": 8
                         },
-                        "blur": 28,
-                        "spread": -8
-                      },
-                      "layout": "vertical",
-                      "gap": "$space-xxs",
-                      "padding": [
-                        12,
-                        16
-                      ],
-                      "children": [
                         {
                           "type": "frame",
-                          "id": "cbGhl",
-                          "name": "Event",
-                          "gap": "$space-xs",
+                          "id": "e3aT8E",
+                          "x": 228,
+                          "y": 94,
+                          "name": "Hub Node",
+                          "width": 96,
+                          "height": 96,
+                          "fill": "$card",
+                          "cornerRadius": 20,
+                          "stroke": "$border",
+                          "strokeWidth": 1,
+                          "effect": {
+                            "type": "shadow",
+                            "shadowType": "outer",
+                            "color": "$shadow-4",
+                            "offset": {
+                              "x": 0,
+                              "y": 8
+                            },
+                            "blur": 24,
+                            "spread": -6
+                          },
+                          "layout": "vertical",
+                          "gap": 6,
+                          "justifyContent": "center",
                           "alignItems": "center",
                           "children": [
                             {
-                              "type": "ellipse",
-                              "id": "J6umJ",
-                              "name": "dot",
-                              "fill": "$success",
-                              "width": 7,
-                              "height": 7
-                            },
-                            {
-                              "type": "text",
-                              "id": "w1KTV",
-                              "name": "t",
-                              "fill": "$foreground",
-                              "content": "webhook · invoice.created",
-                              "fontFamily": "$font-data",
-                              "fontSize": "$text-xs",
-                              "fontWeight": "500"
+                              "type": "rectangle",
+                              "id": "ZGryd",
+                              "name": "Mark",
+                              "fill": {
+                                "type": "image",
+                                "enabled": true,
+                                "url": "logo.png",
+                                "mode": "fit"
+                              },
+                              "width": 40,
+                              "height": 44
                             }
                           ]
                         },
                         {
-                          "type": "text",
-                          "id": "XidrM",
-                          "name": "meta",
-                          "fill": "$muted-foreground",
-                          "content": "→ doorgestuurd naar je app · 84 ms",
-                          "fontFamily": "$font-data",
-                          "fontSize": "$text-2xs",
-                          "fontWeight": "normal"
+                          "type": "frame",
+                          "id": "YWv2q",
+                          "x": 420,
+                          "y": 36,
+                          "name": "Partner Boekhouden",
+                          "width": 124,
+                          "height": 48,
+                          "fill": "$card",
+                          "cornerRadius": 10,
+                          "stroke": "$border",
+                          "strokeWidth": 1,
+                          "effect": {
+                            "type": "shadow",
+                            "shadowType": "outer",
+                            "color": "$shadow-3",
+                            "offset": {
+                              "x": 0,
+                              "y": 2
+                            },
+                            "blur": 8,
+                            "spread": -2
+                          },
+                          "gap": 7,
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "spXso",
+                              "name": "Glyph Doc",
+                              "width": 12,
+                              "height": 15,
+                              "layout": "none",
+                              "children": [
+                                {
+                                  "type": "frame",
+                                  "id": "w6Mnm",
+                                  "x": 0,
+                                  "y": 0,
+                                  "name": "Sheet",
+                                  "clip": true,
+                                  "width": 12,
+                                  "height": 15,
+                                  "fill": "#ffffff",
+                                  "cornerRadius": 2,
+                                  "stroke": "#c2c2c2",
+                                  "strokeWidth": 1,
+                                  "layout": "none",
+                                  "children": [
+                                    {
+                                      "type": "rectangle",
+                                      "cornerRadius": 1,
+                                      "id": "iubOj",
+                                      "x": 2.5,
+                                      "y": 3.5,
+                                      "name": "L1",
+                                      "fill": "#cfcfcf",
+                                      "width": 7,
+                                      "height": 1.3
+                                    },
+                                    {
+                                      "type": "rectangle",
+                                      "cornerRadius": 1,
+                                      "id": "CeiBD",
+                                      "x": 2.5,
+                                      "y": 6.5,
+                                      "name": "L2",
+                                      "fill": "#cfcfcf",
+                                      "width": 7,
+                                      "height": 1.3
+                                    },
+                                    {
+                                      "type": "rectangle",
+                                      "cornerRadius": 1,
+                                      "id": "W0LtWo",
+                                      "x": 2.5,
+                                      "y": 9.5,
+                                      "name": "Amount",
+                                      "fill": "$brand",
+                                      "width": 4.5,
+                                      "height": 1.3
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "id": "lBFQR",
+                              "name": "Label",
+                              "fill": "$foreground",
+                              "content": "Boekhouden",
+                              "fontFamily": "$font-body",
+                              "fontSize": 12,
+                              "fontWeight": "600"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "V0vRvo",
+                          "x": 420,
+                          "y": 122,
+                          "name": "Partner Betalen",
+                          "width": 124,
+                          "height": 48,
+                          "fill": "$card",
+                          "cornerRadius": 10,
+                          "stroke": "$border",
+                          "strokeWidth": 1,
+                          "effect": {
+                            "type": "shadow",
+                            "shadowType": "outer",
+                            "color": "$shadow-3",
+                            "offset": {
+                              "x": 0,
+                              "y": 2
+                            },
+                            "blur": 8,
+                            "spread": -2
+                          },
+                          "gap": 7,
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "M8Wlj",
+                              "name": "Glyph Card",
+                              "width": 17,
+                              "height": 12,
+                              "layout": "none",
+                              "children": [
+                                {
+                                  "type": "frame",
+                                  "id": "gSuFN",
+                                  "x": 0,
+                                  "y": 0,
+                                  "name": "Card",
+                                  "clip": true,
+                                  "width": 17,
+                                  "height": 12,
+                                  "fill": "#ffffff",
+                                  "cornerRadius": 2.5,
+                                  "stroke": "#c2c2c2",
+                                  "strokeWidth": 1,
+                                  "layout": "none",
+                                  "children": [
+                                    {
+                                      "type": "rectangle",
+                                      "id": "tqaSW",
+                                      "x": 0,
+                                      "y": 2.5,
+                                      "name": "Stripe",
+                                      "fill": "#ececec",
+                                      "width": 17,
+                                      "height": 2.5
+                                    },
+                                    {
+                                      "type": "rectangle",
+                                      "cornerRadius": 1,
+                                      "id": "SLXvP",
+                                      "x": 2.2,
+                                      "y": 7,
+                                      "name": "Chip",
+                                      "fill": "$brand",
+                                      "width": 3.5,
+                                      "height": 2.3
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "id": "izE7i",
+                              "name": "Label",
+                              "fill": "$foreground",
+                              "content": "Betalen",
+                              "fontFamily": "$font-body",
+                              "fontSize": 12,
+                              "fontWeight": "600"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "vFRzK",
+                          "x": 420,
+                          "y": 208,
+                          "name": "Partner Meer",
+                          "width": 124,
+                          "height": 48,
+                          "fill": "$card",
+                          "cornerRadius": 10,
+                          "stroke": "$border",
+                          "strokeWidth": 1,
+                          "effect": {
+                            "type": "shadow",
+                            "shadowType": "outer",
+                            "color": "$shadow-3",
+                            "offset": {
+                              "x": 0,
+                              "y": 2
+                            },
+                            "blur": 8,
+                            "spread": -2
+                          },
+                          "layout": "vertical",
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "NYqZh",
+                              "name": "Meer",
+                              "fill": "$muted-foreground",
+                              "content": "+ meer partners",
+                              "fontFamily": "$font-data",
+                              "fontSize": 11,
+                              "fontWeight": "normal"
+                            }
+                          ]
                         }
                       ]
                     }
@@ -1253,7 +1296,7 @@
                   "id": "S3KKXt",
                   "name": "Eyebrow",
                   "fill": "$muted-foreground",
-                  "content": "01 — WAAROM EMEQ",
+                  "content": "01 — WAAROM EMEQ HUB",
                   "fontFamily": "$font-caption",
                   "fontSize": "$text-xs2",
                   "fontWeight": "normal",
@@ -1407,7 +1450,7 @@
                       "fill": "$muted-foreground",
                       "textGrowth": "fixed-width",
                       "width": "fill_container",
-                      "content": "Integreer één keer met het uniforme API-contract van emeq. Nieuwe partners voeg je toe zonder je productlogica opnieuw te ontwerpen.",
+                      "content": "Integreer één keer met het uniforme API-contract van Emeq Hub. Nieuwe partners voeg je toe zonder je productlogica opnieuw te ontwerpen.",
                       "lineHeight": 1.6,
                       "fontFamily": "$font-body",
                       "fontSize": "$text-md",
@@ -1529,7 +1572,7 @@
                       "fill": "$muted-foreground",
                       "textGrowth": "fixed-width",
                       "width": "fill_container",
-                      "content": "emeq beheert OAuth-flows, bewaart credentials versleuteld en ververst tokens automatisch. Minder onderhoud, minder storingen.",
+                      "content": "Emeq Hub beheert OAuth-flows, bewaart credentials versleuteld en ververst tokens automatisch. Minder onderhoud, minder storingen.",
                       "lineHeight": 1.6,
                       "fontFamily": "$font-body",
                       "fontSize": "$text-md",
@@ -1850,7 +1893,7 @@
                       "fill": "$muted-foreground",
                       "textGrowth": "fixed-width",
                       "width": "fill_container",
-                      "content": "De gebruiker rondt OAuth af; emeq slaat tokens veilig op en houdt ze automatisch actueel.",
+                      "content": "De gebruiker rondt OAuth af; Emeq Hub slaat tokens veilig op en houdt ze automatisch actueel.",
                       "lineHeight": 1.6,
                       "fontFamily": "$font-body",
                       "fontSize": "$text-md",
@@ -3651,7 +3694,7 @@
                       "fill": "$muted-foreground",
                       "textGrowth": "fixed-width",
                       "width": "fill_container",
-                      "content": "Gebruik ieder partner-endpoint via één vaste route. emeq kiest de juiste koppeling, voegt credentials toe en geeft status en headers transparant terug.",
+                      "content": "Gebruik ieder partner-endpoint via één vaste route. Emeq Hub kiest de juiste koppeling, voegt credentials toe en geeft status en headers transparant terug.",
                       "lineHeight": 1.6,
                       "fontFamily": "$font-body",
                       "fontSize": "$text-md",
@@ -3771,7 +3814,7 @@
                               "id": "c2WJ7",
                               "name": "l",
                               "fill": "$brand",
-                              "content": "emeq HUB",
+                              "content": "EMEQ HUB",
                               "fontFamily": "$font-data",
                               "fontSize": "$text-2xs",
                               "fontWeight": "normal",
@@ -4332,7 +4375,7 @@
               "fill": "$muted-foreground",
               "textGrowth": "fixed-width",
               "width": 560,
-              "content": "Maak van koppelingen een groeiversneller in plaats van een ontwikkelproject. Start vandaag met emeq.",
+              "content": "Maak van koppelingen een groeiversneller in plaats van een ontwikkelproject. Start vandaag met Emeq Hub.",
               "lineHeight": 1.6,
               "textAlign": "center",
               "fontFamily": "$font-body",
@@ -4472,10 +4515,14 @@
                       "children": [
                         {
                           "type": "rectangle",
-                          "cornerRadius": "$radius-xs",
                           "id": "uoA6t",
                           "name": "Mark",
-                          "fill": "$brand",
+                          "fill": {
+                            "type": "image",
+                            "enabled": true,
+                            "url": "logo.png",
+                            "mode": "fit"
+                          },
                           "width": 14,
                           "height": 14
                         },
@@ -5028,7 +5075,7 @@
               "fill": "$muted-foreground",
               "textGrowth": "fixed-width",
               "width": "fill_container",
-              "content": "Bouw productintegraties zonder maanden werk aan OAuth, tokenbeheer en webhooks. emeq is jouw integratielaag; jij focust op product, klanten en groei.",
+              "content": "Bouw productintegraties zonder maanden werk aan OAuth, tokenbeheer en webhooks. Emeq Hub is jouw integratielaag; jij focust op product, klanten en groei.",
               "lineHeight": 1.6,
               "fontFamily": "$font-body",
               "fontSize": "$text-base",
@@ -5118,321 +5165,404 @@
             },
             {
               "type": "frame",
-              "id": "Lz7VH",
-              "name": "Code Window",
-              "clip": true,
-              "width": "fill_container",
-              "fill": "$card",
-              "cornerRadius": "$radius-sm",
-              "stroke": "$border",
-              "strokeWidth": 1,
-              "effect": {
-                "type": "shadow",
-                "shadowType": "outer",
-                "color": "$shadow-4",
-                "offset": {
-                  "x": 0,
-                  "y": 6
-                },
-                "blur": 24,
-                "spread": -6
-              },
-              "layout": "vertical",
+              "id": "XosIg",
+              "name": "Hub Diagram",
+              "width": 342,
+              "height": 256,
+              "layout": "none",
               "children": [
                 {
-                  "type": "frame",
-                  "id": "zjT0b",
-                  "name": "Titlebar",
-                  "width": "fill_container",
-                  "fill": "$muted",
-                  "stroke": "$border",
-                  "strokeWidth": {
-                    "bottom": 1
-                  },
-                  "strokeLinejoin": "round",
-                  "gap": "$space-sm",
-                  "padding": [
-                    10,
-                    12
+                  "type": "ellipse",
+                  "id": "PuMTs",
+                  "x": 93,
+                  "y": 50,
+                  "name": "Ring 2",
+                  "width": 156,
+                  "height": 156,
+                  "stroke": "#ebebeb",
+                  "strokeWidth": 1
+                },
+                {
+                  "type": "ellipse",
+                  "id": "GbmhB",
+                  "x": 121,
+                  "y": 78,
+                  "name": "Ring 1",
+                  "width": 100,
+                  "height": 100,
+                  "stroke": "#e3e3e3",
+                  "strokeWidth": 1
+                },
+                {
+                  "type": "rectangle",
+                  "id": "dDLaQ",
+                  "x": 88,
+                  "y": 127,
+                  "name": "Line Left",
+                  "fill": "#dddddd",
+                  "width": 47,
+                  "height": 1.5
+                },
+                {
+                  "type": "rectangle",
+                  "id": "bxpk2",
+                  "x": 207,
+                  "y": 127,
+                  "name": "Line Mid",
+                  "fill": "#dddddd",
+                  "width": 43,
+                  "height": 1.5
+                },
+                {
+                  "type": "path",
+                  "id": "rmQgt",
+                  "x": 207,
+                  "y": 52,
+                  "name": "Line Top",
+                  "geometry": "M0 76c18 0 26-76 43-76",
+                  "viewBox": [
+                    0,
+                    0,
+                    43,
+                    76
                   ],
+                  "width": 43,
+                  "height": 76,
+                  "stroke": "#dddddd",
+                  "strokeWidth": 1.5
+                },
+                {
+                  "type": "path",
+                  "id": "IwQWw",
+                  "x": 207,
+                  "y": 128,
+                  "name": "Line Bottom",
+                  "geometry": "M0 0c18 0 26 76 43 76",
+                  "viewBox": [
+                    0,
+                    0,
+                    43,
+                    76
+                  ],
+                  "width": 43,
+                  "height": 76,
+                  "stroke": "#dddddd",
+                  "strokeWidth": 1.5
+                },
+                {
+                  "type": "ellipse",
+                  "id": "gTc5c",
+                  "x": 106,
+                  "y": 125.5,
+                  "name": "Dot Flow",
+                  "fill": "$brand",
+                  "width": 4.5,
+                  "height": 4.5
+                },
+                {
+                  "type": "frame",
+                  "id": "L826wq",
+                  "x": 0,
+                  "y": 108,
+                  "name": "Consumer Node",
+                  "width": 88,
+                  "height": 40,
+                  "fill": "$card",
+                  "cornerRadius": 8,
+                  "stroke": "$border",
+                  "strokeWidth": 1,
+                  "effect": {
+                    "type": "shadow",
+                    "shadowType": "outer",
+                    "color": "$shadow-3",
+                    "offset": {
+                      "x": 0,
+                      "y": 2
+                    },
+                    "blur": 8,
+                    "spread": -2
+                  },
+                  "layout": "vertical",
+                  "justifyContent": "center",
                   "alignItems": "center",
                   "children": [
                     {
-                      "type": "frame",
-                      "id": "e2TRD",
-                      "name": "Dots",
-                      "gap": "$space-xs",
-                      "alignItems": "center",
-                      "children": [
-                        {
-                          "type": "ellipse",
-                          "id": "cTlBQ",
-                          "name": "dot",
-                          "fill": "$error",
-                          "width": 10,
-                          "height": 10
-                        },
-                        {
-                          "type": "ellipse",
-                          "id": "TSyNT",
-                          "name": "dot",
-                          "fill": "$warning",
-                          "width": 10,
-                          "height": 10
-                        },
-                        {
-                          "type": "ellipse",
-                          "id": "vNZSy",
-                          "name": "dot",
-                          "fill": "$success",
-                          "width": 10,
-                          "height": 10
-                        }
-                      ]
-                    },
-                    {
                       "type": "text",
-                      "id": "Whbt6",
-                      "name": "File",
-                      "fill": "$muted-foreground",
-                      "content": "POST · request.http",
-                      "fontFamily": "$font-data",
-                      "fontSize": "$text-xs",
-                      "fontWeight": "normal"
+                      "id": "E06sj",
+                      "name": "Naam",
+                      "fill": "$foreground",
+                      "content": "Jouw app",
+                      "fontFamily": "$font-body",
+                      "fontSize": 11,
+                      "fontWeight": "600"
                     }
                   ]
                 },
                 {
                   "type": "frame",
-                  "id": "Qok4R",
-                  "name": "Body",
-                  "width": "fill_container",
+                  "id": "PCFXc",
+                  "x": 135,
+                  "y": 92,
+                  "name": "Hub Node",
+                  "width": 72,
+                  "height": 72,
+                  "fill": "$card",
+                  "cornerRadius": 16,
+                  "stroke": "$border",
+                  "strokeWidth": 1,
+                  "effect": {
+                    "type": "shadow",
+                    "shadowType": "outer",
+                    "color": "$shadow-4",
+                    "offset": {
+                      "x": 0,
+                      "y": 6
+                    },
+                    "blur": 18,
+                    "spread": -5
+                  },
                   "layout": "vertical",
-                  "gap": "$space-xs",
-                  "padding": [
-                    16,
-                    14
-                  ],
+                  "gap": 4,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "rectangle",
+                      "id": "B4CGGH",
+                      "name": "Mark",
+                      "fill": {
+                        "type": "image",
+                        "enabled": true,
+                        "url": "logo.png",
+                        "mode": "fit"
+                      },
+                      "width": 26,
+                      "height": 28
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "gOCrz",
+                  "x": 250,
+                  "y": 32,
+                  "name": "Partner Boekhouden",
+                  "width": 92,
+                  "height": 40,
+                  "fill": "$card",
+                  "cornerRadius": 8,
+                  "stroke": "$border",
+                  "strokeWidth": 1,
+                  "effect": {
+                    "type": "shadow",
+                    "shadowType": "outer",
+                    "color": "$shadow-3",
+                    "offset": {
+                      "x": 0,
+                      "y": 2
+                    },
+                    "blur": 8,
+                    "spread": -2
+                  },
+                  "gap": 7,
+                  "justifyContent": "center",
+                  "alignItems": "center",
                   "children": [
                     {
                       "type": "frame",
-                      "id": "YM4N6",
-                      "name": "req",
-                      "gap": "$space-tight",
-                      "alignItems": "center",
+                      "id": "r8X0yG",
+                      "name": "Glyph Doc",
+                      "width": 10.2,
+                      "height": 12.75,
+                      "layout": "none",
                       "children": [
                         {
-                          "type": "text",
-                          "id": "w7ekzs",
-                          "name": "s0",
-                          "fill": "$brand",
-                          "content": "POST",
-                          "lineHeight": 1.4,
-                          "fontFamily": "$font-data",
-                          "fontSize": "$text-xs2",
-                          "fontWeight": "normal"
-                        },
-                        {
-                          "type": "text",
-                          "id": "R66DzM",
-                          "name": "s1",
-                          "fill": "$foreground",
-                          "content": "/v1/{provider}/resources",
-                          "lineHeight": 1.4,
-                          "fontFamily": "$font-data",
-                          "fontSize": "$text-xs2",
-                          "fontWeight": "normal"
+                          "type": "frame",
+                          "id": "q3rNyI",
+                          "x": 0,
+                          "y": 0,
+                          "name": "Sheet",
+                          "clip": true,
+                          "width": 10.2,
+                          "height": 12.75,
+                          "fill": "#ffffff",
+                          "cornerRadius": 2,
+                          "stroke": "#c2c2c2",
+                          "strokeWidth": 1,
+                          "layout": "none",
+                          "children": [
+                            {
+                              "type": "rectangle",
+                              "cornerRadius": 1,
+                              "id": "fGk2n",
+                              "x": 2.125,
+                              "y": 2.975,
+                              "name": "L1",
+                              "fill": "#cfcfcf",
+                              "width": 5.95,
+                              "height": 1.105
+                            },
+                            {
+                              "type": "rectangle",
+                              "cornerRadius": 1,
+                              "id": "DDnoZ",
+                              "x": 2.125,
+                              "y": 5.5249999999999995,
+                              "name": "L2",
+                              "fill": "#cfcfcf",
+                              "width": 5.95,
+                              "height": 1.105
+                            },
+                            {
+                              "type": "rectangle",
+                              "cornerRadius": 1,
+                              "id": "M9lVV",
+                              "x": 2.125,
+                              "y": 8.075,
+                              "name": "Amount",
+                              "fill": "$brand",
+                              "width": 3.8249999999999997,
+                              "height": 1.105
+                            }
+                          ]
                         }
                       ]
                     },
                     {
+                      "type": "text",
+                      "id": "zMKmi",
+                      "name": "Label",
+                      "fill": "$foreground",
+                      "content": "Boekhouden",
+                      "fontFamily": "$font-body",
+                      "fontSize": 10,
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "pOhVs",
+                  "x": 250,
+                  "y": 108,
+                  "name": "Partner Betalen",
+                  "width": 92,
+                  "height": 40,
+                  "fill": "$card",
+                  "cornerRadius": 8,
+                  "stroke": "$border",
+                  "strokeWidth": 1,
+                  "effect": {
+                    "type": "shadow",
+                    "shadowType": "outer",
+                    "color": "$shadow-3",
+                    "offset": {
+                      "x": 0,
+                      "y": 2
+                    },
+                    "blur": 8,
+                    "spread": -2
+                  },
+                  "gap": 7,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
                       "type": "frame",
-                      "id": "Vjfoc",
-                      "name": "auth",
-                      "gap": "$space-tight",
-                      "alignItems": "center",
+                      "id": "a5HbYf",
+                      "name": "Glyph Card",
+                      "width": 14.45,
+                      "height": 10.2,
+                      "layout": "none",
                       "children": [
                         {
-                          "type": "text",
-                          "id": "clgZJ",
-                          "name": "s0",
-                          "fill": "$muted-foreground",
-                          "content": "Authorization:",
-                          "lineHeight": 1.4,
-                          "fontFamily": "$font-data",
-                          "fontSize": "$text-xs2",
-                          "fontWeight": "normal"
-                        },
-                        {
-                          "type": "text",
-                          "id": "W8vG7",
-                          "name": "s1",
-                          "fill": "$brand-deep",
-                          "content": "Bearer ••••••••",
-                          "lineHeight": 1.4,
-                          "fontFamily": "$font-data",
-                          "fontSize": "$text-xs2",
-                          "fontWeight": "normal"
+                          "type": "frame",
+                          "id": "iDGqW",
+                          "x": 0,
+                          "y": 0,
+                          "name": "Card",
+                          "clip": true,
+                          "width": 14.45,
+                          "height": 10.2,
+                          "fill": "#ffffff",
+                          "cornerRadius": 2.5,
+                          "stroke": "#c2c2c2",
+                          "strokeWidth": 1,
+                          "layout": "none",
+                          "children": [
+                            {
+                              "type": "rectangle",
+                              "id": "DJvRs",
+                              "x": 0,
+                              "y": 2.125,
+                              "name": "Stripe",
+                              "fill": "#ececec",
+                              "width": 14.45,
+                              "height": 2.125
+                            },
+                            {
+                              "type": "rectangle",
+                              "cornerRadius": 1,
+                              "id": "T1tUZ",
+                              "x": 1.87,
+                              "y": 5.95,
+                              "name": "Chip",
+                              "fill": "$brand",
+                              "width": 2.975,
+                              "height": 1.9549999999999998
+                            }
+                          ]
                         }
                       ]
                     },
                     {
-                      "type": "frame",
-                      "id": "RBDEg",
-                      "name": "gap",
-                      "width": "fill_container",
-                      "height": 6
+                      "type": "text",
+                      "id": "k0Vye",
+                      "name": "Label",
+                      "fill": "$foreground",
+                      "content": "Betalen",
+                      "fontFamily": "$font-body",
+                      "fontSize": 10,
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "nrlq4",
+                  "x": 250,
+                  "y": 184,
+                  "name": "Partner Meer",
+                  "width": 92,
+                  "height": 40,
+                  "fill": "$card",
+                  "cornerRadius": 8,
+                  "stroke": "$border",
+                  "strokeWidth": 1,
+                  "effect": {
+                    "type": "shadow",
+                    "shadowType": "outer",
+                    "color": "$shadow-3",
+                    "offset": {
+                      "x": 0,
+                      "y": 2
                     },
+                    "blur": 8,
+                    "spread": -2
+                  },
+                  "layout": "vertical",
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
                     {
-                      "type": "frame",
-                      "id": "WObyd",
-                      "name": "open",
-                      "gap": "$space-tight",
-                      "alignItems": "center",
-                      "children": [
-                        {
-                          "type": "text",
-                          "id": "QZDrY",
-                          "name": "s0",
-                          "fill": "$muted-foreground",
-                          "content": "{",
-                          "lineHeight": 1.4,
-                          "fontFamily": "$font-data",
-                          "fontSize": "$text-xs2",
-                          "fontWeight": "normal"
-                        }
-                      ]
-                    },
-                    {
-                      "type": "frame",
-                      "id": "IqEAQ",
-                      "name": "type",
-                      "gap": "$space-tight",
-                      "padding": [
-                        0,
-                        0,
-                        0,
-                        16
-                      ],
-                      "alignItems": "center",
-                      "children": [
-                        {
-                          "type": "text",
-                          "id": "O0rgba",
-                          "name": "s0",
-                          "fill": "$muted-foreground",
-                          "content": "\"connection_id\":",
-                          "lineHeight": 1.4,
-                          "fontFamily": "$font-data",
-                          "fontSize": "$text-xs2",
-                          "fontWeight": "normal"
-                        },
-                        {
-                          "type": "text",
-                          "id": "cUoUI",
-                          "name": "s1",
-                          "fill": "$foreground",
-                          "content": "\"conn_8Kd…\",",
-                          "lineHeight": 1.4,
-                          "fontFamily": "$font-data",
-                          "fontSize": "$text-xs2",
-                          "fontWeight": "normal"
-                        }
-                      ]
-                    },
-                    {
-                      "type": "frame",
-                      "id": "b9C9f",
-                      "name": "conn",
-                      "gap": "$space-tight",
-                      "padding": [
-                        0,
-                        0,
-                        0,
-                        16
-                      ],
-                      "alignItems": "center",
-                      "children": [
-                        {
-                          "type": "text",
-                          "id": "oNNT6",
-                          "name": "s0",
-                          "fill": "$muted-foreground",
-                          "content": "\"reference\":",
-                          "lineHeight": 1.4,
-                          "fontFamily": "$font-data",
-                          "fontSize": "$text-xs2",
-                          "fontWeight": "normal"
-                        },
-                        {
-                          "type": "text",
-                          "id": "ExboQ",
-                          "name": "s1",
-                          "fill": "$foreground",
-                          "content": "\"doc-2318\",",
-                          "lineHeight": 1.4,
-                          "fontFamily": "$font-data",
-                          "fontSize": "$text-xs2",
-                          "fontWeight": "normal"
-                        }
-                      ]
-                    },
-                    {
-                      "type": "frame",
-                      "id": "BtpBF",
-                      "name": "lines",
-                      "gap": "$space-tight",
-                      "padding": [
-                        0,
-                        0,
-                        0,
-                        16
-                      ],
-                      "alignItems": "center",
-                      "children": [
-                        {
-                          "type": "text",
-                          "id": "uJjQO",
-                          "name": "s0",
-                          "fill": "$muted-foreground",
-                          "content": "\"payload\":",
-                          "lineHeight": 1.4,
-                          "fontFamily": "$font-data",
-                          "fontSize": "$text-xs2",
-                          "fontWeight": "normal"
-                        },
-                        {
-                          "type": "text",
-                          "id": "NRvme",
-                          "name": "s1",
-                          "fill": "$muted-foreground",
-                          "content": "{ … }",
-                          "lineHeight": 1.4,
-                          "fontFamily": "$font-data",
-                          "fontSize": "$text-xs2",
-                          "fontWeight": "normal"
-                        }
-                      ]
-                    },
-                    {
-                      "type": "frame",
-                      "id": "XvSEg",
-                      "name": "close",
-                      "gap": "$space-tight",
-                      "alignItems": "center",
-                      "children": [
-                        {
-                          "type": "text",
-                          "id": "ow84p",
-                          "name": "s0",
-                          "fill": "$muted-foreground",
-                          "content": "}",
-                          "lineHeight": 1.4,
-                          "fontFamily": "$font-data",
-                          "fontSize": "$text-xs2",
-                          "fontWeight": "normal"
-                        }
-                      ]
+                      "type": "text",
+                      "id": "BMtyk",
+                      "name": "Meer",
+                      "fill": "$muted-foreground",
+                      "content": "+ meer",
+                      "fontFamily": "$font-data",
+                      "fontSize": 10,
+                      "fontWeight": "normal"
                     }
                   ]
                 }
@@ -5535,7 +5665,7 @@
                   "id": "ZPdkB",
                   "name": "Index",
                   "fill": "$muted-foreground",
-                  "content": "01 · WAAROM EMEQ",
+                  "content": "01 · WAAROM EMEQ HUB",
                   "fontFamily": "$font-caption",
                   "fontSize": "$text-2xs",
                   "fontWeight": "normal",
@@ -5700,7 +5830,7 @@
                           "fill": "$muted-foreground",
                           "textGrowth": "fixed-width",
                           "width": "fill_container",
-                          "content": "emeq beheert OAuth-flows, bewaart credentials versleuteld en ververst tokens automatisch. Minder onderhoud, minder storingen.",
+                          "content": "Emeq Hub beheert OAuth-flows, bewaart credentials versleuteld en ververst tokens automatisch. Minder onderhoud, minder storingen.",
                           "lineHeight": 1.6,
                           "fontFamily": "$font-body",
                           "fontSize": "$text-sm",
@@ -6080,7 +6210,7 @@
                           "fill": "$muted-foreground",
                           "textGrowth": "fixed-width",
                           "width": "fill_container",
-                          "content": "De gebruiker rondt OAuth af; emeq slaat tokens veilig op en houdt ze automatisch actueel.",
+                          "content": "De gebruiker rondt OAuth af; Emeq Hub slaat tokens veilig op en houdt ze automatisch actueel.",
                           "lineHeight": 1.6,
                           "fontFamily": "$font-body",
                           "fontSize": "$text-sm",
@@ -7719,7 +7849,7 @@
                           "fill": "$muted-foreground",
                           "textGrowth": "fixed-width",
                           "width": "fill_container",
-                          "content": "Gebruik ieder partner-endpoint via één vaste route. emeq kiest de juiste koppeling, voegt credentials toe en geeft status en headers transparant terug.",
+                          "content": "Gebruik ieder partner-endpoint via één vaste route. Emeq Hub kiest de juiste koppeling, voegt credentials toe en geeft status en headers transparant terug.",
                           "lineHeight": 1.6,
                           "fontFamily": "$font-body",
                           "fontSize": "$text-sm",
@@ -8199,7 +8329,7 @@
               "fill": "$muted-foreground",
               "textGrowth": "fixed-width",
               "width": "fill_container",
-              "content": "Maak van koppelingen een groeiversneller in plaats van een ontwikkelproject. Start vandaag met emeq.",
+              "content": "Maak van koppelingen een groeiversneller in plaats van een ontwikkelproject. Start vandaag met Emeq Hub.",
               "lineHeight": 1.6,
               "textAlign": "center",
               "fontFamily": "$font-body",
@@ -8279,10 +8409,14 @@
                   "children": [
                     {
                       "type": "rectangle",
-                      "cornerRadius": "$radius-xs",
                       "id": "s0vH4",
                       "name": "Mark",
-                      "fill": "$brand",
+                      "fill": {
+                        "type": "image",
+                        "enabled": true,
+                        "url": "logo.png",
+                        "mode": "fit"
+                      },
                       "width": 14,
                       "height": 14
                     },
@@ -8611,10 +8745,14 @@
                   "children": [
                     {
                       "type": "rectangle",
-                      "cornerRadius": "$radius-xs",
                       "id": "r0cfg",
                       "name": "Mark",
-                      "fill": "$brand",
+                      "fill": {
+                        "type": "image",
+                        "enabled": true,
+                        "url": "logo.png",
+                        "mode": "fit"
+                      },
                       "width": 14,
                       "height": 14
                     },
@@ -9685,10 +9823,14 @@
                   "children": [
                     {
                       "type": "rectangle",
-                      "cornerRadius": "$radius-xs",
                       "id": "V6ggn",
                       "name": "Mark",
-                      "fill": "$brand",
+                      "fill": {
+                        "type": "image",
+                        "enabled": true,
+                        "url": "logo.png",
+                        "mode": "fit"
+                      },
                       "width": 14,
                       "height": 14
                     },
@@ -9898,7 +10040,7 @@
                   "fill": "$muted-foreground",
                   "textGrowth": "fixed-width",
                   "width": "fill_container",
-                  "content": "In 30 minuten zie je hoe emeq je koppelingen versnelt: van eerste API-call tot audit-inzicht, afgestemd op jouw use-case.",
+                  "content": "In 30 minuten zie je hoe Emeq Hub je koppelingen versnelt: van eerste API-call tot audit-inzicht, afgestemd op jouw use-case.",
                   "lineHeight": 1.6,
                   "fontFamily": "$font-body",
                   "fontSize": "$text-lg",
@@ -10703,10 +10845,14 @@
                   "children": [
                     {
                       "type": "rectangle",
-                      "cornerRadius": "$radius-xs",
                       "id": "XooS6",
                       "name": "Mark",
-                      "fill": "$brand",
+                      "fill": {
+                        "type": "image",
+                        "enabled": true,
+                        "url": "logo.png",
+                        "mode": "fit"
+                      },
                       "width": 14,
                       "height": 14
                     },
@@ -11814,10 +11960,14 @@
                   "children": [
                     {
                       "type": "rectangle",
-                      "cornerRadius": "$radius-xs",
                       "id": "P9dK0e",
                       "name": "Mark",
-                      "fill": "$brand",
+                      "fill": {
+                        "type": "image",
+                        "enabled": true,
+                        "url": "logo.png",
+                        "mode": "fit"
+                      },
                       "width": 14,
                       "height": 14
                     },
@@ -12983,10 +13133,14 @@
                   "children": [
                     {
                       "type": "rectangle",
-                      "cornerRadius": "$radius-xs",
                       "id": "HC206",
                       "name": "Mark",
-                      "fill": "$brand",
+                      "fill": {
+                        "type": "image",
+                        "enabled": true,
+                        "url": "logo.png",
+                        "mode": "fit"
+                      },
                       "width": 14,
                       "height": 14
                     },
@@ -14740,7 +14894,7 @@
                   "fill": "$muted-foreground",
                   "textGrowth": "fixed-width",
                   "width": "fill_container",
-                  "content": "In 30 minuten zie je hoe emeq je koppelingen versnelt: van eerste API-call tot audit-inzicht, afgestemd op jouw use-case.",
+                  "content": "In 30 minuten zie je hoe Emeq Hub je koppelingen versnelt: van eerste API-call tot audit-inzicht, afgestemd op jouw use-case.",
                   "lineHeight": 1.6,
                   "fontFamily": "$font-body",
                   "fontSize": "$text-base",
@@ -18356,10 +18510,14 @@
                   "children": [
                     {
                       "type": "rectangle",
-                      "cornerRadius": "$radius-xs",
                       "id": "B6fsD",
                       "name": "Mark",
-                      "fill": "$brand",
+                      "fill": {
+                        "type": "image",
+                        "enabled": true,
+                        "url": "logo.png",
+                        "mode": "fit"
+                      },
                       "width": 14,
                       "height": 14
                     },
@@ -21288,10 +21446,14 @@
                   "children": [
                     {
                       "type": "rectangle",
-                      "cornerRadius": "$radius-xs",
                       "id": "e9tLqH",
                       "name": "Mark",
-                      "fill": "$brand",
+                      "fill": {
+                        "type": "image",
+                        "enabled": true,
+                        "url": "logo.png",
+                        "mode": "fit"
+                      },
                       "width": 14,
                       "height": 14
                     },
@@ -21516,7 +21678,7 @@
                   "fill": "$muted-foreground",
                   "textGrowth": "fixed-width",
                   "width": 660,
-                  "content": "emeq is de integratiehub achter je product. Start vandaag met Exact Online en voeg nieuwe systemen toe zonder telkens je architectuur te verbouwen.",
+                  "content": "Emeq Hub is de integratiehub achter je product. Start vandaag met Exact Online en voeg nieuwe systemen toe zonder telkens je architectuur te verbouwen.",
                   "lineHeight": 1.6,
                   "textAlign": "center",
                   "fontFamily": "$font-body",
@@ -21913,7 +22075,7 @@
                   "id": "CVN3m",
                   "name": "H",
                   "fill": "$foreground",
-                  "content": "Ontdek Exact Online",
+                  "content": "Klaar om te koppelen?",
                   "lineHeight": 1.05,
                   "fontFamily": "$font-heading",
                   "fontSize": "$text-2xl",
@@ -22013,10 +22175,14 @@
                       "children": [
                         {
                           "type": "rectangle",
-                          "cornerRadius": "$radius-xs",
                           "id": "R7gsdo",
                           "name": "Mark",
-                          "fill": "$brand",
+                          "fill": {
+                            "type": "image",
+                            "enabled": true,
+                            "url": "logo.png",
+                            "mode": "fit"
+                          },
                           "width": 14,
                           "height": 14
                         },
@@ -22116,7 +22282,7 @@
                       "id": "MI5KP",
                       "name": "Koltitel",
                       "fill": "$muted-foreground",
-                      "content": "Ook van Emeq",
+                      "content": "Ook van Emeq Hub",
                       "fontFamily": "$font-body",
                       "fontSize": "$text-sm",
                       "fontWeight": "500",
@@ -22141,7 +22307,7 @@
                               "id": "NTBvf",
                               "name": "n",
                               "fill": "$foreground",
-                              "content": "Emeq",
+                              "content": "Emeq Hub",
                               "fontFamily": "$font-body",
                               "fontSize": "$text-sm",
                               "fontWeight": "500"
@@ -22343,10 +22509,14 @@
                   "children": [
                     {
                       "type": "rectangle",
-                      "cornerRadius": "$radius-xs",
                       "id": "nBVXP",
                       "name": "Mark",
-                      "fill": "$brand",
+                      "fill": {
+                        "type": "image",
+                        "enabled": true,
+                        "url": "logo.png",
+                        "mode": "fit"
+                      },
                       "width": 14,
                       "height": 14
                     },
@@ -22509,6 +22679,69 @@
               "alignItems": "center",
               "children": [
                 {
+                  "type": "frame",
+                  "id": "jYVJX",
+                  "name": "Breadcrumb",
+                  "width": "fill_container",
+                  "gap": "$space-xs",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "dKmxD",
+                      "name": "Home",
+                      "fill": "$muted-foreground",
+                      "content": "Home",
+                      "fontFamily": "$font-caption",
+                      "fontSize": "$text-2xs",
+                      "fontWeight": "normal",
+                      "letterSpacing": 0.5
+                    },
+                    {
+                      "type": "text",
+                      "id": "c8IFc",
+                      "name": "Glyph ›",
+                      "fill": "$muted-foreground",
+                      "content": "›",
+                      "fontFamily": "$font-body",
+                      "fontSize": 14,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "S6HLEV",
+                      "name": "Integraties",
+                      "fill": "$muted-foreground",
+                      "content": "Integraties",
+                      "fontFamily": "$font-caption",
+                      "fontSize": "$text-2xs",
+                      "fontWeight": "normal",
+                      "letterSpacing": 0.5
+                    },
+                    {
+                      "type": "text",
+                      "id": "xHNMv",
+                      "name": "Glyph ›",
+                      "fill": "$muted-foreground",
+                      "content": "›",
+                      "fontFamily": "$font-body",
+                      "fontSize": 14,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "ytPh2",
+                      "name": "Exact Online",
+                      "fill": "$foreground",
+                      "content": "Exact Online",
+                      "fontFamily": "$font-caption",
+                      "fontSize": "$text-2xs",
+                      "fontWeight": "normal",
+                      "letterSpacing": 0.5
+                    }
+                  ]
+                },
+                {
                   "type": "text",
                   "id": "ZLfI6",
                   "name": "Eyebrow",
@@ -22582,7 +22815,7 @@
                   "fill": "$foreground",
                   "textGrowth": "fixed-width",
                   "width": 840,
-                  "content": "Exact Online, realtime gekoppeld",
+                  "content": "Exact Online koppelen via één API",
                   "lineHeight": 1.05,
                   "textAlign": "center",
                   "fontFamily": "$font-heading",
@@ -22597,7 +22830,7 @@
                   "fill": "$muted-foreground",
                   "textGrowth": "fixed-width",
                   "width": 660,
-                  "content": "Synchroniseer verkoop- en inkoopboekingen, relaties en grootboekgegevens via één API. emeq beheert OAuth, tokens en audit; jouw team bouwt door.",
+                  "content": "Synchroniseer verkoop- en inkoopboekingen, relaties en grootboekgegevens via één API. Emeq Hub beheert OAuth, tokens en audit; jouw team bouwt door.",
                   "lineHeight": 1.6,
                   "textAlign": "center",
                   "fontFamily": "$font-body",
@@ -24119,7 +24352,7 @@
                           "id": "onMqY",
                           "name": "T",
                           "fill": "$foreground",
-                          "content": "emeq host de tokens",
+                          "content": "Emeq Hub host de tokens",
                           "fontFamily": "$font-body",
                           "fontSize": "$text-lg",
                           "fontWeight": "600"
@@ -25162,7 +25395,7 @@
                   "fill": "$muted-foreground",
                   "textGrowth": "fixed-width",
                   "width": "fill_container",
-                  "content": "emeq is de integratiehub achter je product. Start vandaag met Exact Online en voeg nieuwe systemen toe zonder telkens je architectuur te verbouwen.",
+                  "content": "Emeq Hub is de integratiehub achter je product. Start vandaag met Exact Online en voeg nieuwe systemen toe zonder telkens je architectuur te verbouwen.",
                   "lineHeight": 1.6,
                   "textAlign": "center",
                   "fontFamily": "$font-body",
@@ -25626,10 +25859,14 @@
                   "children": [
                     {
                       "type": "rectangle",
-                      "cornerRadius": "$radius-xs",
                       "id": "h5nUl",
                       "name": "Mark",
-                      "fill": "$brand",
+                      "fill": {
+                        "type": "image",
+                        "enabled": true,
+                        "url": "logo.png",
+                        "mode": "fit"
+                      },
                       "width": 14,
                       "height": 14
                     },
@@ -25733,7 +25970,7 @@
                   "id": "Y8rrnl",
                   "name": "Koltitel",
                   "fill": "$muted-foreground",
-                  "content": "Ook van Emeq",
+                  "content": "Ook van Emeq Hub",
                   "fontFamily": "$font-body",
                   "fontSize": "$text-sm",
                   "fontWeight": "500",
@@ -25758,7 +25995,7 @@
                           "id": "Oz8Y0",
                           "name": "n",
                           "fill": "$foreground",
-                          "content": "Emeq",
+                          "content": "Emeq Hub",
                           "fontFamily": "$font-body",
                           "fontSize": "$text-sm",
                           "fontWeight": "500"
@@ -26073,6 +26310,69 @@
               "alignItems": "center",
               "children": [
                 {
+                  "type": "frame",
+                  "id": "VMhDM",
+                  "name": "Breadcrumb",
+                  "width": "fill_container",
+                  "gap": "$space-xs",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "Em8Vg",
+                      "name": "Home",
+                      "fill": "$muted-foreground",
+                      "content": "Home",
+                      "fontFamily": "$font-caption",
+                      "fontSize": "$text-2xs",
+                      "fontWeight": "normal",
+                      "letterSpacing": 0.5
+                    },
+                    {
+                      "type": "text",
+                      "id": "DE4bs",
+                      "name": "Glyph ›",
+                      "fill": "$muted-foreground",
+                      "content": "›",
+                      "fontFamily": "$font-body",
+                      "fontSize": 14,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "EVCFs",
+                      "name": "Integraties",
+                      "fill": "$muted-foreground",
+                      "content": "Integraties",
+                      "fontFamily": "$font-caption",
+                      "fontSize": "$text-2xs",
+                      "fontWeight": "normal",
+                      "letterSpacing": 0.5
+                    },
+                    {
+                      "type": "text",
+                      "id": "zisUi",
+                      "name": "Glyph ›",
+                      "fill": "$muted-foreground",
+                      "content": "›",
+                      "fontFamily": "$font-body",
+                      "fontSize": 14,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "t9s5k",
+                      "name": "Exact Online",
+                      "fill": "$foreground",
+                      "content": "Exact Online",
+                      "fontFamily": "$font-caption",
+                      "fontSize": "$text-2xs",
+                      "fontWeight": "normal",
+                      "letterSpacing": 0.5
+                    }
+                  ]
+                },
+                {
                   "type": "text",
                   "id": "zjPx2",
                   "name": "Eyebrow",
@@ -26146,7 +26446,7 @@
                   "fill": "$foreground",
                   "textGrowth": "fixed-width",
                   "width": "fill_container",
-                  "content": "Exact Online, realtime gekoppeld",
+                  "content": "Exact Online koppelen via één API",
                   "lineHeight": 1.05,
                   "textAlign": "center",
                   "fontFamily": "$font-heading",
@@ -26161,7 +26461,7 @@
                   "fill": "$muted-foreground",
                   "textGrowth": "fixed-width",
                   "width": "fill_container",
-                  "content": "Boekingen, relaties en grootboek — automatisch gesynchroniseerd via emeq. Geen OAuth-gedoe, geen token-beheer.",
+                  "content": "Boekingen, relaties en grootboek — automatisch gesynchroniseerd via Emeq Hub. Geen OAuth-gedoe, geen token-beheer.",
                   "lineHeight": 1.6,
                   "textAlign": "center",
                   "fontFamily": "$font-body",
@@ -27682,7 +27982,7 @@
                           "id": "rj1rr",
                           "name": "T",
                           "fill": "$foreground",
-                          "content": "emeq host de tokens",
+                          "content": "Emeq Hub host de tokens",
                           "fontFamily": "$font-body",
                           "fontSize": "$text-lg",
                           "fontWeight": "600"

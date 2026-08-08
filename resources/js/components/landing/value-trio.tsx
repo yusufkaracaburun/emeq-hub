@@ -7,13 +7,13 @@ const columns = [
         index: '01',
         icon: MergeGlyph,
         title: 'Eén API. Elke partner.',
-        body: 'Integreer één keer met het uniforme API-contract van emeq. Nieuwe partners voeg je toe zonder je productlogica opnieuw te ontwerpen.',
+        body: 'Integreer één keer met het uniforme API-contract van Emeq Hub. Nieuwe partners voeg je toe zonder je productlogica opnieuw te ontwerpen.',
     },
     {
         index: '02',
         icon: KeyGlyph,
         title: 'OAuth en tokens? Al geregeld.',
-        body: 'emeq beheert OAuth-flows, bewaart credentials versleuteld en ververst tokens automatisch. Minder onderhoud, minder storingen.',
+        body: 'Emeq Hub beheert OAuth-flows, bewaart credentials versleuteld en ververst tokens automatisch. Minder onderhoud, minder storingen.',
     },
     {
         index: '03',
@@ -27,7 +27,7 @@ export function ValueTrio() {
     return (
         <section id="waarom" className="px-6 py-24 lg:px-section-x lg:py-section-x">
             <Reveal className="flex max-w-[760px] flex-col gap-4">
-                <Eyebrow>01 — Waarom emeq</Eyebrow>
+                <Eyebrow>01 — Waarom Emeq Hub</Eyebrow>
                 <h2 className="text-xl font-bold tracking-[-1px] text-foreground md:text-3xl">
                     Stop met integraties steeds opnieuw bouwen.
                 </h2>

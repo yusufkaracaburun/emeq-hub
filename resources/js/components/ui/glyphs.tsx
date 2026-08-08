@@ -125,6 +125,17 @@ function DocStampGlyph({ className, ...props }: SvgProps) {
     );
 }
 
+/** Betaalkaart — magstripe en brand-chip. */
+function CardGlyph({ className, ...props }: SvgProps) {
+    return (
+        <Svg viewBox="0 0 18 18" className={cn('size-[18px]', className)} {...props}>
+            <rect x="1" y="3" width="16" height="12" rx="2.5" fill="var(--color-card)" stroke="#c9c9c9" />
+            <rect x="1.5" y="5.6" width="15" height="2.4" fill="#ececec" />
+            <rect x="3.2" y="10" width="3.4" height="2.2" rx="1" fill="var(--color-brand)" />
+        </Svg>
+    );
+}
+
 /** Twee silhouetten — relaties/debiteuren-crediteuren. */
 function UsersGlyph({ className, ...props }: SvgProps) {
     return (
@@ -182,6 +193,7 @@ function CheckCircleGlyph({ className, ...props }: SvgProps) {
 export {
     AlertGlyph,
     BroadcastGlyph,
+    CardGlyph,
     CheckCircleGlyph,
     DocGlyph,
     DocStampGlyph,

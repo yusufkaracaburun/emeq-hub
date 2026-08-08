@@ -10,7 +10,7 @@ const steps = [
     },
     {
         title: 'Laat je klant veilig autoriseren',
-        body: 'De gebruiker rondt OAuth af; emeq slaat tokens veilig op en houdt ze automatisch actueel.',
+        body: 'De gebruiker rondt OAuth af; Emeq Hub slaat tokens veilig op en houdt ze automatisch actueel.',
     },
     {
         title: 'Bouw op één betrouwbare API',

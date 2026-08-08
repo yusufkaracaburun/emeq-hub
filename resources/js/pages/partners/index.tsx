@@ -46,7 +46,7 @@ export default function PartnersIndex({ providers, seo }: PartnersIndexProps) {
                                 Integraties
                             </h1>
                             <p className="max-w-[660px] text-lg leading-[1.6] text-muted-foreground">
-                                emeq is de integratiehub achter je product. Start vandaag met Exact Online en voeg nieuwe
+                                Emeq Hub is de integratiehub achter je product. Start vandaag met Exact Online en voeg nieuwe
                                 systemen toe zonder telkens je architectuur te verbouwen.
                             </p>
                         </Reveal>
@@ -77,7 +77,7 @@ export default function PartnersIndex({ providers, seo }: PartnersIndexProps) {
                     </RevealGroup>
 
                     <Reveal className="flex flex-col items-center gap-6 text-center">
-                        <h2 className="text-2xl font-bold tracking-[-1px] text-foreground">Ontdek Exact Online</h2>
+                        <h2 className="text-2xl font-bold tracking-[-1px] text-foreground">Klaar om te koppelen?</h2>
                         <Link href="/koppelen" className={cn(buttonVariants({ variant: 'primary', size: 'md' }), 'group')}>
                             Start met koppelen
                             <TextGlyph glyph="→" className="transition-transform duration-150 group-hover:translate-x-0.5" />

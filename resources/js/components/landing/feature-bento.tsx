@@ -15,7 +15,7 @@ const rowOne: Cell[] = [
         index: 'F01',
         tag: '/v1/{provider}/{path}',
         title: 'Elk partner-endpoint, één route',
-        body: 'Gebruik ieder partner-endpoint via één vaste route. emeq kiest de juiste koppeling, voegt credentials toe en geeft status en headers transparant terug.',
+        body: 'Gebruik ieder partner-endpoint via één vaste route. Emeq Hub kiest de juiste koppeling, voegt credentials toe en geeft status en headers transparant terug.',
         hero: true,
     },
     {
@@ -92,13 +92,13 @@ function BentoCell({ cell }: { cell: Cell }) {
     );
 }
 
-/** CONSUMER ··· emeq HUB ··· PARTNER API — het pass-through-verhaal in één regel. */
+/** CONSUMER ··· EMEQ HUB ··· PARTNER API — het pass-through-verhaal in één regel. */
 function Schematic() {
     return (
         <div className="hidden items-center border-t border-border pt-[22px] font-mono text-2xs tracking-[0.5px] sm:flex">
             <span className="shrink-0 border border-border bg-background px-3.5 py-[9px] text-muted-foreground">CONSUMER</span>
             <Dots />
-            <span className="shrink-0 border border-brand bg-brand-soft px-3.5 py-[9px] text-brand">emeq HUB</span>
+            <span className="shrink-0 border border-brand bg-brand-soft px-3.5 py-[9px] text-brand">EMEQ HUB</span>
             <Dots />
             <span className="shrink-0 border border-border bg-background px-3.5 py-[9px] text-muted-foreground">PARTNER API</span>
         </div>

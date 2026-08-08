@@ -40,7 +40,7 @@ export function Footer() {
             <div className="flex flex-col items-start gap-10 md:flex-row md:justify-between md:gap-12">
                 <div className="flex flex-col gap-2">
                     <div className="flex items-center gap-2">
-                        <span aria-hidden className="size-3.5 rounded-xs bg-brand" />
+                        <img src="/img/logo.png" alt="" aria-hidden className="h-[18px] w-auto" />
                         <span className="text-[24px] font-bold tracking-[-0.5px] text-foreground">hub</span>
                     </div>
                     <p className="text-sm text-muted-foreground">De integratie-API voor software die wil doorgroeien.</p>

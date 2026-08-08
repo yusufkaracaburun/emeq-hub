@@ -43,9 +43,9 @@ return [
         'live' => true,
         'summary' => 'Verwerk verkoop- en inkoopboekingen, relaties en grootboekgegevens '
             .'betrouwbaar en realtime.',
-        'headline' => 'Exact Online, realtime gekoppeld',
+        'headline' => 'Exact Online koppelen via één API',
         'intro' => 'Synchroniseer verkoop- en inkoopboekingen, relaties en grootboekgegevens '
-            .'via één API. emeq beheert OAuth, tokens en audit; jouw team bouwt door.',
+            .'via één API. Emeq Hub beheert OAuth, tokens en audit; jouw team bouwt door.',
         'features' => [
             ['icon' => 'file-text', 'tag' => 'SalesEntry', 'title' => 'Verkoopfacturen', 'description' => 'Boek verkoopfacturen direct als SalesEntry in Exact.'],
             ['icon' => 'receipt', 'tag' => 'PurchaseEntry', 'title' => 'Inkoopfacturen', 'description' => 'Inkoopboekingen als PurchaseEntry, inclusief bijlagen.'],
@@ -56,7 +56,7 @@ return [
         ],
         'steps' => [
             ['title' => 'Koppel via OAuth', 'description' => 'Eén klik — de gebruiker autoriseert Exact Online.'],
-            ['title' => 'emeq host de tokens', 'description' => 'Token-lifecycle, refresh en webhooks regelen wij.'],
+            ['title' => 'Emeq Hub host de tokens', 'description' => 'Token-lifecycle, refresh en webhooks regelen wij.'],
             ['title' => 'Eén REST-API', 'description' => 'POST /v1/accounting/documents. Klaar.'],
         ],
         'connect_pitch' => 'Maak je financiële integratie schaalbaar. Wij regelen de infrastructuur; '
@@ -130,7 +130,7 @@ return [
         'integration' => [
             [
                 'title' => 'Vraag een Hub-koppeling aan',
-                'description' => 'Je krijgt van Emeq een Personal Access Token met de ability exact:write. '
+                'description' => 'Je krijgt van Emeq Hub een Personal Access Token met de ability exact:write. '
                     .'Daarmee praat je app met de Hub — je bouwt zelf geen Exact-app, geen OAuth en geen token-opslag.',
             ],
             [

@@ -41,7 +41,7 @@ export default function Demo({ slots, seo }: DemoProps) {
                         <span className="text-brand">sneller integreert.</span>
                     </>
                 }
-                intro="In 30 minuten zie je hoe emeq je koppelingen versnelt: van eerste API-call tot audit-inzicht, afgestemd op jouw use-case."
+                intro="In 30 minuten zie je hoe Emeq Hub je koppelingen versnelt: van eerste API-call tot audit-inzicht, afgestemd op jouw use-case."
                 steps={steps}
             >
                 <DemoForm slots={slots} />

@@ -1,7 +1,7 @@
 import { Link } from '@inertiajs/react';
 import { motion } from 'framer-motion';
 import { EASE } from '@/components/motion';
-import { TextGlyph } from '@/components/ui/glyphs';
+import { CardGlyph, DocGlyph, TextGlyph } from '@/components/ui/glyphs';
 import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -38,7 +38,7 @@ export function Hero() {
                     </motion.h1>
 
                     <motion.p {...enter(0.16)} className="text-lg leading-[1.6] text-muted-foreground">
-                        Bouw productintegraties zonder maanden werk aan OAuth, tokenbeheer en webhooks. emeq is jouw
+                        Bouw productintegraties zonder maanden werk aan OAuth, tokenbeheer en webhooks. Emeq Hub is jouw
                         integratielaag; jij focust op product, klanten en groei.
                     </motion.p>
 
@@ -58,69 +58,138 @@ export function Hero() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6, delay: 0.2, ease: EASE }}
-                    className="relative flex-1 lg:max-w-[544px] lg:self-start"
+                    className="relative flex-1 lg:max-w-[552px] lg:self-start"
                 >
-                    <CodeWindow />
-                    <WebhookToast />
+                    <HubDiagram />
                 </motion.div>
             </div>
         </section>
     );
 }
 
-function CodeWindow() {
+/**
+ * Hub-diagram uit landingspage.pen: jouw software → emeq hub → partners.
+ * Twee vaste geometrieën (342×256 en 552×284) die de canvas-frames 1:1 volgen;
+ * vaste maten houden de lijnen en nodes intern uitgelijnd op elke viewport.
+ */
+function HubDiagram() {
     return (
-        <div className="overflow-hidden rounded-lg border border-border bg-card shadow-card">
-            <div className="flex items-center gap-4 border-b border-border bg-muted px-4 py-[13px]">
-                <div aria-hidden className="flex items-center gap-2">
-                    <span className="size-3 rounded-pill bg-border" />
-                    <span className="size-3 rounded-pill bg-border" />
-                    <span className="size-3 rounded-pill bg-border" />
-                </div>
-                <span className="font-mono text-xs text-muted-foreground">request.http</span>
+        <>
+            <div className="relative mx-auto h-[256px] w-[342px] lg:hidden">
+                <motion.svg
+                    aria-hidden
+                    viewBox="0 0 342 256"
+                    fill="none"
+                    className="absolute inset-0"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.9, duration: 0.6, ease: EASE }}
+                >
+                    <circle cx="171" cy="128" r="78" stroke="#ebebeb" />
+                    <circle cx="171" cy="128" r="50" stroke="#e3e3e3" />
+                    <path d="M88 128h47M207 128h43" stroke="#dddddd" strokeWidth="1.5" />
+                    <path d="M207 128c18 0 26-76 43-76M207 128c18 0 26 76 43 76" stroke="#dddddd" strokeWidth="1.5" />
+                    <FlowDot from={90} to={133} cy={128} />
+                </motion.svg>
+                <DiagramCard delay={0.35} className="left-0 top-[108px] h-10 w-[88px]">
+                    <p className="text-[11px] font-semibold text-foreground">Jouw app</p>
+                </DiagramCard>
+                <HubNode delay={0.5} className="left-[135px] top-[92px] size-[72px] rounded-2xl" logoClass="w-[26px]" />
+                <DiagramCard delay={0.65} className="right-0 top-8 h-10 w-[92px] gap-1.5">
+                    <DocGlyph className="size-3.5" />
+                    <span className="text-[10px] font-semibold text-foreground">Boekhouden</span>
+                </DiagramCard>
+                <DiagramCard delay={0.75} className="right-0 top-[108px] h-10 w-[92px] gap-1.5">
+                    <CardGlyph className="size-3.5" />
+                    <span className="text-[10px] font-semibold text-foreground">Betalen</span>
+                </DiagramCard>
+                <DiagramCard delay={0.85} className="right-0 top-[184px] h-10 w-[92px]">
+                    <span className="font-mono text-[10px] text-muted-foreground">+ meer</span>
+                </DiagramCard>
             </div>
 
-            <div className="flex flex-col gap-2 p-[22px] font-mono text-xs2">
-                <p>
-                    <span className="text-brand">POST</span>
-                    <span className="text-foreground"> /v1/{'{provider}'}/resources</span>
-                </p>
-                <p className="text-muted-foreground">
-                    Authorization: <span className="text-foreground">Bearer</span> ••••••••
-                </p>
-                <p aria-hidden className="h-2" />
-                <p className="text-muted-foreground">{'{'}</p>
-                <p className="text-muted-foreground">
-                    {'  "connection_id": '}
-                    <span className="text-foreground">"conn_7fK2…"</span>,
-                </p>
-                <p className="text-muted-foreground">{'  "payload": { … }'}</p>
-                <p className="text-muted-foreground">{'}'}</p>
+            <div className="relative hidden h-[284px] w-[552px] lg:block">
+                <motion.svg
+                    aria-hidden
+                    viewBox="0 0 552 284"
+                    fill="none"
+                    className="absolute inset-0"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.9, duration: 0.6, ease: EASE }}
+                >
+                    <circle cx="276" cy="142" r="102" stroke="#ebebeb" />
+                    <circle cx="276" cy="142" r="66" stroke="#e3e3e3" />
+                    <path d="M148 142h80M324 142h96" stroke="#dddddd" strokeWidth="1.5" />
+                    <path d="M324 142c40 0 56-82 96-82M324 142c40 0 56 82 96 82" stroke="#dddddd" strokeWidth="1.5" />
+                    <FlowDot from={150} to={226} cy={142} />
+                </motion.svg>
+                <DiagramCard delay={0.35} className="left-2 top-28 h-[60px] w-[140px] flex-col gap-0.5">
+                    <p className="text-[13px] font-semibold text-foreground">Jouw software</p>
+                    <p className="font-mono text-[10px] text-muted-foreground">REST · JSON</p>
+                </DiagramCard>
+                <HubNode delay={0.5} className="left-[228px] top-[94px] size-24 rounded-[20px]" logoClass="w-10" />
+                <DiagramCard delay={0.65} className="right-0 top-9 h-12 w-[124px] gap-2">
+                    <DocGlyph className="size-4" />
+                    <span className="text-xs font-semibold text-foreground">Boekhouden</span>
+                </DiagramCard>
+                <DiagramCard delay={0.75} className="right-0 top-[122px] h-12 w-[124px] gap-2">
+                    <CardGlyph className="size-4" />
+                    <span className="text-xs font-semibold text-foreground">Betalen</span>
+                </DiagramCard>
+                <DiagramCard delay={0.85} className="right-0 top-52 h-12 w-[124px]">
+                    <span className="font-mono text-[11px] text-muted-foreground">+ meer partners</span>
+                </DiagramCard>
             </div>
-
-            <div className="flex items-center gap-2 border-t border-border px-[22px] py-3 font-mono text-xs">
-                <span aria-hidden className="size-2 rounded-pill bg-success" />
-                <span className="text-success">200 OK</span>
-                <span className="text-muted-foreground">· doorgestuurd · 142 ms</span>
-            </div>
-        </div>
+        </>
     );
 }
 
-/** Webhook-event dat na de request-animatie "binnenkomt" — de tweede helft van het product. */
-function WebhookToast() {
+/** Brand-dot die herhaald over de consumer→hub-lijn loopt. */
+function FlowDot({ from, to, cy }: { from: number; to: number; cy: number }) {
+    return (
+        <motion.circle
+            cy={cy}
+            r={2.25}
+            fill="var(--color-brand)"
+            initial={{ cx: from, opacity: 0 }}
+            animate={{ cx: [from, to], opacity: [0, 1, 1, 0] }}
+            transition={{ delay: 1.4, duration: 2, times: [0, 0.15, 0.85, 1], repeat: Infinity, repeatDelay: 0.8, ease: 'linear' }}
+        />
+    );
+}
+
+const pop = (delay: number) => ({
+    initial: { opacity: 0, y: 8, scale: 0.97 },
+    animate: { opacity: 1, y: 0, scale: 1 },
+    transition: { delay, duration: 0.45, ease: EASE },
+});
+
+function DiagramCard({ delay, className, children }: { delay: number; className?: string; children: React.ReactNode }) {
     return (
         <motion.div
-            initial={{ opacity: 0, y: 10, scale: 0.96 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ delay: 1.1, type: 'spring', stiffness: 320, damping: 24 }}
-            className="absolute -left-3 bottom-2.5 flex flex-col gap-1 rounded-md border border-border bg-card px-4 py-3 shadow-[0_8px_28px_-8px_#0000001a] lg:-left-10"
+            {...pop(delay)}
+            className={cn(
+                'absolute flex items-center justify-center rounded-lg border border-border bg-card shadow-[0_2px_8px_-2px_#0000000f]',
+                className,
+            )}
         >
-            <p className="flex items-center gap-2 font-mono text-xs font-medium text-foreground">
-                <span aria-hidden className="size-[7px] rounded-pill bg-success" />
-                webhook · invoice.created
-            </p>
-            <p className="font-mono text-2xs text-muted-foreground">→ doorgestuurd naar je app · 84 ms</p>
+            {children}
         </motion.div>
     );
 }
+
+function HubNode({ delay, className, logoClass }: { delay: number; className: string; logoClass: string }) {
+    return (
+        <motion.div
+            {...pop(delay)}
+            className={cn(
+                'absolute flex items-center justify-center border border-border bg-card shadow-[0_8px_24px_-6px_#00000014]',
+                className,
+            )}
+        >
+            <img src="/img/logo.png" alt="Emeq Hub" className={cn('h-auto', logoClass)} />
+        </motion.div>
+    );
+}
+
