@@ -1,3 +1,4 @@
+import { Link } from '@inertiajs/react';
 import { ArrowUpRight } from 'lucide-react';
 
 const links = [
@@ -20,15 +21,13 @@ export function SimpleFooter() {
             <p>© 2026 emeq</p>
             <nav className="flex flex-wrap gap-6">
                 {links.map((link) => (
-                    <a
+                    <Link
                         key={link.label}
                         href={link.href}
-                        target="_blank"
-                        rel="noopener noreferrer"
                         className="transition-colors duration-150 hover:text-foreground"
                     >
                         {link.label}
-                    </a>
+                    </Link>
                 ))}
             </nav>
         </footer>
@@ -42,22 +41,20 @@ export function Footer() {
                 <div className="flex flex-col gap-2">
                     <div className="flex items-center gap-2">
                         <span aria-hidden className="size-3.5 rounded-xs bg-brand" />
-                        <span className="text-[24px] font-bold tracking-[-0.5px] text-foreground">emeq</span>
+                        <span className="text-[24px] font-bold tracking-[-0.5px] text-foreground">hub</span>
                     </div>
                     <p className="text-sm text-muted-foreground">De integratie-API voor software die wil doorgroeien.</p>
                 </div>
 
                 <nav className="flex flex-col items-start gap-3">
                     {links.map((link) => (
-                        <a
+                        <Link
                             key={link.label}
                             href={link.href}
-                            target="_blank"
-                            rel="noopener noreferrer"
                             className="text-sm font-medium text-muted-foreground transition-colors duration-150 hover:text-foreground"
                         >
                             {link.label}
-                        </a>
+                        </Link>
                     ))}
                 </nav>
 
@@ -67,8 +64,6 @@ export function Footer() {
                         <a
                             key={product.name}
                             href={product.href}
-                            target="_blank"
-                            rel="noopener noreferrer"
                             className="group flex items-center gap-1.5 text-sm font-medium text-foreground"
                         >
                             {product.name}
