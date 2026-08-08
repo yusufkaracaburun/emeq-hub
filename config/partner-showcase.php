@@ -22,7 +22,6 @@ declare(strict_types=1);
  *   brand         ?string  hex-accent uit de huisstijl (bv. '#E2001A'). null = amber-fallback.
  *   live          ?bool    true = productie-klaar; alleen deze partners staan in de
  *                 "Nu live met"-strip op de homepage. Ontbreekt = false.
- *   how_it_works  ?list<string>  uitleg-alinea's over het request-pad (optioneel)
  *   capabilities  list<array{title,description}>
  *   endpoints     ?list<array{method,path,target,description}>  Hub→partner endpoint-kaart (optioneel)
  *   connect_steps list<string>
@@ -64,40 +63,6 @@ return [
             .'jij levert de workflow.',
         'meta_description' => 'Koppel je app aan Exact Online zonder zelf OAuth2, token-refresh en '
             .'division-routing te bouwen. De Hub regelt koppeling, tokenopslag en audit-logging.',
-        'how_it_works' => [
-            'Je app authentiseert met een Bearer-token (Personal Access Token) en geeft per call mee '
-                .'om welke eindgebruiker het gaat via de header X-Account-Id. De Hub leidt daaruit de juiste '
-                .'Connection af (Consumer → Account → actieve Exact-koppeling) — nooit via een losse connection-id.',
-            'Voor die Connection injecteert de Hub de juiste division (administratie) en het OAuth-token, '
-                .'en stuurt je verzoek door naar de Exact REST-API. Tokens worden reactief ververst: Exact '
-                .'weigert een refresh zolang het access_token nog geldig is, dus de Hub ververst pas bij verloop.',
-            'Elke call — named resource én generieke pass-through — wordt vastgelegd in een audit-log '
-                .'(methode, geraakte Exact-endpoint, status, duur, response-grootte). Upstream-fouten worden '
-                .'naar een uniform Hub-formaat gemapt, zodat je app niet elk Exact-specifiek foutgeval hoeft te kennen.',
-        ],
-        'use_cases' => [
-            [
-                'title' => 'Koppelen in één keer, daarna automatisch',
-                'value' => 'Je klant geeft de koppeling eenmalig toestemming. Daarna wisselen je app en '
-                    .'Exact Online automatisch gegevens uit — niemand hoeft nog in twee systemen bij te werken '
-                    .'of gegevens over te typen.',
-            ],
-            [
-                'title' => 'Altijd de juiste Exact-gegevens in je app',
-                'value' => 'Grootboekrekeningen, btw-codes, dagboeken en relaties komen rechtstreeks uit de '
-                    .'administratie van je klant. Keuzelijsten in je app blijven kloppen, zonder dubbel beheer.',
-            ],
-            [
-                'title' => 'Boekhoudgegevens opvragen wanneer je ze nodig hebt',
-                'value' => 'Je app kan gegevens uit de administratie tonen — bijvoorbeeld relaties of facturen — '
-                    .'zonder dat je klant Exact Online apart hoeft open te zetten.',
-            ],
-            [
-                'title' => 'Wijzigingen stromen terug naar Exact',
-                'value' => 'Een nieuwe relatie of aanpassing vanuit je app belandt direct in de juiste '
-                    .'Exact-administratie. De boekhouding blijft actueel zonder extra handwerk.',
-            ],
-        ],
         'capabilities' => [
             [
                 'title' => 'Veilige koppeling per klant',
@@ -117,49 +82,49 @@ return [
                 'method' => 'POST',
                 'path' => '/v1/oauth/exact/init',
                 'target' => 'start OAuth-flow',
-                'description' => 'Maakt een pending Connection en geeft de Exact authorize-URL terug (ability exact:write).',
+                'description' => 'Start de OAuth-flow en geeft de authorize-URL terug',
             ],
             [
                 'method' => 'GET',
                 'path' => '/v1/oauth/exact/callback',
                 'target' => 'OAuth-callback',
-                'description' => 'Exact stuurt de eindgebruiker hierheen terug; tokens + division landen encrypted in de Connection.',
+                'description' => 'Exact stuurt de eindgebruiker hierheen terug',
             ],
             [
                 'method' => 'GET',
                 'path' => '/v1/exact/gl-accounts',
                 'target' => 'financial/GLAccounts',
-                'description' => 'Grootboekrekeningen (read-only). OData-query ($select/$filter/$top) wordt doorgegeven.',
+                'description' => 'Grootboekrekeningen',
             ],
             [
                 'method' => 'GET',
                 'path' => '/v1/exact/vat-codes',
                 'target' => 'vat/VATCodes',
-                'description' => 'BTW-codes (read-only) — de referentie voor de tarief→VATCode-mapping.',
+                'description' => 'Btw-codes',
             ],
             [
                 'method' => 'GET',
                 'path' => '/v1/exact/relations',
                 'target' => 'crm/Accounts',
-                'description' => 'Relaties / debiteuren-crediteuren (read-only) — de referentie voor de relatie→GUID-mapping.',
+                'description' => 'Relaties, debiteuren en crediteuren',
             ],
             [
                 'method' => 'GET',
                 'path' => '/v1/exact/journals',
                 'target' => 'financial/Journals',
-                'description' => 'Dagboeken (read-only) — de referentie voor de doc-type→dagboek-mapping.',
+                'description' => 'Dagboeken',
             ],
             [
                 'method' => 'ANY',
                 'path' => '/v1/exact/{path}',
                 'target' => 'elk Exact OData-endpoint',
-                'description' => 'Generieke pass-through: bereik elk overig Exact-endpoint via dezelfde auth + audit.',
+                'description' => 'Elk overig Exact-endpoint via dezelfde auth en audit',
             ],
             [
                 'method' => 'POST',
                 'path' => '/v1/accounting/documents',
                 'target' => 'salesentry / purchaseentry / generaljournalentry',
-                'description' => 'Provider-agnostische boekhoud-sync: POST één canonical FinancialDocument; de Hub mapt naar het juiste Exact-endpoint (verkoop- en inkoopboeking of memoriaal).',
+                'description' => 'Provider-onafhankelijke boekhoud-sync',
             ],
         ],
         'integration' => [
@@ -202,10 +167,10 @@ return [
             'Access- en refresh-token landen encrypted in de Connection; de division wordt automatisch vastgelegd.',
         ],
         'example_curl' => <<<'CURL'
-            curl -X POST {APP_URL}/v1/oauth/exact/init \
-              -H "Authorization: Bearer {PAT}" \
-              -H "Content-Type: application/json" \
-              -d '{"account_external_id":"school1"}'
+            curl https://hub.emeq.nl/v1/exact/gl-accounts \
+              -H "Authorization: Bearer $EMEQ_PAT" \
+              -H "X-Account-Id: klant-2841" \
+              -H "Accept: application/json"
             CURL,
         // De REST-API-resourcelijst, niet de algemene kennisbank — dit veld is de
         // developer-doc-link; support_url dekt de kennisbank al.
@@ -264,43 +229,6 @@ return [
         'support_url' => null,
     ],
 
-    'snelstart' => [
-        'label' => 'SnelStart',
-        'tagline' => 'Boekhouden — NL',
-        'category' => 'Boekhouden',
-        'logo' => '/img/partners/snelstart.svg',
-        'brand' => '#0078C9',
-        'summary' => 'Lees en werk SnelStart-administraties bij zonder zelf de B2B-API te implementeren. '
-            .'De Hub regelt credential-opslag (encrypted at rest) en audit-logging.',
-        'meta_description' => 'Lees en werk SnelStart-administraties bij zonder zelf de B2B-API te '
-            .'implementeren. De Hub regelt credential-opslag en audit-logging.',
-        'capabilities' => [
-            [
-                'title' => 'Key-based koppeling',
-                'description' => 'Koppel met clientkey + subscription-key via /v1/connections; de Hub '
-                    .'encrypt de credentials at rest en bewaart alleen de fingerprint voor debugging.',
-            ],
-            [
-                'title' => 'Pass-through',
-                'description' => 'Elk SnelStart B2B-endpoint via één route (ANY /v1/snelstart/{path}); de Hub '
-                    .'voegt auth toe, logt elke call en mapt upstream-fouten uniform.',
-            ],
-        ],
-        'connect_steps' => [
-            'Vraag bij SnelStart de credentials op (client key, subscription key, subscription ID).',
-            'POST /v1/connections met provider=snelstart en de drie velden.',
-            'De Hub encrypt de credentials at rest; daarna routeer je calls via /v1/snelstart/{path}.',
-        ],
-        'example_curl' => <<<'CURL'
-            curl -X POST {APP_URL}/v1/connections \
-              -H "Authorization: Bearer {PAT}" \
-              -H "Content-Type: application/json" \
-              -d '{"account_external_id":"school1","provider":"snelstart","client_key":"…","subscription_key":"…","subscription_id":"…"}'
-            CURL,
-        // Geen publiek verifieerbare developer-docs of kennisbank-URL gevonden
-        // (b2bapi.snelstart.nl → 404, kennisbank.snelstart.nl → geen DNS).
-        'docs_url' => null,
-        'website_url' => 'https://www.snelstart.nl',
-        'support_url' => null,
-    ],
+    // SnelStart bewust niet in de showcase: de integratie is niet gebouwd en er
+    // is geen partnercontract — de publieke surface toont alleen Exact en Mollie.
 ];

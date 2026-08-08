@@ -51,7 +51,7 @@
                   "id": "zKDvH",
                   "name": "Wordmark",
                   "fill": "$foreground",
-                  "content": "emeq",
+                  "content": "hub",
                   "fontFamily": "$font-heading",
                   "fontSize": "$text-lg",
                   "fontWeight": "700",
@@ -392,7 +392,7 @@
                       "id": "B1EDYL",
                       "name": "Wordmark",
                       "fill": "$foreground",
-                      "content": "emeq",
+                      "content": "hub",
                       "fontFamily": "$font-heading",
                       "fontSize": "$text-xl",
                       "fontWeight": "700",
@@ -4267,7 +4267,7 @@
                           "id": "ZNr4I",
                           "name": "Wordmark",
                           "fill": "$foreground",
-                          "content": "emeq",
+                          "content": "hub",
                           "fontFamily": "$font-heading",
                           "fontSize": "$text-xl",
                           "fontWeight": "700",
@@ -4577,7 +4577,7 @@
               "id": "b1F3y",
               "name": "Wordmark",
               "fill": "$foreground",
-              "content": "emeq",
+              "content": "hub",
               "fontFamily": "$font-heading",
               "fontSize": "$text-xl",
               "fontWeight": "700",
@@ -7977,7 +7977,7 @@
                       "id": "ctsZW",
                       "name": "Wordmark",
                       "fill": "$foreground",
-                      "content": "emeq",
+                      "content": "hub",
                       "fontFamily": "$font-heading",
                       "fontSize": "$text-xl",
                       "fontWeight": "700",
@@ -8309,7 +8309,7 @@
                       "id": "phGn0",
                       "name": "Wordmark",
                       "fill": "$foreground",
-                      "content": "emeq",
+                      "content": "hub",
                       "fontFamily": "$font-heading",
                       "fontSize": "$text-xl",
                       "fontWeight": "700",
@@ -8715,10 +8715,15 @@
                       "type": "frame",
                       "id": "MVE3T",
                       "name": "GDPR",
-                      "cornerRadius": "$radius-xs",
+                      "fill": "$muted",
+                      "cornerRadius": "$radius-pill",
                       "stroke": "$border",
                       "strokeWidth": 1,
-                      "padding": 6,
+                      "gap": "$space-xs",
+                      "padding": [
+                        10,
+                        16
+                      ],
                       "justifyContent": "center",
                       "alignItems": "center",
                       "children": [
@@ -8726,14 +8731,25 @@
                           "type": "rectangle",
                           "id": "wswwg",
                           "name": "GDPR Logo",
+                          "opacity": 0.7,
                           "fill": {
                             "type": "image",
                             "enabled": true,
                             "url": "gdpr.png",
                             "mode": "fit"
                           },
-                          "width": 18,
-                          "height": 18
+                          "width": 20,
+                          "height": 20
+                        },
+                        {
+                          "type": "text",
+                          "id": "S74ow",
+                          "name": "Label",
+                          "fill": "$foreground",
+                          "content": "GDPR",
+                          "fontFamily": "$font-caption",
+                          "fontSize": "$text-xs2",
+                          "fontWeight": "normal"
                         }
                       ]
                     },
@@ -8741,24 +8757,36 @@
                       "type": "frame",
                       "id": "FzHE4",
                       "name": "Tokens encrypted at rest",
-                      "cornerRadius": "$radius-xs",
+                      "fill": "$muted",
+                      "cornerRadius": "$radius-pill",
                       "stroke": "$border",
                       "strokeWidth": 1,
+                      "gap": "$space-xs",
                       "padding": [
-                        5,
-                        10
+                        10,
+                        16
                       ],
+                      "alignItems": "center",
                       "children": [
+                        {
+                          "type": "icon",
+                          "id": "Xo0PD",
+                          "name": "Mark",
+                          "width": 20,
+                          "height": 20,
+                          "icon": "lock",
+                          "library": "lucide",
+                          "fill": "$muted-foreground"
+                        },
                         {
                           "type": "text",
                           "id": "MaiHd",
                           "name": "t",
-                          "fill": "$muted-foreground",
+                          "fill": "$foreground",
                           "content": "Tokens encrypted at rest",
                           "fontFamily": "$font-caption",
-                          "fontSize": "$text-2xs",
-                          "fontWeight": "normal",
-                          "letterSpacing": 1.5
+                          "fontSize": "$text-xs2",
+                          "fontWeight": "normal"
                         }
                       ]
                     }
@@ -9051,6 +9079,65 @@
                 },
                 {
                   "type": "frame",
+                  "id": "By9qB",
+                  "name": "Privacy",
+                  "width": "fill_container",
+                  "gap": "$space-xs",
+                  "children": [
+                    {
+                      "type": "rectangle",
+                      "cornerRadius": "$radius-xs",
+                      "id": "K04Km",
+                      "name": "Checkbox",
+                      "fill": "$background",
+                      "width": 16,
+                      "height": 16,
+                      "stroke": "$input",
+                      "strokeWidth": 1
+                    },
+                    {
+                      "type": "frame",
+                      "id": "GNtp6",
+                      "name": "t",
+                      "gap": 4,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "UC2yB",
+                          "name": "a",
+                          "fill": "$muted-foreground",
+                          "content": "Ik ga akkoord met het",
+                          "fontFamily": "$font-body",
+                          "fontSize": "$text-sm",
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "text",
+                          "id": "NQpEd",
+                          "name": "link",
+                          "fill": "$foreground",
+                          "content": "privacybeleid",
+                          "fontFamily": "$font-body",
+                          "fontSize": "$text-sm",
+                          "fontWeight": "500"
+                        },
+                        {
+                          "type": "text",
+                          "id": "NSbrc",
+                          "name": "b",
+                          "fill": "$muted-foreground",
+                          "content": ". *",
+                          "fontFamily": "$font-body",
+                          "fontSize": "$text-sm",
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
                   "id": "tpa7d",
                   "name": "Submit",
                   "width": "fill_container",
@@ -9254,7 +9341,7 @@
                       "id": "Bmjhu",
                       "name": "Wordmark",
                       "fill": "$foreground",
-                      "content": "emeq",
+                      "content": "hub",
                       "fontFamily": "$font-heading",
                       "fontSize": "$text-xl",
                       "fontWeight": "700",
@@ -9660,10 +9747,15 @@
                       "type": "frame",
                       "id": "CkAYS",
                       "name": "GDPR",
-                      "cornerRadius": "$radius-xs",
+                      "fill": "$muted",
+                      "cornerRadius": "$radius-pill",
                       "stroke": "$border",
                       "strokeWidth": 1,
-                      "padding": 6,
+                      "gap": "$space-xs",
+                      "padding": [
+                        10,
+                        16
+                      ],
                       "justifyContent": "center",
                       "alignItems": "center",
                       "children": [
@@ -9671,14 +9763,25 @@
                           "type": "rectangle",
                           "id": "cHqQi",
                           "name": "GDPR Logo",
+                          "opacity": 0.7,
                           "fill": {
                             "type": "image",
                             "enabled": true,
                             "url": "gdpr.png",
                             "mode": "fit"
                           },
-                          "width": 18,
-                          "height": 18
+                          "width": 20,
+                          "height": 20
+                        },
+                        {
+                          "type": "text",
+                          "id": "y6dfXZ",
+                          "name": "Label",
+                          "fill": "$foreground",
+                          "content": "GDPR",
+                          "fontFamily": "$font-caption",
+                          "fontSize": "$text-xs2",
+                          "fontWeight": "normal"
                         }
                       ]
                     },
@@ -9686,24 +9789,36 @@
                       "type": "frame",
                       "id": "c4oFS",
                       "name": "Tokens encrypted at rest",
-                      "cornerRadius": "$radius-xs",
+                      "fill": "$muted",
+                      "cornerRadius": "$radius-pill",
                       "stroke": "$border",
                       "strokeWidth": 1,
+                      "gap": "$space-xs",
                       "padding": [
-                        5,
-                        10
+                        10,
+                        16
                       ],
+                      "alignItems": "center",
                       "children": [
+                        {
+                          "type": "icon",
+                          "id": "eIhje",
+                          "name": "Mark",
+                          "width": 20,
+                          "height": 20,
+                          "icon": "lock",
+                          "library": "lucide",
+                          "fill": "$muted-foreground"
+                        },
                         {
                           "type": "text",
                           "id": "o0MU9a",
                           "name": "t",
-                          "fill": "$muted-foreground",
+                          "fill": "$foreground",
                           "content": "Tokens encrypted at rest",
                           "fontFamily": "$font-caption",
-                          "fontSize": "$text-2xs",
-                          "fontWeight": "normal",
-                          "letterSpacing": 1.5
+                          "fontSize": "$text-xs2",
+                          "fontWeight": "normal"
                         }
                       ]
                     }
@@ -10202,7 +10317,7 @@
                       "id": "bXQtu",
                       "name": "Wordmark",
                       "fill": "$foreground",
-                      "content": "emeq",
+                      "content": "hub",
                       "fontFamily": "$font-heading",
                       "fontSize": "$text-xl",
                       "fontWeight": "700",
@@ -11303,7 +11418,7 @@
                       "id": "KUdr0",
                       "name": "Wordmark",
                       "fill": "$foreground",
-                      "content": "emeq",
+                      "content": "hub",
                       "fontFamily": "$font-heading",
                       "fontSize": "$text-xl",
                       "fontWeight": "700",
@@ -12462,7 +12577,7 @@
                       "id": "cazoe",
                       "name": "Wordmark",
                       "fill": "$foreground",
-                      "content": "emeq",
+                      "content": "hub",
                       "fontFamily": "$font-heading",
                       "fontSize": "$text-xl",
                       "fontWeight": "700",
@@ -13058,7 +13173,7 @@
               "id": "q70ii",
               "name": "Wordmark",
               "fill": "$foreground",
-              "content": "emeq",
+              "content": "hub",
               "fontFamily": "$font-heading",
               "fontSize": "$text-xl",
               "fontWeight": "700",
@@ -13437,10 +13552,15 @@
                       "type": "frame",
                       "id": "wIHNc",
                       "name": "GDPR",
-                      "cornerRadius": "$radius-xs",
+                      "fill": "$muted",
+                      "cornerRadius": "$radius-pill",
                       "stroke": "$border",
                       "strokeWidth": 1,
-                      "padding": 6,
+                      "gap": "$space-xs",
+                      "padding": [
+                        10,
+                        16
+                      ],
                       "justifyContent": "center",
                       "alignItems": "center",
                       "children": [
@@ -13448,14 +13568,25 @@
                           "type": "rectangle",
                           "id": "XzIfF",
                           "name": "GDPR Logo",
+                          "opacity": 0.7,
                           "fill": {
                             "type": "image",
                             "enabled": true,
                             "url": "gdpr.png",
                             "mode": "fit"
                           },
-                          "width": 18,
-                          "height": 18
+                          "width": 20,
+                          "height": 20
+                        },
+                        {
+                          "type": "text",
+                          "id": "YQuWd",
+                          "name": "Label",
+                          "fill": "$foreground",
+                          "content": "GDPR",
+                          "fontFamily": "$font-caption",
+                          "fontSize": "$text-xs2",
+                          "fontWeight": "normal"
                         }
                       ]
                     },
@@ -13463,24 +13594,36 @@
                       "type": "frame",
                       "id": "IIIdK",
                       "name": "Tokens encrypted at rest",
-                      "cornerRadius": "$radius-xs",
+                      "fill": "$muted",
+                      "cornerRadius": "$radius-pill",
                       "stroke": "$border",
                       "strokeWidth": 1,
+                      "gap": "$space-xs",
                       "padding": [
-                        5,
-                        10
+                        10,
+                        16
                       ],
+                      "alignItems": "center",
                       "children": [
+                        {
+                          "type": "icon",
+                          "id": "t6po2",
+                          "name": "Mark",
+                          "width": 20,
+                          "height": 20,
+                          "icon": "lock",
+                          "library": "lucide",
+                          "fill": "$muted-foreground"
+                        },
                         {
                           "type": "text",
                           "id": "v7Tq4p",
                           "name": "t",
-                          "fill": "$muted-foreground",
+                          "fill": "$foreground",
                           "content": "Tokens encrypted at rest",
                           "fontFamily": "$font-caption",
-                          "fontSize": "$text-2xs",
-                          "fontWeight": "normal",
-                          "letterSpacing": 1.5
+                          "fontSize": "$text-xs2",
+                          "fontWeight": "normal"
                         }
                       ]
                     }
@@ -13954,7 +14097,7 @@
               "id": "AOlEP",
               "name": "Wordmark",
               "fill": "$foreground",
-              "content": "emeq",
+              "content": "hub",
               "fontFamily": "$font-heading",
               "fontSize": "$text-xl",
               "fontWeight": "700",
@@ -14333,10 +14476,15 @@
                       "type": "frame",
                       "id": "XuUw5",
                       "name": "GDPR",
-                      "cornerRadius": "$radius-xs",
+                      "fill": "$muted",
+                      "cornerRadius": "$radius-pill",
                       "stroke": "$border",
                       "strokeWidth": 1,
-                      "padding": 6,
+                      "gap": "$space-xs",
+                      "padding": [
+                        10,
+                        16
+                      ],
                       "justifyContent": "center",
                       "alignItems": "center",
                       "children": [
@@ -14344,14 +14492,25 @@
                           "type": "rectangle",
                           "id": "s31xw2",
                           "name": "GDPR Logo",
+                          "opacity": 0.7,
                           "fill": {
                             "type": "image",
                             "enabled": true,
                             "url": "gdpr.png",
                             "mode": "fit"
                           },
-                          "width": 18,
-                          "height": 18
+                          "width": 20,
+                          "height": 20
+                        },
+                        {
+                          "type": "text",
+                          "id": "WuuQK",
+                          "name": "Label",
+                          "fill": "$foreground",
+                          "content": "GDPR",
+                          "fontFamily": "$font-caption",
+                          "fontSize": "$text-xs2",
+                          "fontWeight": "normal"
                         }
                       ]
                     },
@@ -14359,24 +14518,36 @@
                       "type": "frame",
                       "id": "w8HbkE",
                       "name": "Tokens encrypted at rest",
-                      "cornerRadius": "$radius-xs",
+                      "fill": "$muted",
+                      "cornerRadius": "$radius-pill",
                       "stroke": "$border",
                       "strokeWidth": 1,
+                      "gap": "$space-xs",
                       "padding": [
-                        5,
-                        10
+                        10,
+                        16
                       ],
+                      "alignItems": "center",
                       "children": [
+                        {
+                          "type": "icon",
+                          "id": "Kjpz0",
+                          "name": "Mark",
+                          "width": 20,
+                          "height": 20,
+                          "icon": "lock",
+                          "library": "lucide",
+                          "fill": "$muted-foreground"
+                        },
                         {
                           "type": "text",
                           "id": "UDu1N",
                           "name": "t",
-                          "fill": "$muted-foreground",
+                          "fill": "$foreground",
                           "content": "Tokens encrypted at rest",
                           "fontFamily": "$font-caption",
-                          "fontSize": "$text-2xs",
-                          "fontWeight": "normal",
-                          "letterSpacing": 1.5
+                          "fontSize": "$text-xs2",
+                          "fontWeight": "normal"
                         }
                       ]
                     }
@@ -14850,7 +15021,7 @@
               "id": "Hrdla",
               "name": "Wordmark",
               "fill": "$foreground",
-              "content": "emeq",
+              "content": "hub",
               "fontFamily": "$font-heading",
               "fontSize": "$text-xl",
               "fontWeight": "700",
@@ -15929,7 +16100,7 @@
               "id": "CKW4W",
               "name": "Wordmark",
               "fill": "$foreground",
-              "content": "emeq",
+              "content": "hub",
               "fontFamily": "$font-heading",
               "fontSize": "$text-xl",
               "fontWeight": "700",
@@ -17066,7 +17237,7 @@
               "id": "aSl4z",
               "name": "Wordmark",
               "fill": "$foreground",
-              "content": "emeq",
+              "content": "hub",
               "fontFamily": "$font-heading",
               "fontSize": "$text-xl",
               "fontWeight": "700",
@@ -17655,7 +17826,7 @@
                       "id": "Jgvqe",
                       "name": "Wordmark",
                       "fill": "$foreground",
-                      "content": "emeq",
+                      "content": "hub",
                       "fontFamily": "$font-heading",
                       "fontSize": "$text-xl",
                       "fontWeight": "700",
@@ -19096,7 +19267,7 @@
               "id": "A4gSE",
               "name": "Wordmark",
               "fill": "$foreground",
-              "content": "emeq",
+              "content": "hub",
               "fontFamily": "$font-heading",
               "fontSize": "$text-xl",
               "fontWeight": "700",
@@ -20588,7 +20759,7 @@
                       "id": "mJCs8",
                       "name": "Wordmark",
                       "fill": "$foreground",
-                      "content": "emeq",
+                      "content": "hub",
                       "fontFamily": "$font-heading",
                       "fontSize": "$text-xl",
                       "fontWeight": "700",
@@ -20732,15 +20903,46 @@
               "alignItems": "center",
               "children": [
                 {
-                  "type": "text",
-                  "id": "U8nbi",
-                  "name": "Eyebrow",
-                  "fill": "$muted-foreground",
-                  "content": "PARTNER-INTEGRATIES",
-                  "fontFamily": "$font-caption",
-                  "fontSize": "$text-xs2",
-                  "fontWeight": "normal",
-                  "letterSpacing": 1.5
+                  "type": "frame",
+                  "id": "EBbDG",
+                  "name": "Breadcrumb",
+                  "width": "fill_container",
+                  "gap": "$space-xs",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "bNiGY",
+                      "name": "Home",
+                      "fill": "$muted-foreground",
+                      "content": "Home",
+                      "fontFamily": "$font-caption",
+                      "fontSize": "$text-2xs",
+                      "fontWeight": "normal",
+                      "letterSpacing": 0.5
+                    },
+                    {
+                      "type": "icon",
+                      "id": "wYLat",
+                      "name": "chev",
+                      "width": 12,
+                      "height": 12,
+                      "icon": "chevron-right",
+                      "library": "lucide",
+                      "fill": "$muted-foreground"
+                    },
+                    {
+                      "type": "text",
+                      "id": "gvrS0",
+                      "name": "Integraties",
+                      "fill": "$foreground",
+                      "content": "Integraties",
+                      "fontFamily": "$font-caption",
+                      "fontSize": "$text-2xs",
+                      "fontWeight": "normal",
+                      "letterSpacing": 0.5
+                    }
+                  ]
                 },
                 {
                   "type": "text",
@@ -20749,7 +20951,7 @@
                   "fill": "$foreground",
                   "textGrowth": "fixed-width",
                   "width": 900,
-                  "content": "Eén API voor al je productintegraties.",
+                  "content": "Integraties",
                   "lineHeight": 1.05,
                   "textAlign": "center",
                   "fontFamily": "$font-heading",
@@ -20782,52 +20984,6 @@
               "gap": "$space-md",
               "alignItems": "center",
               "children": [
-                {
-                  "type": "frame",
-                  "id": "E0qs54",
-                  "name": "Search",
-                  "width": 460,
-                  "fill": "$card",
-                  "cornerRadius": "$radius-pill",
-                  "effect": {
-                    "type": "shadow",
-                    "shadowType": "outer",
-                    "color": "#00000010",
-                    "offset": {
-                      "x": 0,
-                      "y": 1
-                    },
-                    "blur": 3
-                  },
-                  "gap": "$space-xs",
-                  "padding": [
-                    13,
-                    18
-                  ],
-                  "alignItems": "center",
-                  "children": [
-                    {
-                      "type": "icon",
-                      "id": "xbx1z",
-                      "name": "i",
-                      "width": 18,
-                      "height": 18,
-                      "icon": "search",
-                      "library": "lucide",
-                      "fill": "$muted-foreground"
-                    },
-                    {
-                      "type": "text",
-                      "id": "Hobwu",
-                      "name": "ph",
-                      "fill": "$muted-foreground",
-                      "content": "Zoek een koppeling…",
-                      "fontFamily": "$font-body",
-                      "fontSize": "$text-md",
-                      "fontWeight": "normal"
-                    }
-                  ]
-                },
                 {
                   "type": "frame",
                   "id": "dZ1LP",
@@ -20887,7 +21043,7 @@
                     {
                       "type": "frame",
                       "id": "T6PKJ",
-                      "name": "Betalen",
+                      "name": "Betalingen",
                       "fill": "$muted",
                       "cornerRadius": "$radius-pill",
                       "padding": [
@@ -20901,55 +21057,7 @@
                           "id": "rmv6m",
                           "name": "l",
                           "fill": "$muted-foreground",
-                          "content": "Betalen",
-                          "fontFamily": "$font-body",
-                          "fontSize": "$text-sm",
-                          "fontWeight": "normal"
-                        }
-                      ]
-                    },
-                    {
-                      "type": "frame",
-                      "id": "TgIpk",
-                      "name": "CRM",
-                      "fill": "$muted",
-                      "cornerRadius": "$radius-pill",
-                      "padding": [
-                        8,
-                        16
-                      ],
-                      "alignItems": "center",
-                      "children": [
-                        {
-                          "type": "text",
-                          "id": "m42Jv3",
-                          "name": "l",
-                          "fill": "$muted-foreground",
-                          "content": "CRM",
-                          "fontFamily": "$font-body",
-                          "fontSize": "$text-sm",
-                          "fontWeight": "normal"
-                        }
-                      ]
-                    },
-                    {
-                      "type": "frame",
-                      "id": "GT7J0",
-                      "name": "E-commerce",
-                      "fill": "$muted",
-                      "cornerRadius": "$radius-pill",
-                      "padding": [
-                        8,
-                        16
-                      ],
-                      "alignItems": "center",
-                      "children": [
-                        {
-                          "type": "text",
-                          "id": "w5Ea7O",
-                          "name": "l",
-                          "fill": "$muted-foreground",
-                          "content": "E-commerce",
+                          "content": "Betalingen",
                           "fontFamily": "$font-body",
                           "fontSize": "$text-sm",
                           "fontWeight": "normal"
@@ -20965,148 +21073,275 @@
               "id": "P3rXL",
               "name": "Partner Grid",
               "width": "fill_container",
+              "layout": "vertical",
               "gap": "$space-lg",
               "justifyContent": "center",
               "children": [
                 {
                   "type": "frame",
-                  "id": "urcZW",
-                  "name": "BOEKHOUDEN Card",
-                  "width": 560,
-                  "fill": "$card",
-                  "cornerRadius": "$radius-lg",
-                  "effect": {
-                    "type": "shadow",
-                    "shadowType": "outer",
-                    "color": "$shadow-4",
-                    "offset": {
-                      "x": 0,
-                      "y": 6
-                    },
-                    "blur": 24,
-                    "spread": -6
-                  },
-                  "layout": "vertical",
-                  "padding": 24,
-                  "justifyContent": "space_between",
+                  "id": "HJirw",
+                  "name": "Row 1",
+                  "gap": "$space-lg",
                   "children": [
                     {
                       "type": "frame",
-                      "id": "P9HOB",
-                      "name": "Body",
-                      "width": "fill_container",
+                      "id": "urcZW",
+                      "name": "Exact Online Card",
+                      "width": 588,
+                      "fill": "$card",
+                      "cornerRadius": "$radius-lg",
+                      "stroke": "$border",
+                      "strokeWidth": 1,
+                      "effect": {
+                        "type": "shadow",
+                        "shadowType": "outer",
+                        "color": "$shadow-2",
+                        "offset": {
+                          "x": 0,
+                          "y": 1
+                        },
+                        "blur": 3
+                      },
                       "layout": "vertical",
-                      "gap": "$space-sm",
+                      "padding": 24,
+                      "justifyContent": "space_between",
                       "children": [
                         {
                           "type": "frame",
-                          "id": "au17y",
-                          "name": "Top",
+                          "id": "P9HOB",
+                          "name": "Body",
                           "width": "fill_container",
-                          "justifyContent": "space_between",
-                          "alignItems": "center",
+                          "layout": "vertical",
+                          "gap": "$space-sm",
                           "children": [
                             {
-                              "type": "rectangle",
-                              "id": "oed91",
-                              "name": "Logo",
-                              "fill": {
-                                "type": "image",
-                                "enabled": true,
-                                "url": "exact.png",
-                                "mode": "fit"
-                              },
-                              "width": 100,
-                              "height": 24
-                            },
-                            {
                               "type": "frame",
-                              "id": "S9HJTC",
-                              "name": "Live",
-                              "fill": "$success-soft",
-                              "cornerRadius": "$radius-pill",
-                              "gap": "$space-tight",
-                              "padding": [
-                                4,
-                                10
-                              ],
+                              "id": "au17y",
+                              "name": "Top",
+                              "width": "fill_container",
+                              "justifyContent": "space_between",
                               "alignItems": "center",
                               "children": [
                                 {
-                                  "type": "ellipse",
-                                  "id": "j7nCP",
-                                  "name": "Dot",
-                                  "fill": "$success",
-                                  "width": 6,
-                                  "height": 6
+                                  "type": "rectangle",
+                                  "id": "oed91",
+                                  "name": "Logo",
+                                  "fill": {
+                                    "type": "image",
+                                    "enabled": true,
+                                    "url": "exact.png",
+                                    "mode": "fit"
+                                  },
+                                  "width": 100,
+                                  "height": 24
                                 },
                                 {
-                                  "type": "text",
-                                  "id": "QMHI1",
-                                  "name": "l",
-                                  "fill": "$success",
-                                  "content": "LIVE",
-                                  "fontFamily": "$font-caption",
-                                  "fontSize": "$text-2xs",
-                                  "fontWeight": "normal",
-                                  "letterSpacing": 1.5
+                                  "type": "frame",
+                                  "id": "S9HJTC",
+                                  "name": "Live",
+                                  "fill": "$success-soft",
+                                  "cornerRadius": "$radius-pill",
+                                  "gap": "$space-tight",
+                                  "padding": [
+                                    4,
+                                    10
+                                  ],
+                                  "alignItems": "center",
+                                  "children": [
+                                    {
+                                      "type": "ellipse",
+                                      "id": "j7nCP",
+                                      "name": "Dot",
+                                      "fill": "$success",
+                                      "width": 6,
+                                      "height": 6
+                                    },
+                                    {
+                                      "type": "text",
+                                      "id": "QMHI1",
+                                      "name": "l",
+                                      "fill": "$success",
+                                      "content": "LIVE",
+                                      "fontFamily": "$font-caption",
+                                      "fontSize": "$text-2xs",
+                                      "fontWeight": "normal",
+                                      "letterSpacing": 1.5
+                                    }
+                                  ]
                                 }
                               ]
+                            },
+                            {
+                              "type": "text",
+                              "id": "Uns9x",
+                              "name": "Cat",
+                              "fill": "$muted-foreground",
+                              "content": "BOEKHOUDEN",
+                              "fontFamily": "$font-caption",
+                              "fontSize": "$text-2xs",
+                              "fontWeight": "normal",
+                              "letterSpacing": 1.5
+                            },
+                            {
+                              "type": "text",
+                              "id": "ufgI6",
+                              "name": "Desc",
+                              "fill": "$foreground",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "Verwerk verkoop- en inkoopboekingen, relaties en grootboekgegevens betrouwbaar en realtime.",
+                              "lineHeight": 1.6,
+                              "fontFamily": "$font-body",
+                              "fontSize": "$text-sm",
+                              "fontWeight": "normal"
                             }
                           ]
                         },
                         {
-                          "type": "text",
-                          "id": "Uns9x",
-                          "name": "Cat",
-                          "fill": "$muted-foreground",
-                          "content": "BOEKHOUDEN",
-                          "fontFamily": "$font-caption",
-                          "fontSize": "$text-2xs",
-                          "fontWeight": "normal",
-                          "letterSpacing": 1.5
-                        },
-                        {
-                          "type": "text",
-                          "id": "ufgI6",
-                          "name": "Desc",
-                          "fill": "$foreground",
-                          "textGrowth": "fixed-width",
-                          "width": "fill_container",
-                          "content": "Verwerk verkoop- en inkoopboekingen, relaties en grootboekgegevens betrouwbaar en realtime.",
-                          "lineHeight": 1.6,
-                          "fontFamily": "$font-body",
-                          "fontSize": "$text-sm",
-                          "fontWeight": "normal"
+                          "type": "frame",
+                          "id": "VOEwP",
+                          "name": "Link",
+                          "gap": "$space-tight",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "d8Tiid",
+                              "name": "l",
+                              "fill": "$brand",
+                              "content": "Bekijk integratie",
+                              "fontFamily": "$font-body",
+                              "fontSize": "$text-sm",
+                              "fontWeight": "600"
+                            },
+                            {
+                              "type": "icon",
+                              "id": "XON9P",
+                              "name": "a",
+                              "width": 15,
+                              "height": 15,
+                              "icon": "arrow-right",
+                              "library": "lucide",
+                              "fill": "$brand"
+                            }
+                          ]
                         }
                       ]
                     },
                     {
                       "type": "frame",
-                      "id": "VOEwP",
-                      "name": "Link",
-                      "gap": "$space-tight",
-                      "alignItems": "center",
+                      "id": "V1S0f",
+                      "name": "Mollie Card",
+                      "width": 588,
+                      "height": "fill_container",
+                      "fill": "$card",
+                      "cornerRadius": "$radius-lg",
+                      "stroke": "$border",
+                      "strokeWidth": 1,
+                      "effect": {
+                        "type": "shadow",
+                        "shadowType": "outer",
+                        "color": "$shadow-2",
+                        "offset": {
+                          "x": 0,
+                          "y": 1
+                        },
+                        "blur": 3
+                      },
+                      "layout": "vertical",
+                      "padding": 24,
+                      "justifyContent": "space_between",
                       "children": [
                         {
-                          "type": "text",
-                          "id": "d8Tiid",
-                          "name": "l",
-                          "fill": "$brand",
-                          "content": "Bekijk integratie",
-                          "fontFamily": "$font-body",
-                          "fontSize": "$text-sm",
-                          "fontWeight": "600"
-                        },
-                        {
-                          "type": "icon",
-                          "id": "XON9P",
-                          "name": "a",
-                          "width": 15,
-                          "height": 15,
-                          "icon": "arrow-right",
-                          "library": "lucide",
-                          "fill": "$brand"
+                          "type": "frame",
+                          "id": "F8Y0m",
+                          "name": "Body",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": "$space-sm",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "hzWXS",
+                              "name": "Top",
+                              "width": "fill_container",
+                              "justifyContent": "space_between",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "rectangle",
+                                  "id": "u2lOav",
+                                  "name": "Logo",
+                                  "fill": {
+                                    "type": "image",
+                                    "enabled": true,
+                                    "url": "mollie.png",
+                                    "mode": "fit"
+                                  },
+                                  "width": 100,
+                                  "height": 24
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "SxZJB",
+                                  "name": "Binnenkort",
+                                  "fill": "$muted",
+                                  "cornerRadius": "$radius-pill",
+                                  "gap": "$space-tight",
+                                  "padding": [
+                                    4,
+                                    10
+                                  ],
+                                  "alignItems": "center",
+                                  "children": [
+                                    {
+                                      "type": "ellipse",
+                                      "id": "bpO4I",
+                                      "name": "Dot",
+                                      "fill": "$muted-foreground",
+                                      "width": 6,
+                                      "height": 6
+                                    },
+                                    {
+                                      "type": "text",
+                                      "id": "WSgS8",
+                                      "name": "l",
+                                      "fill": "$muted-foreground",
+                                      "content": "BINNENKORT",
+                                      "fontFamily": "$font-caption",
+                                      "fontSize": "$text-2xs",
+                                      "fontWeight": "normal",
+                                      "letterSpacing": 1.5
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "id": "IqOhB",
+                              "name": "Cat",
+                              "fill": "$muted-foreground",
+                              "content": "BETALINGEN",
+                              "fontFamily": "$font-caption",
+                              "fontSize": "$text-2xs",
+                              "fontWeight": "normal",
+                              "letterSpacing": 1.5
+                            },
+                            {
+                              "type": "text",
+                              "id": "mj9cw",
+                              "name": "Desc",
+                              "fill": "$foreground",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "Online betalingen en abonnementen via dezelfde Hub-API en hetzelfde audit-log.",
+                              "lineHeight": 1.6,
+                              "fontFamily": "$font-body",
+                              "fontSize": "$text-sm",
+                              "fontWeight": "normal"
+                            }
+                          ]
                         }
                       ]
                     }
@@ -21186,87 +21421,328 @@
         },
         {
           "type": "frame",
-          "id": "lRhp9",
+          "id": "zPgrX",
           "name": "Footer",
           "width": "fill_container",
+          "fill": "$background",
           "stroke": "$border",
           "strokeWidth": {
             "top": 1
           },
           "strokeLinejoin": "round",
+          "layout": "vertical",
+          "gap": "$space-lg",
           "padding": [
-            28,
+            56,
+            "$space-section-x",
+            "$space-2xl",
             "$space-section-x"
           ],
-          "justifyContent": "space_between",
-          "alignItems": "center",
           "children": [
             {
-              "type": "text",
-              "id": "kcHCZ",
-              "name": "Copyright",
-              "fill": "$muted-foreground",
-              "content": "© 2026 emeq",
-              "fontFamily": "$font-body",
-              "fontSize": "$text-xs2",
-              "fontWeight": "normal"
+              "type": "frame",
+              "id": "tww5A",
+              "name": "Footer Top",
+              "width": "fill_container",
+              "gap": "$space-3xl",
+              "justifyContent": "space_between",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "yqj45",
+                  "name": "Brand",
+                  "layout": "vertical",
+                  "gap": "$space-xs",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "jNG1c",
+                      "name": "Logo",
+                      "gap": "$space-xs",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": "$radius-xs",
+                          "id": "R7gsdo",
+                          "name": "Mark",
+                          "fill": "$brand",
+                          "width": 14,
+                          "height": 14
+                        },
+                        {
+                          "type": "text",
+                          "id": "kgaso",
+                          "name": "Wordmark",
+                          "fill": "$foreground",
+                          "content": "hub",
+                          "fontFamily": "$font-heading",
+                          "fontSize": "$text-xl",
+                          "fontWeight": "700",
+                          "letterSpacing": -0.5
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "Wvn7l",
+                      "name": "Tagline",
+                      "fill": "$muted-foreground",
+                      "content": "De integratie-API voor software die wil doorgroeien.",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-sm",
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "SkxcO",
+                  "name": "Links",
+                  "layout": "vertical",
+                  "gap": "$space-sm",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "hWEc6",
+                      "name": "Partners",
+                      "fill": "$muted-foreground",
+                      "content": "Partners",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-sm",
+                      "fontWeight": "500"
+                    },
+                    {
+                      "type": "text",
+                      "id": "gPWib",
+                      "name": "Privacy",
+                      "fill": "$muted-foreground",
+                      "content": "Privacy",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-sm",
+                      "fontWeight": "500"
+                    },
+                    {
+                      "type": "text",
+                      "id": "FNJC9",
+                      "name": "Voorwaarden",
+                      "fill": "$muted-foreground",
+                      "content": "Voorwaarden",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-sm",
+                      "fontWeight": "500"
+                    },
+                    {
+                      "type": "text",
+                      "id": "A8Os4I",
+                      "name": "Verwerkersovereenkomst",
+                      "fill": "$muted-foreground",
+                      "content": "Verwerkersovereenkomst",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-sm",
+                      "fontWeight": "500"
+                    },
+                    {
+                      "type": "text",
+                      "id": "mriLY",
+                      "name": "Support",
+                      "fill": "$muted-foreground",
+                      "content": "Support",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-sm",
+                      "fontWeight": "500"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "FTbvl",
+                  "name": "Ook van Emeq",
+                  "layout": "vertical",
+                  "gap": "$space-sm",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "MI5KP",
+                      "name": "Koltitel",
+                      "fill": "$muted-foreground",
+                      "content": "Ook van Emeq",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-sm",
+                      "fontWeight": "500",
+                      "letterSpacing": 0.5
+                    },
+                    {
+                      "type": "frame",
+                      "id": "Mzd91",
+                      "name": "Emeq",
+                      "layout": "vertical",
+                      "gap": "$space-xxs",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "cuaRc",
+                          "name": "Naam",
+                          "gap": "$space-tight",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "NTBvf",
+                              "name": "n",
+                              "fill": "$foreground",
+                              "content": "Emeq",
+                              "fontFamily": "$font-body",
+                              "fontSize": "$text-sm",
+                              "fontWeight": "500"
+                            },
+                            {
+                              "type": "icon",
+                              "id": "P2KQYX",
+                              "name": "ext",
+                              "width": 12,
+                              "height": 12,
+                              "icon": "arrow-up-right",
+                              "library": "lucide",
+                              "fill": "$muted-foreground"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "kZtvJ",
+                      "name": "Planny",
+                      "layout": "vertical",
+                      "gap": "$space-xxs",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "VM1xQ",
+                          "name": "Naam",
+                          "gap": "$space-tight",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "C3CLq",
+                              "name": "n",
+                              "fill": "$foreground",
+                              "content": "Planny",
+                              "fontFamily": "$font-body",
+                              "fontSize": "$text-sm",
+                              "fontWeight": "500"
+                            },
+                            {
+                              "type": "icon",
+                              "id": "U44ojA",
+                              "name": "ext",
+                              "width": 12,
+                              "height": 12,
+                              "icon": "arrow-up-right",
+                              "library": "lucide",
+                              "fill": "$muted-foreground"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
             },
             {
               "type": "frame",
-              "id": "aN35e",
-              "name": "Footer Links",
-              "gap": "$space-lg",
+              "id": "D5TuGY",
+              "name": "Footer Bar",
+              "width": "fill_container",
+              "stroke": "$border",
+              "strokeWidth": {
+                "top": 1
+              },
+              "strokeLinejoin": "round",
+              "padding": [
+                24,
+                0,
+                0,
+                0
+              ],
+              "justifyContent": "space_between",
               "alignItems": "center",
               "children": [
                 {
                   "type": "text",
-                  "id": "P4i25",
-                  "name": "Partners",
+                  "id": "U112p",
+                  "name": "Copy",
                   "fill": "$muted-foreground",
-                  "content": "Partners",
-                  "fontFamily": "$font-body",
-                  "fontSize": "$text-xs2",
+                  "content": "© 2026 emeq. Alle rechten voorbehouden.",
+                  "fontFamily": "$font-caption",
+                  "fontSize": "$text-xs",
                   "fontWeight": "normal"
                 },
                 {
-                  "type": "text",
-                  "id": "M0tAlK",
-                  "name": "Privacy",
-                  "fill": "$muted-foreground",
-                  "content": "Privacy",
-                  "fontFamily": "$font-body",
-                  "fontSize": "$text-xs2",
-                  "fontWeight": "normal"
-                },
-                {
-                  "type": "text",
-                  "id": "IETXs",
-                  "name": "Voorwaarden",
-                  "fill": "$muted-foreground",
-                  "content": "Voorwaarden",
-                  "fontFamily": "$font-body",
-                  "fontSize": "$text-xs2",
-                  "fontWeight": "normal"
-                },
-                {
-                  "type": "text",
-                  "id": "SHRK6",
-                  "name": "Verwerkersovereenkomst",
-                  "fill": "$muted-foreground",
-                  "content": "Verwerkersovereenkomst",
-                  "fontFamily": "$font-body",
-                  "fontSize": "$text-xs2",
-                  "fontWeight": "normal"
-                },
-                {
-                  "type": "text",
-                  "id": "jZfp5",
-                  "name": "Support",
-                  "fill": "$muted-foreground",
-                  "content": "Support",
-                  "fontFamily": "$font-body",
-                  "fontSize": "$text-xs2",
-                  "fontWeight": "normal"
+                  "type": "frame",
+                  "id": "I02H5",
+                  "name": "Badges",
+                  "gap": "$space-xs",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "ATQla",
+                      "name": "ISO 27001",
+                      "cornerRadius": "$radius-xs",
+                      "stroke": "$border",
+                      "strokeWidth": 1,
+                      "padding": "$space-tight",
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "rectangle",
+                          "id": "cMn2A",
+                          "name": "ISO 27001 Logo",
+                          "opacity": 0.7,
+                          "fill": {
+                            "type": "image",
+                            "enabled": true,
+                            "url": "iso27001.png",
+                            "mode": "fit"
+                          },
+                          "width": 18,
+                          "height": 18
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "XrpFe",
+                      "name": "GDPR",
+                      "cornerRadius": "$radius-xs",
+                      "stroke": "$border",
+                      "strokeWidth": 1,
+                      "padding": 6,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "rectangle",
+                          "id": "cqzCI",
+                          "name": "GDPR Logo",
+                          "opacity": 0.7,
+                          "fill": {
+                            "type": "image",
+                            "enabled": true,
+                            "url": "gdpr.png",
+                            "mode": "fit"
+                          },
+                          "width": 18,
+                          "height": 18
+                        }
+                      ]
+                    }
+                  ]
                 }
               ]
             }
@@ -21329,7 +21805,7 @@
                       "id": "VzbuH",
                       "name": "Wordmark",
                       "fill": "$foreground",
-                      "content": "emeq",
+                      "content": "hub",
                       "fontFamily": "$font-heading",
                       "fontSize": "$text-xl",
                       "fontWeight": "700",
@@ -21465,7 +21941,7 @@
             },
             {
               "type": "frame",
-              "id": "dHDNw",
+              "id": "b1b7BL",
               "name": "Detail Hero",
               "width": "fill_container",
               "layout": "vertical",
@@ -21474,7 +21950,7 @@
               "children": [
                 {
                   "type": "text",
-                  "id": "Nm8VC",
+                  "id": "ZLfI6",
                   "name": "Eyebrow",
                   "fill": "$muted-foreground",
                   "content": "INTEGRATIE · BOEKHOUDEN",
@@ -21485,14 +21961,14 @@
                 },
                 {
                   "type": "frame",
-                  "id": "aFyO6",
+                  "id": "lUuF0",
                   "name": "LogoRow",
                   "gap": "$space-md",
                   "alignItems": "center",
                   "children": [
                     {
                       "type": "rectangle",
-                      "id": "moSvD",
+                      "id": "BkU7z",
                       "name": "Logo",
                       "fill": {
                         "type": "image",
@@ -21505,7 +21981,7 @@
                     },
                     {
                       "type": "frame",
-                      "id": "JzYQQ",
+                      "id": "aI2Yi",
                       "name": "Live",
                       "fill": "$success-soft",
                       "cornerRadius": "$radius-pill",
@@ -21518,7 +21994,7 @@
                       "children": [
                         {
                           "type": "ellipse",
-                          "id": "lRfyB",
+                          "id": "X7LNg",
                           "name": "Dot",
                           "fill": "$success",
                           "width": 6,
@@ -21526,7 +22002,7 @@
                         },
                         {
                           "type": "text",
-                          "id": "ZfZkz",
+                          "id": "dUI0t",
                           "name": "Label",
                           "fill": "$success",
                           "content": "LIVE",
@@ -21541,7 +22017,7 @@
                 },
                 {
                   "type": "text",
-                  "id": "q28Bs",
+                  "id": "VHKh4",
                   "name": "H1",
                   "fill": "$foreground",
                   "textGrowth": "fixed-width",
@@ -21556,7 +22032,7 @@
                 },
                 {
                   "type": "text",
-                  "id": "Es0UZ",
+                  "id": "Kf6w7",
                   "name": "Sub",
                   "fill": "$muted-foreground",
                   "textGrowth": "fixed-width",
@@ -21570,14 +22046,14 @@
                 },
                 {
                   "type": "frame",
-                  "id": "x3JRc",
+                  "id": "u2nsf",
                   "name": "CTA Row",
                   "gap": "$space-md",
                   "alignItems": "center",
                   "children": [
                     {
                       "type": "frame",
-                      "id": "x8rBv",
+                      "id": "vQtD5",
                       "name": "Primary",
                       "fill": "$primary",
                       "cornerRadius": "$radius-md",
@@ -21600,7 +22076,7 @@
                       "children": [
                         {
                           "type": "text",
-                          "id": "V54smx",
+                          "id": "j4Quo",
                           "name": "l",
                           "fill": "$primary-foreground",
                           "content": "Start met Exact Online",
@@ -21610,7 +22086,7 @@
                         },
                         {
                           "type": "icon",
-                          "id": "b2EvZA",
+                          "id": "unWPc",
                           "name": "a",
                           "width": 16,
                           "height": 16,
@@ -21622,7 +22098,7 @@
                     },
                     {
                       "type": "frame",
-                      "id": "Uh97u",
+                      "id": "NXS9C",
                       "name": "Ghost",
                       "fill": "$card",
                       "cornerRadius": "$radius-md",
@@ -21646,7 +22122,7 @@
                       "children": [
                         {
                           "type": "text",
-                          "id": "PRZnJ",
+                          "id": "Qhf1M",
                           "name": "l",
                           "fill": "$foreground",
                           "content": "Bekijk de docs",
@@ -21660,7 +22136,7 @@
                 },
                 {
                   "type": "frame",
-                  "id": "EMR48",
+                  "id": "H7HjVF",
                   "name": "Resources",
                   "width": "fill_container",
                   "gap": "$space-lg",
@@ -21669,14 +22145,14 @@
                   "children": [
                     {
                       "type": "frame",
-                      "id": "xbLzs",
+                      "id": "SOvgk",
                       "name": "exact.com",
                       "gap": "$space-tight",
                       "alignItems": "center",
                       "children": [
                         {
                           "type": "icon",
-                          "id": "RzRp0",
+                          "id": "olOXE",
                           "name": "i",
                           "width": 14,
                           "height": 14,
@@ -21686,7 +22162,7 @@
                         },
                         {
                           "type": "text",
-                          "id": "iHQad",
+                          "id": "koT2K",
                           "name": "l",
                           "fill": "$muted-foreground",
                           "content": "exact.com",
@@ -21698,14 +22174,14 @@
                     },
                     {
                       "type": "frame",
-                      "id": "C9BekE",
+                      "id": "Gaq3i",
                       "name": "Developer-docs",
                       "gap": "$space-tight",
                       "alignItems": "center",
                       "children": [
                         {
                           "type": "icon",
-                          "id": "MSrIK",
+                          "id": "ZaEok",
                           "name": "i",
                           "width": 14,
                           "height": 14,
@@ -21715,7 +22191,7 @@
                         },
                         {
                           "type": "text",
-                          "id": "iUN9v",
+                          "id": "lHSDF",
                           "name": "l",
                           "fill": "$muted-foreground",
                           "content": "Developer-docs",
@@ -21727,14 +22203,14 @@
                     },
                     {
                       "type": "frame",
-                      "id": "U3Ajc",
+                      "id": "Z26jbc",
                       "name": "Exact-support",
                       "gap": "$space-tight",
                       "alignItems": "center",
                       "children": [
                         {
                           "type": "icon",
-                          "id": "ZIbwa",
+                          "id": "Xf82P",
                           "name": "i",
                           "width": 14,
                           "height": 14,
@@ -21744,7 +22220,7 @@
                         },
                         {
                           "type": "text",
-                          "id": "abE2u",
+                          "id": "epcIK",
                           "name": "l",
                           "fill": "$muted-foreground",
                           "content": "Exact-support",
@@ -21760,7 +22236,7 @@
             },
             {
               "type": "frame",
-              "id": "d6dyI",
+              "id": "qtAV6",
               "name": "Features",
               "width": "fill_container",
               "layout": "vertical",
@@ -21769,7 +22245,7 @@
               "children": [
                 {
                   "type": "frame",
-                  "id": "m91cs",
+                  "id": "hyvZp",
                   "name": "Head",
                   "layout": "vertical",
                   "gap": "$space-sm",
@@ -21777,7 +22253,7 @@
                   "children": [
                     {
                       "type": "text",
-                      "id": "YLnHJ",
+                      "id": "vX1wf",
                       "name": "Eyebrow",
                       "fill": "$muted-foreground",
                       "content": "MOGELIJKHEDEN",
@@ -21788,7 +22264,7 @@
                     },
                     {
                       "type": "text",
-                      "id": "PTfiW",
+                      "id": "TRF85",
                       "name": "H2",
                       "fill": "$foreground",
                       "content": "Wat je met Exact Online automatiseert",
@@ -21802,13 +22278,13 @@
                 },
                 {
                   "type": "frame",
-                  "id": "vFqL6",
+                  "id": "Poj6U",
                   "name": "Row0",
                   "width": "fill_container",
                   "gap": "$space-lg",
                   "children": [
                     {
-                      "id": "oiXR4",
+                      "id": "r73a6J",
                       "type": "ref",
                       "ref": "aCSlG",
                       "name": "Verkoopfacturen",
@@ -21826,7 +22302,7 @@
                       }
                     },
                     {
-                      "id": "VqpyI",
+                      "id": "R66BG",
                       "type": "ref",
                       "ref": "aCSlG",
                       "name": "Inkoopfacturen",
@@ -21844,7 +22320,7 @@
                       }
                     },
                     {
-                      "id": "L8Dvc",
+                      "id": "b7vRQQ",
                       "type": "ref",
                       "ref": "aCSlG",
                       "name": "Relaties",
@@ -21865,13 +22341,13 @@
                 },
                 {
                   "type": "frame",
-                  "id": "o7zcoi",
+                  "id": "YxQ2O",
                   "name": "Row1",
                   "width": "fill_container",
                   "gap": "$space-lg",
                   "children": [
                     {
-                      "id": "m1TlgE",
+                      "id": "mZXbT",
                       "type": "ref",
                       "ref": "aCSlG",
                       "name": "Grootboek & kostenplaats",
@@ -21889,7 +22365,7 @@
                       }
                     },
                     {
-                      "id": "Exc2A",
+                      "id": "nZc4r",
                       "type": "ref",
                       "ref": "aCSlG",
                       "name": "Verlegde btw",
@@ -21907,7 +22383,7 @@
                       }
                     },
                     {
-                      "id": "niVQ6",
+                      "id": "zpvMC",
                       "type": "ref",
                       "ref": "aCSlG",
                       "name": "Webhooks & audit",
@@ -21930,7 +22406,7 @@
             },
             {
               "type": "frame",
-              "id": "PnFKS",
+              "id": "h0rFZ",
               "name": "How It Works",
               "width": "fill_container",
               "layout": "vertical",
@@ -21939,7 +22415,7 @@
               "children": [
                 {
                   "type": "frame",
-                  "id": "n1XMd",
+                  "id": "nj5rL",
                   "name": "Head",
                   "layout": "vertical",
                   "gap": "$space-sm",
@@ -21947,7 +22423,7 @@
                   "children": [
                     {
                       "type": "text",
-                      "id": "B3F8h",
+                      "id": "peg3E",
                       "name": "Eyebrow",
                       "fill": "$muted-foreground",
                       "content": "ZO WERKT HET",
@@ -21958,7 +22434,7 @@
                     },
                     {
                       "type": "text",
-                      "id": "LLqCg",
+                      "id": "k4kB5",
                       "name": "H2",
                       "fill": "$foreground",
                       "content": "Live met Exact Online in drie stappen",
@@ -21972,13 +22448,13 @@
                 },
                 {
                   "type": "frame",
-                  "id": "eSB0c",
+                  "id": "gRGwL",
                   "name": "Steps",
                   "width": "fill_container",
                   "gap": "$space-lg",
                   "children": [
                     {
-                      "id": "qFHI1",
+                      "id": "qhgV2",
                       "type": "ref",
                       "ref": "kKpAT",
                       "name": "Step 1",
@@ -21996,7 +22472,7 @@
                       }
                     },
                     {
-                      "id": "wuLHL",
+                      "id": "sXMoL",
                       "type": "ref",
                       "ref": "kKpAT",
                       "name": "Step 2",
@@ -22014,7 +22490,7 @@
                       }
                     },
                     {
-                      "id": "MouF3",
+                      "id": "tBGWm",
                       "type": "ref",
                       "ref": "kKpAT",
                       "name": "Step 3",
@@ -22038,86 +22514,647 @@
             {
               "type": "frame",
               "id": "ddmBh",
-              "name": "Connect CTA",
+              "name": "Koppelen",
               "width": "fill_container",
               "fill": "$brand-subtle",
-              "cornerRadius": "$radius-2xl",
-              "layout": "vertical",
-              "gap": "$space-lg",
-              "padding": [
-                60,
-                "$space-4xl"
-              ],
-              "alignItems": "center",
+              "cornerRadius": "$radius-xl",
+              "gap": "$space-3xl",
+              "padding": "$space-3xl",
               "children": [
                 {
-                  "type": "text",
-                  "id": "u66klC",
-                  "name": "H",
-                  "fill": "$foreground",
-                  "content": "Klaar om Exact Online te koppelen?",
-                  "lineHeight": 1.05,
-                  "fontFamily": "$font-heading",
-                  "fontSize": "$text-2xl",
-                  "fontWeight": "700",
-                  "letterSpacing": -1
-                },
-                {
-                  "type": "text",
-                  "id": "Pydvc",
-                  "name": "Sub",
-                  "fill": "$muted-foreground",
-                  "textGrowth": "fixed-width",
-                  "width": 520,
-                  "content": "Maak je financiële integratie schaalbaar. Wij regelen de infrastructuur; jij levert de workflow.",
-                  "lineHeight": 1.6,
-                  "textAlign": "center",
-                  "fontFamily": "$font-body",
-                  "fontSize": "$text-base",
-                  "fontWeight": "normal"
-                },
-                {
                   "type": "frame",
-                  "id": "p30jqU",
-                  "name": "Primary",
-                  "fill": "$primary",
-                  "cornerRadius": "$radius-md",
-                  "effect": {
-                    "type": "shadow",
-                    "shadowType": "outer",
-                    "color": "$shadow-3",
-                    "offset": {
-                      "x": 0,
-                      "y": 1
-                    },
-                    "blur": 3
-                  },
-                  "gap": "$space-xs",
-                  "padding": [
-                    15,
-                    26
-                  ],
-                  "alignItems": "center",
+                  "id": "L2Zgj1",
+                  "name": "Uitleg",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": "$space-md",
                   "children": [
                     {
                       "type": "text",
-                      "id": "nmg1n",
-                      "name": "l",
-                      "fill": "$primary-foreground",
-                      "content": "Start met Exact Online",
+                      "id": "u66klC",
+                      "name": "H",
+                      "fill": "$foreground",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Klaar om Exact Online te koppelen?",
+                      "lineHeight": 1.2,
+                      "fontFamily": "$font-heading",
+                      "fontSize": "$text-xl",
+                      "fontWeight": "700",
+                      "letterSpacing": -1
+                    },
+                    {
+                      "type": "text",
+                      "id": "pJKhg",
+                      "name": "Sub",
+                      "fill": "$muted-foreground",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Vertel kort wat je wilt koppelen. Wij regelen de omgeving, het token en de onboarding.",
+                      "lineHeight": 1.6,
                       "fontFamily": "$font-body",
-                      "fontSize": "$text-md",
+                      "fontSize": "$text-base",
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "LZhdJ",
+                      "name": "Wat er gebeurt",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "padding": [
+                        8,
+                        0,
+                        0,
+                        0
+                      ],
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "JqZEc",
+                          "name": "Wij nemen contact op",
+                          "width": "fill_container",
+                          "stroke": "$border",
+                          "strokeWidth": {
+                            "top": 1,
+                            "bottom": 1
+                          },
+                          "strokeLinejoin": "round",
+                          "gap": "$space-md",
+                          "padding": [
+                            18,
+                            0
+                          ],
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "t5ytlc",
+                              "name": "ix",
+                              "fill": "$brand",
+                              "content": "01",
+                              "fontFamily": "$font-data",
+                              "fontSize": "$text-xs2",
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "frame",
+                              "id": "a2MLNI",
+                              "name": "c",
+                              "width": "fill_container",
+                              "layout": "vertical",
+                              "gap": "$space-xxs",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "Ltj8x",
+                                  "name": "t",
+                                  "fill": "$foreground",
+                                  "content": "We brengen je integratievraag scherp",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": "$text-base",
+                                  "fontWeight": "600"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "Y0NGL",
+                                  "name": "d",
+                                  "fill": "$muted-foreground",
+                                  "textGrowth": "fixed-width",
+                                  "width": "fill_container",
+                                  "content": "Een korte intake over systemen, data en gewenste uitkomst.",
+                                  "lineHeight": 1.6,
+                                  "fontFamily": "$font-body",
+                                  "fontSize": "$text-sm",
+                                  "fontWeight": "normal"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "KBEFH",
+                          "name": "Omgeving & token klaar",
+                          "width": "fill_container",
+                          "stroke": "$border",
+                          "strokeWidth": {
+                            "bottom": 1
+                          },
+                          "strokeLinejoin": "round",
+                          "gap": "$space-md",
+                          "padding": [
+                            18,
+                            0
+                          ],
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "L4Ij0k",
+                              "name": "ix",
+                              "fill": "$brand",
+                              "content": "02",
+                              "fontFamily": "$font-data",
+                              "fontSize": "$text-xs2",
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "frame",
+                              "id": "qx2Dq",
+                              "name": "c",
+                              "width": "fill_container",
+                              "layout": "vertical",
+                              "gap": "$space-xxs",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "cUomj",
+                                  "name": "t",
+                                  "fill": "$foreground",
+                                  "content": "Je omgeving staat klaar",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": "$text-base",
+                                  "fontWeight": "600"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "YnYeJ",
+                                  "name": "d",
+                                  "fill": "$muted-foreground",
+                                  "textGrowth": "fixed-width",
+                                  "width": "fill_container",
+                                  "content": "Je ontvangt een veilige omgeving, API-token en heldere onboarding.",
+                                  "lineHeight": 1.6,
+                                  "fontFamily": "$font-body",
+                                  "fontSize": "$text-sm",
+                                  "fontWeight": "normal"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "VDrLA",
+                          "name": "Eerste koppeling live",
+                          "width": "fill_container",
+                          "stroke": "$border",
+                          "strokeWidth": {
+                            "bottom": 1
+                          },
+                          "strokeLinejoin": "round",
+                          "gap": "$space-md",
+                          "padding": [
+                            18,
+                            0
+                          ],
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "o5Rmt",
+                              "name": "ix",
+                              "fill": "$brand",
+                              "content": "03",
+                              "fontFamily": "$font-data",
+                              "fontSize": "$text-xs2",
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "frame",
+                              "id": "I9Q0ae",
+                              "name": "c",
+                              "width": "fill_container",
+                              "layout": "vertical",
+                              "gap": "$space-xxs",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "I27rWh",
+                                  "name": "t",
+                                  "fill": "$foreground",
+                                  "content": "Je eerste integratie gaat live",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": "$text-base",
+                                  "fontWeight": "600"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "zMhso",
+                                  "name": "d",
+                                  "fill": "$muted-foreground",
+                                  "textGrowth": "fixed-width",
+                                  "width": "fill_container",
+                                  "content": "Samen zetten we de eerste koppeling om in resultaat.",
+                                  "lineHeight": 1.6,
+                                  "fontFamily": "$font-body",
+                                  "fontSize": "$text-sm",
+                                  "fontWeight": "normal"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "Yd2BI",
+                  "name": "Form Card",
+                  "width": 520,
+                  "fill": "$card",
+                  "cornerRadius": "$radius-lg",
+                  "stroke": "$border",
+                  "strokeWidth": 1,
+                  "effect": {
+                    "type": "shadow",
+                    "shadowType": "outer",
+                    "color": "$shadow-4",
+                    "offset": {
+                      "x": 0,
+                      "y": 6
+                    },
+                    "blur": 24,
+                    "spread": -6
+                  },
+                  "layout": "vertical",
+                  "gap": "$space-md",
+                  "padding": [
+                    36,
+                    32
+                  ],
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "JiBB9",
+                      "name": "FormTitle",
+                      "fill": "$foreground",
+                      "content": "Start je integratie-aanvraag",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-lg",
                       "fontWeight": "600"
                     },
                     {
-                      "type": "icon",
-                      "id": "q8kdO",
-                      "name": "a",
-                      "width": 16,
-                      "height": 16,
-                      "icon": "arrow-right",
-                      "library": "lucide",
-                      "fill": "$primary-foreground"
+                      "type": "frame",
+                      "id": "oAfyQ",
+                      "name": "Naam",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": "$space-xs",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "hcHqd",
+                          "name": "lbl",
+                          "fill": "$foreground",
+                          "content": "Naam *",
+                          "fontFamily": "$font-body",
+                          "fontSize": "$text-xs2",
+                          "fontWeight": "500"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "GWmJA",
+                          "name": "input",
+                          "width": "fill_container",
+                          "fill": "$background",
+                          "cornerRadius": "$radius-sm",
+                          "stroke": "$input",
+                          "strokeWidth": 1,
+                          "padding": [
+                            12,
+                            14
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "G7vjeL",
+                              "name": "ph",
+                              "fill": "$muted-foreground",
+                              "content": "Je volledige naam",
+                              "fontFamily": "$font-body",
+                              "fontSize": "$text-sm",
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "ceL4H",
+                      "name": "Werk-e-mail",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": "$space-xs",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "cMwze",
+                          "name": "lbl",
+                          "fill": "$foreground",
+                          "content": "Werk-e-mail *",
+                          "fontFamily": "$font-body",
+                          "fontSize": "$text-xs2",
+                          "fontWeight": "500"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "tW4zK",
+                          "name": "input",
+                          "width": "fill_container",
+                          "fill": "$background",
+                          "cornerRadius": "$radius-sm",
+                          "stroke": "$input",
+                          "strokeWidth": 1,
+                          "padding": [
+                            12,
+                            14
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "tY9IG",
+                              "name": "ph",
+                              "fill": "$muted-foreground",
+                              "content": "naam@bedrijf.nl",
+                              "fontFamily": "$font-data",
+                              "fontSize": "$text-sm",
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "V3X0y",
+                      "name": "Bedrijf",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": "$space-xs",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "xuUrS",
+                          "name": "lbl",
+                          "fill": "$foreground",
+                          "content": "Bedrijf *",
+                          "fontFamily": "$font-body",
+                          "fontSize": "$text-xs2",
+                          "fontWeight": "500"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "Li80c",
+                          "name": "input",
+                          "width": "fill_container",
+                          "fill": "$background",
+                          "cornerRadius": "$radius-sm",
+                          "stroke": "$input",
+                          "strokeWidth": 1,
+                          "padding": [
+                            12,
+                            14
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "aX29B",
+                              "name": "ph",
+                              "fill": "$muted-foreground",
+                              "content": "Bedrijfsnaam",
+                              "fontFamily": "$font-body",
+                              "fontSize": "$text-sm",
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "CedGO",
+                      "name": "Wat wil je koppelen?",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": "$space-xs",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "j5NPN",
+                          "name": "lbl",
+                          "fill": "$foreground",
+                          "content": "Wat wil je koppelen? *",
+                          "fontFamily": "$font-body",
+                          "fontSize": "$text-xs2",
+                          "fontWeight": "500"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "AmNhZ",
+                          "name": "input",
+                          "width": "fill_container",
+                          "fill": "$background",
+                          "cornerRadius": "$radius-sm",
+                          "stroke": "$input",
+                          "strokeWidth": 1,
+                          "padding": [
+                            12,
+                            14
+                          ],
+                          "justifyContent": "space_between",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "x49KIU",
+                              "name": "ph",
+                              "fill": "$foreground",
+                              "content": "Exact Online",
+                              "fontFamily": "$font-body",
+                              "fontSize": "$text-sm",
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "icon",
+                              "id": "APu0u",
+                              "name": "chev",
+                              "width": 16,
+                              "height": 16,
+                              "icon": "chevron-down",
+                              "library": "lucide",
+                              "fill": "$muted-foreground"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "mEyke",
+                      "name": "Toelichting",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": "$space-xs",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "e5AoY",
+                          "name": "lbl",
+                          "fill": "$foreground",
+                          "content": "Toelichting (optioneel)",
+                          "fontFamily": "$font-body",
+                          "fontSize": "$text-xs2",
+                          "fontWeight": "500"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "pgCHO",
+                          "name": "input",
+                          "width": "fill_container",
+                          "height": 96,
+                          "fill": "$background",
+                          "cornerRadius": "$radius-sm",
+                          "stroke": "$input",
+                          "strokeWidth": 1,
+                          "padding": [
+                            12,
+                            14
+                          ],
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "we4g4",
+                              "name": "ph",
+                              "fill": "$muted-foreground",
+                              "content": "Welke systemen, datastromen of processen wil je verbinden?",
+                              "fontFamily": "$font-body",
+                              "fontSize": "$text-sm",
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "Coxn3",
+                      "name": "Privacy",
+                      "width": "fill_container",
+                      "gap": "$space-xs",
+                      "children": [
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": "$radius-xs",
+                          "id": "g7bz7",
+                          "name": "Checkbox",
+                          "fill": "$background",
+                          "width": 16,
+                          "height": 16,
+                          "stroke": "$input",
+                          "strokeWidth": 1
+                        },
+                        {
+                          "type": "frame",
+                          "id": "AWEIE",
+                          "name": "t",
+                          "gap": 4,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "E0IzWJ",
+                              "name": "a",
+                              "fill": "$muted-foreground",
+                              "content": "Ik ga akkoord met het",
+                              "fontFamily": "$font-body",
+                              "fontSize": "$text-sm",
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "text",
+                              "id": "ckjeu",
+                              "name": "link",
+                              "fill": "$foreground",
+                              "content": "privacybeleid",
+                              "fontFamily": "$font-body",
+                              "fontSize": "$text-sm",
+                              "fontWeight": "500"
+                            },
+                            {
+                              "type": "text",
+                              "id": "ajdTO",
+                              "name": "b",
+                              "fill": "$muted-foreground",
+                              "content": ". *",
+                              "fontFamily": "$font-body",
+                              "fontSize": "$text-sm",
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "xnaHo",
+                      "name": "Submit",
+                      "width": "fill_container",
+                      "fill": "$primary",
+                      "cornerRadius": "$radius-md",
+                      "effect": {
+                        "type": "shadow",
+                        "shadowType": "outer",
+                        "color": "$shadow-3",
+                        "offset": {
+                          "x": 0,
+                          "y": 1
+                        },
+                        "blur": 3
+                      },
+                      "gap": "$space-xs",
+                      "padding": [
+                        13,
+                        22
+                      ],
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "q6SCvN",
+                          "name": "l",
+                          "fill": "$primary-foreground",
+                          "content": "Start mijn aanvraag",
+                          "fontFamily": "$font-body",
+                          "fontSize": "$text-md",
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "icon",
+                          "id": "Ntc7T",
+                          "name": "a",
+                          "width": 16,
+                          "height": 16,
+                          "icon": "arrow-right",
+                          "library": "lucide",
+                          "fill": "$primary-foreground"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "LLEFM",
+                      "name": "Note",
+                      "fill": "$muted-foreground",
+                      "content": "Persoonlijk contact binnen één werkdag · vrijblijvend",
+                      "fontFamily": "$font-data",
+                      "fontSize": "$text-2xs",
+                      "fontWeight": "normal"
                     }
                   ]
                 }
@@ -22127,7 +23164,7 @@
         },
         {
           "type": "frame",
-          "id": "n1V6Mp",
+          "id": "G4OE8",
           "name": "Footer",
           "width": "fill_container",
           "stroke": "$border",
@@ -22144,7 +23181,7 @@
           "children": [
             {
               "type": "text",
-              "id": "lyEjG",
+              "id": "IHGod",
               "name": "Copyright",
               "fill": "$muted-foreground",
               "content": "© 2026 emeq",
@@ -22154,14 +23191,14 @@
             },
             {
               "type": "frame",
-              "id": "M2rVS",
+              "id": "v2QdwO",
               "name": "Footer Links",
               "gap": "$space-lg",
               "alignItems": "center",
               "children": [
                 {
                   "type": "text",
-                  "id": "byvqc",
+                  "id": "m1JpUy",
                   "name": "Partners",
                   "fill": "$muted-foreground",
                   "content": "Partners",
@@ -22171,7 +23208,7 @@
                 },
                 {
                   "type": "text",
-                  "id": "o7U3Ia",
+                  "id": "XYdsE",
                   "name": "Privacy",
                   "fill": "$muted-foreground",
                   "content": "Privacy",
@@ -22181,7 +23218,7 @@
                 },
                 {
                   "type": "text",
-                  "id": "aoLkz",
+                  "id": "Ldt8g",
                   "name": "Voorwaarden",
                   "fill": "$muted-foreground",
                   "content": "Voorwaarden",
@@ -22191,7 +23228,7 @@
                 },
                 {
                   "type": "text",
-                  "id": "oIDI9",
+                  "id": "mGMqx",
                   "name": "Verwerkersovereenkomst",
                   "fill": "$muted-foreground",
                   "content": "Verwerkersovereenkomst",
@@ -22201,7 +23238,7 @@
                 },
                 {
                   "type": "text",
-                  "id": "SkwSJ",
+                  "id": "VXLkZ",
                   "name": "Support",
                   "fill": "$muted-foreground",
                   "content": "Support",
@@ -22373,7 +23410,7 @@
               "id": "bYjZI",
               "name": "Wordmark",
               "fill": "$foreground",
-              "content": "emeq",
+              "content": "hub",
               "fontFamily": "$font-heading",
               "fontSize": "$text-xl",
               "fontWeight": "700",
@@ -22460,7 +23497,7 @@
           "gap": "$space-2xl",
           "padding": [
             "$space-3xl",
-            20
+            "$space-lg"
           ],
           "alignItems": "center",
           "children": [
@@ -22486,15 +23523,46 @@
               "alignItems": "center",
               "children": [
                 {
-                  "type": "text",
-                  "id": "M4FN0P",
-                  "name": "Eyebrow",
-                  "fill": "$muted-foreground",
-                  "content": "PARTNER-INTEGRATIES",
-                  "fontFamily": "$font-caption",
-                  "fontSize": "$text-xs",
-                  "fontWeight": "normal",
-                  "letterSpacing": 1.5
+                  "type": "frame",
+                  "id": "oe8qe",
+                  "name": "Breadcrumb",
+                  "width": "fill_container",
+                  "gap": "$space-xs",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "NgHp2",
+                      "name": "Home",
+                      "fill": "$muted-foreground",
+                      "content": "Home",
+                      "fontFamily": "$font-caption",
+                      "fontSize": "$text-2xs",
+                      "fontWeight": "normal",
+                      "letterSpacing": 0.5
+                    },
+                    {
+                      "type": "icon",
+                      "id": "gUqiI",
+                      "name": "chev",
+                      "width": 12,
+                      "height": 12,
+                      "icon": "chevron-right",
+                      "library": "lucide",
+                      "fill": "$muted-foreground"
+                    },
+                    {
+                      "type": "text",
+                      "id": "TB1cO",
+                      "name": "Integraties",
+                      "fill": "$foreground",
+                      "content": "Integraties",
+                      "fontFamily": "$font-caption",
+                      "fontSize": "$text-2xs",
+                      "fontWeight": "normal",
+                      "letterSpacing": 0.5
+                    }
+                  ]
                 },
                 {
                   "type": "text",
@@ -22503,7 +23571,7 @@
                   "fill": "$foreground",
                   "textGrowth": "fixed-width",
                   "width": "fill_container",
-                  "content": "Eén API voor al je productintegraties.",
+                  "content": "Integraties",
                   "lineHeight": 1.05,
                   "textAlign": "center",
                   "fontFamily": "$font-heading",
@@ -22536,52 +23604,6 @@
               "gap": "$space-md",
               "alignItems": "center",
               "children": [
-                {
-                  "type": "frame",
-                  "id": "MINiy",
-                  "name": "Search",
-                  "width": "fill_container",
-                  "fill": "$card",
-                  "cornerRadius": "$radius-pill",
-                  "effect": {
-                    "type": "shadow",
-                    "shadowType": "outer",
-                    "color": "#00000010",
-                    "offset": {
-                      "x": 0,
-                      "y": 1
-                    },
-                    "blur": 3
-                  },
-                  "gap": "$space-xs",
-                  "padding": [
-                    12,
-                    16
-                  ],
-                  "alignItems": "center",
-                  "children": [
-                    {
-                      "type": "icon",
-                      "id": "XhxCh",
-                      "name": "i",
-                      "width": 18,
-                      "height": 18,
-                      "icon": "search",
-                      "library": "lucide",
-                      "fill": "$muted-foreground"
-                    },
-                    {
-                      "type": "text",
-                      "id": "r7ADd",
-                      "name": "ph",
-                      "fill": "$muted-foreground",
-                      "content": "Zoek een koppeling…",
-                      "fontFamily": "$font-body",
-                      "fontSize": "$text-md",
-                      "fontWeight": "normal"
-                    }
-                  ]
-                },
                 {
                   "type": "frame",
                   "id": "VE18g",
@@ -22651,7 +23673,7 @@
                         {
                           "type": "frame",
                           "id": "vHiXP",
-                          "name": "Betalen",
+                          "name": "Betalingen",
                           "fill": "$muted",
                           "cornerRadius": "$radius-pill",
                           "padding": [
@@ -22665,66 +23687,7 @@
                               "id": "ym7Nx",
                               "name": "l",
                               "fill": "$muted-foreground",
-                              "content": "Betalen",
-                              "fontFamily": "$font-body",
-                              "fontSize": "$text-xs2",
-                              "fontWeight": "normal"
-                            }
-                          ]
-                        }
-                      ]
-                    },
-                    {
-                      "type": "frame",
-                      "id": "NH62j",
-                      "name": "ChipRow",
-                      "width": "fill_container",
-                      "gap": "$space-xs",
-                      "justifyContent": "center",
-                      "alignItems": "center",
-                      "children": [
-                        {
-                          "type": "frame",
-                          "id": "J9j3x",
-                          "name": "CRM",
-                          "fill": "$muted",
-                          "cornerRadius": "$radius-pill",
-                          "padding": [
-                            8,
-                            14
-                          ],
-                          "alignItems": "center",
-                          "children": [
-                            {
-                              "type": "text",
-                              "id": "ciibU",
-                              "name": "l",
-                              "fill": "$muted-foreground",
-                              "content": "CRM",
-                              "fontFamily": "$font-body",
-                              "fontSize": "$text-xs2",
-                              "fontWeight": "normal"
-                            }
-                          ]
-                        },
-                        {
-                          "type": "frame",
-                          "id": "FBBv0",
-                          "name": "E-commerce",
-                          "fill": "$muted",
-                          "cornerRadius": "$radius-pill",
-                          "padding": [
-                            8,
-                            14
-                          ],
-                          "alignItems": "center",
-                          "children": [
-                            {
-                              "type": "text",
-                              "id": "lyg8G",
-                              "name": "l",
-                              "fill": "$muted-foreground",
-                              "content": "E-commerce",
+                              "content": "Betalingen",
                               "fontFamily": "$font-body",
                               "fontSize": "$text-xs2",
                               "fontWeight": "normal"
@@ -22740,20 +23703,21 @@
             {
               "type": "frame",
               "id": "RrOPT",
-              "name": "Exact Card",
+              "name": "Exact Online Card",
               "width": "fill_container",
               "fill": "$card",
               "cornerRadius": "$radius-lg",
+              "stroke": "$border",
+              "strokeWidth": 1,
               "effect": {
                 "type": "shadow",
                 "shadowType": "outer",
-                "color": "$shadow-4",
+                "color": "$shadow-2",
                 "offset": {
                   "x": 0,
-                  "y": 6
+                  "y": 1
                 },
-                "blur": 24,
-                "spread": -6
+                "blur": 3
               },
               "layout": "vertical",
               "gap": "$space-sm",
@@ -22852,7 +23816,7 @@
                       "id": "xV4i0",
                       "name": "l",
                       "fill": "$brand",
-                      "content": "Ontdek Exact Online",
+                      "content": "Bekijk integratie",
                       "fontFamily": "$font-body",
                       "fontSize": "$text-sm",
                       "fontWeight": "600"
@@ -22868,6 +23832,112 @@
                       "fill": "$brand"
                     }
                   ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "kTUkK",
+              "name": "Mollie Card",
+              "width": "fill_container",
+              "fill": "$card",
+              "cornerRadius": "$radius-lg",
+              "stroke": "$border",
+              "strokeWidth": 1,
+              "effect": {
+                "type": "shadow",
+                "shadowType": "outer",
+                "color": "$shadow-2",
+                "offset": {
+                  "x": 0,
+                  "y": 1
+                },
+                "blur": 3
+              },
+              "layout": "vertical",
+              "gap": "$space-sm",
+              "padding": 24,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "S28W34",
+                  "name": "Top",
+                  "width": "fill_container",
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "rectangle",
+                      "id": "WSl5d",
+                      "name": "Logo",
+                      "fill": {
+                        "type": "image",
+                        "enabled": true,
+                        "url": "mollie.png",
+                        "mode": "fit"
+                      },
+                      "width": 100,
+                      "height": 24
+                    },
+                    {
+                      "type": "frame",
+                      "id": "z2sa2",
+                      "name": "Binnenkort",
+                      "fill": "$muted",
+                      "cornerRadius": "$radius-pill",
+                      "gap": "$space-tight",
+                      "padding": [
+                        4,
+                        10
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "ellipse",
+                          "id": "GWxma",
+                          "name": "Dot",
+                          "fill": "$muted-foreground",
+                          "width": 6,
+                          "height": 6
+                        },
+                        {
+                          "type": "text",
+                          "id": "OYEq9",
+                          "name": "l",
+                          "fill": "$muted-foreground",
+                          "content": "BINNENKORT",
+                          "fontFamily": "$font-caption",
+                          "fontSize": "$text-2xs",
+                          "fontWeight": "normal",
+                          "letterSpacing": 1.5
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "PZUCB",
+                  "name": "Cat",
+                  "fill": "$muted-foreground",
+                  "content": "BETALINGEN",
+                  "fontFamily": "$font-caption",
+                  "fontSize": "$text-2xs",
+                  "fontWeight": "normal",
+                  "letterSpacing": 1.5
+                },
+                {
+                  "type": "text",
+                  "id": "yEweZ",
+                  "name": "Desc",
+                  "fill": "$foreground",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Online betalingen en abonnementen via dezelfde Hub-API en hetzelfde audit-log.",
+                  "lineHeight": 1.6,
+                  "fontFamily": "$font-body",
+                  "fontSize": "$text-sm",
+                  "fontWeight": "normal"
                 }
               ]
             },
@@ -22945,90 +24015,323 @@
         },
         {
           "type": "frame",
-          "id": "iNLTX",
+          "id": "y8UACS",
           "name": "Footer",
           "width": "fill_container",
+          "fill": "$background",
           "stroke": "$border",
           "strokeWidth": {
             "top": 1
           },
           "strokeLinejoin": "round",
           "layout": "vertical",
-          "gap": "$space-xs",
+          "gap": "$space-lg",
           "padding": [
-            24,
+            "$space-2xl",
+            20,
+            26,
             20
           ],
-          "justifyContent": "space_between",
           "children": [
             {
-              "type": "text",
-              "id": "YsSKT",
-              "name": "Copyright",
-              "fill": "$muted-foreground",
-              "content": "© 2026 emeq",
-              "fontFamily": "$font-body",
-              "fontSize": "$text-xs2",
-              "fontWeight": "normal"
+              "type": "frame",
+              "id": "ztXGh",
+              "name": "Brand",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": "$space-sm",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "RRRiZ",
+                  "name": "Brand Row",
+                  "gap": "$space-xs",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "rectangle",
+                      "cornerRadius": "$radius-xs",
+                      "id": "h5nUl",
+                      "name": "Mark",
+                      "fill": "$brand",
+                      "width": 14,
+                      "height": 14
+                    },
+                    {
+                      "type": "text",
+                      "id": "ojez2",
+                      "name": "Wordmark",
+                      "fill": "$foreground",
+                      "content": "hub",
+                      "fontFamily": "$font-heading",
+                      "fontSize": "$text-xl",
+                      "fontWeight": "700",
+                      "letterSpacing": -0.5
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "mGRez",
+                  "name": "Tagline",
+                  "fill": "$muted-foreground",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "De integratie-API voor software die wil doorgroeien.",
+                  "lineHeight": 1.6,
+                  "fontFamily": "$font-body",
+                  "fontSize": "$text-sm",
+                  "fontWeight": "normal"
+                }
+              ]
             },
             {
               "type": "frame",
-              "id": "v1swNK",
-              "name": "Footer Links",
+              "id": "B8t6Rj",
+              "name": "Links",
               "width": "fill_container",
               "layout": "vertical",
+              "gap": "$space-sm",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "nG0um",
+                  "name": "Partners",
+                  "fill": "$foreground",
+                  "content": "Partners",
+                  "fontFamily": "$font-body",
+                  "fontSize": "$text-sm",
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "L1rxOH",
+                  "name": "Privacy",
+                  "fill": "$foreground",
+                  "content": "Privacy",
+                  "fontFamily": "$font-body",
+                  "fontSize": "$text-sm",
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "QC1qp",
+                  "name": "Voorwaarden",
+                  "fill": "$foreground",
+                  "content": "Voorwaarden",
+                  "fontFamily": "$font-body",
+                  "fontSize": "$text-sm",
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "NRhum",
+                  "name": "Verwerkersovereenkomst",
+                  "fill": "$foreground",
+                  "content": "Verwerkersovereenkomst",
+                  "fontFamily": "$font-body",
+                  "fontSize": "$text-sm",
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "AzAr8",
+                  "name": "Support",
+                  "fill": "$foreground",
+                  "content": "Support",
+                  "fontFamily": "$font-body",
+                  "fontSize": "$text-sm",
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "hBMJy",
+              "name": "Ook van Emeq",
+              "layout": "vertical",
+              "gap": "$space-sm",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "Y8rrnl",
+                  "name": "Koltitel",
+                  "fill": "$muted-foreground",
+                  "content": "Ook van Emeq",
+                  "fontFamily": "$font-body",
+                  "fontSize": "$text-sm",
+                  "fontWeight": "500",
+                  "letterSpacing": 0.5
+                },
+                {
+                  "type": "frame",
+                  "id": "ZN8et",
+                  "name": "Emeq",
+                  "layout": "vertical",
+                  "gap": "$space-xxs",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "EyB6r",
+                      "name": "Naam",
+                      "gap": "$space-tight",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "Oz8Y0",
+                          "name": "n",
+                          "fill": "$foreground",
+                          "content": "Emeq",
+                          "fontFamily": "$font-body",
+                          "fontSize": "$text-sm",
+                          "fontWeight": "500"
+                        },
+                        {
+                          "type": "icon",
+                          "id": "M5HsK",
+                          "name": "ext",
+                          "width": 12,
+                          "height": 12,
+                          "icon": "arrow-up-right",
+                          "library": "lucide",
+                          "fill": "$muted-foreground"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "y4gShS",
+                  "name": "Planny",
+                  "layout": "vertical",
+                  "gap": "$space-xxs",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "SuSZz",
+                      "name": "Naam",
+                      "gap": "$space-tight",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "XskEj",
+                          "name": "n",
+                          "fill": "$foreground",
+                          "content": "Planny",
+                          "fontFamily": "$font-body",
+                          "fontSize": "$text-sm",
+                          "fontWeight": "500"
+                        },
+                        {
+                          "type": "icon",
+                          "id": "cuYl9",
+                          "name": "ext",
+                          "width": 12,
+                          "height": 12,
+                          "icon": "arrow-up-right",
+                          "library": "lucide",
+                          "fill": "$muted-foreground"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "n38WdF",
+              "name": "Bottom Bar",
+              "width": "fill_container",
+              "stroke": "$border",
+              "strokeWidth": {
+                "top": 1
+              },
+              "strokeLinejoin": "round",
               "gap": "$space-xs",
+              "padding": [
+                20,
+                0,
+                0,
+                0
+              ],
+              "justifyContent": "space_between",
               "alignItems": "center",
               "children": [
                 {
                   "type": "text",
-                  "id": "Q2LzPe",
-                  "name": "Partners",
+                  "id": "qpDMQ",
+                  "name": "Copy",
                   "fill": "$muted-foreground",
-                  "content": "Partners",
-                  "fontFamily": "$font-body",
-                  "fontSize": "$text-xs2",
+                  "content": "© 2026 emeq",
+                  "fontFamily": "$font-data",
+                  "fontSize": "$text-2xs",
                   "fontWeight": "normal"
                 },
                 {
-                  "type": "text",
-                  "id": "HxZrj",
-                  "name": "Privacy",
-                  "fill": "$muted-foreground",
-                  "content": "Privacy",
-                  "fontFamily": "$font-body",
-                  "fontSize": "$text-xs2",
-                  "fontWeight": "normal"
-                },
-                {
-                  "type": "text",
-                  "id": "NucxK",
-                  "name": "Voorwaarden",
-                  "fill": "$muted-foreground",
-                  "content": "Voorwaarden",
-                  "fontFamily": "$font-body",
-                  "fontSize": "$text-xs2",
-                  "fontWeight": "normal"
-                },
-                {
-                  "type": "text",
-                  "id": "xHaFy",
-                  "name": "Verwerkersovereenkomst",
-                  "fill": "$muted-foreground",
-                  "content": "Verwerkersovereenkomst",
-                  "fontFamily": "$font-body",
-                  "fontSize": "$text-xs2",
-                  "fontWeight": "normal"
-                },
-                {
-                  "type": "text",
-                  "id": "PeP4W",
-                  "name": "Support",
-                  "fill": "$muted-foreground",
-                  "content": "Support",
-                  "fontFamily": "$font-body",
-                  "fontSize": "$text-xs2",
-                  "fontWeight": "normal"
+                  "type": "frame",
+                  "id": "cVtvf",
+                  "name": "Chips",
+                  "gap": "$space-xs",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "nMYLR",
+                      "name": "ISO 27001",
+                      "cornerRadius": "$radius-sm",
+                      "stroke": "$border",
+                      "strokeWidth": 1,
+                      "padding": "$space-tight",
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "rectangle",
+                          "id": "MnliN",
+                          "name": "ISO 27001 Logo",
+                          "opacity": 0.7,
+                          "fill": {
+                            "type": "image",
+                            "enabled": true,
+                            "url": "iso27001.png",
+                            "mode": "fit"
+                          },
+                          "width": 18,
+                          "height": 18
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "HwCGt",
+                      "name": "GDPR",
+                      "cornerRadius": "$radius-sm",
+                      "stroke": "$border",
+                      "strokeWidth": 1,
+                      "padding": 6,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "rectangle",
+                          "id": "QnbZD",
+                          "name": "GDPR Logo",
+                          "fill": {
+                            "type": "image",
+                            "enabled": true,
+                            "url": "gdpr.png",
+                            "mode": "fit"
+                          },
+                          "width": 18,
+                          "height": 18
+                        }
+                      ]
+                    }
+                  ]
                 }
               ]
             }
@@ -23071,7 +24374,7 @@
               "id": "nNBYZ",
               "name": "Wordmark",
               "fill": "$foreground",
-              "content": "emeq",
+              "content": "hub",
               "fontFamily": "$font-heading",
               "fontSize": "$text-xl",
               "fontWeight": "700",
@@ -23158,7 +24461,7 @@
           "gap": "$space-3xl",
           "padding": [
             "$space-3xl",
-            20
+            "$space-lg"
           ],
           "alignItems": "center",
           "children": [
@@ -23176,7 +24479,7 @@
             },
             {
               "type": "frame",
-              "id": "FKloD",
+              "id": "WvKAG",
               "name": "Detail Hero",
               "width": "fill_container",
               "layout": "vertical",
@@ -23185,7 +24488,7 @@
               "children": [
                 {
                   "type": "text",
-                  "id": "wznMV",
+                  "id": "zjPx2",
                   "name": "Eyebrow",
                   "fill": "$muted-foreground",
                   "content": "INTEGRATIE · BOEKHOUDEN",
@@ -23196,14 +24499,14 @@
                 },
                 {
                   "type": "frame",
-                  "id": "d6GA2",
+                  "id": "BhZcA",
                   "name": "LogoRow",
                   "gap": "$space-sm",
                   "alignItems": "center",
                   "children": [
                     {
                       "type": "rectangle",
-                      "id": "i4rsT",
+                      "id": "bjOrJ",
                       "name": "Logo",
                       "fill": {
                         "type": "image",
@@ -23216,7 +24519,7 @@
                     },
                     {
                       "type": "frame",
-                      "id": "I4XgnJ",
+                      "id": "vEbNz",
                       "name": "Live",
                       "fill": "$success-soft",
                       "cornerRadius": "$radius-pill",
@@ -23229,7 +24532,7 @@
                       "children": [
                         {
                           "type": "ellipse",
-                          "id": "OXN52",
+                          "id": "HyOdl",
                           "name": "Dot",
                           "fill": "$success",
                           "width": 6,
@@ -23237,7 +24540,7 @@
                         },
                         {
                           "type": "text",
-                          "id": "J3dMY",
+                          "id": "o7rO0N",
                           "name": "l",
                           "fill": "$success",
                           "content": "LIVE",
@@ -23252,7 +24555,7 @@
                 },
                 {
                   "type": "text",
-                  "id": "qEZhq",
+                  "id": "d5uEn",
                   "name": "H1",
                   "fill": "$foreground",
                   "textGrowth": "fixed-width",
@@ -23267,7 +24570,7 @@
                 },
                 {
                   "type": "text",
-                  "id": "BsDod",
+                  "id": "VQFPQ",
                   "name": "Sub",
                   "fill": "$muted-foreground",
                   "textGrowth": "fixed-width",
@@ -23281,7 +24584,7 @@
                 },
                 {
                   "type": "frame",
-                  "id": "Zo480",
+                  "id": "Cyq4R",
                   "name": "CTA",
                   "width": "fill_container",
                   "layout": "vertical",
@@ -23290,7 +24593,7 @@
                   "children": [
                     {
                       "type": "frame",
-                      "id": "I2BqiZ",
+                      "id": "AZnM8",
                       "name": "Primary",
                       "width": "fill_container",
                       "fill": "$primary",
@@ -23315,7 +24618,7 @@
                       "children": [
                         {
                           "type": "text",
-                          "id": "I9neJ",
+                          "id": "sw9Kq",
                           "name": "l",
                           "fill": "$primary-foreground",
                           "content": "Koppel Exact Online",
@@ -23325,7 +24628,7 @@
                         },
                         {
                           "type": "icon",
-                          "id": "Ulozz",
+                          "id": "wC6Wl",
                           "name": "a",
                           "width": 16,
                           "height": 16,
@@ -23337,7 +24640,7 @@
                     },
                     {
                       "type": "frame",
-                      "id": "z88OT",
+                      "id": "mC5LM",
                       "name": "Ghost",
                       "width": "fill_container",
                       "fill": "$card",
@@ -23363,7 +24666,7 @@
                       "children": [
                         {
                           "type": "text",
-                          "id": "n4KcZ1",
+                          "id": "q58hx0",
                           "name": "l",
                           "fill": "$foreground",
                           "content": "Bekijk de docs",
@@ -23377,7 +24680,7 @@
                 },
                 {
                   "type": "frame",
-                  "id": "EPXps",
+                  "id": "vs5pa",
                   "name": "Resources",
                   "width": "fill_container",
                   "layout": "vertical",
@@ -23387,14 +24690,14 @@
                   "children": [
                     {
                       "type": "frame",
-                      "id": "Yn7bw",
+                      "id": "enrc4",
                       "name": "exact.com",
                       "gap": "$space-tight",
                       "alignItems": "center",
                       "children": [
                         {
                           "type": "icon",
-                          "id": "IllGD",
+                          "id": "pg9Ih",
                           "name": "i",
                           "width": 14,
                           "height": 14,
@@ -23404,7 +24707,7 @@
                         },
                         {
                           "type": "text",
-                          "id": "B04o3",
+                          "id": "eeuDb",
                           "name": "l",
                           "fill": "$muted-foreground",
                           "content": "exact.com",
@@ -23416,14 +24719,14 @@
                     },
                     {
                       "type": "frame",
-                      "id": "uOjQC",
+                      "id": "JHG2J",
                       "name": "Developer-docs",
                       "gap": "$space-tight",
                       "alignItems": "center",
                       "children": [
                         {
                           "type": "icon",
-                          "id": "siKtc",
+                          "id": "I2h0Lq",
                           "name": "i",
                           "width": 14,
                           "height": 14,
@@ -23433,7 +24736,7 @@
                         },
                         {
                           "type": "text",
-                          "id": "dxWag",
+                          "id": "gaTyZ",
                           "name": "l",
                           "fill": "$muted-foreground",
                           "content": "Developer-docs",
@@ -23445,14 +24748,14 @@
                     },
                     {
                       "type": "frame",
-                      "id": "j0mELu",
+                      "id": "rIWyy",
                       "name": "Exact-support",
                       "gap": "$space-tight",
                       "alignItems": "center",
                       "children": [
                         {
                           "type": "icon",
-                          "id": "BcjCh",
+                          "id": "mEdsH",
                           "name": "i",
                           "width": 14,
                           "height": 14,
@@ -23462,7 +24765,7 @@
                         },
                         {
                           "type": "text",
-                          "id": "EwLnM",
+                          "id": "cuG6N",
                           "name": "l",
                           "fill": "$muted-foreground",
                           "content": "Exact-support",
@@ -23478,7 +24781,7 @@
             },
             {
               "type": "frame",
-              "id": "WNxlg",
+              "id": "zxBWM",
               "name": "Features",
               "width": "fill_container",
               "layout": "vertical",
@@ -23487,7 +24790,7 @@
               "children": [
                 {
                   "type": "frame",
-                  "id": "JU7xR",
+                  "id": "j3MA1",
                   "name": "Head",
                   "layout": "vertical",
                   "gap": "$space-xs",
@@ -23495,7 +24798,7 @@
                   "children": [
                     {
                       "type": "text",
-                      "id": "m41pE",
+                      "id": "l1vgvg",
                       "name": "Eyebrow",
                       "fill": "$muted-foreground",
                       "content": "MOGELIJKHEDEN",
@@ -23506,7 +24809,7 @@
                     },
                     {
                       "type": "text",
-                      "id": "l1XdV",
+                      "id": "I9XJg",
                       "name": "H2",
                       "fill": "$foreground",
                       "content": "Wat kun je koppelen",
@@ -23520,14 +24823,14 @@
                 },
                 {
                   "type": "frame",
-                  "id": "k31m0",
+                  "id": "h5tDqg",
                   "name": "Col",
                   "width": "fill_container",
                   "layout": "vertical",
                   "gap": "$space-md",
                   "children": [
                     {
-                      "id": "JmYSS",
+                      "id": "Uay7d",
                       "type": "ref",
                       "ref": "aCSlG",
                       "name": "Verkoopfacturen",
@@ -23545,7 +24848,7 @@
                       }
                     },
                     {
-                      "id": "Tnuxk",
+                      "id": "W355jP",
                       "type": "ref",
                       "ref": "aCSlG",
                       "name": "Inkoopfacturen",
@@ -23563,7 +24866,7 @@
                       }
                     },
                     {
-                      "id": "G0pG8t",
+                      "id": "D4AAS",
                       "type": "ref",
                       "ref": "aCSlG",
                       "name": "Relaties",
@@ -23581,7 +24884,7 @@
                       }
                     },
                     {
-                      "id": "P9q3wz",
+                      "id": "XCUW9",
                       "type": "ref",
                       "ref": "aCSlG",
                       "name": "Grootboek & kostenplaats",
@@ -23599,7 +24902,7 @@
                       }
                     },
                     {
-                      "id": "UjhL0",
+                      "id": "E9Ph0",
                       "type": "ref",
                       "ref": "aCSlG",
                       "name": "Verlegde btw",
@@ -23617,7 +24920,7 @@
                       }
                     },
                     {
-                      "id": "biKKc",
+                      "id": "PPWCj",
                       "type": "ref",
                       "ref": "aCSlG",
                       "name": "Webhooks & audit",
@@ -23640,7 +24943,7 @@
             },
             {
               "type": "frame",
-              "id": "qkocG",
+              "id": "sqJSI",
               "name": "How It Works",
               "width": "fill_container",
               "layout": "vertical",
@@ -23649,7 +24952,7 @@
               "children": [
                 {
                   "type": "frame",
-                  "id": "Y1hDuF",
+                  "id": "wlASu",
                   "name": "Head",
                   "layout": "vertical",
                   "gap": "$space-xs",
@@ -23657,7 +24960,7 @@
                   "children": [
                     {
                       "type": "text",
-                      "id": "oeEBk",
+                      "id": "RYyIF",
                       "name": "Eyebrow",
                       "fill": "$muted-foreground",
                       "content": "ZO WERKT HET",
@@ -23668,7 +24971,7 @@
                     },
                     {
                       "type": "text",
-                      "id": "BdtLp",
+                      "id": "hg3h2",
                       "name": "H2",
                       "fill": "$foreground",
                       "content": "Koppelen in drie stappen",
@@ -23682,14 +24985,14 @@
                 },
                 {
                   "type": "frame",
-                  "id": "SCgQe",
+                  "id": "ZdRWV",
                   "name": "Col",
                   "width": "fill_container",
                   "layout": "vertical",
                   "gap": "$space-lg",
                   "children": [
                     {
-                      "id": "EE81S",
+                      "id": "YhDYI",
                       "type": "ref",
                       "ref": "kKpAT",
                       "name": "Step 1",
@@ -23707,7 +25010,7 @@
                       }
                     },
                     {
-                      "id": "sUPWx",
+                      "id": "UNkJw",
                       "type": "ref",
                       "ref": "kKpAT",
                       "name": "Step 2",
@@ -23725,7 +25028,7 @@
                       }
                     },
                     {
-                      "id": "njJ3G",
+                      "id": "BGTnm",
                       "type": "ref",
                       "ref": "kKpAT",
                       "name": "Step 3",
@@ -23749,17 +25052,16 @@
             {
               "type": "frame",
               "id": "PRSlU",
-              "name": "Connect CTA",
+              "name": "Koppelen",
               "width": "fill_container",
               "fill": "$brand-subtle",
-              "cornerRadius": "$radius-2xl",
+              "cornerRadius": "$radius-xl",
               "layout": "vertical",
-              "gap": "$space-md",
+              "gap": "$space-lg",
               "padding": [
-                "$space-2xl",
-                28
+                "$space-xl",
+                "$space-lg"
               ],
-              "alignItems": "center",
               "children": [
                 {
                   "type": "text",
@@ -23768,58 +25070,623 @@
                   "fill": "$foreground",
                   "textGrowth": "fixed-width",
                   "width": "fill_container",
-                  "content": "Klaar om Exact te koppelen?",
-                  "lineHeight": 1.05,
-                  "textAlign": "center",
+                  "content": "Klaar om Exact Online te koppelen?",
+                  "lineHeight": 1.2,
                   "fontFamily": "$font-heading",
                   "fontSize": "$text-xl",
                   "fontWeight": "700",
                   "letterSpacing": -1
                 },
                 {
-                  "type": "frame",
-                  "id": "oHM9K",
-                  "name": "Primary",
+                  "type": "text",
+                  "id": "uWZFm",
+                  "name": "Sub",
+                  "fill": "$muted-foreground",
+                  "textGrowth": "fixed-width",
                   "width": "fill_container",
-                  "fill": "$primary",
-                  "cornerRadius": "$radius-md",
+                  "content": "Vertel kort wat je wilt koppelen. Wij regelen de omgeving, het token en de onboarding.",
+                  "lineHeight": 1.6,
+                  "fontFamily": "$font-body",
+                  "fontSize": "$text-base",
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "frame",
+                  "id": "LtJgY",
+                  "name": "Wat er gebeurt",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "padding": [
+                    8,
+                    0,
+                    0,
+                    0
+                  ],
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "QIApe",
+                      "name": "Wij nemen contact op",
+                      "width": "fill_container",
+                      "stroke": "$border",
+                      "strokeWidth": {
+                        "top": 1,
+                        "bottom": 1
+                      },
+                      "strokeLinejoin": "round",
+                      "gap": "$space-md",
+                      "padding": [
+                        18,
+                        0
+                      ],
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "BpUBL",
+                          "name": "ix",
+                          "fill": "$brand",
+                          "content": "01",
+                          "fontFamily": "$font-data",
+                          "fontSize": "$text-xs2",
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "fRLrJ",
+                          "name": "c",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": "$space-xxs",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "TLhWC",
+                              "name": "t",
+                              "fill": "$foreground",
+                              "content": "We brengen je integratievraag scherp",
+                              "fontFamily": "$font-body",
+                              "fontSize": "$text-base",
+                              "fontWeight": "600"
+                            },
+                            {
+                              "type": "text",
+                              "id": "RoOI0",
+                              "name": "d",
+                              "fill": "$muted-foreground",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "Een korte intake over systemen, data en gewenste uitkomst.",
+                              "lineHeight": 1.6,
+                              "fontFamily": "$font-body",
+                              "fontSize": "$text-sm",
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "VF3OT",
+                      "name": "Omgeving & token klaar",
+                      "width": "fill_container",
+                      "stroke": "$border",
+                      "strokeWidth": {
+                        "bottom": 1
+                      },
+                      "strokeLinejoin": "round",
+                      "gap": "$space-md",
+                      "padding": [
+                        18,
+                        0
+                      ],
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "QaBNk",
+                          "name": "ix",
+                          "fill": "$brand",
+                          "content": "02",
+                          "fontFamily": "$font-data",
+                          "fontSize": "$text-xs2",
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "cIZ2U",
+                          "name": "c",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": "$space-xxs",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "uW1n4",
+                              "name": "t",
+                              "fill": "$foreground",
+                              "content": "Je omgeving staat klaar",
+                              "fontFamily": "$font-body",
+                              "fontSize": "$text-base",
+                              "fontWeight": "600"
+                            },
+                            {
+                              "type": "text",
+                              "id": "Cklap",
+                              "name": "d",
+                              "fill": "$muted-foreground",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "Je ontvangt een veilige omgeving, API-token en heldere onboarding.",
+                              "lineHeight": 1.6,
+                              "fontFamily": "$font-body",
+                              "fontSize": "$text-sm",
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "W4JnJT",
+                      "name": "Eerste koppeling live",
+                      "width": "fill_container",
+                      "stroke": "$border",
+                      "strokeWidth": {
+                        "bottom": 1
+                      },
+                      "strokeLinejoin": "round",
+                      "gap": "$space-md",
+                      "padding": [
+                        18,
+                        0
+                      ],
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "CDjeU",
+                          "name": "ix",
+                          "fill": "$brand",
+                          "content": "03",
+                          "fontFamily": "$font-data",
+                          "fontSize": "$text-xs2",
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "vi9h5",
+                          "name": "c",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": "$space-xxs",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "t3Khg",
+                              "name": "t",
+                              "fill": "$foreground",
+                              "content": "Je eerste integratie gaat live",
+                              "fontFamily": "$font-body",
+                              "fontSize": "$text-base",
+                              "fontWeight": "600"
+                            },
+                            {
+                              "type": "text",
+                              "id": "BEGHs",
+                              "name": "d",
+                              "fill": "$muted-foreground",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "Samen zetten we de eerste koppeling om in resultaat.",
+                              "lineHeight": 1.6,
+                              "fontFamily": "$font-body",
+                              "fontSize": "$text-sm",
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "KIEMt",
+                  "name": "Form Card",
+                  "width": "fill_container",
+                  "fill": "$card",
+                  "cornerRadius": "$radius-lg",
+                  "stroke": "$border",
+                  "strokeWidth": 1,
                   "effect": {
                     "type": "shadow",
                     "shadowType": "outer",
-                    "color": "$shadow-3",
+                    "color": "$shadow-4",
                     "offset": {
                       "x": 0,
-                      "y": 1
+                      "y": 6
                     },
-                    "blur": 3
+                    "blur": 24,
+                    "spread": -6
                   },
-                  "gap": "$space-xs",
+                  "layout": "vertical",
+                  "gap": "$space-md",
                   "padding": [
-                    13,
-                    22
+                    24,
+                    20
                   ],
-                  "justifyContent": "center",
-                  "alignItems": "center",
                   "children": [
                     {
                       "type": "text",
-                      "id": "vE9Ie",
-                      "name": "l",
-                      "fill": "$primary-foreground",
-                      "content": "Koppel Exact Online",
+                      "id": "UlnNY",
+                      "name": "FormTitle",
+                      "fill": "$foreground",
+                      "content": "Start je integratie-aanvraag",
                       "fontFamily": "$font-body",
-                      "fontSize": "$text-md",
+                      "fontSize": "$text-lg",
                       "fontWeight": "600"
                     },
                     {
-                      "type": "icon",
-                      "id": "dU0qB",
-                      "name": "a",
-                      "width": 16,
-                      "height": 16,
-                      "icon": "arrow-right",
-                      "library": "lucide",
-                      "fill": "$primary-foreground"
+                      "type": "frame",
+                      "id": "sQoQq",
+                      "name": "Naam",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": "$space-xs",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "NN6P6",
+                          "name": "lbl",
+                          "fill": "$foreground",
+                          "content": "Naam *",
+                          "fontFamily": "$font-body",
+                          "fontSize": "$text-xs2",
+                          "fontWeight": "500"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "A4lId",
+                          "name": "input",
+                          "width": "fill_container",
+                          "fill": "$background",
+                          "cornerRadius": "$radius-sm",
+                          "stroke": "$input",
+                          "strokeWidth": 1,
+                          "padding": [
+                            12,
+                            14
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "tKR8H",
+                              "name": "ph",
+                              "fill": "$muted-foreground",
+                              "content": "Je volledige naam",
+                              "fontFamily": "$font-body",
+                              "fontSize": "$text-sm",
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "eijMR",
+                      "name": "Werk-e-mail",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": "$space-xs",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "ygLXB",
+                          "name": "lbl",
+                          "fill": "$foreground",
+                          "content": "Werk-e-mail *",
+                          "fontFamily": "$font-body",
+                          "fontSize": "$text-xs2",
+                          "fontWeight": "500"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "w6wlfx",
+                          "name": "input",
+                          "width": "fill_container",
+                          "fill": "$background",
+                          "cornerRadius": "$radius-sm",
+                          "stroke": "$input",
+                          "strokeWidth": 1,
+                          "padding": [
+                            12,
+                            14
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "di7m0",
+                              "name": "ph",
+                              "fill": "$muted-foreground",
+                              "content": "naam@bedrijf.nl",
+                              "fontFamily": "$font-data",
+                              "fontSize": "$text-sm",
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "Ocp6F",
+                      "name": "Bedrijf",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": "$space-xs",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "AfemW",
+                          "name": "lbl",
+                          "fill": "$foreground",
+                          "content": "Bedrijf *",
+                          "fontFamily": "$font-body",
+                          "fontSize": "$text-xs2",
+                          "fontWeight": "500"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "MYbvj",
+                          "name": "input",
+                          "width": "fill_container",
+                          "fill": "$background",
+                          "cornerRadius": "$radius-sm",
+                          "stroke": "$input",
+                          "strokeWidth": 1,
+                          "padding": [
+                            12,
+                            14
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "TAg5U",
+                              "name": "ph",
+                              "fill": "$muted-foreground",
+                              "content": "Bedrijfsnaam",
+                              "fontFamily": "$font-body",
+                              "fontSize": "$text-sm",
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "ZE5du",
+                      "name": "Wat wil je koppelen?",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": "$space-xs",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "Y4NQJJ",
+                          "name": "lbl",
+                          "fill": "$foreground",
+                          "content": "Wat wil je koppelen? *",
+                          "fontFamily": "$font-body",
+                          "fontSize": "$text-xs2",
+                          "fontWeight": "500"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "YPEnG",
+                          "name": "input",
+                          "width": "fill_container",
+                          "fill": "$background",
+                          "cornerRadius": "$radius-sm",
+                          "stroke": "$input",
+                          "strokeWidth": 1,
+                          "padding": [
+                            12,
+                            14
+                          ],
+                          "justifyContent": "space_between",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "dNn6C",
+                              "name": "ph",
+                              "fill": "$foreground",
+                              "content": "Exact Online",
+                              "fontFamily": "$font-body",
+                              "fontSize": "$text-sm",
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "icon",
+                              "id": "rBSGd",
+                              "name": "chev",
+                              "width": 16,
+                              "height": 16,
+                              "icon": "chevron-down",
+                              "library": "lucide",
+                              "fill": "$muted-foreground"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "S8B3v",
+                      "name": "Toelichting",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": "$space-xs",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "sNEIE",
+                          "name": "lbl",
+                          "fill": "$foreground",
+                          "content": "Toelichting (optioneel)",
+                          "fontFamily": "$font-body",
+                          "fontSize": "$text-xs2",
+                          "fontWeight": "500"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "dxzL6",
+                          "name": "input",
+                          "width": "fill_container",
+                          "height": 96,
+                          "fill": "$background",
+                          "cornerRadius": "$radius-sm",
+                          "stroke": "$input",
+                          "strokeWidth": 1,
+                          "padding": [
+                            12,
+                            14
+                          ],
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "HQ3tx",
+                              "name": "ph",
+                              "fill": "$muted-foreground",
+                              "content": "Welke systemen, datastromen of processen wil je verbinden?",
+                              "fontFamily": "$font-body",
+                              "fontSize": "$text-sm",
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "fpkWh",
+                      "name": "Privacy",
+                      "width": "fill_container",
+                      "gap": "$space-xs",
+                      "children": [
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": "$radius-xs",
+                          "id": "sGBTi",
+                          "name": "Checkbox",
+                          "fill": "$background",
+                          "width": 16,
+                          "height": 16,
+                          "stroke": "$input",
+                          "strokeWidth": 1
+                        },
+                        {
+                          "type": "frame",
+                          "id": "Y78zYO",
+                          "name": "t",
+                          "gap": 4,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "vavnv",
+                              "name": "a",
+                              "fill": "$muted-foreground",
+                              "content": "Ik ga akkoord met het",
+                              "fontFamily": "$font-body",
+                              "fontSize": "$text-sm",
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "text",
+                              "id": "yWdeU",
+                              "name": "link",
+                              "fill": "$foreground",
+                              "content": "privacybeleid",
+                              "fontFamily": "$font-body",
+                              "fontSize": "$text-sm",
+                              "fontWeight": "500"
+                            },
+                            {
+                              "type": "text",
+                              "id": "gLWC9",
+                              "name": "b",
+                              "fill": "$muted-foreground",
+                              "content": ". *",
+                              "fontFamily": "$font-body",
+                              "fontSize": "$text-sm",
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "L2SUnu",
+                      "name": "Submit",
+                      "width": "fill_container",
+                      "fill": "$primary",
+                      "cornerRadius": "$radius-md",
+                      "effect": {
+                        "type": "shadow",
+                        "shadowType": "outer",
+                        "color": "$shadow-3",
+                        "offset": {
+                          "x": 0,
+                          "y": 1
+                        },
+                        "blur": 3
+                      },
+                      "gap": "$space-xs",
+                      "padding": [
+                        13,
+                        22
+                      ],
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "avbma",
+                          "name": "l",
+                          "fill": "$primary-foreground",
+                          "content": "Start mijn aanvraag",
+                          "fontFamily": "$font-body",
+                          "fontSize": "$text-md",
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "icon",
+                          "id": "bNlk7",
+                          "name": "a",
+                          "width": 16,
+                          "height": 16,
+                          "icon": "arrow-right",
+                          "library": "lucide",
+                          "fill": "$primary-foreground"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "QcMke",
+                      "name": "Note",
+                      "fill": "$muted-foreground",
+                      "content": "Persoonlijk contact binnen één werkdag · vrijblijvend",
+                      "fontFamily": "$font-data",
+                      "fontSize": "$text-2xs",
+                      "fontWeight": "normal"
                     }
                   ]
                 }
@@ -23829,7 +25696,7 @@
         },
         {
           "type": "frame",
-          "id": "HRAys",
+          "id": "Fqk7Q",
           "name": "Footer",
           "width": "fill_container",
           "stroke": "$border",
@@ -23841,13 +25708,13 @@
           "gap": "$space-xs",
           "padding": [
             24,
-            20
+            "$space-lg"
           ],
           "justifyContent": "space_between",
           "children": [
             {
               "type": "text",
-              "id": "Jkkcz",
+              "id": "wYL5C",
               "name": "Copyright",
               "fill": "$muted-foreground",
               "content": "© 2026 emeq",
@@ -23857,7 +25724,7 @@
             },
             {
               "type": "frame",
-              "id": "p0kfCz",
+              "id": "ZiXsd",
               "name": "Footer Links",
               "width": "fill_container",
               "layout": "vertical",
@@ -23866,7 +25733,7 @@
               "children": [
                 {
                   "type": "text",
-                  "id": "W4ldQ",
+                  "id": "uikvx",
                   "name": "Partners",
                   "fill": "$muted-foreground",
                   "content": "Partners",
@@ -23876,7 +25743,7 @@
                 },
                 {
                   "type": "text",
-                  "id": "R0cxG",
+                  "id": "wB3ha",
                   "name": "Privacy",
                   "fill": "$muted-foreground",
                   "content": "Privacy",
@@ -23886,7 +25753,7 @@
                 },
                 {
                   "type": "text",
-                  "id": "v3LWu",
+                  "id": "AttVc",
                   "name": "Voorwaarden",
                   "fill": "$muted-foreground",
                   "content": "Voorwaarden",
@@ -23896,7 +25763,7 @@
                 },
                 {
                   "type": "text",
-                  "id": "HNeHa",
+                  "id": "VCbsQ",
                   "name": "Verwerkersovereenkomst",
                   "fill": "$muted-foreground",
                   "content": "Verwerkersovereenkomst",
@@ -23906,7 +25773,7 @@
                 },
                 {
                   "type": "text",
-                  "id": "QJfh5",
+                  "id": "GAwxP",
                   "name": "Support",
                   "fill": "$muted-foreground",
                   "content": "Support",

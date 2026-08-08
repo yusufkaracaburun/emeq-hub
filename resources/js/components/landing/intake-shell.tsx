@@ -1,14 +1,11 @@
+import { Lock } from 'lucide-react';
 import { type ReactNode } from 'react';
 import { SimpleFooter } from '@/components/landing/footer';
+import { IntakeStepList, type IntakeStep } from '@/components/landing/intake-steps';
 import { Nav } from '@/components/landing/nav';
 import { Reveal } from '@/components/motion';
 import { Eyebrow } from '@/components/ui/eyebrow';
-import { cn } from '@/lib/utils';
-
-interface IntakeStep {
-    title: string;
-    description: string;
-}
+import { Pill } from '@/components/ui/pill';
 
 interface IntakeShellProps {
     eyebrow: string;
@@ -42,31 +39,23 @@ export function IntakeShell({ eyebrow, title, intro, steps, children }: IntakeSh
                         </h1>
                         <p className="text-lg leading-[1.6] text-muted-foreground">{intro}</p>
 
-                        <ol className="mt-2 flex flex-col">
-                            {steps.map((step, index) => (
-                                <li
-                                    key={step.title}
-                                    className={cn(
-                                        'flex items-start gap-4 border-b border-border py-[18px]',
-                                        index === 0 && 'border-t',
-                                    )}
-                                >
-                                    <span className="font-mono text-xs2 text-brand">{`0${index + 1}`}</span>
-                                    <div className="flex flex-col gap-1">
-                                        <p className="text-base font-semibold text-foreground">{step.title}</p>
-                                        <p className="text-sm leading-[1.6] text-muted-foreground">{step.description}</p>
-                                    </div>
-                                </li>
-                            ))}
-                        </ol>
+                        <div className="mt-2">
+                            <IntakeStepList steps={steps} />
+                        </div>
 
-                        <div className="flex items-center gap-2">
-                            <span className="flex items-center justify-center rounded-xs border border-border p-1.5">
-                                <img src="/img/badges/gdpr.png" alt="GDPR" className="size-[18px]" />
-                            </span>
-                            <span className="rounded-xs border border-border px-2.5 py-[5px] font-mono text-2xs tracking-[1.5px] text-muted-foreground">
+                        <div className="flex flex-wrap items-center gap-2">
+                            <Pill
+                                icon={<img src="/img/badges/gdpr.png" alt="" aria-hidden className="size-5 opacity-70" />}
+                                className="border border-border"
+                            >
+                                GDPR
+                            </Pill>
+                            <Pill
+                                icon={<Lock aria-hidden className="size-5 text-muted-foreground" />}
+                                className="border border-border"
+                            >
                                 Tokens encrypted at rest
-                            </span>
+                            </Pill>
                         </div>
                     </Reveal>
 

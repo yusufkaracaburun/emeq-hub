@@ -32,9 +32,9 @@ export function Nav() {
         >
             <div className="flex items-center justify-between px-6 py-[18px] lg:px-section-x">
                 <div className="flex items-center gap-10">
-                    <Link href="/" className="flex items-center gap-2" aria-label="emeq home">
+                    <Link href="/" className="flex items-center gap-2" aria-label="hub home">
                         <span aria-hidden className="size-3.5 rounded-xs bg-brand" />
-                        <span className="text-[24px] font-bold tracking-[-0.5px] text-foreground">emeq</span>
+                        <span className="text-[24px] font-bold tracking-[-0.5px] text-foreground">hub</span>
                     </Link>
                     <nav className="hidden items-center gap-6 md:flex">
                         {links.map((link) => (

@@ -1,4 +1,3 @@
-import { Link } from '@inertiajs/react';
 import { MotionConfig } from 'framer-motion';
 import {
     ArrowRight,
@@ -8,24 +7,25 @@ import {
     ListChecks,
     Percent,
     Receipt,
-    RefreshCw,
-    Send,
     Users,
     Webhook,
     type LucideIcon,
 } from 'lucide-react';
 import { SimpleFooter } from '@/components/landing/footer';
+import { IntakeStepList, intakeSteps } from '@/components/landing/intake-steps';
+import { KoppelForm } from '@/components/landing/koppel-form';
 import { Nav } from '@/components/landing/nav';
 import { Reveal, RevealGroup, RevealItem } from '@/components/motion';
 import { Seo } from '@/components/seo';
 import { buttonVariants } from '@/components/ui/button';
 import { Eyebrow } from '@/components/ui/eyebrow';
 import { FeatureCard } from '@/components/ui/feature-card';
-import { type ProviderDetail, type SeoMeta } from '@/lib/types';
+import { type ProviderDetail, type ProviderSummary, type SeoMeta } from '@/lib/types';
 import { cn } from '@/lib/utils';
 
 interface PartnersShowProps {
     provider: ProviderDetail;
+    providers: ProviderSummary[];
     seo: SeoMeta;
 }
 
@@ -37,18 +37,12 @@ const featureIcons: Record<string, LucideIcon> = {
     'book-open': BookOpen,
     percent: Percent,
     webhook: Webhook,
-    'refresh-cw': RefreshCw,
     'list-checks': ListChecks,
-    send: Send,
 };
 
-export default function PartnersShow({ provider, seo }: PartnersShowProps) {
-    const features =
-        provider.features ??
-        provider.use_cases?.map((useCase) => ({ icon: 'list-checks', title: useCase.title, description: useCase.value })) ??
-        [];
-    const steps =
-        provider.steps ?? provider.how_it_works?.map((paragraph) => ({ title: '', description: paragraph })) ?? [];
+export default function PartnersShow({ provider, providers, seo }: PartnersShowProps) {
+    const features = provider.features ?? [];
+    const steps = provider.steps ?? [];
 
     return (
         <MotionConfig reducedMotion="user">
@@ -64,7 +58,7 @@ export default function PartnersShow({ provider, seo }: PartnersShowProps) {
                     <ProviderHero provider={provider} />
                     {features.length > 0 && <Features provider={provider} features={features} />}
                     {steps.length > 0 && <HowItWorks provider={provider} steps={steps} />}
-                    <ConnectCta provider={provider} />
+                    <ConnectSection provider={provider} providers={providers} />
                 </div>
             </main>
             <SimpleFooter />
@@ -97,11 +91,11 @@ function ProviderHero({ provider }: { provider: ProviderDetail }) {
                 {provider.intro ?? provider.summary}
             </p>
 
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-                <Link href="/koppelen" className={cn(buttonVariants({ variant: 'primary', size: 'md' }), 'group')}>
+            <div className="flex w-full flex-col gap-4 sm:w-auto sm:flex-row sm:items-center">
+                <a href="#koppelen" className={cn(buttonVariants({ variant: 'primary', size: 'md' }), 'group')}>
                     Start met {provider.label}
                     <ArrowRight aria-hidden className="size-4 transition-transform duration-150 group-hover:translate-x-0.5" />
-                </Link>
+                </a>
                 {provider.docs_url && (
                     <a
                         href={provider.docs_url}
@@ -216,20 +210,30 @@ function HowItWorks({
     );
 }
 
-function ConnectCta({ provider }: { provider: ProviderDetail }) {
+/** Koppelen-sectie: uitleg + intake-stappen links, het /koppelen-formulier rechts met deze partner voorgeselecteerd. */
+function ConnectSection({ provider, providers }: { provider: ProviderDetail; providers: ProviderSummary[] }) {
     return (
-        <Reveal className="flex flex-col items-center gap-6 rounded-2xl bg-brand-subtle px-8 py-[60px] text-center lg:px-16">
-            <h2 className="text-xl font-bold tracking-[-1px] text-foreground md:text-2xl">
-                Klaar om {provider.label} te koppelen?
-            </h2>
-            <p className="max-w-[520px] text-base leading-[1.6] text-muted-foreground">
-                {provider.connect_pitch ??
-                    'Vraag een koppeling aan en we richten je toegang in — binnen één werkdag persoonlijk contact.'}
-            </p>
-            <Link href="/koppelen" className={cn(buttonVariants({ variant: 'primary', size: 'lg' }), 'group')}>
-                Start met {provider.label}
-                <ArrowRight aria-hidden className="size-4 transition-transform duration-150 group-hover:translate-x-0.5" />
-            </Link>
+        <Reveal id="koppelen" className="rounded-xl bg-brand-subtle p-6 md:p-12">
+            <div className="grid gap-10 lg:grid-cols-[1fr_520px] lg:gap-12">
+                <div className="flex flex-col gap-4">
+                    <h2 className="text-xl font-bold leading-[1.2] tracking-[-0.5px] text-foreground">
+                        Klaar om {provider.label} te koppelen?
+                    </h2>
+                    <p className="text-base leading-[1.6] text-muted-foreground">
+                        Vertel kort wat je wilt koppelen. Wij regelen de omgeving, het token en de onboarding.
+                    </p>
+                    <div className="mt-2">
+                        <IntakeStepList steps={intakeSteps} />
+                    </div>
+                </div>
+
+                <div className="h-fit rounded-lg border border-border bg-card px-8 py-9 shadow-card">
+                    <KoppelForm
+                        providers={providers.map(({ key, label }) => ({ key, label }))}
+                        preselect={provider.key}
+                    />
+                </div>
+            </div>
         </Reveal>
     );
 }

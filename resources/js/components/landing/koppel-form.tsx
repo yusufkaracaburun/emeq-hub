@@ -1,5 +1,5 @@
 import { Link, useForm, usePage } from '@inertiajs/react';
-import { ArrowRight, CircleAlert, CircleCheck } from 'lucide-react';
+import { ArrowRight, ChevronDown, CircleAlert, CircleCheck } from 'lucide-react';
 import { type FormEvent } from 'react';
 import { Button } from '@/components/ui/button';
 import { type ProviderSummary, type SharedProps } from '@/lib/types';
@@ -23,7 +23,6 @@ export function KoppelForm({ providers, preselect }: KoppelFormProps) {
         contact_name: '',
         email: '',
         company: '',
-        app_url: '',
         providers: (preselect ? [preselect] : []) as string[],
         message: '',
         privacy_accepted: false as boolean,
@@ -45,15 +44,6 @@ export function KoppelForm({ providers, preselect }: KoppelFormProps) {
     const submit = (event: FormEvent) => {
         event.preventDefault();
         form.post('/koppelen', { preserveScroll: true });
-    };
-
-    const toggleProvider = (key: string) => {
-        form.setData(
-            'providers',
-            form.data.providers.includes(key)
-                ? form.data.providers.filter((k) => k !== key)
-                : [...form.data.providers, key],
-        );
     };
 
     return (
@@ -92,39 +82,30 @@ export function KoppelForm({ providers, preselect }: KoppelFormProps) {
                 />
             </Field>
 
-            <Field label="URL van je app" error={form.errors.app_url}>
-                <TextInput
-                    type="url"
-                    value={form.data.app_url}
-                    invalid={Boolean(form.errors.app_url)}
-                    placeholder="https://jouwapp.nl"
-                    mono
-                    onChange={(v) => form.setData('app_url', v)}
-                />
-            </Field>
-
-            <Field label="Welke integraties? *" error={form.errors.providers}>
-                <div className="flex flex-wrap gap-2.5">
-                    {providers.map((provider) => {
-                        const selected = form.data.providers.includes(provider.key);
-
-                        return (
-                            <button
-                                key={provider.key}
-                                type="button"
-                                aria-pressed={selected}
-                                onClick={() => toggleProvider(provider.key)}
-                                className={cn(
-                                    'rounded-pill border px-3.5 py-[7px] text-sm font-medium transition-colors duration-150',
-                                    selected
-                                        ? 'border-brand bg-brand-soft text-brand'
-                                        : 'border-border bg-card text-muted-foreground hover:border-brand hover:text-foreground',
-                                )}
-                            >
+            <Field label="Wat wil je koppelen? *" error={form.errors.providers}>
+                <div className="relative">
+                    <select
+                        value={form.data.providers[0] ?? ''}
+                        onChange={(e) => form.setData('providers', e.target.value ? [e.target.value] : [])}
+                        className={cn(
+                            inputClasses(Boolean(form.errors.providers)),
+                            'appearance-none pr-10',
+                            form.data.providers.length === 0 && 'text-muted-foreground',
+                        )}
+                    >
+                        <option value="" disabled>
+                            Kies een categorie
+                        </option>
+                        {providers.map((provider) => (
+                            <option key={provider.key} value={provider.key}>
                                 {provider.label}
-                            </button>
-                        );
-                    })}
+                            </option>
+                        ))}
+                    </select>
+                    <ChevronDown
+                        aria-hidden
+                        className="pointer-events-none absolute right-3.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+                    />
                 </div>
             </Field>
 

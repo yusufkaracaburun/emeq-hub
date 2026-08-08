@@ -23,8 +23,6 @@ export interface ProviderDetail {
     features?: { icon: string; title: string; description: string }[];
     steps?: { title: string; description: string }[];
     connect_pitch?: string;
-    how_it_works?: string[];
-    use_cases?: { title: string; value: string }[];
     capabilities: { title: string; description: string }[];
     endpoints?: { method: string; path: string; target: string; description: string }[];
     integration?: { title: string; description: string }[];

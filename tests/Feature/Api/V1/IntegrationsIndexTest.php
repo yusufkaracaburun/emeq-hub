@@ -23,12 +23,12 @@ class IntegrationsIndexTest extends TestCase
             ->assertOk()
             ->json());
 
-        $this->assertEqualsCanonicalizing(['exact', 'mollie', 'snelstart'], $items->pluck('key')->all());
+        // Alleen providers die in beide configs staan; Snelstart zit wél in
+        // hub-providers maar wordt (nog) niet publiek aangeboden.
+        $this->assertEqualsCanonicalizing(['exact', 'mollie'], $items->pluck('key')->all());
         $this->assertTrue($items->every(fn (array $i): bool => $i['status'] === 'disconnected'));
         $this->assertTrue($items->firstWhere('key', 'exact')['connectable']);
         $this->assertTrue($items->firstWhere('key', 'mollie')['connectable']);
-        // Snelstart heeft geen OAuth-flow → zichtbaar maar niet koppelbaar.
-        $this->assertFalse($items->firstWhere('key', 'snelstart')['connectable']);
     }
 
     public function test_merges_connection_status_for_given_account(): void
@@ -48,7 +48,6 @@ class IntegrationsIndexTest extends TestCase
         $this->assertSame('connected', $mollie['status']);
         $this->assertNotNull($mollie['connection_id']);
         $this->assertSame('pending', $items->firstWhere('key', 'exact')['status']);
-        $this->assertSame('disconnected', $items->firstWhere('key', 'snelstart')['status']);
     }
 
     public function test_revoked_connection_reports_disconnected_and_null_id(): void

@@ -155,6 +155,16 @@ class PublicSeoTest extends TestCase
         }
     }
 
+    public function test_snelstart_stays_off_the_public_surface(): void
+    {
+        // Bewuste productkeuze: de SnelStart-integratie is niet gebouwd en er is
+        // geen partnercontract — de showcase toont alleen Exact en Mollie.
+        $keys = array_column(app(ProviderShowcase::class)->summaries(), 'key');
+
+        $this->assertNotContains('snelstart', $keys);
+        $this->get('/partners/snelstart')->assertNotFound();
+    }
+
     public function test_robots_opens_the_public_surface_and_names_the_sitemap_in_production(): void
     {
         $this->app['env'] = 'production';
