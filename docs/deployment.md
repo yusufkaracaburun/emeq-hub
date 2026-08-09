@@ -325,6 +325,30 @@ make prod-ps                          # alles up/healthy
 make prod-logs                        # app + horizon + tunnel
 ```
 
+## Monitoring — wat er is, en wat er niet is
+
+**Wat er is:**
+
+- Container-healthchecks in `docker-compose.prod.yml` — herstarten een omgevallen
+  container, maar melden niets naar buiten.
+- `/up` checkt db + redis en geeft `{"status":"up","database":"ok","redis":"ok"}`.
+- `backup:monitor` — dagelijkse health-check op de backup-keten (zie § Backup & restore).
+
+**Wat er niet is:**
+
+- Geen externe uptime-monitor. Valt de app om, of gaat cloudflared/db/redis onderuit,
+  dan krijgt niemand een seintje — je merkt het pas als je zelf kijkt of iemand belt.
+- Geen error-aggregatie. `sentry/sentry-laravel` zit in de codebase (`config/sentry.php`
+  + `Integration::handles` in `bootstrap/app.php`) maar staat **uit**: er is geen DSN
+  gezet. Dormant, niet actief.
+- Logs gaan op `LOG_LEVEL=warning` naar `stderr` en daarmee naar Docker-daemon-rotatie.
+  Geen sink, geen alerting, geen retentie voorbij de rotatie.
+
+Dat gat is bekend en staat open als [#53](https://github.com/yusufkaracaburun/emeq-hub/issues/53).
+Twee besluiten wachten daar op een keuze: welk meldkanaal, en Sentry activeren of de dep
+verwijderen. Niets van dit alles is nu ingeregeld — ga er bij een incident niet vanuit dat
+je gealarmeerd wordt.
+
 ## Troubleshooting
 
 | Symptoom | Oorzaak / fix |
