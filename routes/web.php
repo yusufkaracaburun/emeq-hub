@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AccessRequestController;
+use App\Http\Controllers\ConnectHandoffController;
 use App\Http\Controllers\DemoRequestController;
 use App\Http\Controllers\Dev\ExactOAuthTracerController;
 use App\Http\Controllers\ExactDeprovisionController;
@@ -38,6 +39,24 @@ Route::middleware('signed')->group(function (): void {
         ->name('oauth.connected');
     Route::get('/oauth/failed', [OAuthLandingController::class, 'failed'])
         ->name('oauth.failed');
+});
+
+// Consumer-handoff: de eindgebruiker van een consumer-app koppelt hier zelf.
+// Niet publiek — de getekende link wordt server-side gemint door de consumer
+// (`POST /v1/connect-sessions`) en legt het Account vast, zodat de keten
+// Consumer → Account → Connection intact blijft zonder eindgebruiker-auth in
+// de Hub. Noindex volgt automatisch: de routes staan niet in PublicPages.
+Route::middleware('signed')->group(function (): void {
+    Route::get('/connect/{account}', [ConnectHandoffController::class, 'show'])
+        ->name('connect.show');
+    Route::post('/connect/{account}/{provider}', [ConnectHandoffController::class, 'start'])
+        ->where('provider', '[a-z][a-z0-9_-]*')
+        ->middleware('throttle:12,1')
+        ->name('connect.start');
+    Route::delete('/connect/{account}/{provider}', [ConnectHandoffController::class, 'disconnect'])
+        ->where('provider', '[a-z][a-z0-9_-]*')
+        ->middleware('throttle:12,1')
+        ->name('connect.disconnect');
 });
 
 // Exact App Center Seamless-deprovisioning ("Niet meer gebruiken"): Exact

@@ -10,12 +10,15 @@ use App\Http\Middleware\ResolveMollieAccount;
 use App\Http\Middleware\ResolveSnelstartAccount;
 use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\SetNoIndexHeaders;
+use App\Support\Seo\SeoMeta;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Exceptions\InvalidSignatureException;
 use Illuminate\Support\Facades\Route;
+use Inertia\Inertia;
 use Laravel\Sanctum\Http\Middleware\CheckAbilities;
 use Laravel\Sanctum\Http\Middleware\CheckForAnyAbility;
 use Sentry\Laravel\Integration;
@@ -78,6 +81,26 @@ return Application::configure(basePath: dirname(__DIR__))
             }
 
             return null;
+        });
+
+        // Een verlopen of gemanipuleerde handoff-link is voor de eindgebruiker
+        // geen kale 403 maar een verwachte situatie: de link is bewust
+        // kortlevend. Toon dezelfde pagina met uitleg + terugweg. Andere
+        // signed-routes houden hun standaardgedrag.
+        $exceptions->render(function (InvalidSignatureException $e, Request $request) {
+            if (! $request->is('connect/*') || $request->expectsJson()) {
+                return null;
+            }
+
+            return Inertia::render('connect/index', [
+                'state' => 'expired',
+                'consumerName' => null,
+                'accountName' => null,
+                'providers' => [],
+                'returnUrl' => null,
+                'expiresAt' => null,
+                'seo' => SeoMeta::make('Koppellink verlopen', 'Deze koppellink is niet meer geldig.'),
+            ])->toResponse($request)->setStatusCode(410);
         });
 
         Integration::handles($exceptions);

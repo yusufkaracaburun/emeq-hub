@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\V1\Exact\JournalsController as ExactJournalsControl
 use App\Http\Controllers\Api\V1\Exact\PassThroughController as ExactPassThroughController;
 use App\Http\Controllers\Api\V1\Exact\RelationsController as ExactRelationsController;
 use App\Http\Controllers\Api\V1\Exact\VatCodesController as ExactVatCodesController;
+use App\Http\Controllers\Api\V1\ConnectSessionController;
 use App\Http\Controllers\Api\V1\IntegrationController;
 use App\Http\Controllers\Api\V1\Mollie\Connect\ClientLinksController as ConnectClientLinksController;
 use App\Http\Controllers\Api\V1\Mollie\Connect\OnboardingController as ConnectOnboardingController;
@@ -56,6 +57,13 @@ Route::middleware('auth:sanctum')->group(function (): void {
     Route::get('/integrations', IntegrationController::class)
         ->middleware('ability:integrations:manage,consumer:manage-accounts,*')
         ->name('api.integrations.index');
+
+    // Getekende handoff-link waarmee de consumer-app zijn eigen eindgebruiker
+    // naar de Hub stuurt om zelf te koppelen (banner-CTA → deze URL). Kortlevend
+    // en account-gebonden; de pagina zelf leeft op /connect/{account} in web.php.
+    Route::post('/connect-sessions', ConnectSessionController::class)
+        ->middleware('ability:integrations:manage,consumer:manage-accounts,*')
+        ->name('api.connect-sessions.store');
 
     Route::middleware(['ability:integrations:manage,mollie:write', 'feature.provider:mollie'])->group(function (): void {
         Route::post('/oauth/mollie/init', ProviderInitController::class)

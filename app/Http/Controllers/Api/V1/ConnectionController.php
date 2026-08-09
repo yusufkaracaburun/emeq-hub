@@ -2,14 +2,13 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Actions\Connect\RevokeConnection;
 use App\Http\Concerns\GuardsTokenAbility;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\StoreConnectionRequest;
 use App\Http\Resources\Api\V1\ConnectionResource;
 use App\Models\Account;
 use App\Models\Connection;
-use App\OAuth\Exceptions\ProviderDisabledException;
-use App\OAuth\OAuthFlowRegistry;
 use App\Sanctum\TokenAbilities;
 use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -24,7 +23,7 @@ class ConnectionController extends Controller
 {
     use GuardsTokenAbility;
 
-    public function __construct(private readonly OAuthFlowRegistry $registry) {}
+    public function __construct(private readonly RevokeConnection $revokeConnection) {}
 
     public function store(StoreConnectionRequest $request): JsonResponse|ConnectionResource
     {
@@ -104,32 +103,9 @@ class ConnectionController extends Controller
             return $this->notFound('connection_not_found', 'Connection niet gevonden.');
         }
 
-        $this->revokeConnection($model);
+        $this->revokeConnection->handle($model);
 
         return response()->noContent();
-    }
-
-    /**
-     * Provider-side deprovisioning (token-revoke + webhook-teardown) via de
-     * OAuthFlow als die bestaat; anders alleen lokaal markeren (Snelstart heeft
-     * geen OAuth-flow). Een uitgeschakelde provider mag het loskoppelen niet
-     * blokkeren — bij ProviderDisabledException valt het terug op lokaal.
-     */
-    private function revokeConnection(Connection $model): void
-    {
-        $provider = $model->provider->value;
-
-        if (in_array($provider, $this->registry->providers(), true)) {
-            try {
-                $this->registry->for($provider)->revoke($model);
-
-                return;
-            } catch (ProviderDisabledException) {
-                // val door naar lokale revoke
-            }
-        }
-
-        $model->update(['status' => 'revoked', 'revoked_at' => now()]);
     }
 
     private function findOwnedConnection(Request $request, int $connectionId): ?Connection
