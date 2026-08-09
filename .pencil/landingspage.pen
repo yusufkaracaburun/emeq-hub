@@ -1262,7 +1262,7 @@
                   "fill": {
                     "type": "image",
                     "enabled": true,
-                    "url": "exact.png",
+                    "url": "partners/exact.png",
                     "mode": "fit"
                   },
                   "width": 120,
@@ -3351,7 +3351,7 @@
                       "fill": {
                         "type": "image",
                         "enabled": true,
-                        "url": "iso27001.png",
+                        "url": "compliance/iso27001.png",
                         "mode": "fit"
                       },
                       "width": 20,
@@ -3391,7 +3391,7 @@
                       "fill": {
                         "type": "image",
                         "enabled": true,
-                        "url": "gdpr.png",
+                        "url": "compliance/gdpr.png",
                         "mode": "fit"
                       },
                       "width": 20,
@@ -4762,7 +4762,7 @@
                           "fill": {
                             "type": "image",
                             "enabled": true,
-                            "url": "iso27001.png",
+                            "url": "compliance/iso27001.png",
                             "mode": "fit"
                           },
                           "width": 18,
@@ -4789,7 +4789,7 @@
                           "fill": {
                             "type": "image",
                             "enabled": true,
-                            "url": "gdpr.png",
+                            "url": "compliance/gdpr.png",
                             "mode": "fit"
                           },
                           "width": 18,
@@ -5623,7 +5623,7 @@
                       "fill": {
                         "type": "image",
                         "enabled": true,
-                        "url": "exact.png",
+                        "url": "partners/exact.png",
                         "mode": "fit"
                       },
                       "width": 85,
@@ -7478,7 +7478,7 @@
                           "fill": {
                             "type": "image",
                             "enabled": true,
-                            "url": "iso27001.png",
+                            "url": "compliance/iso27001.png",
                             "mode": "fit"
                           },
                           "width": 20,
@@ -7518,7 +7518,7 @@
                           "fill": {
                             "type": "image",
                             "enabled": true,
-                            "url": "gdpr.png",
+                            "url": "compliance/gdpr.png",
                             "mode": "fit"
                           },
                           "width": 20,
@@ -8658,7 +8658,7 @@
                           "fill": {
                             "type": "image",
                             "enabled": true,
-                            "url": "iso27001.png",
+                            "url": "compliance/iso27001.png",
                             "mode": "fit"
                           },
                           "width": 18,
@@ -8684,7 +8684,7 @@
                           "fill": {
                             "type": "image",
                             "enabled": true,
-                            "url": "gdpr.png",
+                            "url": "compliance/gdpr.png",
                             "mode": "fit"
                           },
                           "width": 18,
@@ -9195,7 +9195,7 @@
                           "fill": {
                             "type": "image",
                             "enabled": true,
-                            "url": "gdpr.png",
+                            "url": "compliance/gdpr.png",
                             "mode": "fit"
                           },
                           "width": 20,
@@ -10273,7 +10273,7 @@
                           "fill": {
                             "type": "image",
                             "enabled": true,
-                            "url": "gdpr.png",
+                            "url": "compliance/gdpr.png",
                             "mode": "fit"
                           },
                           "width": 20,
@@ -14162,7 +14162,7 @@
                           "fill": {
                             "type": "image",
                             "enabled": true,
-                            "url": "gdpr.png",
+                            "url": "compliance/gdpr.png",
                             "mode": "fit"
                           },
                           "width": 20,
@@ -15128,7 +15128,7 @@
                           "fill": {
                             "type": "image",
                             "enabled": true,
-                            "url": "gdpr.png",
+                            "url": "compliance/gdpr.png",
                             "mode": "fit"
                           },
                           "width": 20,
@@ -21839,7 +21839,7 @@
                                   "fill": {
                                     "type": "image",
                                     "enabled": true,
-                                    "url": "exact.png",
+                                    "url": "partners/exact.png",
                                     "mode": "fit"
                                   },
                                   "width": 100,
@@ -21985,7 +21985,7 @@
                                   "fill": {
                                     "type": "image",
                                     "enabled": true,
-                                    "url": "mollie.png",
+                                    "url": "partners/mollie.png",
                                     "mode": "fit"
                                   },
                                   "width": 100,
@@ -23001,7 +23001,7 @@
                           "fill": {
                             "type": "image",
                             "enabled": true,
-                            "url": "iso27001.png",
+                            "url": "compliance/iso27001.png",
                             "mode": "fit"
                           },
                           "width": 18,
@@ -23028,7 +23028,7 @@
                           "fill": {
                             "type": "image",
                             "enabled": true,
-                            "url": "gdpr.png",
+                            "url": "compliance/gdpr.png",
                             "mode": "fit"
                           },
                           "width": 18,
@@ -23344,7 +23344,7 @@
                       "fill": {
                         "type": "image",
                         "enabled": true,
-                        "url": "exact.png",
+                        "url": "partners/exact.png",
                         "mode": "fit"
                       },
                       "width": 190,
@@ -26125,7 +26125,7 @@
                       "fill": {
                         "type": "image",
                         "enabled": true,
-                        "url": "exact.png",
+                        "url": "partners/exact.png",
                         "mode": "fit"
                       },
                       "width": 100,
@@ -26260,7 +26260,7 @@
                       "fill": {
                         "type": "image",
                         "enabled": true,
-                        "url": "mollie.png",
+                        "url": "partners/mollie.png",
                         "mode": "fit"
                       },
                       "width": 100,
@@ -27277,7 +27277,7 @@
                           "fill": {
                             "type": "image",
                             "enabled": true,
-                            "url": "iso27001.png",
+                            "url": "compliance/iso27001.png",
                             "mode": "fit"
                           },
                           "width": 18,
@@ -27303,7 +27303,7 @@
                           "fill": {
                             "type": "image",
                             "enabled": true,
-                            "url": "gdpr.png",
+                            "url": "compliance/gdpr.png",
                             "mode": "fit"
                           },
                           "width": 18,
@@ -27564,7 +27564,7 @@
                       "fill": {
                         "type": "image",
                         "enabled": true,
-                        "url": "exact.png",
+                        "url": "partners/exact.png",
                         "mode": "fit"
                       },
                       "width": 150,
@@ -35027,7 +35027,7 @@
                   "fill": {
                     "type": "image",
                     "enabled": true,
-                    "url": "exact.png",
+                    "url": "partners/exact.png",
                     "mode": "fit"
                   },
                   "width": 150,
@@ -35254,7 +35254,7 @@
                   "fill": {
                     "type": "image",
                     "enabled": true,
-                    "url": "exact.png",
+                    "url": "partners/exact.png",
                     "mode": "fit"
                   },
                   "width": 150,
@@ -35377,6 +35377,4663 @@
                   "fontFamily": "IBM Plex Mono",
                   "fontSize": 18,
                   "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "group",
+      "id": "b36Yw3",
+      "x": 0,
+      "y": 0,
+      "name": "Banners · In-app (NL)",
+      "children": [
+        {
+          "type": "frame",
+          "id": "ZwJ13",
+          "x": 13200,
+          "y": 5190,
+          "name": "In-app · Strip · 1128×64",
+          "clip": true,
+          "width": 1128,
+          "height": 64,
+          "fill": "$card",
+          "cornerRadius": "$radius-lg",
+          "stroke": "$border",
+          "strokeWidth": 1,
+          "strokeAlignment": "inner",
+          "gap": 14,
+          "padding": [
+            0,
+            20
+          ],
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "sAeCq",
+              "name": "Left",
+              "gap": 14,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "bxVup",
+                  "name": "Badge",
+                  "fill": "$brand-soft",
+                  "cornerRadius": "$radius-pill",
+                  "padding": [
+                    4,
+                    10
+                  ],
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "i1SRZ",
+                      "name": "Badge Label",
+                      "fill": "$brand-deep",
+                      "content": "NIEUW",
+                      "fontFamily": "IBM Plex Mono",
+                      "fontSize": 11,
+                      "fontWeight": "normal",
+                      "letterSpacing": 1.5
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "Rr6xT",
+                  "name": "Tekst",
+                  "fill": "$foreground",
+                  "content": "Koppel je administratie en laat facturen automatisch meelopen.",
+                  "fontFamily": "Inter",
+                  "fontSize": 15,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "jqh2T",
+              "name": "Actie",
+              "gap": 6,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "h5rKeO",
+                  "name": "Label",
+                  "fill": "$brand",
+                  "content": "Koppelen",
+                  "fontFamily": "Inter",
+                  "fontSize": 15,
+                  "fontWeight": "600"
+                },
+                {
+                  "type": "text",
+                  "id": "nMup4",
+                  "name": "Glyph",
+                  "fill": "$brand",
+                  "content": "→",
+                  "fontFamily": "Inter",
+                  "fontSize": 15,
+                  "fontWeight": "500"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "zdFJN",
+          "x": 13200,
+          "y": 5334,
+          "name": "In-app · Dashboard callout · 720×240",
+          "clip": true,
+          "width": 720,
+          "height": 240,
+          "fill": "$card",
+          "cornerRadius": "$radius-xl",
+          "stroke": "$border",
+          "strokeWidth": 1,
+          "strokeAlignment": "inner",
+          "layout": "vertical",
+          "gap": 22,
+          "padding": 28,
+          "justifyContent": "space_between",
+          "children": [
+            {
+              "type": "ellipse",
+              "id": "C2xj0G",
+              "layoutPosition": "absolute",
+              "x": 520,
+              "y": -80,
+              "name": "Ring A",
+              "fill": "#00000000",
+              "width": 340,
+              "height": 340,
+              "stroke": "#a236962e",
+              "strokeWidth": 1.5
+            },
+            {
+              "type": "frame",
+              "id": "QE6fT",
+              "name": "Top",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 8,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "Yt6op",
+                  "name": "Eyebrow Row",
+                  "gap": 10,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "FKu3F",
+                      "name": "Badge",
+                      "fill": "$brand-soft",
+                      "cornerRadius": "$radius-pill",
+                      "padding": [
+                        4,
+                        10
+                      ],
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "o3yP7c",
+                          "name": "Badge Label",
+                          "fill": "$brand-deep",
+                          "content": "KOPPELINGEN",
+                          "fontFamily": "IBM Plex Mono",
+                          "fontSize": 11,
+                          "fontWeight": "normal",
+                          "letterSpacing": 1.5
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "Mb0nx",
+                  "name": "Titel",
+                  "fill": "$foreground",
+                  "content": "Laat je administratie het werk doen.",
+                  "fontFamily": "Inter",
+                  "fontSize": 26,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "DpaLs",
+                  "name": "Sub",
+                  "fill": "$muted-foreground",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Koppel het systeem dat je al gebruikt. Facturen en betalingen lopen daarna automatisch mee — geen dubbel werk, geen export-bestanden.",
+                  "lineHeight": 1.5,
+                  "fontFamily": "Inter",
+                  "fontSize": 15,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "NaHzs",
+              "name": "Bottom",
+              "width": "fill_container",
+              "justifyContent": "space_between",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "EQyTK",
+                  "name": "CTA",
+                  "fill": "$primary",
+                  "cornerRadius": "$radius-pill",
+                  "gap": 8,
+                  "padding": [
+                    11,
+                    20
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "QYfTR",
+                      "name": "Label",
+                      "fill": "$primary-foreground",
+                      "content": "Koppeling instellen",
+                      "fontFamily": "Inter",
+                      "fontSize": 15,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "pIq7E",
+                      "name": "Glyph",
+                      "fill": "$primary-foreground",
+                      "content": "→",
+                      "fontFamily": "Inter",
+                      "fontSize": 15,
+                      "fontWeight": "500"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "JDkc8",
+                  "name": "Powered by",
+                  "gap": 7,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "rectangle",
+                      "id": "v2jAa1",
+                      "name": "Mark",
+                      "fill": {
+                        "type": "image",
+                        "enabled": true,
+                        "url": "logo.png",
+                        "mode": "fit"
+                      },
+                      "width": 16,
+                      "height": 16
+                    },
+                    {
+                      "type": "text",
+                      "id": "F02rI",
+                      "name": "Label",
+                      "fill": "$muted-foreground",
+                      "content": "Powered by emeq hub",
+                      "fontFamily": "IBM Plex Mono",
+                      "fontSize": 11,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "NU6py",
+          "x": 13980,
+          "y": 5334,
+          "name": "In-app · Zijpaneel kaart · 340×420",
+          "clip": true,
+          "width": 340,
+          "height": 420,
+          "fill": "$card",
+          "cornerRadius": "$radius-xl",
+          "stroke": "$border",
+          "strokeWidth": 1,
+          "strokeAlignment": "inner",
+          "layout": "vertical",
+          "gap": 18,
+          "padding": 24,
+          "justifyContent": "space_between",
+          "children": [
+            {
+              "type": "ellipse",
+              "id": "MkBGu",
+              "layoutPosition": "absolute",
+              "x": 170,
+              "y": 230,
+              "name": "Ring A",
+              "fill": "#00000000",
+              "width": 300,
+              "height": 300,
+              "stroke": "#a236962e",
+              "strokeWidth": 1.5
+            },
+            {
+              "type": "frame",
+              "id": "C2q6AV",
+              "name": "Top",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 14,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "KUdqJ",
+                  "name": "Icon Tile",
+                  "width": 44,
+                  "height": 44,
+                  "fill": "$brand-soft",
+                  "cornerRadius": "$radius-lg",
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "YmyQd",
+                      "name": "Glyph",
+                      "width": 22,
+                      "height": 22,
+                      "icon": "link",
+                      "library": "lucide",
+                      "fill": "$brand-deep"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "d51QMJ",
+                  "name": "Titel",
+                  "fill": "$foreground",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Minder overtypen,\nmeer overzicht.",
+                  "lineHeight": 1.25,
+                  "fontFamily": "Inter",
+                  "fontSize": 23,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "peJeA",
+                  "name": "Sub",
+                  "fill": "$muted-foreground",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Koppel je bestaande systeem en laat gegevens automatisch heen en weer lopen.",
+                  "lineHeight": 1.5,
+                  "fontFamily": "Inter",
+                  "fontSize": 14,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "frame",
+                  "id": "m8XClP",
+                  "name": "Voordelen",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 9,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "YU7vY",
+                      "name": "Eenmalig instellen",
+                      "width": "fill_container",
+                      "gap": 9,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "AyNCV",
+                          "name": "Check",
+                          "width": 15,
+                          "height": 15,
+                          "icon": "check",
+                          "library": "lucide",
+                          "fill": "$success"
+                        },
+                        {
+                          "type": "text",
+                          "id": "xLb39",
+                          "name": "Label",
+                          "fill": "$foreground",
+                          "content": "Eenmalig instellen",
+                          "fontFamily": "Inter",
+                          "fontSize": 14,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "aan1t",
+                      "name": "Altijd actuele gegevens",
+                      "width": "fill_container",
+                      "gap": 9,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "ebLN2",
+                          "name": "Check",
+                          "width": 15,
+                          "height": 15,
+                          "icon": "check",
+                          "library": "lucide",
+                          "fill": "$success"
+                        },
+                        {
+                          "type": "text",
+                          "id": "y08cQ",
+                          "name": "Label",
+                          "fill": "$foreground",
+                          "content": "Altijd actuele gegevens",
+                          "fontFamily": "Inter",
+                          "fontSize": 14,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "Mi9mI",
+                      "name": "Veilig, jij houdt de regie",
+                      "width": "fill_container",
+                      "gap": 9,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "Y1UoJ",
+                          "name": "Check",
+                          "width": 15,
+                          "height": 15,
+                          "icon": "check",
+                          "library": "lucide",
+                          "fill": "$success"
+                        },
+                        {
+                          "type": "text",
+                          "id": "W1qj5",
+                          "name": "Label",
+                          "fill": "$foreground",
+                          "content": "Veilig, jij houdt de regie",
+                          "fontFamily": "Inter",
+                          "fontSize": 14,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "x5jTD",
+              "name": "Bottom",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 14,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "H27hgx",
+                  "name": "CTA",
+                  "width": "fill_container",
+                  "fill": "$primary",
+                  "cornerRadius": "$radius-pill",
+                  "gap": 8,
+                  "padding": [
+                    12,
+                    20
+                  ],
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "oypjq",
+                      "name": "Label",
+                      "fill": "$primary-foreground",
+                      "content": "Koppeling instellen",
+                      "fontFamily": "Inter",
+                      "fontSize": 15,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "rE5ME",
+                      "name": "Glyph",
+                      "fill": "$primary-foreground",
+                      "content": "→",
+                      "fontFamily": "Inter",
+                      "fontSize": 15,
+                      "fontWeight": "500"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "kaQIl",
+                  "name": "Powered by",
+                  "width": "fill_container",
+                  "gap": 7,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "rectangle",
+                      "id": "GrL4H",
+                      "name": "Mark",
+                      "fill": {
+                        "type": "image",
+                        "enabled": true,
+                        "url": "logo.png",
+                        "mode": "fit"
+                      },
+                      "width": 15,
+                      "height": 15
+                    },
+                    {
+                      "type": "text",
+                      "id": "wQRzk",
+                      "name": "Label",
+                      "fill": "$muted-foreground",
+                      "content": "Powered by emeq hub",
+                      "fontFamily": "IBM Plex Mono",
+                      "fontSize": 11,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "lj5vb",
+          "x": 14400,
+          "y": 5334,
+          "name": "In-app · Mobiel callout · 342×auto",
+          "clip": true,
+          "width": 342,
+          "fill": "$card",
+          "cornerRadius": "$radius-xl",
+          "stroke": "$border",
+          "strokeWidth": 1,
+          "strokeAlignment": "inner",
+          "layout": "vertical",
+          "gap": 16,
+          "padding": 20,
+          "children": [
+            {
+              "type": "ellipse",
+              "id": "uHfbG",
+              "layoutPosition": "absolute",
+              "x": 200,
+              "y": -60,
+              "name": "Ring A",
+              "fill": "#00000000",
+              "width": 260,
+              "height": 260,
+              "stroke": "#a236962e",
+              "strokeWidth": 1.5
+            },
+            {
+              "type": "frame",
+              "id": "r4A1Fb",
+              "name": "Top",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 10,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "D6XwyB",
+                  "name": "Head Row",
+                  "width": "fill_container",
+                  "gap": 10,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "s2Rwo",
+                      "name": "Icon Tile",
+                      "width": 36,
+                      "height": 36,
+                      "fill": "$brand-soft",
+                      "cornerRadius": "$radius-md",
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "MvNqU",
+                          "name": "Glyph",
+                          "width": 18,
+                          "height": 18,
+                          "icon": "link",
+                          "library": "lucide",
+                          "fill": "$brand-deep"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "afAWR",
+                      "name": "Titel",
+                      "fill": "$foreground",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Koppel je administratie",
+                      "lineHeight": 1.3,
+                      "fontFamily": "Inter",
+                      "fontSize": 18,
+                      "fontWeight": "700"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "xDluB",
+                  "name": "Sub",
+                  "fill": "$muted-foreground",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Facturen en betalingen lopen daarna automatisch mee. Geen dubbel werk.",
+                  "lineHeight": 1.5,
+                  "fontFamily": "Inter",
+                  "fontSize": 14,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "BHBbF",
+              "name": "CTA",
+              "width": "fill_container",
+              "fill": "$primary",
+              "cornerRadius": "$radius-pill",
+              "gap": 8,
+              "padding": [
+                12,
+                20
+              ],
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "xUQlU",
+                  "name": "Label",
+                  "fill": "$primary-foreground",
+                  "content": "Koppeling instellen",
+                  "fontFamily": "Inter",
+                  "fontSize": 15,
+                  "fontWeight": "600"
+                },
+                {
+                  "type": "text",
+                  "id": "Y0XFW",
+                  "name": "Glyph",
+                  "fill": "$primary-foreground",
+                  "content": "→",
+                  "fontFamily": "Inter",
+                  "fontSize": 15,
+                  "fontWeight": "500"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "aY1kk",
+              "name": "Powered by",
+              "width": "fill_container",
+              "gap": 7,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "id": "sxcyc",
+                  "name": "Mark",
+                  "fill": {
+                    "type": "image",
+                    "enabled": true,
+                    "url": "logo.png",
+                    "mode": "fit"
+                  },
+                  "width": 14,
+                  "height": 14
+                },
+                {
+                  "type": "text",
+                  "id": "w4rsn",
+                  "name": "Label",
+                  "fill": "$muted-foreground",
+                  "content": "Powered by emeq hub",
+                  "fontFamily": "IBM Plex Mono",
+                  "fontSize": 11,
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "iUOMo",
+          "x": 14400,
+          "y": 5580,
+          "name": "In-app · Mobiel strip · 342×auto",
+          "clip": true,
+          "width": 342,
+          "fill": "$brand-subtle",
+          "cornerRadius": "$radius-lg",
+          "stroke": "$border",
+          "strokeWidth": 1,
+          "strokeAlignment": "inner",
+          "gap": 12,
+          "padding": [
+            12,
+            14
+          ],
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "icon",
+              "id": "GNatK",
+              "name": "Glyph",
+              "width": 18,
+              "height": 18,
+              "icon": "link",
+              "library": "lucide",
+              "fill": "$brand-deep"
+            },
+            {
+              "type": "frame",
+              "id": "eBzEZ",
+              "name": "Tekst",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 2,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "gnX58",
+                  "name": "Titel",
+                  "fill": "$foreground",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Koppel je administratie",
+                  "fontFamily": "Inter",
+                  "fontSize": 14,
+                  "fontWeight": "600"
+                },
+                {
+                  "type": "text",
+                  "id": "wouMp",
+                  "name": "Sub",
+                  "fill": "$muted-foreground",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Facturen lopen automatisch mee",
+                  "fontFamily": "Inter",
+                  "fontSize": 13,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "FjLVG",
+              "name": "Glyph Arrow",
+              "fill": "$brand",
+              "content": "→",
+              "fontFamily": "Inter",
+              "fontSize": 16,
+              "fontWeight": "500"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "group",
+      "id": "dlfCe",
+      "x": 0,
+      "y": 0,
+      "name": "Banners · In-app (EN)",
+      "children": [
+        {
+          "type": "frame",
+          "id": "C1aqX",
+          "x": 13200,
+          "y": 5850,
+          "name": "In-app EN · Strip · 1128×64",
+          "clip": true,
+          "width": 1128,
+          "height": 64,
+          "fill": "$card",
+          "cornerRadius": "$radius-lg",
+          "stroke": "$border",
+          "strokeWidth": 1,
+          "strokeAlignment": "inner",
+          "gap": 14,
+          "padding": [
+            0,
+            20
+          ],
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "Xdwet",
+              "name": "Left",
+              "gap": 14,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "hHOtw",
+                  "name": "Badge",
+                  "fill": "$brand-soft",
+                  "cornerRadius": "$radius-pill",
+                  "padding": [
+                    4,
+                    10
+                  ],
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "CWGeQ",
+                      "name": "Badge Label",
+                      "fill": "$brand-deep",
+                      "content": "NEW",
+                      "fontFamily": "IBM Plex Mono",
+                      "fontSize": 11,
+                      "fontWeight": "normal",
+                      "letterSpacing": 1.5
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "n4o1VO",
+                  "name": "Tekst",
+                  "fill": "$foreground",
+                  "content": "Connect your accounting system and let invoices flow automatically.",
+                  "fontFamily": "Inter",
+                  "fontSize": 15,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "ttr8Z",
+              "name": "Actie",
+              "gap": 6,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "L9EGo",
+                  "name": "Label",
+                  "fill": "$brand",
+                  "content": "Connect",
+                  "fontFamily": "Inter",
+                  "fontSize": 15,
+                  "fontWeight": "600"
+                },
+                {
+                  "type": "text",
+                  "id": "K8yap",
+                  "name": "Glyph",
+                  "fill": "$brand",
+                  "content": "→",
+                  "fontFamily": "Inter",
+                  "fontSize": 15,
+                  "fontWeight": "500"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "lSZIg",
+          "x": 13200,
+          "y": 5994,
+          "name": "In-app EN · Dashboard callout · 720×240",
+          "clip": true,
+          "width": 720,
+          "height": 240,
+          "fill": "$card",
+          "cornerRadius": "$radius-xl",
+          "stroke": "$border",
+          "strokeWidth": 1,
+          "strokeAlignment": "inner",
+          "layout": "vertical",
+          "gap": 22,
+          "padding": 28,
+          "justifyContent": "space_between",
+          "children": [
+            {
+              "type": "ellipse",
+              "id": "jt0Ci",
+              "layoutPosition": "absolute",
+              "x": 520,
+              "y": -80,
+              "name": "Ring A",
+              "fill": "#00000000",
+              "width": 340,
+              "height": 340,
+              "stroke": "#a236962e",
+              "strokeWidth": 1.5
+            },
+            {
+              "type": "frame",
+              "id": "gvvgZ",
+              "name": "Top",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 8,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "yHJLK",
+                  "name": "Eyebrow Row",
+                  "gap": 10,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "xZT2j",
+                      "name": "Badge",
+                      "fill": "$brand-soft",
+                      "cornerRadius": "$radius-pill",
+                      "padding": [
+                        4,
+                        10
+                      ],
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "Ofj9M",
+                          "name": "Badge Label",
+                          "fill": "$brand-deep",
+                          "content": "INTEGRATIONS",
+                          "fontFamily": "IBM Plex Mono",
+                          "fontSize": 11,
+                          "fontWeight": "normal",
+                          "letterSpacing": 1.5
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "d1UStl",
+                  "name": "Titel",
+                  "fill": "$foreground",
+                  "content": "Let your admin do the work.",
+                  "fontFamily": "Inter",
+                  "fontSize": 26,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "mSjCR",
+                  "name": "Sub",
+                  "fill": "$muted-foreground",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Connect the system you already use. Invoices and payments then flow automatically — no double entry, no export files.",
+                  "lineHeight": 1.5,
+                  "fontFamily": "Inter",
+                  "fontSize": 15,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "Zw4nf",
+              "name": "Bottom",
+              "width": "fill_container",
+              "justifyContent": "space_between",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "n7yZa",
+                  "name": "CTA",
+                  "fill": "$primary",
+                  "cornerRadius": "$radius-pill",
+                  "gap": 8,
+                  "padding": [
+                    11,
+                    20
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "w0DdPm",
+                      "name": "Label",
+                      "fill": "$primary-foreground",
+                      "content": "Set up integration",
+                      "fontFamily": "Inter",
+                      "fontSize": 15,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "T7wsgk",
+                      "name": "Glyph",
+                      "fill": "$primary-foreground",
+                      "content": "→",
+                      "fontFamily": "Inter",
+                      "fontSize": 15,
+                      "fontWeight": "500"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "kyVgd",
+                  "name": "Powered by",
+                  "gap": 7,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "rectangle",
+                      "id": "o1mK3",
+                      "name": "Mark",
+                      "fill": {
+                        "type": "image",
+                        "enabled": true,
+                        "url": "logo.png",
+                        "mode": "fit"
+                      },
+                      "width": 16,
+                      "height": 16
+                    },
+                    {
+                      "type": "text",
+                      "id": "Zxa5Q",
+                      "name": "Label",
+                      "fill": "$muted-foreground",
+                      "content": "Powered by emeq hub",
+                      "fontFamily": "IBM Plex Mono",
+                      "fontSize": 11,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "w6a2Pi",
+          "x": 13980,
+          "y": 5994,
+          "name": "In-app EN · Sidebar card · 340×420",
+          "clip": true,
+          "width": 340,
+          "height": 420,
+          "fill": "$card",
+          "cornerRadius": "$radius-xl",
+          "stroke": "$border",
+          "strokeWidth": 1,
+          "strokeAlignment": "inner",
+          "layout": "vertical",
+          "gap": 18,
+          "padding": 24,
+          "justifyContent": "space_between",
+          "children": [
+            {
+              "type": "ellipse",
+              "id": "QM9Gp",
+              "layoutPosition": "absolute",
+              "x": 170,
+              "y": 230,
+              "name": "Ring A",
+              "fill": "#00000000",
+              "width": 300,
+              "height": 300,
+              "stroke": "#a236962e",
+              "strokeWidth": 1.5
+            },
+            {
+              "type": "frame",
+              "id": "ag4Z3",
+              "name": "Top",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 14,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "SzUyq",
+                  "name": "Icon Tile",
+                  "width": 44,
+                  "height": 44,
+                  "fill": "$brand-soft",
+                  "cornerRadius": "$radius-lg",
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "dE2nW",
+                      "name": "Glyph",
+                      "width": 22,
+                      "height": 22,
+                      "icon": "link",
+                      "library": "lucide",
+                      "fill": "$brand-deep"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "GQmuW",
+                  "name": "Titel",
+                  "fill": "$foreground",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Less retyping,\nmore overview.",
+                  "lineHeight": 1.25,
+                  "fontFamily": "Inter",
+                  "fontSize": 23,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "o5Pq6R",
+                  "name": "Sub",
+                  "fill": "$muted-foreground",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Connect your existing system and let data flow back and forth automatically.",
+                  "lineHeight": 1.5,
+                  "fontFamily": "Inter",
+                  "fontSize": 14,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "frame",
+                  "id": "y6x6qt",
+                  "name": "Voordelen",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 9,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "CFfcY",
+                      "name": "Eenmalig instellen",
+                      "width": "fill_container",
+                      "gap": 9,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "C79Edq",
+                          "name": "Check",
+                          "width": 15,
+                          "height": 15,
+                          "icon": "check",
+                          "library": "lucide",
+                          "fill": "$success"
+                        },
+                        {
+                          "type": "text",
+                          "id": "Zio1e",
+                          "name": "Label",
+                          "fill": "$foreground",
+                          "content": "Set up once",
+                          "fontFamily": "Inter",
+                          "fontSize": 14,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "Ud5cl",
+                      "name": "Altijd actuele gegevens",
+                      "width": "fill_container",
+                      "gap": 9,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "i6wC2k",
+                          "name": "Check",
+                          "width": 15,
+                          "height": 15,
+                          "icon": "check",
+                          "library": "lucide",
+                          "fill": "$success"
+                        },
+                        {
+                          "type": "text",
+                          "id": "hn5Ba",
+                          "name": "Label",
+                          "fill": "$foreground",
+                          "content": "Always up-to-date data",
+                          "fontFamily": "Inter",
+                          "fontSize": 14,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "cquQh",
+                      "name": "Veilig, jij houdt de regie",
+                      "width": "fill_container",
+                      "gap": 9,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "PEk9M",
+                          "name": "Check",
+                          "width": 15,
+                          "height": 15,
+                          "icon": "check",
+                          "library": "lucide",
+                          "fill": "$success"
+                        },
+                        {
+                          "type": "text",
+                          "id": "dFmQO",
+                          "name": "Label",
+                          "fill": "$foreground",
+                          "content": "Secure, you stay in control",
+                          "fontFamily": "Inter",
+                          "fontSize": 14,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "Gj4Uv",
+              "name": "Bottom",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 14,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "uEo67",
+                  "name": "CTA",
+                  "width": "fill_container",
+                  "fill": "$primary",
+                  "cornerRadius": "$radius-pill",
+                  "gap": 8,
+                  "padding": [
+                    12,
+                    20
+                  ],
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "KYqcG",
+                      "name": "Label",
+                      "fill": "$primary-foreground",
+                      "content": "Set up integration",
+                      "fontFamily": "Inter",
+                      "fontSize": 15,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "JijgJ",
+                      "name": "Glyph",
+                      "fill": "$primary-foreground",
+                      "content": "→",
+                      "fontFamily": "Inter",
+                      "fontSize": 15,
+                      "fontWeight": "500"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "Y6oDV",
+                  "name": "Powered by",
+                  "width": "fill_container",
+                  "gap": 7,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "rectangle",
+                      "id": "cDpwk",
+                      "name": "Mark",
+                      "fill": {
+                        "type": "image",
+                        "enabled": true,
+                        "url": "logo.png",
+                        "mode": "fit"
+                      },
+                      "width": 15,
+                      "height": 15
+                    },
+                    {
+                      "type": "text",
+                      "id": "uRcCF",
+                      "name": "Label",
+                      "fill": "$muted-foreground",
+                      "content": "Powered by emeq hub",
+                      "fontFamily": "IBM Plex Mono",
+                      "fontSize": 11,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "axpzV",
+          "x": 14400,
+          "y": 5994,
+          "name": "In-app EN · Mobile callout · 342×auto",
+          "clip": true,
+          "width": 342,
+          "fill": "$card",
+          "cornerRadius": "$radius-xl",
+          "stroke": "$border",
+          "strokeWidth": 1,
+          "strokeAlignment": "inner",
+          "layout": "vertical",
+          "gap": 16,
+          "padding": 20,
+          "children": [
+            {
+              "type": "ellipse",
+              "id": "DPaCQ",
+              "layoutPosition": "absolute",
+              "x": 200,
+              "y": -60,
+              "name": "Ring A",
+              "fill": "#00000000",
+              "width": 260,
+              "height": 260,
+              "stroke": "#a236962e",
+              "strokeWidth": 1.5
+            },
+            {
+              "type": "frame",
+              "id": "olDMQ",
+              "name": "Top",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 10,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "UbCqT",
+                  "name": "Head Row",
+                  "width": "fill_container",
+                  "gap": 10,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "pxdtU",
+                      "name": "Icon Tile",
+                      "width": 36,
+                      "height": 36,
+                      "fill": "$brand-soft",
+                      "cornerRadius": "$radius-md",
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "W0PnSZ",
+                          "name": "Glyph",
+                          "width": 18,
+                          "height": 18,
+                          "icon": "link",
+                          "library": "lucide",
+                          "fill": "$brand-deep"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "HgBQ6",
+                      "name": "Titel",
+                      "fill": "$foreground",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Connect your accounting",
+                      "lineHeight": 1.3,
+                      "fontFamily": "Inter",
+                      "fontSize": 18,
+                      "fontWeight": "700"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "MHpum",
+                  "name": "Sub",
+                  "fill": "$muted-foreground",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Invoices and payments then flow automatically. No double entry.",
+                  "lineHeight": 1.5,
+                  "fontFamily": "Inter",
+                  "fontSize": 14,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "n8lkU",
+              "name": "CTA",
+              "width": "fill_container",
+              "fill": "$primary",
+              "cornerRadius": "$radius-pill",
+              "gap": 8,
+              "padding": [
+                12,
+                20
+              ],
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "HF591",
+                  "name": "Label",
+                  "fill": "$primary-foreground",
+                  "content": "Set up integration",
+                  "fontFamily": "Inter",
+                  "fontSize": 15,
+                  "fontWeight": "600"
+                },
+                {
+                  "type": "text",
+                  "id": "o8WoKs",
+                  "name": "Glyph",
+                  "fill": "$primary-foreground",
+                  "content": "→",
+                  "fontFamily": "Inter",
+                  "fontSize": 15,
+                  "fontWeight": "500"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "QMXMX",
+              "name": "Powered by",
+              "width": "fill_container",
+              "gap": 7,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "id": "B4Mwy",
+                  "name": "Mark",
+                  "fill": {
+                    "type": "image",
+                    "enabled": true,
+                    "url": "logo.png",
+                    "mode": "fit"
+                  },
+                  "width": 14,
+                  "height": 14
+                },
+                {
+                  "type": "text",
+                  "id": "z9KBQu",
+                  "name": "Label",
+                  "fill": "$muted-foreground",
+                  "content": "Powered by emeq hub",
+                  "fontFamily": "IBM Plex Mono",
+                  "fontSize": 11,
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "WOXE8",
+          "x": 14400,
+          "y": 6240,
+          "name": "In-app EN · Mobile strip · 342×auto",
+          "clip": true,
+          "width": 342,
+          "fill": "$brand-subtle",
+          "cornerRadius": "$radius-lg",
+          "stroke": "$border",
+          "strokeWidth": 1,
+          "strokeAlignment": "inner",
+          "gap": 12,
+          "padding": [
+            12,
+            14
+          ],
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "icon",
+              "id": "KSNm8",
+              "name": "Glyph",
+              "width": 18,
+              "height": 18,
+              "icon": "link",
+              "library": "lucide",
+              "fill": "$brand-deep"
+            },
+            {
+              "type": "frame",
+              "id": "dUKyT",
+              "name": "Tekst",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 2,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "cGO30",
+                  "name": "Titel",
+                  "fill": "$foreground",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Connect your accounting",
+                  "fontFamily": "Inter",
+                  "fontSize": 14,
+                  "fontWeight": "600"
+                },
+                {
+                  "type": "text",
+                  "id": "zxQV1",
+                  "name": "Sub",
+                  "fill": "$muted-foreground",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Invoices flow automatically",
+                  "fontFamily": "Inter",
+                  "fontSize": 13,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "z89tM",
+              "name": "Glyph Arrow",
+              "fill": "$brand",
+              "content": "→",
+              "fontFamily": "Inter",
+              "fontSize": 16,
+              "fontWeight": "500"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "group",
+      "id": "HNutI",
+      "x": 0,
+      "y": 0,
+      "name": "Pagina's · Koppeling starten (consumer handoff)",
+      "children": [
+        {
+          "type": "frame",
+          "id": "Ew9TH",
+          "x": 24490,
+          "y": 0,
+          "name": "Pagina · Je koppelingen (consumer handoff) · Desktop",
+          "clip": true,
+          "width": 1440,
+          "height": 1100,
+          "fill": "$background",
+          "layout": "vertical",
+          "children": [
+            {
+              "type": "frame",
+              "id": "V3N87M",
+              "name": "Nav",
+              "width": "fill_container",
+              "fill": "$background",
+              "stroke": "$border",
+              "strokeAlignment": "inner",
+              "strokeLinejoin": "round",
+              "padding": [
+                18,
+                "$space-section-x"
+              ],
+              "justifyContent": "space_between",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "O0pv8",
+                  "name": "Nav Left",
+                  "gap": "$space-2xl",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "l9DFlP",
+                      "name": "Logo",
+                      "gap": "$space-xs",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "rectangle",
+                          "id": "wNdRY",
+                          "name": "Mark",
+                          "fill": {
+                            "type": "image",
+                            "enabled": true,
+                            "url": "logo.png",
+                            "mode": "fit"
+                          },
+                          "width": 14,
+                          "height": 14
+                        },
+                        {
+                          "type": "text",
+                          "id": "YXVkO",
+                          "name": "Wordmark",
+                          "fill": "$foreground",
+                          "content": "hub",
+                          "fontFamily": "$font-heading",
+                          "fontSize": "$text-xl",
+                          "fontWeight": "700",
+                          "letterSpacing": -0.5
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "RC3c9",
+                  "name": "Secure Badge",
+                  "fill": "$muted",
+                  "cornerRadius": "$radius-pill",
+                  "gap": 7,
+                  "padding": [
+                    7,
+                    12
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "nwkBU",
+                      "name": "Lock",
+                      "width": 13,
+                      "height": 13,
+                      "icon": "lock",
+                      "library": "lucide",
+                      "fill": "$muted-foreground"
+                    },
+                    {
+                      "type": "text",
+                      "id": "g9MJlw",
+                      "name": "Label",
+                      "fill": "$muted-foreground",
+                      "content": "Beveiligde koppeling",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-xs2",
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "MFke9",
+              "name": "Content",
+              "width": "fill_container",
+              "height": "fill_container",
+              "layout": "vertical",
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "id": "hC2YF",
+                  "layoutPosition": "absolute",
+                  "x": 0,
+                  "y": 0,
+                  "name": "Header Pattern",
+                  "opacity": 0.3,
+                  "fill": {
+                    "type": "shader",
+                    "enabled": true,
+                    "url": "dotgrid.glsl",
+                    "uniforms": {
+                      "u_cell": 34,
+                      "u_color": "#a23696",
+                      "u_opacity": 0.08,
+                      "u_fade": 0.6
+                    }
+                  },
+                  "width": 1440,
+                  "height": 962
+                },
+                {
+                  "type": "frame",
+                  "id": "W4w27",
+                  "name": "Column",
+                  "width": 720,
+                  "layout": "vertical",
+                  "gap": "$space-xl",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "m9yHG",
+                      "name": "Handoff Signal",
+                      "fill": "$card",
+                      "cornerRadius": "$radius-pill",
+                      "stroke": "$border",
+                      "strokeWidth": 1,
+                      "gap": "$space-xs",
+                      "padding": [
+                        7,
+                        14
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "lC0M3",
+                          "name": "Consumer",
+                          "fill": "$foreground",
+                          "content": "{app}",
+                          "fontFamily": "$font-body",
+                          "fontSize": "$text-xs2",
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "text",
+                          "id": "Fhp29",
+                          "name": "Glyph",
+                          "fill": "$muted-foreground",
+                          "content": "⇄",
+                          "fontFamily": "$font-body",
+                          "fontSize": "$text-xs2",
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "j2gBJ",
+                          "name": "Mark",
+                          "fill": {
+                            "type": "image",
+                            "enabled": true,
+                            "url": "logo.png",
+                            "mode": "fit"
+                          },
+                          "width": 14,
+                          "height": 14
+                        },
+                        {
+                          "type": "text",
+                          "id": "N6yFQt",
+                          "name": "Wordmark",
+                          "fill": "$foreground",
+                          "content": "emeq hub",
+                          "fontFamily": "$font-body",
+                          "fontSize": "$text-xs2",
+                          "fontWeight": "700"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "KriMh",
+                      "name": "Header",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": "$space-md",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "nOBnj",
+                          "name": "Eyebrow",
+                          "fill": "$brand",
+                          "content": "KOPPELINGEN BEHEREN",
+                          "fontFamily": "$font-caption",
+                          "fontSize": "$text-xs",
+                          "fontWeight": "normal",
+                          "letterSpacing": 2
+                        },
+                        {
+                          "type": "text",
+                          "id": "gYMGG",
+                          "name": "H1",
+                          "fill": "$foreground",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Je koppelingen",
+                          "lineHeight": 1.15,
+                          "textAlign": "center",
+                          "fontFamily": "$font-heading",
+                          "fontSize": "$text-3xl",
+                          "fontWeight": "700"
+                        },
+                        {
+                          "type": "text",
+                          "id": "dNbZI",
+                          "name": "Sub",
+                          "fill": "$muted-foreground",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Je beheert de koppelingen van {klantnaam}. Een gekoppeld systeem wisselt automatisch gegevens uit met {app} — je hoeft niets meer over te typen.",
+                          "lineHeight": 1.55,
+                          "textAlign": "center",
+                          "fontFamily": "$font-body",
+                          "fontSize": "$text-base",
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "qS1e8",
+                      "name": "Provider Picker",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": "$space-sm",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "TG3xJ",
+                          "name": "Optie · Exact Online (gekoppeld)",
+                          "width": "fill_container",
+                          "fill": "$card",
+                          "cornerRadius": "$radius-lg",
+                          "stroke": "$border",
+                          "strokeWidth": 1,
+                          "gap": "$space-md",
+                          "padding": [
+                            18,
+                            22
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "hegsq",
+                              "name": "Logo Slot",
+                              "width": 120,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "rectangle",
+                                  "id": "TJuSr",
+                                  "name": "Logo",
+                                  "fill": {
+                                    "type": "image",
+                                    "enabled": true,
+                                    "url": "partners/exact.png",
+                                    "mode": "fit"
+                                  },
+                                  "width": 110,
+                                  "height": 30
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "klB4C",
+                              "name": "Tekst",
+                              "width": "fill_container",
+                              "layout": "vertical",
+                              "gap": 3,
+                              "children": [
+                                {
+                                  "type": "frame",
+                                  "id": "p21xo",
+                                  "name": "Status Row",
+                                  "width": "fill_container",
+                                  "gap": 8,
+                                  "alignItems": "center",
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "bizvl",
+                                      "name": "Naam",
+                                      "fill": "$foreground",
+                                      "content": "Exact Online",
+                                      "fontFamily": "$font-body",
+                                      "fontSize": "$text-md",
+                                      "fontWeight": "600"
+                                    },
+                                    {
+                                      "type": "frame",
+                                      "id": "rOgvK",
+                                      "name": "Pill",
+                                      "fill": "$success-soft",
+                                      "cornerRadius": "$radius-pill",
+                                      "padding": [
+                                        2,
+                                        8
+                                      ],
+                                      "children": [
+                                        {
+                                          "type": "text",
+                                          "id": "CoFP9",
+                                          "name": "Label",
+                                          "fill": "$success",
+                                          "content": "GEKOPPELD",
+                                          "fontFamily": "$font-caption",
+                                          "fontSize": "$text-2xs",
+                                          "fontWeight": "normal",
+                                          "letterSpacing": 1
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "mclrQ",
+                                  "name": "Sub",
+                                  "fill": "$muted-foreground",
+                                  "textGrowth": "fixed-width",
+                                  "width": "fill_container",
+                                  "content": "Boekhouding · facturen en grootboek",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": "$text-xs2",
+                                  "fontWeight": "normal"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "Ute1Q",
+                              "name": "Acties",
+                              "gap": 8,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "frame",
+                                  "id": "uFvSO",
+                                  "name": "CTA",
+                                  "fill": "$card",
+                                  "cornerRadius": "$radius-md",
+                                  "stroke": "$border",
+                                  "strokeWidth": 1,
+                                  "gap": 8,
+                                  "padding": [
+                                    10,
+                                    20
+                                  ],
+                                  "alignItems": "center",
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "b4JlFe",
+                                      "name": "Label",
+                                      "fill": "$foreground",
+                                      "content": "Opnieuw",
+                                      "fontFamily": "$font-body",
+                                      "fontSize": "$text-sm",
+                                      "fontWeight": "600"
+                                    },
+                                    {
+                                      "type": "text",
+                                      "id": "SnpnD",
+                                      "name": "Glyph",
+                                      "fill": "$foreground",
+                                      "content": "→",
+                                      "fontFamily": "$font-body",
+                                      "fontSize": "$text-sm",
+                                      "fontWeight": "500"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "CKtPl",
+                                  "name": "Ontkoppelen",
+                                  "fill": "$card",
+                                  "cornerRadius": "$radius-md",
+                                  "stroke": "$border",
+                                  "strokeWidth": 1,
+                                  "padding": [
+                                    10,
+                                    14
+                                  ],
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "O3g8Q",
+                                      "name": "Label",
+                                      "fill": "$foreground",
+                                      "content": "Ontkoppelen",
+                                      "fontFamily": "$font-body",
+                                      "fontSize": "$text-sm",
+                                      "fontWeight": "600"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "pRswZ",
+                          "name": "Optie · Mollie",
+                          "width": "fill_container",
+                          "fill": "$card",
+                          "cornerRadius": "$radius-lg",
+                          "stroke": "$border",
+                          "strokeWidth": 1,
+                          "gap": "$space-md",
+                          "padding": [
+                            18,
+                            22
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "TvMYx",
+                              "name": "Logo Slot",
+                              "width": 120,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "rectangle",
+                                  "id": "v2RNb",
+                                  "name": "Logo",
+                                  "fill": {
+                                    "type": "image",
+                                    "enabled": true,
+                                    "url": "partners/mollie.png",
+                                    "mode": "fit"
+                                  },
+                                  "width": 104,
+                                  "height": 26
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "uPm5O",
+                              "name": "Tekst",
+                              "width": "fill_container",
+                              "layout": "vertical",
+                              "gap": 3,
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "G7gdl",
+                                  "name": "Naam",
+                                  "fill": "$foreground",
+                                  "content": "Mollie",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": "$text-md",
+                                  "fontWeight": "600"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "o888w",
+                                  "name": "Sub",
+                                  "fill": "$muted-foreground",
+                                  "textGrowth": "fixed-width",
+                                  "width": "fill_container",
+                                  "content": "Betalingen · incasso en betaallinks",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": "$text-xs2",
+                                  "fontWeight": "normal"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "hii72",
+                              "name": "CTA",
+                              "fill": "$primary",
+                              "cornerRadius": "$radius-md",
+                              "gap": 8,
+                              "padding": [
+                                10,
+                                20
+                              ],
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "wVx4G",
+                                  "name": "Label",
+                                  "fill": "$primary-foreground",
+                                  "content": "Koppelen",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": "$text-sm",
+                                  "fontWeight": "600"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "HSq7P",
+                                  "name": "Glyph",
+                                  "fill": "$primary-foreground",
+                                  "content": "→",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": "$text-sm",
+                                  "fontWeight": "500"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "GjAjX",
+                      "name": "Transparantie",
+                      "width": "fill_container",
+                      "fill": "$muted",
+                      "cornerRadius": "$radius-lg",
+                      "layout": "vertical",
+                      "gap": "$space-sm",
+                      "padding": 20,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "JrNmy",
+                          "name": "Kop",
+                          "fill": "$foreground",
+                          "content": "Wat er gebeurt als je koppelt",
+                          "fontFamily": "$font-body",
+                          "fontSize": "$text-sm",
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "d0V2uX",
+                          "name": "Punt",
+                          "width": "fill_container",
+                          "gap": 10,
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "UD860",
+                              "name": "Icon",
+                              "width": 16,
+                              "height": 16,
+                              "icon": "shield-check",
+                              "library": "lucide",
+                              "fill": "$muted-foreground"
+                            },
+                            {
+                              "type": "text",
+                              "id": "bcIpz",
+                              "name": "Tekst",
+                              "fill": "$muted-foreground",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "Je logt in bij het systeem zelf. Emeq Hub ziet je wachtwoord nooit.",
+                              "lineHeight": 1.5,
+                              "fontFamily": "$font-body",
+                              "fontSize": "$text-xs2",
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "KQwdU",
+                          "name": "Punt",
+                          "width": "fill_container",
+                          "gap": 10,
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "Cuglz",
+                              "name": "Icon",
+                              "width": 16,
+                              "height": 16,
+                              "icon": "repeat",
+                              "library": "lucide",
+                              "fill": "$muted-foreground"
+                            },
+                            {
+                              "type": "text",
+                              "id": "b6EM3x",
+                              "name": "Tekst",
+                              "fill": "$muted-foreground",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "{app} wisselt daarna alleen de gegevens uit die voor deze koppeling nodig zijn.",
+                              "lineHeight": 1.5,
+                              "fontFamily": "$font-body",
+                              "fontSize": "$text-xs2",
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "RnIOK",
+                          "name": "Punt",
+                          "width": "fill_container",
+                          "gap": 10,
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "eRLK4",
+                              "name": "Icon",
+                              "width": 16,
+                              "height": 16,
+                              "icon": "circle-x",
+                              "library": "lucide",
+                              "fill": "$muted-foreground"
+                            },
+                            {
+                              "type": "text",
+                              "id": "K56me",
+                              "name": "Tekst",
+                              "fill": "$muted-foreground",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "Je kunt de koppeling op elk moment intrekken — op deze pagina, of bij de leverancier zelf.",
+                              "lineHeight": 1.5,
+                              "fontFamily": "$font-body",
+                              "fontSize": "$text-xs2",
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "ouJYg",
+                      "name": "CTA Terug",
+                      "fill": "$primary",
+                      "cornerRadius": "$radius-md",
+                      "gap": 8,
+                      "padding": [
+                        12,
+                        24
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "cBmeJ",
+                          "name": "Label",
+                          "fill": "$primary-foreground",
+                          "content": "Terug naar {app}",
+                          "fontFamily": "$font-body",
+                          "fontSize": "$text-sm",
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "text",
+                          "id": "aCrjN",
+                          "name": "Glyph",
+                          "fill": "$primary-foreground",
+                          "content": "→",
+                          "fontFamily": "$font-body",
+                          "fontSize": "$text-sm",
+                          "fontWeight": "500"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "hdmRK",
+                      "name": "Hint",
+                      "fill": "$muted-foreground",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Deze pagina is persoonlijk en verloopt na 15 minuten.",
+                      "textAlign": "center",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-xs2",
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "HVV5Y",
+              "name": "Footer",
+              "width": "fill_container",
+              "stroke": "$border",
+              "strokeWidth": {
+                "top": 1
+              },
+              "strokeLinejoin": "round",
+              "padding": [
+                28,
+                "$space-section-x"
+              ],
+              "justifyContent": "space_between",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "pdoHZ",
+                  "name": "Copyright",
+                  "fill": "$muted-foreground",
+                  "content": "© 2026 emeq",
+                  "fontFamily": "$font-body",
+                  "fontSize": "$text-xs2",
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "frame",
+                  "id": "xix7g",
+                  "name": "Footer Links",
+                  "gap": "$space-xs",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "EIlf3",
+                      "name": "Partners",
+                      "fill": "$muted-foreground",
+                      "content": "Partners",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-xs2",
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "k5YK9",
+                      "name": "Privacy",
+                      "fill": "$muted-foreground",
+                      "content": "Privacy",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-xs2",
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "Jz5Ln",
+                      "name": "Voorwaarden",
+                      "fill": "$muted-foreground",
+                      "content": "Voorwaarden",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-xs2",
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "i9tzuc",
+                      "name": "Sep",
+                      "fill": "$muted-foreground",
+                      "content": "·",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-xs2",
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "C53rU",
+                      "name": "Verwerkersovereenkomst",
+                      "fill": "$muted-foreground",
+                      "content": "Verwerkersovereenkomst",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-xs2",
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "rrO40",
+                      "name": "Sep",
+                      "fill": "$muted-foreground",
+                      "content": "·",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-xs2",
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "p2yOz",
+                      "name": "Support",
+                      "fill": "$muted-foreground",
+                      "content": "Support",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-xs2",
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "aUb6p",
+          "x": 26050,
+          "y": 0,
+          "name": "Pagina · Je koppelingen · Mobiel 390",
+          "clip": true,
+          "width": 390,
+          "height": 1090,
+          "fill": "$background",
+          "layout": "vertical",
+          "children": [
+            {
+              "type": "frame",
+              "id": "Tgc5p",
+              "name": "Nav",
+              "width": "fill_container",
+              "fill": "$background",
+              "stroke": "$border",
+              "strokeAlignment": "inner",
+              "strokeLinejoin": "round",
+              "padding": [
+                14,
+                20
+              ],
+              "justifyContent": "space_between",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "O08TmW",
+                  "name": "Nav Left",
+                  "gap": "$space-2xl",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "v2j6N",
+                      "name": "Logo",
+                      "gap": "$space-xs",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "rectangle",
+                          "id": "c6ZZJk",
+                          "name": "Mark",
+                          "fill": {
+                            "type": "image",
+                            "enabled": true,
+                            "url": "logo.png",
+                            "mode": "fit"
+                          },
+                          "width": 14,
+                          "height": 14
+                        },
+                        {
+                          "type": "text",
+                          "id": "A1a5rP",
+                          "name": "Wordmark",
+                          "fill": "$foreground",
+                          "content": "hub",
+                          "fontFamily": "$font-heading",
+                          "fontSize": "$text-xl",
+                          "fontWeight": "700",
+                          "letterSpacing": -0.5
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "rGg46",
+                  "x": 98,
+                  "y": 18,
+                  "name": "Secure Badge",
+                  "enabled": false,
+                  "fill": "$muted",
+                  "cornerRadius": "$radius-pill",
+                  "gap": 7,
+                  "padding": [
+                    7,
+                    12
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "WpOQ9",
+                      "name": "Lock",
+                      "width": 13,
+                      "height": 13,
+                      "icon": "lock",
+                      "library": "lucide",
+                      "fill": "$muted-foreground"
+                    },
+                    {
+                      "type": "text",
+                      "id": "U6vvM",
+                      "name": "Label",
+                      "fill": "$muted-foreground",
+                      "content": "Beveiligde koppeling",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-xs2",
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "hp0IH",
+              "name": "Content",
+              "width": "fill_container",
+              "height": "fill_container",
+              "layout": "vertical",
+              "padding": [
+                0,
+                20
+              ],
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "id": "cu8Hz",
+                  "layoutPosition": "absolute",
+                  "x": 0,
+                  "y": 0,
+                  "name": "Header Pattern",
+                  "opacity": 0.3,
+                  "fill": {
+                    "type": "shader",
+                    "enabled": true,
+                    "url": "dotgrid.glsl",
+                    "uniforms": {
+                      "u_cell": 34,
+                      "u_color": "#a23696",
+                      "u_opacity": 0.08,
+                      "u_fade": 0.6
+                    }
+                  },
+                  "width": 390,
+                  "height": 977
+                },
+                {
+                  "type": "frame",
+                  "id": "F88qSb",
+                  "name": "Column",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": "$space-lg",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "XEOOV",
+                      "name": "Handoff Signal",
+                      "fill": "$card",
+                      "cornerRadius": "$radius-pill",
+                      "stroke": "$border",
+                      "strokeWidth": 1,
+                      "gap": "$space-xs",
+                      "padding": [
+                        7,
+                        14
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "uVjBR",
+                          "name": "Consumer",
+                          "fill": "$foreground",
+                          "content": "{app}",
+                          "fontFamily": "$font-body",
+                          "fontSize": "$text-xs2",
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "text",
+                          "id": "k3hYuo",
+                          "name": "Glyph",
+                          "fill": "$muted-foreground",
+                          "content": "⇄",
+                          "fontFamily": "$font-body",
+                          "fontSize": "$text-xs2",
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "GhQ78",
+                          "name": "Mark",
+                          "fill": {
+                            "type": "image",
+                            "enabled": true,
+                            "url": "logo.png",
+                            "mode": "fit"
+                          },
+                          "width": 14,
+                          "height": 14
+                        },
+                        {
+                          "type": "text",
+                          "id": "L9QKu8",
+                          "name": "Wordmark",
+                          "fill": "$foreground",
+                          "content": "emeq hub",
+                          "fontFamily": "$font-body",
+                          "fontSize": "$text-xs2",
+                          "fontWeight": "700"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "o35Zch",
+                      "name": "Header",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": "$space-md",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "neDWT",
+                          "name": "Eyebrow",
+                          "fill": "$brand",
+                          "content": "KOPPELINGEN BEHEREN",
+                          "fontFamily": "$font-caption",
+                          "fontSize": "$text-xs",
+                          "fontWeight": "normal",
+                          "letterSpacing": 2
+                        },
+                        {
+                          "type": "text",
+                          "id": "K5Jkr",
+                          "name": "H1",
+                          "fill": "$foreground",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Je koppelingen",
+                          "lineHeight": 1.15,
+                          "textAlign": "center",
+                          "fontFamily": "$font-heading",
+                          "fontSize": "$text-2xl",
+                          "fontWeight": "700"
+                        },
+                        {
+                          "type": "text",
+                          "id": "gtbPW",
+                          "name": "Sub",
+                          "fill": "$muted-foreground",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Je beheert de koppelingen van {klantnaam}. Een gekoppeld systeem wisselt automatisch gegevens uit met {app}.",
+                          "lineHeight": 1.55,
+                          "textAlign": "center",
+                          "fontFamily": "$font-body",
+                          "fontSize": "$text-base",
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "J3Alta",
+                      "name": "Provider Picker",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": "$space-sm",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "Tqk23",
+                          "name": "Optie · Exact Online",
+                          "width": "fill_container",
+                          "fill": "$card",
+                          "cornerRadius": "$radius-lg",
+                          "stroke": "$border",
+                          "strokeWidth": 1,
+                          "layout": "vertical",
+                          "gap": "$space-sm",
+                          "padding": [
+                            16,
+                            18
+                          ],
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "tjjSz",
+                              "name": "Logo Slot",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "rectangle",
+                                  "id": "WvH7X",
+                                  "name": "Logo",
+                                  "fill": {
+                                    "type": "image",
+                                    "enabled": true,
+                                    "url": "partners/exact.png",
+                                    "mode": "fit"
+                                  },
+                                  "width": 150,
+                                  "height": 30
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "adibk",
+                              "name": "Tekst",
+                              "width": "fill_container",
+                              "layout": "vertical",
+                              "gap": 3,
+                              "children": [
+                                {
+                                  "type": "frame",
+                                  "id": "m3pQCx",
+                                  "name": "Status Row",
+                                  "width": "fill_container",
+                                  "gap": 8,
+                                  "alignItems": "center",
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "H7hbl",
+                                      "name": "Naam",
+                                      "fill": "$foreground",
+                                      "content": "Exact Online",
+                                      "fontFamily": "$font-body",
+                                      "fontSize": "$text-md",
+                                      "fontWeight": "600"
+                                    },
+                                    {
+                                      "type": "frame",
+                                      "id": "x6ofVA",
+                                      "name": "Pill",
+                                      "fill": "$success-soft",
+                                      "cornerRadius": "$radius-pill",
+                                      "padding": [
+                                        2,
+                                        8
+                                      ],
+                                      "children": [
+                                        {
+                                          "type": "text",
+                                          "id": "BUKak",
+                                          "name": "Label",
+                                          "fill": "$success",
+                                          "content": "GEKOPPELD",
+                                          "fontFamily": "$font-caption",
+                                          "fontSize": "$text-2xs",
+                                          "fontWeight": "normal",
+                                          "letterSpacing": 1
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "X7iDcc",
+                                  "name": "Sub",
+                                  "fill": "$muted-foreground",
+                                  "content": "Boekhouding · facturen en grootboek",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": "$text-xs2",
+                                  "fontWeight": "normal"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "sFJTX",
+                              "name": "CTA",
+                              "width": "fill_container",
+                              "fill": "$primary",
+                              "cornerRadius": "$radius-md",
+                              "gap": 8,
+                              "padding": [
+                                10,
+                                20
+                              ],
+                              "justifyContent": "center",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "AoDzO",
+                                  "name": "Label",
+                                  "fill": "$primary-foreground",
+                                  "content": "Opnieuw koppelen",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": "$text-sm",
+                                  "fontWeight": "600"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "iJPL8",
+                                  "name": "Glyph",
+                                  "fill": "$primary-foreground",
+                                  "content": "→",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": "$text-sm",
+                                  "fontWeight": "500"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "T9Ok8r",
+                              "name": "Ontkoppelen",
+                              "width": "fill_container",
+                              "fill": "$card",
+                              "cornerRadius": "$radius-md",
+                              "stroke": "$border",
+                              "strokeWidth": 1,
+                              "padding": [
+                                12,
+                                18
+                              ],
+                              "justifyContent": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "V1GhF",
+                                  "name": "Label",
+                                  "fill": "$foreground",
+                                  "content": "Ontkoppelen",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": "$text-sm",
+                                  "fontWeight": "600"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "yMsau",
+                          "name": "Optie · Mollie",
+                          "width": "fill_container",
+                          "fill": "$card",
+                          "cornerRadius": "$radius-lg",
+                          "stroke": "$border",
+                          "strokeWidth": 1,
+                          "layout": "vertical",
+                          "gap": "$space-sm",
+                          "padding": [
+                            16,
+                            18
+                          ],
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "X5s2b",
+                              "name": "Logo Slot",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "rectangle",
+                                  "id": "zNwWi",
+                                  "name": "Logo",
+                                  "fill": {
+                                    "type": "image",
+                                    "enabled": true,
+                                    "url": "partners/mollie.png",
+                                    "mode": "fit"
+                                  },
+                                  "width": 104,
+                                  "height": 26
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "dg8Kd",
+                              "name": "Tekst",
+                              "width": "fill_container",
+                              "layout": "vertical",
+                              "gap": 3,
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "w1xdpm",
+                                  "name": "Naam",
+                                  "fill": "$foreground",
+                                  "content": "Mollie",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": "$text-md",
+                                  "fontWeight": "600"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "njIaT",
+                                  "name": "Sub",
+                                  "fill": "$muted-foreground",
+                                  "content": "Betalingen · incasso en betaallinks",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": "$text-xs2",
+                                  "fontWeight": "normal"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "yUiNR",
+                              "name": "CTA",
+                              "width": "fill_container",
+                              "fill": "$primary",
+                              "cornerRadius": "$radius-md",
+                              "gap": 8,
+                              "padding": [
+                                10,
+                                20
+                              ],
+                              "justifyContent": "center",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "pAfob",
+                                  "name": "Label",
+                                  "fill": "$primary-foreground",
+                                  "content": "Koppelen",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": "$text-sm",
+                                  "fontWeight": "600"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "d9j50G",
+                                  "name": "Glyph",
+                                  "fill": "$primary-foreground",
+                                  "content": "→",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": "$text-sm",
+                                  "fontWeight": "500"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "mAujh",
+                      "name": "Transparantie",
+                      "width": "fill_container",
+                      "fill": "$muted",
+                      "cornerRadius": "$radius-lg",
+                      "layout": "vertical",
+                      "gap": "$space-sm",
+                      "padding": 20,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "khtBZ",
+                          "name": "Kop",
+                          "fill": "$foreground",
+                          "content": "Wat er gebeurt als je koppelt",
+                          "fontFamily": "$font-body",
+                          "fontSize": "$text-sm",
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "Rn5NU",
+                          "name": "Punt",
+                          "width": "fill_container",
+                          "gap": 10,
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "U2z4IQ",
+                              "name": "Icon",
+                              "width": 16,
+                              "height": 16,
+                              "icon": "shield-check",
+                              "library": "lucide",
+                              "fill": "$muted-foreground"
+                            },
+                            {
+                              "type": "text",
+                              "id": "eIeru",
+                              "name": "Tekst",
+                              "fill": "$muted-foreground",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "Je logt in bij het systeem zelf. Emeq Hub ziet je wachtwoord nooit.",
+                              "lineHeight": 1.5,
+                              "fontFamily": "$font-body",
+                              "fontSize": "$text-xs2",
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "mIHBU",
+                          "name": "Punt",
+                          "width": "fill_container",
+                          "gap": 10,
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "bkb1R",
+                              "name": "Icon",
+                              "width": 16,
+                              "height": 16,
+                              "icon": "repeat",
+                              "library": "lucide",
+                              "fill": "$muted-foreground"
+                            },
+                            {
+                              "type": "text",
+                              "id": "S1Cx4f",
+                              "name": "Tekst",
+                              "fill": "$muted-foreground",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "{app} wisselt daarna alleen de gegevens uit die voor deze koppeling nodig zijn.",
+                              "lineHeight": 1.5,
+                              "fontFamily": "$font-body",
+                              "fontSize": "$text-xs2",
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "jG140",
+                          "name": "Punt",
+                          "width": "fill_container",
+                          "gap": 10,
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "j9539",
+                              "name": "Icon",
+                              "width": 16,
+                              "height": 16,
+                              "icon": "circle-x",
+                              "library": "lucide",
+                              "fill": "$muted-foreground"
+                            },
+                            {
+                              "type": "text",
+                              "id": "V2nKk",
+                              "name": "Tekst",
+                              "fill": "$muted-foreground",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "Je kunt de koppeling op elk moment intrekken — op deze pagina, of bij de leverancier zelf.",
+                              "lineHeight": 1.5,
+                              "fontFamily": "$font-body",
+                              "fontSize": "$text-xs2",
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "x8QMT",
+                      "name": "Hint",
+                      "fill": "$muted-foreground",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Deze pagina is persoonlijk en verloopt na 15 minuten.",
+                      "textAlign": "center",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-xs2",
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "PEt2B",
+              "name": "Footer",
+              "width": "fill_container",
+              "stroke": "$border",
+              "strokeWidth": {
+                "top": 1
+              },
+              "strokeLinejoin": "round",
+              "layout": "vertical",
+              "gap": 10,
+              "padding": 20,
+              "justifyContent": "space_between",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "qOLuY",
+                  "name": "Copyright",
+                  "fill": "$muted-foreground",
+                  "content": "© 2026 emeq",
+                  "fontFamily": "$font-body",
+                  "fontSize": "$text-xs2",
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "HakPr",
+          "x": 24490,
+          "y": 1240,
+          "name": "Pagina · Koppellink verlopen · Desktop",
+          "clip": true,
+          "width": 1440,
+          "height": 760,
+          "fill": "$background",
+          "layout": "vertical",
+          "children": [
+            {
+              "type": "frame",
+              "id": "RjixU",
+              "name": "Nav",
+              "width": "fill_container",
+              "fill": "$background",
+              "stroke": "$border",
+              "strokeAlignment": "inner",
+              "strokeLinejoin": "round",
+              "padding": [
+                18,
+                "$space-section-x"
+              ],
+              "justifyContent": "space_between",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "vxoW8",
+                  "name": "Nav Left",
+                  "gap": "$space-2xl",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "IlQPb",
+                      "name": "Logo",
+                      "gap": "$space-xs",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "rectangle",
+                          "id": "x3mL3n",
+                          "name": "Mark",
+                          "fill": {
+                            "type": "image",
+                            "enabled": true,
+                            "url": "logo.png",
+                            "mode": "fit"
+                          },
+                          "width": 14,
+                          "height": 14
+                        },
+                        {
+                          "type": "text",
+                          "id": "tcDya",
+                          "name": "Wordmark",
+                          "fill": "$foreground",
+                          "content": "hub",
+                          "fontFamily": "$font-heading",
+                          "fontSize": "$text-xl",
+                          "fontWeight": "700",
+                          "letterSpacing": -0.5
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "V6QZnO",
+                  "name": "Secure Badge",
+                  "fill": "$muted",
+                  "cornerRadius": "$radius-pill",
+                  "gap": 7,
+                  "padding": [
+                    7,
+                    12
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "zJhxa",
+                      "name": "Lock",
+                      "width": 13,
+                      "height": 13,
+                      "icon": "lock",
+                      "library": "lucide",
+                      "fill": "$muted-foreground"
+                    },
+                    {
+                      "type": "text",
+                      "id": "RIQKG",
+                      "name": "Label",
+                      "fill": "$muted-foreground",
+                      "content": "Beveiligde koppeling",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-xs2",
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "C6DGK0",
+              "name": "Content",
+              "width": "fill_container",
+              "height": "fill_container",
+              "layout": "vertical",
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "id": "g7VOv",
+                  "layoutPosition": "absolute",
+                  "x": 0,
+                  "y": 0,
+                  "name": "Header Pattern",
+                  "opacity": 0.3,
+                  "fill": {
+                    "type": "shader",
+                    "enabled": true,
+                    "url": "dotgrid.glsl",
+                    "uniforms": {
+                      "u_cell": 34,
+                      "u_color": "#a23696",
+                      "u_opacity": 0.08,
+                      "u_fade": 0.6
+                    }
+                  },
+                  "width": 1440,
+                  "height": 622
+                },
+                {
+                  "type": "frame",
+                  "id": "pQXoW",
+                  "name": "Column",
+                  "width": 720,
+                  "layout": "vertical",
+                  "gap": "$space-xl",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "zuc1Y",
+                      "name": "State Icon",
+                      "width": 56,
+                      "height": 56,
+                      "fill": "$muted",
+                      "cornerRadius": "$radius-full",
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "oOnTd",
+                          "name": "Glyph",
+                          "width": 26,
+                          "height": 26,
+                          "icon": "clock-alert",
+                          "library": "lucide",
+                          "fill": "$muted-foreground"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "S95k8g",
+                      "name": "Header",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": "$space-md",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "M4zmql",
+                          "name": "Eyebrow",
+                          "fill": "$muted-foreground",
+                          "content": "LINK VERLOPEN",
+                          "fontFamily": "$font-caption",
+                          "fontSize": "$text-xs",
+                          "fontWeight": "normal",
+                          "letterSpacing": 2
+                        },
+                        {
+                          "type": "text",
+                          "id": "vYkuB",
+                          "name": "H1",
+                          "fill": "$foreground",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Deze koppellink is niet meer geldig",
+                          "lineHeight": 1.15,
+                          "textAlign": "center",
+                          "fontFamily": "$font-heading",
+                          "fontSize": "$text-3xl",
+                          "fontWeight": "700"
+                        },
+                        {
+                          "type": "text",
+                          "id": "aw9zX",
+                          "name": "Sub",
+                          "fill": "$muted-foreground",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Een koppellink is 15 minuten geldig. Ga terug naar de app waar je vandaan komt en start de koppeling daar opnieuw — je bent zo weer hier.",
+                          "lineHeight": 1.55,
+                          "textAlign": "center",
+                          "fontFamily": "$font-body",
+                          "fontSize": "$text-base",
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "vBNg3",
+                      "name": "Hint",
+                      "fill": "$muted-foreground",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Lukt het daarna nog niet? Neem contact op met de supportafdeling van die app.",
+                      "textAlign": "center",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-xs2",
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "aeITU",
+              "name": "Footer",
+              "width": "fill_container",
+              "stroke": "$border",
+              "strokeWidth": {
+                "top": 1
+              },
+              "strokeLinejoin": "round",
+              "padding": [
+                28,
+                "$space-section-x"
+              ],
+              "justifyContent": "space_between",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "s4Y0Ct",
+                  "name": "Copyright",
+                  "fill": "$muted-foreground",
+                  "content": "© 2026 emeq",
+                  "fontFamily": "$font-body",
+                  "fontSize": "$text-xs2",
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "frame",
+                  "id": "yT1cK",
+                  "name": "Footer Links",
+                  "gap": "$space-xs",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "Y1ZufN",
+                      "name": "Partners",
+                      "fill": "$muted-foreground",
+                      "content": "Partners",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-xs2",
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "z5Hue4",
+                      "name": "Privacy",
+                      "fill": "$muted-foreground",
+                      "content": "Privacy",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-xs2",
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "Z5mXnQ",
+                      "name": "Voorwaarden",
+                      "fill": "$muted-foreground",
+                      "content": "Voorwaarden",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-xs2",
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "m4wpd",
+                      "name": "Sep",
+                      "fill": "$muted-foreground",
+                      "content": "·",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-xs2",
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "vkRjX",
+                      "name": "Verwerkersovereenkomst",
+                      "fill": "$muted-foreground",
+                      "content": "Verwerkersovereenkomst",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-xs2",
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "phmPS",
+                      "name": "Sep",
+                      "fill": "$muted-foreground",
+                      "content": "·",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-xs2",
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "r4kIGY",
+                      "name": "Support",
+                      "fill": "$muted-foreground",
+                      "content": "Support",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-xs2",
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "pJFdA",
+          "x": 26050,
+          "y": 1240,
+          "name": "Pagina · Koppeling geweigerd (bestaand: /oauth/failed) · Desktop",
+          "clip": true,
+          "width": 1440,
+          "height": 760,
+          "fill": "$background",
+          "layout": "vertical",
+          "children": [
+            {
+              "type": "frame",
+              "id": "gSQN2",
+              "name": "Nav",
+              "width": "fill_container",
+              "fill": "$background",
+              "stroke": "$border",
+              "strokeAlignment": "inner",
+              "strokeLinejoin": "round",
+              "padding": [
+                18,
+                "$space-section-x"
+              ],
+              "justifyContent": "space_between",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "Q09tr1",
+                  "name": "Nav Left",
+                  "gap": "$space-2xl",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "RwG4V",
+                      "name": "Logo",
+                      "gap": "$space-xs",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "rectangle",
+                          "id": "SVcgz",
+                          "name": "Mark",
+                          "fill": {
+                            "type": "image",
+                            "enabled": true,
+                            "url": "logo.png",
+                            "mode": "fit"
+                          },
+                          "width": 14,
+                          "height": 14
+                        },
+                        {
+                          "type": "text",
+                          "id": "RAE64",
+                          "name": "Wordmark",
+                          "fill": "$foreground",
+                          "content": "hub",
+                          "fontFamily": "$font-heading",
+                          "fontSize": "$text-xl",
+                          "fontWeight": "700",
+                          "letterSpacing": -0.5
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "d4zcS",
+                  "name": "Secure Badge",
+                  "fill": "$muted",
+                  "cornerRadius": "$radius-pill",
+                  "gap": 7,
+                  "padding": [
+                    7,
+                    12
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "yOQis",
+                      "name": "Lock",
+                      "width": 13,
+                      "height": 13,
+                      "icon": "lock",
+                      "library": "lucide",
+                      "fill": "$muted-foreground"
+                    },
+                    {
+                      "type": "text",
+                      "id": "WZYJm",
+                      "name": "Label",
+                      "fill": "$muted-foreground",
+                      "content": "Beveiligde koppeling",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-xs2",
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "Xdbxq",
+              "name": "Content",
+              "width": "fill_container",
+              "height": "fill_container",
+              "layout": "vertical",
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "id": "a60Hi",
+                  "layoutPosition": "absolute",
+                  "x": 0,
+                  "y": 0,
+                  "name": "Header Pattern",
+                  "opacity": 0.3,
+                  "fill": {
+                    "type": "shader",
+                    "enabled": true,
+                    "url": "dotgrid.glsl",
+                    "uniforms": {
+                      "u_cell": 34,
+                      "u_color": "#a23696",
+                      "u_opacity": 0.08,
+                      "u_fade": 0.6
+                    }
+                  },
+                  "width": 1440,
+                  "height": 622
+                },
+                {
+                  "type": "frame",
+                  "id": "tcfb7",
+                  "name": "Column",
+                  "width": 720,
+                  "layout": "vertical",
+                  "gap": "$space-xl",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "p22P6",
+                      "name": "Handoff Signal",
+                      "fill": "$card",
+                      "cornerRadius": "$radius-pill",
+                      "stroke": "$border",
+                      "strokeWidth": 1,
+                      "gap": "$space-xs",
+                      "padding": [
+                        7,
+                        14
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "q6RZK",
+                          "name": "Consumer",
+                          "fill": "$foreground",
+                          "content": "{app}",
+                          "fontFamily": "$font-body",
+                          "fontSize": "$text-xs2",
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "text",
+                          "id": "hrzUU",
+                          "name": "Glyph",
+                          "fill": "$muted-foreground",
+                          "content": "⇄",
+                          "fontFamily": "$font-body",
+                          "fontSize": "$text-xs2",
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "WjJIE",
+                          "name": "Mark",
+                          "fill": {
+                            "type": "image",
+                            "enabled": true,
+                            "url": "logo.png",
+                            "mode": "fit"
+                          },
+                          "width": 14,
+                          "height": 14
+                        },
+                        {
+                          "type": "text",
+                          "id": "vUUfa",
+                          "name": "Wordmark",
+                          "fill": "$foreground",
+                          "content": "emeq hub",
+                          "fontFamily": "$font-body",
+                          "fontSize": "$text-xs2",
+                          "fontWeight": "700"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "pZLQv",
+                      "name": "State Icon",
+                      "width": 56,
+                      "height": 56,
+                      "fill": "$muted",
+                      "cornerRadius": "$radius-full",
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "mTX9O",
+                          "name": "Glyph",
+                          "width": 26,
+                          "height": 26,
+                          "icon": "shield-x",
+                          "library": "lucide",
+                          "fill": "$muted-foreground"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "kPNmh",
+                      "name": "Header",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": "$space-md",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "mPwLF",
+                          "name": "Eyebrow",
+                          "fill": "$muted-foreground",
+                          "content": "GEEN TOESTEMMING GEGEVEN",
+                          "fontFamily": "$font-caption",
+                          "fontSize": "$text-xs",
+                          "fontWeight": "normal",
+                          "letterSpacing": 2
+                        },
+                        {
+                          "type": "text",
+                          "id": "s0CMTi",
+                          "name": "H1",
+                          "fill": "$foreground",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "De koppeling is niet voltooid",
+                          "lineHeight": 1.15,
+                          "textAlign": "center",
+                          "fontFamily": "$font-heading",
+                          "fontSize": "$text-3xl",
+                          "fontWeight": "700"
+                        },
+                        {
+                          "type": "text",
+                          "id": "h602h",
+                          "name": "Sub",
+                          "fill": "$muted-foreground",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Je hebt bij {provider} geen toestemming gegeven, of de sessie is afgebroken. Er is niets gewijzigd en er zijn geen gegevens uitgewisseld.",
+                          "lineHeight": 1.55,
+                          "textAlign": "center",
+                          "fontFamily": "$font-body",
+                          "fontSize": "$text-base",
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "rtedh",
+                      "name": "CTA",
+                      "fill": "$primary",
+                      "cornerRadius": "$radius-md",
+                      "gap": 8,
+                      "padding": [
+                        12,
+                        24
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "uN1bz",
+                          "name": "Label",
+                          "fill": "$primary-foreground",
+                          "content": "Opnieuw proberen",
+                          "fontFamily": "$font-body",
+                          "fontSize": "$text-sm",
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "text",
+                          "id": "Z53e5",
+                          "name": "Glyph",
+                          "fill": "$primary-foreground",
+                          "content": "→",
+                          "fontFamily": "$font-body",
+                          "fontSize": "$text-sm",
+                          "fontWeight": "500"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "r7vuJ",
+                      "name": "Hint",
+                      "fill": "$muted-foreground",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Wil je liever niet koppelen? Dan hoef je niets te doen — sluit dit venster.",
+                      "textAlign": "center",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-xs2",
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "vBd5x",
+              "name": "Footer",
+              "width": "fill_container",
+              "stroke": "$border",
+              "strokeWidth": {
+                "top": 1
+              },
+              "strokeLinejoin": "round",
+              "padding": [
+                28,
+                "$space-section-x"
+              ],
+              "justifyContent": "space_between",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "puKew",
+                  "name": "Copyright",
+                  "fill": "$muted-foreground",
+                  "content": "© 2026 emeq",
+                  "fontFamily": "$font-body",
+                  "fontSize": "$text-xs2",
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "frame",
+                  "id": "Fifkm",
+                  "name": "Footer Links",
+                  "gap": "$space-xs",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "HfIG7",
+                      "name": "Partners",
+                      "fill": "$muted-foreground",
+                      "content": "Partners",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-xs2",
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "oQvgi",
+                      "name": "Privacy",
+                      "fill": "$muted-foreground",
+                      "content": "Privacy",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-xs2",
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "FRCTr",
+                      "name": "Voorwaarden",
+                      "fill": "$muted-foreground",
+                      "content": "Voorwaarden",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-xs2",
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "OeWbb",
+                      "name": "Sep",
+                      "fill": "$muted-foreground",
+                      "content": "·",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-xs2",
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "aaJJ7",
+                      "name": "Verwerkersovereenkomst",
+                      "fill": "$muted-foreground",
+                      "content": "Verwerkersovereenkomst",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-xs2",
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "l6VBU",
+                      "name": "Sep",
+                      "fill": "$muted-foreground",
+                      "content": "·",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-xs2",
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "vH62v",
+                      "name": "Support",
+                      "fill": "$muted-foreground",
+                      "content": "Support",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-xs2",
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "S8h89r",
+          "x": 29330,
+          "y": 1240,
+          "name": "Pagina · Ontkoppelen bevestigen · Desktop",
+          "clip": true,
+          "width": 1440,
+          "height": 1100,
+          "fill": "$background",
+          "layout": "vertical",
+          "children": [
+            {
+              "type": "frame",
+              "id": "kPUpK",
+              "name": "Nav",
+              "width": "fill_container",
+              "fill": "$background",
+              "stroke": "$border",
+              "strokeAlignment": "inner",
+              "strokeLinejoin": "round",
+              "padding": [
+                18,
+                "$space-section-x"
+              ],
+              "justifyContent": "space_between",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "sSRWx",
+                  "name": "Nav Left",
+                  "gap": "$space-2xl",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "CM6xc",
+                      "name": "Logo",
+                      "gap": "$space-xs",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "rectangle",
+                          "id": "p6eBt",
+                          "name": "Mark",
+                          "fill": {
+                            "type": "image",
+                            "enabled": true,
+                            "url": "logo.png",
+                            "mode": "fit"
+                          },
+                          "width": 14,
+                          "height": 14
+                        },
+                        {
+                          "type": "text",
+                          "id": "tmY0c",
+                          "name": "Wordmark",
+                          "fill": "$foreground",
+                          "content": "hub",
+                          "fontFamily": "$font-heading",
+                          "fontSize": "$text-xl",
+                          "fontWeight": "700",
+                          "letterSpacing": -0.5
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "WdQ8E",
+                  "name": "Secure Badge",
+                  "fill": "$muted",
+                  "cornerRadius": "$radius-pill",
+                  "gap": 7,
+                  "padding": [
+                    7,
+                    12
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "X2ZAl",
+                      "name": "Lock",
+                      "width": 13,
+                      "height": 13,
+                      "icon": "lock",
+                      "library": "lucide",
+                      "fill": "$muted-foreground"
+                    },
+                    {
+                      "type": "text",
+                      "id": "anKxP",
+                      "name": "Label",
+                      "fill": "$muted-foreground",
+                      "content": "Beveiligde koppeling",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-xs2",
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "UXxyl",
+              "name": "Content",
+              "width": "fill_container",
+              "height": "fill_container",
+              "layout": "vertical",
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "id": "ynEdT",
+                  "layoutPosition": "absolute",
+                  "x": 0,
+                  "y": 0,
+                  "name": "Header Pattern",
+                  "opacity": 0.3,
+                  "fill": {
+                    "type": "shader",
+                    "enabled": true,
+                    "url": "dotgrid.glsl",
+                    "uniforms": {
+                      "u_cell": 34,
+                      "u_color": "#a23696",
+                      "u_opacity": 0.08,
+                      "u_fade": 0.6
+                    }
+                  },
+                  "width": 1440,
+                  "height": 962
+                },
+                {
+                  "type": "frame",
+                  "id": "mcaGu",
+                  "name": "Column",
+                  "width": 720,
+                  "layout": "vertical",
+                  "gap": "$space-xl",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "h7qcS",
+                      "name": "Handoff Signal",
+                      "fill": "$card",
+                      "cornerRadius": "$radius-pill",
+                      "stroke": "$border",
+                      "strokeWidth": 1,
+                      "gap": "$space-xs",
+                      "padding": [
+                        7,
+                        14
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "Sq41Z",
+                          "name": "Consumer",
+                          "fill": "$foreground",
+                          "content": "{app}",
+                          "fontFamily": "$font-body",
+                          "fontSize": "$text-xs2",
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "text",
+                          "id": "rFoDF",
+                          "name": "Glyph",
+                          "fill": "$muted-foreground",
+                          "content": "⇄",
+                          "fontFamily": "$font-body",
+                          "fontSize": "$text-xs2",
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "ZZ2TQ",
+                          "name": "Mark",
+                          "fill": {
+                            "type": "image",
+                            "enabled": true,
+                            "url": "logo.png",
+                            "mode": "fit"
+                          },
+                          "width": 14,
+                          "height": 14
+                        },
+                        {
+                          "type": "text",
+                          "id": "d27sgd",
+                          "name": "Wordmark",
+                          "fill": "$foreground",
+                          "content": "emeq hub",
+                          "fontFamily": "$font-body",
+                          "fontSize": "$text-xs2",
+                          "fontWeight": "700"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "WoC6a",
+                      "name": "State Icon",
+                      "width": 56,
+                      "height": 56,
+                      "fill": "$muted",
+                      "cornerRadius": "$radius-full",
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "tEfbw",
+                          "name": "Glyph",
+                          "width": 28,
+                          "height": 28,
+                          "icon": "unplug",
+                          "library": "lucide",
+                          "fill": "$muted-foreground"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "xPwCc",
+                      "name": "Header",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": "$space-md",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "do5om",
+                          "name": "Eyebrow",
+                          "fill": "$muted-foreground",
+                          "content": "KOPPELING BEHEREN",
+                          "fontFamily": "$font-caption",
+                          "fontSize": "$text-xs",
+                          "fontWeight": "normal",
+                          "letterSpacing": 2
+                        },
+                        {
+                          "type": "text",
+                          "id": "mSxje",
+                          "name": "H1",
+                          "fill": "$foreground",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Weet je zeker dat je wilt ontkoppelen?",
+                          "lineHeight": 1.15,
+                          "textAlign": "center",
+                          "fontFamily": "$font-heading",
+                          "fontSize": "$text-3xl",
+                          "fontWeight": "700"
+                        },
+                        {
+                          "type": "text",
+                          "id": "FaTky",
+                          "name": "Sub",
+                          "fill": "$muted-foreground",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Bevestig hieronder. Je kunt daarna altijd opnieuw koppelen.",
+                          "lineHeight": 1.55,
+                          "textAlign": "center",
+                          "fontFamily": "$font-body",
+                          "fontSize": "$text-base",
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "D9a7Ua",
+                      "name": "Provider Picker",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": "$space-sm",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "CQiYC",
+                          "name": "Optie · Exact Online · Bevestigen",
+                          "width": "fill_container",
+                          "fill": "$card",
+                          "cornerRadius": "$radius-lg",
+                          "stroke": "$border",
+                          "strokeWidth": 1,
+                          "gap": "$space-md",
+                          "padding": [
+                            18,
+                            22
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "r5N9m",
+                              "name": "Tekst",
+                              "width": "fill_container",
+                              "layout": "vertical",
+                              "gap": 3,
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "qc46s",
+                                  "name": "Titel",
+                                  "fill": "$foreground",
+                                  "content": "Exact Online ontkoppelen?",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": "$text-md",
+                                  "fontWeight": "600"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "uq8G3",
+                                  "name": "Sub",
+                                  "fill": "$muted-foreground",
+                                  "textGrowth": "fixed-width",
+                                  "width": "fill_container",
+                                  "content": "De toegang wordt ingetrokken. Gegevens die al zijn uitgewisseld blijven staan.",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": "$text-xs2",
+                                  "fontWeight": "normal"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "rIR73",
+                              "name": "Acties",
+                              "gap": 8,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "frame",
+                                  "id": "GuNoR",
+                                  "name": "Bevestig",
+                                  "fill": "$primary",
+                                  "cornerRadius": "$radius-md",
+                                  "padding": [
+                                    10,
+                                    20
+                                  ],
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "U8InwG",
+                                      "name": "Label",
+                                      "fill": "$primary-foreground",
+                                      "content": "Ontkoppelen",
+                                      "fontFamily": "$font-body",
+                                      "fontSize": "$text-sm",
+                                      "fontWeight": "600"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "uPVIi",
+                                  "name": "Annuleer",
+                                  "fill": "$card",
+                                  "cornerRadius": "$radius-md",
+                                  "stroke": "$border",
+                                  "strokeWidth": 1,
+                                  "padding": [
+                                    10,
+                                    18
+                                  ],
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "zOd4E",
+                                      "name": "Label",
+                                      "fill": "$foreground",
+                                      "content": "Annuleren",
+                                      "fontFamily": "$font-body",
+                                      "fontSize": "$text-sm",
+                                      "fontWeight": "600"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "s8wBZ",
+                          "name": "Optie · Mollie",
+                          "width": "fill_container",
+                          "fill": "$card",
+                          "cornerRadius": "$radius-lg",
+                          "stroke": "$border",
+                          "strokeWidth": 1,
+                          "gap": "$space-md",
+                          "padding": [
+                            18,
+                            22
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "qYAO3",
+                              "name": "Logo Slot",
+                              "width": 120,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "rectangle",
+                                  "id": "gKGXx",
+                                  "name": "Logo",
+                                  "fill": {
+                                    "type": "image",
+                                    "enabled": true,
+                                    "url": "partners/mollie.png",
+                                    "mode": "fit"
+                                  },
+                                  "width": 104,
+                                  "height": 26
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "wPGT2",
+                              "name": "Tekst",
+                              "width": "fill_container",
+                              "layout": "vertical",
+                              "gap": 3,
+                              "children": [
+                                {
+                                  "type": "frame",
+                                  "id": "oMYwu",
+                                  "name": "Status Row",
+                                  "width": "fill_container",
+                                  "gap": 8,
+                                  "alignItems": "center",
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "IUEHP",
+                                      "name": "Naam",
+                                      "fill": "$foreground",
+                                      "content": "Mollie",
+                                      "fontFamily": "$font-body",
+                                      "fontSize": "$text-md",
+                                      "fontWeight": "600"
+                                    },
+                                    {
+                                      "type": "frame",
+                                      "id": "fLGbB",
+                                      "name": "Pill",
+                                      "fill": "$success-soft",
+                                      "cornerRadius": "$radius-pill",
+                                      "padding": [
+                                        2,
+                                        8
+                                      ],
+                                      "children": [
+                                        {
+                                          "type": "text",
+                                          "id": "uY9Wq",
+                                          "name": "Label",
+                                          "fill": "$success",
+                                          "content": "GEKOPPELD",
+                                          "fontFamily": "$font-caption",
+                                          "fontSize": "$text-2xs",
+                                          "fontWeight": "normal",
+                                          "letterSpacing": 1
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "Snoo5",
+                                  "name": "Sub",
+                                  "fill": "$muted-foreground",
+                                  "textGrowth": "fixed-width",
+                                  "width": "fill_container",
+                                  "content": "Betalingen · incasso en betaallinks",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": "$text-xs2",
+                                  "fontWeight": "normal"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "ZsWVs",
+                              "name": "Acties",
+                              "gap": 8,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "frame",
+                                  "id": "Eew8G",
+                                  "name": "CTA",
+                                  "fill": "$card",
+                                  "cornerRadius": "$radius-md",
+                                  "stroke": "$border",
+                                  "strokeWidth": 1,
+                                  "gap": 8,
+                                  "padding": [
+                                    10,
+                                    20
+                                  ],
+                                  "alignItems": "center",
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "u0yLjL",
+                                      "name": "Label",
+                                      "fill": "$foreground",
+                                      "content": "Opnieuw",
+                                      "fontFamily": "$font-body",
+                                      "fontSize": "$text-sm",
+                                      "fontWeight": "600"
+                                    },
+                                    {
+                                      "type": "text",
+                                      "id": "N2WN5F",
+                                      "name": "Glyph",
+                                      "fill": "$foreground",
+                                      "content": "→",
+                                      "fontFamily": "$font-body",
+                                      "fontSize": "$text-sm",
+                                      "fontWeight": "500"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "EPH8z",
+                                  "name": "Ontkoppelen",
+                                  "fill": "$card",
+                                  "cornerRadius": "$radius-md",
+                                  "stroke": "$border",
+                                  "strokeWidth": 1,
+                                  "padding": [
+                                    10,
+                                    14
+                                  ],
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "gCRkN",
+                                      "name": "Label",
+                                      "fill": "$foreground",
+                                      "content": "Ontkoppelen",
+                                      "fontFamily": "$font-body",
+                                      "fontSize": "$text-sm",
+                                      "fontWeight": "600"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "dAb2v",
+                      "name": "Hint",
+                      "fill": "$muted-foreground",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Ontkoppelen trekt de toegang in. Gegevens die al zijn uitgewisseld blijven staan.",
+                      "textAlign": "center",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-xs2",
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "TiRVO",
+              "name": "Footer",
+              "width": "fill_container",
+              "stroke": "$border",
+              "strokeWidth": {
+                "top": 1
+              },
+              "strokeLinejoin": "round",
+              "padding": [
+                28,
+                "$space-section-x"
+              ],
+              "justifyContent": "space_between",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "h5aECM",
+                  "name": "Copyright",
+                  "fill": "$muted-foreground",
+                  "content": "© 2026 emeq",
+                  "fontFamily": "$font-body",
+                  "fontSize": "$text-xs2",
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "frame",
+                  "id": "EFiKH",
+                  "name": "Footer Links",
+                  "gap": "$space-xs",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "PVL9O",
+                      "name": "Partners",
+                      "fill": "$muted-foreground",
+                      "content": "Partners",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-xs2",
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "hHJ17",
+                      "name": "Privacy",
+                      "fill": "$muted-foreground",
+                      "content": "Privacy",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-xs2",
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "swxCs",
+                      "name": "Voorwaarden",
+                      "fill": "$muted-foreground",
+                      "content": "Voorwaarden",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-xs2",
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "RzZF9",
+                      "name": "Sep",
+                      "fill": "$muted-foreground",
+                      "content": "·",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-xs2",
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "mNlYG",
+                      "name": "Verwerkersovereenkomst",
+                      "fill": "$muted-foreground",
+                      "content": "Verwerkersovereenkomst",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-xs2",
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "qbGGX",
+                      "name": "Sep",
+                      "fill": "$muted-foreground",
+                      "content": "·",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-xs2",
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "jHmX6",
+                      "name": "Support",
+                      "fill": "$muted-foreground",
+                      "content": "Support",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-xs2",
+                      "fontWeight": "normal"
+                    }
+                  ]
                 }
               ]
             }
