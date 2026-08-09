@@ -75,6 +75,41 @@ class ExactOAuthFlowTest extends TestCase
         );
     }
 
+    public function test_exchange_code_normalises_user_id_before_storing(): void
+    {
+        Bus::fake([RegisterExactWebhookSubscriptionsJob::class]);
+
+        Http::fake([
+            'start.exactonline.nl/api/oauth2/token' => Http::response([
+                'access_token' => 'acc_xyz',
+                'token_type' => 'bearer',
+                'expires_in' => '600',
+                'refresh_token' => 'ref_xyz',
+            ]),
+            // .NET-formatter "B": accolades + hoofdletters.
+            'start.exactonline.nl/api/v1/current/Me' => Http::response([
+                'd' => ['results' => [[
+                    'CurrentDivision' => 4471372,
+                    'UserID' => '{D3B3F9A1-9C2E-4B7A-8F7E-2F4A1B6C9D0E}',
+                ]]],
+            ]),
+        ]);
+
+        $connection = Connection::factory()->forExact()->create([
+            'status' => 'pending',
+            'oauth_state' => 'st',
+            'oauth_state_expires_at' => now()->addMinutes(30),
+            'administratie_id' => null,
+        ]);
+
+        $this->app->make(ExactOAuthFlow::class)->exchangeCode($connection, 'auth_code_abc');
+
+        $this->assertSame(
+            'd3b3f9a1-9c2e-4b7a-8f7e-2f4a1b6c9d0e',
+            $connection->refresh()->metadata['exact_user_id'] ?? null,
+        );
+    }
+
     public function test_exchange_code_clears_revoked_at_on_reconnect(): void
     {
         Bus::fake([RegisterExactWebhookSubscriptionsJob::class]);

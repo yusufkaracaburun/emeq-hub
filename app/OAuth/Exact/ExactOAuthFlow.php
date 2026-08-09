@@ -7,6 +7,7 @@ use App\Jobs\Exact\DeleteExactWebhookSubscriptionsJob;
 use App\Jobs\Exact\RegisterExactWebhookSubscriptionsJob;
 use App\Models\Account;
 use App\Models\Connection;
+use App\Support\Exact\ExactUserId;
 use App\OAuth\Contracts\OAuthFlow;
 use Emeq\ExactApi\OData\Envelope;
 use Illuminate\Contracts\Config\Repository as ConfigRepository;
@@ -69,7 +70,7 @@ final class ExactOAuthFlow implements OAuthFlow
         // connection terugvindt. Merge zodat bestaande metadata blijft staan.
         $metadata = $connection->metadata ?? [];
         if ($me['user_id'] !== null) {
-            $metadata['exact_user_id'] = $me['user_id'];
+            $metadata['exact_user_id'] = ExactUserId::normalize($me['user_id']);
         }
 
         $connection->fill([
@@ -165,7 +166,7 @@ final class ExactOAuthFlow implements OAuthFlow
         }
 
         $metadata = $connection->metadata ?? [];
-        $metadata['exact_user_id'] = $userId;
+        $metadata['exact_user_id'] = ExactUserId::normalize($userId);
 
         $connection->update(['metadata' => $metadata]);
 
