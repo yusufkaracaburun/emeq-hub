@@ -30,7 +30,7 @@ class StartProviderConnection
      * @return array{connection: Connection, redirect_url: string}
      *
      * @throws ProviderNotConnectableException Provider bestaat niet of heeft geen OAuth-flow.
-     * @throws ProviderDisabledException       Kill-switch staat uit voor deze provider.
+     * @throws ProviderDisabledException Kill-switch staat uit voor deze provider.
      */
     public function handle(Account $account, Provider $provider, ?string $returnUrl): array
     {
