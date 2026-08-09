@@ -61,6 +61,14 @@ class DemoRequestsTable
                     ->visible(fn (DemoRequest $record): bool => $record->status === 'new')
                     ->requiresConfirmation()
                     ->action(fn (DemoRequest $record) => $record->update(['status' => 'handled'])),
+                Action::make('decline')
+                    ->label('Afwijzen')
+                    ->icon('heroicon-o-x-mark')
+                    ->color('danger')
+                    ->visible(fn (DemoRequest $record): bool => $record->status === 'new')
+                    ->requiresConfirmation()
+                    ->modalDescription('De aanvraag blijft bewaard, maar verdwijnt uit de nieuwe-inbox.')
+                    ->action(fn (DemoRequest $record) => $record->update(['status' => 'declined'])),
             ])
             ->toolbarActions([])
             ->defaultSort('created_at', 'desc')
