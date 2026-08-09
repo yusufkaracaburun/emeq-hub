@@ -135,7 +135,13 @@ class ConnectHandoffController extends Controller
             );
         }
 
-        return redirect()->to($this->links->mint($account, $this->returnUrl($request))['url']);
+        // Vervaltijd overnemen, niet opnieuw zetten: ontkoppelen is idempotent,
+        // dus een verse TTL zou een gelekte link onbeperkt verlengbaar maken.
+        return redirect()->to($this->links->mint(
+            $account,
+            $this->returnUrl($request),
+            $this->links->inheritedExpiry($request),
+        )['url']);
     }
 
     /**

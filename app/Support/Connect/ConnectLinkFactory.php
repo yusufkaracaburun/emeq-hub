@@ -28,11 +28,13 @@ class ConnectLinkFactory
     public const TTL_MINUTES = 15;
 
     /**
+     * @param  CarbonImmutable|null  $expiresAt  Vervaltijd van een bestaande link, om die
+     *                                           over te nemen in plaats van te verlengen.
      * @return array{url: string, expires_at: CarbonImmutable}
      */
-    public function mint(Account $account, ?string $returnUrl = null): array
+    public function mint(Account $account, ?string $returnUrl = null, ?CarbonImmutable $expiresAt = null): array
     {
-        $expiresAt = CarbonImmutable::now()->addMinutes(self::TTL_MINUTES);
+        $expiresAt ??= CarbonImmutable::now()->addMinutes(self::TTL_MINUTES);
 
         $parameters = ['account' => $account->getKey()];
 

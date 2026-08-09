@@ -212,6 +212,30 @@ class ConnectHandoffTest extends TestCase
         Queue::assertPushed(ForwardConnectionRevokedToConsumerJob::class);
     }
 
+    public function test_disconnecting_does_not_extend_the_link_lifetime(): void
+    {
+        Queue::fake();
+
+        $account = $this->account();
+        Connection::factory()->forExact()->active()->for($account)->create();
+
+        $link = $this->linkFor($account);
+        $originalExpiry = $this->expiryOf($link);
+
+        $disconnectUrl = collect($this->getPageProps($link)['providers'])
+            ->firstWhere('key', 'exact')['disconnect_url'];
+
+        // Zonder tijdsprong zou een verse mint in dezelfde seconde dezelfde
+        // vervaltijd opleveren en zou deze test niets bewijzen.
+        $this->travel(5)->minutes();
+
+        $redirect = $this->delete($disconnectUrl)->assertRedirect()->headers->get('Location');
+
+        // De TTL begrenst de schade van een gelekte link. Wie de link heeft mag
+        // ontkoppelen, maar niet z'n eigen venster oprekken.
+        $this->assertSame($originalExpiry, $this->expiryOf($redirect));
+    }
+
     public function test_a_disconnected_provider_is_offered_for_connecting_again(): void
     {
         $account = $this->account();
@@ -303,6 +327,13 @@ class ConnectHandoffTest extends TestCase
     {
         return collect($this->getPageProps($this->linkFor($account))['providers'])
             ->firstWhere('key', $provider)['start_url'];
+    }
+
+    private function expiryOf(string $url): int
+    {
+        parse_str((string) parse_url($url, PHP_URL_QUERY), $query);
+
+        return (int) ($query['expires'] ?? 0);
     }
 
     /**
