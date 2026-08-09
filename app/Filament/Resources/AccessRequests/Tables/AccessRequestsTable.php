@@ -71,6 +71,14 @@ class AccessRequestsTable
                     ->visible(fn (AccessRequest $record): bool => $record->status === 'new')
                     ->requiresConfirmation()
                     ->action(fn (AccessRequest $record) => $record->update(['status' => 'handled'])),
+                Action::make('decline')
+                    ->label('Afwijzen')
+                    ->icon('heroicon-o-x-mark')
+                    ->color('danger')
+                    ->visible(fn (AccessRequest $record): bool => $record->status === 'new')
+                    ->requiresConfirmation()
+                    ->modalDescription('De aanvraag blijft bewaard, maar verdwijnt uit de nieuwe-inbox en kan niet meer ge-onboard worden.')
+                    ->action(fn (AccessRequest $record) => $record->update(['status' => 'declined'])),
             ])
             ->toolbarActions([])
             ->defaultSort('created_at', 'desc')
