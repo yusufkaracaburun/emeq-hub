@@ -32598,6 +32598,2791 @@
       "width": 560,
       "height": 0,
       "content": "App Center URI's (prod):\nMeer informatie / Probeer nu / Starten\n  → https://hub.emeq.nl/partners/exact\nNiet meer gebruiken (Deprovisioning URL)\n  → https://hub.emeq.nl/exact/stop\n  Exact append: ?Country=&Language=&UserId=\n  ← dit design (Confirm / Done / Soft)"
+    },
+    {
+      "type": "group",
+      "id": "j5RKfi",
+      "x": 0,
+      "y": 0,
+      "name": "Banners · NL",
+      "children": [
+        {
+          "type": "frame",
+          "id": "E3vel",
+          "x": 13200,
+          "y": 0,
+          "name": "Banner · LinkedIn/OG · 1200×630",
+          "clip": true,
+          "width": 1200,
+          "height": 630,
+          "fill": "$background",
+          "layout": "vertical",
+          "padding": [
+            56,
+            64
+          ],
+          "justifyContent": "space_between",
+          "children": [
+            {
+              "type": "ellipse",
+              "id": "W4yuv",
+              "layoutPosition": "absolute",
+              "x": 705,
+              "y": 135,
+              "name": "Ring A",
+              "fill": "#00000000",
+              "width": 900,
+              "height": 900,
+              "stroke": "#a236962e",
+              "strokeWidth": 1.5
+            },
+            {
+              "type": "ellipse",
+              "id": "mvbKV",
+              "layoutPosition": "absolute",
+              "x": 896,
+              "y": 326,
+              "name": "Ring B",
+              "fill": "#00000000",
+              "width": 675,
+              "height": 675,
+              "stroke": "#a2369624",
+              "strokeWidth": 1.5
+            },
+            {
+              "type": "frame",
+              "id": "OGD0v",
+              "name": "Logo",
+              "gap": 10,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "id": "kA2e2",
+                  "name": "Mark",
+                  "fill": {
+                    "type": "image",
+                    "enabled": true,
+                    "url": "logo.png",
+                    "mode": "fit"
+                  },
+                  "width": 40,
+                  "height": 40
+                },
+                {
+                  "type": "text",
+                  "id": "QQXNQ",
+                  "name": "Wordmark",
+                  "fill": "$foreground",
+                  "content": "hub",
+                  "fontFamily": "Inter",
+                  "fontSize": 34,
+                  "fontWeight": "700"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "aomIV",
+              "name": "Copy",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 22,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "TAr5o",
+                  "name": "Eyebrow",
+                  "fill": "$muted-foreground",
+                  "content": "UNIFIED API · INTEGRATIEPLATFORM",
+                  "fontFamily": "IBM Plex Mono",
+                  "fontSize": 16,
+                  "fontWeight": "normal",
+                  "letterSpacing": 3
+                },
+                {
+                  "type": "frame",
+                  "id": "jdWv1",
+                  "name": "H1",
+                  "gap": 16,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "wECzT",
+                      "name": "w1",
+                      "fill": "$foreground",
+                      "content": "Integreer",
+                      "fontFamily": "Inter",
+                      "fontSize": 72,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "h7IwtQ",
+                      "name": "w2",
+                      "fill": "$brand",
+                      "content": "zonder grenzen.",
+                      "fontFamily": "Inter",
+                      "fontSize": 72,
+                      "fontWeight": "700"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "f35Zx",
+                  "name": "Sub",
+                  "fill": "$muted-foreground",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Eén API voor alle externe systemen die je klanten gebruiken —\nzonder maanden werk aan OAuth, tokenbeheer en webhooks.",
+                  "lineHeight": 1.45,
+                  "fontFamily": "Inter",
+                  "fontSize": 24,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "p9ZZom",
+              "name": "Bottom",
+              "width": "fill_container",
+              "justifyContent": "space_between",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "YKaO5",
+                  "name": "CTA",
+                  "fill": "$primary",
+                  "cornerRadius": "$radius-pill",
+                  "gap": 12,
+                  "padding": [
+                    18,
+                    32
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "RDw93",
+                      "name": "Label",
+                      "fill": "$primary-foreground",
+                      "content": "Start met koppelen",
+                      "fontFamily": "Inter",
+                      "fontSize": 22,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "k5Ktt8",
+                      "name": "Glyph",
+                      "fill": "$primary-foreground",
+                      "content": "→",
+                      "fontFamily": "Inter",
+                      "fontSize": 22,
+                      "fontWeight": "500"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "a8jKuR",
+                  "name": "Partners",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "RdRwN",
+                      "name": "URL",
+                      "fill": "$muted-foreground",
+                      "content": "hub.emeq.nl",
+                      "fontFamily": "IBM Plex Mono",
+                      "fontSize": 18,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "v2xby",
+          "x": 14520,
+          "y": 0,
+          "name": "Banner · X post · 1600×900",
+          "clip": true,
+          "width": 1600,
+          "height": 900,
+          "fill": "$background",
+          "layout": "vertical",
+          "padding": [
+            76,
+            88
+          ],
+          "justifyContent": "space_between",
+          "children": [
+            {
+              "type": "ellipse",
+              "id": "MWL0p",
+              "layoutPosition": "absolute",
+              "x": 940,
+              "y": 240,
+              "name": "Ring A",
+              "fill": "#00000000",
+              "width": 1200,
+              "height": 1200,
+              "stroke": "#a236962e",
+              "strokeWidth": 1.5
+            },
+            {
+              "type": "ellipse",
+              "id": "TLe82",
+              "layoutPosition": "absolute",
+              "x": 1195,
+              "y": 495,
+              "name": "Ring B",
+              "fill": "#00000000",
+              "width": 900,
+              "height": 900,
+              "stroke": "#a2369624",
+              "strokeWidth": 1.5
+            },
+            {
+              "type": "frame",
+              "id": "Qu6BP",
+              "name": "Logo",
+              "gap": 10,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "id": "u9rCk",
+                  "name": "Mark",
+                  "fill": {
+                    "type": "image",
+                    "enabled": true,
+                    "url": "logo.png",
+                    "mode": "fit"
+                  },
+                  "width": 52,
+                  "height": 52
+                },
+                {
+                  "type": "text",
+                  "id": "bfm3S",
+                  "name": "Wordmark",
+                  "fill": "$foreground",
+                  "content": "hub",
+                  "fontFamily": "Inter",
+                  "fontSize": 44,
+                  "fontWeight": "700"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "WJ0Ib",
+              "name": "Copy",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 22,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "E4xawA",
+                  "name": "Eyebrow",
+                  "fill": "$muted-foreground",
+                  "content": "UNIFIED API · INTEGRATIEPLATFORM",
+                  "fontFamily": "IBM Plex Mono",
+                  "fontSize": 20,
+                  "fontWeight": "normal",
+                  "letterSpacing": 4
+                },
+                {
+                  "type": "frame",
+                  "id": "vnoF5",
+                  "name": "H1",
+                  "gap": 22,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "fKR1Z",
+                      "name": "w1",
+                      "fill": "$foreground",
+                      "content": "Integreer",
+                      "fontFamily": "Inter",
+                      "fontSize": 96,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "YGAhi",
+                      "name": "w2",
+                      "fill": "$brand",
+                      "content": "zonder grenzen.",
+                      "fontFamily": "Inter",
+                      "fontSize": 96,
+                      "fontWeight": "700"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "iO33R",
+                  "name": "Sub",
+                  "fill": "$muted-foreground",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Eén API voor alle externe systemen die je klanten gebruiken —\nzonder maanden werk aan OAuth, tokenbeheer en webhooks.",
+                  "lineHeight": 1.45,
+                  "fontFamily": "Inter",
+                  "fontSize": 30,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "gU1DF",
+              "name": "Bottom",
+              "width": "fill_container",
+              "justifyContent": "space_between",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "B4iNs",
+                  "name": "CTA",
+                  "fill": "$primary",
+                  "cornerRadius": "$radius-pill",
+                  "gap": 14,
+                  "padding": [
+                    22,
+                    40
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "wHvqe",
+                      "name": "Label",
+                      "fill": "$primary-foreground",
+                      "content": "Start met koppelen",
+                      "fontFamily": "Inter",
+                      "fontSize": 27,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "RYG11",
+                      "name": "Glyph",
+                      "fill": "$primary-foreground",
+                      "content": "→",
+                      "fontFamily": "Inter",
+                      "fontSize": 27,
+                      "fontWeight": "500"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "bAFYf",
+                  "name": "Partners",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "vK946",
+                      "name": "URL",
+                      "fill": "$muted-foreground",
+                      "content": "hub.emeq.nl",
+                      "fontFamily": "IBM Plex Mono",
+                      "fontSize": 22,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "z3309",
+          "x": 16240,
+          "y": 0,
+          "name": "Banner · Instagram square · 1080×1080",
+          "clip": true,
+          "width": 1080,
+          "height": 1080,
+          "fill": "$background",
+          "layout": "vertical",
+          "padding": [
+            80,
+            72
+          ],
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "ellipse",
+              "id": "oIHkC",
+              "layoutPosition": "absolute",
+              "x": 635,
+              "y": 635,
+              "name": "Ring A",
+              "fill": "#00000000",
+              "width": 810,
+              "height": 810,
+              "stroke": "#a236962e",
+              "strokeWidth": 1.5
+            },
+            {
+              "type": "ellipse",
+              "id": "PHXo0",
+              "layoutPosition": "absolute",
+              "x": 807,
+              "y": 807,
+              "name": "Ring B",
+              "fill": "#00000000",
+              "width": 608,
+              "height": 608,
+              "stroke": "#a2369624",
+              "strokeWidth": 1.5
+            },
+            {
+              "type": "frame",
+              "id": "JmLkj",
+              "name": "Logo",
+              "gap": 12,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "id": "J54cK",
+                  "name": "Mark",
+                  "fill": {
+                    "type": "image",
+                    "enabled": true,
+                    "url": "logo.png",
+                    "mode": "fit"
+                  },
+                  "width": 52,
+                  "height": 52
+                },
+                {
+                  "type": "text",
+                  "id": "PH5H8",
+                  "name": "Wordmark",
+                  "fill": "$foreground",
+                  "content": "hub",
+                  "fontFamily": "Inter",
+                  "fontSize": 44,
+                  "fontWeight": "700"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "EAkvN",
+              "name": "Copy",
+              "layout": "vertical",
+              "gap": 28,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "dTa2b",
+                  "name": "Eyebrow",
+                  "fill": "$muted-foreground",
+                  "content": "UNIFIED API · INTEGRATIEPLATFORM",
+                  "fontFamily": "IBM Plex Mono",
+                  "fontSize": 18,
+                  "fontWeight": "normal",
+                  "letterSpacing": 4
+                },
+                {
+                  "type": "frame",
+                  "id": "g0lIi",
+                  "name": "H1",
+                  "layout": "vertical",
+                  "gap": 4,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "Z8GQar",
+                      "name": "L1",
+                      "fill": "$foreground",
+                      "content": "Integreer",
+                      "fontFamily": "Inter",
+                      "fontSize": 100,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "p3Nud",
+                      "name": "L2",
+                      "fill": "$brand",
+                      "content": "zonder grenzen.",
+                      "fontFamily": "Inter",
+                      "fontSize": 100,
+                      "fontWeight": "700"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "J8tQSV",
+                  "name": "Sub",
+                  "fill": "$muted-foreground",
+                  "textGrowth": "fixed-width",
+                  "width": 820,
+                  "content": "Eén API voor al je externe koppelingen.\nJij focust op je product.",
+                  "lineHeight": 1.45,
+                  "textAlign": "center",
+                  "fontFamily": "Inter",
+                  "fontSize": 30,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "xSrgE",
+              "name": "Bottom",
+              "layout": "vertical",
+              "gap": 36,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "MjS75",
+                  "name": "CTA",
+                  "fill": "$primary",
+                  "cornerRadius": "$radius-pill",
+                  "gap": 14,
+                  "padding": [
+                    22,
+                    44
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "V4MvXL",
+                      "name": "Label",
+                      "fill": "$primary-foreground",
+                      "content": "Start met koppelen",
+                      "fontFamily": "Inter",
+                      "fontSize": 26,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "BjiSu",
+                      "name": "Glyph",
+                      "fill": "$primary-foreground",
+                      "content": "→",
+                      "fontFamily": "Inter",
+                      "fontSize": 26,
+                      "fontWeight": "500"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "pmLmg",
+                  "name": "URL",
+                  "fill": "$muted-foreground",
+                  "content": "hub.emeq.nl",
+                  "fontFamily": "IBM Plex Mono",
+                  "fontSize": 20,
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "PzSGG",
+          "x": 17440,
+          "y": 0,
+          "name": "Banner · Instagram story · 1080×1920",
+          "clip": true,
+          "width": 1080,
+          "height": 1920,
+          "fill": "$background",
+          "layout": "vertical",
+          "padding": [
+            140,
+            72
+          ],
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "ellipse",
+              "id": "n4jIIv",
+              "layoutPosition": "absolute",
+              "x": 288,
+              "y": 1128,
+              "name": "Ring A",
+              "fill": "#00000000",
+              "width": 1440,
+              "height": 1440,
+              "stroke": "#a236962e",
+              "strokeWidth": 1.5
+            },
+            {
+              "type": "ellipse",
+              "id": "KrSW9",
+              "layoutPosition": "absolute",
+              "x": 594,
+              "y": 1434,
+              "name": "Ring B",
+              "fill": "#00000000",
+              "width": 1080,
+              "height": 1080,
+              "stroke": "#a2369624",
+              "strokeWidth": 1.5
+            },
+            {
+              "type": "frame",
+              "id": "BbEta",
+              "name": "Logo",
+              "gap": 12,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "id": "fY25o",
+                  "name": "Mark",
+                  "fill": {
+                    "type": "image",
+                    "enabled": true,
+                    "url": "logo.png",
+                    "mode": "fit"
+                  },
+                  "width": 60,
+                  "height": 60
+                },
+                {
+                  "type": "text",
+                  "id": "m7nwP3",
+                  "name": "Wordmark",
+                  "fill": "$foreground",
+                  "content": "hub",
+                  "fontFamily": "Inter",
+                  "fontSize": 50,
+                  "fontWeight": "700"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "nPX9P",
+              "name": "Copy",
+              "layout": "vertical",
+              "gap": 28,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "baARy",
+                  "name": "Eyebrow",
+                  "fill": "$muted-foreground",
+                  "content": "UNIFIED API · INTEGRATIEPLATFORM",
+                  "fontFamily": "IBM Plex Mono",
+                  "fontSize": 20,
+                  "fontWeight": "normal",
+                  "letterSpacing": 4
+                },
+                {
+                  "type": "frame",
+                  "id": "F4peix",
+                  "name": "H1",
+                  "layout": "vertical",
+                  "gap": 4,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "NhL3Y",
+                      "name": "L1",
+                      "fill": "$foreground",
+                      "content": "Integreer",
+                      "fontFamily": "Inter",
+                      "fontSize": 110,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "ebQrX",
+                      "name": "L2",
+                      "fill": "$brand",
+                      "content": "zonder grenzen.",
+                      "fontFamily": "Inter",
+                      "fontSize": 110,
+                      "fontWeight": "700"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "XCjW8",
+                  "name": "Sub",
+                  "fill": "$muted-foreground",
+                  "textGrowth": "fixed-width",
+                  "width": 820,
+                  "content": "Eén API voor al je externe koppelingen —\nzonder maanden werk aan OAuth,\ntokenbeheer en webhooks.",
+                  "lineHeight": 1.45,
+                  "textAlign": "center",
+                  "fontFamily": "Inter",
+                  "fontSize": 34,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "L8oNPw",
+              "name": "Bottom",
+              "layout": "vertical",
+              "gap": 36,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "CTBm7",
+                  "name": "CTA",
+                  "fill": "$primary",
+                  "cornerRadius": "$radius-pill",
+                  "gap": 16,
+                  "padding": [
+                    26,
+                    52
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "yF9PM",
+                      "name": "Label",
+                      "fill": "$primary-foreground",
+                      "content": "Start met koppelen",
+                      "fontFamily": "Inter",
+                      "fontSize": 30,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "ZBmtG",
+                      "name": "Glyph",
+                      "fill": "$primary-foreground",
+                      "content": "→",
+                      "fontFamily": "Inter",
+                      "fontSize": 30,
+                      "fontWeight": "500"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "i5TLbp",
+                  "name": "URL",
+                  "fill": "$muted-foreground",
+                  "content": "hub.emeq.nl",
+                  "fontFamily": "IBM Plex Mono",
+                  "fontSize": 22,
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "H6DRJ",
+          "x": 18640,
+          "y": 0,
+          "name": "Banner · Web leaderboard · 970×250",
+          "clip": true,
+          "width": 970,
+          "height": 250,
+          "fill": "$background",
+          "stroke": "$border",
+          "strokeWidth": 1,
+          "strokeAlignment": "inner",
+          "gap": 40,
+          "padding": [
+            0,
+            48
+          ],
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "ellipse",
+              "id": "x2tahJ",
+              "layoutPosition": "absolute",
+              "x": 570,
+              "y": -150,
+              "name": "Ring A",
+              "fill": "#00000000",
+              "width": 728,
+              "height": 728,
+              "stroke": "#a236962e",
+              "strokeWidth": 1.5
+            },
+            {
+              "type": "ellipse",
+              "id": "PmG8E",
+              "layoutPosition": "absolute",
+              "x": 724,
+              "y": 4,
+              "name": "Ring B",
+              "fill": "#00000000",
+              "width": 546,
+              "height": 546,
+              "stroke": "#a2369624",
+              "strokeWidth": 1.5
+            },
+            {
+              "type": "frame",
+              "id": "dUL7R",
+              "name": "Copy",
+              "layout": "vertical",
+              "gap": 14,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "ywzdZ",
+                  "name": "Logo",
+                  "gap": 8,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "rectangle",
+                      "id": "T8YDK",
+                      "name": "Mark",
+                      "fill": {
+                        "type": "image",
+                        "enabled": true,
+                        "url": "logo.png",
+                        "mode": "fit"
+                      },
+                      "width": 26,
+                      "height": 26
+                    },
+                    {
+                      "type": "text",
+                      "id": "OLHLD",
+                      "name": "Wordmark",
+                      "fill": "$foreground",
+                      "content": "hub",
+                      "fontFamily": "Inter",
+                      "fontSize": 22,
+                      "fontWeight": "700"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "xYVeM",
+                  "name": "H1",
+                  "gap": 9,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "UJLpW",
+                      "name": "w1",
+                      "fill": "$foreground",
+                      "content": "Integreer",
+                      "fontFamily": "Inter",
+                      "fontSize": 38,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "q9t5q",
+                      "name": "w2",
+                      "fill": "$brand",
+                      "content": "zonder grenzen.",
+                      "fontFamily": "Inter",
+                      "fontSize": 38,
+                      "fontWeight": "700"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "fNpMo",
+                  "name": "Sub",
+                  "fill": "$muted-foreground",
+                  "content": "Eén API voor al je externe koppelingen · hub.emeq.nl",
+                  "fontFamily": "Inter",
+                  "fontSize": 17,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "S4wffT",
+              "name": "CTA",
+              "fill": "$primary",
+              "cornerRadius": "$radius-pill",
+              "gap": 10,
+              "padding": [
+                15,
+                28
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "SXwmh",
+                  "name": "Label",
+                  "fill": "$primary-foreground",
+                  "content": "Start met koppelen",
+                  "fontFamily": "Inter",
+                  "fontSize": 18,
+                  "fontWeight": "600"
+                },
+                {
+                  "type": "text",
+                  "id": "r2WJS",
+                  "name": "Glyph",
+                  "fill": "$primary-foreground",
+                  "content": "→",
+                  "fontFamily": "Inter",
+                  "fontSize": 18,
+                  "fontWeight": "500"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "Y7eeY",
+          "x": 19730,
+          "y": 0,
+          "name": "Banner · Sales demo (dark) · 1200×630",
+          "clip": true,
+          "width": 1200,
+          "height": 630,
+          "fill": "#33102e",
+          "layout": "vertical",
+          "padding": [
+            56,
+            64
+          ],
+          "justifyContent": "space_between",
+          "children": [
+            {
+              "type": "ellipse",
+              "id": "wDLqw",
+              "layoutPosition": "absolute",
+              "x": 705,
+              "y": 135,
+              "name": "Ring A",
+              "fill": "#00000000",
+              "width": 900,
+              "height": 900,
+              "stroke": "#e9b8e22e",
+              "strokeWidth": 1.5
+            },
+            {
+              "type": "ellipse",
+              "id": "ZkOCL",
+              "layoutPosition": "absolute",
+              "x": 896,
+              "y": 326,
+              "name": "Ring B",
+              "fill": "#00000000",
+              "width": 675,
+              "height": 675,
+              "stroke": "#e9b8e224",
+              "strokeWidth": 1.5
+            },
+            {
+              "type": "frame",
+              "id": "uaOqT",
+              "name": "Logo",
+              "gap": 10,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "NCLuw",
+                  "name": "Mark",
+                  "width": 40,
+                  "height": 40,
+                  "fill": "#ffffff",
+                  "cornerRadius": 10,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "rectangle",
+                      "id": "ACp8y",
+                      "name": "MarkImg",
+                      "fill": {
+                        "type": "image",
+                        "enabled": true,
+                        "url": "logo.png",
+                        "mode": "fit"
+                      },
+                      "width": 28,
+                      "height": 28
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "fosKx",
+                  "name": "Wordmark",
+                  "fill": "#ffffff",
+                  "content": "hub",
+                  "fontFamily": "Inter",
+                  "fontSize": 34,
+                  "fontWeight": "700"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "wKTzy",
+              "name": "Copy",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 22,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "mWQxY",
+                  "name": "Eyebrow",
+                  "fill": "#e9b8e2",
+                  "content": "LIVE DEMO · 30 MINUTEN",
+                  "fontFamily": "IBM Plex Mono",
+                  "fontSize": 16,
+                  "fontWeight": "normal",
+                  "letterSpacing": 3
+                },
+                {
+                  "type": "text",
+                  "id": "xQU2C",
+                  "name": "H1",
+                  "fill": "#ffffff",
+                  "content": "Zie de Hub in actie.",
+                  "fontFamily": "Inter",
+                  "fontSize": 76,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "SnPsJ",
+                  "name": "Sub",
+                  "fill": "#dcc3d8",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Plan een demo en ontdek hoe je in dagen — niet maanden —\neen nieuwe koppeling live hebt.",
+                  "lineHeight": 1.45,
+                  "fontFamily": "Inter",
+                  "fontSize": 24,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "sQOMg",
+              "name": "Bottom",
+              "width": "fill_container",
+              "justifyContent": "space_between",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "DVFEO",
+                  "name": "CTA",
+                  "fill": "#ffffff",
+                  "cornerRadius": "$radius-pill",
+                  "gap": 12,
+                  "padding": [
+                    18,
+                    32
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "Wnfbf",
+                      "name": "Label",
+                      "fill": "#581c50",
+                      "content": "Demo aanvragen",
+                      "fontFamily": "Inter",
+                      "fontSize": 22,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "ZgEQo",
+                      "name": "Glyph",
+                      "fill": "#581c50",
+                      "content": "→",
+                      "fontFamily": "Inter",
+                      "fontSize": 22,
+                      "fontWeight": "500"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "Iq85G",
+                  "name": "URL",
+                  "fill": "#e9b8e2",
+                  "content": "hub.emeq.nl/demo",
+                  "fontFamily": "IBM Plex Mono",
+                  "fontSize": 18,
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "group",
+      "id": "Gh8ce",
+      "x": 0,
+      "y": 0,
+      "name": "Banners · EN",
+      "children": [
+        {
+          "type": "frame",
+          "id": "ookIC",
+          "x": 13200,
+          "y": 2160,
+          "name": "Banner EN · LinkedIn/OG · 1200×630",
+          "clip": true,
+          "width": 1200,
+          "height": 630,
+          "fill": "$background",
+          "layout": "vertical",
+          "padding": [
+            56,
+            64
+          ],
+          "justifyContent": "space_between",
+          "children": [
+            {
+              "type": "ellipse",
+              "id": "q74iqc",
+              "layoutPosition": "absolute",
+              "x": 705,
+              "y": 135,
+              "name": "Ring A",
+              "fill": "#00000000",
+              "width": 900,
+              "height": 900,
+              "stroke": "#a236962e",
+              "strokeWidth": 1.5
+            },
+            {
+              "type": "ellipse",
+              "id": "c1B9ef",
+              "layoutPosition": "absolute",
+              "x": 896,
+              "y": 326,
+              "name": "Ring B",
+              "fill": "#00000000",
+              "width": 675,
+              "height": 675,
+              "stroke": "#a2369624",
+              "strokeWidth": 1.5
+            },
+            {
+              "type": "frame",
+              "id": "aktrs",
+              "name": "Logo",
+              "gap": 10,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "id": "EOUaY",
+                  "name": "Mark",
+                  "fill": {
+                    "type": "image",
+                    "enabled": true,
+                    "url": "logo.png",
+                    "mode": "fit"
+                  },
+                  "width": 40,
+                  "height": 40
+                },
+                {
+                  "type": "text",
+                  "id": "lSykI",
+                  "name": "Wordmark",
+                  "fill": "$foreground",
+                  "content": "hub",
+                  "fontFamily": "Inter",
+                  "fontSize": 34,
+                  "fontWeight": "700"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "w2ySaS",
+              "name": "Copy",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 22,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "jJxAm",
+                  "name": "Eyebrow",
+                  "fill": "$muted-foreground",
+                  "content": "UNIFIED API · INTEGRATION PLATFORM",
+                  "fontFamily": "IBM Plex Mono",
+                  "fontSize": 16,
+                  "fontWeight": "normal",
+                  "letterSpacing": 3
+                },
+                {
+                  "type": "frame",
+                  "id": "DV8ja",
+                  "name": "H1",
+                  "gap": 16,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "R853Hs",
+                      "name": "w1",
+                      "fill": "$foreground",
+                      "content": "Integrate",
+                      "fontFamily": "Inter",
+                      "fontSize": 72,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "v6yTPZ",
+                      "name": "w2",
+                      "fill": "$brand",
+                      "content": "without limits.",
+                      "fontFamily": "Inter",
+                      "fontSize": 72,
+                      "fontWeight": "700"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "kJovN",
+                  "name": "Sub",
+                  "fill": "$muted-foreground",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "One API for every external system your customers use —\nwithout months of work on OAuth, token management and webhooks.",
+                  "lineHeight": 1.45,
+                  "fontFamily": "Inter",
+                  "fontSize": 24,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "wjVMk",
+              "name": "Bottom",
+              "width": "fill_container",
+              "justifyContent": "space_between",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "L6Ool",
+                  "name": "CTA",
+                  "fill": "$primary",
+                  "cornerRadius": "$radius-pill",
+                  "gap": 12,
+                  "padding": [
+                    18,
+                    32
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "c7z8I",
+                      "name": "Label",
+                      "fill": "$primary-foreground",
+                      "content": "Start connecting",
+                      "fontFamily": "Inter",
+                      "fontSize": 22,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "V6CMv",
+                      "name": "Glyph",
+                      "fill": "$primary-foreground",
+                      "content": "→",
+                      "fontFamily": "Inter",
+                      "fontSize": 22,
+                      "fontWeight": "500"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "Y0l8l",
+                  "name": "Partners",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "OVe9p",
+                      "name": "URL",
+                      "fill": "$muted-foreground",
+                      "content": "hub.emeq.nl",
+                      "fontFamily": "IBM Plex Mono",
+                      "fontSize": 18,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "MiZw2",
+          "x": 14520,
+          "y": 2160,
+          "name": "Banner EN · X post · 1600×900",
+          "clip": true,
+          "width": 1600,
+          "height": 900,
+          "fill": "$background",
+          "layout": "vertical",
+          "padding": [
+            76,
+            88
+          ],
+          "justifyContent": "space_between",
+          "children": [
+            {
+              "type": "ellipse",
+              "id": "q50ws4",
+              "layoutPosition": "absolute",
+              "x": 940,
+              "y": 240,
+              "name": "Ring A",
+              "fill": "#00000000",
+              "width": 1200,
+              "height": 1200,
+              "stroke": "#a236962e",
+              "strokeWidth": 1.5
+            },
+            {
+              "type": "ellipse",
+              "id": "U9tvH",
+              "layoutPosition": "absolute",
+              "x": 1195,
+              "y": 495,
+              "name": "Ring B",
+              "fill": "#00000000",
+              "width": 900,
+              "height": 900,
+              "stroke": "#a2369624",
+              "strokeWidth": 1.5
+            },
+            {
+              "type": "frame",
+              "id": "zYBNs",
+              "name": "Logo",
+              "gap": 10,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "id": "reOtq",
+                  "name": "Mark",
+                  "fill": {
+                    "type": "image",
+                    "enabled": true,
+                    "url": "logo.png",
+                    "mode": "fit"
+                  },
+                  "width": 52,
+                  "height": 52
+                },
+                {
+                  "type": "text",
+                  "id": "SqNc7",
+                  "name": "Wordmark",
+                  "fill": "$foreground",
+                  "content": "hub",
+                  "fontFamily": "Inter",
+                  "fontSize": 44,
+                  "fontWeight": "700"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "gnMpL",
+              "name": "Copy",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 22,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "CodCF",
+                  "name": "Eyebrow",
+                  "fill": "$muted-foreground",
+                  "content": "UNIFIED API · INTEGRATION PLATFORM",
+                  "fontFamily": "IBM Plex Mono",
+                  "fontSize": 20,
+                  "fontWeight": "normal",
+                  "letterSpacing": 4
+                },
+                {
+                  "type": "frame",
+                  "id": "T6fU46",
+                  "name": "H1",
+                  "gap": 22,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "cRuDS",
+                      "name": "w1",
+                      "fill": "$foreground",
+                      "content": "Integrate",
+                      "fontFamily": "Inter",
+                      "fontSize": 96,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "d5pJrT",
+                      "name": "w2",
+                      "fill": "$brand",
+                      "content": "without limits.",
+                      "fontFamily": "Inter",
+                      "fontSize": 96,
+                      "fontWeight": "700"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "gK5C2",
+                  "name": "Sub",
+                  "fill": "$muted-foreground",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "One API for every external system your customers use —\nwithout months of work on OAuth, token management and webhooks.",
+                  "lineHeight": 1.45,
+                  "fontFamily": "Inter",
+                  "fontSize": 30,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "U8P0cF",
+              "name": "Bottom",
+              "width": "fill_container",
+              "justifyContent": "space_between",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "Uz1G7",
+                  "name": "CTA",
+                  "fill": "$primary",
+                  "cornerRadius": "$radius-pill",
+                  "gap": 14,
+                  "padding": [
+                    22,
+                    40
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "TT7iH",
+                      "name": "Label",
+                      "fill": "$primary-foreground",
+                      "content": "Start connecting",
+                      "fontFamily": "Inter",
+                      "fontSize": 27,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "hGOHv",
+                      "name": "Glyph",
+                      "fill": "$primary-foreground",
+                      "content": "→",
+                      "fontFamily": "Inter",
+                      "fontSize": 27,
+                      "fontWeight": "500"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "n5F7Ry",
+                  "name": "Partners",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "pYi2V",
+                      "name": "URL",
+                      "fill": "$muted-foreground",
+                      "content": "hub.emeq.nl",
+                      "fontFamily": "IBM Plex Mono",
+                      "fontSize": 22,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "CzABx",
+          "x": 16240,
+          "y": 2160,
+          "name": "Banner EN · Instagram square · 1080×1080",
+          "clip": true,
+          "width": 1080,
+          "height": 1080,
+          "fill": "$background",
+          "layout": "vertical",
+          "padding": [
+            80,
+            72
+          ],
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "ellipse",
+              "id": "c52Cs",
+              "layoutPosition": "absolute",
+              "x": 635,
+              "y": 635,
+              "name": "Ring A",
+              "fill": "#00000000",
+              "width": 810,
+              "height": 810,
+              "stroke": "#a236962e",
+              "strokeWidth": 1.5
+            },
+            {
+              "type": "ellipse",
+              "id": "R1LCf",
+              "layoutPosition": "absolute",
+              "x": 807,
+              "y": 807,
+              "name": "Ring B",
+              "fill": "#00000000",
+              "width": 608,
+              "height": 608,
+              "stroke": "#a2369624",
+              "strokeWidth": 1.5
+            },
+            {
+              "type": "frame",
+              "id": "R8CWN",
+              "name": "Logo",
+              "gap": 12,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "id": "R3cqJe",
+                  "name": "Mark",
+                  "fill": {
+                    "type": "image",
+                    "enabled": true,
+                    "url": "logo.png",
+                    "mode": "fit"
+                  },
+                  "width": 52,
+                  "height": 52
+                },
+                {
+                  "type": "text",
+                  "id": "bkDKi",
+                  "name": "Wordmark",
+                  "fill": "$foreground",
+                  "content": "hub",
+                  "fontFamily": "Inter",
+                  "fontSize": 44,
+                  "fontWeight": "700"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "gx05p",
+              "name": "Copy",
+              "layout": "vertical",
+              "gap": 28,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "jnsvL",
+                  "name": "Eyebrow",
+                  "fill": "$muted-foreground",
+                  "content": "UNIFIED API · INTEGRATION PLATFORM",
+                  "fontFamily": "IBM Plex Mono",
+                  "fontSize": 18,
+                  "fontWeight": "normal",
+                  "letterSpacing": 4
+                },
+                {
+                  "type": "frame",
+                  "id": "f0M307",
+                  "name": "H1",
+                  "layout": "vertical",
+                  "gap": 4,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "n8XBt2",
+                      "name": "L1",
+                      "fill": "$foreground",
+                      "content": "Integrate",
+                      "fontFamily": "Inter",
+                      "fontSize": 100,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "N8zOw",
+                      "name": "L2",
+                      "fill": "$brand",
+                      "content": "without limits.",
+                      "fontFamily": "Inter",
+                      "fontSize": 100,
+                      "fontWeight": "700"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "aHXan",
+                  "name": "Sub",
+                  "fill": "$muted-foreground",
+                  "textGrowth": "fixed-width",
+                  "width": 820,
+                  "content": "One API for all your external integrations.\nYou focus on your product.",
+                  "lineHeight": 1.45,
+                  "textAlign": "center",
+                  "fontFamily": "Inter",
+                  "fontSize": 30,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "fbh5n",
+              "name": "Bottom",
+              "layout": "vertical",
+              "gap": 36,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "YWdDz",
+                  "name": "CTA",
+                  "fill": "$primary",
+                  "cornerRadius": "$radius-pill",
+                  "gap": 14,
+                  "padding": [
+                    22,
+                    44
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "t5ZaaA",
+                      "name": "Label",
+                      "fill": "$primary-foreground",
+                      "content": "Start connecting",
+                      "fontFamily": "Inter",
+                      "fontSize": 26,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "SEaar",
+                      "name": "Glyph",
+                      "fill": "$primary-foreground",
+                      "content": "→",
+                      "fontFamily": "Inter",
+                      "fontSize": 26,
+                      "fontWeight": "500"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "l4oM3M",
+                  "name": "URL",
+                  "fill": "$muted-foreground",
+                  "content": "hub.emeq.nl",
+                  "fontFamily": "IBM Plex Mono",
+                  "fontSize": 20,
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "scCT9",
+          "x": 17440,
+          "y": 2160,
+          "name": "Banner EN · Instagram story · 1080×1920",
+          "clip": true,
+          "width": 1080,
+          "height": 1920,
+          "fill": "$background",
+          "layout": "vertical",
+          "padding": [
+            140,
+            72
+          ],
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "ellipse",
+              "id": "XsXAs",
+              "layoutPosition": "absolute",
+              "x": 288,
+              "y": 1128,
+              "name": "Ring A",
+              "fill": "#00000000",
+              "width": 1440,
+              "height": 1440,
+              "stroke": "#a236962e",
+              "strokeWidth": 1.5
+            },
+            {
+              "type": "ellipse",
+              "id": "dD3R5",
+              "layoutPosition": "absolute",
+              "x": 594,
+              "y": 1434,
+              "name": "Ring B",
+              "fill": "#00000000",
+              "width": 1080,
+              "height": 1080,
+              "stroke": "#a2369624",
+              "strokeWidth": 1.5
+            },
+            {
+              "type": "frame",
+              "id": "A1AwIF",
+              "name": "Logo",
+              "gap": 12,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "id": "S9ghms",
+                  "name": "Mark",
+                  "fill": {
+                    "type": "image",
+                    "enabled": true,
+                    "url": "logo.png",
+                    "mode": "fit"
+                  },
+                  "width": 60,
+                  "height": 60
+                },
+                {
+                  "type": "text",
+                  "id": "OkWCW",
+                  "name": "Wordmark",
+                  "fill": "$foreground",
+                  "content": "hub",
+                  "fontFamily": "Inter",
+                  "fontSize": 50,
+                  "fontWeight": "700"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "wWdBw",
+              "name": "Copy",
+              "layout": "vertical",
+              "gap": 28,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "p6jtwU",
+                  "name": "Eyebrow",
+                  "fill": "$muted-foreground",
+                  "content": "UNIFIED API · INTEGRATION PLATFORM",
+                  "fontFamily": "IBM Plex Mono",
+                  "fontSize": 20,
+                  "fontWeight": "normal",
+                  "letterSpacing": 4
+                },
+                {
+                  "type": "frame",
+                  "id": "H4HE9o",
+                  "name": "H1",
+                  "layout": "vertical",
+                  "gap": 4,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "AdHFA",
+                      "name": "L1",
+                      "fill": "$foreground",
+                      "content": "Integrate",
+                      "fontFamily": "Inter",
+                      "fontSize": 110,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "F9qq79",
+                      "name": "L2",
+                      "fill": "$brand",
+                      "content": "without limits.",
+                      "fontFamily": "Inter",
+                      "fontSize": 110,
+                      "fontWeight": "700"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "yElMA",
+                  "name": "Sub",
+                  "fill": "$muted-foreground",
+                  "textGrowth": "fixed-width",
+                  "width": 820,
+                  "content": "One API for all your external integrations —\nwithout months of work on OAuth,\ntoken management and webhooks.",
+                  "lineHeight": 1.45,
+                  "textAlign": "center",
+                  "fontFamily": "Inter",
+                  "fontSize": 34,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "SWuoh",
+              "name": "Bottom",
+              "layout": "vertical",
+              "gap": 36,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "yWjNJ",
+                  "name": "CTA",
+                  "fill": "$primary",
+                  "cornerRadius": "$radius-pill",
+                  "gap": 16,
+                  "padding": [
+                    26,
+                    52
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "Jzf3A",
+                      "name": "Label",
+                      "fill": "$primary-foreground",
+                      "content": "Start connecting",
+                      "fontFamily": "Inter",
+                      "fontSize": 30,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "zpWec",
+                      "name": "Glyph",
+                      "fill": "$primary-foreground",
+                      "content": "→",
+                      "fontFamily": "Inter",
+                      "fontSize": 30,
+                      "fontWeight": "500"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "o0VWg",
+                  "name": "URL",
+                  "fill": "$muted-foreground",
+                  "content": "hub.emeq.nl",
+                  "fontFamily": "IBM Plex Mono",
+                  "fontSize": 22,
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "wcz2l",
+          "x": 18640,
+          "y": 2160,
+          "name": "Banner EN · Web leaderboard · 970×250",
+          "clip": true,
+          "width": 970,
+          "height": 250,
+          "fill": "$background",
+          "stroke": "$border",
+          "strokeWidth": 1,
+          "strokeAlignment": "inner",
+          "gap": 40,
+          "padding": [
+            0,
+            48
+          ],
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "ellipse",
+              "id": "sqWp5",
+              "layoutPosition": "absolute",
+              "x": 570,
+              "y": -150,
+              "name": "Ring A",
+              "fill": "#00000000",
+              "width": 728,
+              "height": 728,
+              "stroke": "#a236962e",
+              "strokeWidth": 1.5
+            },
+            {
+              "type": "ellipse",
+              "id": "QJc7C",
+              "layoutPosition": "absolute",
+              "x": 724,
+              "y": 4,
+              "name": "Ring B",
+              "fill": "#00000000",
+              "width": 546,
+              "height": 546,
+              "stroke": "#a2369624",
+              "strokeWidth": 1.5
+            },
+            {
+              "type": "frame",
+              "id": "ppMKR",
+              "name": "Copy",
+              "layout": "vertical",
+              "gap": 14,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "V2p80R",
+                  "name": "Logo",
+                  "gap": 8,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "rectangle",
+                      "id": "UaVZH",
+                      "name": "Mark",
+                      "fill": {
+                        "type": "image",
+                        "enabled": true,
+                        "url": "logo.png",
+                        "mode": "fit"
+                      },
+                      "width": 26,
+                      "height": 26
+                    },
+                    {
+                      "type": "text",
+                      "id": "ag2tS",
+                      "name": "Wordmark",
+                      "fill": "$foreground",
+                      "content": "hub",
+                      "fontFamily": "Inter",
+                      "fontSize": 22,
+                      "fontWeight": "700"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "kwziK",
+                  "name": "H1",
+                  "gap": 9,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "M1u9m",
+                      "name": "w1",
+                      "fill": "$foreground",
+                      "content": "Integrate",
+                      "fontFamily": "Inter",
+                      "fontSize": 38,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "sTwVT",
+                      "name": "w2",
+                      "fill": "$brand",
+                      "content": "without limits.",
+                      "fontFamily": "Inter",
+                      "fontSize": 38,
+                      "fontWeight": "700"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "VW5kr",
+                  "name": "Sub",
+                  "fill": "$muted-foreground",
+                  "content": "One API for all your external integrations · hub.emeq.nl",
+                  "fontFamily": "Inter",
+                  "fontSize": 17,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "dQADP",
+              "name": "CTA",
+              "fill": "$primary",
+              "cornerRadius": "$radius-pill",
+              "gap": 10,
+              "padding": [
+                15,
+                28
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "UToF0",
+                  "name": "Label",
+                  "fill": "$primary-foreground",
+                  "content": "Start connecting",
+                  "fontFamily": "Inter",
+                  "fontSize": 18,
+                  "fontWeight": "600"
+                },
+                {
+                  "type": "text",
+                  "id": "gHyAu",
+                  "name": "Glyph",
+                  "fill": "$primary-foreground",
+                  "content": "→",
+                  "fontFamily": "Inter",
+                  "fontSize": 18,
+                  "fontWeight": "500"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "KsfPf",
+          "x": 19730,
+          "y": 2160,
+          "name": "Banner EN · Sales demo (dark) · 1200×630",
+          "clip": true,
+          "width": 1200,
+          "height": 630,
+          "fill": "#33102e",
+          "layout": "vertical",
+          "padding": [
+            56,
+            64
+          ],
+          "justifyContent": "space_between",
+          "children": [
+            {
+              "type": "ellipse",
+              "id": "fqYlz",
+              "layoutPosition": "absolute",
+              "x": 705,
+              "y": 135,
+              "name": "Ring A",
+              "fill": "#00000000",
+              "width": 900,
+              "height": 900,
+              "stroke": "#e9b8e22e",
+              "strokeWidth": 1.5
+            },
+            {
+              "type": "ellipse",
+              "id": "jJtxJ",
+              "layoutPosition": "absolute",
+              "x": 896,
+              "y": 326,
+              "name": "Ring B",
+              "fill": "#00000000",
+              "width": 675,
+              "height": 675,
+              "stroke": "#e9b8e224",
+              "strokeWidth": 1.5
+            },
+            {
+              "type": "frame",
+              "id": "kzM62",
+              "name": "Logo",
+              "gap": 10,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "IlaYy",
+                  "name": "Mark",
+                  "width": 40,
+                  "height": 40,
+                  "fill": "#ffffff",
+                  "cornerRadius": 10,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "rectangle",
+                      "id": "EboY5",
+                      "name": "MarkImg",
+                      "fill": {
+                        "type": "image",
+                        "enabled": true,
+                        "url": "logo.png",
+                        "mode": "fit"
+                      },
+                      "width": 28,
+                      "height": 28
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "NjGm0",
+                  "name": "Wordmark",
+                  "fill": "#ffffff",
+                  "content": "hub",
+                  "fontFamily": "Inter",
+                  "fontSize": 34,
+                  "fontWeight": "700"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "oauc2",
+              "name": "Copy",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 22,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "AbGgZ",
+                  "name": "Eyebrow",
+                  "fill": "#e9b8e2",
+                  "content": "LIVE DEMO · 30 MINUTES",
+                  "fontFamily": "IBM Plex Mono",
+                  "fontSize": 16,
+                  "fontWeight": "normal",
+                  "letterSpacing": 3
+                },
+                {
+                  "type": "text",
+                  "id": "N9hCR",
+                  "name": "H1",
+                  "fill": "#ffffff",
+                  "content": "See the Hub in action.",
+                  "fontFamily": "Inter",
+                  "fontSize": 76,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "s1P8Nn",
+                  "name": "Sub",
+                  "fill": "#dcc3d8",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Book a demo and see how you take a new integration\nlive in days — not months.",
+                  "lineHeight": 1.45,
+                  "fontFamily": "Inter",
+                  "fontSize": 24,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "VOXWd",
+              "name": "Bottom",
+              "width": "fill_container",
+              "justifyContent": "space_between",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "n3j05C",
+                  "name": "CTA",
+                  "fill": "#ffffff",
+                  "cornerRadius": "$radius-pill",
+                  "gap": 12,
+                  "padding": [
+                    18,
+                    32
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "H5bIL",
+                      "name": "Label",
+                      "fill": "#581c50",
+                      "content": "Request a demo",
+                      "fontFamily": "Inter",
+                      "fontSize": 22,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "mPEGk",
+                      "name": "Glyph",
+                      "fill": "#581c50",
+                      "content": "→",
+                      "fontFamily": "Inter",
+                      "fontSize": 22,
+                      "fontWeight": "500"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "ma43Q",
+                  "name": "URL",
+                  "fill": "#e9b8e2",
+                  "content": "hub.emeq.nl/demo",
+                  "fontFamily": "IBM Plex Mono",
+                  "fontSize": 18,
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "group",
+      "id": "W3SF1",
+      "x": 0,
+      "y": 0,
+      "name": "Banners · Exact App Center",
+      "children": [
+        {
+          "type": "frame",
+          "id": "abfKP",
+          "x": 13200,
+          "y": 4320,
+          "name": "Banner · Exact App Center · NL · 1200×630",
+          "clip": true,
+          "width": 1200,
+          "height": 630,
+          "fill": "$background",
+          "layout": "vertical",
+          "padding": [
+            56,
+            64
+          ],
+          "justifyContent": "space_between",
+          "children": [
+            {
+              "type": "ellipse",
+              "id": "EWozN",
+              "layoutPosition": "absolute",
+              "x": 705,
+              "y": 135,
+              "name": "Ring A",
+              "fill": "#00000000",
+              "width": 900,
+              "height": 900,
+              "stroke": "#a236962e",
+              "strokeWidth": 1.5
+            },
+            {
+              "type": "ellipse",
+              "id": "ErvU4",
+              "layoutPosition": "absolute",
+              "x": 896,
+              "y": 326,
+              "name": "Ring B",
+              "fill": "#00000000",
+              "width": 675,
+              "height": 675,
+              "stroke": "#a2369624",
+              "strokeWidth": 1.5
+            },
+            {
+              "type": "frame",
+              "id": "OeLsI",
+              "name": "Lockup",
+              "gap": 18,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "ebZCD",
+                  "name": "Logo",
+                  "gap": 10,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "rectangle",
+                      "id": "tALuF",
+                      "name": "Mark",
+                      "fill": {
+                        "type": "image",
+                        "enabled": true,
+                        "url": "logo.png",
+                        "mode": "fit"
+                      },
+                      "width": 40,
+                      "height": 40
+                    },
+                    {
+                      "type": "text",
+                      "id": "SNIpv",
+                      "name": "Wordmark",
+                      "fill": "$foreground",
+                      "content": "hub",
+                      "fontFamily": "Inter",
+                      "fontSize": 34,
+                      "fontWeight": "700"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "bvsax",
+                  "name": "Link Glyph",
+                  "fill": "$muted-foreground",
+                  "content": "⇄",
+                  "fontFamily": "Inter",
+                  "fontSize": 26,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "rectangle",
+                  "id": "rgyAR",
+                  "name": "Exact Logo",
+                  "fill": {
+                    "type": "image",
+                    "enabled": true,
+                    "url": "exact.png",
+                    "mode": "fit"
+                  },
+                  "width": 150,
+                  "height": 32
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "MhOay",
+              "name": "Copy",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 22,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "oex4m",
+                  "name": "Eyebrow",
+                  "fill": "$muted-foreground",
+                  "content": "NU LIVE IN HET EXACT APP CENTER",
+                  "fontFamily": "IBM Plex Mono",
+                  "fontSize": 16,
+                  "fontWeight": "normal",
+                  "letterSpacing": 3
+                },
+                {
+                  "type": "frame",
+                  "id": "BNeoE",
+                  "name": "H1",
+                  "layout": "vertical",
+                  "gap": 2,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "tbuU0",
+                      "name": "L1",
+                      "fill": "$foreground",
+                      "content": "Koppel je software",
+                      "fontFamily": "Inter",
+                      "fontSize": 66,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "og6co",
+                      "name": "L2",
+                      "fill": "$brand",
+                      "content": "met Exact Online.",
+                      "fontFamily": "Inter",
+                      "fontSize": 66,
+                      "fontWeight": "700"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "v5Cd2",
+                  "name": "Sub",
+                  "fill": "$muted-foreground",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "OAuth, tokenverversing, webhooks en administraties — geregeld.\nJouw product praat via één REST-API met Exact Online.",
+                  "lineHeight": 1.45,
+                  "fontFamily": "Inter",
+                  "fontSize": 23,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "NI17U",
+              "name": "Bottom",
+              "width": "fill_container",
+              "justifyContent": "space_between",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "C33Or2",
+                  "name": "CTA",
+                  "fill": "$primary",
+                  "cornerRadius": "$radius-pill",
+                  "gap": 12,
+                  "padding": [
+                    18,
+                    32
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "NqTCg",
+                      "name": "Label",
+                      "fill": "$primary-foreground",
+                      "content": "Bekijk in het App Center",
+                      "fontFamily": "Inter",
+                      "fontSize": 22,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "czDHF",
+                      "name": "Glyph",
+                      "fill": "$primary-foreground",
+                      "content": "→",
+                      "fontFamily": "Inter",
+                      "fontSize": 22,
+                      "fontWeight": "500"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "Keicg",
+                  "name": "URL",
+                  "fill": "$muted-foreground",
+                  "content": "hub.emeq.nl/partners/exact",
+                  "fontFamily": "IBM Plex Mono",
+                  "fontSize": 18,
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "f7nlas",
+          "x": 14520,
+          "y": 4320,
+          "name": "Banner · Exact App Center · EN · 1200×630",
+          "clip": true,
+          "width": 1200,
+          "height": 630,
+          "fill": "$background",
+          "layout": "vertical",
+          "padding": [
+            56,
+            64
+          ],
+          "justifyContent": "space_between",
+          "children": [
+            {
+              "type": "ellipse",
+              "id": "QCa73",
+              "layoutPosition": "absolute",
+              "x": 705,
+              "y": 135,
+              "name": "Ring A",
+              "fill": "#00000000",
+              "width": 900,
+              "height": 900,
+              "stroke": "#a236962e",
+              "strokeWidth": 1.5
+            },
+            {
+              "type": "ellipse",
+              "id": "rhDVM",
+              "layoutPosition": "absolute",
+              "x": 896,
+              "y": 326,
+              "name": "Ring B",
+              "fill": "#00000000",
+              "width": 675,
+              "height": 675,
+              "stroke": "#a2369624",
+              "strokeWidth": 1.5
+            },
+            {
+              "type": "frame",
+              "id": "CEEH8",
+              "name": "Lockup",
+              "gap": 18,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "c8b2o",
+                  "name": "Logo",
+                  "gap": 10,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "rectangle",
+                      "id": "s0ZXX",
+                      "name": "Mark",
+                      "fill": {
+                        "type": "image",
+                        "enabled": true,
+                        "url": "logo.png",
+                        "mode": "fit"
+                      },
+                      "width": 40,
+                      "height": 40
+                    },
+                    {
+                      "type": "text",
+                      "id": "rSsUY",
+                      "name": "Wordmark",
+                      "fill": "$foreground",
+                      "content": "hub",
+                      "fontFamily": "Inter",
+                      "fontSize": 34,
+                      "fontWeight": "700"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "I3Z1zv",
+                  "name": "Link Glyph",
+                  "fill": "$muted-foreground",
+                  "content": "⇄",
+                  "fontFamily": "Inter",
+                  "fontSize": 26,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "rectangle",
+                  "id": "lqdLe",
+                  "name": "Exact Logo",
+                  "fill": {
+                    "type": "image",
+                    "enabled": true,
+                    "url": "exact.png",
+                    "mode": "fit"
+                  },
+                  "width": 150,
+                  "height": 32
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "UQbHk",
+              "name": "Copy",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 22,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "IoiwL",
+                  "name": "Eyebrow",
+                  "fill": "$muted-foreground",
+                  "content": "NOW LIVE IN THE EXACT APP CENTER",
+                  "fontFamily": "IBM Plex Mono",
+                  "fontSize": 16,
+                  "fontWeight": "normal",
+                  "letterSpacing": 3
+                },
+                {
+                  "type": "frame",
+                  "id": "KpVCQ",
+                  "name": "H1",
+                  "layout": "vertical",
+                  "gap": 2,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "jKxT6",
+                      "name": "L1",
+                      "fill": "$foreground",
+                      "content": "Connect your software",
+                      "fontFamily": "Inter",
+                      "fontSize": 66,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "rlQFU",
+                      "name": "L2",
+                      "fill": "$brand",
+                      "content": "to Exact Online.",
+                      "fontFamily": "Inter",
+                      "fontSize": 66,
+                      "fontWeight": "700"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "q2xQO9",
+                  "name": "Sub",
+                  "fill": "$muted-foreground",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "OAuth, token refresh, webhooks and divisions — handled.\nYour product talks to Exact Online through one REST API.",
+                  "lineHeight": 1.45,
+                  "fontFamily": "Inter",
+                  "fontSize": 23,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "Ok49M",
+              "name": "Bottom",
+              "width": "fill_container",
+              "justifyContent": "space_between",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "c5YHn",
+                  "name": "CTA",
+                  "fill": "$primary",
+                  "cornerRadius": "$radius-pill",
+                  "gap": 12,
+                  "padding": [
+                    18,
+                    32
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "FEi1V",
+                      "name": "Label",
+                      "fill": "$primary-foreground",
+                      "content": "View in the App Center",
+                      "fontFamily": "Inter",
+                      "fontSize": 22,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "CsRtt",
+                      "name": "Glyph",
+                      "fill": "$primary-foreground",
+                      "content": "→",
+                      "fontFamily": "Inter",
+                      "fontSize": 22,
+                      "fontWeight": "500"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "P2dwsJ",
+                  "name": "URL",
+                  "fill": "$muted-foreground",
+                  "content": "hub.emeq.nl/partners/exact",
+                  "fontFamily": "IBM Plex Mono",
+                  "fontSize": 18,
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        }
+      ]
     }
   ],
   "variables": {
