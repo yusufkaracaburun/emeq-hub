@@ -420,7 +420,7 @@ De secties *"Met de app kunt u"* en *"Welke gegevens worden uitgewisseld"* vult 
 
 `/dev/exact/*` is **alleen local/testing** (OAuth-tracer). Op `hub.emeq.nl` → **404**. Niet invullen in het App Center.
 
-Tijdelijk (pagina's die wél 200 geven), tot er productie-Stop is:
+Zo ingevuld in het App Center:
 
 | Veld | URI |
 |---|---|
@@ -429,17 +429,21 @@ Tijdelijk (pagina's die wél 200 geven), tot er productie-Stop is:
 | Meer informatie | `https://hub.emeq.nl/partners/exact` |
 | Niet meer gebruiken | `https://hub.emeq.nl/exact/stop` (Exact appendt `?Country=&Language=&UserId=`) |
 
-Info + koppel-formulier zitten op die ene Exact-partnerpagina (`#koppelen`). Optioneel dieper linken: `…/partners/exact#koppelen`.
+Drie van de vier wijzen bewust naar dezelfde partnerpagina: info én koppel-formulier zitten daar (`#koppelen`). Exact levert bij "Starten" geen Consumer-context mee, dus een directe OAuth-start zou de keten `Consumer → Account → Connection` overslaan. De aanvraag loopt daarom via het formulier; wij zetten de koppeling klaar en sturen de handoff-link (`/connect/{account}`). Optioneel dieper linken: `…/partners/exact#koppelen`.
+
+"Niet meer gebruiken" is wél een echte flow: `/exact/stop` doet de deprovisioning (revoke + fan-out + audit).
 
 ---
 
-## Wat er nog tussen jou en "Submit" staat
-
+## Status
 
 | #                                              | Blokker                                                       | Status       |
 | ---------------------------------------------- | ------------------------------------------------------------- | ------------ |
 | Scope-matrix + ⓘ verifiëren                    | [#39](https://github.com/yusufkaracaburun/emeq-hub/issues/39) | ✅ 2026-08-08 |
-| Listing: logo 600×300 + teksten                | —                                                             | ⬜            |
-| Submit (OVH-PDF's op verzoek als Exact vraagt) | [#50](https://github.com/yusufkaracaburun/emeq-hub/issues/50) | ⬜            |
+| Listing: logo 600×300 + teksten                | [#47](https://github.com/yusufkaracaburun/emeq-hub/issues/47) | ✅ 2026-08-09 |
+| Seamless-URI's ingevuld                        | [#48](https://github.com/yusufkaracaburun/emeq-hub/issues/48) | ✅ 2026-08-09 |
+| Submit (OVH-PDF's op verzoek als Exact vraagt) | [#50](https://github.com/yusufkaracaburun/emeq-hub/issues/50) | ✅ 2026-08-09 — status *Wordt beoordeeld* |
+
+Resteert: Exact's oordeel afwachten en de lifecycle doorlopen tot **PUBLICEREN**. Pas daarna kunnen externe tenants koppelen.
 
 
