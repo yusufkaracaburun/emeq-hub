@@ -1,6 +1,6 @@
 # Architecture
 
-Structurele map voor agents. De canonieke high-level beschrijving (Consumer→Account→Connection-keten, domeinmodel-tabel, invariants) staat in `CLAUDE.md` (`.ai/project rules`-block); dit document is de **document-existing** laag- en componentkaart. Gemigreerd uit `.planning/codebase/ARCHITECTURE.md` (analyse 2026-05-15) bij de GSD→ai-kit-overgang.
+Structurele map voor agents. De canonieke high-level beschrijving (Consumer→Account→Connection-keten, domeinmodel-tabel, invariants) staat in `CLAUDE.md`; dit document is de **document-existing** laag- en componentkaart. Gemigreerd uit `.planning/codebase/ARCHITECTURE.md` (analyse 2026-05-15) bij de GSD→ai-kit-overgang.
 
 ## System overview
 

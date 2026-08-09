@@ -1,13 +1,13 @@
 # Domein
 
-De canonieke domeintaal staat in **`CLAUDE.md`** (`.ai/project rules`-block) en
+De canonieke domeintaal staat in **`CLAUDE.md`** (domeinmodel + invariants) en
 **`CONTEXT.md`** (glossary-scaffold). Dit bestand is een pointer, geen tweede bron.
 
 ## Kernketen
 
 `Consumer → Account → Connection → SDK-call` — strict, altijd via
 `Bearer-token → Consumer → Account → Connection`. Nooit impliciet via session of
-query-string. Zie de invariants in `CLAUDE.md` (`.ai/project rules`).
+query-string. Zie de invariants in `CLAUDE.md`.
 
 ## Entiteiten
 

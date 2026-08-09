@@ -1,6 +1,6 @@
 # Subsystem-pointers (gedetailleerd)
 
-Verplaatst uit `CLAUDE.md` (context-lean, 2026-07-10). `CLAUDE.md` houdt per subsysteem een één-regel-samenvatting; dit bestand draagt de volledige pointers met gotchas en `.docs/decisions`-links. Bij domein-wijzigingen: hier bijwerken (docs-sync-skill triggert erop).
+Verplaatst uit `CLAUDE.md` (context-lean, 2026-07-10; SEO/GEO-pointer nagekomen 2026-08-09). `CLAUDE.md` houdt per subsysteem een één-regel-samenvatting; dit bestand draagt de volledige pointers met gotchas en `.docs/decisions`-links. Bij domein-wijzigingen: hier bijwerken (docs-sync-skill triggert erop).
 
 - **Planning / open werk**: GitHub-issues (`P*`/`area/*`-labels) zijn de bron voor open + forward-werk; `/ai:next` rankt ze. Historische GSD-planning leeft in git-history (verwijderd uit de werkboom bij de ai-kit-overgang).
 - **Werkdocumentatie** (lokaal, gitignored): `.docs/decisions/` (ADRs), `.docs/plans/`, `.docs/errors/`, `.docs/stack/`. Lees `.docs/README.md` voor de indeling. Partner-research is verplaatst naar de SDK-repos (`packages/<sdk>/docs/partners/`).
