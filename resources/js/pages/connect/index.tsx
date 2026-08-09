@@ -111,10 +111,13 @@ function ProviderRow({ provider }: { provider: ConnectProvider }) {
                         De toegang wordt ingetrokken. Gegevens die al zijn uitgewisseld blijven staan.
                     </span>
                 </div>
+                {/*
+                    "Ontkoppelen" blijft op dezelfde plek staan als de knop die deze stap
+                    opende (rechts op desktop, onderaan op mobiel), zodat een destructieve
+                    actie nooit onder de cursor wegschuift. Annuleren heet "Toch behouden",
+                    gelijk aan /exact/stop.
+                */}
                 <div className="flex shrink-0 gap-2">
-                    <Button type="button" size="sm" onClick={disconnect} disabled={working}>
-                        {working ? 'Bezig…' : 'Ontkoppelen'}
-                    </Button>
                     <Button
                         type="button"
                         size="sm"
@@ -122,7 +125,10 @@ function ProviderRow({ provider }: { provider: ConnectProvider }) {
                         onClick={() => setConfirming(false)}
                         disabled={working}
                     >
-                        Annuleren
+                        Toch behouden
+                    </Button>
+                    <Button type="button" size="sm" onClick={disconnect} disabled={working}>
+                        {working ? 'Bezig…' : 'Ontkoppelen'}
                     </Button>
                 </div>
             </div>
@@ -179,10 +185,11 @@ function ProviderRow({ provider }: { provider: ConnectProvider }) {
     );
 }
 
-/** Wat de gebruiker deelt als hij koppelt — toestemming vragen zonder dit is te mager. */
-function Disclosure({ consumerName }: { consumerName: string | null }) {
-    const app = consumerName ?? 'de app';
+/** Fallback als de consumer geen naam heeft — één bron, zodat losse teksten niet uiteenlopen. */
+const APP_FALLBACK = 'de app waar je vandaan komt';
 
+/** Wat de gebruiker deelt als hij koppelt — toestemming vragen zonder dit is te mager. */
+function Disclosure({ app }: { app: string }) {
     const points = [
         `Je logt in bij het systeem zelf. Emeq Hub ziet je wachtwoord nooit.`,
         `${app} wisselt daarna alleen de gegevens uit die voor deze koppeling nodig zijn.`,
@@ -203,7 +210,7 @@ function Disclosure({ consumerName }: { consumerName: string | null }) {
 }
 
 export default function Connect({ state, consumerName, accountName, providers, returnUrl, seo }: ConnectProps) {
-    const app = consumerName ?? 'de app waar je vandaan komt';
+    const app = consumerName ?? APP_FALLBACK;
 
     return (
         <MotionConfig reducedMotion="user">
@@ -248,7 +255,7 @@ export default function Connect({ state, consumerName, accountName, providers, r
                                     ))}
                                 </div>
 
-                                <Disclosure consumerName={consumerName} />
+                                <Disclosure app={app} />
 
                                 {returnUrl && (
                                     <Button type="button" size="sm" onClick={() => (window.location.href = returnUrl)}>
@@ -274,8 +281,8 @@ export default function Connect({ state, consumerName, accountName, providers, r
                                         Deze koppellink is niet meer geldig
                                     </h1>
                                     <p className="max-w-[560px] text-base leading-[1.55] text-muted-foreground">
-                                        Een koppellink is 15 minuten geldig. Ga terug naar de app waar je vandaan komt en
-                                        start de koppeling daar opnieuw — je bent zo weer hier.
+                                        Een koppellink is 15 minuten geldig. Ga terug naar {APP_FALLBACK} en start de
+                                        koppeling daar opnieuw — je bent zo weer hier.
                                     </p>
                                 </div>
 
