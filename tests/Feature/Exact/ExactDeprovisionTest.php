@@ -16,6 +16,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Mail;
 use Inertia\Testing\AssertableInertia;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 /**
@@ -29,6 +30,8 @@ class ExactDeprovisionTest extends TestCase
     use RefreshDatabase;
 
     private const USER_ID = 'd3b3f9a1-9c2e-4b7a-8f7e-2f4a1b6c9d0e';
+
+    private const USER_ID_UPPER = 'D3B3F9A1-9C2E-4B7A-8F7E-2F4A1B6C9D0E';
 
     private function activeExactConnection(array $overrides = []): Connection
     {
@@ -60,6 +63,68 @@ class ExactDeprovisionTest extends TestCase
             ->assertInertia(fn (AssertableInertia $page) => $page
                 ->component('exact/stop')
                 ->where('state', 'soft'))
+            ->assertSessionMissing('exact_stop.connection_id');
+    }
+
+    /**
+     * @return array<string, array{0: string}>
+     */
+    public static function guidSpellings(): array
+    {
+        return [
+            'hoofdletters' => [self::USER_ID_UPPER],
+            'accolades' => ['{'.self::USER_ID.'}'],
+            'accolades + hoofdletters' => ['{'.self::USER_ID_UPPER.'}'],
+            'spaties eromheen' => [' '.self::USER_ID.' '],
+        ];
+    }
+
+    #[DataProvider('guidSpellings')]
+    public function test_stop_matches_regardless_of_guid_spelling(string $incoming): void
+    {
+        $connection = $this->activeExactConnection();
+
+        $this->get('/exact/stop?UserId='.urlencode($incoming))
+            ->assertOk()
+            ->assertInertia(fn (AssertableInertia $page) => $page->where('state', 'confirm'))
+            ->assertSessionHas('exact_stop.connection_id', $connection->id);
+    }
+
+    /**
+     * Spiegelbeeld: een rij die vóór de normalisatie met accolades of in
+     * hoofdletters is opgeslagen moet nog steeds gevonden worden.
+     *
+     * @return array<string, array{0: string}>
+     */
+    public static function storedSpellings(): array
+    {
+        return [
+            'opgeslagen in hoofdletters' => [self::USER_ID_UPPER],
+            'opgeslagen met accolades' => ['{'.self::USER_ID.'}'],
+            'opgeslagen met accolades + hoofdletters' => ['{'.self::USER_ID_UPPER.'}'],
+        ];
+    }
+
+    #[DataProvider('storedSpellings')]
+    public function test_stop_matches_legacy_stored_spellings(string $stored): void
+    {
+        $connection = $this->activeExactConnection([
+            'metadata' => ['exact_user_id' => $stored],
+        ]);
+
+        $this->get('/exact/stop?UserId='.self::USER_ID)
+            ->assertOk()
+            ->assertInertia(fn (AssertableInertia $page) => $page->where('state', 'confirm'))
+            ->assertSessionHas('exact_stop.connection_id', $connection->id);
+    }
+
+    public function test_stop_with_blank_user_id_shows_soft_state(): void
+    {
+        $this->activeExactConnection();
+
+        $this->get('/exact/stop?UserId='.urlencode('   '))
+            ->assertOk()
+            ->assertInertia(fn (AssertableInertia $page) => $page->where('state', 'soft'))
             ->assertSessionMissing('exact_stop.connection_id');
     }
 

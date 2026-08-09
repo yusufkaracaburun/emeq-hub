@@ -9,6 +9,7 @@ use App\Jobs\Webhooks\ForwardConnectionRevokedToConsumerJob;
 use App\Mail\ConnectionDeprovisioned;
 use App\Models\Connection;
 use App\OAuth\Exact\ExactOAuthFlow;
+use App\Support\Exact\ExactUserId;
 use App\Support\Seo\SeoMeta;
 use App\Webhooks\InboundWebhookRecorder;
 use Illuminate\Http\RedirectResponse;
@@ -39,14 +40,14 @@ class ExactDeprovisionController extends Controller
 
     public function confirm(Request $request): Response
     {
-        $exactUserId = $request->query('UserId');
+        $exactUserId = ExactUserId::normalize($request->query('UserId'));
         $connection = $this->matchConnection($exactUserId);
 
         if ($connection === null) {
             // Alleen auditen als Exact daadwerkelijk een UserId meestuurde:
             // dan is dit een deprovision-poging die we niet konden matchen
             // (triage-waardig), geen kale crawler-hit.
-            if (filled($exactUserId)) {
+            if ($exactUserId !== null) {
                 $this->recorder->record(
                     Provider::Exact->value,
                     $request,
@@ -119,9 +120,12 @@ class ExactDeprovisionController extends Controller
         return $this->page('done');
     }
 
-    private function matchConnection(?string $exactUserId): ?Connection
+    /**
+     * @param  string|null  $normalized  al door ExactUserId::normalize() gehaald
+     */
+    private function matchConnection(?string $normalized): ?Connection
     {
-        if ($exactUserId === null || $exactUserId === '') {
+        if ($normalized === null) {
             return null;
         }
 
@@ -129,7 +133,7 @@ class ExactDeprovisionController extends Controller
             ->where('provider', Provider::Exact)
             ->where('status', 'active')
             ->whereNull('revoked_at')
-            ->where('metadata->exact_user_id', $exactUserId)
+            ->whereIn('metadata->exact_user_id', ExactUserId::storageCandidates($normalized))
             ->latest('id')
             ->first();
     }
