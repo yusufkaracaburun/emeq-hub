@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api\V1\Accounting;
 
 use App\Accounting\AccountingTargetRegistry;
+use App\Accounting\BankStatement;
+use App\Accounting\Contracts\ReadsBankStatements;
 use App\Accounting\Contracts\ReadsDocuments;
 use App\Accounting\Contracts\ReadsLedgerAccounts;
 use App\Accounting\Contracts\ReadsRelations;
@@ -73,6 +75,33 @@ class ReadController extends Controller
                 ? $target->readDocuments($connection, $query, $documentType)
                 : null,
             static fn (PostedDocument $item): array => $item->toArray(),
+        );
+    }
+
+    /**
+     * Bank- of kasafschriften met hun mutaties.
+     *
+     * Filter met `?kind=bank|cash`; standaard bank. Dit is de resource waarover de
+     * bank-webhooks notificeren — zonder dit endpoint is zo'n melding onbruikbaar.
+     */
+    public function bankStatements(Request $request): JsonResponse
+    {
+        $kind = $request->query('kind', BankStatement::KIND_BANK);
+
+        if (! in_array($kind, [BankStatement::KIND_BANK, BankStatement::KIND_CASH], true)) {
+            return response()->json([
+                'error' => 'invalid_query',
+                'message' => "Onbekende kind '{$kind}'. Geldig: bank, cash.",
+            ], 400);
+        }
+
+        return $this->read(
+            $request,
+            Capability::ReadBankStatements,
+            fn (object $target, ReadQuery $query, $connection) => $target instanceof ReadsBankStatements
+                ? $target->readBankStatements($connection, $query, (string) $kind)
+                : null,
+            static fn (BankStatement $item): array => $item->toArray(),
         );
     }
 

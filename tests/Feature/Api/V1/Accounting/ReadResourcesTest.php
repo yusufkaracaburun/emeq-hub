@@ -13,6 +13,8 @@ use App\Models\Connection;
 use App\Models\ConnectionAccountingRef;
 use App\Models\Consumer;
 use App\Sanctum\TokenAbilities;
+use Emeq\ExactApi\Http\Request\Read\GetBankEntries;
+use Emeq\ExactApi\Http\Request\Read\GetCashEntries;
 use Emeq\ExactApi\Http\Request\Read\GetPurchaseEntries;
 use Emeq\ExactApi\Http\Request\Read\GetRelations;
 use Emeq\ExactApi\Http\Request\Read\GetSalesEntries;
@@ -414,6 +416,80 @@ class ReadResourcesTest extends TestCase
             ->assertJsonPath('data.2.party.name', 'Klant een');
 
         $this->assertSame(1, $queries, 'Relatienamen horen in één query opgehaald te worden.');
+    }
+
+    /**
+     * De resource waarover de bank-webhooks notificeren. Zonder dit endpoint kreeg een
+     * consumer wel het seintje maar niet de inhoud.
+     */
+    public function test_bank_statements_expose_the_lines_the_webhook_notifies_about(): void
+    {
+        MockClient::global([
+            GetBankEntries::class => MockResponse::make(['d' => ['results' => [[
+                'EntryID' => 'bank-1',
+                'EntryNumber' => 42,
+                'JournalCode' => '20',
+                'FinancialYear' => 2026,
+                'FinancialPeriod' => 6,
+                'Currency' => 'EUR',
+                'OpeningBalanceFC' => 1000.0,
+                'ClosingBalanceFC' => 1250.0,
+                'BankEntryLines' => ['results' => [[
+                    'ID' => 'line-1',
+                    'Date' => '2026-06-16T00:00:00',
+                    'AmountFC' => 250.0,
+                    'Description' => 'Betaling Acme',
+                    'Account' => 'cust-guid',
+                    'AccountName' => 'Acme BV',
+                    'GLAccount' => 'gl-guid',
+                    'GLAccountCode' => '1300',
+                    'VATCode' => '4',
+                    'DocumentNumber' => 7001,
+                ]]],
+            ]]]], 200),
+        ]);
+        [$consumer] = $this->connected();
+
+        $this->fetch($consumer, 'bank-statements')
+            ->assertOk()
+            ->assertJsonPath('data.0.id', 'bank-1')
+            ->assertJsonPath('data.0.kind', 'bank')
+            ->assertJsonPath('data.0.journal', '20')
+            ->assertJsonPath('data.0.financial_year', 2026)
+            ->assertJsonPath('data.0.opening_balance', 1000)
+            ->assertJsonPath('data.0.closing_balance', 1250)
+            ->assertJsonPath('data.0.lines.0.date', '2026-06-16')
+            ->assertJsonPath('data.0.lines.0.amount', 250)
+            // Anders dan bij een boeking levert Exact de tegenpartij-naam op de regel.
+            ->assertJsonPath('data.0.lines.0.relation.name', 'Acme BV')
+            ->assertJsonPath('data.0.lines.0.ledger_account_code', '1300')
+            ->assertJsonPath('data.0.lines.0.document_number', '7001');
+    }
+
+    public function test_the_cash_kind_reads_the_cash_resource(): void
+    {
+        MockClient::global([
+            GetCashEntries::class => MockResponse::make(['d' => ['results' => [[
+                'EntryID' => 'cash-1',
+                'CashEntryLines' => ['results' => []],
+            ]]]], 200),
+        ]);
+        [$consumer] = $this->connected();
+
+        $this->fetch($consumer, 'bank-statements', ['kind' => 'cash'])
+            ->assertOk()
+            ->assertJsonPath('data.0.kind', 'cash');
+
+        MockClient::global()->assertSent(GetCashEntries::class);
+    }
+
+    public function test_an_unknown_statement_kind_is_rejected(): void
+    {
+        [$consumer] = $this->connected();
+
+        $this->fetch($consumer, 'bank-statements', ['kind' => 'onzin'])
+            ->assertStatus(400)
+            ->assertJsonPath('error', 'invalid_query');
     }
 
     public function test_reading_requires_a_read_ability(): void

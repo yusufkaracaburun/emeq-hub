@@ -143,6 +143,8 @@ Route::middleware('auth:sanctum')->group(function (): void {
     Route::get('/accounting/documents', [AccountingReadController::class, 'documents'])
         ->name('api.accounting.documents.index');
     // Cursor-paginatie: `?limit=&cursor=`, cursor ondoorzichtig.
+    Route::get('/accounting/bank-statements', [AccountingReadController::class, 'bankStatements'])
+        ->name('api.accounting.bank-statements');
     Route::get('/accounting/ledger-accounts', [AccountingReadController::class, 'ledgerAccounts'])
         ->name('api.accounting.ledger-accounts');
     Route::get('/accounting/tax-codes', [AccountingReadController::class, 'taxCodes'])

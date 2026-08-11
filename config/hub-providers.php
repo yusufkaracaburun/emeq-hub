@@ -58,6 +58,8 @@ return [
             'purchaseentry/PurchaseEntries',
             'documents/Documents',
             'documents/DocumentAttachments',
+            'financialtransaction/BankEntries',
+            'financialtransaction/CashEntries',
             'webhooks/WebhookSubscriptions',
         ],
     ],

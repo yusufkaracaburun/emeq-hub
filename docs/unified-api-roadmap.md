@@ -3,7 +3,7 @@
 > Niets staat onder **IMPLEMENTED** zonder werkende code én tests. Bij twijfel gaat
 > het naar NEXT. Architectuur staat in `unified-api-architecture.md`.
 
-Laatste update: 2026-08-11 · suite: 1249 passed, 1 incomplete, 0 failures.
+Laatste update: 2026-08-11 · suite: 1252 passed, 1 incomplete, 0 failures.
 Startbaseline vóór dit traject: 1120 passed · PHPStan-baseline 206 → 125.
 
 ---
@@ -142,6 +142,16 @@ Vereist `emeq/exact-api` v0.3.0 (`Envelope::nextSkipToken`, `GetSalesEntries`,
 `GetPurchaseEntries`).
 → `ReadResourcesTest::test_documents_are_read_back_from_the_resource_they_were_written_to`
 en vier andere
+
+### Bank- en kasafschriften leesbaar
+`GET /v1/accounting/bank-statements?kind=bank|cash` met `BankStatement` +
+`BankStatementLine`. De Hub abonneerde al op de webhook-topics BankEntries/CashEntries
+maar had geen lees-pad, dus kreeg een consumer een seintje zonder inhoud. Endpoint-paden
+en veldnamen geverifieerd tegen de officiële Exact REST-referentie. Een afschrift met
+regels, niet losse transacties — zo modelleren de pakketten het ook, en het open- en
+sluitsaldo laat een consumer controleren of hij alles heeft.
+→ `ReadResourcesTest::test_bank_statements_expose_the_lines_the_webhook_notifies_about`
+en twee andere
 
 ### Statische analyse
 PHPStan/Larastan level 5 op `app/`, `database/factories/` en `routes/`, met een

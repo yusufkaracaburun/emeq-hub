@@ -6,8 +6,11 @@ namespace App\Accounting\Exact;
 
 use App\Accounting\AccountingResult;
 use App\Accounting\Attachment;
+use App\Accounting\BankStatement;
+use App\Accounting\BankStatementLine;
 use App\Accounting\Contracts\AccountingTarget;
 use App\Accounting\Contracts\EnrichesValidation;
+use App\Accounting\Contracts\ReadsBankStatements;
 use App\Accounting\Contracts\ReadsDocuments;
 use App\Accounting\Contracts\ReadsLedgerAccounts;
 use App\Accounting\Contracts\ReadsRelations;
@@ -41,6 +44,8 @@ use Emeq\ExactApi\Contracts\TokenStore;
 use Emeq\ExactApi\Enums\ExactDocumentType;
 use Emeq\ExactApi\Exact;
 use Emeq\ExactApi\Http\ExactConnector;
+use Emeq\ExactApi\Http\Request\Read\GetBankEntries;
+use Emeq\ExactApi\Http\Request\Read\GetCashEntries;
 use Emeq\ExactApi\Http\Request\Read\GetPurchaseEntries;
 use Emeq\ExactApi\Http\Request\Read\GetRelations;
 use Emeq\ExactApi\Http\Request\Read\GetSalesEntries;
@@ -62,7 +67,7 @@ use Throwable;
  * De Exact-wire (endpoints, veldnamen, AmountFC/AmountDC, response-envelope) leeft in
  * de SDK; deze adapter levert alleen geresolvede waarden in een neutrale regel-vorm.
  */
-final class ExactAccountingTarget implements AccountingTarget, EnrichesValidation, ReadsDocuments, ReadsLedgerAccounts, ReadsRelations, ReadsTaxCodes, SyncsReferenceData, UploadsAttachments
+final class ExactAccountingTarget implements AccountingTarget, EnrichesValidation, ReadsBankStatements, ReadsDocuments, ReadsLedgerAccounts, ReadsRelations, ReadsTaxCodes, SyncsReferenceData, UploadsAttachments
 {
     public function __construct(
         private readonly ReferenceResolver $references,
@@ -179,6 +184,90 @@ final class ExactAccountingTarget implements AccountingTarget, EnrichesValidatio
             items: $this->toPostedDocuments($rows, $connection, $purchase, $collection, $partyField),
             nextCursor: $token === null ? null : Cursor::of($token),
         );
+    }
+
+    /**
+     * Capability `accounting.bank_statements.read`.
+     *
+     * De resource waarover de webhook-topics `BankEntries`/`CashEntries` notificeren.
+     * Zonder deze read draagt zo'n notificatie alleen een Key en kan de ontvanger er
+     * niets mee.
+     *
+     * @return ReadPage<BankStatement>
+     */
+    public function readBankStatements(Connection $connection, ReadQuery $query, string $kind = BankStatement::KIND_BANK): ReadPage
+    {
+        $cash = $kind === BankStatement::KIND_CASH;
+        $collection = $cash ? 'CashEntryLines' : 'BankEntryLines';
+
+        $params = [
+            '$select' => 'EntryID,EntryNumber,JournalCode,FinancialYear,FinancialPeriod,Currency,OpeningBalanceFC,ClosingBalanceFC',
+            '$expand' => $collection,
+            '$top' => $query->limit,
+        ];
+
+        if ($query->cursor !== null) {
+            $params['$skiptoken'] = $query->cursor->value;
+        }
+
+        $request = $cash ? new GetCashEntries($params) : new GetBankEntries($params);
+        $response = $this->connector($connection)->send($request);
+
+        if ($response->failed()) {
+            $response->throw();
+        }
+
+        $json = (array) $response->json();
+        $token = Envelope::nextSkipToken($json);
+
+        return new ReadPage(
+            items: array_map(
+                static fn (array $row): BankStatement => self::toBankStatement($row, $kind, $collection),
+                Envelope::results($json),
+            ),
+            nextCursor: $token === null ? null : Cursor::of($token),
+        );
+    }
+
+    /**
+     * @param  array<string, mixed>  $row
+     */
+    private static function toBankStatement(array $row, string $kind, string $collection): BankStatement
+    {
+        return new BankStatement(
+            id: (string) ($row['EntryID'] ?? ''),
+            kind: $kind,
+            lines: self::toBankStatementLines($row[$collection] ?? null),
+            number: self::nullableString($row['EntryNumber'] ?? null),
+            journal: self::nullableString($row['JournalCode'] ?? null),
+            financialYear: isset($row['FinancialYear']) ? (int) $row['FinancialYear'] : null,
+            financialPeriod: isset($row['FinancialPeriod']) ? (int) $row['FinancialPeriod'] : null,
+            openingBalance: isset($row['OpeningBalanceFC']) ? (float) $row['OpeningBalanceFC'] : null,
+            closingBalance: isset($row['ClosingBalanceFC']) ? (float) $row['ClosingBalanceFC'] : null,
+            currency: self::nullableString($row['Currency'] ?? null) ?? 'EUR',
+        );
+    }
+
+    /**
+     * @return list<BankStatementLine>
+     */
+    private static function toBankStatementLines(mixed $raw): array
+    {
+        $rows = Envelope::results(is_array($raw) ? ['d' => $raw] : null);
+
+        return array_map(static fn (array $line): BankStatementLine => new BankStatementLine(
+            id: (string) ($line['ID'] ?? ''),
+            amount: (float) ($line['AmountFC'] ?? 0),
+            date: self::toDate($line['Date'] ?? null),
+            description: self::nullableString($line['Description'] ?? null),
+            // Anders dan bij een boeking levert Exact hier de naam op de regel zelf.
+            relationId: self::nullableString($line['Account'] ?? null),
+            relationName: self::nullableString($line['AccountName'] ?? null),
+            ledgerAccountId: self::nullableString($line['GLAccount'] ?? null),
+            ledgerAccountCode: self::nullableString($line['GLAccountCode'] ?? null),
+            taxCode: self::nullableString($line['VATCode'] ?? null),
+            documentNumber: self::nullableString($line['DocumentNumber'] ?? null),
+        ), $rows);
     }
 
     /**
