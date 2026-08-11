@@ -66,6 +66,11 @@ jobs:
       - name: Check code style (Pint)
         run: vendor/bin/pint --test
 
+      # Level 5 met een baseline van 206 bestaande hits: nieuwe code moet schoon
+      # zijn, bestaande schuld blokkeert de build niet.
+      - name: Static analysis (PHPStan/Larastan)
+        run: composer stan
+
       - name: Run tests
         run: php artisan test
         env:

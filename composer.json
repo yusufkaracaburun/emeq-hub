@@ -36,6 +36,7 @@
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
+        "larastan/larastan": "^3.10",
         "laravel/boost": "^2.4",
         "laravel/pail": "^1.2.5",
         "laravel/pao": "^1.0.6",
@@ -76,6 +77,9 @@
         "test:integration": [
             "@php artisan config:clear --ansi",
             "vendor/bin/phpunit --configuration=phpunit.integration.xml"
+        ],
+        "stan": [
+            "@php -d memory_limit=2G vendor/bin/phpstan analyse --no-progress"
         ],
         "db:fresh": [
             "@php artisan migrate:fresh --seed"

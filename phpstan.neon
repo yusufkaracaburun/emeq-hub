@@ -1,0 +1,19 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+    - phpstan-baseline.neon
+
+parameters:
+    paths:
+        - app
+        - database/factories
+        - routes
+
+    level: 5
+
+    # Filament v4 en Livewire genereren properties/methods die statisch niet te zien
+    # zijn; die worden per geval in de baseline gezet, niet globaal genegeerd.
+    ignoreErrors: []
+
+    # Blade-views compileren tijdens analyse levert false positives op Inertia-pages.
+    excludePaths:
+        - app/Filament/*/Pages/*.php
