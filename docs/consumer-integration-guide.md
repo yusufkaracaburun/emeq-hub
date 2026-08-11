@@ -1,5 +1,4 @@
-| Geboekte documenten lezen | `GET /v1/accounting/documents` | `exact:read` |
-| Bank-/kasafschriften lezen | `GET /v1/accounting/bank-statements` | `exact:read` |# emeq Hub — Consumer-integratiehandleiding
+# emeq Hub — Consumer-integratiehandleiding
 
 Voor ontwikkelaars die een (multi-tenant) consumer-app aan de emeq Hub koppelen.
 Eén integratie → alle huidige én toekomstige providers (Exact, Mollie, …). Nieuwe
@@ -269,6 +268,7 @@ een header, niet de query-param `account_external_id` van de connect-laag):
 |---|---|---|
 | Capabilities opvragen | `GET /v1/accounting/capabilities` | `exact:read` |
 | Geboekte documenten lezen | `GET /v1/accounting/documents` | `exact:read` |
+| Bank-/kasafschriften lezen | `GET /v1/accounting/bank-statements` | `exact:read` |
 | Grootboek lezen | `GET /v1/accounting/ledger-accounts` | `exact:read` |
 | Btw-codes lezen | `GET /v1/accounting/tax-codes` | `exact:read` |
 | Klanten lezen | `GET /v1/accounting/customers` | `exact:read` |
