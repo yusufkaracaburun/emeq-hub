@@ -141,14 +141,30 @@ De mapping wordt na connect automatisch afgeleid uit de mirror
 (`ExactMappingDeriver`) en is daarna handmatig te overschrijven via
 `PUT /v1/accounting/mapping`.
 
-## Sync-state 🚧
+## Sync-state
 
-`provider_entity_links` beantwoordt: welke canonieke entity hoort bij welke
-provider-entity, wat was de laatste bekende versie, wie was de bron van de laatste
-mutatie, is deze update stale, en heeft de Hub dit event zelf veroorzaakt.
+`provider_entity_links` beantwoordt vandaag: welke canonieke entity hoort bij welke
+provider-entity, met welke inhoud is die geschreven, en wie was de bron.
 
 Provider-neutraal schema, uniek op `(connection_id, entity_type, external_id)` én
 op `(connection_id, entity_type, provider_entity_id)` — beide richtingen 1:1.
+
+Bij een schrijfactie beslist de tabel vóór de partner-call:
+
+| link-staat | gedrag |
+|---|---|
+| geen link | normaal boeken, daarna vastleggen |
+| link, gelijke `payload_fingerprint` | niet boeken → `200` + `deduplicated: true` |
+| link, andere fingerprint | niet boeken → `409 document_already_posted` |
+
+De fingerprint (`DocumentFingerprint`) hasht de **betekenis** van het document, niet
+de HTTP-bytes: sleutelvolgorde en `200` versus `200.00` mogen het antwoord niet
+veranderen. Regelvolgorde telt wél mee — de adapters kennen geen update-pad, dus
+omgekeerde regels zijn een andere boeking.
+
+🚧 Nog te komen (fase 9): `provider_version`, `canonical_version` en `last_seen_at`
+voor staleness-detectie, plus de read-back-probe voor het geval de partner commit
+maar de respons ons niet bereikt.
 
 ## Idempotentie 🚧
 
@@ -159,7 +175,7 @@ unique index is de mutex. Wat de Hub wél en niet garandeert:
 |---|---|
 | Twee gelijktijdige requests met dezelfde key boeken één keer | ja — 409 op de tweede |
 | Retry na netwerkfout replay't de eerste respons | ja, binnen de retentie |
-| Retry ná key-expiry boekt niet opnieuw | ja — via `provider_entity_links` |
+| Retry ná key-verlies boekt niet opnieuw | ja — via `provider_entity_links` |
 | Zelfde key met een ander payload | 422, geen stille verkeerde replay |
 | Provider commit + timeout richting Hub | **niet** gedekt zonder read-back-probe (fase 9) |
 

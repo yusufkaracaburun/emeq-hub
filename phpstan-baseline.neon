@@ -1,38 +1,8 @@
 parameters:
 	ignoreErrors:
 		-
-			message: '#^Cannot access property \$value on string\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: app/Accounting/AccountingSyncRunner.php
-
-		-
-			message: '#^Call to function is_array\(\) with array\{\} will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 2
-			path: app/Accounting/Exact/ConnectionMappingExactReferenceResolver.php
-
-		-
-			message: '#^Offset ''accounting_mapping'' on string\|null on left side of \?\? does not exist\.$#'
-			identifier: nullCoalesce.offset
-			count: 1
-			path: app/Accounting/Exact/ConnectionMappingExactReferenceResolver.php
-
-		-
-			message: '#^Offset string on array\{\} on left side of \?\? does not exist\.$#'
-			identifier: nullCoalesce.offset
-			count: 1
-			path: app/Accounting/Exact/ConnectionMappingExactReferenceResolver.php
-
-		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$consumer\.$#'
 			identifier: property.notFound
-			count: 1
-			path: app/Accounting/Exact/ExactAccountingTarget.php
-
-		-
-			message: '#^Offset ''accounting_mapping'' on string\|null in empty\(\) does not exist\.$#'
-			identifier: empty.offset
 			count: 1
 			path: app/Accounting/Exact/ExactAccountingTarget.php
 
@@ -49,12 +19,6 @@ parameters:
 			path: app/Accounting/Exact/ExactAccountingTarget.php
 
 		-
-			message: '#^Offset ''accounting_mapping'' on array\{\}\|string on left side of \?\? does not exist\.$#'
-			identifier: nullCoalesce.offset
-			count: 1
-			path: app/Accounting/Exact/ExactMappingDeriver.php
-
-		-
 			message: '#^Offset ''percentage'' on string\|null on left side of \?\? does not exist\.$#'
 			identifier: nullCoalesce.offset
 			count: 2
@@ -64,12 +28,6 @@ parameters:
 			message: '#^Offset ''type'' on string\|null on left side of \?\? does not exist\.$#'
 			identifier: nullCoalesce.offset
 			count: 2
-			path: app/Accounting/Exact/ExactMappingDeriver.php
-
-		-
-			message: '#^Property App\\Models\\Connection\:\:\$metadata \(string\|null\) does not accept array\<string, array\<string, array\<string, string\>\>\>\.$#'
-			identifier: assign.propertyType
-			count: 1
 			path: app/Accounting/Exact/ExactMappingDeriver.php
 
 		-
@@ -97,24 +55,6 @@ parameters:
 			path: app/Accounting/Exact/ExactMappingDeriver.php
 
 		-
-			message: '#^Call to function is_array\(\) with array\{\} will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: app/Accounting/Exact/ExactRelationResolver.php
-
-		-
-			message: '#^Offset ''accounting_mapping'' on string\|null on left side of \?\? does not exist\.$#'
-			identifier: nullCoalesce.offset
-			count: 1
-			path: app/Accounting/Exact/ExactRelationResolver.php
-
-		-
-			message: '#^Offset ''auto_create…'' on array\{\} on left side of \?\? does not exist\.$#'
-			identifier: nullCoalesce.offset
-			count: 1
-			path: app/Accounting/Exact/ExactRelationResolver.php
-
-		-
 			message: '#^Offset ''is_sales'' on array\{is_sales\: bool, is_supplier\: bool, status\: string\|null\} on left side of \?\? always exists and is not nullable\.$#'
 			identifier: nullCoalesce.offset
 			count: 1
@@ -123,12 +63,6 @@ parameters:
 		-
 			message: '#^Offset ''is_supplier'' on array\{is_sales\: bool, is_supplier\: bool, status\: string\|null\} on left side of \?\? always exists and is not nullable\.$#'
 			identifier: nullCoalesce.offset
-			count: 1
-			path: app/Accounting/Exact/ExactRelationResolver.php
-
-		-
-			message: '#^Strict comparison using \=\=\= between false and true will always evaluate to false\.$#'
-			identifier: identical.alwaysFalse
 			count: 1
 			path: app/Accounting/Exact/ExactRelationResolver.php
 
@@ -143,12 +77,6 @@ parameters:
 			identifier: binaryOp.invalid
 			count: 1
 			path: app/Accounting/Validation/Validators/IbanValidator.php
-
-		-
-			message: '#^Cannot access property \$value on string\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: app/Actions/Connect/RevokeConnection.php
 
 		-
 			message: '#^Call to function is_string\(\) with string will always evaluate to true\.$#'
@@ -427,106 +355,10 @@ parameters:
 			path: app/Console/Commands/AccountingSmoke.php
 
 		-
-			message: '#^Cannot access property \$value on string\.$#'
-			identifier: property.nonObject
-			count: 2
-			path: app/Console/Commands/Exact/PurgeTestData.php
-
-		-
 			message: '#^PHPDoc tag @param has invalid value \(array\{0\: int, 1\: int\}  \.\.\.\)\: Unexpected token "\\n     \* ", expected variable at offset 45 on line 2$#'
 			identifier: phpDoc.parseError
 			count: 1
 			path: app/Console/Commands/Exact/PurgeTestData.php
-
-		-
-			message: '#^Cannot access property \$value on string\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: app/Filament/Actions/ManageAccountingMappingAction.php
-
-		-
-			message: '#^Offset ''0'' on array\{\} on left side of \?\? does not exist\.$#'
-			identifier: nullCoalesce.offset
-			count: 1
-			path: app/Filament/Actions/ManageAccountingMappingAction.php
-
-		-
-			message: '#^Offset ''21'' on array\{\} on left side of \?\? does not exist\.$#'
-			identifier: nullCoalesce.offset
-			count: 1
-			path: app/Filament/Actions/ManageAccountingMappingAction.php
-
-		-
-			message: '#^Offset ''9'' on array\{\} on left side of \?\? does not exist\.$#'
-			identifier: nullCoalesce.offset
-			count: 1
-			path: app/Filament/Actions/ManageAccountingMappingAction.php
-
-		-
-			message: '#^Offset ''accounting_mapping'' on string\|null on left side of \?\? does not exist\.$#'
-			identifier: nullCoalesce.offset
-			count: 1
-			path: app/Filament/Actions/ManageAccountingMappingAction.php
-
-		-
-			message: '#^Offset ''auto_create…'' on array\{\} on left side of \?\? does not exist\.$#'
-			identifier: nullCoalesce.offset
-			count: 1
-			path: app/Filament/Actions/ManageAccountingMappingAction.php
-
-		-
-			message: '#^Offset ''expense'' on array\{\} on left side of \?\? does not exist\.$#'
-			identifier: nullCoalesce.offset
-			count: 1
-			path: app/Filament/Actions/ManageAccountingMappingAction.php
-
-		-
-			message: '#^Offset ''gl_accounts'' on array\{\} on left side of \?\? does not exist\.$#'
-			identifier: nullCoalesce.offset
-			count: 1
-			path: app/Filament/Actions/ManageAccountingMappingAction.php
-
-		-
-			message: '#^Offset ''income'' on array\{\} on left side of \?\? does not exist\.$#'
-			identifier: nullCoalesce.offset
-			count: 1
-			path: app/Filament/Actions/ManageAccountingMappingAction.php
-
-		-
-			message: '#^Offset ''journals'' on array\{\} on left side of \?\? does not exist\.$#'
-			identifier: nullCoalesce.offset
-			count: 1
-			path: app/Filament/Actions/ManageAccountingMappingAction.php
-
-		-
-			message: '#^Offset ''purchase'' on array\{\} on left side of \?\? does not exist\.$#'
-			identifier: nullCoalesce.offset
-			count: 1
-			path: app/Filament/Actions/ManageAccountingMappingAction.php
-
-		-
-			message: '#^Offset ''reverse_charge\:21'' on array\{\} on left side of \?\? does not exist\.$#'
-			identifier: nullCoalesce.offset
-			count: 1
-			path: app/Filament/Actions/ManageAccountingMappingAction.php
-
-		-
-			message: '#^Offset ''reverse_charge\:9'' on array\{\} on left side of \?\? does not exist\.$#'
-			identifier: nullCoalesce.offset
-			count: 1
-			path: app/Filament/Actions/ManageAccountingMappingAction.php
-
-		-
-			message: '#^Offset ''sales'' on array\{\} on left side of \?\? does not exist\.$#'
-			identifier: nullCoalesce.offset
-			count: 1
-			path: app/Filament/Actions/ManageAccountingMappingAction.php
-
-		-
-			message: '#^Offset ''vat_codes'' on array\{\} on left side of \?\? does not exist\.$#'
-			identifier: nullCoalesce.offset
-			count: 1
-			path: app/Filament/Actions/ManageAccountingMappingAction.php
 
 		-
 			message: '#^Parameter \#1 \$values of static method App\\Filament\\Actions\\ManageAccountingMappingAction\:\:scalarMap\(\) expects array\<string, mixed\>, array\<int\|string, mixed\> given\.$#'
@@ -535,38 +367,8 @@ parameters:
 			path: app/Filament/Actions/ManageAccountingMappingAction.php
 
 		-
-			message: '#^Property App\\Models\\Connection\:\:\$metadata \(string\|null\) does not accept array\<string, array\<string, mixed\>\>\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: app/Filament/Actions/ManageAccountingMappingAction.php
-
-		-
-			message: '#^Strict comparison using \=\=\= between false and true will always evaluate to false\.$#'
-			identifier: identical.alwaysFalse
-			count: 1
-			path: app/Filament/Actions/ManageAccountingMappingAction.php
-
-		-
-			message: '#^Cannot access property \$value on string\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: app/Filament/Actions/StartOAuthFlowAction.php
-
-		-
 			message: '#^Parameter \#1 \$account of static method App\\Filament\\Actions\\StartOAuthFlowAction\:\:dispatch\(\) expects App\\Models\\Account, Illuminate\\Database\\Eloquent\\Model\|null given\.$#'
 			identifier: argument.type
-			count: 1
-			path: app/Filament/Actions/StartOAuthFlowAction.php
-
-		-
-			message: '#^Result of && is always false\.$#'
-			identifier: booleanAnd.alwaysFalse
-			count: 2
-			path: app/Filament/Actions/StartOAuthFlowAction.php
-
-		-
-			message: '#^Strict comparison using \=\=\= between string and App\\Enums\\Provider\:\:Mollie will always evaluate to false\.$#'
-			identifier: identical.alwaysFalse
 			count: 1
 			path: app/Filament/Actions/StartOAuthFlowAction.php
 
@@ -649,36 +451,6 @@ parameters:
 			path: app/Filament/Resources/CashierSubscriptions/Tables/CashierSubscriptionsTable.php
 
 		-
-			message: '#^Cannot access property \$value on string\.$#'
-			identifier: property.nonObject
-			count: 2
-			path: app/Filament/Resources/Connections/ConnectionResource.php
-
-		-
-			message: '#^Offset ''accounting_mapping'' on string\|null on left side of \?\? does not exist\.$#'
-			identifier: nullCoalesce.offset
-			count: 5
-			path: app/Filament/Resources/Connections/ConnectionResource.php
-
-		-
-			message: '#^Strict comparison using \=\=\= between string\|null and App\\Enums\\Provider\:\:Exact will always evaluate to false\.$#'
-			identifier: identical.alwaysFalse
-			count: 1
-			path: app/Filament/Resources/Connections/ConnectionResource.php
-
-		-
-			message: '#^Strict comparison using \=\=\= between string\|null and App\\Enums\\Provider\:\:Mollie will always evaluate to false\.$#'
-			identifier: identical.alwaysFalse
-			count: 1
-			path: app/Filament/Resources/Connections/ConnectionResource.php
-
-		-
-			message: '#^Strict comparison using \=\=\= between string\|null and App\\Enums\\Provider\:\:Snelstart will always evaluate to false\.$#'
-			identifier: identical.alwaysFalse
-			count: 1
-			path: app/Filament/Resources/Connections/ConnectionResource.php
-
-		-
 			message: '#^Parameter \#1 \$chart of method Filament\\Widgets\\StatsOverviewWidget\\Stat\:\:chart\(\) expects array\<float\>\|Illuminate\\Contracts\\Support\\Arrayable\|null, list\<int\> given\.$#'
 			identifier: argument.type
 			count: 1
@@ -689,12 +461,6 @@ parameters:
 			identifier: notIdentical.alwaysTrue
 			count: 1
 			path: app/Http/Controllers/Api/V1/AccountSubscriptions/AccountSubscriptionController.php
-
-		-
-			message: '#^Cannot access property \$value on string\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: app/Http/Controllers/Api/V1/Accounting/DocumentsController.php
 
 		-
 			message: '#^Method App\\Http\\Controllers\\Api\\V1\\Accounting\\DocumentsController\:\:resolveAccountingConnection\(\) should return array\{App\\Models\\Account, App\\Models\\Connection\} but returns array\{App\\Models\\Account, Illuminate\\Database\\Eloquent\\Model\}\.$#'
@@ -715,26 +481,8 @@ parameters:
 			path: app/Http/Controllers/Api/V1/Accounting/MappingController.php
 
 		-
-			message: '#^Cannot access property \$value on string\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: app/Http/Controllers/Api/V1/Accounting/MappingController.php
-
-		-
 			message: '#^Method App\\Http\\Controllers\\Api\\V1\\Accounting\\MappingController\:\:resolve\(\) should return array\{App\\Models\\Account, App\\Models\\Connection\}\|Illuminate\\Http\\JsonResponse but returns array\{App\\Models\\Account, Illuminate\\Database\\Eloquent\\Model\}\.$#'
 			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/Api/V1/Accounting/MappingController.php
-
-		-
-			message: '#^Offset ''accounting_mapping'' on array\{\}\|string on left side of \?\? does not exist\.$#'
-			identifier: nullCoalesce.offset
-			count: 1
-			path: app/Http/Controllers/Api/V1/Accounting/MappingController.php
-
-		-
-			message: '#^Offset ''accounting_mapping'' on string\|null on left side of \?\? does not exist\.$#'
-			identifier: nullCoalesce.offset
 			count: 1
 			path: app/Http/Controllers/Api/V1/Accounting/MappingController.php
 
@@ -745,38 +493,8 @@ parameters:
 			path: app/Http/Controllers/Api/V1/Accounting/MappingController.php
 
 		-
-			message: '#^Property App\\Models\\Connection\:\:\$metadata \(string\|null\) does not accept array\<string, array\<string, array\|bool\>\>\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: app/Http/Controllers/Api/V1/Accounting/MappingController.php
-
-		-
-			message: '#^Strict comparison using \!\=\= between string and App\\Enums\\Provider\:\:Exact will always evaluate to true\.$#'
-			identifier: notIdentical.alwaysTrue
-			count: 1
-			path: app/Http/Controllers/Api/V1/Accounting/MappingController.php
-
-		-
-			message: '#^Unreachable statement \- code above always terminates\.$#'
-			identifier: deadCode.unreachable
-			count: 1
-			path: app/Http/Controllers/Api/V1/Accounting/MappingController.php
-
-		-
-			message: '#^Cannot access property \$value on string\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: app/Http/Controllers/Api/V1/Accounting/ValidateDocumentController.php
-
-		-
 			message: '#^Method App\\Http\\Controllers\\Api\\V1\\Accounting\\ValidateDocumentController\:\:resolveAccountingConnection\(\) should return array\{App\\Models\\Account, App\\Models\\Connection\} but returns array\{App\\Models\\Account, Illuminate\\Database\\Eloquent\\Model\}\.$#'
 			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/Api/V1/Accounting/ValidateDocumentController.php
-
-		-
-			message: '#^Strict comparison using \=\=\= between string and App\\Enums\\Provider\:\:Exact will always evaluate to false\.$#'
-			identifier: identical.alwaysFalse
 			count: 1
 			path: app/Http/Controllers/Api/V1/Accounting/ValidateDocumentController.php
 
@@ -895,12 +613,6 @@ parameters:
 			path: app/Http/Resources/Api/V1/AccountSubscriptionResource.php
 
 		-
-			message: '#^Cannot call method toIso8601String\(\) on string\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: app/Http/Resources/Api/V1/ConnectionResource.php
-
-		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
 			identifier: property.notFound
 			count: 1
@@ -919,12 +631,6 @@ parameters:
 			path: app/Jobs/Accounting/SyncAccountingDocumentJob.php
 
 		-
-			message: '#^Cannot access property \$value on string\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: app/Jobs/Accounting/SyncAccountingDocumentJob.php
-
-		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$consumer\.$#'
 			identifier: property.notFound
 			count: 1
@@ -933,18 +639,6 @@ parameters:
 		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$external_id\.$#'
 			identifier: property.notFound
-			count: 1
-			path: app/Jobs/Webhooks/ForwardConnectionRevokedToConsumerJob.php
-
-		-
-			message: '#^Cannot access property \$value on string\.$#'
-			identifier: property.nonObject
-			count: 2
-			path: app/Jobs/Webhooks/ForwardConnectionRevokedToConsumerJob.php
-
-		-
-			message: '#^Cannot call method toIso8601String\(\) on string\.$#'
-			identifier: method.nonObject
 			count: 1
 			path: app/Jobs/Webhooks/ForwardConnectionRevokedToConsumerJob.php
 
@@ -967,42 +661,6 @@ parameters:
 			path: app/Jobs/Webhooks/ForwardSnelstartWebhookToConsumerJob.php
 
 		-
-			message: '#^Cannot access property \$value on string\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: app/Mail/ConnectionDeprovisioned.php
-
-		-
-			message: '#^Cannot access property \$value on string\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: app/Models/Connection.php
-
-		-
-			message: '#^Cannot call method getTimestamp\(\) on string\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: app/Mollie/HubMollieCredentialResolver.php
-
-		-
-			message: '#^Cannot call method lt\(\) on string\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: app/Mollie/HubMollieCredentialResolver.php
-
-		-
-			message: '#^Cannot call method gt\(\) on string\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: app/OAuth/Exact/ExactOAuthFlow.php
-
-		-
-			message: '#^Cannot call method gt\(\) on string\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: app/OAuth/Mollie/MollieConnectOAuthFlow.php
-
-		-
 			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:connections\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -1015,43 +673,13 @@ parameters:
 			path: app/Services/ConsumerOnboarding.php
 
 		-
-			message: '#^Parameter \#1 \$object of static method DateTimeImmutable\:\:createFromInterface\(\) expects DateTimeInterface, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Services/Exact/ConnectionTokenStore.php
-
-		-
-			message: '#^Call to function is_array\(\) with array\{\} will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: app/Services/Exact/ExactWebhookSubscriptionManager.php
-
-		-
-			message: '#^Cannot unset offset ''exact_webhooks'' on array\{\}\|string\.$#'
-			identifier: unset.offset
-			count: 1
-			path: app/Services/Exact/ExactWebhookSubscriptionManager.php
-
-		-
-			message: '#^Offset ''exact_webhooks'' on array\{\}\|string on left side of \?\? does not exist\.$#'
-			identifier: nullCoalesce.offset
-			count: 1
-			path: app/Services/Exact/ExactWebhookSubscriptionManager.php
-
-		-
-			message: '#^Cannot access property \$value on string\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: app/Support/Connect/ProviderConnectStatus.php
-
-		-
 			message: '#^Method App\\Support\\Connect\\ProviderConnectStatus\:\:connectionStatuses\(\) should return Illuminate\\Support\\Collection\<string, App\\Models\\Connection\> but returns Illuminate\\Database\\Eloquent\\Collection\<string, Illuminate\\Database\\Eloquent\\Model\>\.$#'
 			identifier: return.type
 			count: 1
 			path: app/Support/Connect/ProviderConnectStatus.php
 
 		-
-			message: '#^Parameter \#1 \$keyBy of method Illuminate\\Support\\Collection\<int,Illuminate\\Database\\Eloquent\\Model\>\:\:keyBy\(\) expects \(callable\(Illuminate\\Database\\Eloquent\\Model, int\)\: string\)\|list\<Closure\|string\>\|string, Closure\(App\\Models\\Connection\)\: string given\.$#'
+			message: '#^Parameter \#1 \$keyBy of method Illuminate\\Support\\Collection\<int,Illuminate\\Database\\Eloquent\\Model\>\:\:keyBy\(\) expects \(callable\(Illuminate\\Database\\Eloquent\\Model, int\)\: \(''exact''\|''mollie''\|''snelstart''\)\)\|list\<Closure\|string\>\|string, Closure\(App\\Models\\Connection\)\: \(''exact''\|''mollie''\|''snelstart''\) given\.$#'
 			identifier: argument.type
 			count: 1
 			path: app/Support/Connect/ProviderConnectStatus.php

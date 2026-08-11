@@ -11,7 +11,20 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 
+/**
+ * Statische analyse leest de casts uit {@see Connection::casts()} niet en valt terug
+ * op het kolomtype uit de migratie — daardoor las `provider` als string en `metadata`
+ * als string|null. Deze declaraties zetten dat recht.
+ *
+ * @property Provider $provider
+ * @property array<string, mixed>|null $metadata
+ * @property array<int, string>|null $scopes
+ * @property Carbon|null $expires_at
+ * @property Carbon|null $revoked_at
+ * @property Carbon|null $oauth_state_expires_at
+ */
 #[Fillable([
     'account_id',
     'provider',

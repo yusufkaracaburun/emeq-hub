@@ -3,8 +3,8 @@
 > Niets staat onder **IMPLEMENTED** zonder werkende code én tests. Bij twijfel gaat
 > het naar NEXT. Architectuur staat in `unified-api-architecture.md`.
 
-Laatste update: 2026-08-11 · suite: 1137 passed, 1 incomplete, 0 failures.
-Startbaseline vóór dit traject: 1120 passed.
+Laatste update: 2026-08-11 · suite: 1165 passed, 1 incomplete, 0 failures.
+Startbaseline vóór dit traject: 1120 passed · PHPStan-baseline 206 → 135.
 
 ---
 
@@ -54,6 +54,19 @@ dubbele boeking), geen payload-check bij key-hergebruik, geen verval, geen pruni
 Zie NEXT.
 → `StoreDocumentTest::test_retry_with_same_idempotency_key_books_once`
 
+### Provider-entity-links + dedupe
+`provider_entity_links` legt per Connection vast welk canoniek `external_id` bij welke
+partner-entity hoort, met een semantische `DocumentFingerprint` van het document.
+Tweede verdedigingslijn naast de idempotency-key: die vervalt, deze niet. De check
+zit in `AccountingSyncRunner`, dus het sync- én het async-pad krijgen hem.
+Gelijke inhoud → `200 deduplicated: true` met de eerdere referentie, zonder de partner
+te raken. Afwijkende inhoud onder hetzelfde `external_id` → `409
+document_already_posted`; de adapters kennen geen update-pad, dus dat zou een tweede
+boeking voor één brondocument worden. Beide takken landen in `pass_through_calls`.
+→ `tests/Feature/Api/V1/Accounting/ProviderEntityLinkTest.php`,
+`tests/Unit/Accounting/DocumentFingerprintTest.php`,
+`AsyncStoreDocumentTest::test_async_job_deduplicates_a_repeat_of_the_same_document`
+
 ### Pass-through escape hatch
 `/v1/exact/*` en `/v1/snelstart/*` met path-whitelist, ability-guard en audit naar
 `pass_through_calls`. Bedoeld als uitzondering, niet als hoofdweg.
@@ -76,7 +89,7 @@ vijf de outbound fan-outs. Zichtbaar in beide Filament-infolists.
 
 ### Statische analyse
 PHPStan/Larastan level 5 op `app/`, `database/factories/` en `routes/`, met een
-baseline van 206 bestaande hits. Nieuwe code moet schoon zijn; bestaande schuld
+baseline van 135 bestaande hits. Nieuwe code moet schoon zijn; bestaande schuld
 blokkeert de build niet. Draait in CI naast Pint, tests en `composer audit`.
 → `phpstan.neon`, `.github/workflows/ci.yml`
 
@@ -86,29 +99,23 @@ blokkeert de build niet. Draait in CI naast Pint, tests en `composer audit`.
 
 Gepland en ontworpen; volgorde is bindend vanwege harde afhankelijkheden.
 
-### 1. Provider-entity-links + dedupe
-`provider_entity_links` legt duurzaam vast welke canonieke document-`external_id` bij
-welke provider-entity hoort. Maakt een retry ná verlies van de idempotency-key
-detecteerbaar. **Moet vóór punt 2 landen**, anders opent de key-TTL een herboek-venster.
-Nieuwe responses: `200 deduplicated: true` en `409 document_already_posted`.
-
-### 2. Idempotency-hardening
+### 1. Idempotency-hardening
 Claim-first insert met de unique index als mutex; `in_flight`/`completed`-staat met
 lease en takeover; payload-fingerprint-guard; verval en pruning.
 Nieuwe responses: `409 idempotency_request_in_progress`, `422 idempotency_key_reuse`.
 **Breaking** — consumers moeten meebewegen.
 
-### 3. Capability-registry
+### 2. Capability-registry
 Providers declareren wat ze kunnen via `implements`, niet via config.
 `GET /v1/accounting/capabilities`. Haalt de laatste twee provider-conditionals uit de
 accounting-controllers en sluit het gat waarin de dry-run Exact belt terwijl de
 kill-switch uit staat.
 
-### 4. Error-normalisatie
+### 3. Error-normalisatie
 Canonieke foutcategorieën naast de bestaande `error`-sleutel; drie bijna-identieke
 `UpstreamErrorMapper`s achter één contract.
 
-### 5. Canonieke read-resources
+### 4. Canonieke read-resources
 `GET /v1/accounting/{ledger-accounts,tax-codes,customers,suppliers}` uit mirror en
 SDK. Daarna `GET /v1/accounting/invoices` — vereist eerst nieuwe read-requests in
 `emeq/exact-api` (die bestaan nog niet).

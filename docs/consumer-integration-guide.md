@@ -396,6 +396,24 @@ Idempotency-Key: factuur-2026-0042
 
 `status` ∈ `posted` / `pending` / `rejected` / `failed`.
 
+**Dubbele boeking, tweede vangnet.** Naast de `Idempotency-Key` houdt de Hub per
+koppeling bij welk `external_id` al geboekt is en met welke inhoud. Dat blijft staan
+ook als je idempotency-sleutel weg is:
+
+- Zelfde `external_id`, **zelfde inhoud** → `200` met
+  `{ "status": "posted", "deduplicated": true, "external_ref": "…", "external_number": "…" }`.
+  Er is niets opnieuw geboekt; `external_ref` is die van de oorspronkelijke boeking.
+  Behandel dit als succes.
+- Zelfde `external_id`, **andere inhoud** → `409`
+  `{ "status": "rejected", "error": "document_already_posted", "external_ref": "…" }`.
+  Er staat al een boeking onder dat nummer met een andere inhoud. Boekhoudkundig is
+  een correctie een creditnota met een eigen `external_id` — hergebruik het oude
+  nummer niet. **Niet retryen.**
+
+De vergelijking kijkt naar de betekenis van het document, niet naar de exacte bytes:
+sleutelvolgorde en `200` versus `200.00` maken geen verschil. Een gewijzigd bedrag,
+tarief, regel, datum of factuurnummer wél.
+
 **Onbekende relatie?** Standaard geeft een party die niet in Exact bestaat
 `422 mapping_failed`. Staat **auto-create** aan op de Connection (Hub-admin →
 Boekhoud-mapping → "Onbekende relaties automatisch aanmaken"), dan maakt de Hub de
@@ -403,6 +421,7 @@ relatie zelf aan (match op `vat_number`, anders `name`) en boekt door. Stuur dus
 altijd een nette `party.name` (+ `vat_number` indien bekend) mee.
 
 Foutcodes: `403 insufficient_ability` (PAT mist `{provider}:write`) ·
+`409 document_already_posted` (zie hierboven — corrigeer met een nieuw `external_id`) ·
 `422 mapping_failed` (onvolledige boekhoud-mapping óf onbekende relatie zonder
 auto-create — los op in de Hub-admin) · `422 upstream_rejected` (het pakket wees de
 boeking functioneel af, bv. een ongeldig btw-nummer — **niet retryen**, corrigeer het
@@ -426,8 +445,12 @@ Hub-canonical formaat — buig niets naar Exact). Voor elk boekbaar document:
    een webhook-callback geregistreerd heb.
 4. Verwerk `201 posted`: bewaar `external_ref` (interne GUID) + `external_number`
    (leesbaar boekstuknummer, toon dít aan de gebruiker) in mijn sync-ledger naast
-   mijn external_id. Behandel `422 mapping_failed` als "actie vereist in de Hub-admin",
-   niet als retrybare fout. Retry nooit een 5xx zonder dezelfde Idempotency-Key.
+   mijn external_id. Behandel `200` met `deduplicated: true` net zo — dat is
+   dezelfde boeking, niet opnieuw uitgevoerd. Behandel `422 mapping_failed` als
+   "actie vereist in de Hub-admin", niet als retrybare fout. `409
+   document_already_posted` betekent dat ik hetzelfde external_id met andere inhoud
+   stuurde: nooit retryen, maar een creditnota + nieuw external_id maken. Retry
+   nooit een 5xx zonder dezelfde Idempotency-Key.
 Stuur `party.external_id` consistent mee zodat relaties gecachet worden.
 ```
 

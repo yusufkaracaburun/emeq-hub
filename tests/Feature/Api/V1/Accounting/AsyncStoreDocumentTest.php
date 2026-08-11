@@ -14,6 +14,7 @@ use App\Jobs\Accounting\SyncAccountingDocumentJob;
 use App\Models\Account;
 use App\Models\Connection;
 use App\Models\Consumer;
+use App\Models\ProviderEntityLink;
 use App\Sanctum\TokenAbilities;
 use Emeq\ExactApi\Http\Request\Write\CreateSalesEntry;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -277,5 +278,68 @@ class AsyncStoreDocumentTest extends TestCase
 
         // Exact heeft geen idempotency-key → de push mag nooit herhaald worden.
         $this->assertSame(1, $job->tries);
+    }
+
+    /**
+     * De dedupe-laag zit in AccountingSyncRunner en niet in de controller, juist zodat
+     * het async-pad hem óók krijgt. Deze test bewaakt die keuze.
+     */
+    public function test_async_job_records_the_provider_entity_link(): void
+    {
+        Bus::fake([CallWebhookJob::class]);
+        MockClient::global([
+            CreateSalesEntry::class => MockResponse::make(['d' => ['ID' => 'inv-guid-async']], 201),
+        ]);
+        $this->bindFakeReferences();
+
+        [, $account, $connection] = $this->consumerWithExactConnection([
+            'url' => 'https://consumer.test/accounting',
+            'secret' => 'consumer-secret-xyz',
+        ]);
+        $document = FinancialDocument::fromArray($this->salesInvoicePayload());
+
+        (new SyncAccountingDocumentJob($document, $connection, $account, (int) $account->consumer_id))->handle(
+            app(AccountingSyncRunner::class)
+        );
+
+        $this->assertDatabaseHas('provider_entity_links', [
+            'connection_id' => $connection->id,
+            'external_id' => 'INV-2026-001',
+            'provider_entity_id' => 'inv-guid-async',
+            'origin' => ProviderEntityLink::ORIGIN_HUB,
+        ]);
+    }
+
+    /**
+     * Een tweede async-boeking van hetzelfde document mag de partner niet nog eens
+     * raken; de terugmelding blijft `posted` met een dedupe-markering.
+     */
+    public function test_async_job_deduplicates_a_repeat_of_the_same_document(): void
+    {
+        Bus::fake([CallWebhookJob::class]);
+        MockClient::global([
+            CreateSalesEntry::class => MockResponse::make(['d' => ['ID' => 'inv-guid-async2']], 201),
+        ]);
+        $this->bindFakeReferences();
+
+        [, $account, $connection] = $this->consumerWithExactConnection([
+            'url' => 'https://consumer.test/accounting',
+            'secret' => 'consumer-secret-xyz',
+        ]);
+        $consumerId = (int) $account->consumer_id;
+        $document = FinancialDocument::fromArray($this->salesInvoicePayload());
+        $runner = app(AccountingSyncRunner::class);
+
+        (new SyncAccountingDocumentJob($document, $connection, $account, $consumerId))->handle($runner);
+        (new SyncAccountingDocumentJob($document, $connection, $account, $consumerId))->handle($runner);
+
+        MockClient::global()->assertSentCount(1);
+        $this->assertDatabaseCount('provider_entity_links', 1);
+
+        Bus::assertDispatched(
+            CallWebhookJob::class,
+            fn (CallWebhookJob $job): bool => ($job->payload['deduplicated'] ?? false) === true
+                && $job->payload['status'] === 'posted'
+        );
     }
 }

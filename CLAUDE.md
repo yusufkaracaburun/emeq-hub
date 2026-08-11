@@ -23,6 +23,7 @@ De hele stack draait lokaal in Docker (`docker compose up -d --build` → `http:
 | **Account** | Eindgebruiker bij een Consumer, uniek op `consumer_id + external_id` |
 | **Connection** | Eén koppeling tussen één Account en één Provider. Encrypted tokens + `expires_at` + scopes |
 | **PassThroughCall** | Immutable audit-rij per Consumer→Hub→Partner-request. Zie `.docs/decisions/pass-through-calls-table.md` |
+| **ProviderEntityLink** | Canoniek `external_id` ⇄ partner-entity per Connection, met payload-fingerprint. Houdt herboeking tegen wanneer de idempotency-key weg is; fundament voor sync-state. Zie `docs/unified-api-architecture.md` |
 | **InboundWebhookEvent** | Metadata-only audit van partner→Hub-webhooks via `App\Webhooks\InboundWebhookRecorder` — géén payload of headers (AVG: de Hub is processor). Outbound fan-out loopt via spatie webhook-server en persisteert geen rij |
 
 ## Invariants — niet doorbreken zonder approval
@@ -42,7 +43,8 @@ Volledige versie met gotchas en `.docs/decisions`-links: `docs/agents/subsystems
 - **Provider-credential-laag** — `config/hub-providers.php` + `ProviderCredentialDescriptor` is de single source voor credential-metadata; provider-identiteit getypeerd via `App\Enums\Provider`.
 - **Feature-flags / kill-switch** — Pennant `feature.provider:{provider}` op `/v1/*`, auto-gedefinieerd uit `config('hub-providers')`.
 - **Accounting-sync** — canonical `FinancialDocument` op `POST /v1/accounting/documents` → `AccountingTargetRegistry` → provider-adapter (Exact: salesentry/purchaseentry, géén memoriaal). Mapping wordt na connect automatisch afgeleid uit de mirror; dry-run via `POST /v1/accounting/documents/validate` (findings-rapport zónder te boeken).
-- **Idempotency** — `Idempotency-Key`-header via `EnsureIdempotency`; `idempotent:required` op accounting-documents.
+- **Idempotency** — `Idempotency-Key`-header via `EnsureIdempotency`; `idempotent:required` op accounting-documents. Tweede laag: `provider_entity_links` dedupliceert op `(connection, external_id)` ook nadat de key weg is.
+- **Observability** — één `request_id` (ULID) via `AssignRequestId`, in `Context` → logs, queued jobs, `pass_through_calls`, `inbound_webhook_events` en de `X-Emeq-Request-Id`-header op consumer-webhooks.
 - **Exact pass-through** — `/v1/exact/*` via `ExactForwarder`; named read-resources staan vóór de `{path}`-catch-all; wire-details leven in de SDK.
 - **Partner-credentials in DB** — `ExactSettings` (encrypted at rest) → `config('services.exact.*')`, niet `.env`.
 - **Webhooks** — Exact op `POST /webhooks/exact`, HMAC-signature in **uppercase hex**; subscriptions beheerd in de OAuth-lifecycle. Alle inkomende webhooks ge-audit via `InboundWebhookRecorder`.
