@@ -469,6 +469,37 @@ document: `message` is een leesbare uitleg, `provider_message` de rauwe pakket-t
 echt transient, mét `Retry-After` waar relevant; **wél** retrybaar).
 Elke fout draagt `{ "status": "failed", "external_id": "…", "error": "…", "message": "…" }`.
 
+### Foutenvelope (alle `/v1/*`-endpoints)
+
+Elke fout, van welk endpoint dan ook, draagt dezelfde drie velden naast wat het
+endpoint zelf teruggeeft:
+
+```json
+{
+  "error": "mapping_failed",
+  "category": "REFERENCE_MAPPING_MISSING",
+  "message": "…",
+  "request_id": "01HXYZ…"
+}
+```
+
+- **`error`** — de specifieke code. Ongewijzigd; blijf hierop branchen waar je dat al doet.
+- **`category`** — de provider-onafhankelijke klasse fout. Handig als je niet elke code
+  apart wilt afvangen: `VALIDATION_ERROR`, `AUTHENTICATION_ERROR`,
+  `AUTHORIZATION_ERROR`, `RATE_LIMITED`, `RESOURCE_NOT_FOUND`, `CONFLICT`,
+  `PROVIDER_UNAVAILABLE`, `UNSUPPORTED_CAPABILITY`, `REFERENCE_MAPPING_MISSING`,
+  `PROVIDER_ERROR`, `INTERNAL_ERROR`.
+- **`request_id`** — stuur deze mee bij een supportvraag; daarmee is de hele keten
+  (jouw request → onze verwerking → de partner-call → de terugmelding) in één keer
+  terug te vinden. Je kunt hem ook zelf bepalen door `X-Request-Id` mee te sturen.
+
+Vuistregel voor retries: alleen `RATE_LIMITED`, `PROVIDER_UNAVAILABLE` en
+`INTERNAL_ERROR` zijn het opnieuw proberen waard (met dezelfde `Idempotency-Key`). De
+rest verandert niet door het nog eens te sturen.
+
+`PROVIDER_ERROR` betekent dat de boekhoudpartner het afwees, `INTERNAL_ERROR` dat het
+aan onze kant misging — dat onderscheid bepaalt bij wie je moet zijn.
+
 **🤖 Agent-prompt**
 
 ```text

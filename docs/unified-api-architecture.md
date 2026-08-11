@@ -222,15 +222,36 @@ Envelope: `event_id`, `event_type`, `occurred_at`, `connection_id`, `resource_ty
 Event-types per domein: `accounting.document.*`, `accounting.customer.*`,
 `payment.*`. Betalingen worden **niet** in het accounting-domein geperst.
 
-## Error-normalisatie 🚧
+## Error-normalisatie
 
-Een consumer hoeft Exact's foutvormen niet te kennen. Canonieke categorieën:
-`VALIDATION_ERROR`, `AUTHENTICATION_ERROR`, `AUTHORIZATION_ERROR`, `RATE_LIMITED`,
-`RESOURCE_NOT_FOUND`, `CONFLICT`, `PROVIDER_UNAVAILABLE`, `UNSUPPORTED_CAPABILITY`,
-`REFERENCE_MAPPING_MISSING`, `PROVIDER_ERROR`.
+Een consumer hoeft Exact's foutvormen niet te kennen. Elke `/v1/*`-fout draagt naast
+de bestaande `error`-sleutel een `category` en het `request_id`:
 
-De bestaande `error`-sleutel blijft; `category` en `request_id` komen ernaast.
-Partner-diagnostiek gaat naar logs en `metadata`, nooit tokens of headers.
+```json
+{ "error": "mapping_failed", "category": "REFERENCE_MAPPING_MISSING",
+  "message": "…", "request_id": "01H…" }
+```
+
+Categorieën: `VALIDATION_ERROR`, `AUTHENTICATION_ERROR`, `AUTHORIZATION_ERROR`,
+`RATE_LIMITED`, `RESOURCE_NOT_FOUND`, `CONFLICT`, `PROVIDER_UNAVAILABLE`,
+`UNSUPPORTED_CAPABILITY`, `REFERENCE_MAPPING_MISSING`, `PROVIDER_ERROR`,
+`INTERNAL_ERROR`. Die laatste is bewust apart van `PROVIDER_ERROR`: onze storing en
+die van de partner sturen een consumer een andere kant op.
+
+De categorie volgt in de regel uit de HTTP-status; alleen waar de code méér zegt dan
+de status staat een override (`mapping_failed` is geen invoerfout, `upstream_rejected`
+is de partner die weigert, `idempotency_key_reuse` is een conflict).
+
+`NormalizeApiErrors` legt de envelope er buitenom overheen, dus ook over
+framework-fouten (validatie, 404, throttle) en over `abort_unless`-paden die alleen
+een `message` produceerden. Additief: `error` verandert niet, en de historische
+`code`-sleutel op de 401 blijft staan.
+
+**Wat bewust níet gedeeld is:** de drie `UpstreamErrorMapper`s (Exact, Snelstart,
+Mollie) blijven los. Ze delen een return-shape, geen logica — Exact parseert
+OData-enveloppen en humaniseert btw-meldingen, de andere twee hebben eigen
+exception-hiërarchieën. Samenvoegen zou provider-semantiek in gedeelde code duwen.
+Partner-diagnostiek gaat naar logs, nooit tokens of headers.
 
 ## Observability
 

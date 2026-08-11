@@ -3,7 +3,7 @@
 > Niets staat onder **IMPLEMENTED** zonder werkende code én tests. Bij twijfel gaat
 > het naar NEXT. Architectuur staat in `unified-api-architecture.md`.
 
-Laatste update: 2026-08-11 · suite: 1195 passed, 1 incomplete, 0 failures.
+Laatste update: 2026-08-11 · suite: 1224 passed, 1 incomplete, 0 failures.
 Startbaseline vóór dit traject: 1120 passed · PHPStan-baseline 206 → 135.
 
 ---
@@ -110,6 +110,15 @@ vijf de outbound fan-outs. Zichtbaar in beide Filament-infolists.
 `tests/Feature/Api/V1/Accounting/RequestIdCorrelationTest.php`,
 `tests/Unit/Webhooks/ConsumerWebhookHeadersTest.php`
 
+### Error-normalisatie
+Elke `/v1/*`-fout draagt naast `error` een provider-onafhankelijke `category` en het
+`request_id`. `NormalizeApiErrors` legt die envelope buitenom over de hele stack heen,
+dus ook over framework-fouten en over `abort_unless`-paden die alleen een `message`
+teruggaven. De categorie volgt uit de status, met een override waar de code méér zegt.
+Additief — `error` en de historische `code` op de 401 blijven onaangeroerd.
+→ `tests/Unit/Support/Errors/ErrorCodeTest.php`,
+`tests/Feature/Api/ErrorEnvelopeTest.php`
+
 ### Statische analyse
 PHPStan/Larastan level 5 op `app/`, `database/factories/` en `routes/`, met een
 baseline van 135 bestaande hits. Nieuwe code moet schoon zijn; bestaande schuld
@@ -122,11 +131,7 @@ blokkeert de build niet. Draait in CI naast Pint, tests en `composer audit`.
 
 Gepland en ontworpen; volgorde is bindend vanwege harde afhankelijkheden.
 
-### 1. Error-normalisatie
-Canonieke foutcategorieën naast de bestaande `error`-sleutel; drie bijna-identieke
-`UpstreamErrorMapper`s achter één contract.
-
-### 2. Canonieke read-resources
+### 1. Canonieke read-resources
 `GET /v1/accounting/{ledger-accounts,tax-codes,customers,suppliers}` uit mirror en
 SDK. Daarna `GET /v1/accounting/invoices` — vereist eerst nieuwe read-requests in
 `emeq/exact-api` (die bestaan nog niet).

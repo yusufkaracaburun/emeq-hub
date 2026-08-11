@@ -5,6 +5,7 @@ use App\Http\Middleware\EnsureEmeqAdminToken;
 use App\Http\Middleware\EnsureIdempotency;
 use App\Http\Middleware\EnsureProviderEnabled;
 use App\Http\Middleware\HandleInertiaRequests;
+use App\Http\Middleware\NormalizeApiErrors;
 use App\Http\Middleware\RequireCashierWebhookSecret;
 use App\Http\Middleware\ResolveExactAccount;
 use App\Http\Middleware\ResolveMollieAccount;
@@ -53,8 +54,10 @@ return Application::configure(basePath: dirname(__DIR__))
         );
 
         // Als eerste in de globale stack: ook een 401 of een gethrottled request
-        // moet een correlatie-id dragen. Zie AssignRequestId.
-        $middleware->prepend(AssignRequestId::class);
+        // moet een correlatie-id dragen en de foutenvelope volgen. NormalizeApiErrors
+        // staat ná AssignRequestId zodat het correlatie-id er al is, en buitenom alles
+        // zodat het ook gerenderde exceptions ziet.
+        $middleware->prepend([AssignRequestId::class, NormalizeApiErrors::class]);
 
         $middleware->append(SecurityHeaders::class);
         $middleware->append(SetNoIndexHeaders::class);
