@@ -81,7 +81,12 @@ De guard (`app/Integrations/OAuth/ReturnUrlResolver.php`) accepteert een
 - gelijk is aan de `app_url`-host, **of**
 - een subdomein is van hetzelfde registreerbare basisdomein.
 
-Prioriteit: expliciete `return_url` → `Origin` van de init-call → `app_url`.
+Prioriteit: expliciete `return_url` → `Origin` van de init-call → `app_url`
+(alleen bij OAuth-init). De hosted `/connect`-handoff (`POST /v1/connect-sessions`)
+valt **niet** terug op bare `app_url` — anders landt "Terug naar …" op het
+marketingdomein wanneer de consumer-host buiten de guard valt (lokaal /
+eigen domein). Zonder geldige return-URL gebruikt de connect-pagina
+`document.referrer`.
 
 Gevolg voor multi-tenant consumers: één `app_url` op het basisdomein
 (`https://voorbeeld.nl`) dekt álle tenant-subdomeinen (`klant1.voorbeeld.nl`, …).

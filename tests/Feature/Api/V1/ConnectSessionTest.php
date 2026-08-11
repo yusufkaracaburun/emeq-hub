@@ -60,7 +60,27 @@ class ConnectSessionTest extends TestCase
             ->json('url');
 
         $this->assertStringNotContainsString('evil.test', urldecode($url));
-        $this->assertStringContainsString('consumer.test', urldecode($url));
+        // Handoff: geen bare app_url als stille fallback (anders → marketingdomein).
+        $this->assertStringNotContainsString('return_url=', $url);
+    }
+
+    public function test_matching_return_url_is_carried_into_the_link(): void
+    {
+        $consumer = Consumer::factory()->withAppUrl('https://consumer.test')->create();
+        $token = $consumer->createToken('t', [TokenAbilities::INTEGRATIONS_MANAGE])->plainTextToken;
+
+        $url = $this->withHeader('Authorization', "Bearer {$token}")
+            ->postJson('/v1/connect-sessions', [
+                'account_external_id' => 'school1',
+                'return_url' => 'https://tenant.consumer.test/integraties?emeq=return',
+            ])
+            ->assertOk()
+            ->json('url');
+
+        $this->assertStringContainsString(
+            'tenant.consumer.test/integraties',
+            urldecode($url),
+        );
     }
 
     public function test_requires_a_token_ability(): void

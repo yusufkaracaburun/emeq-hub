@@ -1,6 +1,6 @@
 import { router } from '@inertiajs/react';
 import { MotionConfig } from 'framer-motion';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { SimpleFooter } from '@/components/landing/footer';
 import { Reveal } from '@/components/motion';
 import { Seo } from '@/components/seo';
@@ -209,8 +209,44 @@ function Disclosure({ app }: { app: string }) {
     );
 }
 
+/** Signed return_url when host passed the guard; else document.referrer (not Hub). */
+function useHandoffBackUrl(returnUrl: string | null): string | null {
+    const [backUrl, setBackUrl] = useState(returnUrl);
+
+    useEffect(() => {
+        const referrer = document.referrer;
+        const hasExternalReferrer = referrer !== '' && !referrer.startsWith(window.location.origin);
+
+        if (returnUrl) {
+            try {
+                const signed = new URL(returnUrl);
+                const isBareRoot = (signed.pathname === '/' || signed.pathname === '') && signed.search === '';
+
+                // Bare app_url-fallback (geen pad) terwijl de gebruiker vanaf een
+                // andere host kwam → liever de referrer dan het marketingdomein.
+                if (isBareRoot && hasExternalReferrer && new URL(referrer).host !== signed.host) {
+                    setBackUrl(referrer);
+
+                    return;
+                }
+            } catch {
+                // keep signed returnUrl
+            }
+
+            setBackUrl(returnUrl);
+
+            return;
+        }
+
+        setBackUrl(hasExternalReferrer ? referrer : null);
+    }, [returnUrl]);
+
+    return backUrl;
+}
+
 export default function Connect({ state, consumerName, accountName, providers, returnUrl, seo }: ConnectProps) {
     const app = consumerName ?? APP_FALLBACK;
+    const backUrl = useHandoffBackUrl(returnUrl);
 
     return (
         <MotionConfig reducedMotion="user">
@@ -257,8 +293,8 @@ export default function Connect({ state, consumerName, accountName, providers, r
 
                                 <Disclosure app={app} />
 
-                                {returnUrl && (
-                                    <Button type="button" size="sm" onClick={() => (window.location.href = returnUrl)}>
+                                {backUrl && (
+                                    <Button type="button" size="sm" onClick={() => (window.location.href = backUrl)}>
                                         Terug naar {app}
                                         <span aria-hidden className="ml-2">
                                             →
