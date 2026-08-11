@@ -36,7 +36,7 @@ De scheiding die het systeem overeind houdt:
 | Mapping / transformatie | in de adapter — zie hieronder | Canoniek → partner-payload |
 | Referentie-resolutie | `App\Accounting\Contracts\ReferenceResolver` | Canonieke sleutel → provider-identiteit |
 | Sync-state | `provider_entity_links` | Canonieke entity ⇄ provider-entity |
-| Event-normalisatie | `App\Webhooks\*` 🚧 | Partner-webhook → canoniek event |
+| Event-normalisatie | `App\Integrations\Webhooks\CanonicalEventRegistry` | Partner-webhook → canoniek event |
 | Transport / auth | `emeq/*-api` SDK's + `Connection` | HTTP, OAuth, tokens |
 
 De regel die alles bij elkaar houdt: **provider-kennis daalt naar de adapter**. Een

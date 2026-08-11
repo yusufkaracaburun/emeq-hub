@@ -13,7 +13,7 @@ emeq-hub (Laravel 13.9)
   Routes (api.php /v1/*, webhooks.php /webhooks/*)
     → Middleware (resolve.{snelstart,mollie}.account, emeq.admin, ability:…)
     → Controllers (Api\V1\*, Webhooks\*) — orchestratie + audit, geen domeinlogica
-    → Domain/Service (app/{Models,OAuth,Mollie,Services,Billing,Support,Jobs})
+    → Domein (app/{Models,Accounting,Billing,Books}) + integraties (app/Integrations/<Provider>)
     → SDK-packages → Partner-API
        ├─ emeq/snelstart-api (Saloon connector + OData QueryBuilder) → Snelstart (clientkey)
        └─ emeq/mollie-api + mollie/mollie-api-php + cashier-mollie → Mollie (Connect OAuth2)
@@ -31,10 +31,40 @@ Redis 7: queue (default + webhooks), sessions, cache, Horizon-supervision
 | Controllers | `app/Http/Controllers/{Api/V1,Webhooks}/` | Request → SDK-call → response + audit-write; géén domeinlogica |
 | Middleware | `app/Http/Middleware/` | Cross-cutting auth/scoping/guards vóór controllers |
 | Models | `app/Models/` | Eloquent multi-tenant data + Cashier `Billable` |
-| Service/Domain | `app/{OAuth,Mollie,Services,Billing,Support}/` | Provider-specifieke logica die niet in een Model hoort en niet in de dunne SDK mag |
-| Jobs | `app/Jobs/` | Async werk via Horizon-queue |
+| Canoniek domein | `app/Accounting/` | Wat de Hub belooft: `FinancialDocument`, `Capability`, de contracten. Noemt geen partner |
+| Integraties | `app/Integrations/` | Hoe een partner wordt aangesproken. Zie de indelingsregel hieronder |
+| Overig domein | `app/{Billing,Books,Services,Support}/` | Logica die niet in een Model hoort en niet in de dunne SDK mag |
+| Jobs | `app/Jobs/` | Provider-neutraal async werk; provider-eigen jobs staan in `app/Integrations/<Provider>/Jobs/` |
 | Console | `app/Console/Commands/` | Artisan-ops (`HubConsumerCreate`, `PruneOAuthPendingConnections`) |
 | SDK-packages | `packages/<sdk>/` (gitignored, VCS-require) | Dunne Saloon/HTTP-laag; géén Hub-domeinmodellen |
+
+## Indeling van `app/Integrations`
+
+Eén regel bepaalt waar integratiecode landt:
+
+> Heet een map zoals een `Provider`-enum-case, dan is de inhoud van die provider.
+> Anders is het gedeeld en mag er geen providernaam in voorkomen.
+
+```text
+app/Integrations/
+  Contracts/     OAuthFlow · ResolvesCanonicalEvent · MapsUpstreamExceptions
+  Errors/        ErrorCode · UpstreamErrorMapperRegistry
+  Exceptions/    ProviderDisabledException (Pennant-kill-switch, alle registries)
+  OAuth/         OAuthFlowRegistry · ReturnUrlResolver · Testing/FakeOAuthFlow
+  PassThrough/   PassThroughRecorder (enige schrijfplek van pass_through_calls)
+  Webhooks/      CanonicalEvent · CanonicalEventRegistry · ConsumerWebhookHeaders · InboundWebhookRecorder
+  Exact/         Accounting/ · OAuth/ · Webhooks/ · PassThrough/ · Errors/ · Jobs/
+  Mollie/        OAuth/ · Webhooks/ · PassThrough/ · Errors/ · Exceptions/
+  Snelstart/     Webhooks/ · PassThrough/ · Errors/
+```
+
+Buiten `app/Integrations` blijven de HTTP-edge (`app/Http/Controllers` — routes binden daarop),
+artisan-commands, Filament, en het canonieke boekhouddomein.
+
+`tests/Architecture/` handhaaft dit: mapnamen, de zuiverheid van de gedeelde laag, geen
+kruisverwijzing tussen providers, geen integratie die de HTTP- of admin-laag kent, en
+volledigheid van de vier registries over `Provider::cases()`. ADR:
+`.docs/decisions/integration-layer-structure.md`.
 
 ## Component-verantwoordelijkheden
 
@@ -44,18 +74,21 @@ Redis 7: queue (default + webhooks), sessions, cache, Horizon-supervision
 | `Account` | Eindgebruiker bij Consumer; uniek `(consumer_id, external_id)`; bezit `connections()` | `app/Models/Account.php` |
 | `Connection` | OAuth- óf key-koppeling per Account/provider; encrypted casts; `fingerprint()` | `app/Models/Connection.php` |
 | `PassThroughCall` | Immutable audit-row per pass-through; `$timestamps=false`, eigen `created_at` | `app/Models/PassThroughCall.php` |
-| `OAuthFlow` contract | Provider-agnostisch OAuth2: `getAuthorizationUrl`/`exchangeCode`/`refreshToken`/`revoke` | `app/OAuth/Contracts/OAuthFlow.php` |
-| `OAuthFlowRegistry` | Singleton-registry; `register()` + `for(provider)` via container | `app/OAuth/OAuthFlowRegistry.php` |
-| `MollieConnectOAuthFlow` | Live Connect-impl; `Illuminate\Http\Client` + `Cache::lock` voor refresh | `app/OAuth/Mollie/MollieConnectOAuthFlow.php` |
-| `MollieConnectionContext` | Per-request scoped holder voor huidige Mollie-Connection | `app/Mollie/MollieConnectionContext.php` |
-| `Hub{Mollie,Snelstart}CredentialResolver` | Implementeert SDK-`*CredentialResolver`-contract per Connection; lazy refresh vóór expiry | `app/Mollie/`, `app/Services/Snelstart/` |
+| `OAuthFlow` contract | Provider-agnostisch OAuth2: `getAuthorizationUrl`/`exchangeCode`/`refreshToken`/`revoke` | `app/Integrations/Contracts/OAuthFlow.php` |
+| `OAuthFlowRegistry` | Singleton-registry; `register()` + `for(provider)` via container | `app/Integrations/OAuth/OAuthFlowRegistry.php` |
+| `MollieConnectOAuthFlow` | Live Connect-impl; `Illuminate\Http\Client` + `Cache::lock` voor refresh | `app/Integrations/Mollie/OAuth/MollieConnectOAuthFlow.php` |
+| `MollieConnectionContext` | Per-request scoped holder voor huidige Mollie-Connection | `app/Integrations/Mollie/MollieConnectionContext.php` |
+| `Hub{Mollie,Snelstart,Exact}CredentialResolver` | Implementeert SDK-`*CredentialResolver`-contract per Connection; lazy refresh vóór expiry | `app/Integrations/<Provider>/` |
+| `UpstreamErrorMapperRegistry` | Kiest de foutmapper per provider; zonder registratie een neutrale 502 i.p.v. een 500 | `app/Integrations/Errors/` |
+| `CanonicalEventRegistry` | Partner-webhook → canoniek event; zonder resolver `unmapped`, geen verzonnen naam | `app/Integrations/Webhooks/` |
+| `PassThroughRecorder` | Enige schrijfplek van `pass_through_calls` (was 7 plekken) | `app/Integrations/PassThrough/` |
 | `Resolve{Mollie,Snelstart}Account` mw | Leest `X-Account-Id`, scopt Account op Consumer, bindt resolver/context | `app/Http/Middleware/` |
 | `AbstractMolliePassThroughController` | Gedeelde write-pipeline 8 Mollie-controllers: ability-guard, 415-guard, exception-map, audit, Idempotency-Key-forward | `app/Http/Controllers/Api/V1/Mollie/` |
 | Snelstart `PassThroughController` | Catch-all `/v1/snelstart/{path}` via `RawSnelstartRequest` + eigen audit | `app/Http/Controllers/Api/V1/Snelstart/` |
 | `MollieWebhookController` | Connect webhook-ingress: signature-verify, lookup, anti-spoofing fetch, Spatie-audit, fan-out | `app/Http/Controllers/Webhooks/` |
-| `ForwardMollieWebhookToConsumer` | Async fan-out via Spatie webhook-server + per-Consumer secret | `app/Jobs/` |
-| `{Snelstart,Mollie}UpstreamErrorMapper` | SDK-exceptions → `{status,body,headers,short_code}`; 401/403→502 cloaked | `app/Support/{Snelstart,Mollie}/` |
-| `{Snelstart,Mollie}HeaderForwarder` | Whitelist forward-headers; blokkeert credential-headers | `app/Support/{Snelstart,Mollie}/` |
+| `ForwardWebhookToConsumerJob` | Eén async fan-out voor alle providers via Spatie webhook-server + per-Consumer secret | `app/Jobs/Webhooks/` |
+| `UpstreamErrorMapper` per provider | SDK-exceptions → `{status,body,headers,short_code}`; 401/403→502 cloaked | `app/Integrations/<Provider>/Errors/` |
+| `HeaderForwarder` per provider | Whitelist forward-headers; blokkeert credential-headers | `app/Integrations/<Provider>/PassThrough/` |
 | `TokenAbilities` | `final class` met `public const` (geen enum — Sanctum vergelijkt ruwe strings) | `app/Sanctum/TokenAbilities.php` |
 | `PlanResolver` | Config-driven plan-lookup (`config/billing-plans.php`); throwt `UnknownPlanException` | `app/Billing/PlanResolver.php` |
 

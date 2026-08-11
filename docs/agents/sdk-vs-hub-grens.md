@@ -16,19 +16,19 @@ Hub-begrip? Dan kan het niet naar de SDK.**
 
 | Bestand | Regels | Waarom het in de Hub hoort |
 |---|---:|---|
-| `Accounting/Exact/ExactAccountingTarget` | 585 | Canoniek `FinancialDocument` → Exact; leest `Connection.administratie_id`, spreekt `ReferenceResolver` aan |
-| `Services/Exact/ExactReferenceData` | 463 | **Deels SDK-materiaal** — zie hieronder |
+| `Integrations/Exact/Accounting/ExactAccountingTarget` | 585 | Canoniek `FinancialDocument` → Exact; leest `Connection.administratie_id`, spreekt `ReferenceResolver` aan |
+| `Integrations/Exact/ExactReferenceData` | 463 | **Deels SDK-materiaal** — zie hieronder |
 | `Http/Controllers/Dev/ExactOAuthTracerController` | 328 | Dev-tooling tegen Hub-Connections |
-| `Accounting/Validation/Enrichment/ExactReportEnricher` | 250 | Leest de mirror-tabel |
-| `Support/Exact/UpstreamErrorMapper` | 235 | Vertaalt naar het Hub-foutcontract |
-| `Services/Exact/ExactWebhookSubscriptionManager` | 223 | Schrijft in `connections.metadata`, leidt de callback-URL af |
-| `OAuth/Exact/ExactOAuthFlow` | 216 | Maakt en muteert `Connection`-rijen |
-| `Accounting/Exact/ConnectionMappingExactReferenceResolver` | 199 | Leest `connections.metadata.accounting_mapping` |
-| `Accounting/Exact/ExactRelationResolver` | 196 | Leest en schrijft `connection_accounting_refs` |
-| `Support/Exact/ExactForwarder` | 161 | Schrijft `pass_through_calls`, past de circuit-breaker toe |
+| `Integrations/Exact/Accounting/ExactReportEnricher` | 250 | Leest de mirror-tabel |
+| `Integrations/Exact/Errors/UpstreamErrorMapper` | 235 | Vertaalt naar het Hub-foutcontract |
+| `Integrations/Exact/ExactWebhookSubscriptionManager` | 223 | Schrijft in `connections.metadata`, leidt de callback-URL af |
+| `Integrations/Exact/OAuth/ExactOAuthFlow` | 216 | Maakt en muteert `Connection`-rijen |
+| `Integrations/Exact/Accounting/ConnectionMappingExactReferenceResolver` | 199 | Leest `connections.metadata.accounting_mapping` |
+| `Integrations/Exact/Accounting/ExactRelationResolver` | 196 | Leest en schrijft `connection_accounting_refs` |
+| `Integrations/Exact/PassThrough/ExactForwarder` | 161 | Schrijft `pass_through_calls`, past de circuit-breaker toe |
 | `Http/Controllers/ExactDeprovisionController` | 154 | App Center-lifecycle tegen Connections |
 | `Console/Commands/Exact/*` | 220 | Operaties op Hub-tabellen |
-| `Accounting/Exact/ExactMappingDeriver` | 141 | Schrijft `connections.metadata` |
+| `Integrations/Exact/Accounting/ExactMappingDeriver` | 141 | Schrijft `connections.metadata` |
 | `Http/Controllers/Webhooks/ExactWebhookController` | 105 | Tenant-routing Division → Connection |
 | Vier named-resource-controllers + pass-through | ~250 | HTTP, abilities, audit |
 | Rest (jobs, tokenstore, whitelist, error-budget) | ~575 | Queue, Connection-tokens, Hub-config |

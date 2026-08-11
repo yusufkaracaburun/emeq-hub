@@ -4,7 +4,7 @@ Domein-glossary + grenzen voor agents. Authoritative architectuur staat in `CLAU
 
 ## Wat dit is
 
-Multi-tenant integration-platform: één Laravel-Hub die OAuth-koppelingen, webhook-routing en een uniforme pass-through REST-API exposeert naar boekhoud-/betaal-partner-API's (Snelstart, Mollie; gepland: Moneybird, Exact, Ibanity, Twinfield). Losse dunne `emeq/*` SDK-packages leveren de partner-specifieke HTTP-laag.
+Multi-tenant integration-platform: één Laravel-Hub die OAuth-koppelingen, webhook-routing en een uniforme pass-through REST-API exposeert naar boekhoud-/betaal-partner-API's (Exact Online, Snelstart, Mollie; gepland: Moneybird, Ibanity, Twinfield). Losse dunne `emeq/*` SDK-packages leveren de partner-specifieke HTTP-laag.
 
 ## Glossary
 
@@ -13,9 +13,11 @@ Multi-tenant integration-platform: één Laravel-Hub die OAuth-koppelingen, webh
 | **Consumer** | Eén SaaS-app van Emeq óf een betalende derde. Authentiseert met een Sanctum-PAT. Bezit `accounts`. |
 | **Account** | Eindgebruiker bij een Consumer (klant van die SaaS-app). Uniek op `(consumer_id, external_id)`. Bezit `connections`. |
 | **Connection** | Eén koppeling tussen één Account en één Provider. OAuth2 (Mollie: access/refresh-token + scopes) óf clientkey (Snelstart: client_key + subscription_key/id). Tokens encrypted at rest. |
-| **Provider** | Een partner-integratie, getypeerd via `App\Enums\Provider`. Metadata via `config/hub-providers.php` + `ProviderCredentialDescriptor`. |
-| **PassThroughCall** | Immutable audit-rij per Consumer→Hub→Partner-pass-through. Eén rij per request; endpoint-template als `path`, nooit query-string/concrete-id. |
-| **WebhookCall** | Spatie fan-out-audit: inkomende partner-webhook + uitgaande consumer-callback. |
+| **Provider** | De **identiteit** van een partner: een case van `App\Enums\Provider`, de key in `config/hub-providers.php`, de waarde in `connections.provider`. |
+| **Integration** | De **code** die een Provider implementeert: `app/Integrations/<Provider>/`. Provider is wie, Integration is hoe. Een map onder `app/Integrations` heet zoals een Provider-case óf is gedeeld — en gedeelde code noemt geen provider. |
+| **PassThroughCall** | Immutable audit-rij per Consumer→Hub→Partner-pass-through. Eén rij per request; endpoint-template als `path`, nooit query-string/concrete-id. Geschreven op precies één plek: `PassThroughRecorder`. |
+| **InboundWebhookEvent** | Metadata-only audit van partner→Hub-webhooks via `InboundWebhookRecorder` — géén payload of headers (AVG: de Hub is processor). Outbound fan-out persisteert geen rij. |
+| **CanonicalEvent** | Het providerneutrale event in de webhook-envelope naar de consumer (`{event, provider, account_id, occurred_at, data}`). Per provider vertaalt één `ResolvesCanonicalEvent` de partner-vorm; ontbreekt die, dan `unmapped` — nooit een verzonnen naam. |
 | **OAuthFlow** | Provider-agnostisch OAuth2-contract; per provider één implementatie, geresolved via `OAuthFlowRegistry`. |
 | **CredentialResolver** | SDK-contract dat de Hub per-request bindt aan de juiste Connection. SDK kent géén Hub-domein. |
 | **PAT / ability** | Sanctum Personal Access Token + abilities (`snelstart:*`, `mollie:*`, `billing:*`, `admin`). `TokenAbilities` is een `final class` met consts, geen enum. |
