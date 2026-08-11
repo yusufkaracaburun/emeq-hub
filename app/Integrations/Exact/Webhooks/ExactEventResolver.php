@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Integrations\Exact\Webhooks;
 
-use App\Integrations\Webhooks\CanonicalEvent;
 use App\Integrations\Contracts\ResolvesCanonicalEvent;
+use App\Integrations\Webhooks\CanonicalEvent;
 
 /**
  * Exact beschrijft z'n events met een `Topic`. De Hub abonneert op precies de

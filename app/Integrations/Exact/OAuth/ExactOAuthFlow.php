@@ -2,13 +2,13 @@
 
 namespace App\Integrations\Exact\OAuth;
 
-use App\Integrations\Exact\Jobs\SyncExactReferenceJob;
-use App\Integrations\Exact\Jobs\DeleteExactWebhookSubscriptionsJob;
-use App\Integrations\Exact\Jobs\RegisterExactWebhookSubscriptionsJob;
-use App\Models\Account;
-use App\Models\Connection;
 use App\Integrations\Contracts\OAuthFlow;
 use App\Integrations\Exact\ExactUserId;
+use App\Integrations\Exact\Jobs\DeleteExactWebhookSubscriptionsJob;
+use App\Integrations\Exact\Jobs\RegisterExactWebhookSubscriptionsJob;
+use App\Integrations\Exact\Jobs\SyncExactReferenceJob;
+use App\Models\Account;
+use App\Models\Connection;
 use Emeq\ExactApi\OData\Envelope;
 use Illuminate\Contracts\Config\Repository as ConfigRepository;
 use Illuminate\Http\Client\Factory as HttpFactory;

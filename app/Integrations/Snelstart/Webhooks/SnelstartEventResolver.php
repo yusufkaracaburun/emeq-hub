@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Integrations\Snelstart\Webhooks;
 
-use App\Integrations\Webhooks\CanonicalEvent;
 use App\Integrations\Contracts\ResolvesCanonicalEvent;
+use App\Integrations\Webhooks\CanonicalEvent;
 
 /**
  * Snelstart beschrijft z'n events als `Entity.Action` — 'Relatie.Created',

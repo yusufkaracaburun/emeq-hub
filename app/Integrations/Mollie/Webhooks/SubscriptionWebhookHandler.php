@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Integrations\Mollie\Webhooks;
 
 use App\Billing\Account\AccountSubscriptionManager;
+use App\Integrations\Mollie\MollieConnectionContext;
 use App\Models\AccountSubscription;
 use App\Models\Connection;
-use App\Integrations\Mollie\MollieConnectionContext;
 
 /**
  * Webhook-handler voor Mollie Subscription-id's (`sub_*`-prefix) per

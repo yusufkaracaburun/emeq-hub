@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Integrations\Exact\Accounting;
 
+use App\Integrations\Exact\ExactReferenceData;
 use App\Models\Connection;
 use App\Models\ConnectionAccountingRef;
-use App\Integrations\Exact\ExactReferenceData;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 

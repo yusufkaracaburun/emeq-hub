@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Integrations\Exact\Jobs;
 
-use App\Models\Connection;
 use App\Integrations\Exact\ExactWebhookSubscriptionManager;
+use App\Models\Connection;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;

@@ -2,9 +2,9 @@
 
 namespace App\Integrations\Mollie\OAuth;
 
+use App\Integrations\Contracts\OAuthFlow;
 use App\Models\Account;
 use App\Models\Connection;
-use App\Integrations\Contracts\OAuthFlow;
 use Illuminate\Contracts\Config\Repository as ConfigRepository;
 use Illuminate\Http\Client\Factory as HttpFactory;
 use Illuminate\Support\Facades\Cache;

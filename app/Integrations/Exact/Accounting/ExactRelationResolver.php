@@ -6,11 +6,11 @@ namespace App\Integrations\Exact\Accounting;
 
 use App\Accounting\Exceptions\AccountingMappingException;
 use App\Accounting\Party;
-use App\Models\Connection;
-use App\Models\ConnectionAccountingRef;
 use App\Integrations\Exact\ConnectionTokenStore;
 use App\Integrations\Exact\ExactReferenceData;
 use App\Integrations\Exact\HubExactCredentialResolver;
+use App\Models\Connection;
+use App\Models\ConnectionAccountingRef;
 use Emeq\ExactApi\Contracts\ExactCredentialResolver;
 use Emeq\ExactApi\Contracts\TokenStore;
 use Emeq\ExactApi\Exact;

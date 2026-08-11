@@ -2,9 +2,9 @@
 
 namespace App\Integrations\OAuth\Testing;
 
+use App\Integrations\Contracts\OAuthFlow;
 use App\Models\Account;
 use App\Models\Connection;
-use App\Integrations\Contracts\OAuthFlow;
 
 final class FakeOAuthFlow implements OAuthFlow
 {

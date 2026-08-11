@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Integrations\Mollie\Errors;
 
-use App\Integrations\Mollie\Exceptions\MissingPartnerTokenException;
 use App\Integrations\Contracts\MapsUpstreamExceptions;
+use App\Integrations\Mollie\Exceptions\MissingPartnerTokenException;
 use Emeq\MollieApi\Exceptions\AuthenticationException;
 use Emeq\MollieApi\Exceptions\MollieException;
 use Emeq\MollieApi\Exceptions\NotFoundException;

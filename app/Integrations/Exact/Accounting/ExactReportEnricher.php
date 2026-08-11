@@ -5,13 +5,12 @@ declare(strict_types=1);
 namespace App\Integrations\Exact\Accounting;
 
 use App\Accounting\Enums\TaxTreatment;
-use App\Integrations\Exact\Accounting\ConnectionMappingExactReferenceResolver;
 use App\Accounting\Validation\Finding;
 use App\Accounting\Validation\Severity;
 use App\Accounting\Validation\Support\Money;
+use App\Integrations\Exact\ExactReferenceData;
 use App\Models\Connection;
 use App\Models\ConnectionAccountingRef;
-use App\Integrations\Exact\ExactReferenceData;
 use Throwable;
 
 /**
