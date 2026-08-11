@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature;
 
-use App\Jobs\Webhooks\ForwardExactWebhookToConsumerJob;
+use App\Jobs\Webhooks\ForwardWebhookToConsumerJob;
 use App\Models\Account;
 use App\Models\Connection;
 use App\Models\Consumer;
@@ -33,7 +33,7 @@ class ExactWebhookControllerTest extends TestCase
 
     public function test_valid_notification_with_known_division_dispatches_job(): void
     {
-        Bus::fake([ForwardExactWebhookToConsumerJob::class]);
+        Bus::fake([ForwardWebhookToConsumerJob::class]);
 
         $consumer = Consumer::factory()->withWebhookCallback()->create();
         $account = Account::factory()->for($consumer)->create();
@@ -62,8 +62,8 @@ class ExactWebhookControllerTest extends TestCase
         $this->assertNotNull($event->request_fingerprint);
 
         Bus::assertDispatched(
-            ForwardExactWebhookToConsumerJob::class,
-            fn (ForwardExactWebhookToConsumerJob $job): bool => $job->exactConnection->is($connection)
+            ForwardWebhookToConsumerJob::class,
+            fn (ForwardWebhookToConsumerJob $job): bool => $job->providerConnection->is($connection)
                 && $job->payload['Content']['Division'] === (int) self::DIVISION,
         );
     }
@@ -76,26 +76,26 @@ class ExactWebhookControllerTest extends TestCase
      */
     public function test_a_division_connected_by_two_consumers_fans_out_to_both(): void
     {
-        Bus::fake([ForwardExactWebhookToConsumerJob::class]);
+        Bus::fake([ForwardWebhookToConsumerJob::class]);
 
         $first = $this->connectionForNewConsumer();
         $second = $this->connectionForNewConsumer();
 
         $this->postSignedWebhook($this->content())->assertStatus(200);
 
-        Bus::assertDispatchedTimes(ForwardExactWebhookToConsumerJob::class, 2);
+        Bus::assertDispatchedTimes(ForwardWebhookToConsumerJob::class, 2);
 
         foreach ([$first, $second] as $connection) {
             Bus::assertDispatched(
-                ForwardExactWebhookToConsumerJob::class,
-                fn (ForwardExactWebhookToConsumerJob $job): bool => $job->exactConnection->is($connection),
+                ForwardWebhookToConsumerJob::class,
+                fn (ForwardWebhookToConsumerJob $job): bool => $job->providerConnection->is($connection),
             );
         }
     }
 
     public function test_empty_body_validation_ping_returns_200_without_audit(): void
     {
-        Bus::fake([ForwardExactWebhookToConsumerJob::class]);
+        Bus::fake([ForwardWebhookToConsumerJob::class]);
 
         $response = $this->call(
             method: 'POST',
@@ -111,7 +111,7 @@ class ExactWebhookControllerTest extends TestCase
 
     public function test_unknown_division_returns_200_with_null_tenant_audit(): void
     {
-        Bus::fake([ForwardExactWebhookToConsumerJob::class]);
+        Bus::fake([ForwardWebhookToConsumerJob::class]);
 
         $response = $this->postSignedWebhook($this->content(division: 999999));
 
@@ -129,7 +129,7 @@ class ExactWebhookControllerTest extends TestCase
 
     public function test_idempotent_duplicate_notification_does_not_redispatch(): void
     {
-        Bus::fake([ForwardExactWebhookToConsumerJob::class]);
+        Bus::fake([ForwardWebhookToConsumerJob::class]);
 
         $consumer = Consumer::factory()->withWebhookCallback()->create();
         $account = Account::factory()->for($consumer)->create();
@@ -153,12 +153,12 @@ class ExactWebhookControllerTest extends TestCase
         $this->assertSame('duplicate', $events[1]->outcome);
         $this->assertNull($events[1]->event_id, 'Duplicate-rij heeft event_id NULL om de unique-index niet te triggeren');
 
-        Bus::assertDispatchedTimes(ForwardExactWebhookToConsumerJob::class, 1);
+        Bus::assertDispatchedTimes(ForwardWebhookToConsumerJob::class, 1);
     }
 
     public function test_content_without_division_returns_400_with_audit(): void
     {
-        Bus::fake([ForwardExactWebhookToConsumerJob::class]);
+        Bus::fake([ForwardWebhookToConsumerJob::class]);
 
         $response = $this->postSignedWebhook(['Topic' => 'GeneralJournalEntries', 'Action' => 'Update']);
 
@@ -175,7 +175,7 @@ class ExactWebhookControllerTest extends TestCase
 
     public function test_invalid_signature_returns_401_without_audit(): void
     {
-        Bus::fake([ForwardExactWebhookToConsumerJob::class]);
+        Bus::fake([ForwardWebhookToConsumerJob::class]);
 
         $contentJson = json_encode($this->content(), JSON_THROW_ON_ERROR);
         $body = '{"Content":'.$contentJson.',"HashCode":"not-a-valid-hashcode"}';
@@ -194,7 +194,7 @@ class ExactWebhookControllerTest extends TestCase
 
     public function test_revoked_connection_treated_as_unknown(): void
     {
-        Bus::fake([ForwardExactWebhookToConsumerJob::class]);
+        Bus::fake([ForwardWebhookToConsumerJob::class]);
 
         $consumer = Consumer::factory()->withWebhookCallback()->create();
         $account = Account::factory()->for($consumer)->create();

@@ -2,7 +2,7 @@
 
 namespace Tests\Feature\Webhooks;
 
-use App\Jobs\Webhooks\ForwardMollieWebhookToConsumerJob;
+use App\Jobs\Webhooks\ForwardWebhookToConsumerJob;
 use App\Models\Account;
 use App\Models\Connection;
 use App\Models\Consumer;
@@ -47,7 +47,7 @@ class MollieWebhookAntiSpoofingTest extends TestCase
 
         $response->assertStatus(400);
         $response->assertJsonPath('error', 'resource_ownership_failed');
-        Bus::assertNotDispatched(ForwardMollieWebhookToConsumerJob::class);
+        Bus::assertNotDispatched(ForwardWebhookToConsumerJob::class);
 
         $event = InboundWebhookEvent::query()->latest('id')->first();
         $this->assertNotNull($event);
@@ -74,7 +74,7 @@ class MollieWebhookAntiSpoofingTest extends TestCase
 
         $response->assertStatus(400);
         $response->assertJsonPath('error', 'resource_ownership_failed');
-        Bus::assertNotDispatched(ForwardMollieWebhookToConsumerJob::class);
+        Bus::assertNotDispatched(ForwardWebhookToConsumerJob::class);
 
         $event = InboundWebhookEvent::query()->latest('id')->first();
         $this->assertNotNull($event);

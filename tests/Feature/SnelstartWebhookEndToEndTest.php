@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature;
 
-use App\Jobs\Webhooks\ForwardSnelstartWebhookToConsumerJob;
+use App\Jobs\Webhooks\ForwardWebhookToConsumerJob;
 use App\Models\Account;
 use App\Models\Connection;
 use App\Models\Consumer;
@@ -43,7 +43,7 @@ final class SnelstartWebhookEndToEndTest extends TestCase
 
     public function test_sc_1_valid_known_administratie_dispatches_forward_job(): void
     {
-        Bus::fake([ForwardSnelstartWebhookToConsumerJob::class]);
+        Bus::fake([ForwardWebhookToConsumerJob::class]);
 
         $consumer = Consumer::factory()->withWebhookCallback()->create();
         $account = Account::factory()->for($consumer)->create();
@@ -75,8 +75,8 @@ final class SnelstartWebhookEndToEndTest extends TestCase
         $this->assertNotNull($event->request_fingerprint);
 
         Bus::assertDispatched(
-            ForwardSnelstartWebhookToConsumerJob::class,
-            fn (ForwardSnelstartWebhookToConsumerJob $job): bool => $job->snelstartConnection->id === $connection->id
+            ForwardWebhookToConsumerJob::class,
+            fn (ForwardWebhookToConsumerJob $job): bool => $job->providerConnection->id === $connection->id
                 && $job->eventId === 'evt-001'
                 && ($job->payload['administratieId'] ?? null) === 'admin-uuid-1',
         );
@@ -84,7 +84,7 @@ final class SnelstartWebhookEndToEndTest extends TestCase
 
     public function test_sc_2_invalid_signature_returns_401_without_audit(): void
     {
-        Bus::fake([ForwardSnelstartWebhookToConsumerJob::class]);
+        Bus::fake([ForwardWebhookToConsumerJob::class]);
 
         $consumer = Consumer::factory()->withWebhookCallback()->create();
         $account = Account::factory()->for($consumer)->create();
@@ -120,7 +120,7 @@ final class SnelstartWebhookEndToEndTest extends TestCase
 
     public function test_sc_3_unknown_administratie_returns_200_with_null_tenant_audit(): void
     {
-        Bus::fake([ForwardSnelstartWebhookToConsumerJob::class]);
+        Bus::fake([ForwardWebhookToConsumerJob::class]);
 
         $consumer = Consumer::factory()->withWebhookCallback()->create();
         $account = Account::factory()->for($consumer)->create();
@@ -148,7 +148,7 @@ final class SnelstartWebhookEndToEndTest extends TestCase
 
     public function test_sc_4_idempotent_event_id_does_not_redispatch(): void
     {
-        Bus::fake([ForwardSnelstartWebhookToConsumerJob::class]);
+        Bus::fake([ForwardWebhookToConsumerJob::class]);
 
         $consumer = Consumer::factory()->withWebhookCallback()->create();
         $account = Account::factory()->for($consumer)->create();
@@ -177,12 +177,12 @@ final class SnelstartWebhookEndToEndTest extends TestCase
         $this->assertSame('duplicate', $events[1]->outcome);
         $this->assertSame(200, $events[1]->status);
 
-        Bus::assertDispatchedTimes(ForwardSnelstartWebhookToConsumerJob::class, 1);
+        Bus::assertDispatchedTimes(ForwardWebhookToConsumerJob::class, 1);
     }
 
     public function test_sc_5_cross_consumer_isolation_routes_to_correct_consumer(): void
     {
-        Bus::fake([ForwardSnelstartWebhookToConsumerJob::class]);
+        Bus::fake([ForwardWebhookToConsumerJob::class]);
 
         $consumerA = Consumer::factory()->withWebhookCallback('https://a.example.test/hooks')->create();
         $accountA = Account::factory()->for($consumerA)->create();
@@ -213,10 +213,10 @@ final class SnelstartWebhookEndToEndTest extends TestCase
         $this->assertNotSame($consumerB->id, $event->consumer_id);
 
         Bus::assertDispatched(
-            ForwardSnelstartWebhookToConsumerJob::class,
-            fn (ForwardSnelstartWebhookToConsumerJob $job): bool => $job->snelstartConnection->id === $connectionA->id
-                && $job->snelstartConnection->account->consumer_id === $consumerA->id
-                && $job->snelstartConnection->id !== $connectionB->id,
+            ForwardWebhookToConsumerJob::class,
+            fn (ForwardWebhookToConsumerJob $job): bool => $job->providerConnection->id === $connectionA->id
+                && $job->providerConnection->account->consumer_id === $consumerA->id
+                && $job->providerConnection->id !== $connectionB->id,
         );
     }
 

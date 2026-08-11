@@ -6,7 +6,7 @@ namespace App\Http\Controllers\Webhooks;
 
 use App\Enums\Provider;
 use App\Http\Controllers\Controller;
-use App\Jobs\Webhooks\ForwardSnelstartWebhookToConsumerJob;
+use App\Jobs\Webhooks\ForwardWebhookToConsumerJob;
 use App\Models\Connection;
 use App\Webhooks\InboundWebhookRecorder;
 use Illuminate\Http\Request;
@@ -90,7 +90,7 @@ final class SnelstartWebhookController extends Controller
         }
 
         foreach ($connections as $connection) {
-            ForwardSnelstartWebhookToConsumerJob::dispatch($connection, $payload, $eventId ?? 'no-id');
+            ForwardWebhookToConsumerJob::dispatch(Provider::Snelstart, $connection, $payload, $eventId ?? 'no-id');
         }
 
         return response('', 200);

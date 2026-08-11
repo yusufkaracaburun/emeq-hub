@@ -6,7 +6,7 @@ namespace App\Http\Controllers\Webhooks;
 
 use App\Enums\Provider;
 use App\Http\Controllers\Controller;
-use App\Jobs\Webhooks\ForwardExactWebhookToConsumerJob;
+use App\Jobs\Webhooks\ForwardWebhookToConsumerJob;
 use App\Models\Connection;
 use App\Webhooks\InboundWebhookRecorder;
 use Illuminate\Http\Request;
@@ -113,7 +113,7 @@ final class ExactWebhookController extends Controller
         }
 
         foreach ($connections as $connection) {
-            ForwardExactWebhookToConsumerJob::dispatch($connection, $payload, $eventId);
+            ForwardWebhookToConsumerJob::dispatch(Provider::Exact, $connection, $payload, $eventId);
         }
 
         return response('', 200);

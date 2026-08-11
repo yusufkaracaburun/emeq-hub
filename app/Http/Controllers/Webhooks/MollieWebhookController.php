@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Webhooks;
 
 use App\Enums\Provider;
 use App\Http\Controllers\Controller;
-use App\Jobs\Webhooks\ForwardMollieWebhookToConsumerJob;
+use App\Jobs\Webhooks\ForwardWebhookToConsumerJob;
 use App\Models\Connection;
 use App\Webhooks\InboundWebhookRecorder;
 use App\Webhooks\Mollie\WebhookHandlerResult;
@@ -25,7 +25,7 @@ use Mollie\Api\Exceptions\InvalidSignatureException;
  *  4. WebhookPayloadRouter::routeFor() — id-prefix dispatch
  *  5. Audit via de provider-agnostische InboundWebhookRecorder (metadata-only,
  *     `inbound_webhook_events`) — alleen als result.shouldAudit()
- *  6. ForwardMollieWebhookToConsumerJob-dispatch (alleen als result.shouldFanOut())
+ *  6. ForwardWebhookToConsumerJob-dispatch (alleen als result.shouldFanOut())
  *  7. 202 Accepted (of 400 op anti-spoof-fail)
  *
  * Géén idempotency-dedup: Mollie vuurt meerdere legitieme webhooks voor dezelfde
@@ -99,7 +99,10 @@ class MollieWebhookController extends Controller
 
         // 7. Fan-out
         if ($result->shouldFanOut()) {
-            ForwardMollieWebhookToConsumerJob::dispatch($connection, $payload);
+            // `queue: null` houdt de Mollie-fan-out bewust op de default-queue: dat is
+            // een andere Horizon-supervisor dan `webhooks` (5 processen i.p.v. 10) en
+            // die keuze stond al zo (b0c612c). Verplaatsen is een capaciteitsbesluit.
+            ForwardWebhookToConsumerJob::dispatch(Provider::Mollie, $connection, $payload, null, null);
         }
 
         // 8. 202 Accepted

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Api\V1\AccountSubscriptions;
 
-use App\Jobs\Webhooks\ForwardMollieWebhookToConsumerJob;
+use App\Jobs\Webhooks\ForwardWebhookToConsumerJob;
 use App\Models\AccountSubscription;
 use App\Sanctum\TokenAbilities;
 use Emeq\MollieApi\Webhooks\MollieWebhookSignature;
@@ -143,8 +143,8 @@ class MollieAndAccountSubscriptionsCoexistenceTest extends TestCase
 
         // D-31: Phase 5a fan-out-pad blijft werkend.
         Bus::assertDispatched(
-            ForwardMollieWebhookToConsumerJob::class,
-            fn (ForwardMollieWebhookToConsumerJob $job) => $job->mollieConnection->id === $connection->id
+            ForwardWebhookToConsumerJob::class,
+            fn (ForwardWebhookToConsumerJob $job) => $job->providerConnection->id === $connection->id
                 && ($job->payload['id'] ?? null) === 'tr_oneshot',
         );
 

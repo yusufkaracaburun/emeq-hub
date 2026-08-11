@@ -2,7 +2,8 @@
 
 namespace Tests\Feature\Webhooks;
 
-use App\Jobs\Webhooks\ForwardMollieWebhookToConsumerJob;
+use App\Enums\Provider;
+use App\Jobs\Webhooks\ForwardWebhookToConsumerJob;
 use App\Models\Account;
 use App\Models\Connection;
 use App\Models\Consumer;
@@ -53,8 +54,8 @@ class MollieWebhookFanOutTest extends TestCase
         $response->assertStatus(202);
 
         Bus::assertDispatched(
-            ForwardMollieWebhookToConsumerJob::class,
-            fn (ForwardMollieWebhookToConsumerJob $job) => $job->mollieConnection->id === $connection->id
+            ForwardWebhookToConsumerJob::class,
+            fn (ForwardWebhookToConsumerJob $job) => $job->providerConnection->id === $connection->id
                 && $job->payload['id'] === 'tr_fanout_1',
         );
     }
@@ -70,7 +71,7 @@ class MollieWebhookFanOutTest extends TestCase
         $account = Account::factory()->for($consumer)->create();
         $connection = Connection::factory()->forMollie()->active()->for($account)->create();
 
-        $job = new ForwardMollieWebhookToConsumerJob($connection, ['id' => 'tr_handle_1']);
+        $job = new ForwardWebhookToConsumerJob(Provider::Mollie, $connection, ['id' => 'tr_handle_1']);
         $job->handle();
 
         // Spatie's webhook-server dispatcht intern een CallWebhookJob.
@@ -95,7 +96,7 @@ class MollieWebhookFanOutTest extends TestCase
         $account = Account::factory()->for($consumer)->create();
         $connection = Connection::factory()->forMollie()->active()->for($account)->create();
 
-        $job = new ForwardMollieWebhookToConsumerJob($connection, ['id' => 'tr_no_callback']);
+        $job = new ForwardWebhookToConsumerJob(Provider::Mollie, $connection, ['id' => 'tr_no_callback']);
         $job->handle();
 
         Queue::assertNothingPushed();

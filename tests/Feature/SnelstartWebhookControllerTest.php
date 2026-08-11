@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature;
 
-use App\Jobs\Webhooks\ForwardSnelstartWebhookToConsumerJob;
+use App\Jobs\Webhooks\ForwardWebhookToConsumerJob;
 use App\Models\Account;
 use App\Models\Connection;
 use App\Models\Consumer;
@@ -33,7 +33,7 @@ class SnelstartWebhookControllerTest extends TestCase
 
     public function test_valid_webhook_with_known_administratie_dispatches_job(): void
     {
-        Bus::fake([ForwardSnelstartWebhookToConsumerJob::class]);
+        Bus::fake([ForwardWebhookToConsumerJob::class]);
 
         $consumer = Consumer::factory()->withWebhookCallback()->create();
         $account = Account::factory()->for($consumer)->create();
@@ -68,9 +68,9 @@ class SnelstartWebhookControllerTest extends TestCase
         $this->assertNotNull($event->request_fingerprint);
 
         Bus::assertDispatched(
-            ForwardSnelstartWebhookToConsumerJob::class,
-            function (ForwardSnelstartWebhookToConsumerJob $job) use ($connection): bool {
-                return $job->snelstartConnection->is($connection)
+            ForwardWebhookToConsumerJob::class,
+            function (ForwardWebhookToConsumerJob $job) use ($connection): bool {
+                return $job->providerConnection->is($connection)
                     && $job->eventId === 'evt-1'
                     && $job->payload['administratieId'] === 'aaa-111';
             },
@@ -79,7 +79,7 @@ class SnelstartWebhookControllerTest extends TestCase
 
     public function test_unknown_administratie_returns_200_with_null_tenant_audit(): void
     {
-        Bus::fake([ForwardSnelstartWebhookToConsumerJob::class]);
+        Bus::fake([ForwardWebhookToConsumerJob::class]);
 
         $response = $this->postSignedWebhook([
             'administratieId' => 'bbb-222',
@@ -100,7 +100,7 @@ class SnelstartWebhookControllerTest extends TestCase
 
     public function test_idempotent_duplicate_event_id_does_not_redispatch(): void
     {
-        Bus::fake([ForwardSnelstartWebhookToConsumerJob::class]);
+        Bus::fake([ForwardWebhookToConsumerJob::class]);
 
         $consumer = Consumer::factory()->withWebhookCallback()->create();
         $account = Account::factory()->for($consumer)->create();
@@ -129,12 +129,12 @@ class SnelstartWebhookControllerTest extends TestCase
         $this->assertSame('duplicate', $events[1]->outcome);
         $this->assertSame(200, $events[1]->status);
 
-        Bus::assertDispatchedTimes(ForwardSnelstartWebhookToConsumerJob::class, 1);
+        Bus::assertDispatchedTimes(ForwardWebhookToConsumerJob::class, 1);
     }
 
     public function test_malformed_payload_returns_400_with_audit(): void
     {
-        Bus::fake([ForwardSnelstartWebhookToConsumerJob::class]);
+        Bus::fake([ForwardWebhookToConsumerJob::class]);
 
         $response = $this->postSignedWebhook([
             'eventId' => 'evt-no-administratie',
@@ -154,7 +154,7 @@ class SnelstartWebhookControllerTest extends TestCase
 
     public function test_invalid_signature_returns_401_without_audit(): void
     {
-        Bus::fake([ForwardSnelstartWebhookToConsumerJob::class]);
+        Bus::fake([ForwardWebhookToConsumerJob::class]);
 
         $response = $this->postJson(
             '/webhooks/snelstart',
@@ -171,7 +171,7 @@ class SnelstartWebhookControllerTest extends TestCase
 
     public function test_revoked_connection_treated_as_unknown(): void
     {
-        Bus::fake([ForwardSnelstartWebhookToConsumerJob::class]);
+        Bus::fake([ForwardWebhookToConsumerJob::class]);
 
         $consumer = Consumer::factory()->withWebhookCallback()->create();
         $account = Account::factory()->for($consumer)->create();
@@ -201,7 +201,7 @@ class SnelstartWebhookControllerTest extends TestCase
 
     public function test_cross_consumer_isolation_routes_to_correct_consumer(): void
     {
-        Bus::fake([ForwardSnelstartWebhookToConsumerJob::class]);
+        Bus::fake([ForwardWebhookToConsumerJob::class]);
 
         $consumerA = Consumer::factory()->withWebhookCallback()->create();
         $accountA = Account::factory()->for($consumerA)->create();
@@ -230,9 +230,9 @@ class SnelstartWebhookControllerTest extends TestCase
         $this->assertSame($connectionA->id, $event->connection_id);
 
         Bus::assertDispatched(
-            ForwardSnelstartWebhookToConsumerJob::class,
-            function (ForwardSnelstartWebhookToConsumerJob $job) use ($accountA): bool {
-                return $job->snelstartConnection->account_id === $accountA->id;
+            ForwardWebhookToConsumerJob::class,
+            function (ForwardWebhookToConsumerJob $job) use ($accountA): bool {
+                return $job->providerConnection->account_id === $accountA->id;
             },
         );
     }

@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Feature;
 
-use App\Jobs\Webhooks\ForwardSnelstartWebhookToConsumerJob;
+use App\Enums\Provider;
+use App\Jobs\Webhooks\ForwardWebhookToConsumerJob;
 use App\Models\Account;
 use App\Models\Connection;
 use App\Models\Consumer;
@@ -15,27 +16,28 @@ use Spatie\WebhookServer\BackoffStrategy\ExponentialBackoffStrategy;
 use Spatie\WebhookServer\CallWebhookJob;
 use Tests\TestCase;
 
-class ForwardSnelstartWebhookToConsumerJobTest extends TestCase
+class ForwardWebhookToConsumerJobTest extends TestCase
 {
     use RefreshDatabase;
 
     public function test_job_dispatches_to_webhooks_queue(): void
     {
-        Bus::fake([ForwardSnelstartWebhookToConsumerJob::class]);
+        Bus::fake([ForwardWebhookToConsumerJob::class]);
 
         $consumer = Consumer::factory()->withWebhookCallback()->create();
         $account = Account::factory()->for($consumer)->create();
         $connection = Connection::factory()->forSnelstart()->active()->for($account)->create();
 
-        ForwardSnelstartWebhookToConsumerJob::dispatch(
+        ForwardWebhookToConsumerJob::dispatch(
+            Provider::Snelstart,
             $connection,
             ['administratieId' => $connection->administratie_id, 'type' => 'Relatie.Created'],
             'evt-queue-1',
         );
 
         Bus::assertDispatched(
-            ForwardSnelstartWebhookToConsumerJob::class,
-            fn (ForwardSnelstartWebhookToConsumerJob $job): bool => $job->queue === 'webhooks',
+            ForwardWebhookToConsumerJob::class,
+            fn (ForwardWebhookToConsumerJob $job): bool => $job->queue === 'webhooks',
         );
     }
 
@@ -53,7 +55,8 @@ class ForwardSnelstartWebhookToConsumerJobTest extends TestCase
         $account = Account::factory()->for($consumer)->create();
         $connection = Connection::factory()->forSnelstart()->active()->for($account)->create();
 
-        (new ForwardSnelstartWebhookToConsumerJob(
+        (new ForwardWebhookToConsumerJob(
+            Provider::Snelstart,
             $connection,
             ['administratieId' => $connection->administratie_id],
             'evt-no-callback',
@@ -75,7 +78,7 @@ class ForwardSnelstartWebhookToConsumerJobTest extends TestCase
 
         $payload = ['administratieId' => $connection->administratie_id, 'type' => 'Verkoopfactuur.Created'];
 
-        (new ForwardSnelstartWebhookToConsumerJob($connection, $payload, 'evt-with-secret'))->handle();
+        (new ForwardWebhookToConsumerJob(Provider::Snelstart, $connection, $payload, 'evt-with-secret'))->handle();
 
         Bus::assertDispatched(CallWebhookJob::class, function (CallWebhookJob $job) use ($payload): bool {
             $signatureHeader = config('webhook-server.signature_header_name', 'Signature');
@@ -95,7 +98,8 @@ class ForwardSnelstartWebhookToConsumerJobTest extends TestCase
         $account = Account::factory()->for($consumer)->create();
         $connection = Connection::factory()->forSnelstart()->active()->for($account)->create();
 
-        (new ForwardSnelstartWebhookToConsumerJob(
+        (new ForwardWebhookToConsumerJob(
+            Provider::Snelstart,
             $connection,
             ['administratieId' => $connection->administratie_id],
             'evt-001',
@@ -114,7 +118,8 @@ class ForwardSnelstartWebhookToConsumerJobTest extends TestCase
         $account = Account::factory()->for($consumer)->create();
         $connection = Connection::factory()->forSnelstart()->active()->for($account)->create();
 
-        (new ForwardSnelstartWebhookToConsumerJob(
+        (new ForwardWebhookToConsumerJob(
+            Provider::Snelstart,
             $connection,
             ['administratieId' => $connection->administratie_id],
             'evt-retry-policy',
@@ -142,7 +147,7 @@ class ForwardSnelstartWebhookToConsumerJobTest extends TestCase
 
         $payload = ['administratieId' => $connection->administratie_id];
 
-        (new ForwardSnelstartWebhookToConsumerJob($connection, $payload, 'evt-anti-corr'))->handle();
+        (new ForwardWebhookToConsumerJob(Provider::Snelstart, $connection, $payload, 'evt-anti-corr'))->handle();
 
         Bus::assertDispatched(CallWebhookJob::class, function (CallWebhookJob $job) use ($payload): bool {
             $signatureHeader = config('webhook-server.signature_header_name', 'Signature');
