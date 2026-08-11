@@ -1,36 +1,6 @@
 parameters:
 	ignoreErrors:
 		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$consumer\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Accounting/Exact/ExactAccountingTarget.php
-
-		-
-			message: '#^Parameter \#1 \$array \(non\-empty\-list\<App\\Accounting\\Attachment\>\) of array_values is already a list, call has no effect\.$#'
-			identifier: arrayValues.list
-			count: 1
-			path: app/Accounting/Exact/ExactAccountingTarget.php
-
-		-
-			message: '#^Using nullsafe property access "\?\-\>name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 1
-			path: app/Accounting/Exact/ExactAccountingTarget.php
-
-		-
-			message: '#^Offset ''is_sales'' on array\{is_sales\: bool, is_supplier\: bool, status\: string\|null\} on left side of \?\? always exists and is not nullable\.$#'
-			identifier: nullCoalesce.offset
-			count: 1
-			path: app/Accounting/Exact/ExactRelationResolver.php
-
-		-
-			message: '#^Offset ''is_supplier'' on array\{is_sales\: bool, is_supplier\: bool, status\: string\|null\} on left side of \?\? always exists and is not nullable\.$#'
-			identifier: nullCoalesce.offset
-			count: 1
-			path: app/Accounting/Exact/ExactRelationResolver.php
-
-		-
 			message: '#^Parameter \#1 \$array \(list\<App\\Accounting\\Validation\\Finding\>\) of array_values is already a list, call has no effect\.$#'
 			identifier: arrayValues.list
 			count: 1
@@ -49,7 +19,7 @@ parameters:
 			path: app/Billing/Account/AccountSubscriptionManager.php
 
 		-
-			message: '#^Parameter \#1 \$connection of method App\\Mollie\\MollieConnectionContext\:\:set\(\) expects App\\Models\\Connection, Illuminate\\Database\\Eloquent\\Model\|null given\.$#'
+			message: '#^Parameter \#1 \$connection of method App\\Integrations\\Mollie\\MollieConnectionContext\:\:set\(\) expects App\\Models\\Connection, Illuminate\\Database\\Eloquent\\Model\|null given\.$#'
 			identifier: argument.type
 			count: 2
 			path: app/Billing/Account/AccountSubscriptionManager.php
@@ -427,19 +397,7 @@ parameters:
 			path: app/Http/Controllers/Api/V1/AccountSubscriptions/AccountSubscriptionController.php
 
 		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$provider\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Http/Controllers/Api/V1/Accounting/MappingController.php
-
-		-
 			message: '#^Anonymous function should return Illuminate\\Support\\Collection\<int, array\{code\: string, label\: string\|null, attrs\: array\<string, mixed\>\|null\}\> but returns Illuminate\\Support\\Collection\<int, array\{code\: string, label\: string\|null, attrs\: array\<string, mixed\>\|null\}\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/Api/V1/Accounting/MappingController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Api\\V1\\Accounting\\MappingController\:\:resolve\(\) should return array\{App\\Models\\Account, App\\Models\\Connection\}\|Illuminate\\Http\\JsonResponse but returns array\{App\\Models\\Account, Illuminate\\Database\\Eloquent\\Model\}\.$#'
 			identifier: return.type
 			count: 1
 			path: app/Http/Controllers/Api/V1/Accounting/MappingController.php
@@ -467,18 +425,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/Http/Controllers/Api/V1/IntegrationController.php
-
-		-
-			message: '#^Call to function is_array\(\) with array\<string, mixed\> will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: app/Http/Controllers/Api/V1/Mollie/AbstractMolliePassThroughController.php
-
-		-
-			message: '#^Call to function is_array\(\) with array\<string, mixed\> will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: app/Http/Controllers/Api/V1/Mollie/Connect/AbstractMollieConnectPassThroughController.php
 
 		-
 			message: '#^Instanceof between Mollie\\Api\\Resources\\CustomerCollection and Mollie\\Api\\Resources\\BaseCollection will always evaluate to true\.$#'
@@ -565,6 +511,42 @@ parameters:
 			path: app/Http/Resources/Api/V1/AccountSubscriptionResource.php
 
 		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$consumer\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Integrations/Exact/Accounting/ExactAccountingTarget.php
+
+		-
+			message: '#^Parameter \#1 \$array \(non\-empty\-list\<App\\Accounting\\Attachment\>\) of array_values is already a list, call has no effect\.$#'
+			identifier: arrayValues.list
+			count: 1
+			path: app/Integrations/Exact/Accounting/ExactAccountingTarget.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Integrations/Exact/Accounting/ExactAccountingTarget.php
+
+		-
+			message: '#^Offset ''is_sales'' on array\{is_sales\: bool, is_supplier\: bool, status\: string\|null\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/Integrations/Exact/Accounting/ExactRelationResolver.php
+
+		-
+			message: '#^Offset ''is_supplier'' on array\{is_sales\: bool, is_supplier\: bool, status\: string\|null\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/Integrations/Exact/Accounting/ExactRelationResolver.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$consumer_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Integrations/Webhooks/InboundWebhookRecorder.php
+
+		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
 			identifier: property.notFound
 			count: 1
@@ -598,19 +580,13 @@ parameters:
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$consumer\.$#'
 			identifier: property.notFound
 			count: 1
-			path: app/Jobs/Webhooks/ForwardExactWebhookToConsumerJob.php
+			path: app/Jobs/Webhooks/ForwardWebhookToConsumerJob.php
 
 		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$consumer\.$#'
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$external_id\.$#'
 			identifier: property.notFound
 			count: 1
-			path: app/Jobs/Webhooks/ForwardMollieWebhookToConsumerJob.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$consumer\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Jobs/Webhooks/ForwardSnelstartWebhookToConsumerJob.php
+			path: app/Jobs/Webhooks/ForwardWebhookToConsumerJob.php
 
 		-
 			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:connections\(\)\.$#'
@@ -635,12 +611,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/Support/Connect/ProviderConnectStatus.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$consumer_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Webhooks/InboundWebhookRecorder.php
 
 		-
 			message: '#^Strict comparison using \!\=\= between PDO and null will always evaluate to true\.$#'

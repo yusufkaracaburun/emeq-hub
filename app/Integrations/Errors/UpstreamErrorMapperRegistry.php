@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Integrations\Errors;
 
+use App\Integrations\Contracts\MapsUpstreamExceptions;
 use Throwable;
 
 /**
