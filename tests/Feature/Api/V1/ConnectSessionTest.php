@@ -7,6 +7,7 @@ namespace Tests\Feature\Api\V1;
 use App\Models\Consumer;
 use App\Sanctum\TokenAbilities;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\URL;
 use Tests\TestCase;
 
@@ -97,8 +98,8 @@ class ConnectSessionTest extends TestCase
         return [$consumer, $token];
     }
 
-    private function requestFor(string $url): \Illuminate\Http\Request
+    private function requestFor(string $url): Request
     {
-        return \Illuminate\Http\Request::create($url);
+        return Request::create($url);
     }
 }
