@@ -287,7 +287,7 @@ class ReadResourcesTest extends TestCase
         $account = $consumer->accounts()->create(['external_id' => 'school1', 'display_name' => 'School 1']);
         Connection::factory()->forSnelstart()->for($account)->create();
 
-        $token = $consumer->createToken('t', [TokenAbilities::SNELSTART_READ])->plainTextToken;
+        $token = $consumer->createToken('t', [TokenAbilities::ACCOUNTING_READ])->plainTextToken;
 
         $this->withHeader('Authorization', "Bearer {$token}")
             ->withHeader('X-Account-Id', 'school1')
@@ -330,7 +330,7 @@ class ReadResourcesTest extends TestCase
             'label' => 'Acme BV',
         ]);
 
-        $this->fetch($consumer, 'documents')
+        $this->fetch($consumer, 'documents', ['type' => 'sales_invoice'])
             ->assertOk()
             ->assertJsonPath('data.0.id', 'entry-1')
             ->assertJsonPath('data.0.type', 'sales_invoice')
@@ -362,7 +362,7 @@ class ReadResourcesTest extends TestCase
         ]);
         [$consumer] = $this->connected();
 
-        $this->fetch($consumer, 'documents')
+        $this->fetch($consumer, 'documents', ['type' => 'sales_invoice'])
             ->assertOk()
             ->assertJsonPath('data.0.external_id', null)
             ->assertJsonPath('data.0.net_total', 0);
@@ -392,6 +392,21 @@ class ReadResourcesTest extends TestCase
         [$consumer] = $this->connected();
 
         $this->fetch($consumer, 'documents', ['type' => 'onzin'])
+            ->assertStatus(400)
+            ->assertJsonPath('error', 'invalid_query');
+    }
+
+    /**
+     * Zonder type kwamen hier verkoopboekingen terug. Wie om documenten vroeg kreeg
+     * dus één soort, zonder dat iets dat zei. Liever vragen dan stil de verkeerde
+     * helft leveren — boekhoudpakketten houden verkoop en inkoop in gescheiden
+     * collecties met een eigen cursor.
+     */
+    public function test_documents_without_a_type_is_rejected_instead_of_defaulting_to_sales(): void
+    {
+        [$consumer] = $this->connected();
+
+        $this->fetch($consumer, 'documents')
             ->assertStatus(400)
             ->assertJsonPath('error', 'invalid_query');
     }
@@ -428,7 +443,7 @@ class ReadResourcesTest extends TestCase
             }
         });
 
-        $this->fetch($consumer, 'documents')
+        $this->fetch($consumer, 'documents', ['type' => 'sales_invoice'])
             ->assertOk()
             ->assertJsonPath('data.0.party.name', 'Klant een')
             ->assertJsonPath('data.2.party.name', 'Klant een');

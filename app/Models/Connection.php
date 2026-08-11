@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Str;
 
 /**
  * Statische analyse leest de casts uit {@see Connection::casts()} niet en valt terug
@@ -26,6 +27,7 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $oauth_state_expires_at
  */
 #[Fillable([
+    'public_id',
     'account_id',
     'provider',
     'status',
@@ -48,6 +50,20 @@ class Connection extends Model
 {
     /** @use HasFactory<ConnectionFactory> */
     use HasFactory;
+
+    /**
+     * Het voorvoegsel maakt in een log of een support-gesprek meteen duidelijk
+     * waar een id bij hoort, en voorkomt dat een consumer 'm verwart met de
+     * `X-Account-Id` die hij zelf aanlevert.
+     */
+    public const PUBLIC_ID_PREFIX = 'con_';
+
+    protected static function booted(): void
+    {
+        static::creating(function (self $connection): void {
+            $connection->public_id ??= self::PUBLIC_ID_PREFIX.Str::ulid()->toBase32();
+        });
+    }
 
     public function account(): BelongsTo
     {

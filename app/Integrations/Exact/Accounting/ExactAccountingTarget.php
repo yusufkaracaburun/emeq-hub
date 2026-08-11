@@ -136,9 +136,9 @@ final class ExactAccountingTarget implements AccountingTarget, EnrichesValidatio
      *
      * @return ReadPage<PostedDocument>
      */
-    public function readDocuments(Connection $connection, ReadQuery $query, ?DocumentType $type = null): ReadPage
+    public function readDocuments(Connection $connection, ReadQuery $query, DocumentType $type): ReadPage
     {
-        $purchase = $type !== null && in_array($type, [DocumentType::PurchaseInvoice, DocumentType::Expense], true);
+        $purchase = in_array($type, [DocumentType::PurchaseInvoice, DocumentType::Expense], true);
 
         $collection = $purchase ? 'PurchaseEntryLines' : 'SalesEntryLines';
         $partyField = $purchase ? 'Supplier' : 'Customer';

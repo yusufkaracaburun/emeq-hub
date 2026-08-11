@@ -11,6 +11,9 @@ return new class extends Migration
     {
         Schema::create('connections', function (Blueprint $table): void {
             $table->id();
+            // Publieke, stabiele sleutel waarmee een consumer één koppeling aanwijst.
+            // De primary key is intern en opsombaar en hoort niet in een API-contract.
+            $table->string('public_id', 40)->unique();
             $table->foreignId('account_id')->constrained('accounts')->cascadeOnDelete();
             $table->string('provider');
             $table->string('status')->default('active');

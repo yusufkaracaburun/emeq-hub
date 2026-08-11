@@ -187,18 +187,21 @@ class MappingController extends Controller
      */
     private function resolve(Request $request, bool $write): array|JsonResponse
     {
-        [$account, $connection] = $this->resolveAccountingConnection($request, $this->registry->providers());
+        $allowed = false;
 
-        $provider = $connection->provider->value;
-
-        foreach (TokenAbilities::accounting($provider, $write) as $ability) {
+        foreach (TokenAbilities::accounting($write) as $ability) {
             if ($request->user()?->tokenCan($ability)) {
-                return [$account, $connection];
+                $allowed = true;
+                break;
             }
         }
 
-        $required = $write ? TokenAbilities::ACCOUNTING_WRITE : TokenAbilities::ACCOUNTING_READ;
+        if (! $allowed) {
+            $required = $write ? TokenAbilities::ACCOUNTING_WRITE : TokenAbilities::ACCOUNTING_READ;
 
-        return response()->json(['error' => 'insufficient_ability', 'message' => "Token mist vereiste ability '{$required}'."], 403);
+            return response()->json(['error' => 'insufficient_ability', 'message' => "Token mist vereiste ability '{$required}'."], 403);
+        }
+
+        return $this->resolveAccountingConnection($request, $this->registry->providers());
     }
 }

@@ -65,7 +65,7 @@ final class ForwardConnectionRevokedToConsumerJob implements ShouldQueue
                 $this->revokedConnection->provider,
                 (string) $account->external_id,
                 [
-                    'connection_id' => $this->revokedConnection->id,
+                    'connection_id' => $this->revokedConnection->public_id,
                     'source' => $this->source,
                     'revoked_at' => $this->revokedConnection->revoked_at?->toIso8601String(),
                 ],

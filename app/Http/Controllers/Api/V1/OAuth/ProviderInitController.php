@@ -73,7 +73,7 @@ class ProviderInitController extends Controller
         }
 
         return [
-            'connection_id' => (string) $result['connection']->id,
+            'connection_id' => (string) $result['connection']->public_id,
             'redirect_url' => $result['redirect_url'],
         ];
     }

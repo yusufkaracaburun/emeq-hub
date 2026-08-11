@@ -64,19 +64,29 @@ final class TokenAbilities
     /**
      * De abilities die toegang geven tot een canoniek accounting-endpoint.
      *
-     * Any-of: de canonieke ability óf de provider-ability van de gekoppelde provider.
-     * Die tweede staat er zolang bestaande consumers nog op `{provider}:*`-tokens
-     * draaien; hij mag weg zodra die vervangen zijn. `*` wordt niet genoemd omdat
-     * Sanctum's `can()` daar zelf al op matcht.
+     * Provider-onafhankelijk, op één overgangspad na: tokens met `exact:*` houden
+     * toegang. Die zijn uitgegeven toen `/v1/accounting/*` nog Exact-only was en
+     * draaien nog bij bestaande consumers.
+     *
+     * Het pad noemt Exact expliciet en niet "de gekoppelde provider". Dat laatste
+     * stond er, en zou betekenen dat elke nieuwe provider automatisch een
+     * legacy-recht erft dat bij hem nooit heeft bestaan — een Moneybird-token met
+     * `moneybird:write` zou dan de canonieke boek-endpoint openen zonder ooit
+     * `accounting:write` te hebben gekregen.
+     *
+     * **Verwijderen zodra de bestaande consumers een `accounting:*`-token hebben.**
+     * Daarna is deze methode een lijst van twee constanten en mag de allowlist weg.
+     *
+     * `*` wordt niet genoemd omdat Sanctum's `can()` daar zelf al op matcht.
      *
      * @return list<string>
      */
-    public static function accounting(string $provider, bool $write): array
+    public static function accounting(bool $write): array
     {
         if ($write) {
-            return [self::ACCOUNTING_WRITE, "{$provider}:write"];
+            return [self::ACCOUNTING_WRITE, self::EXACT_WRITE];
         }
 
-        return [self::ACCOUNTING_READ, self::ACCOUNTING_WRITE, "{$provider}:read", "{$provider}:write"];
+        return [self::ACCOUNTING_READ, self::ACCOUNTING_WRITE, self::EXACT_READ, self::EXACT_WRITE];
     }
 }

@@ -43,33 +43,63 @@ class MultipleAccountingConnectionsTest extends TestCase
     {
         $consumer = $this->consumerWithTwoConnections();
 
-        $this->fetch($consumer, 'capabilities')
+        $response = $this->fetch($consumer, 'capabilities')
             ->assertStatus(409)
-            ->assertJsonPath('error', 'multiple_accounting_connections')
-            ->assertJsonPath('providers', ['exact', 'snelstart']);
+            ->assertJsonPath('error', 'multiple_accounting_connections');
+
+        // De consumer krijgt genoeg terug om een keuze te tonen: de sleutel om mee te
+        // sturen, plus waar die koppeling naartoe wijst.
+        $this->assertSame(
+            ['exact', 'snelstart'],
+            array_column($response->json('connections'), 'provider'),
+        );
+        foreach ($response->json('connections') as $connection) {
+            $this->assertStringStartsWith('con_', $connection['connection_id']);
+        }
     }
 
-    public function test_the_provider_header_selects_the_connection(): void
+    /**
+     * De sleutel is de koppeling zelf, niet het pakket eronder. Een consumer van de
+     * Unified API hoeft niet te weten dat er "exact" of "moneybird" achter zit.
+     */
+    public function test_the_connection_header_selects_the_connection(): void
+    {
+        $consumer = $this->consumerWithTwoConnections();
+        $account = $consumer->accounts()->sole();
+
+        foreach (['exact', 'snelstart'] as $provider) {
+            $connection = $account->connections()->where('provider', $provider)->sole();
+
+            $this->fetch($consumer, 'capabilities', $connection->public_id)
+                ->assertOk()
+                ->assertJsonPath('provider', $provider);
+        }
+    }
+
+    public function test_a_connection_id_this_account_does_not_have_is_a_404(): void
     {
         $consumer = $this->consumerWithTwoConnections();
 
-        $this->fetch($consumer, 'capabilities', 'snelstart')
-            ->assertOk()
-            ->assertJsonPath('provider', 'snelstart');
-
-        $this->fetch($consumer, 'capabilities', 'exact')
-            ->assertOk()
-            ->assertJsonPath('provider', 'exact');
-    }
-
-    public function test_a_provider_the_account_has_not_connected_is_a_404(): void
-    {
-        $consumer = $this->consumerWithTwoConnections();
-
-        $this->fetch($consumer, 'capabilities', 'moneybird')
+        $this->fetch($consumer, 'capabilities', 'con_NIETVANDITACCOUNT')
             ->assertStatus(404)
-            ->assertJsonPath('error', 'no_accounting_connection')
-            ->assertJsonPath('providers', ['exact', 'snelstart']);
+            ->assertJsonPath('error', 'connection_not_found');
+    }
+
+    /**
+     * De keten blijft strikt: een geldig connection_id van een ánder Account is voor
+     * deze Consumer even onvindbaar als een verzonnen id.
+     */
+    public function test_a_connection_id_of_another_consumer_is_not_reachable(): void
+    {
+        $consumer = $this->consumerWithTwoConnections();
+
+        $other = Consumer::factory()->create();
+        $otherAccount = $other->accounts()->create(['external_id' => 'other', 'display_name' => 'Other']);
+        $otherConnection = Connection::factory()->forExact()->for($otherAccount)->create(['status' => 'active']);
+
+        $this->fetch($consumer, 'capabilities', (string) $otherConnection->public_id)
+            ->assertStatus(404)
+            ->assertJsonPath('error', 'connection_not_found');
     }
 
     /**
@@ -100,15 +130,15 @@ class MultipleAccountingConnectionsTest extends TestCase
         return $consumer;
     }
 
-    private function fetch(Consumer $consumer, string $path, ?string $provider = null): TestResponse
+    private function fetch(Consumer $consumer, string $path, ?string $connectionId = null): TestResponse
     {
         $token = $consumer->createToken('t', [TokenAbilities::ACCOUNTING_READ])->plainTextToken;
 
         $request = $this->withHeader('Authorization', "Bearer {$token}")
             ->withHeader('X-Account-Id', 'school1');
 
-        if ($provider !== null) {
-            $request = $request->withHeader('X-Provider', $provider);
+        if ($connectionId !== null) {
+            $request = $request->withHeader('X-Connection-Id', $connectionId);
         }
 
         return $request->getJson('/v1/accounting/'.$path);

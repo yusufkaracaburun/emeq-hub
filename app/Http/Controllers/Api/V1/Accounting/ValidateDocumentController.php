@@ -34,11 +34,11 @@ class ValidateDocumentController extends Controller
 
     public function __invoke(ValidateDocumentRequest $request): JsonResponse
     {
+        $this->guardAbility($request, TokenAbilities::accounting(write: false));
+
         [, $connection] = $this->resolveAccountingConnection($request, $this->registry->providers());
 
         $provider = $connection->provider->value;
-
-        $this->guardAbility($request, TokenAbilities::accounting($provider, write: false));
 
         $payload = $request->validated();
         $report = $this->inspector->inspect($payload);

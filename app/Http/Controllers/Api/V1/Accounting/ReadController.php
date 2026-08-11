@@ -55,21 +55,33 @@ class ReadController extends Controller
      * Geboekte documenten uit de gekoppelde administratie.
      *
      * De leeskant van `POST /v1/accounting/documents` — zelfde pad, zelfde canonieke
-     * begrip. Filter met `?type=sales_invoice|purchase_invoice`; zonder filter komen
-     * verkoopboekingen terug, want dat is wat de meeste consumers zoeken.
+     * begrip.
+     *
+     * `?type=` is verplicht. Zonder filter kwamen hier verkoopboekingen terug: een
+     * stille keuze, want de consumer vroeg om documenten en kreeg er één soort van.
+     * Boekhoudpakketten houden verkoop en inkoop in gescheiden collecties met een
+     * eigen cursor, dus "alles" is niet in één pagina te leveren zonder te liegen
+     * over de volgorde.
      */
     public function documents(Request $request): JsonResponse
     {
         $type = $request->query('type');
 
-        if (is_string($type) && DocumentType::tryFrom($type) === null) {
+        if (! is_string($type) || $type === '') {
+            return response()->json([
+                'error' => 'invalid_query',
+                'message' => 'Query-parameter type is verplicht. Geldig: '.implode(', ', DocumentType::values()).'.',
+            ], 400);
+        }
+
+        if (DocumentType::tryFrom($type) === null) {
             return response()->json([
                 'error' => 'invalid_query',
                 'message' => "Onbekend type '{$type}'. Geldig: ".implode(', ', DocumentType::values()).'.',
             ], 400);
         }
 
-        $documentType = is_string($type) ? DocumentType::from($type) : null;
+        $documentType = DocumentType::from($type);
 
         return $this->read(
             $request,
@@ -172,10 +184,14 @@ class ReadController extends Controller
      */
     private function read(Request $request, Capability $capability, callable $fetch, callable $transform): JsonResponse
     {
+        // Ability vóór resolutie: nu de canonieke abilities niet meer van de
+        // gekoppelde provider afhangen, hoeft een token zonder recht niet eerst te
+        // horen wélke koppelingen dit Account heeft.
+        $this->guardAbility($request, TokenAbilities::accounting(write: false));
+
         [, $connection] = $this->resolveAccountingConnection($request, $this->registry->providers());
 
         $provider = $connection->provider->value;
-        $this->guardAbility($request, TokenAbilities::accounting($provider, write: false));
 
         if (! in_array($capability, $this->registry->capabilitiesFor($connection), true)) {
             return response()->json([

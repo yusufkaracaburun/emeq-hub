@@ -388,17 +388,22 @@ definitie providerspecifiek is.
 Beide identificeren de tenant via **header** `X-Account-Id: <external_id>` (let op:
 een header, niet de query-param `account_external_id` van de connect-laag):
 
-> **Meerdere boekhoudkoppelingen op één Account?** Stuur dan ook
-> `X-Provider: <provider>` mee. Heeft het Account precies één boekhoudkoppeling —
+> **Meerdere boekhoudkoppelingen op één Account?** Wijs er één aan met
+> `X-Connection-Id: <connection_id>` — de waarde die `GET /v1/integrations` per
+> gekoppelde provider teruggeeft. Heeft het Account precies één boekhoudkoppeling —
 > het normale geval — dan is die header niet nodig. Zijn het er meer en laat je 'm
-> weg, dan antwoordt de Hub `409 multiple_accounting_connections` met de
-> beschikbare providers in `providers`; hij kiest bewust niet zelf. Een
-> `X-Provider` die het Account niet gekoppeld heeft geeft `404`.
+> weg, dan antwoordt de Hub `409 multiple_accounting_connections` met de keuze in
+> `connections` (`connection_id`, `provider`, `administration`); hij kiest bewust
+> niet zelf. Een `connection_id` dat dit Account niet heeft geeft `404`.
+>
+> Je kiest dus een **koppeling**, geen pakket. De Unified API vraagt nergens om een
+> providernaam: dat is precies de belofte dat je code hetzelfde blijft als de
+> eindgebruiker morgen op een ander boekhoudpakket zit.
 
 | Doel | Request | Ability |
 |---|---|---|
 | Capabilities opvragen | `GET /v1/accounting/capabilities` | `accounting:read` |
-| Geboekte documenten lezen | `GET /v1/accounting/documents` | `accounting:read` |
+| Geboekte documenten lezen | `GET /v1/accounting/documents?type=…` | `accounting:read` |
 | Bank-/kasafschriften lezen | `GET /v1/accounting/bank-statements` | `accounting:read` |
 | Grootboek lezen | `GET /v1/accounting/ledger-accounts` | `accounting:read` |
 | Btw-codes lezen | `GET /v1/accounting/tax-codes` | `accounting:read` |
@@ -472,9 +477,10 @@ waarmee je kunt controleren of je alle regels hebt, en per regel de tegenpartij,
 bedrag, de datum en de grootboekrekening.
 
 **Geboekte documenten teruglezen** gaat via `GET /v1/accounting/documents` — hetzelfde
-pad als waar je op POST, want het is hetzelfde begrip. Filter met
-`?type=sales_invoice` of `?type=purchase_invoice`; zonder filter krijg je
-verkoopboekingen.
+pad als waar je op POST, want het is hetzelfde begrip. `?type=` is **verplicht**:
+`sales_invoice`, `purchase_invoice`, `credit_note`, `income` of `expense`. Boekhoud-
+pakketten bewaren verkoop en inkoop in gescheiden collecties met een eigen cursor, dus
+"alles in één lijst" bestaat daar niet. Wil je beide, doe dan twee calls.
 
 ```json
 {
@@ -816,8 +822,11 @@ koppelde:
   `X-Account-Id`), niet een Hub-intern nummer.
 - **`occurred_at`** — wanneer de Hub het event uitstuurde. De meeste partners
   leveren geen eigen tijdstempel; doen alsof van wel zou liegen over de bron.
-- **`data`** — de payload van de partner, ongewijzigd. Handig om te debuggen;
-  bouw er geen routering op, want die vorm verschilt per provider.
+- **`data`** — bij een event dat van de partner komt: diens payload, ongewijzigd.
+  Handig om te debuggen; bouw er geen routering op, want die vorm verschilt per
+  provider. Bij de twee events die de Hub zélf publiceert —
+  `accounting.document.synced` en `connection.revoked` — is `data` wél van de Hub
+  en dus provider-onafhankelijk; die velden staan hieronder per event.
 
 Huidige `event`-waarden:
 

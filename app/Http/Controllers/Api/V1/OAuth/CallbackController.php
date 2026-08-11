@@ -39,7 +39,7 @@ class CallbackController extends Controller
         $this->registry->for(Provider::Mollie->value)->exchangeCode($connection, $validated['code']);
 
         return response()->json([
-            'connection_id' => (string) $connection->id,
+            'connection_id' => (string) $connection->public_id,
             'status' => 'active',
             'return_url' => $connection->oauth_return_url,
         ]);

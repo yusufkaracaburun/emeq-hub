@@ -173,7 +173,7 @@ class MappingApiTest extends TestCase
         $account = $consumer->accounts()->create(['external_id' => 'school1', 'display_name' => 'School 1']);
         Connection::factory()->forSnelstart()->for($account)->create();
 
-        $token = $consumer->createToken('t', [TokenAbilities::SNELSTART_WRITE])->plainTextToken;
+        $token = $consumer->createToken('t', [TokenAbilities::ACCOUNTING_WRITE])->plainTextToken;
 
         $this->withHeader('Authorization', "Bearer {$token}")
             ->withHeader('X-Account-Id', 'school1')

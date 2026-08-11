@@ -39,16 +39,16 @@ class DocumentsController extends Controller
 
     public function store(StoreDocumentRequest $request): JsonResponse
     {
-        [$account, $connection] = $this->resolveAccountingConnection($request, $this->registry->providers());
-
-        $provider = $connection->provider->value;
-
-        if (! $this->tokenCanWrite($request, $provider)) {
+        if (! $this->tokenCanWrite($request)) {
             return response()->json([
                 'error' => 'insufficient_ability',
                 'message' => "Token mist vereiste ability '".TokenAbilities::ACCOUNTING_WRITE."'.",
             ], 403);
         }
+
+        [$account, $connection] = $this->resolveAccountingConnection($request, $this->registry->providers());
+
+        $provider = $connection->provider->value;
 
         $document = FinancialDocument::fromArray($request->validated());
 
@@ -97,7 +97,7 @@ class DocumentsController extends Controller
         return str_contains(strtolower((string) $request->header('Prefer', '')), 'respond-async');
     }
 
-    private function tokenCanWrite(StoreDocumentRequest $request, string $provider): bool
+    private function tokenCanWrite(StoreDocumentRequest $request): bool
     {
         $token = $request->user()?->currentAccessToken();
 
@@ -105,7 +105,7 @@ class DocumentsController extends Controller
             return false;
         }
 
-        foreach (TokenAbilities::accounting($provider, write: true) as $ability) {
+        foreach (TokenAbilities::accounting(write: true) as $ability) {
             if ($token->can($ability)) {
                 return true;
             }

@@ -12,7 +12,8 @@ Multi-tenant integration-platform: één Laravel-Hub die OAuth-koppelingen, webh
 |------|-----------|
 | **Consumer** | Eén SaaS-app van Emeq óf een betalende derde. Authentiseert met een Sanctum-PAT. Bezit `accounts`. |
 | **Account** | Eindgebruiker bij een Consumer (klant van die SaaS-app). Uniek op `(consumer_id, external_id)`. Bezit `connections`. |
-| **Connection** | Eén koppeling tussen één Account en één Provider. OAuth2 (Mollie: access/refresh-token + scopes) óf clientkey (Snelstart: client_key + subscription_key/id). Tokens encrypted at rest. |
+| **Connection** | Eén koppeling tussen één Account en één Provider. OAuth2 (Mollie: access/refresh-token + scopes) óf clientkey (Snelstart: client_key + subscription_key/id). Tokens encrypted at rest. Naar buiten heet een koppeling `public_id` (`con_…`); de primary key is intern en komt nooit in een API-antwoord. |
+| **X-Connection-Id** | Kiest de koppeling op `/v1/accounting/*` wanneer een Account er meer dan één heeft; bij precies één is de header overbodig. Bewust géén providernaam: de Unified API vraagt nergens welk pakket eronder hangt. Bij meerdere en geen header → `409` met de keuze in `connections`. |
 | **Provider** | De **identiteit** van een partner: een case van `App\Enums\Provider`, de key in `config/hub-providers.php`, de waarde in `connections.provider`. |
 | **Integration** | De **code** die een Provider implementeert: `app/Integrations/<Provider>/`. Provider is wie, Integration is hoe. Een map onder `app/Integrations` heet zoals een Provider-case óf is gedeeld — en gedeelde code noemt geen provider. |
 | **PassThroughCall** | Immutable audit-rij per Consumer→Hub→Partner-pass-through. Eén rij per request; endpoint-template als `path`, nooit query-string/concrete-id. Geschreven op precies één plek: `PassThroughRecorder`. |

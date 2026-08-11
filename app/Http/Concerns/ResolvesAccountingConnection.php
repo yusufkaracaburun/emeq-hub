@@ -16,9 +16,18 @@ use Illuminate\Http\Request;
  * write, lezen = read). Faalpaden gooien de exacte JSON-respons als
  * HttpResponseException.
  *
- * Heeft een Account meer dan één boekhoudkoppeling, dan moet de consumer kiezen met
- * `X-Provider`. Zolang er precies één is blijft die header optioneel — impliciet
- * werken is het normale geval en hoeft niet duurder te worden.
+ * Heeft een Account meer dan één boekhoudkoppeling, dan wijst de consumer er één aan
+ * met `X-Connection-Id` — de publieke sleutel uit `GET /v1/integrations`. Zolang er
+ * precies één is blijft die header optioneel: impliciet werken is het normale geval
+ * en hoeft niet duurder te worden.
+ *
+ * Bewust géén provider-header. De Unified API belooft dat een consumer niet hoeft te
+ * weten welk boekhoudpakket eronder hangt; een `X-Provider` zou die belofte breken en
+ * kan bovendien twee koppelingen bij dezelfde provider niet uit elkaar houden.
+ *
+ * De keten blijft strikt: de kandidaten komen uit `$account->connections()`, en dat
+ * Account is al op de Consumer van de Bearer-token gescopet. Een id van een andere
+ * Consumer matcht dus niets.
  */
 trait ResolvesAccountingConnection
 {
@@ -63,37 +72,53 @@ trait ResolvesAccountingConnection
      */
     private function pickConnection(Request $request, array $candidates): Connection
     {
-        $requested = $request->header('X-Provider');
-        $available = array_map(static fn (Connection $c): string => $c->provider->value, $candidates);
+        $requested = $request->header('X-Connection-Id');
 
         if (is_string($requested) && $requested !== '') {
             foreach ($candidates as $candidate) {
-                if ($candidate->provider->value === $requested) {
+                if ($candidate->public_id === $requested) {
                     return $candidate;
                 }
             }
 
             $this->failAccounting(
-                'no_accounting_connection',
-                "Geen actieve '{$requested}'-koppeling voor dit Account. Beschikbaar: ".implode(', ', $available).'.',
+                'connection_not_found',
+                'Geen actieve boekhoudkoppeling met dit connection_id voor dit Account.',
                 404,
-                ['providers' => $available],
+                ['connections' => $this->describe($candidates)],
             );
         }
 
         if (count($candidates) > 1) {
-            // Zonder deze afslag koos `->first()` op rij-volgorde welk boekhoudpakket
+            // Zonder deze afslag koos `->first()` op rij-volgorde welke administratie
             // de boeking kreeg. Dat is niet zichtbaar voor de consumer en niet stabiel
             // tussen requests, dus liever weigeren dan gokken.
             $this->failAccounting(
                 'multiple_accounting_connections',
-                'Dit Account heeft meerdere boekhoudkoppelingen. Kies er één met de header X-Provider. Beschikbaar: '.implode(', ', $available).'.',
+                'Dit Account heeft meerdere boekhoudkoppelingen. Wijs er één aan met de header X-Connection-Id.',
                 409,
-                ['providers' => $available],
+                ['connections' => $this->describe($candidates)],
             );
         }
 
         return $candidates[0];
+    }
+
+    /**
+     * Genoeg om de consumer een keuze te laten tonen: de sleutel om mee te sturen,
+     * plus waar die koppeling naartoe wijst. De provider staat er als label bij, niet
+     * als selector — kiezen gebeurt op `connection_id`.
+     *
+     * @param  list<Connection>  $candidates
+     * @return list<array{connection_id: string, provider: string, administration: ?string}>
+     */
+    private function describe(array $candidates): array
+    {
+        return array_map(static fn (Connection $c): array => [
+            'connection_id' => (string) $c->public_id,
+            'provider' => $c->provider->value,
+            'administration' => $c->administratie_id,
+        ], $candidates);
     }
 
     /**

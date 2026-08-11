@@ -79,7 +79,7 @@ class ExactInitTest extends TestCase
             ->postJson('/v1/oauth/exact/init', ['account_external_id' => 'school1'])
             ->assertOk()->json('connection_id');
 
-        $this->assertSame((string) $active->id, $reused);
+        $this->assertSame((string) $active->public_id, $reused);
         $this->assertSame(1, Connection::where('account_id', $account->id)->where('provider', 'exact')->count());
 
         $fresh = $active->fresh();
@@ -108,7 +108,7 @@ class ExactInitTest extends TestCase
         // Reconnect herbruikt dezelfde row en wist de revoke-markering, anders
         // blijft de connection na reconnect 'active' mét revoked_at en faalt een
         // volgende DELETE op de revoked-guard (404).
-        $this->assertSame((string) $revoked->id, $reused);
+        $this->assertSame((string) $revoked->public_id, $reused);
         $fresh = $revoked->fresh();
         $this->assertNull($fresh->revoked_at);
         $this->assertSame('pending', $fresh->status);

@@ -54,7 +54,9 @@ class ProviderConnectStatus
                         $connection->status === 'pending' => 'pending',
                         default => 'disconnected',
                     },
-                    'connection_id' => $live ? (string) $connection->id : null,
+                    // De publieke sleutel, niet de primary key: dit is precies de waarde
+                    // die als `X-Connection-Id` terugkomt op de accounting-endpoints.
+                    'connection_id' => $live ? (string) $connection->public_id : null,
                 ];
             })
             ->values()
@@ -74,7 +76,7 @@ class ProviderConnectStatus
         }
 
         return $account->connections()
-            ->get(['id', 'provider', 'status', 'revoked_at'])
+            ->get(['id', 'public_id', 'provider', 'status', 'revoked_at'])
             ->keyBy(fn (Connection $connection): string => $connection->provider->value);
     }
 }

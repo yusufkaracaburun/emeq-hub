@@ -40,7 +40,7 @@ class ForwardConnectionRevokedToConsumerJobTest extends TestCase
                 // heet overal `account_id`, de eventspecifieke velden staan in `data`.
                 && $job->payload['account_id'] === $account->external_id
                 && is_string($job->payload['occurred_at'])
-                && $job->payload['data']['connection_id'] === $connection->id
+                && $job->payload['data']['connection_id'] === $connection->public_id
                 && $job->payload['data']['source'] === 'exact_app_center'
                 && $job->payload['data']['revoked_at'] !== null
                 && ($job->headers['X-Emeq-Event-Id'] ?? null) === 'evt-revoked-1';
