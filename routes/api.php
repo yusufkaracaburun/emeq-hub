@@ -138,7 +138,10 @@ Route::middleware('auth:sanctum')->group(function (): void {
     Route::get('/accounting/capabilities', [AccountingMappingController::class, 'capabilities'])
         ->name('api.accounting.capabilities');
 
-    // Provider-onafhankelijk lezen. Grootboek en btw uit de mirror, relaties live.
+    // Provider-onafhankelijk lezen. Grootboek en btw uit de mirror, documenten en
+    // relaties live.
+    Route::get('/accounting/documents', [AccountingReadController::class, 'documents'])
+        ->name('api.accounting.documents.index');
     // Cursor-paginatie: `?limit=&cursor=`, cursor ondoorzichtig.
     Route::get('/accounting/ledger-accounts', [AccountingReadController::class, 'ledgerAccounts'])
         ->name('api.accounting.ledger-accounts');

@@ -13,8 +13,11 @@ use App\Models\Connection;
 use App\Models\ConnectionAccountingRef;
 use App\Models\Consumer;
 use App\Sanctum\TokenAbilities;
+use Emeq\ExactApi\Http\Request\Read\GetPurchaseEntries;
 use Emeq\ExactApi\Http\Request\Read\GetRelations;
+use Emeq\ExactApi\Http\Request\Read\GetSalesEntries;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Testing\TestResponse;
 use Saloon\Http\Faking\MockClient;
 use Saloon\Http\Faking\MockResponse;
@@ -272,6 +275,145 @@ class ReadResourcesTest extends TestCase
             ->assertStatus(422)
             ->assertJsonPath('error', 'unsupported_capability')
             ->assertJsonPath('category', 'UNSUPPORTED_CAPABILITY');
+    }
+
+    /**
+     * De leeskant van POST /v1/accounting/documents — zelfde pad, zelfde begrip.
+     */
+    public function test_documents_are_read_back_from_the_resource_they_were_written_to(): void
+    {
+        MockClient::global([
+            GetSalesEntries::class => MockResponse::make(['d' => ['results' => [[
+                'EntryID' => 'entry-1',
+                'EntryNumber' => 60001,
+                'Customer' => 'cust-guid',
+                'EntryDate' => '2026-06-16T00:00:00',
+                'DueDate' => '2026-07-16T00:00:00',
+                'Journal' => '70',
+                'Description' => '2026-001',
+                'YourRef' => 'Emeq · INV-2026-001',
+                'Currency' => 'EUR',
+                'SalesEntryLines' => ['results' => [
+                    ['Description' => 'Consultancy', 'AmountFC' => 200.0, 'VATCode' => '4', 'GLAccount' => 'gl-guid'],
+                    ['Description' => 'Reiskosten', 'AmountFC' => 50.0, 'VATCode' => '2', 'GLAccount' => 'gl-guid'],
+                ]],
+            ]]]], 200),
+        ]);
+        [$consumer, $connection] = $this->connected();
+
+        // Relatienaam komt uit de mirror, niet uit een tweede partner-call.
+        ConnectionAccountingRef::query()->create([
+            'connection_id' => $connection->getKey(),
+            'kind' => ConnectionAccountingRef::KIND_RELATION,
+            'code' => 'INV-CUST',
+            'native_id' => 'cust-guid',
+            'label' => 'Acme BV',
+        ]);
+
+        $this->fetch($consumer, 'documents')
+            ->assertOk()
+            ->assertJsonPath('data.0.id', 'entry-1')
+            ->assertJsonPath('data.0.type', 'sales_invoice')
+            ->assertJsonPath('data.0.number', '60001')
+            // YourRef draagt de provenance; hieruit komt de sleutel van de consumer terug.
+            ->assertJsonPath('data.0.external_id', 'INV-2026-001')
+            ->assertJsonPath('data.0.issue_date', '2026-06-16')
+            ->assertJsonPath('data.0.due_date', '2026-07-16')
+            ->assertJsonPath('data.0.party.id', 'cust-guid')
+            ->assertJsonPath('data.0.party.name', 'Acme BV')
+            // Totaal uit de regels, niet uit een header-veld van de partner.
+            ->assertJsonPath('data.0.net_total', 250)
+            ->assertJsonCount(2, 'data.0.lines')
+            ->assertJsonPath('data.0.lines.0.tax_code', '4');
+    }
+
+    /**
+     * Een document dat buiten de Hub om is ingevoerd heeft geen provenance en dus
+     * geen external_id — null is dan het eerlijke antwoord.
+     */
+    public function test_a_document_without_provenance_has_no_external_id(): void
+    {
+        MockClient::global([
+            GetSalesEntries::class => MockResponse::make(['d' => ['results' => [[
+                'EntryID' => 'entry-2',
+                'YourRef' => 'handmatig ingevoerd',
+                'SalesEntryLines' => ['results' => []],
+            ]]]], 200),
+        ]);
+        [$consumer] = $this->connected();
+
+        $this->fetch($consumer, 'documents')
+            ->assertOk()
+            ->assertJsonPath('data.0.external_id', null)
+            ->assertJsonPath('data.0.net_total', 0);
+    }
+
+    public function test_the_purchase_filter_reads_the_purchase_resource(): void
+    {
+        MockClient::global([
+            GetPurchaseEntries::class => MockResponse::make(['d' => ['results' => [[
+                'EntryID' => 'pentry-1',
+                'Supplier' => 'supp-guid',
+                'PurchaseEntryLines' => ['results' => [['AmountFC' => 100.0]]],
+            ]]]], 200),
+        ]);
+        [$consumer] = $this->connected();
+
+        $this->fetch($consumer, 'documents', ['type' => 'purchase_invoice'])
+            ->assertOk()
+            ->assertJsonPath('data.0.type', 'purchase_invoice')
+            ->assertJsonPath('data.0.party.id', 'supp-guid');
+
+        MockClient::global()->assertSent(GetPurchaseEntries::class);
+    }
+
+    public function test_an_unknown_document_type_is_rejected(): void
+    {
+        [$consumer] = $this->connected();
+
+        $this->fetch($consumer, 'documents', ['type' => 'onzin'])
+            ->assertStatus(400)
+            ->assertJsonPath('error', 'invalid_query');
+    }
+
+    /**
+     * Eén query voor alle relatienamen op de pagina; per document opzoeken zou een
+     * N+1 zijn tegen de mirror.
+     */
+    public function test_relation_names_are_resolved_in_a_single_query(): void
+    {
+        MockClient::global([
+            GetSalesEntries::class => MockResponse::make(['d' => ['results' => [
+                ['EntryID' => 'e1', 'Customer' => 'c1', 'SalesEntryLines' => ['results' => []]],
+                ['EntryID' => 'e2', 'Customer' => 'c2', 'SalesEntryLines' => ['results' => []]],
+                ['EntryID' => 'e3', 'Customer' => 'c1', 'SalesEntryLines' => ['results' => []]],
+            ]]], 200),
+        ]);
+        [$consumer, $connection] = $this->connected();
+
+        foreach (['c1' => 'Klant een', 'c2' => 'Klant twee'] as $guid => $name) {
+            ConnectionAccountingRef::query()->create([
+                'connection_id' => $connection->getKey(),
+                'kind' => ConnectionAccountingRef::KIND_RELATION,
+                'code' => $guid,
+                'native_id' => $guid,
+                'label' => $name,
+            ]);
+        }
+
+        $queries = 0;
+        DB::listen(function ($q) use (&$queries): void {
+            if (str_contains($q->sql, 'connection_accounting_refs')) {
+                $queries++;
+            }
+        });
+
+        $this->fetch($consumer, 'documents')
+            ->assertOk()
+            ->assertJsonPath('data.0.party.name', 'Klant een')
+            ->assertJsonPath('data.2.party.name', 'Klant een');
+
+        $this->assertSame(1, $queries, 'Relatienamen horen in één query opgehaald te worden.');
     }
 
     public function test_reading_requires_a_read_ability(): void

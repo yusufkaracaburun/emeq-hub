@@ -60,8 +60,8 @@ Enums: `DocumentType` (`sales_invoice`, `purchase_invoice`, `income`, `expense`,
 `credit_note`), `TaxTreatment` (`standard`, `reverse_charge`), `SyncStatus`.
 
 **Leeszijde**: `LedgerAccount`, `TaxCode`, `Relation` (debiteur én crediteur — één
-type met een `role`, want beide partners kennen één relatie-entiteit met rolvlaggen).
-`Invoice` 🚧.
+type met een `role`, want beide partners kennen één relatie-entiteit met rolvlaggen),
+en `PostedDocument` + `PostedDocumentLine`.
 
 Elk read-type draagt een `id` dat **ondoorzichtig** is: gebruik 'm om terug te
 verwijzen, lees er geen betekenis in. Vandaag is het de partner-identiteit; dat is
@@ -130,8 +130,32 @@ code (keyset op de unieke index), voor een live lijst het `$skiptoken` uit Exact
 Bewust géén `total`: Exact levert dat niet zonder tweede call, en een veld dat bij de
 ene provider klopt en bij de andere ontbreekt is erger dan geen veld.
 
-🚧 `GET /v1/accounting/invoices` volgt: de SDK-reads (`GetSalesEntries`,
-`GetPurchaseEntries`) staan er sinds v0.3.0, de canonieke `Invoice` nog niet.
+`GET /v1/accounting/documents` is de leeskant van de POST op datzelfde pad — één
+begrip, één resource, `?type=` als filter. Geen `/invoices` plus `/bills`: verkoop en
+inkoop zijn hetzelfde soort ding met een andere richting, en twee paden zouden twee
+canonieke concepten suggereren waar er één is.
+
+Het leest terug uit precies de resources waar `push()` naartoe schrijft
+(`salesentry/SalesEntries`, `purchaseentry/PurchaseEntries`), dus wat je stuurde krijg
+je terug. Twee keuzes daarbij:
+
+- **Alleen bewezen velden worden opgevraagd** — die uit de write-body plus
+  `EntryID`/`EntryNumber`, die de SDK al uit de create-respons leest. Geen gegokte
+  Exact-veldnamen.
+- **Het totaal komt uit de regels, niet uit een header-veld.** Zo'n veld betekent per
+  pakket iets anders (met of zonder btw, in valuta of in administratie-valuta) en dat
+  verschil hoort niet in een canoniek antwoord.
+
+`PostedDocument` is bewust een ander type dan `FinancialDocument`: dat is wat je
+stuurt, dit is wat er ligt. Een geboekt document heeft een partner-identiteit en een
+boekstuknummer, en mist de bijlagen en de vrije `category`-hint die alleen bij het
+schrijven bestaan. Eén type voor allebei zou op elk veld een slag om de arm nodig
+hebben.
+
+`external_id` wordt teruggelezen uit de provenance die de Hub bij het boeken in
+`YourRef` meeschreef. Documenten die buiten de Hub om zijn ingevoerd hebben er geen —
+dan is `null` het eerlijke antwoord. Relatienamen komen uit de mirror in één query per
+pagina, want Exact levert bij een boeking alleen de relatie-GUID.
 
 ## Capabilities
 

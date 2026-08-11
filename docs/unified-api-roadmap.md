@@ -3,7 +3,7 @@
 > Niets staat onder **IMPLEMENTED** zonder werkende code én tests. Bij twijfel gaat
 > het naar NEXT. Architectuur staat in `unified-api-architecture.md`.
 
-Laatste update: 2026-08-11 · suite: 1244 passed, 1 incomplete, 0 failures.
+Laatste update: 2026-08-11 · suite: 1249 passed, 1 incomplete, 0 failures.
 Startbaseline vóór dit traject: 1120 passed · PHPStan-baseline 206 → 125.
 
 ---
@@ -130,6 +130,19 @@ Canonieke types `LedgerAccount`, `TaxCode`, `Relation`.
 → `tests/Feature/Api/V1/Accounting/ReadResourcesTest.php`,
 `tests/Unit/Accounting/Read/CursorTest.php`
 
+### Canoniek lezen van geboekte documenten
+`GET /v1/accounting/documents?type=` — de leeskant van de POST op datzelfde pad, met
+`PostedDocument` + `PostedDocumentLine`. Leest uit de resources waar de Hub naartoe
+schrijft, dus je krijgt terug wat je stuurde; `external_id` komt uit de provenance in
+`YourRef` (null voor documenten die buiten de Hub om zijn ingevoerd). Alleen bewezen
+Exact-velden worden opgevraagd, en het totaal wordt uit de regels berekend in plaats
+van uit een header-veld waarvan de betekenis per pakket verschilt. Relatienamen uit de
+mirror in één query per pagina — met een test die dat vastlegt.
+Vereist `emeq/exact-api` v0.3.0 (`Envelope::nextSkipToken`, `GetSalesEntries`,
+`GetPurchaseEntries`).
+→ `ReadResourcesTest::test_documents_are_read_back_from_the_resource_they_were_written_to`
+en vier andere
+
 ### Statische analyse
 PHPStan/Larastan level 5 op `app/`, `database/factories/` en `routes/`, met een
 baseline van 125 bestaande hits. Nieuwe code moet schoon zijn; bestaande schuld
@@ -142,23 +155,16 @@ blokkeert de build niet. Draait in CI naast Pint, tests en `composer audit`.
 
 Gepland en ontworpen; volgorde is bindend vanwege harde afhankelijkheden.
 
-### 1. `GET /v1/accounting/invoices`
-De SDK-kant staat er: `GetSalesEntries`/`GetPurchaseEntries` +
-`Envelope::nextSkipToken()` in `emeq/exact-api` v0.3.0. Wat nog moet: een canonieke
-`Invoice` met regels, een `ReadsInvoices`-contract, en de Exact→canoniek-mapping.
-Bewust `salesentry/SalesEntries` en niet de item-based factuurmodule — dat is waar de
-Hub naartoe schrijft, dus dat is wat je terugleest.
+### 1. Transformation-pipeline
+Nu er twee richtingen zijn (schrijven én lezen) valt er iets te generaliseren dat niet
+alleen Exact's vorm is. Succescriterium: de Exact-adapter wordt kleiner, en geen enkele
+stage is Exact-only zonder als hook gemarkeerd te zijn.
 
 ---
 
 ## LATER
 
 Ontworpen, nog niet ingepland op een datum.
-
-### Transformation-pipeline
-Gefaseerde canoniek→provider-transformatie met provider-hooks voor echte semantische
-verschillen. Bewust ná het lees-pad: met alleen het schrijf-pad generaliseer je op
-één richting en één provider.
 
 ### Event-normalisatie
 Canonieke event-envelope (`accounting.*`, `payment.*`), provider-event-adapters die

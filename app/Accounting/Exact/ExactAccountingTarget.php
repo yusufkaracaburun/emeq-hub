@@ -8,6 +8,7 @@ use App\Accounting\AccountingResult;
 use App\Accounting\Attachment;
 use App\Accounting\Contracts\AccountingTarget;
 use App\Accounting\Contracts\EnrichesValidation;
+use App\Accounting\Contracts\ReadsDocuments;
 use App\Accounting\Contracts\ReadsLedgerAccounts;
 use App\Accounting\Contracts\ReadsRelations;
 use App\Accounting\Contracts\ReadsTaxCodes;
@@ -20,6 +21,8 @@ use App\Accounting\FinancialDocument;
 use App\Accounting\FinancialDocumentLine;
 use App\Accounting\LedgerAccount;
 use App\Accounting\MirrorReader;
+use App\Accounting\PostedDocument;
+use App\Accounting\PostedDocumentLine;
 use App\Accounting\Read\Cursor;
 use App\Accounting\Read\ReadPage;
 use App\Accounting\Read\ReadQuery;
@@ -28,15 +31,19 @@ use App\Accounting\TaxCode;
 use App\Accounting\Validation\Enrichment\ExactReportEnricher;
 use App\Accounting\Validation\Finding;
 use App\Models\Connection;
+use App\Models\ConnectionAccountingRef;
 use App\Services\Exact\ConnectionTokenStore;
 use App\Services\Exact\ExactReferenceData;
 use App\Services\Exact\HubExactCredentialResolver;
+use Carbon\CarbonImmutable;
 use Emeq\ExactApi\Contracts\ExactCredentialResolver;
 use Emeq\ExactApi\Contracts\TokenStore;
 use Emeq\ExactApi\Enums\ExactDocumentType;
 use Emeq\ExactApi\Exact;
 use Emeq\ExactApi\Http\ExactConnector;
+use Emeq\ExactApi\Http\Request\Read\GetPurchaseEntries;
 use Emeq\ExactApi\Http\Request\Read\GetRelations;
+use Emeq\ExactApi\Http\Request\Read\GetSalesEntries;
 use Emeq\ExactApi\Http\Request\Write\CreateDocument;
 use Emeq\ExactApi\Http\Request\Write\CreateDocumentAttachment;
 use Emeq\ExactApi\Http\Request\Write\CreatePurchaseEntry;
@@ -55,7 +62,7 @@ use Throwable;
  * De Exact-wire (endpoints, veldnamen, AmountFC/AmountDC, response-envelope) leeft in
  * de SDK; deze adapter levert alleen geresolvede waarden in een neutrale regel-vorm.
  */
-final class ExactAccountingTarget implements AccountingTarget, EnrichesValidation, ReadsLedgerAccounts, ReadsRelations, ReadsTaxCodes, SyncsReferenceData, UploadsAttachments
+final class ExactAccountingTarget implements AccountingTarget, EnrichesValidation, ReadsDocuments, ReadsLedgerAccounts, ReadsRelations, ReadsTaxCodes, SyncsReferenceData, UploadsAttachments
 {
     public function __construct(
         private readonly ReferenceResolver $references,
@@ -126,6 +133,151 @@ final class ExactAccountingTarget implements AccountingTarget, EnrichesValidatio
             ),
             nextCursor: $token === null ? null : Cursor::of($token),
         );
+    }
+
+    /**
+     * Capability `accounting.documents.read`. Leest terug uit dezelfde resources waar
+     * `push()` naartoe schrijft, dus wat je stuurde krijg je terug.
+     *
+     * Alleen velden die aantoonbaar bestaan worden opgevraagd: die uit de write-body
+     * plus `EntryID`/`EntryNumber` (die leest de SDK al uit de create-respons). Een
+     * header-totaal wordt niet opgehaald maar uit de regels berekend — per pakket
+     * betekent zo'n veld iets anders (met of zonder btw, in valuta of administratie-
+     * valuta) en dat verschil hoort niet in een canoniek antwoord.
+     *
+     * @return ReadPage<PostedDocument>
+     */
+    public function readDocuments(Connection $connection, ReadQuery $query, ?DocumentType $type = null): ReadPage
+    {
+        $purchase = $type !== null && in_array($type, [DocumentType::PurchaseInvoice, DocumentType::Expense], true);
+
+        $collection = $purchase ? 'PurchaseEntryLines' : 'SalesEntryLines';
+        $partyField = $purchase ? 'Supplier' : 'Customer';
+
+        $params = [
+            '$select' => "EntryID,EntryNumber,{$partyField},EntryDate,DueDate,Journal,Description,YourRef,Currency",
+            '$expand' => $collection,
+            '$top' => $query->limit,
+        ];
+
+        if ($query->cursor !== null) {
+            $params['$skiptoken'] = $query->cursor->value;
+        }
+
+        $request = $purchase ? new GetPurchaseEntries($params) : new GetSalesEntries($params);
+        $response = $this->connector($connection)->send($request);
+
+        if ($response->failed()) {
+            $response->throw();
+        }
+
+        $json = (array) $response->json();
+        $rows = Envelope::results($json);
+        $token = Envelope::nextSkipToken($json);
+
+        return new ReadPage(
+            items: $this->toPostedDocuments($rows, $connection, $purchase, $collection, $partyField),
+            nextCursor: $token === null ? null : Cursor::of($token),
+        );
+    }
+
+    /**
+     * @param  list<array<string, mixed>>  $rows
+     * @return list<PostedDocument>
+     */
+    private function toPostedDocuments(array $rows, Connection $connection, bool $purchase, string $collection, string $partyField): array
+    {
+        $names = $this->relationNames($connection, array_values(array_filter(array_map(
+            static fn (array $row): ?string => self::nullableString($row[$partyField] ?? null),
+            $rows,
+        ))));
+
+        return array_map(function (array $row) use ($names, $purchase, $collection, $partyField): PostedDocument {
+            $partyId = self::nullableString($row[$partyField] ?? null);
+
+            return new PostedDocument(
+                id: (string) ($row['EntryID'] ?? ''),
+                type: $purchase ? DocumentType::PurchaseInvoice : DocumentType::SalesInvoice,
+                lines: self::toPostedLines($row[$collection] ?? null),
+                number: self::nullableString($row['EntryNumber'] ?? null),
+                externalId: self::externalIdFromProvenance(self::nullableString($row['YourRef'] ?? null)),
+                issueDate: self::toDate($row['EntryDate'] ?? null),
+                dueDate: self::toDate($row['DueDate'] ?? null),
+                reference: self::nullableString($row['Description'] ?? null),
+                partyId: $partyId,
+                partyName: $partyId === null ? null : ($names[$partyId] ?? null),
+                journal: self::nullableString($row['Journal'] ?? null),
+                currency: self::nullableString($row['Currency'] ?? null) ?? 'EUR',
+            );
+        }, $rows);
+    }
+
+    /**
+     * Relatienamen uit de mirror in één query — Exact levert bij de boekingsregels
+     * alleen de relatie-GUID, en per document een lookup doen zou een N+1 zijn.
+     *
+     * @param  list<string>  $ids
+     * @return array<string, string>
+     */
+    private function relationNames(Connection $connection, array $ids): array
+    {
+        if ($ids === []) {
+            return [];
+        }
+
+        return ConnectionAccountingRef::query()
+            ->where('connection_id', $connection->getKey())
+            ->where('kind', ConnectionAccountingRef::KIND_RELATION)
+            ->whereIn('native_id', array_unique($ids))
+            ->pluck('label', 'native_id')
+            ->filter()
+            ->all();
+    }
+
+    /**
+     * @return list<PostedDocumentLine>
+     */
+    private static function toPostedLines(mixed $raw): array
+    {
+        $rows = Envelope::results(is_array($raw) ? ['d' => $raw] : null);
+
+        return array_map(static fn (array $line): PostedDocumentLine => new PostedDocumentLine(
+            amount: (float) ($line['AmountFC'] ?? 0),
+            description: self::nullableString($line['Description'] ?? null),
+            taxCode: self::nullableString($line['VATCode'] ?? null),
+            ledgerAccountId: self::nullableString($line['GLAccount'] ?? null),
+            costCenter: self::nullableString($line['CostCenter'] ?? null),
+            costUnit: self::nullableString($line['CostUnit'] ?? null),
+        ), $rows);
+    }
+
+    /**
+     * `YourRef` draagt "{consumer} · {external_id}" (zie {@see self::provenance()}).
+     * Alleen het deel ná de scheider is van de consumer; ontbreekt die, dan is het
+     * document buiten de Hub om ingevoerd en hebben we geen external_id.
+     */
+    private static function externalIdFromProvenance(?string $yourRef): ?string
+    {
+        if ($yourRef === null || ! str_contains($yourRef, ' · ')) {
+            return null;
+        }
+
+        return self::nullableString(mb_substr($yourRef, mb_strpos($yourRef, ' · ') + 3));
+    }
+
+    private static function toDate(mixed $value): ?CarbonImmutable
+    {
+        $value = self::nullableString($value);
+
+        if ($value === null) {
+            return null;
+        }
+
+        try {
+            return CarbonImmutable::parse($value);
+        } catch (Throwable) {
+            return null;
+        }
     }
 
     /**

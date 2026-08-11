@@ -5,11 +5,14 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api\V1\Accounting;
 
 use App\Accounting\AccountingTargetRegistry;
+use App\Accounting\Contracts\ReadsDocuments;
 use App\Accounting\Contracts\ReadsLedgerAccounts;
 use App\Accounting\Contracts\ReadsRelations;
 use App\Accounting\Contracts\ReadsTaxCodes;
 use App\Accounting\Enums\Capability;
+use App\Accounting\Enums\DocumentType;
 use App\Accounting\LedgerAccount;
+use App\Accounting\PostedDocument;
 use App\Accounting\Read\ReadQuery;
 use App\Accounting\Relation;
 use App\Accounting\TaxCode;
@@ -42,6 +45,36 @@ class ReadController extends Controller
     use ResolvesAccountingConnection;
 
     public function __construct(private readonly AccountingTargetRegistry $registry) {}
+
+    /**
+     * Geboekte documenten uit de gekoppelde administratie.
+     *
+     * De leeskant van `POST /v1/accounting/documents` — zelfde pad, zelfde canonieke
+     * begrip. Filter met `?type=sales_invoice|purchase_invoice`; zonder filter komen
+     * verkoopboekingen terug, want dat is wat de meeste consumers zoeken.
+     */
+    public function documents(Request $request): JsonResponse
+    {
+        $type = $request->query('type');
+
+        if (is_string($type) && DocumentType::tryFrom($type) === null) {
+            return response()->json([
+                'error' => 'invalid_query',
+                'message' => "Onbekend type '{$type}'. Geldig: ".implode(', ', DocumentType::values()).'.',
+            ], 400);
+        }
+
+        $documentType = is_string($type) ? DocumentType::from($type) : null;
+
+        return $this->read(
+            $request,
+            Capability::ReadDocuments,
+            fn (object $target, ReadQuery $query, $connection) => $target instanceof ReadsDocuments
+                ? $target->readDocuments($connection, $query, $documentType)
+                : null,
+            static fn (PostedDocument $item): array => $item->toArray(),
+        );
+    }
 
     /**
      * Grootboekrekeningen van de gekoppelde administratie.

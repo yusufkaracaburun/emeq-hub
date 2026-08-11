@@ -6,6 +6,7 @@ namespace App\Accounting\Enums;
 
 use App\Accounting\Contracts\AccountingTarget;
 use App\Accounting\Contracts\EnrichesValidation;
+use App\Accounting\Contracts\ReadsDocuments;
 use App\Accounting\Contracts\ReadsLedgerAccounts;
 use App\Accounting\Contracts\ReadsRelations;
 use App\Accounting\Contracts\ReadsTaxCodes;
@@ -35,6 +36,9 @@ enum Capability: string
     /** Provider-specifieke findings toevoegen aan een dry-run. */
     case EnrichValidation = 'accounting.validation.enrich';
 
+    /** Geboekte documenten uitlezen. */
+    case ReadDocuments = 'accounting.documents.read';
+
     /** Grootboekrekeningen uitlezen. */
     case ReadLedgerAccounts = 'accounting.ledger_accounts.read';
 
@@ -56,6 +60,7 @@ enum Capability: string
             self::UploadAttachments => UploadsAttachments::class,
             self::SyncReferenceData => SyncsReferenceData::class,
             self::EnrichValidation => EnrichesValidation::class,
+            self::ReadDocuments => ReadsDocuments::class,
             self::ReadLedgerAccounts => ReadsLedgerAccounts::class,
             self::ReadTaxCodes => ReadsTaxCodes::class,
             self::ReadRelations => ReadsRelations::class,

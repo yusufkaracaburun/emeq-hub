@@ -267,6 +267,7 @@ een header, niet de query-param `account_external_id` van de connect-laag):
 | Doel | Request | Ability |
 |---|---|---|
 | Capabilities opvragen | `GET /v1/accounting/capabilities` | `exact:read` |
+| Geboekte documenten lezen | `GET /v1/accounting/documents` | `exact:read` |
 | Grootboek lezen | `GET /v1/accounting/ledger-accounts` | `exact:read` |
 | Btw-codes lezen | `GET /v1/accounting/tax-codes` | `exact:read` |
 | Klanten lezen | `GET /v1/accounting/customers` | `exact:read` |
@@ -331,6 +332,38 @@ X-Account-Id: bob
 - **`limit`** is 1–200, standaard 50.
 - Bij `customers`/`suppliers` draagt elke rij `roles` (`debtor` en/of `creditor`); een
   relatie kan allebei zijn. `/customers` en `/suppliers` filteren op één rol.
+
+**Geboekte documenten teruglezen** gaat via `GET /v1/accounting/documents` — hetzelfde
+pad als waar je op POST, want het is hetzelfde begrip. Filter met
+`?type=sales_invoice` of `?type=purchase_invoice`; zonder filter krijg je
+verkoopboekingen.
+
+```json
+{
+  "data": [{
+    "id": "entry-guid", "type": "sales_invoice", "number": "60001",
+    "external_id": "INV-2026-001",
+    "issue_date": "2026-06-16", "due_date": "2026-07-16",
+    "party": { "id": "cust-guid", "name": "Acme BV" },
+    "journal": "70", "currency": "EUR", "net_total": 250.0,
+    "lines": [{ "description": "Consultancy", "amount": 200.0,
+                "tax_code": "4", "ledger_account_id": "gl-guid",
+                "cost_center": null, "cost_unit": null }]
+  }],
+  "next_cursor": null, "has_more": false
+}
+```
+
+- **`external_id`** is jóuw sleutel, teruggelezen uit de herkomst die de Hub bij het
+  boeken meeschreef. Documenten die buiten de Hub om in het pakket zijn ingevoerd
+  hebben er geen: dan is het `null`. Daarmee kun je jouw administratie afstemmen tegen
+  die van het pakket.
+- **`net_total`** telt de regels op. Bewust niet het totaalveld van het pakket: dat
+  betekent per pakket iets anders (met of zonder btw, in valuta of in
+  administratie-valuta).
+- **`party.name`** komt uit de Hub-spiegel. Is de relatie daar nog niet bekend, dan is
+  hij `null` terwijl `party.id` wél gevuld is — draai `POST /v1/accounting/sync` of
+  zoek 'm op via `/v1/accounting/customers`.
 
 `ledger-accounts` en `tax-codes` komen uit de Hub-spiegel van jouw administratie —
 snel en zonder je boekhoudpakket te belasten. Ververs die met
