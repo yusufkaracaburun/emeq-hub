@@ -23,6 +23,7 @@ providers verschijnen vanzelf; je past je code niet aan per provider.
 - [Stap 5 — Loskoppelen](#stap-5--loskoppelen)
 - [Boekhouden — documenten valideren & boeken](#boekhouden--documenten-valideren--boeken)
   - [Boekhoud-mapping (zelf-service, optioneel)](#boekhoud-mapping-zelf-service-optioneel)
+- [Webhooks ontvangen](#webhooks-ontvangen)
 - [Valkuilen](#valkuilen)
 
 ## Concepten
@@ -676,6 +677,54 @@ auto_create_relations }` — stuur alleen de gewijzigde velden. Optioneel een kn
 "hersynchroniseren" → `POST /v1/accounting/sync`. Default hoeft de tenant niets in te
 stellen; de Hub auto-derivet bij connect.
 ```
+
+## Webhooks ontvangen
+
+Gebeurt er iets bij de gekoppelde partner, dan POST de Hub naar je
+`webhook_callback_url`, HMAC-gesigneerd met je `webhook_callback_secret`.
+
+**Elke** webhook heeft dezelfde vorm, ongeacht welk pakket je eindgebruiker
+koppelde:
+
+```json
+{
+  "event": "accounting.bank_statement.changed",
+  "provider": "exact",
+  "account_id": "school1",
+  "occurred_at": "2026-08-11T14:22:03+00:00",
+  "data": { "…": "de ruwe payload van de partner" }
+}
+```
+
+- **`event`** — canonieke naam uit het Hub-vocabulaire. Route hierop, niet op
+  `provider` en niet op iets uit `data`.
+- **`account_id`** — hetzelfde id dat jij bij het koppelen aanleverde (je
+  `X-Account-Id`), niet een Hub-intern nummer.
+- **`occurred_at`** — wanneer de Hub het event uitstuurde. De meeste partners
+  leveren geen eigen tijdstempel; doen alsof van wel zou liegen over de bron.
+- **`data`** — de payload van de partner, ongewijzigd. Handig om te debuggen;
+  bouw er geen routering op, want die vorm verschilt per provider.
+
+Huidige `event`-waarden:
+
+| Event | Betekenis |
+|---|---|
+| `accounting.bank_statement.changed` | bankmutatie gewijzigd |
+| `accounting.cash_statement.changed` | kasmutatie gewijzigd |
+| `accounting.relation.changed` | debiteur/crediteur gewijzigd |
+| `accounting.sales_invoice.changed` | verkoopfactuur gewijzigd |
+| `accounting.document.synced` | de Hub heeft jouw document weggeschreven |
+| `billing.payment.changed` | betaling gewijzigd |
+| `billing.subscription.changed` | abonnement gewijzigd |
+| `unmapped` | de partner stuurde iets waar de Hub nog geen naam voor heeft — negeer, of kijk in `data` |
+
+Behandel een onbekende `event`-waarde als `unmapped`: de lijst groeit additief en
+een nieuwe naam mag jouw handler niet laten crashen.
+
+> **Wijziging.** Tot nu toe stuurde de Hub de ruwe partner-payload als body. Die
+> staat nu onder `data`. Migreren is dus `body` → `body.data`, en daarna kun je op
+> `body.event` gaan routeren in plaats van op provider-specifieke velden als
+> Exact's `Topic`.
 
 ## Valkuilen
 

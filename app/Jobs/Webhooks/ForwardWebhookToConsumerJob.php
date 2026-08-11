@@ -6,6 +6,7 @@ namespace App\Jobs\Webhooks;
 
 use App\Enums\Provider;
 use App\Models\Connection;
+use App\Webhooks\CanonicalEventRegistry;
 use App\Webhooks\ConsumerWebhookHeaders;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -58,9 +59,10 @@ final class ForwardWebhookToConsumerJob implements ShouldQueue
         }
     }
 
-    public function handle(): void
+    public function handle(CanonicalEventRegistry $events): void
     {
-        $consumer = $this->providerConnection->account?->consumer;
+        $account = $this->providerConnection->account;
+        $consumer = $account?->consumer;
 
         if ($consumer === null || ! $consumer->webhook_callback_url) {
             Log::info('webhook.fanout_skipped', [
@@ -78,7 +80,17 @@ final class ForwardWebhookToConsumerJob implements ShouldQueue
 
         WebhookCall::create()
             ->url($consumer->webhook_callback_url)
-            ->payload($this->payload)
+            ->payload([
+                'event' => $events->eventFor($this->provider, $this->payload),
+                'provider' => $this->provider->value,
+                // Het id dat de consumer zelf aanleverde bij het koppelen — die kent
+                // z'n eigen `X-Account-Id`, niet onze primary key.
+                'account_id' => $account->external_id,
+                // Wanneer de Hub het event uitstuurde. De partner levert zelden een
+                // eigen tijdstempel; doen alsof van wel zou liegen over de bron.
+                'occurred_at' => now()->toIso8601String(),
+                'data' => $this->payload,
+            ])
             ->useSecret((string) $consumer->webhook_callback_secret)
             ->withHeaders(ConsumerWebhookHeaders::make($this->eventId))
             ->dispatch();

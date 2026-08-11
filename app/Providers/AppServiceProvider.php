@@ -18,6 +18,10 @@ use App\Support\Errors\UpstreamErrorMapperRegistry;
 use App\Support\Exact\UpstreamErrorMapper as ExactUpstreamErrorMapper;
 use App\Support\Mollie\UpstreamErrorMapper as MollieUpstreamErrorMapper;
 use App\Support\Snelstart\UpstreamErrorMapper as SnelstartUpstreamErrorMapper;
+use App\Webhooks\CanonicalEventRegistry;
+use App\Webhooks\Exact\ExactEventResolver;
+use App\Webhooks\Mollie\MollieEventResolver;
+use App\Webhooks\Snelstart\SnelstartEventResolver;
 use Dedoc\Scramble\Scramble;
 use Dedoc\Scramble\Support\Generator\OpenApi;
 use Dedoc\Scramble\Support\Generator\SecurityScheme;
@@ -53,6 +57,17 @@ class AppServiceProvider extends ServiceProvider
             $registry->register(Provider::Exact->value, ExactUpstreamErrorMapper::class);
             $registry->register(Provider::Mollie->value, MollieUpstreamErrorMapper::class);
             $registry->register(Provider::Snelstart->value, SnelstartUpstreamErrorMapper::class);
+
+            return $registry;
+        });
+
+        // Partner-payload → canonieke event-naam. De consumer krijgt één envelope
+        // met één vocabulaire, ongeacht welk pakket z'n eindgebruiker koppelde.
+        $this->app->singleton(CanonicalEventRegistry::class, function (): CanonicalEventRegistry {
+            $registry = new CanonicalEventRegistry;
+            $registry->register(Provider::Exact, ExactEventResolver::class);
+            $registry->register(Provider::Mollie, MollieEventResolver::class);
+            $registry->register(Provider::Snelstart, SnelstartEventResolver::class);
 
             return $registry;
         });

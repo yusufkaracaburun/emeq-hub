@@ -9,6 +9,8 @@ use App\Jobs\Webhooks\ForwardWebhookToConsumerJob;
 use App\Models\Account;
 use App\Models\Connection;
 use App\Models\Consumer;
+use App\Webhooks\CanonicalEvent;
+use App\Webhooks\CanonicalEventRegistry;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Log;
@@ -60,7 +62,7 @@ class ForwardWebhookToConsumerJobTest extends TestCase
             $connection,
             ['administratieId' => $connection->administratie_id],
             'evt-no-callback',
-        ))->handle();
+        ))->handle(app(CanonicalEventRegistry::class));
 
         Bus::assertNotDispatched(CallWebhookJob::class);
     }
@@ -78,14 +80,17 @@ class ForwardWebhookToConsumerJobTest extends TestCase
 
         $payload = ['administratieId' => $connection->administratie_id, 'type' => 'Verkoopfactuur.Created'];
 
-        (new ForwardWebhookToConsumerJob(Provider::Snelstart, $connection, $payload, 'evt-with-secret'))->handle();
+        (new ForwardWebhookToConsumerJob(Provider::Snelstart, $connection, $payload, 'evt-with-secret'))->handle(app(CanonicalEventRegistry::class));
 
         Bus::assertDispatched(CallWebhookJob::class, function (CallWebhookJob $job) use ($payload): bool {
             $signatureHeader = config('webhook-server.signature_header_name', 'Signature');
-            $expectedSignature = hash_hmac('sha256', json_encode($payload), 'consumer-secret-abc');
+            // De HMAC gaat over wat er daadwerkelijk de deur uit gaat: de envelope.
+            $expectedSignature = hash_hmac('sha256', json_encode($job->payload), 'consumer-secret-abc');
 
             return $job->webhookUrl === 'https://consumer.test/snelstart'
-                && $job->payload === $payload
+                && $job->payload['event'] === CanonicalEvent::SALES_INVOICE_CHANGED
+                && $job->payload['provider'] === 'snelstart'
+                && $job->payload['data'] === $payload
                 && ($job->headers[$signatureHeader] ?? null) === $expectedSignature;
         });
     }
@@ -103,7 +108,7 @@ class ForwardWebhookToConsumerJobTest extends TestCase
             $connection,
             ['administratieId' => $connection->administratie_id],
             'evt-001',
-        ))->handle();
+        ))->handle(app(CanonicalEventRegistry::class));
 
         Bus::assertDispatched(CallWebhookJob::class, function (CallWebhookJob $job): bool {
             return ($job->headers['X-Emeq-Event-Id'] ?? null) === 'evt-001';
@@ -123,7 +128,7 @@ class ForwardWebhookToConsumerJobTest extends TestCase
             $connection,
             ['administratieId' => $connection->administratie_id],
             'evt-retry-policy',
-        ))->handle();
+        ))->handle(app(CanonicalEventRegistry::class));
 
         Bus::assertDispatched(CallWebhookJob::class, function (CallWebhookJob $job): bool {
             return $job->tries === 5
@@ -147,14 +152,14 @@ class ForwardWebhookToConsumerJobTest extends TestCase
 
         $payload = ['administratieId' => $connection->administratie_id];
 
-        (new ForwardWebhookToConsumerJob(Provider::Snelstart, $connection, $payload, 'evt-anti-corr'))->handle();
+        (new ForwardWebhookToConsumerJob(Provider::Snelstart, $connection, $payload, 'evt-anti-corr'))->handle(app(CanonicalEventRegistry::class));
 
-        Bus::assertDispatched(CallWebhookJob::class, function (CallWebhookJob $job) use ($payload): bool {
+        Bus::assertDispatched(CallWebhookJob::class, function (CallWebhookJob $job): bool {
             $signatureHeader = config('webhook-server.signature_header_name', 'Signature');
             $signature = $job->headers[$signatureHeader] ?? null;
 
-            $expectedConsumer = hash_hmac('sha256', json_encode($payload), 'consumer-only');
-            $unexpectedPartner = hash_hmac('sha256', json_encode($payload), 'partner-only');
+            $expectedConsumer = hash_hmac('sha256', json_encode($job->payload), 'consumer-only');
+            $unexpectedPartner = hash_hmac('sha256', json_encode($job->payload), 'partner-only');
 
             return $signature === $expectedConsumer && $signature !== $unexpectedPartner;
         });

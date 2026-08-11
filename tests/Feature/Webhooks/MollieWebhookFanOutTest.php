@@ -7,6 +7,8 @@ use App\Jobs\Webhooks\ForwardWebhookToConsumerJob;
 use App\Models\Account;
 use App\Models\Connection;
 use App\Models\Consumer;
+use App\Webhooks\CanonicalEvent;
+use App\Webhooks\CanonicalEventRegistry;
 use Emeq\MollieApi\Mollie;
 use Emeq\MollieApi\Webhooks\MollieWebhookSignature;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -72,13 +74,14 @@ class MollieWebhookFanOutTest extends TestCase
         $connection = Connection::factory()->forMollie()->active()->for($account)->create();
 
         $job = new ForwardWebhookToConsumerJob(Provider::Mollie, $connection, ['id' => 'tr_handle_1']);
-        $job->handle();
+        $job->handle(app(CanonicalEventRegistry::class));
 
         // Spatie's webhook-server dispatcht intern een CallWebhookJob.
         Queue::assertPushed(CallWebhookJob::class, function (CallWebhookJob $pushed) {
             return $pushed->webhookUrl === 'https://consumer.test/hooks'
                 && is_array($pushed->payload)
-                && ($pushed->payload['id'] ?? null) === 'tr_handle_1';
+                && $pushed->payload['event'] === CanonicalEvent::PAYMENT_CHANGED
+                && ($pushed->payload['data']['id'] ?? null) === 'tr_handle_1';
         });
     }
 
@@ -97,7 +100,7 @@ class MollieWebhookFanOutTest extends TestCase
         $connection = Connection::factory()->forMollie()->active()->for($account)->create();
 
         $job = new ForwardWebhookToConsumerJob(Provider::Mollie, $connection, ['id' => 'tr_no_callback']);
-        $job->handle();
+        $job->handle(app(CanonicalEventRegistry::class));
 
         Queue::assertNothingPushed();
     }
