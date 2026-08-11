@@ -7,7 +7,7 @@ namespace App\Support\Exact;
 use App\Enums\Provider;
 use App\Models\Account;
 use App\Models\Connection;
-use App\Models\PassThroughCall;
+use App\Support\PassThrough\PassThroughRecorder;
 use Emeq\ExactApi\Exact;
 use Illuminate\Http\Request;
 use Saloon\Contracts\Body\HasBody;
@@ -25,7 +25,10 @@ use Throwable;
  */
 final class ExactForwarder
 {
-    public function __construct(private readonly ExactErrorBudget $errorBudget) {}
+    public function __construct(
+        private readonly ExactErrorBudget $errorBudget,
+        private readonly PassThroughRecorder $recorder,
+    ) {}
 
     public function forward(
         Request $request,
@@ -90,24 +93,20 @@ final class ExactForwarder
 
         $this->errorBudget->record($connection, $endpoint, $upstreamStatus);
 
-        PassThroughCall::create([
-            'consumer_id' => $request->user()->getKey(),
-            'account_id' => $account->getKey(),
-            'connection_id' => $connection->getKey(),
-            'provider' => Provider::Exact->value,
-            'method' => $method,
-            'path' => $endpoint,
-            'query_keys' => $query !== [] ? implode(',', array_keys($query)) : null,
-            'status' => $status,
-            'duration_ms' => (int) round((microtime(true) - $start) * 1000),
-            'request_fingerprint' => (is_array($body) && $body !== [])
-                ? substr(hash('sha256', json_encode($body, JSON_THROW_ON_ERROR)), 0, 12)
-                : null,
-            'response_size_bytes' => strlen($responseBody),
-            'upstream_error' => $upstreamError,
-            'response_body' => PassThroughCall::errorBody($status, $responseBody),
-            'created_at' => now(),
-        ]);
+        $this->recorder->record(
+            provider: Provider::Exact,
+            consumerId: $request->user()->getKey(),
+            accountId: $account->getKey(),
+            connectionId: $connection->getKey(),
+            method: $method,
+            path: $endpoint,
+            status: $status,
+            responseBody: $responseBody,
+            startedAt: $start,
+            query: $query,
+            body: $body,
+            upstreamError: $upstreamError,
+        );
 
         return response($responseBody, $status)->withHeaders(array_merge(
             ['Content-Type' => $contentType],
@@ -136,22 +135,18 @@ final class ExactForwarder
             'message' => 'Te veel fouten op dit Exact-endpoint; tijdelijk geblokkeerd om de gedeelde Exact-app-key te beschermen.',
         ], JSON_THROW_ON_ERROR);
 
-        PassThroughCall::create([
-            'consumer_id' => $request->user()->getKey(),
-            'account_id' => $account->getKey(),
-            'connection_id' => $connection->getKey(),
-            'provider' => Provider::Exact->value,
-            'method' => $method,
-            'path' => $endpoint,
-            'query_keys' => $query !== [] ? implode(',', array_keys($query)) : null,
-            'status' => Response::HTTP_TOO_MANY_REQUESTS,
-            'duration_ms' => 0,
-            'request_fingerprint' => null,
-            'response_size_bytes' => strlen($body),
-            'upstream_error' => 'circuit_open',
-            'response_body' => $body,
-            'created_at' => now(),
-        ]);
+        $this->recorder->record(
+            provider: Provider::Exact,
+            consumerId: $request->user()->getKey(),
+            accountId: $account->getKey(),
+            connectionId: $connection->getKey(),
+            method: $method,
+            path: $endpoint,
+            status: Response::HTTP_TOO_MANY_REQUESTS,
+            responseBody: $body,
+            query: $query,
+            upstreamError: 'circuit_open',
+        );
 
         return response($body, Response::HTTP_TOO_MANY_REQUESTS)->withHeaders([
             'Content-Type' => 'application/json',

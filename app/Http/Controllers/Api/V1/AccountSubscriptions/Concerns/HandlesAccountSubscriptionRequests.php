@@ -7,8 +7,8 @@ namespace App\Http\Controllers\Api\V1\AccountSubscriptions\Concerns;
 use App\Billing\Account\Exceptions\InvalidStateTransitionException;
 use App\Enums\Provider;
 use App\Models\AccountSubscription;
-use App\Models\PassThroughCall;
 use App\Support\Mollie\UpstreamErrorMapper;
+use App\Support\PassThrough\PassThroughRecorder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -88,16 +88,15 @@ trait HandlesAccountSubscriptionRequests
             return;
         }
 
-        PassThroughCall::create([
-            'consumer_id' => (int) $request->user()?->getKey(),
-            'account_id' => $accountId,
-            'connection_id' => $connectionId,
-            'provider' => Provider::Mollie->value,
-            'method' => $request->method(),
-            'path' => $path,
-            'status' => $status,
-            'duration_ms' => 0,
-            'response_body' => PassThroughCall::errorBody($status, $responseBody),
-        ]);
+        app(PassThroughRecorder::class)->record(
+            provider: Provider::Mollie,
+            consumerId: (int) $request->user()?->getKey(),
+            accountId: $accountId,
+            connectionId: $connectionId,
+            method: $request->method(),
+            path: $path,
+            status: $status,
+            responseBody: $responseBody,
+        );
     }
 }

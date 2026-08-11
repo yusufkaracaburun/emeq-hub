@@ -7,10 +7,10 @@ namespace App\Http\Controllers\Api\V1\Mollie\Connect;
 use App\Enums\Provider;
 use App\Exceptions\Mollie\MissingPartnerTokenException;
 use App\Http\Controllers\Controller;
-use App\Models\PassThroughCall;
 use App\Mollie\MollieAccessTokenResolver;
 use App\Sanctum\TokenAbilities;
 use App\Support\Mollie\UpstreamErrorMapper;
+use App\Support\PassThrough\PassThroughRecorder;
 use Emeq\MollieApi\Exceptions\MollieExceptionMapper;
 use Illuminate\Http\Request;
 use Mollie\Api\Exceptions\ApiException as MollieApiException;
@@ -46,6 +46,7 @@ abstract class AbstractMollieConnectPassThroughController extends Controller
 
     public function __construct(
         protected readonly MollieAccessTokenResolver $tokenResolver,
+        protected readonly PassThroughRecorder $recorder,
     ) {}
 
     /**
@@ -181,29 +182,29 @@ abstract class AbstractMollieConnectPassThroughController extends Controller
         // 5. Audit-write — Connect-shape: token_type=partner, geen Account/Connection.
         $query = $request->query();
 
-        PassThroughCall::create([
+        $this->recorder->record(
+            provider: Provider::Mollie,
+            consumerId: $request->user()->getKey(),
+            // Connect-calls lopen op het partner-token, niet op een Connection van een
+            // Account — vandaar geen tenant-kolommen maar wel een token-fingerprint.
+            accountId: null,
+            connectionId: null,
+            method: $method,
+            path: $endpoint,
+            status: $status,
+            responseBody: $responseBody,
+            startedAt: $start,
+            query: $query,
+            body: $body,
+            upstreamError: $upstreamError,
             // Expliciet — matched de factory-default + voorkomt dat pre-save
             // $model->direction-reads NULL teruggeven (WR-05).
-            'direction' => 'outbound',
-            'consumer_id' => $request->user()->getKey(),
-            'account_id' => null,
-            'connection_id' => null,
-            'provider' => Provider::Mollie->value,
-            'token_type' => 'partner',
-            'method' => $method,
-            'path' => $endpoint,
-            'query_keys' => $query !== [] ? implode(',', array_keys($query)) : null,
-            'status' => $status,
-            'duration_ms' => (int) round((microtime(true) - $start) * 1000),
-            'request_fingerprint' => (is_array($body) && $body !== [])
-                ? substr(hash('sha256', json_encode($body, JSON_THROW_ON_ERROR)), 0, 12)
-                : null,
-            'partner_token_fingerprint' => $partnerFingerprint,
-            'response_size_bytes' => strlen($responseBody),
-            'upstream_error' => $upstreamError,
-            'response_body' => PassThroughCall::errorBody($status, $responseBody),
-            'created_at' => now(),
-        ]);
+            direction: 'outbound',
+            extra: [
+                'token_type' => 'partner',
+                'partner_token_fingerprint' => $partnerFingerprint,
+            ],
+        );
 
         return response($responseBody, $status)->withHeaders(array_merge(
             ['Content-Type' => 'application/json'],

@@ -10,10 +10,10 @@ use App\Accounting\Exceptions\AccountingMappingException;
 use App\Jobs\Accounting\SyncAccountingDocumentJob;
 use App\Models\Account;
 use App\Models\Connection;
-use App\Models\PassThroughCall;
 use App\Models\ProviderEntityLink;
 use App\OAuth\Exceptions\ProviderDisabledException;
 use App\Support\Errors\UpstreamErrorMapperRegistry;
+use App\Support\PassThrough\PassThroughRecorder;
 use Throwable;
 
 /**
@@ -27,6 +27,7 @@ final readonly class AccountingSyncRunner
         private AccountingTargetRegistry $registry,
         private ProviderEntityLinkRecorder $links,
         private UpstreamErrorMapperRegistry $errors,
+        private PassThroughRecorder $recorder,
     ) {}
 
     public function run(FinancialDocument $document, Connection $connection, Account $account, int $consumerId): AccountingSyncOutcome
@@ -303,23 +304,23 @@ final readonly class AccountingSyncRunner
         ?string $upstreamError,
         array $responseBody,
     ): void {
-        PassThroughCall::create([
-            'direction' => 'outbound',
-            'consumer_id' => $consumerId,
-            'account_id' => $account->getKey(),
-            'connection_id' => $connection->getKey(),
-            'provider' => $provider,
-            'method' => 'POST',
+        $this->recorder->record(
+            provider: $connection->provider,
+            consumerId: $consumerId,
+            accountId: $account->getKey(),
+            connectionId: $connection->getKey(),
+            method: 'POST',
             // Genormaliseerd endpoint-pad (leading /, conform de andere audit-paden).
             // De doc-type-suffix is verwijderd — hoort niet in `path`.
-            'path' => '/v1/accounting/documents',
-            'status' => $status,
-            'duration_ms' => (int) round((microtime(true) - $start) * 1000),
-            'request_fingerprint' => substr(hash('sha256', $document->externalId), 0, 12),
-            'response_size_bytes' => strlen((string) json_encode($responseBody)),
-            'upstream_error' => $upstreamError,
-            'response_body' => PassThroughCall::errorBody($status, (string) json_encode($responseBody)),
-            'created_at' => now(),
-        ]);
+            path: '/v1/accounting/documents',
+            status: $status,
+            responseBody: (string) json_encode($responseBody),
+            startedAt: $start,
+            upstreamError: $upstreamError,
+            direction: 'outbound',
+            // De canonieke identiteit is de fingerprint, niet de body: die is hier al
+            // gevalideerd en het externalId is wat een rij herleidbaar maakt.
+            requestFingerprint: substr(hash('sha256', $document->externalId), 0, 12),
+        );
     }
 }

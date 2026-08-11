@@ -7,8 +7,8 @@ use App\Http\Controllers\Api\V1\Concerns\GuardsPassThroughRequest;
 use App\Http\Controllers\Controller;
 use App\Models\Account;
 use App\Models\Connection;
-use App\Models\PassThroughCall;
 use App\Sanctum\TokenAbilities;
+use App\Support\PassThrough\PassThroughRecorder;
 use App\Support\Snelstart\HeaderForwarder;
 use App\Support\Snelstart\UpstreamErrorMapper;
 use Dedoc\Scramble\Attributes\Group;
@@ -23,6 +23,8 @@ use Throwable;
 class PassThroughController extends Controller
 {
     use GuardsPassThroughRequest;
+
+    public function __construct(private readonly PassThroughRecorder $recorder) {}
 
     private const ALLOWED_METHODS = ['GET', 'POST', 'PATCH', 'DELETE'];
 
@@ -100,24 +102,20 @@ class PassThroughController extends Controller
         /** @var Connection $connection */
         $connection = $request->attributes->get('snelstart_connection');
 
-        PassThroughCall::create([
-            'consumer_id' => $request->user()->getKey(),
-            'account_id' => $account->getKey(),
-            'connection_id' => $connection->getKey(),
-            'provider' => Provider::Snelstart->value,
-            'method' => $method,
-            'path' => $endpoint,
-            'query_keys' => $query !== [] ? implode(',', array_keys($query)) : null,
-            'status' => $status,
-            'duration_ms' => (int) round((microtime(true) - $start) * 1000),
-            'request_fingerprint' => (is_array($body) && $body !== [])
-                ? substr(hash('sha256', json_encode($body, JSON_THROW_ON_ERROR)), 0, 12)
-                : null,
-            'response_size_bytes' => strlen($responseBody),
-            'upstream_error' => $upstreamError,
-            'response_body' => PassThroughCall::errorBody($status, $responseBody),
-            'created_at' => now(),
-        ]);
+        $this->recorder->record(
+            provider: Provider::Snelstart,
+            consumerId: $request->user()->getKey(),
+            accountId: $account->getKey(),
+            connectionId: $connection->getKey(),
+            method: $method,
+            path: $endpoint,
+            status: $status,
+            responseBody: $responseBody,
+            startedAt: $start,
+            query: $query,
+            body: $body,
+            upstreamError: $upstreamError,
+        );
 
         return response($responseBody, $status)->withHeaders(array_merge(
             ['Content-Type' => $contentType],

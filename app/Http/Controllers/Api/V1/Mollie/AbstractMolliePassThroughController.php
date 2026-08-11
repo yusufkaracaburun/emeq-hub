@@ -6,9 +6,9 @@ use App\Enums\Provider;
 use App\Http\Controllers\Controller;
 use App\Models\Account;
 use App\Models\Connection;
-use App\Models\PassThroughCall;
 use App\Sanctum\TokenAbilities;
 use App\Support\Mollie\UpstreamErrorMapper;
+use App\Support\PassThrough\PassThroughRecorder;
 use Emeq\MollieApi\Facades\Mollie;
 use Illuminate\Http\Request;
 use Mollie\Api\MollieApiClient;
@@ -27,6 +27,8 @@ use Throwable;
  */
 abstract class AbstractMolliePassThroughController extends Controller
 {
+    public function __construct(protected readonly PassThroughRecorder $recorder) {}
+
     /**
      * Voer een Mollie-SDK-call uit binnen het pass-through-frame.
      *
@@ -101,24 +103,20 @@ abstract class AbstractMolliePassThroughController extends Controller
         $connection = $request->attributes->get('mollie_connection');
         $query = $request->query();
 
-        PassThroughCall::create([
-            'consumer_id' => $request->user()->getKey(),
-            'account_id' => $account->getKey(),
-            'connection_id' => $connection->getKey(),
-            'provider' => Provider::Mollie->value,
-            'method' => $method,
-            'path' => $endpoint,                       // CRITICAL: template, GEEN query-string
-            'query_keys' => $query !== [] ? implode(',', array_keys($query)) : null,
-            'status' => $status,
-            'duration_ms' => (int) round((microtime(true) - $start) * 1000),
-            'request_fingerprint' => (is_array($body) && $body !== [])
-                ? substr(hash('sha256', json_encode($body, JSON_THROW_ON_ERROR)), 0, 12)
-                : null,                                 // CRITICAL: NULL bij lege body
-            'response_size_bytes' => strlen($responseBody),
-            'upstream_error' => $upstreamError,
-            'response_body' => PassThroughCall::errorBody($status, $responseBody),
-            'created_at' => now(),
-        ]);
+        $this->recorder->record(
+            provider: Provider::Mollie,
+            consumerId: $request->user()->getKey(),
+            accountId: $account->getKey(),
+            connectionId: $connection->getKey(),
+            method: $method,
+            path: $endpoint,
+            status: $status,
+            responseBody: $responseBody,
+            startedAt: $start,
+            query: $query,
+            body: $body,
+            upstreamError: $upstreamError,
+        );
 
         return response($responseBody, $status)->withHeaders(array_merge(
             ['Content-Type' => 'application/json'],
