@@ -4,6 +4,10 @@ Voor ontwikkelaars die een (multi-tenant) consumer-app aan de emeq Hub koppelen.
 Eén integratie → alle huidige én toekomstige providers (Exact, Mollie, …). Nieuwe
 providers verschijnen vanzelf; je past je code niet aan per provider.
 
+Laravel-consumers: gebruik **[`emeq/hub-sdk`](https://github.com/yusufkaracaburun/emeq-hub-sdk)**
+(provider-agnostische Saloon-client). Partner-SDK’s (`emeq/exact-api`, …) blijven
+Hub-intern — niet in de consumer-app.
+
 > Altijd-actuele API-referentie: **`/docs/api`** (OpenAPI, auto-gegenereerd).
 > Deze handleiding is de narratieve laag eromheen.
 

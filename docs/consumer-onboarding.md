@@ -15,6 +15,11 @@ De endpoint-voor-endpoint-walkthrough staat **niet** hier maar in
 enige plek waar request/response-shapes leven. Dit document beschrijft de rollen,
 de volgorde en de invarianten eromheen.
 
+Laravel-apps: installeer
+[`emeq/hub-sdk`](https://github.com/yusufkaracaburun/emeq-hub-sdk) — provider-
+agnostisch; nieuwe Hub-partners vragen geen SDK-release. Partner-packages
+(`exact-api`, …) blijven Hub→partner.
+
 ---
 
 ## Rolmodel
@@ -132,7 +137,9 @@ Verifieer met de verse PAT, vanaf het domein van de Consumer, in deze volgorde:
 
 ```bash
 curl -s -X POST "$HUB/v1/accounts" \
-  -H "Authorization: Bearer $PAT" -H 'Accept: application/json' \
+  -H "Authorization: Bearer $PAT" \
+  -H 'Accept: application/json' \
+  -H 'Content-Type: application/json' \
   -d '{"external_id":"rooktest","display_name":"Rooktest"}'
 
 curl -s "$HUB/v1/integrations?account_external_id=rooktest" \
@@ -140,13 +147,16 @@ curl -s "$HUB/v1/integrations?account_external_id=rooktest" \
 ```
 
 Verwacht `201`/`409` en daarna een providerlijst. Faalt dit, dan is er geen
-enkel punt om aan de consumer-kant te gaan bouwen.
+enkel punt om aan de consumer-kant te gaan bouwen. Zonder
+`Content-Type: application/json` parseert Laravel de body niet en krijg je
+`external_id` required.
 
 ### A6. Overdracht
 
 De Consumer krijgt: base-URL, PAT, de gekozen abilities, en een verwijzing naar
 de integratiehandleiding en naar `/docs/api`. Verder niets — geen provider-
-credentials, geen Hub-interne details.
+credentials, geen Hub-interne details. Geen `/admin`-login voor derden — de
+Hub-admin blijft Emeq-intern.
 
 ---
 
@@ -165,7 +175,8 @@ Browser (eindgebruiker) → consumer-backend → Hub /v1/*
 ```
 
 CORS op de Hub laat elke https-origin toe, dus een directe browser→Hub-call
-wérkt — en lekt het token. Altijd via de eigen backend.
+wérkt — en lekt het token. Altijd via de eigen backend (of `emeq/hub-sdk`
+BFF-routes achter je eigen auth).
 
 ### B2 — Account-id hoort aan de serverkant thuis
 
@@ -248,45 +259,24 @@ Laravel 13, subdomein per tenant (`klant.voorbeeld.nl`), database per tenant.
 
 **system-kant, vier stukken:**
 
-1. **Config** — `config/services.php` krijgt `emeq.base` + `emeq.pat` uit env.
+1. **Package** — `composer require emeq/hub-sdk:^0.3` (VCS:
+   `https://github.com/yusufkaracaburun/emeq-hub-sdk.git`). Env:
+   `EMEQ_HUB_BASE`, `EMEQ_HUB_PAT`, `EMEQ_HUB_ROUTES=true`,
+   `EMEQ_HUB_ROUTES_MIDDLEWARE=api,auth:api`,
+   `EMEQ_HUB_OAUTH_RETURN_PATH=/configuration/integraties?emeq=return`.
 
-2. **Hub-client** — één service die de tenant aan het Account bindt. `accountId()`
-   komt uit de host-resolutie, niet uit de request (B2):
+2. **Account-binding** — implementeer `Emeq\HubSdk\Contracts\ResolvesAccountId`
+   (server-side tenant → Hub `external_id`, B2). In system: `config('instance.id')`
+   via `App\Integrations\Hub\HubAccountIdResolver`.
 
-   ```php
-   public function accountId(): string
-   {
-       $this->connection->toDefault();
-       $instance = $this->instances->findByDomainWithoutRelations();
-       $this->connection->toInstance($instance);
+3. **BFF-routes** — komen uit het package (`EMEQ_HUB_ROUTES`). Alleen:
+   `GET …/integrations` (optionele status) en
+   `POST …/integrations/connect-session` (mint Hub `/connect`). Geen
+   per-provider connect/destroy in de consumer.
 
-       return (string) $instance->id;
-   }
-
-   public function request(): PendingRequest
-   {
-       return Http::withToken(config('services.emeq.pat'))
-           ->acceptJson()
-           ->baseUrl(rtrim(config('services.emeq.base'), '/').'/v1')
-           ->withHeaders(['X-Account-Id' => $this->accountId()]);
-   }
-   ```
-
-3. **Routes** — binnen de bestaande `auth:api`-groep, plus de eigen rolcheck:
-   een gewone medewerker hoort de boekhoudkoppeling van zijn werkgever niet te
-   kunnen verbreken.
-
-   ```php
-   Route::get('/integrations',                     'IntegrationController@index');
-   Route::post('/integrations/{provider}/connect', 'IntegrationController@connect');
-   Route::delete('/integrations/{connection}',     'IntegrationController@disconnect');
-   ```
-
-   `return_url` bouwt de controller server-side uit de request-host — niet uit
-   de body.
-
-4. **Instellingen-scherm** — kaarten uit `GET /integrations`, data-driven (B3),
-   met de verplichte privacy-checkbox (B4) vóór de koppelknop.
+4. **Instellingen-scherm** — één CTA die `connect-session` mint en doorstuurt
+   naar Hub. Connect / disconnect / status beheer je op Hub `/connect`
+   (single source of truth). Privacy-checkbox (B4) hoort vóór die CTA.
 
 ---
 
@@ -303,8 +293,13 @@ Laravel 13, subdomein per tenant (`klant.voorbeeld.nl`), database per tenant.
 | Tenant ziet andermans boekhouding | Account-id kwam uit een client-parameter (B2) |
 | Nieuwe provider verschijnt niet in de UI | Providerlijst hardcoded i.p.v. data-driven (B3) |
 
+Pennant (`feature.provider:{provider}`) is een **globale** kill-switch in Hub
+`/admin` / config — geen per-tenant toggle in de consumer-UI.
+
 ## Zie ook
 
+- [`emeq/hub-sdk`](https://github.com/yusufkaracaburun/emeq-hub-sdk) — Laravel
+  consumer SDK (BFF `connect-session`, `Hub::integrations()`, accounting)
 - [`consumer-integration-guide.md`](consumer-integration-guide.md) — endpoints,
   payloads, foutenvelope, agent-prompts
 - `/docs/api` — OpenAPI-referentie, auto-gegenereerd

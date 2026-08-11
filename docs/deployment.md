@@ -221,8 +221,31 @@ Smoke-test op de server: `curl -fsS http://127.0.0.1:8090/up` →
 `{"status":"up","database":"ok","redis":"ok"}`, en `https://hub.emeq.nl/up` via
 Cloudflare.
 
-Daarna: admin-user aanmaken, inloggen op `/admin`, Exact-credentials invullen onder
-Beheer → Integratie-instellingen, en de Exact-tenant koppelen.
+Daarna: admin-user aanmaken (zie [Bootstrap van de admin-user](#bootstrap-van-de-admin-user)),
+inloggen op `/admin`, Exact-credentials invullen onder Beheer → Integratie-instellingen,
+en de Exact-tenant koppelen.
+
+### Bootstrap van de admin-user
+
+`php artisan db:seed` doet op productie **niets**: `DatabaseSeeder::run()` begint met
+`if (app()->isProduction()) return;`. De enige weg naar een eerste user is
+`EmeqStaffSeeder`, en die leest twee env-variabelen — ontbreken ze, dan stopt hij stil.
+
+```bash
+# in .env.prod, vóór het seeden
+EMEQ_STAFF_SEED_EMAIL=…
+EMEQ_STAFF_SEED_PASSWORD=…
+```
+
+```bash
+docker compose -f docker-compose.prod.yml --env-file .env.prod exec -T app \
+  php artisan db:seed --class=EmeqStaffSeeder --force
+```
+
+Levert één user met rol `super-admin`, plus de rolrijen `super-admin`/`staff`/`boekhouder`
+en hun permissies. De seeder is bootstrap-only: bestaat de user al, dan gooit hij een
+`RuntimeException` in plaats van het wachtwoord te overschrijven. Wachtwoord kwijt →
+resetten via `tinker`, niet via de seeder.
 
 ## Release (terugkerend)
 
