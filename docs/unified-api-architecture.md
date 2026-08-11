@@ -33,7 +33,7 @@ De scheiding die het systeem overeind houdt:
 | Unified API | `App\Http\Controllers\Api\V1\Accounting\*` | HTTP-contract. Kent géén providernaam |
 | Capability-registry | `App\Accounting\AccountingTargetRegistry` | Wat kan deze provider? |
 | Provider-adapter | `App\Accounting\Exact\ExactAccountingTarget` | Canoniek ⇄ partner-payload |
-| Mapping / transformatie | `App\Accounting\Pipeline\*` 🚧 | Herhaalbare mechaniek; semantiek blijft in de adapter |
+| Mapping / transformatie | in de adapter — zie hieronder | Canoniek → partner-payload |
 | Referentie-resolutie | `App\Accounting\Contracts\ReferenceResolver` | Canonieke sleutel → provider-identiteit |
 | Sync-state | `provider_entity_links` | Canonieke entity ⇄ provider-entity |
 | Event-normalisatie | `App\Webhooks\*` 🚧 | Partner-webhook → canoniek event |
@@ -156,6 +156,37 @@ hebben.
 `YourRef` meeschreef. Documenten die buiten de Hub om zijn ingevoerd hebben er geen —
 dan is `null` het eerlijke antwoord. Relatienamen komen uit de mirror in één query per
 pagina, want Exact levert bij een boeking alleen de relatie-GUID.
+
+## Waarom er geen transformation-pipeline is
+
+Het oorspronkelijke plan had een gefaseerde pipeline (validatie → normalisatie →
+monetair → datum → reference-resolutie → provider-hook). Die is er niet gekomen, en
+dat is een meting en geen vergetelheid.
+
+De volledige canoniek→Exact-transformatie is 48 regels: `buildRequest()`, `lines()` en
+`provenance()`. Uitgesplitst:
+
+| Onderdeel | Regels | Deelbaar met een tweede provider? |
+|---|---|---|
+| `match ($type)` → SDK-request-klasse | 24 | Nee — dit ís de providerkeuze |
+| Regelmapping via `ReferenceResolver` | 13 | Zit al achter een seam; een stage voegt alleen indirectie toe |
+| Datumformaat | 2 | Een configwaarde, geen stage |
+| `description = number ?? externalId` | 1 | Ja |
+| Provenance-stempel | 5 | Concept wel, `YourRef` + de limiet van 50 niet |
+
+Netto zo'n negen deelbare regels, waarvan zes one-liners. Een pipeline zou die negen
+regels in stages verpakken en daarbovenop een hook-mechanisme nodig hebben voor alles
+wat wél provider-specifiek is — dus voor het merendeel. De adapter wordt daar groter
+van, niet kleiner.
+
+Het criterium was: de adapter moet krimpen en geen stage mag provider-only zijn zonder
+als hook gemarkeerd te staan. Dat haalt hij niet. De seam die er wél toe doet bestaat
+al — `ReferenceResolver` — en die vangt precies het deel op dat per provider verschilt
+zonder de rest te abstraheren.
+
+Heroverwegen zodra Moneybird er is. Dán is er een tweede datapunt en blijkt vanzelf
+wat werkelijk gedeeld is; nu zou elke stage-grens een gok zijn met Exact als enige
+voorbeeld.
 
 ## Capabilities
 

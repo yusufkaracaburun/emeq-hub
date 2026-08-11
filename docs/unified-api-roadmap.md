@@ -155,26 +155,21 @@ blokkeert de build niet. Draait in CI naast Pint, tests en `composer audit`.
 
 Gepland en ontworpen; volgorde is bindend vanwege harde afhankelijkheden.
 
-### 1. Transformation-pipeline
-Nu er twee richtingen zijn (schrijven én lezen) valt er iets te generaliseren dat niet
-alleen Exact's vorm is. Succescriterium: de Exact-adapter wordt kleiner, en geen enkele
-stage is Exact-only zonder als hook gemarkeerd te zijn.
+### 1. Event-normalisatie
+Canonieke event-envelope (`accounting.*`, `payment.*`), provider-event-adapters die zo
+nodig de volle resource ophalen, atomaire dedupe en loop-detectie.
+**Breaking** voor bestaande consumers — vereist coördinatie met emeq-app.
+
+### 2. Bidirectionele sync-state
+`provider_entity_links` uitgebreid met versies en staleness-detectie; read-back-probe
+die het herboek-venster dicht dat overblijft wanneer de partner commit maar de respons
+ons niet bereikt.
 
 ---
 
 ## LATER
 
 Ontworpen, nog niet ingepland op een datum.
-
-### Event-normalisatie
-Canonieke event-envelope (`accounting.*`, `payment.*`), provider-event-adapters die
-zo nodig de volle resource ophalen, atomaire dedupe en loop-detectie.
-**Breaking** voor bestaande consumers — vereist coördinatie met emeq-app.
-
-### Bidirectionele sync-state
-`provider_entity_links` uitgebreid met versies en staleness-detectie; read-back-probe
-die het herboek-venster dicht dat overblijft wanneer de partner commit maar de
-respons ons niet bereikt.
 
 ### Provider #2 — Moneybird
 Adapter + `ReferenceResolver` + registratie. De SDK-repo `emeq/moneybird-api` bestaat
@@ -202,3 +197,4 @@ stub-implementatie.
 | Polling-adapters | Geen provider die het nu nodig heeft |
 | Gedistribueerde consistentie / vector clocks | Last-writer-wins met stale-check dekt de werkelijke behoefte |
 | Exactly-once-garantie | De partner garandeert het niet; we modelleren wat we echt leveren |
+| Transformation-pipeline | Gemeten: 9 van de 48 transformatie-regels zijn deelbaar, de rest ís de providerkeuze. De adapter zou er groter van worden. Heroverwegen bij Moneybird — zie `unified-api-architecture.md` |
