@@ -6,12 +6,8 @@ namespace Tests\Feature\Api\V1\Accounting;
 
 use App\Accounting\AccountingResult;
 use App\Accounting\Contracts\AccountingTarget;
-use App\Accounting\Contracts\ReferenceResolver;
-use App\Accounting\Enums\DocumentType;
-use App\Accounting\Enums\TaxTreatment;
 use App\Accounting\Exact\ExactAccountingTarget;
 use App\Accounting\FinancialDocument;
-use App\Accounting\Party;
 use App\Http\Middleware\EnsureIdempotency;
 use App\Models\Connection;
 use App\Models\Consumer;
@@ -24,6 +20,7 @@ use Illuminate\Support\Str;
 use Illuminate\Testing\TestResponse;
 use Saloon\Http\Faking\MockClient;
 use Saloon\Http\Faking\MockResponse;
+use Tests\Concerns\BindsFakeAccountingReferences;
 use Tests\TestCase;
 
 /**
@@ -33,6 +30,7 @@ use Tests\TestCase;
  */
 class IdempotencyTest extends TestCase
 {
+    use BindsFakeAccountingReferences;
     use RefreshDatabase;
 
     protected function setUp(): void
@@ -53,42 +51,6 @@ class IdempotencyTest extends TestCase
         MockClient::destroyGlobal();
 
         parent::tearDown();
-    }
-
-    private function bindFakeReferences(): void
-    {
-        $this->app->bind(ReferenceResolver::class, fn (): ReferenceResolver => new class implements ReferenceResolver
-        {
-            public function relationRef(Party $party, Connection $connection): string
-            {
-                return 'cust-guid';
-            }
-
-            public function vatCode(float $taxRate, TaxTreatment $treatment, Connection $connection): string
-            {
-                return '4';
-            }
-
-            public function glAccountRef(?string $category, Connection $connection): ?string
-            {
-                return 'gl-guid';
-            }
-
-            public function journal(DocumentType $type, Connection $connection): string
-            {
-                return '90';
-            }
-
-            public function costCenter(?string $code, Connection $connection): ?string
-            {
-                return $code;
-            }
-
-            public function costUnit(?string $code, Connection $connection): ?string
-            {
-                return $code;
-            }
-        });
     }
 
     private function consumerWithExactConnection(): Consumer

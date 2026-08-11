@@ -110,34 +110,18 @@ final class ExactAccountingTarget implements AccountingTarget, EnrichesValidatio
      */
     public function readRelations(Connection $connection, ReadQuery $query, ?string $role = null): ReadPage
     {
-        $params = [
-            '$select' => 'ID,Code,Name,VATNumber,Email,IsSales,IsSupplier',
-            '$top' => $query->limit,
-        ];
+        $params = ['$select' => 'ID,Code,Name,VATNumber,Email,IsSales,IsSupplier'];
 
         if ($role !== null) {
             $params['$filter'] = $role === Relation::ROLE_CREDITOR ? 'IsSupplier eq true' : 'IsSales eq true';
         }
 
-        if ($query->cursor !== null) {
-            $params['$skiptoken'] = $query->cursor->value;
-        }
-
-        $response = $this->connector($connection)->send(new GetRelations($params));
-
-        if ($response->failed()) {
-            $response->throw();
-        }
-
-        $json = (array) $response->json();
-        $token = Envelope::nextSkipToken($json);
-
-        return new ReadPage(
-            items: array_map(
-                static fn (array $row): Relation => self::toRelation($row),
-                Envelope::results($json),
-            ),
-            nextCursor: $token === null ? null : Cursor::of($token),
+        return $this->readPage(
+            $connection,
+            $query,
+            $params,
+            static fn (array $p): SdkRequest => new GetRelations($p),
+            static fn (array $rows): array => array_map(self::toRelation(...), $rows),
         );
     }
 
@@ -160,30 +144,15 @@ final class ExactAccountingTarget implements AccountingTarget, EnrichesValidatio
         $collection = $purchase ? 'PurchaseEntryLines' : 'SalesEntryLines';
         $partyField = $purchase ? 'Supplier' : 'Customer';
 
-        $params = [
-            '$select' => "EntryID,EntryNumber,{$partyField},EntryDate,DueDate,Journal,Description,YourRef,Currency",
-            '$expand' => $collection,
-            '$top' => $query->limit,
-        ];
-
-        if ($query->cursor !== null) {
-            $params['$skiptoken'] = $query->cursor->value;
-        }
-
-        $request = $purchase ? new GetPurchaseEntries($params) : new GetSalesEntries($params);
-        $response = $this->connector($connection)->send($request);
-
-        if ($response->failed()) {
-            $response->throw();
-        }
-
-        $json = (array) $response->json();
-        $rows = Envelope::results($json);
-        $token = Envelope::nextSkipToken($json);
-
-        return new ReadPage(
-            items: $this->toPostedDocuments($rows, $connection, $purchase, $collection, $partyField),
-            nextCursor: $token === null ? null : Cursor::of($token),
+        return $this->readPage(
+            $connection,
+            $query,
+            [
+                '$select' => "EntryID,EntryNumber,{$partyField},EntryDate,DueDate,Journal,Description,YourRef,Currency",
+                '$expand' => $collection,
+            ],
+            static fn (array $p): SdkRequest => $purchase ? new GetPurchaseEntries($p) : new GetSalesEntries($p),
+            fn (array $rows): array => $this->toPostedDocuments($rows, $connection, $purchase, $collection, $partyField),
         );
     }
 
@@ -243,32 +212,18 @@ final class ExactAccountingTarget implements AccountingTarget, EnrichesValidatio
         $cash = $kind === BankStatement::KIND_CASH;
         $collection = $cash ? 'CashEntryLines' : 'BankEntryLines';
 
-        $params = [
-            '$select' => 'EntryID,EntryNumber,JournalCode,FinancialYear,FinancialPeriod,Currency,OpeningBalanceFC,ClosingBalanceFC',
-            '$expand' => $collection,
-            '$top' => $query->limit,
-        ];
-
-        if ($query->cursor !== null) {
-            $params['$skiptoken'] = $query->cursor->value;
-        }
-
-        $request = $cash ? new GetCashEntries($params) : new GetBankEntries($params);
-        $response = $this->connector($connection)->send($request);
-
-        if ($response->failed()) {
-            $response->throw();
-        }
-
-        $json = (array) $response->json();
-        $token = Envelope::nextSkipToken($json);
-
-        return new ReadPage(
-            items: array_map(
+        return $this->readPage(
+            $connection,
+            $query,
+            [
+                '$select' => 'EntryID,EntryNumber,JournalCode,FinancialYear,FinancialPeriod,Currency,OpeningBalanceFC,ClosingBalanceFC',
+                '$expand' => $collection,
+            ],
+            static fn (array $p): SdkRequest => $cash ? new GetCashEntries($p) : new GetBankEntries($p),
+            static fn (array $rows): array => array_map(
                 static fn (array $row): BankStatement => self::toBankStatement($row, $kind, $collection),
-                Envelope::results($json),
+                $rows,
             ),
-            nextCursor: $token === null ? null : Cursor::of($token),
         );
     }
 
@@ -463,6 +418,48 @@ final class ExactAccountingTarget implements AccountingTarget, EnrichesValidatio
         app()->forgetInstance(Exact::class);
 
         return $division;
+    }
+
+    /**
+     * De gedeelde vorm van elke gepagineerde OData-lees: cursor erin, versturen, falen
+     * omhoog laten gaan, envelope pellen, `__next` naar een cursor, pagina terug.
+     *
+     * Eén plek, zodat het paginatie-contract voor alle lees-endpoints gelijk ís in
+     * plaats van dat het per methode toevallig hetzelfde geschreven is.
+     *
+     * @template T
+     *
+     * @param  array<string, scalar|null>  $params
+     * @param  callable(array<string, scalar|null>): SdkRequest  $makeRequest
+     * @param  callable(list<array<string, mixed>>): list<T>  $mapRows
+     * @return ReadPage<T>
+     */
+    private function readPage(
+        Connection $connection,
+        ReadQuery $query,
+        array $params,
+        callable $makeRequest,
+        callable $mapRows,
+    ): ReadPage {
+        $params['$top'] = $query->limit;
+
+        if ($query->cursor !== null) {
+            $params['$skiptoken'] = $query->cursor->value;
+        }
+
+        $response = $this->connector($connection)->send($makeRequest($params));
+
+        if ($response->failed()) {
+            $response->throw();
+        }
+
+        $json = (array) $response->json();
+        $token = Envelope::nextSkipToken($json);
+
+        return new ReadPage(
+            items: $mapRows(Envelope::results($json)),
+            nextCursor: $token === null ? null : Cursor::of($token),
+        );
     }
 
     private function connector(Connection $connection): ExactConnector

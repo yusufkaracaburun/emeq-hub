@@ -2,10 +2,7 @@
 
 namespace Tests\Feature\Api\V1\Accounting;
 
-use App\Accounting\Contracts\ReferenceResolver;
 use App\Accounting\Enums\DocumentType;
-use App\Accounting\Enums\TaxTreatment;
-use App\Accounting\Party;
 use App\Models\Connection;
 use App\Models\ConnectionAccountingRef;
 use App\Models\Consumer;
@@ -21,10 +18,12 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
 use Saloon\Http\Faking\MockClient;
 use Saloon\Http\Faking\MockResponse;
+use Tests\Concerns\BindsFakeAccountingReferences;
 use Tests\TestCase;
 
 class StoreDocumentTest extends TestCase
 {
+    use BindsFakeAccountingReferences;
     use RefreshDatabase;
 
     protected function setUp(): void
@@ -45,46 +44,6 @@ class StoreDocumentTest extends TestCase
         MockClient::destroyGlobal();
 
         parent::tearDown();
-    }
-
-    private function bindFakeReferences(): void
-    {
-        $this->app->bind(ReferenceResolver::class, fn (): ReferenceResolver => new class implements ReferenceResolver
-        {
-            public function relationRef(Party $party, Connection $connection): string
-            {
-                return $party->role === 'creditor' ? 'supp-guid' : 'cust-guid';
-            }
-
-            public function vatCode(float $taxRate, TaxTreatment $treatment, Connection $connection): string
-            {
-                if ($treatment === TaxTreatment::ReverseCharge) {
-                    return $taxRate >= 21.0 ? '6' : '7';
-                }
-
-                return $taxRate >= 21.0 ? '4' : '2';
-            }
-
-            public function glAccountRef(?string $category, Connection $connection): ?string
-            {
-                return 'gl-guid';
-            }
-
-            public function journal(DocumentType $type, Connection $connection): string
-            {
-                return in_array($type, [DocumentType::PurchaseInvoice, DocumentType::Expense], true) ? '20' : '90';
-            }
-
-            public function costCenter(?string $code, Connection $connection): ?string
-            {
-                return $code;
-            }
-
-            public function costUnit(?string $code, Connection $connection): ?string
-            {
-                return $code;
-            }
-        });
     }
 
     /**

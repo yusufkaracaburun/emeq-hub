@@ -8,6 +8,7 @@ use App\Support\Errors\ErrorCode;
 use Closure;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response as HttpResponse;
 use Illuminate\Support\Facades\Context;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -33,30 +34,67 @@ class NormalizeApiErrors
     {
         $response = $next($request);
 
-        if (! $request->is('v1/*') || ! $response instanceof JsonResponse) {
+        if (! $request->is('v1/*') || $response->getStatusCode() < 400) {
             return $response;
         }
 
         $status = $response->getStatusCode();
+        $payload = $this->decode($response);
 
-        if ($status < 400) {
-            return $response;
-        }
-
-        $payload = $response->getData(true);
-
-        if (! is_array($payload)) {
+        // Alleen een JSON-object krijgt de envelope. Een gevulde lijst zou door de
+        // spread in een object veranderen (`{"0":…}`) en dus van vorm wisselen; een
+        // niet-JSON body (HTML-foutpagina, bestand, stream) laten we met rust.
+        if ($payload === null || ($payload !== [] && array_is_list($payload))) {
             return $response;
         }
 
         $error = $this->errorKey($payload, $status);
 
-        return $response->setData([
+        $enveloped = [
             ...$payload,
             'error' => $error,
             'category' => ErrorCode::for($status, $error)->value,
             'request_id' => Context::get('request_id'),
-        ]);
+        ];
+
+        if ($response instanceof JsonResponse) {
+            return $response->setData($enveloped);
+        }
+
+        // De pass-through-controllers geven `response($body, $status)` terug — een
+        // gewone Response met een JSON content-type, geen JsonResponse. Dat is het
+        // merendeel van het foutverkeer; die overslaan zou de envelope grotendeels
+        // leeg laten lopen.
+        $response->setContent((string) json_encode($enveloped));
+
+        return $response;
+    }
+
+    /**
+     * De body als array, of null wanneer dit geen JSON is dat we mogen aanraken.
+     *
+     * @return array<mixed>|null
+     */
+    private function decode(Response $response): ?array
+    {
+        if ($response instanceof JsonResponse) {
+            $data = $response->getData(true);
+
+            return is_array($data) ? $data : null;
+        }
+
+        // Streamed of binary: `getContent()` is dan onbetrouwbaar of leeg.
+        if (! $response instanceof HttpResponse) {
+            return null;
+        }
+
+        if (! str_contains((string) $response->headers->get('Content-Type'), 'json')) {
+            return null;
+        }
+
+        $decoded = json_decode((string) $response->getContent(), true);
+
+        return is_array($decoded) ? $decoded : null;
     }
 
     /**

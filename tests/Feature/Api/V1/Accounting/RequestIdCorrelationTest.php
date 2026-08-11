@@ -4,10 +4,6 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Api\V1\Accounting;
 
-use App\Accounting\Contracts\ReferenceResolver;
-use App\Accounting\Enums\DocumentType;
-use App\Accounting\Enums\TaxTreatment;
-use App\Accounting\Party;
 use App\Models\Connection;
 use App\Models\Consumer;
 use App\Sanctum\TokenAbilities;
@@ -18,6 +14,7 @@ use Illuminate\Support\Str;
 use Saloon\Http\Faking\MockClient;
 use Saloon\Http\Faking\MockResponse;
 use Spatie\WebhookServer\CallWebhookJob;
+use Tests\Concerns\BindsFakeAccountingReferences;
 use Tests\TestCase;
 
 /**
@@ -27,6 +24,7 @@ use Tests\TestCase;
  */
 class RequestIdCorrelationTest extends TestCase
 {
+    use BindsFakeAccountingReferences;
     use RefreshDatabase;
 
     private const REQUEST_ID = 'corr-test-000000001';
@@ -49,42 +47,6 @@ class RequestIdCorrelationTest extends TestCase
         MockClient::destroyGlobal();
 
         parent::tearDown();
-    }
-
-    private function bindFakeReferences(): void
-    {
-        $this->app->bind(ReferenceResolver::class, fn (): ReferenceResolver => new class implements ReferenceResolver
-        {
-            public function relationRef(Party $party, Connection $connection): string
-            {
-                return 'cust-guid';
-            }
-
-            public function vatCode(float $taxRate, TaxTreatment $treatment, Connection $connection): string
-            {
-                return '4';
-            }
-
-            public function glAccountRef(?string $category, Connection $connection): ?string
-            {
-                return 'gl-guid';
-            }
-
-            public function journal(DocumentType $type, Connection $connection): string
-            {
-                return '90';
-            }
-
-            public function costCenter(?string $code, Connection $connection): ?string
-            {
-                return $code;
-            }
-
-            public function costUnit(?string $code, Connection $connection): ?string
-            {
-                return $code;
-            }
-        });
     }
 
     /**

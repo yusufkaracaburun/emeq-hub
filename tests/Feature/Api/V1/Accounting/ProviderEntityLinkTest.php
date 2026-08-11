@@ -4,10 +4,6 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Api\V1\Accounting;
 
-use App\Accounting\Contracts\ReferenceResolver;
-use App\Accounting\Enums\DocumentType;
-use App\Accounting\Enums\TaxTreatment;
-use App\Accounting\Party;
 use App\Models\Connection;
 use App\Models\Consumer;
 use App\Models\IdempotencyKey;
@@ -20,6 +16,7 @@ use Illuminate\Support\Str;
 use Illuminate\Testing\TestResponse;
 use Saloon\Http\Faking\MockClient;
 use Saloon\Http\Faking\MockResponse;
+use Tests\Concerns\BindsFakeAccountingReferences;
 use Tests\TestCase;
 
 /**
@@ -29,6 +26,7 @@ use Tests\TestCase;
  */
 class ProviderEntityLinkTest extends TestCase
 {
+    use BindsFakeAccountingReferences;
     use RefreshDatabase;
 
     protected function setUp(): void
@@ -49,42 +47,6 @@ class ProviderEntityLinkTest extends TestCase
         MockClient::destroyGlobal();
 
         parent::tearDown();
-    }
-
-    private function bindFakeReferences(): void
-    {
-        $this->app->bind(ReferenceResolver::class, fn (): ReferenceResolver => new class implements ReferenceResolver
-        {
-            public function relationRef(Party $party, Connection $connection): string
-            {
-                return 'cust-guid';
-            }
-
-            public function vatCode(float $taxRate, TaxTreatment $treatment, Connection $connection): string
-            {
-                return '4';
-            }
-
-            public function glAccountRef(?string $category, Connection $connection): ?string
-            {
-                return 'gl-guid';
-            }
-
-            public function journal(DocumentType $type, Connection $connection): string
-            {
-                return '90';
-            }
-
-            public function costCenter(?string $code, Connection $connection): ?string
-            {
-                return $code;
-            }
-
-            public function costUnit(?string $code, Connection $connection): ?string
-            {
-                return $code;
-            }
-        });
     }
 
     /**
@@ -355,6 +317,108 @@ class ProviderEntityLinkTest extends TestCase
         $this->postDocument($consumer, $this->salesInvoicePayload())->assertStatus(422);
 
         MockClient::global()->assertNotSent(GetSalesEntries::class);
+    }
+
+    /**
+     * De idempotency-key beschermt alleen tegen retries mét dezelfde sleutel. Een client
+     * die per poging een verse UUID genereert omzeilt die volledig — dan is de claim op
+     * `external_id` het enige dat een dubbele boeking tegenhoudt.
+     */
+    public function test_a_concurrent_attempt_with_a_different_key_is_refused(): void
+    {
+        MockClient::global([
+            CreateSalesEntry::class => MockResponse::make(['d' => ['ID' => 'inv-race']], 201),
+        ]);
+        $this->bindFakeReferences();
+
+        [$consumer, $connection] = $this->consumerWithExactConnection();
+
+        // Deterministische stand-in voor de race: de claim van de eerste poging staat er
+        // al, nog zonder partner-referentie.
+        ProviderEntityLink::query()->create([
+            'connection_id' => $connection->getKey(),
+            'entity_type' => ProviderEntityLink::ENTITY_FINANCIAL_DOCUMENT,
+            'external_id' => 'INV-2026-001',
+            'provider' => 'exact',
+            'provider_entity_id' => null,
+            'origin' => ProviderEntityLink::ORIGIN_HUB,
+            'last_synced_at' => now(),
+        ]);
+
+        $this->postDocument($consumer, $this->salesInvoicePayload())
+            ->assertStatus(409)
+            ->assertJsonPath('error', 'document_sync_in_progress');
+
+        MockClient::global()->assertNothingSent();
+    }
+
+    /**
+     * Een claim van een gecrashte worker mag dit document niet voorgoed blokkeren.
+     */
+    public function test_a_stale_claim_is_taken_over(): void
+    {
+        MockClient::global([
+            CreateSalesEntry::class => MockResponse::make(['d' => ['ID' => 'inv-takeover']], 201),
+        ]);
+        $this->bindFakeReferences();
+
+        [$consumer, $connection] = $this->consumerWithExactConnection();
+
+        ProviderEntityLink::query()->create([
+            'connection_id' => $connection->getKey(),
+            'entity_type' => ProviderEntityLink::ENTITY_FINANCIAL_DOCUMENT,
+            'external_id' => 'INV-2026-001',
+            'provider' => 'exact',
+            'provider_entity_id' => null,
+            'origin' => ProviderEntityLink::ORIGIN_HUB,
+            'last_synced_at' => now()->subSeconds(IdempotencyKey::leaseSeconds() + 60),
+        ]);
+
+        $this->postDocument($consumer, $this->salesInvoicePayload())->assertStatus(201);
+
+        $this->assertSame('inv-takeover', ProviderEntityLink::query()->sole()->provider_entity_id);
+    }
+
+    /**
+     * Eén storing mag dit external_id niet permanent blokkeren — geldt voor élke
+     * faalgrond, ook een mapping-fout die niet eens bij de partner aankomt.
+     */
+    public function test_a_failed_attempt_releases_the_claim(): void
+    {
+        MockClient::global([
+            CreateSalesEntry::class => MockResponse::make(['error' => ['message' => ['value' => 'stuk']]], 500),
+        ]);
+        $this->bindFakeReferences();
+
+        [$consumer] = $this->consumerWithExactConnection();
+
+        $this->postDocument($consumer, $this->salesInvoicePayload())->assertStatus(422);
+        $this->assertDatabaseCount('provider_entity_links', 0);
+
+        // En dus mag een volgende poging gewoon boeken.
+        MockClient::destroyGlobal();
+        MockClient::global([
+            CreateSalesEntry::class => MockResponse::make(['d' => ['ID' => 'inv-retry']], 201),
+        ]);
+
+        $this->postDocument($consumer, $this->salesInvoicePayload())->assertStatus(201);
+    }
+
+    /**
+     * Een mapping-fout raakt de partner niet eens, maar liet de claim eerder wél staan.
+     */
+    public function test_a_mapping_failure_also_releases_the_claim(): void
+    {
+        $this->bindFakeReferences();
+
+        [$consumer, $connection] = $this->consumerWithExactConnection();
+        $connection->update(['administratie_id' => null]);
+
+        $this->postDocument($consumer, $this->salesInvoicePayload())
+            ->assertStatus(422)
+            ->assertJsonPath('error', 'mapping_failed');
+
+        $this->assertDatabaseCount('provider_entity_links', 0);
     }
 
     public function test_a_rejected_repost_is_audited(): void

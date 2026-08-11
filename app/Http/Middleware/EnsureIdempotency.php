@@ -52,7 +52,19 @@ class EnsureIdempotency
             return $this->error('idempotency_key_invalid', 'Idempotency-Key moet 1–255 printbare ASCII-tekens zijn.', 400);
         }
 
+        // De claim is per consumer; zonder consumer valt er niets te claimen. Op een
+        // `required`-route is dat geen geldige situatie maar een verkeerde
+        // middleware-volgorde — dan liever hard falen dan stilzwijgend zonder
+        // bescherming doorlopen.
         if ($consumerId === null) {
+            if ($mode === 'required') {
+                return $this->error(
+                    'idempotency_unavailable',
+                    'Idempotentie vereist een geauthenticeerde consumer.',
+                    500,
+                );
+            }
+
             return $next($request);
         }
 

@@ -40,14 +40,20 @@ final readonly class AccountingSyncRunner
         // Tweede verdedigingslijn naast de idempotency-key: die vervalt, deze niet.
         // Bewust hier en niet in de controller, zodat het async-pad via
         // SyncAccountingDocumentJob dezelfde bescherming krijgt.
-        $existing = $this->links->find($connection, $document->externalId);
+        //
+        // Claim-first, met de unique index als mutex. Alleen lezen zou twee
+        // gelijktijdige requests met verschillende idempotency-keys allebei laten
+        // boeken: die zien geen link, en de tabel vangt dat pas achteraf.
+        $claim = $this->claimOrExplain($document, $connection, $fingerprint);
 
-        if ($existing !== null) {
-            [$status, $upstreamError, $responseBody] = $this->replayExistingLink($existing, $document, $provider, $fingerprint);
+        if (! $claim instanceof ProviderEntityLink) {
+            [$status, $upstreamError, $responseBody] = $claim;
             $this->audit($account, $connection, $consumerId, $provider, $document, $status, $start, $upstreamError, $responseBody);
 
             return new AccountingSyncOutcome($status, $responseBody);
         }
+
+        $booked = false;
 
         try {
             $result = $this->registry->for($provider)->push($document, $connection);
@@ -68,6 +74,7 @@ final readonly class AccountingSyncRunner
             }
 
             $this->rememberLink($document, $connection, $result, $fingerprint);
+            $booked = true;
         } catch (ProviderDisabledException $e) {
             $status = 503;
             $upstreamError = 'provider_disabled';
@@ -87,12 +94,77 @@ final readonly class AccountingSyncRunner
             // daar ontstaat de dubbele boeking bij een retry. Even navragen.
             if ($status >= 502 && ($probed = $this->probe($document, $connection, $fingerprint)) !== null) {
                 [$status, $upstreamError, $responseBody] = $probed;
+                $booked = true;
+            }
+        } finally {
+            // Niets geboekt → claim vrijgeven, anders blokkeert één storing dit
+            // external_id voorgoed. Geldt voor élke faalgrond, ook een mapping-fout of
+            // een uitgeschakelde provider.
+            if (! $booked) {
+                $this->links->releaseClaim($claim);
             }
         }
 
         $this->audit($account, $connection, $consumerId, $provider, $document, $status, $start, $upstreamError, $responseBody);
 
         return new AccountingSyncOutcome($status, $responseBody);
+    }
+
+    /**
+     * Probeert dit `external_id` te claimen. Lukt dat, dan is de boeking van ons.
+     *
+     * Lukt het niet, dan is er al iets: een afgeronde boeking (replay of conflict), een
+     * lopende poging (409, even wachten), of een claim van een request dat gestorven is
+     * — die laatste nemen we over, want anders blokkeert een gecrashte worker dit
+     * document tot iemand handmatig ingrijpt.
+     *
+     * @return ProviderEntityLink|array{0: int, 1: string, 2: array<string, mixed>}
+     */
+    private function claimOrExplain(FinancialDocument $document, Connection $connection, string $fingerprint): ProviderEntityLink|array
+    {
+        $claim = $this->links->claim($document, $connection);
+
+        if ($claim !== null) {
+            return $claim;
+        }
+
+        $existing = $this->links->find($connection, $document->externalId);
+
+        // Tussen onze INSERT en deze SELECT is de rij weer weg: een gelijktijdige poging
+        // faalde en gaf zijn claim vrij. De consumer mag het gewoon opnieuw proberen.
+        if ($existing === null) {
+            return $this->syncInProgress($document, $connection->provider->value);
+        }
+
+        if ($existing->provider_entity_id !== null) {
+            return $this->replayExistingLink($existing, $document, $connection->provider->value, $fingerprint);
+        }
+
+        if (! $this->links->claimIsStale($existing)) {
+            return $this->syncInProgress($document, $connection->provider->value);
+        }
+
+        $this->links->releaseClaim($existing);
+
+        return $this->links->claim($document, $connection)
+            ?? $this->syncInProgress($document, $connection->provider->value);
+    }
+
+    /**
+     * Er loopt op dit moment een boeking voor dit document. Geen fout van de consumer —
+     * wachten en opnieuw proberen is het juiste antwoord.
+     *
+     * @return array{0: int, 1: string, 2: array<string, mixed>}
+     */
+    private function syncInProgress(FinancialDocument $document, string $provider): array
+    {
+        return [409, 'sync_in_progress', [
+            'provider' => $provider,
+            'status' => SyncStatus::Pending->value,
+            'external_id' => $document->externalId,
+            'error' => 'document_sync_in_progress',
+            'message' => "Er loopt al een boeking voor external_id '{$document->externalId}' op deze koppeling. Probeer het zo opnieuw.",
+        ]];
     }
 
     /**

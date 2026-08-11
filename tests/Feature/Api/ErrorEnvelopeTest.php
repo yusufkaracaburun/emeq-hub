@@ -8,8 +8,12 @@ use App\Models\Connection;
 use App\Models\Consumer;
 use App\Sanctum\TokenAbilities;
 use App\Support\Errors\ErrorCode;
+use Emeq\ExactApi\Http\Request\RawExactRequest;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
+use Saloon\Http\Faking\MockClient;
+use Saloon\Http\Faking\MockResponse;
 use Tests\TestCase;
 
 /**
@@ -173,6 +177,53 @@ class ErrorEnvelopeTest extends TestCase
         $this->assertStringNotContainsString($token, $body);
         $this->assertStringNotContainsString('Bearer', $body);
         $this->assertStringNotContainsString('Authorization', $body);
+    }
+
+    /**
+     * De pass-through-controllers geven `response($body, $status)` terug — een gewone
+     * Response met een JSON-content-type, geen JsonResponse. Dat is het merendeel van
+     * het foutverkeer; die overslaan zou de envelope grotendeels leeg laten lopen.
+     */
+    public function test_a_pass_through_error_carries_the_envelope_too(): void
+    {
+        config([
+            'services.exact.client_id' => 'app_test_id',
+            'services.exact.client_secret' => 'app_test_secret',
+            'services.exact.redirect_uri' => 'https://hub.test/v1/oauth/exact/callback',
+            'services.exact.auth_base_url' => 'https://start.exactonline.nl',
+            'services.exact.api_base_url' => 'https://start.exactonline.nl',
+        ]);
+        MockClient::global([
+            RawExactRequest::class => MockResponse::make(['error' => ['message' => ['value' => 'stuk']]], 503),
+        ]);
+
+        $consumer = $this->consumerWithExactConnection();
+        $token = $consumer->createToken('t', [TokenAbilities::EXACT_READ])->plainTextToken;
+
+        $response = $this->withHeader('Authorization', "Bearer {$token}")
+            ->withHeader('X-Account-Id', 'school1')
+            ->getJson('/v1/exact/financial/GLAccounts');
+
+        $this->assertGreaterThanOrEqual(500, $response->status());
+        $this->assertNotNull($response->json('category'));
+        $this->assertNotNull($response->json('request_id'));
+        $this->assertNotNull($response->json('error'));
+
+        MockClient::destroyGlobal();
+    }
+
+    /**
+     * Een JSON-lijst zou door de spread in een object veranderen (`{"0":…}`). Dat is
+     * geen envelope maar een vormwijziging, dus die body blijft ongemoeid.
+     */
+    public function test_a_list_body_is_left_untouched(): void
+    {
+        Route::middleware('api')->get('/v1/__test_list_error', fn () => response()->json(['a', 'b'], 422));
+
+        $response = $this->getJson('/v1/__test_list_error');
+
+        $response->assertStatus(422);
+        $this->assertSame(['a', 'b'], $response->json());
     }
 
     /**

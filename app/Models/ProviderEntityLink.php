@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 
 /**
  * Welke canonieke entity hoort bij welke entity aan partnerzijde, per Connection.
@@ -19,6 +20,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * Bewust géén `MassPrunable`: dit is geen audit-spoor maar de identiteitstabel die
  * dubbele boekingen tegenhoudt. Een rij prunen opent precies het gat dat de tabel
  * dicht. Rijen verdwijnen alleen met hun Connection (cascade).
+ */
+/**
+ * Statische analyse leest `casts()` niet en valt terug op het kolomtype uit de
+ * migratie. Zie ook {@see Connection}.
+ *
+ * @property Carbon|null $last_synced_at
  */
 #[Fillable([
     'connection_id',
