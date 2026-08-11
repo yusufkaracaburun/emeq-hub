@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace App\Integrations\Exact\PassThrough;
 
 use App\Enums\Provider;
-use App\Integrations\Exact\Errors\UpstreamErrorMapper;
+use App\Integrations\PassThrough\PassThroughContext;
+use App\Integrations\PassThrough\PassThroughPipeline;
 use App\Integrations\PassThrough\PassThroughRecorder;
+use App\Integrations\PassThrough\UpstreamResult;
 use App\Models\Account;
 use App\Models\Connection;
 use Emeq\ExactApi\Exact;
@@ -14,7 +16,6 @@ use Illuminate\Http\Request;
 use Saloon\Contracts\Body\HasBody;
 use Saloon\Http\Request as SdkRequest;
 use Symfony\Component\HttpFoundation\Response;
-use Throwable;
 
 /**
  * Stuurt één division-scoped Exact-SDK-request door en logt 'm in pass_through_calls.
@@ -28,6 +29,7 @@ final class ExactForwarder
 {
     public function __construct(
         private readonly ExactErrorBudget $errorBudget,
+        private readonly PassThroughPipeline $pipeline,
         private readonly PassThroughRecorder $recorder,
     ) {}
 
@@ -55,64 +57,40 @@ final class ExactForwarder
         $query = $sdkRequest->query()->all();
         $body = $sdkRequest instanceof HasBody ? $sdkRequest->body()->all() : null;
 
-        $start = microtime(true);
-        $upstreamError = null;
-        $responseBody = '';
-        $status = 0;
-        $upstreamStatus = 0;
-        $contentType = 'application/json';
-        $extraHeaders = [];
+        return $this->pipeline->run(
+            new PassThroughContext(
+                provider: Provider::Exact,
+                consumerId: $request->user()->getKey(),
+                accountId: $account->getKey(),
+                connectionId: $connection->getKey(),
+                method: $method,
+                path: $endpoint,
+                query: $query,
+                body: $body,
+            ),
+            function () use ($division, $sdkRequest): UpstreamResult {
+                /** @var Exact $exact */
+                $exact = app(Exact::class);
 
-        try {
-            /** @var Exact $exact */
-            $exact = app(Exact::class);
+                $sdkResponse = $exact->connector($division)->send($sdkRequest);
 
-            $sdkResponse = $exact->connector($division)->send($sdkRequest);
+                // De SDK throwt niet automatisch op failed-status — geef de Exact-mapped
+                // exception een kans om door de foutmapper te worden gemapt.
+                if ($sdkResponse->failed()) {
+                    $sdkResponse->throw();
+                }
 
-            // De SDK throwt niet automatisch op failed-status — geef de Exact-mapped
-            // exception een kans om door UpstreamErrorMapper te worden gemapt.
-            if ($sdkResponse->failed()) {
-                $sdkResponse->throw();
-            }
-
-            $status = $sdkResponse->status();
-            $upstreamStatus = $status;
-            $responseBody = $sdkResponse->body();
-            $contentType = $sdkResponse->header('Content-Type') ?? 'application/json';
-            $extraHeaders = HeaderForwarder::forwardResponse($sdkResponse);
-        } catch (Throwable $e) {
-            $mapped = UpstreamErrorMapper::mapException($e);
-            $status = $mapped['status'];
-            // Tel tegen het error-budget op wat Exact zélf teruggaf (de mapper maskeert
-            // 401/403 naar 502 voor de consumer; de breaker spiegelt Exact's limiet).
-            $upstreamStatus = (int) ($mapped['body']['upstream_status'] ?? $mapped['status']);
-            $responseBody = json_encode($mapped['body'], JSON_THROW_ON_ERROR);
-            $contentType = 'application/json';
-            $extraHeaders = $mapped['headers'];
-            $upstreamError = $mapped['short_code'];
-        }
-
-        $this->errorBudget->record($connection, $endpoint, $upstreamStatus);
-
-        $this->recorder->record(
-            provider: Provider::Exact,
-            consumerId: $request->user()->getKey(),
-            accountId: $account->getKey(),
-            connectionId: $connection->getKey(),
-            method: $method,
-            path: $endpoint,
-            status: $status,
-            responseBody: $responseBody,
-            startedAt: $start,
-            query: $query,
-            body: $body,
-            upstreamError: $upstreamError,
+                return new UpstreamResult(
+                    status: $sdkResponse->status(),
+                    body: $sdkResponse->body(),
+                    contentType: $sdkResponse->header('Content-Type') ?? 'application/json',
+                    headers: HeaderForwarder::forwardResponse($sdkResponse),
+                );
+            },
+            // Tel tegen het error-budget wat Exact zélf teruggaf: de mapper maskeert
+            // 401/403 naar 502 voor de consumer, de breaker spiegelt Exact's limiet.
+            fn (int $upstreamStatus) => $this->errorBudget->record($connection, $endpoint, $upstreamStatus),
         );
-
-        return response($responseBody, $status)->withHeaders(array_merge(
-            ['Content-Type' => $contentType],
-            $extraHeaders,
-        ));
     }
 
     /**

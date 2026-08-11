@@ -3,9 +3,12 @@
 namespace App\Http\Controllers\Api\V1\Mollie;
 
 use App\Enums\Provider;
+use App\Http\Controllers\Api\V1\Concerns\GuardsPassThroughRequest;
+use App\Http\Controllers\Api\V1\Mollie\Concerns\RendersMollieResult;
 use App\Http\Controllers\Controller;
-use App\Integrations\Mollie\Errors\UpstreamErrorMapper;
-use App\Integrations\PassThrough\PassThroughRecorder;
+use App\Integrations\PassThrough\PassThroughContext;
+use App\Integrations\PassThrough\PassThroughPipeline;
+use App\Integrations\PassThrough\UpstreamResult;
 use App\Models\Account;
 use App\Models\Connection;
 use App\Sanctum\TokenAbilities;
@@ -27,7 +30,12 @@ use Throwable;
  */
 abstract class AbstractMolliePassThroughController extends Controller
 {
-    public function __construct(protected readonly PassThroughRecorder $recorder) {}
+    use GuardsPassThroughRequest;
+    use RendersMollieResult;
+
+    private const BODY_METHODS = ['POST', 'PATCH'];
+
+    public function __construct(protected readonly PassThroughPipeline $pipeline) {}
 
     /**
      * Voer een Mollie-SDK-call uit binnen het pass-through-frame.
@@ -44,84 +52,38 @@ abstract class AbstractMolliePassThroughController extends Controller
     {
         $method = strtoupper($request->method());
 
-        // 1. Ability-guard (D-14)
         $required = $method === 'GET'
             ? [TokenAbilities::MOLLIE_READ, TokenAbilities::MOLLIE_WRITE, TokenAbilities::ADMIN]
             : [TokenAbilities::MOLLIE_WRITE, TokenAbilities::ADMIN];
 
-        $token = $request->user()?->currentAccessToken();
-        $hasAbility = $token !== null && collect($required)->contains(fn (string $ability) => $token->can($ability));
-
-        if (! $hasAbility) {
-            return response()->json([
-                'error' => 'insufficient_ability',
-                'message' => 'Token mist vereiste ability voor deze methode.',
-            ], Response::HTTP_FORBIDDEN);
+        if ($response = $this->guardTokenAbility($request, $required)) {
+            return $response;
         }
 
-        // 2. 415-guard voor write-methods (D-05)
-        $body = null;
-        if (in_array($method, ['POST', 'PATCH'], true)) {
-            $contentType = strtolower((string) $request->header('Content-Type', ''));
-            if (! str_starts_with($contentType, 'application/json')) {
-                return response()->json([
-                    'error' => 'unsupported_content_type',
-                    'message' => 'Pass-through accepteert alleen application/json voor POST/PATCH.',
-                ], Response::HTTP_UNSUPPORTED_MEDIA_TYPE);
-            }
-            $body = $request->json()->all();
+        if ($response = $this->guardJsonContentType($request, $method, self::BODY_METHODS)) {
+            return $response;
         }
 
-        // 3. SDK-call + exception-mapping
-        $start = microtime(true);
-        $upstreamError = null;
-        $responseBody = '';
-        $status = $method === 'POST' ? 201 : 200;
-        $extraHeaders = [];
+        $body = in_array($method, self::BODY_METHODS, true) ? $request->json()->all() : null;
 
-        try {
-            $result = $sdkCall($request);
-            // Concrete subclass kan {status, body} wrapper returnen voor non-default status
-            if (is_array($result) && isset($result['status'], $result['body']) && is_int($result['status']) && is_array($result['body'])) {
-                $status = $result['status'];
-                $responseBody = json_encode($result['body'], JSON_THROW_ON_ERROR);
-            } else {
-                $responseBody = json_encode($result, JSON_THROW_ON_ERROR);
-            }
-        } catch (Throwable $e) {
-            $mapped = UpstreamErrorMapper::mapException($e);
-            $status = $mapped['status'];
-            $responseBody = json_encode($mapped['body'], JSON_THROW_ON_ERROR);
-            $extraHeaders = $mapped['headers'];
-            $upstreamError = $mapped['short_code'];
-        }
-
-        // 4. Audit-write (D-05 — alle drie 5b-CRITICAL-fixes ingebakken)
         /** @var Account $account */
         $account = $request->attributes->get('mollie_account');
         /** @var Connection $connection */
         $connection = $request->attributes->get('mollie_connection');
-        $query = $request->query();
 
-        $this->recorder->record(
-            provider: Provider::Mollie,
-            consumerId: $request->user()->getKey(),
-            accountId: $account->getKey(),
-            connectionId: $connection->getKey(),
-            method: $method,
-            path: $endpoint,
-            status: $status,
-            responseBody: $responseBody,
-            startedAt: $start,
-            query: $query,
-            body: $body,
-            upstreamError: $upstreamError,
+        return $this->pipeline->run(
+            new PassThroughContext(
+                provider: Provider::Mollie,
+                consumerId: $request->user()->getKey(),
+                accountId: $account->getKey(),
+                connectionId: $connection->getKey(),
+                method: $method,
+                path: $endpoint,
+                query: $request->query(),
+                body: $body,
+            ),
+            fn (): UpstreamResult => $this->toUpstreamResult($sdkCall($request), $method),
         );
-
-        return response($responseBody, $status)->withHeaders(array_merge(
-            ['Content-Type' => 'application/json'],
-            $extraHeaders,
-        ));
     }
 
     /**

@@ -5,11 +5,14 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api\V1\Mollie\Connect;
 
 use App\Enums\Provider;
+use App\Http\Controllers\Api\V1\Concerns\GuardsPassThroughRequest;
+use App\Http\Controllers\Api\V1\Mollie\Concerns\RendersMollieResult;
 use App\Http\Controllers\Controller;
-use App\Integrations\Mollie\Errors\UpstreamErrorMapper;
 use App\Integrations\Mollie\Exceptions\MissingPartnerTokenException;
 use App\Integrations\Mollie\MollieAccessTokenResolver;
-use App\Integrations\PassThrough\PassThroughRecorder;
+use App\Integrations\PassThrough\PassThroughContext;
+use App\Integrations\PassThrough\PassThroughPipeline;
+use App\Integrations\PassThrough\UpstreamResult;
 use App\Sanctum\TokenAbilities;
 use Emeq\MollieApi\Exceptions\MollieExceptionMapper;
 use Illuminate\Http\Request;
@@ -36,6 +39,11 @@ use Throwable;
  */
 abstract class AbstractMollieConnectPassThroughController extends Controller
 {
+    use GuardsPassThroughRequest;
+    use RendersMollieResult;
+
+    private const BODY_METHODS = ['POST', 'PATCH'];
+
     /**
      * Partner-access-token geresolved per request door handle(). Gecached zodat
      * client() én de audit-fingerprint dezelfde waarde delen — voorkomt dat
@@ -46,7 +54,7 @@ abstract class AbstractMollieConnectPassThroughController extends Controller
 
     public function __construct(
         protected readonly MollieAccessTokenResolver $tokenResolver,
-        protected readonly PassThroughRecorder $recorder,
+        protected readonly PassThroughPipeline $pipeline,
     ) {}
 
     /**
@@ -112,104 +120,61 @@ abstract class AbstractMollieConnectPassThroughController extends Controller
     {
         $method = strtoupper($request->method());
 
-        // 1. Ability-guard (D-14 — hergebruikt Phase-5a abilities)
         $required = $method === 'GET'
             ? [TokenAbilities::MOLLIE_READ, TokenAbilities::MOLLIE_WRITE, TokenAbilities::ADMIN]
             : [TokenAbilities::MOLLIE_WRITE, TokenAbilities::ADMIN];
 
-        $token = $request->user()?->currentAccessToken();
-        $hasAbility = $token !== null && collect($required)->contains(fn (string $ability) => $token->can($ability));
-
-        if (! $hasAbility) {
-            return response()->json([
-                'error' => 'insufficient_ability',
-                'message' => 'Token mist vereiste ability voor deze methode.',
-            ], Response::HTTP_FORBIDDEN);
+        if ($response = $this->guardTokenAbility($request, $required)) {
+            return $response;
         }
 
-        // 2. 415-guard voor write-methods
-        $body = null;
-        if (in_array($method, ['POST', 'PATCH'], true)) {
-            $contentType = strtolower((string) $request->header('Content-Type', ''));
-            if (! str_starts_with($contentType, 'application/json')) {
-                return response()->json([
-                    'error' => 'unsupported_content_type',
-                    'message' => 'Pass-through accepteert alleen application/json voor POST/PATCH.',
-                ], Response::HTTP_UNSUPPORTED_MEDIA_TYPE);
-            }
-            $body = $request->json()->all();
+        if ($response = $this->guardJsonContentType($request, $method, self::BODY_METHODS)) {
+            return $response;
         }
 
-        // 3. Partner-token één keer resolven — voor zowel client() als audit-
-        //    fingerprint, zodat ze gegarandeerd dezelfde waarde delen (WR-02).
+        $body = in_array($method, self::BODY_METHODS, true) ? $request->json()->all() : null;
+
+        // Partner-token één keer resolven — voor zowel client() als de audit-
+        // fingerprint, zodat ze gegarandeerd dezelfde waarde delen (WR-02).
         $partnerFingerprint = null;
         $tokenMissing = false;
         try {
             $this->resolvedPartnerToken = $this->tokenResolver->resolveFor('partner');
             $partnerFingerprint = substr(hash('sha256', $this->resolvedPartnerToken), 0, 12);
         } catch (MissingPartnerTokenException) {
-            // Partner-token niet geconfigureerd — SDK-call hieronder krijgt een
-            // 503 via UpstreamErrorMapper, audit-rij krijgt NULL fingerprint.
+            // Partner-token niet geconfigureerd — de call hieronder gooit 'm alsnog,
+            // zodat de foutmapper er een 503 van maakt; auditrij krijgt NULL fingerprint.
             $tokenMissing = true;
         }
 
-        // 4. SDK-call + exception-mapping
-        $start = microtime(true);
-        $upstreamError = null;
-        $responseBody = '';
-        $status = $method === 'POST' ? 201 : 200;
-        $extraHeaders = [];
+        return $this->pipeline->run(
+            new PassThroughContext(
+                provider: Provider::Mollie,
+                consumerId: $request->user()->getKey(),
+                // Connect-calls lopen op het partner-token, niet op een Connection van een
+                // Account — vandaar geen tenant-kolommen maar wel een token-fingerprint.
+                accountId: null,
+                connectionId: null,
+                method: $method,
+                path: $endpoint,
+                query: $request->query(),
+                body: $body,
+                // Expliciet — matched de factory-default + voorkomt dat pre-save
+                // $model->direction-reads NULL teruggeven (WR-05).
+                direction: 'outbound',
+                extra: [
+                    'token_type' => 'partner',
+                    'partner_token_fingerprint' => $partnerFingerprint,
+                ],
+            ),
+            function () use ($sdkCall, $request, $method, $tokenMissing): UpstreamResult {
+                if ($tokenMissing) {
+                    throw new MissingPartnerTokenException;
+                }
 
-        try {
-            if ($tokenMissing) {
-                throw new MissingPartnerTokenException;
-            }
-            $result = $sdkCall($request);
-            if (is_array($result) && isset($result['status'], $result['body']) && is_int($result['status']) && is_array($result['body'])) {
-                $status = $result['status'];
-                $responseBody = json_encode($result['body'], JSON_THROW_ON_ERROR);
-            } else {
-                $responseBody = json_encode($result, JSON_THROW_ON_ERROR);
-            }
-        } catch (Throwable $e) {
-            $mapped = UpstreamErrorMapper::mapException($e);
-            $status = $mapped['status'];
-            $responseBody = json_encode($mapped['body'], JSON_THROW_ON_ERROR);
-            $extraHeaders = $mapped['headers'];
-            $upstreamError = $mapped['short_code'];
-        }
-
-        // 5. Audit-write — Connect-shape: token_type=partner, geen Account/Connection.
-        $query = $request->query();
-
-        $this->recorder->record(
-            provider: Provider::Mollie,
-            consumerId: $request->user()->getKey(),
-            // Connect-calls lopen op het partner-token, niet op een Connection van een
-            // Account — vandaar geen tenant-kolommen maar wel een token-fingerprint.
-            accountId: null,
-            connectionId: null,
-            method: $method,
-            path: $endpoint,
-            status: $status,
-            responseBody: $responseBody,
-            startedAt: $start,
-            query: $query,
-            body: $body,
-            upstreamError: $upstreamError,
-            // Expliciet — matched de factory-default + voorkomt dat pre-save
-            // $model->direction-reads NULL teruggeven (WR-05).
-            direction: 'outbound',
-            extra: [
-                'token_type' => 'partner',
-                'partner_token_fingerprint' => $partnerFingerprint,
-            ],
+                return $this->toUpstreamResult($sdkCall($request), $method);
+            },
         );
-
-        return response($responseBody, $status)->withHeaders(array_merge(
-            ['Content-Type' => 'application/json'],
-            $extraHeaders,
-        ));
     }
 
     /**

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Integrations\Exact\PassThrough;
 
+use App\Integrations\PassThrough\HeaderWhitelist;
 use Emeq\ExactApi\Http\ExactConnector;
 use Illuminate\Http\Request;
 use Saloon\Http\Response as SaloonResponse;
@@ -25,17 +26,7 @@ final class HeaderForwarder
      */
     public static function forward(Request $request): array
     {
-        $out = [];
-
-        foreach (self::ALLOWED as $name) {
-            $value = $request->header($name);
-
-            if (is_string($value) && $value !== '') {
-                $out[$name] = $value;
-            }
-        }
-
-        return $out;
+        return HeaderWhitelist::filter($request, self::ALLOWED);
     }
 
     /**

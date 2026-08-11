@@ -5,8 +5,9 @@ namespace App\Http\Controllers\Api\V1\Snelstart;
 use App\Enums\Provider;
 use App\Http\Controllers\Api\V1\Concerns\GuardsPassThroughRequest;
 use App\Http\Controllers\Controller;
-use App\Integrations\PassThrough\PassThroughRecorder;
-use App\Integrations\Snelstart\Errors\UpstreamErrorMapper;
+use App\Integrations\PassThrough\PassThroughContext;
+use App\Integrations\PassThrough\PassThroughPipeline;
+use App\Integrations\PassThrough\UpstreamResult;
 use App\Integrations\Snelstart\PassThrough\HeaderForwarder;
 use App\Models\Account;
 use App\Models\Connection;
@@ -17,14 +18,13 @@ use Emeq\SnelstartApi\Snelstart;
 use Illuminate\Http\Request;
 use Saloon\Enums\Method;
 use Symfony\Component\HttpFoundation\Response;
-use Throwable;
 
 #[Group(name: 'Snelstart', description: 'Snelstart OData-calls met de clientKey + subscriptionKey van de gekoppelde Account.', weight: 60)]
 class PassThroughController extends Controller
 {
     use GuardsPassThroughRequest;
 
-    public function __construct(private readonly PassThroughRecorder $recorder) {}
+    public function __construct(private readonly PassThroughPipeline $pipeline) {}
 
     private const ALLOWED_METHODS = ['GET', 'POST', 'PATCH', 'DELETE'];
 
@@ -56,70 +56,48 @@ class PassThroughController extends Controller
         $query = $request->query();
         $headers = HeaderForwarder::forward($request);
 
-        $start = microtime(true);
-        $upstreamError = null;
-        $responseBody = '';
-        $status = 0;
-        $contentType = 'application/json';
-        $extraHeaders = [];
-
-        try {
-            /** @var Snelstart $snelstart */
-            $snelstart = app(Snelstart::class);
-
-            $sdkRequest = new RawSnelstartRequest(
-                method: Method::from($method),
-                endpoint: $endpoint,
-                query: $query,
-                body: $body,
-                headers: $headers,
-            );
-
-            $sdkResponse = $snelstart->connector()->send($sdkRequest);
-
-            // De SDK throwt niet automatisch op failed-status — geef de
-            // Snelstart-mapped exception (Authentication/Validation/Server/
-            // NotFound/RateLimit) een kans om door UpstreamErrorMapper te
-            // worden gemapt naar de juiste Hub-response.
-            if ($sdkResponse->failed()) {
-                $sdkResponse->throw();
-            }
-
-            $status = $sdkResponse->status();
-            $responseBody = $sdkResponse->body();
-            $contentType = $sdkResponse->header('Content-Type') ?? 'application/json';
-        } catch (Throwable $e) {
-            $mapped = UpstreamErrorMapper::mapException($e);
-            $status = $mapped['status'];
-            $responseBody = json_encode($mapped['body'], JSON_THROW_ON_ERROR);
-            $contentType = 'application/json';
-            $extraHeaders = $mapped['headers'];
-            $upstreamError = $mapped['short_code'];
-        }
-
         /** @var Account $account */
         $account = $request->attributes->get('snelstart_account');
         /** @var Connection $connection */
         $connection = $request->attributes->get('snelstart_connection');
 
-        $this->recorder->record(
-            provider: Provider::Snelstart,
-            consumerId: $request->user()->getKey(),
-            accountId: $account->getKey(),
-            connectionId: $connection->getKey(),
-            method: $method,
-            path: $endpoint,
-            status: $status,
-            responseBody: $responseBody,
-            startedAt: $start,
-            query: $query,
-            body: $body,
-            upstreamError: $upstreamError,
-        );
+        return $this->pipeline->run(
+            new PassThroughContext(
+                provider: Provider::Snelstart,
+                consumerId: $request->user()->getKey(),
+                accountId: $account->getKey(),
+                connectionId: $connection->getKey(),
+                method: $method,
+                path: $endpoint,
+                query: $query,
+                body: $body,
+            ),
+            function () use ($method, $endpoint, $query, $body, $headers): UpstreamResult {
+                /** @var Snelstart $snelstart */
+                $snelstart = app(Snelstart::class);
 
-        return response($responseBody, $status)->withHeaders(array_merge(
-            ['Content-Type' => $contentType],
-            $extraHeaders,
-        ));
+                $sdkResponse = $snelstart->connector()->send(new RawSnelstartRequest(
+                    method: Method::from($method),
+                    endpoint: $endpoint,
+                    query: $query,
+                    body: $body,
+                    headers: $headers,
+                ));
+
+                // De SDK throwt niet automatisch op failed-status — geef de
+                // Snelstart-mapped exception (Authentication/Validation/Server/
+                // NotFound/RateLimit) een kans om door de foutmapper te worden
+                // gemapt naar de juiste Hub-response.
+                if ($sdkResponse->failed()) {
+                    $sdkResponse->throw();
+                }
+
+                return new UpstreamResult(
+                    status: $sdkResponse->status(),
+                    body: $sdkResponse->body(),
+                    contentType: $sdkResponse->header('Content-Type') ?? 'application/json',
+                );
+            },
+        );
     }
 }
