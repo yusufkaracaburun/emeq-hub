@@ -273,6 +273,13 @@ definitie providerspecifiek is.
 Beide identificeren de tenant via **header** `X-Account-Id: <external_id>` (let op:
 een header, niet de query-param `account_external_id` van de connect-laag):
 
+> **Meerdere boekhoudkoppelingen op één Account?** Stuur dan ook
+> `X-Provider: <provider>` mee. Heeft het Account precies één boekhoudkoppeling —
+> het normale geval — dan is die header niet nodig. Zijn het er meer en laat je 'm
+> weg, dan antwoordt de Hub `409 multiple_accounting_connections` met de
+> beschikbare providers in `providers`; hij kiest bewust niet zelf. Een
+> `X-Provider` die het Account niet gekoppeld heeft geeft `404`.
+
 | Doel | Request | Ability |
 |---|---|---|
 | Capabilities opvragen | `GET /v1/accounting/capabilities` | `accounting:read` |

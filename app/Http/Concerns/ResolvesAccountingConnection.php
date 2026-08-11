@@ -12,8 +12,13 @@ use Illuminate\Http\Request;
 /**
  * Resolvet de boekhoud-Connection voor een consumer-request via de strikte keten
  * `Bearer → Consumer → Account (X-Account-Id) → actieve Connection`. Gedeeld door de
- * boek- en validate-edges; de ability-check blijft per controller (boeken = write,
- * valideren = read). Faalpaden gooien de exacte JSON-respons als HttpResponseException.
+ * boek-, validate- en lees-edges; de ability-check blijft per controller (boeken =
+ * write, lezen = read). Faalpaden gooien de exacte JSON-respons als
+ * HttpResponseException.
+ *
+ * Heeft een Account meer dan één boekhoudkoppeling, dan moet de consumer kiezen met
+ * `X-Provider`. Zolang er precies één is blijft die header optioneel — impliciet
+ * werken is het normale geval en hoeft niet duurder te worden.
  */
 trait ResolvesAccountingConnection
 {
@@ -38,24 +43,68 @@ trait ResolvesAccountingConnection
             $this->failAccounting('account_not_found', 'Account niet gevonden voor deze Consumer.', 404);
         }
 
-        /** @var Connection|null $connection */
-        $connection = $account->connections()
+        /** @var list<Connection> $candidates */
+        $candidates = $account->connections()
             ->whereNull('revoked_at')
             ->whereIn('provider', $providers)
-            ->first();
+            ->orderBy('id')
+            ->get()
+            ->all();
 
-        if ($connection === null) {
+        if ($candidates === []) {
             $this->failAccounting('no_accounting_connection', 'Geen actieve boekhoud-Connection voor dit Account.', 404);
         }
 
-        return [$account, $connection];
+        return [$account, $this->pickConnection($request, $candidates)];
     }
 
-    private function failAccounting(string $error, string $message, int $status): never
+    /**
+     * @param  list<Connection>  $candidates
+     */
+    private function pickConnection(Request $request, array $candidates): Connection
+    {
+        $requested = $request->header('X-Provider');
+        $available = array_map(static fn (Connection $c): string => $c->provider->value, $candidates);
+
+        if (is_string($requested) && $requested !== '') {
+            foreach ($candidates as $candidate) {
+                if ($candidate->provider->value === $requested) {
+                    return $candidate;
+                }
+            }
+
+            $this->failAccounting(
+                'no_accounting_connection',
+                "Geen actieve '{$requested}'-koppeling voor dit Account. Beschikbaar: ".implode(', ', $available).'.',
+                404,
+                ['providers' => $available],
+            );
+        }
+
+        if (count($candidates) > 1) {
+            // Zonder deze afslag koos `->first()` op rij-volgorde welk boekhoudpakket
+            // de boeking kreeg. Dat is niet zichtbaar voor de consumer en niet stabiel
+            // tussen requests, dus liever weigeren dan gokken.
+            $this->failAccounting(
+                'multiple_accounting_connections',
+                'Dit Account heeft meerdere boekhoudkoppelingen. Kies er één met de header X-Provider. Beschikbaar: '.implode(', ', $available).'.',
+                409,
+                ['providers' => $available],
+            );
+        }
+
+        return $candidates[0];
+    }
+
+    /**
+     * @param  array<string, mixed>  $extra
+     */
+    private function failAccounting(string $error, string $message, int $status, array $extra = []): never
     {
         throw new HttpResponseException(response()->json([
             'error' => $error,
             'message' => $message,
+            ...$extra,
         ], $status));
     }
 }

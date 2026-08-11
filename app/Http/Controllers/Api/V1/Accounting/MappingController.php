@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Api\V1\Accounting;
 
 use App\Accounting\AccountingTargetRegistry;
 use App\Accounting\Enums\Capability;
+use App\Http\Concerns\ResolvesAccountingConnection;
 use App\Http\Controllers\Controller;
 use App\Models\Account;
 use App\Models\Connection;
@@ -25,6 +26,8 @@ use Illuminate\Http\Request;
 #[Group(name: 'Accounting Sync', description: 'Beheer de boekhoud-referentie-mirror en de optionele mapping-override van een Account-koppeling.', weight: 51)]
 class MappingController extends Controller
 {
+    use ResolvesAccountingConnection;
+
     public function __construct(private readonly AccountingTargetRegistry $registry) {}
 
     /**
@@ -184,29 +187,7 @@ class MappingController extends Controller
      */
     private function resolve(Request $request, bool $write): array|JsonResponse
     {
-        $accountHeader = $request->header('X-Account-Id');
-
-        if (! is_string($accountHeader) || $accountHeader === '') {
-            return response()->json(['error' => 'missing_account_header', 'message' => 'Vereiste header X-Account-Id ontbreekt.'], 400);
-        }
-
-        $account = Account::query()
-            ->where('consumer_id', $request->user()?->getKey())
-            ->where('external_id', $accountHeader)
-            ->first();
-
-        if ($account === null) {
-            return response()->json(['error' => 'account_not_found', 'message' => 'Account niet gevonden voor deze Consumer.'], 404);
-        }
-
-        $connection = $account->connections()
-            ->whereNull('revoked_at')
-            ->whereIn('provider', $this->registry->providers())
-            ->first();
-
-        if ($connection === null) {
-            return response()->json(['error' => 'no_accounting_connection', 'message' => 'Geen actieve boekhoud-Connection voor dit Account.'], 404);
-        }
+        [$account, $connection] = $this->resolveAccountingConnection($request, $this->registry->providers());
 
         $provider = $connection->provider->value;
 
