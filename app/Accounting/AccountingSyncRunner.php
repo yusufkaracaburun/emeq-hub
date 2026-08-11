@@ -130,7 +130,7 @@ final readonly class AccountingSyncRunner
             return $claim;
         }
 
-        $existing = $this->links->find($connection, $document->externalId);
+        $existing = $this->links->find($connection, $document);
 
         // Tussen onze INSERT en deze SELECT is de rij weer weg: een gelijktijdige poging
         // faalde en gaf zijn claim vrij. De consumer mag het gewoon opnieuw proberen.

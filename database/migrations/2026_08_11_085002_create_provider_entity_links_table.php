@@ -28,6 +28,14 @@ return new class extends Migration
             // 'financial_document' vandaag; 'relation', 'payment' zodra die entities
             // een eigen identiteit krijgen.
             $table->string('entity_type', 32);
+            // De soort binnen dat type — voor documenten het DocumentType. Zonder deze
+            // kolom deelden een verkoop- en een inkoopfactuur één identiteit, terwijl
+            // hun nummerreeksen bij de consumer los van elkaar lopen: external_id "100"
+            // als verkoopfactuur maakte "100" als inkoopfactuur permanent onboekbaar.
+            // NOT NULL met lege default en niet nullable: in een unique index telt elke
+            // NULL als uniek, dus een entity-type zonder subtype zou z'n dedupe
+            // verliezen.
+            $table->string('entity_subtype', 32)->default('');
             // De identiteit die de consumer aanlevert. Max 255 conform StoreDocumentRequest.
             $table->string('external_id');
 
@@ -42,7 +50,7 @@ return new class extends Migration
             $table->timestamps();
 
             // De dedupe-sleutel: één canoniek document per connectie, precies één keer.
-            $table->unique(['connection_id', 'entity_type', 'external_id'], 'provider_entity_links_canonical_unique');
+            $table->unique(['connection_id', 'entity_type', 'entity_subtype', 'external_id'], 'provider_entity_links_canonical_unique');
             // Andersom ook 1:1 — vangt de bug waarbij twee canonieke documenten
             // dezelfde partner-entity claimen. Meerdere NULLs zijn toegestaan in een
             // unique index (PG en SQLite), en provider_entity_id mag legitiem NULL zijn

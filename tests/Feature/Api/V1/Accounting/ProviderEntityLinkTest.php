@@ -10,6 +10,7 @@ use App\Models\IdempotencyKey;
 use App\Models\ProviderEntityLink;
 use App\Sanctum\TokenAbilities;
 use Emeq\ExactApi\Http\Request\Read\GetSalesEntries;
+use Emeq\ExactApi\Http\Request\Write\CreatePurchaseEntry;
 use Emeq\ExactApi\Http\Request\Write\CreateSalesEntry;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
@@ -98,6 +99,44 @@ class ProviderEntityLinkTest extends TestCase
             ->withHeader('X-Account-Id', $accountExternalId)
             ->withHeader('Idempotency-Key', $idempotencyKey ?? (string) Str::uuid())
             ->postJson('/v1/accounting/documents', $payload);
+    }
+
+    /**
+     * Verkoop- en inkoopnummering lopen bij een consumer los van elkaar, dus
+     * external_id "INV-2026-001" kan allebei voorkomen. Zolang het documenttype
+     * niet in de identiteitssleutel zat, maakte de eerste boeking de tweede
+     * permanent onmogelijk: de claim botste, de fingerprint week af, en het
+     * antwoord was 409 "gebruik een nieuw external_id".
+     */
+    public function test_a_sales_and_a_purchase_invoice_may_share_an_external_id(): void
+    {
+        MockClient::global([
+            CreateSalesEntry::class => MockResponse::make(['d' => ['ID' => 'sales-guid']], 201),
+            CreatePurchaseEntry::class => MockResponse::make(['d' => ['ID' => 'purchase-guid']], 201),
+        ]);
+        $this->bindFakeReferences();
+
+        [$consumer] = $this->consumerWithExactConnection();
+
+        $this->postDocument($consumer, $this->salesInvoicePayload())
+            ->assertStatus(201)
+            ->assertJsonPath('external_ref', 'sales-guid');
+
+        $this->postDocument($consumer, $this->salesInvoicePayload([
+            'type' => 'purchase_invoice',
+            'party' => ['role' => 'creditor', 'name' => 'Leverancier BV', 'vat_number' => 'NL000099998B57'],
+            'lines' => [
+                ['description' => 'Inkoop', 'amount' => 200, 'tax_rate' => 21, 'category' => 'inkoop'],
+            ],
+        ]))
+            ->assertStatus(201)
+            ->assertJsonPath('external_ref', 'purchase-guid');
+
+        $this->assertSame(2, ProviderEntityLink::query()->count());
+        $this->assertEqualsCanonicalizing(
+            ['sales_invoice', 'purchase_invoice'],
+            ProviderEntityLink::query()->pluck('entity_subtype')->all(),
+        );
     }
 
     public function test_successful_push_records_the_link(): void
@@ -338,6 +377,7 @@ class ProviderEntityLinkTest extends TestCase
         ProviderEntityLink::query()->create([
             'connection_id' => $connection->getKey(),
             'entity_type' => ProviderEntityLink::ENTITY_FINANCIAL_DOCUMENT,
+            'entity_subtype' => 'sales_invoice',
             'external_id' => 'INV-2026-001',
             'provider' => 'exact',
             'provider_entity_id' => null,
@@ -367,6 +407,7 @@ class ProviderEntityLinkTest extends TestCase
         ProviderEntityLink::query()->create([
             'connection_id' => $connection->getKey(),
             'entity_type' => ProviderEntityLink::ENTITY_FINANCIAL_DOCUMENT,
+            'entity_subtype' => 'sales_invoice',
             'external_id' => 'INV-2026-001',
             'provider' => 'exact',
             'provider_entity_id' => null,

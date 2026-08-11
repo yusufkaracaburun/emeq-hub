@@ -31,6 +31,7 @@ use Illuminate\Support\Carbon;
     'connection_id',
     'provider',
     'entity_type',
+    'entity_subtype',
     'external_id',
     'provider_entity_id',
     'provider_entity_number',

@@ -15,12 +15,13 @@ use Illuminate\Database\UniqueConstraintViolationException;
  */
 final readonly class ProviderEntityLinkRecorder
 {
-    public function find(Connection $connection, string $externalId): ?ProviderEntityLink
+    public function find(Connection $connection, FinancialDocument $document): ?ProviderEntityLink
     {
         return ProviderEntityLink::query()
             ->where('connection_id', $connection->getKey())
             ->where('entity_type', ProviderEntityLink::ENTITY_FINANCIAL_DOCUMENT)
-            ->where('external_id', $externalId)
+            ->where('entity_subtype', $document->type->value)
+            ->where('external_id', $document->externalId)
             ->first();
     }
 
@@ -42,6 +43,7 @@ final readonly class ProviderEntityLinkRecorder
             return ProviderEntityLink::query()->create([
                 'connection_id' => $connection->getKey(),
                 'entity_type' => ProviderEntityLink::ENTITY_FINANCIAL_DOCUMENT,
+                'entity_subtype' => $document->type->value,
                 'external_id' => $document->externalId,
                 'provider' => $connection->provider->value,
                 'provider_entity_id' => null,
@@ -92,6 +94,7 @@ final readonly class ProviderEntityLinkRecorder
             [
                 'connection_id' => $connection->getKey(),
                 'entity_type' => ProviderEntityLink::ENTITY_FINANCIAL_DOCUMENT,
+                'entity_subtype' => $document->type->value,
                 'external_id' => $document->externalId,
             ],
             [

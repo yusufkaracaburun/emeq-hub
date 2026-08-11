@@ -545,6 +545,12 @@ ook als je idempotency-sleutel weg is:
   een correctie een creditnota met een eigen `external_id` — hergebruik het oude
   nummer niet. **Niet retryen.**
 
+> De identiteit van een document is `(koppeling, type, external_id)` — het `type`
+> telt mee. Verkoop- en inkoopnummering lopen bij de meeste consumers los van
+> elkaar, dus `external_id: "100"` mag zowel een `sales_invoice` als een
+> `purchase_invoice` zijn; die botsen niet. Twee documenten van hetzelfde type met
+> hetzelfde `external_id` botsen wél.
+
 De vergelijking kijkt naar de betekenis van het document, niet naar de exacte bytes:
 sleutelvolgorde en `200` versus `200.00` maken geen verschil. Een gewijzigd bedrag,
 tarief, regel, datum of factuurnummer wél.
