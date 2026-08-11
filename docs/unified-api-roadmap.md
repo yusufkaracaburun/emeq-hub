@@ -3,8 +3,8 @@
 > Niets staat onder **IMPLEMENTED** zonder werkende code én tests. Bij twijfel gaat
 > het naar NEXT. Architectuur staat in `unified-api-architecture.md`.
 
-Laatste update: 2026-08-11 · suite: 1224 passed, 1 incomplete, 0 failures.
-Startbaseline vóór dit traject: 1120 passed · PHPStan-baseline 206 → 135.
+Laatste update: 2026-08-11 · suite: 1244 passed, 1 incomplete, 0 failures.
+Startbaseline vóór dit traject: 1120 passed · PHPStan-baseline 206 → 125.
 
 ---
 
@@ -119,9 +119,20 @@ Additief — `error` en de historische `code` op de 401 blijven onaangeroerd.
 → `tests/Unit/Support/Errors/ErrorCodeTest.php`,
 `tests/Feature/Api/ErrorEnvelopeTest.php`
 
+### Canoniek lees-pad (referentiedata + relaties)
+`GET /v1/accounting/{ledger-accounts,tax-codes,customers,suppliers}` met één
+antwoordvorm: `{data, next_cursor, has_more}`. Capability-gated, dus de controller
+kent geen providernaam. Grootboek en btw komen uit de mirror (geen partner-call, met
+een test die dat vastlegt); relaties live en fail-hard — een lege lijst teruggeven
+terwijl de partner plat ligt is een leugen. Cursor-paginatie, ondoorzichtig voor de
+consumer: keyset op `code` voor de mirror, Exact's `$skiptoken` voor de live lijst.
+Canonieke types `LedgerAccount`, `TaxCode`, `Relation`.
+→ `tests/Feature/Api/V1/Accounting/ReadResourcesTest.php`,
+`tests/Unit/Accounting/Read/CursorTest.php`
+
 ### Statische analyse
 PHPStan/Larastan level 5 op `app/`, `database/factories/` en `routes/`, met een
-baseline van 135 bestaande hits. Nieuwe code moet schoon zijn; bestaande schuld
+baseline van 125 bestaande hits. Nieuwe code moet schoon zijn; bestaande schuld
 blokkeert de build niet. Draait in CI naast Pint, tests en `composer audit`.
 → `phpstan.neon`, `.github/workflows/ci.yml`
 
@@ -131,10 +142,12 @@ blokkeert de build niet. Draait in CI naast Pint, tests en `composer audit`.
 
 Gepland en ontworpen; volgorde is bindend vanwege harde afhankelijkheden.
 
-### 1. Canonieke read-resources
-`GET /v1/accounting/{ledger-accounts,tax-codes,customers,suppliers}` uit mirror en
-SDK. Daarna `GET /v1/accounting/invoices` — vereist eerst nieuwe read-requests in
-`emeq/exact-api` (die bestaan nog niet).
+### 1. `GET /v1/accounting/invoices`
+De SDK-kant staat er: `GetSalesEntries`/`GetPurchaseEntries` +
+`Envelope::nextSkipToken()` in `emeq/exact-api` v0.3.0. Wat nog moet: een canonieke
+`Invoice` met regels, een `ReadsInvoices`-contract, en de Exact→canoniek-mapping.
+Bewust `salesentry/SalesEntries` en niet de item-based factuurmodule — dat is waar de
+Hub naartoe schrijft, dus dat is wat je terugleest.
 
 ---
 

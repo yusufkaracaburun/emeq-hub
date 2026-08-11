@@ -59,8 +59,14 @@ document is een waarde, geen rij.
 Enums: `DocumentType` (`sales_invoice`, `purchase_invoice`, `income`, `expense`,
 `credit_note`), `TaxTreatment` (`standard`, `reverse_charge`), `SyncStatus`.
 
-**Leeszijde** 🚧: `LedgerAccount`, `TaxCode`, `Customer`, `Supplier`, `Invoice` —
-zie fase 6 in het plan.
+**Leeszijde**: `LedgerAccount`, `TaxCode`, `Relation` (debiteur én crediteur — één
+type met een `role`, want beide partners kennen één relatie-entiteit met rolvlaggen).
+`Invoice` 🚧.
+
+Elk read-type draagt een `id` dat **ondoorzichtig** is: gebruik 'm om terug te
+verwijzen, lees er geen betekenis in. Vandaag is het de partner-identiteit; dat is
+geen belofte. Wat wél betekenis heeft staat apart — `code` op een grootboekrekening
+is het nummer dat de boekhouder kent en dat je in `line.category` kunt terugleggen.
 
 Waarom géén `App\Domain\Accounting`: de repo is capability-at-root
 (`App\Accounting`, `App\Books`, `App\Billing`, `App\Webhooks`), met de provider als
@@ -89,16 +95,43 @@ Async-variant: `Prefer: respond-async` → 202 `pending` → `SyncAccountingDocu
 audit-bescherming zit in de runner, niet in de controller, juist zodat beide paden
 hem krijgen.
 
-## Leespad 🚧
+## Leespad
 
-Fase 6. Twee bronnen:
+```
+GET /v1/accounting/{ledger-accounts,tax-codes,customers,suppliers}
+  → ReadController               resolve connection, ability, capability
+  → AccountingTargetRegistry     contract of null
+  → ExactAccountingTarget        Reads*-implementatie
+      ├─ mirror   (grootboek, btw)   → MirrorReader, geen partner-call
+      └─ live     (relaties)         → emeq/exact-api
+  ← ReadPage<T> → { data, next_cursor, has_more }
+```
 
-- **Mirror** (`connection_accounting_refs`) voor stabiele referentiedata —
-  grootboek, btw-codes, dagboeken, kostenplaatsen. Geen live partner-call.
-- **Live** via de SDK voor bewegende data — relaties, facturen.
+Twee bronnen, bewust verschillend:
 
-Paginatie is cursor-based (`?cursor=&limit=`) met een opaque cursor, omdat Exact
-OData `$skiptoken` gebruikt en offset-paginatie daar niet op mapt.
+- **Mirror** (`connection_accounting_refs`) voor stabiele referentiedata. Geen
+  partner-call: die zou verspilling zijn én een extra faalpunt. `MirrorReader` is
+  gedeeld — het schema is niet provider-specifiek, dus de leescode ook niet. Wat per
+  provider verschilt is hoe de mirror gevúld wordt.
+- **Live** via de SDK voor bewegende data (relaties). Faalt hard: een lege lijst
+  teruggeven terwijl de partner plat ligt is een leugen. Dat is het verschil met
+  `ExactReferenceData`, dat bewust fail-soft is voor de admin-UI.
+
+`/customers` en `/suppliers` zijn twee ingangen op één bron — beide partners die we
+kennen hebben één relatie-entiteit met rolvlaggen, net als het canonieke `Party` op
+de schrijfzijde.
+
+**Paginatie** is cursor-based (`?cursor=&limit=`), niet offset: Exact OData pagineert
+met `$skiptoken` en `?page=3` zou een leugen zijn die de Hub zou moeten nabouwen. De
+cursor is voor de consumer ondoorzichtig — voor de mirror is het de laatst geziene
+code (keyset op de unieke index), voor een live lijst het `$skiptoken` uit Exact's
+`__next`. Door 'm te verpakken belooft het contract niets over die vorm.
+
+Bewust géén `total`: Exact levert dat niet zonder tweede call, en een veld dat bij de
+ene provider klopt en bij de andere ontbreekt is erger dan geen veld.
+
+🚧 `GET /v1/accounting/invoices` volgt: de SDK-reads (`GetSalesEntries`,
+`GetPurchaseEntries`) staan er sinds v0.3.0, de canonieke `Invoice` nog niet.
 
 ## Capabilities
 

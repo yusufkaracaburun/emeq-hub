@@ -267,6 +267,10 @@ een header, niet de query-param `account_external_id` van de connect-laag):
 | Doel | Request | Ability |
 |---|---|---|
 | Capabilities opvragen | `GET /v1/accounting/capabilities` | `exact:read` |
+| Grootboek lezen | `GET /v1/accounting/ledger-accounts` | `exact:read` |
+| Btw-codes lezen | `GET /v1/accounting/tax-codes` | `exact:read` |
+| Klanten lezen | `GET /v1/accounting/customers` | `exact:read` |
+| Leveranciers lezen | `GET /v1/accounting/suppliers` | `exact:read` |
 | Valideren (dry-run) | `POST /v1/accounting/documents/validate` | `exact:read` |
 | Boeken | `POST /v1/accounting/documents` | `exact:write` |
 
@@ -297,6 +301,45 @@ negeert, dan is uitbreiding voor jou niet-breaking. Ontbreekt
 `documents.attachments`, stuur dan geen bijlagen mee. `enabled: false` betekent dat de
 provider tijdelijk uitgezet is (onderhoud, incident); wat hij *kan* verandert daar niet
 door, maar schrijfacties geven dan `503 provider_disabled`.
+
+### Lezen uit de boekhouding
+
+Vier endpoints, één antwoordvorm:
+
+```http
+GET /v1/accounting/ledger-accounts?limit=50
+X-Account-Id: bob
+```
+
+```json
+{
+  "data": [
+    { "id": "a1b2…", "code": "8000", "name": "Omzet", "attributes": {} }
+  ],
+  "next_cursor": "MDgwMA",
+  "has_more": true
+}
+```
+
+- **`id`** is **ondoorzichtig**. Gebruik 'm om terug te verwijzen, lees er geen
+  betekenis in en parse 'm niet. Wat wél betekenis heeft staat apart: `code` op een
+  grootboekrekening is het nummer dat je boekhouder kent en dat je in
+  `line.category` kunt terugleggen.
+- **Paginatie is cursor-based.** Geef `next_cursor` ongewijzigd terug als `?cursor=`
+  tot `has_more` false is. Geen `?page=`: de onderliggende pakketten pagineren niet
+  op offset. De cursor is ondoorzichtig — bewaar 'm niet langdurig.
+- **`limit`** is 1–200, standaard 50.
+- Bij `customers`/`suppliers` draagt elke rij `roles` (`debtor` en/of `creditor`); een
+  relatie kan allebei zijn. `/customers` en `/suppliers` filteren op één rol.
+
+`ledger-accounts` en `tax-codes` komen uit de Hub-spiegel van jouw administratie —
+snel en zonder je boekhoudpakket te belasten. Ververs die met
+`POST /v1/accounting/sync` na wijzigingen in het pakket. `customers`/`suppliers`
+worden live opgehaald.
+
+Controleer met `GET /v1/accounting/capabilities` of `accounting.relations.read` en
+`accounting.ledger_accounts.read` in de lijst staan; ontbreekt er één, dan geeft dat
+endpoint `422 unsupported_capability`.
 
 ### Canonical document
 

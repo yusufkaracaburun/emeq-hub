@@ -38,6 +38,7 @@ trait ResolvesAccountingConnection
             $this->failAccounting('account_not_found', 'Account niet gevonden voor deze Consumer.', 404);
         }
 
+        /** @var Connection|null $connection */
         $connection = $account->connections()
             ->whereNull('revoked_at')
             ->whereIn('provider', $providers)

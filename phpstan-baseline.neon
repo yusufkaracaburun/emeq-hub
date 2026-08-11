@@ -19,42 +19,6 @@ parameters:
 			path: app/Accounting/Exact/ExactAccountingTarget.php
 
 		-
-			message: '#^Offset ''percentage'' on string\|null on left side of \?\? does not exist\.$#'
-			identifier: nullCoalesce.offset
-			count: 2
-			path: app/Accounting/Exact/ExactMappingDeriver.php
-
-		-
-			message: '#^Offset ''type'' on string\|null on left side of \?\? does not exist\.$#'
-			identifier: nullCoalesce.offset
-			count: 2
-			path: app/Accounting/Exact/ExactMappingDeriver.php
-
-		-
-			message: '#^Strict comparison using \=\=\= between \-1\.0 and 0\.0\|9\.0\|21\.0 will always evaluate to false\.$#'
-			identifier: identical.alwaysFalse
-			count: 1
-			path: app/Accounting/Exact/ExactMappingDeriver.php
-
-		-
-			message: '#^Strict comparison using \=\=\= between \-1\.0 and 9\.0\|21\.0 will always evaluate to false\.$#'
-			identifier: identical.alwaysFalse
-			count: 1
-			path: app/Accounting/Exact/ExactMappingDeriver.php
-
-		-
-			message: '#^Strict comparison using \=\=\= between 0 and 20 will always evaluate to false\.$#'
-			identifier: identical.alwaysFalse
-			count: 1
-			path: app/Accounting/Exact/ExactMappingDeriver.php
-
-		-
-			message: '#^Strict comparison using \=\=\= between 0 and 22 will always evaluate to false\.$#'
-			identifier: identical.alwaysFalse
-			count: 1
-			path: app/Accounting/Exact/ExactMappingDeriver.php
-
-		-
 			message: '#^Offset ''is_sales'' on array\{is_sales\: bool, is_supplier\: bool, status\: string\|null\} on left side of \?\? always exists and is not nullable\.$#'
 			identifier: nullCoalesce.offset
 			count: 1
@@ -463,19 +427,13 @@ parameters:
 			path: app/Http/Controllers/Api/V1/AccountSubscriptions/AccountSubscriptionController.php
 
 		-
-			message: '#^Method App\\Http\\Controllers\\Api\\V1\\Accounting\\DocumentsController\:\:resolveAccountingConnection\(\) should return array\{App\\Models\\Account, App\\Models\\Connection\} but returns array\{App\\Models\\Account, Illuminate\\Database\\Eloquent\\Model\}\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/Api/V1/Accounting/DocumentsController.php
-
-		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$provider\.$#'
 			identifier: property.notFound
 			count: 1
 			path: app/Http/Controllers/Api/V1/Accounting/MappingController.php
 
 		-
-			message: '#^Anonymous function should return Illuminate\\Support\\Collection\<int, array\{code\: string, label\: string\|null, attrs\: string\|null\}\> but returns Illuminate\\Support\\Collection\<int, array\{code\: string, label\: string\|null, attrs\: string\|null\}\>\.$#'
+			message: '#^Anonymous function should return Illuminate\\Support\\Collection\<int, array\{code\: string, label\: string\|null, attrs\: array\<string, mixed\>\|null\}\> but returns Illuminate\\Support\\Collection\<int, array\{code\: string, label\: string\|null, attrs\: array\<string, mixed\>\|null\}\>\.$#'
 			identifier: return.type
 			count: 1
 			path: app/Http/Controllers/Api/V1/Accounting/MappingController.php
@@ -487,16 +445,10 @@ parameters:
 			path: app/Http/Controllers/Api/V1/Accounting/MappingController.php
 
 		-
-			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<\(int\|string\),Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\ConnectionAccountingRef\>\>\:\:map\(\) expects callable\(Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\ConnectionAccountingRef\>, int\|string\)\: Illuminate\\Support\\Collection\<int, array\{code\: string, label\: string\|null, attrs\: string\|null\}\>, Closure\(mixed\)\: Illuminate\\Support\\Collection\<int, array\{code\: string, label\: string\|null, attrs\: string\|null\}\> given\.$#'
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<\(int\|string\),Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\ConnectionAccountingRef\>\>\:\:map\(\) expects callable\(Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\ConnectionAccountingRef\>, int\|string\)\: Illuminate\\Support\\Collection\<int, array\{code\: string, label\: string\|null, attrs\: array\<string, mixed\>\|null\}\>, Closure\(mixed\)\: Illuminate\\Support\\Collection\<int, array\{code\: string, label\: string\|null, attrs\: array\<string, mixed\>\|null\}\> given\.$#'
 			identifier: argument.type
 			count: 1
 			path: app/Http/Controllers/Api/V1/Accounting/MappingController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Api\\V1\\Accounting\\ValidateDocumentController\:\:resolveAccountingConnection\(\) should return array\{App\\Models\\Account, App\\Models\\Connection\} but returns array\{App\\Models\\Account, Illuminate\\Database\\Eloquent\\Model\}\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/Api/V1/Accounting/ValidateDocumentController.php
 
 		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$display_name\.$#'

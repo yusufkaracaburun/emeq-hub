@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "93d416c53b281cb0f60401f8194093a6",
+    "content-hash": "2446b0b7e1323c4e78e4a87bf0869a6c",
     "packages": [
         {
             "name": "akaunting/laravel-money",
@@ -1492,16 +1492,16 @@
         },
         {
             "name": "emeq/exact-api",
-            "version": "v0.2.13",
+            "version": "v0.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/yusufkaracaburun/emeq-exact-api.git",
-                "reference": "57808f04dd285920d8e5c1b70812552d06a9acf4"
+                "reference": "b25cf0364b6d95502819a205e799330d06410f01"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/yusufkaracaburun/emeq-exact-api/zipball/57808f04dd285920d8e5c1b70812552d06a9acf4",
-                "reference": "57808f04dd285920d8e5c1b70812552d06a9acf4",
+                "url": "https://api.github.com/repos/yusufkaracaburun/emeq-exact-api/zipball/b25cf0364b6d95502819a205e799330d06410f01",
+                "reference": "b25cf0364b6d95502819a205e799330d06410f01",
                 "shasum": ""
             },
             "require": {
@@ -1585,10 +1585,10 @@
                 "saloon"
             ],
             "support": {
-                "source": "https://github.com/yusufkaracaburun/emeq-exact-api/tree/v0.2.13",
+                "source": "https://github.com/yusufkaracaburun/emeq-exact-api/tree/v0.3.0",
                 "issues": "https://github.com/yusufkaracaburun/emeq-exact-api/issues"
             },
-            "time": "2026-06-23T21:44:02+00:00"
+            "time": "2026-08-11T10:07:46+00:00"
         },
         {
             "name": "emeq/mollie-api",

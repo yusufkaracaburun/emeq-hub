@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\V1\AccountController;
 use App\Http\Controllers\Api\V1\Accounting\DocumentsController as AccountingDocumentsController;
 use App\Http\Controllers\Api\V1\Accounting\MappingController as AccountingMappingController;
+use App\Http\Controllers\Api\V1\Accounting\ReadController as AccountingReadController;
 use App\Http\Controllers\Api\V1\Accounting\ValidateDocumentController as AccountingValidateDocumentController;
 use App\Http\Controllers\Api\V1\AccountSubscriptions\AccountSubscriptionController;
 use App\Http\Controllers\Api\V1\AccountSubscriptions\PauseController;
@@ -136,6 +137,17 @@ Route::middleware('auth:sanctum')->group(function (): void {
     // optionele mapping-override. Account + Connection in de controller geresolved.
     Route::get('/accounting/capabilities', [AccountingMappingController::class, 'capabilities'])
         ->name('api.accounting.capabilities');
+
+    // Provider-onafhankelijk lezen. Grootboek en btw uit de mirror, relaties live.
+    // Cursor-paginatie: `?limit=&cursor=`, cursor ondoorzichtig.
+    Route::get('/accounting/ledger-accounts', [AccountingReadController::class, 'ledgerAccounts'])
+        ->name('api.accounting.ledger-accounts');
+    Route::get('/accounting/tax-codes', [AccountingReadController::class, 'taxCodes'])
+        ->name('api.accounting.tax-codes');
+    Route::get('/accounting/customers', [AccountingReadController::class, 'customers'])
+        ->name('api.accounting.customers');
+    Route::get('/accounting/suppliers', [AccountingReadController::class, 'suppliers'])
+        ->name('api.accounting.suppliers');
     Route::post('/accounting/sync', [AccountingMappingController::class, 'sync'])
         ->name('api.accounting.sync');
     Route::get('/accounting/reference-data', [AccountingMappingController::class, 'referenceData'])

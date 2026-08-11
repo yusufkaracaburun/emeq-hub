@@ -45,6 +45,7 @@ enum ErrorCode: string
         'mapping_failed' => self::ReferenceMappingMissing->value,
         // 422 die zegt "deze provider kan dit niet".
         'sync_unsupported' => self::UnsupportedCapability->value,
+        'unsupported_capability' => self::UnsupportedCapability->value,
         // 422 waarbij de partner functioneel weigerde — niet ónze validatie.
         'upstream_rejected' => self::ProviderError->value,
         'upstream_validation' => self::ProviderError->value,

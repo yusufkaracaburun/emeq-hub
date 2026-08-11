@@ -7,6 +7,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 
 /**
  * Eén rij gemirrorde boekhoud-referentiedata per Connection: een stabiele `code`
@@ -15,6 +16,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * De boeking resolvet code→native_id lokaal tegen deze mirror (geen live partner-call);
  * de mirror wordt ververst door de reference-sync. `kind` ∈
  * gl|vat|journal|relation|cost_center|cost_unit.
+ */
+/**
+ * Statische analyse leest `casts()` niet en valt terug op het kolomtype uit de
+ * migratie; `attrs` las daardoor als string. Zie ook {@see Connection}.
+ *
+ * @property array<string, mixed>|null $attrs
+ * @property Carbon|null $synced_at
  */
 #[Fillable([
     'connection_id',

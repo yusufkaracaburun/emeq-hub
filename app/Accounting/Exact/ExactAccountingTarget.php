@@ -8,6 +8,9 @@ use App\Accounting\AccountingResult;
 use App\Accounting\Attachment;
 use App\Accounting\Contracts\AccountingTarget;
 use App\Accounting\Contracts\EnrichesValidation;
+use App\Accounting\Contracts\ReadsLedgerAccounts;
+use App\Accounting\Contracts\ReadsRelations;
+use App\Accounting\Contracts\ReadsTaxCodes;
 use App\Accounting\Contracts\ReferenceResolver;
 use App\Accounting\Contracts\SyncsReferenceData;
 use App\Accounting\Contracts\UploadsAttachments;
@@ -15,16 +18,25 @@ use App\Accounting\Enums\DocumentType;
 use App\Accounting\Exceptions\AccountingMappingException;
 use App\Accounting\FinancialDocument;
 use App\Accounting\FinancialDocumentLine;
+use App\Accounting\LedgerAccount;
+use App\Accounting\MirrorReader;
+use App\Accounting\Read\Cursor;
+use App\Accounting\Read\ReadPage;
+use App\Accounting\Read\ReadQuery;
+use App\Accounting\Relation;
+use App\Accounting\TaxCode;
 use App\Accounting\Validation\Enrichment\ExactReportEnricher;
 use App\Accounting\Validation\Finding;
 use App\Models\Connection;
 use App\Services\Exact\ConnectionTokenStore;
+use App\Services\Exact\ExactReferenceData;
 use App\Services\Exact\HubExactCredentialResolver;
 use Emeq\ExactApi\Contracts\ExactCredentialResolver;
 use Emeq\ExactApi\Contracts\TokenStore;
 use Emeq\ExactApi\Enums\ExactDocumentType;
 use Emeq\ExactApi\Exact;
 use Emeq\ExactApi\Http\ExactConnector;
+use Emeq\ExactApi\Http\Request\Read\GetRelations;
 use Emeq\ExactApi\Http\Request\Write\CreateDocument;
 use Emeq\ExactApi\Http\Request\Write\CreateDocumentAttachment;
 use Emeq\ExactApi\Http\Request\Write\CreatePurchaseEntry;
@@ -43,14 +55,141 @@ use Throwable;
  * De Exact-wire (endpoints, veldnamen, AmountFC/AmountDC, response-envelope) leeft in
  * de SDK; deze adapter levert alleen geresolvede waarden in een neutrale regel-vorm.
  */
-final class ExactAccountingTarget implements AccountingTarget, EnrichesValidation, SyncsReferenceData, UploadsAttachments
+final class ExactAccountingTarget implements AccountingTarget, EnrichesValidation, ReadsLedgerAccounts, ReadsRelations, ReadsTaxCodes, SyncsReferenceData, UploadsAttachments
 {
     public function __construct(
         private readonly ReferenceResolver $references,
         private readonly ExactReferenceSync $referenceSync,
         private readonly ExactMappingDeriver $mappingDeriver,
         private readonly ExactReportEnricher $reportEnricher,
+        private readonly MirrorReader $mirror,
     ) {}
+
+    /**
+     * Capability `accounting.ledger_accounts.read` — uit de mirror, geen partner-call.
+     *
+     * @return ReadPage<LedgerAccount>
+     */
+    public function readLedgerAccounts(Connection $connection, ReadQuery $query): ReadPage
+    {
+        return $this->mirror->ledgerAccounts($connection, $query);
+    }
+
+    /**
+     * Capability `accounting.tax_codes.read` — uit de mirror, geen partner-call.
+     *
+     * @return ReadPage<TaxCode>
+     */
+    public function readTaxCodes(Connection $connection, ReadQuery $query): ReadPage
+    {
+        return $this->mirror->taxCodes($connection, $query);
+    }
+
+    /**
+     * Capability `accounting.relations.read` — wél live: relaties bewegen, en de mirror
+     * vult zich alleen lui met wat er geboekt is.
+     *
+     * Faalt hard, in tegenstelling tot {@see ExactReferenceData} die
+     * fail-soft naar `[]` gaat: een lege lijst teruggeven terwijl Exact plat ligt is een
+     * leugen tegen de consumer. De exception loopt door naar UpstreamErrorMapper.
+     *
+     * @return ReadPage<Relation>
+     */
+    public function readRelations(Connection $connection, ReadQuery $query, ?string $role = null): ReadPage
+    {
+        $params = [
+            '$select' => 'ID,Code,Name,VATNumber,Email,IsSales,IsSupplier',
+            '$top' => $query->limit,
+        ];
+
+        if ($role !== null) {
+            $params['$filter'] = $role === Relation::ROLE_CREDITOR ? 'IsSupplier eq true' : 'IsSales eq true';
+        }
+
+        if ($query->cursor !== null) {
+            $params['$skiptoken'] = $query->cursor->value;
+        }
+
+        $response = $this->connector($connection)->send(new GetRelations($params));
+
+        if ($response->failed()) {
+            $response->throw();
+        }
+
+        $json = (array) $response->json();
+        $token = Envelope::nextSkipToken($json);
+
+        return new ReadPage(
+            items: array_map(
+                static fn (array $row): Relation => self::toRelation($row),
+                Envelope::results($json),
+            ),
+            nextCursor: $token === null ? null : Cursor::of($token),
+        );
+    }
+
+    /**
+     * @param  array<string, mixed>  $row
+     */
+    private static function toRelation(array $row): Relation
+    {
+        // Exact vult Code op met spaties tot een vaste breedte.
+        $code = trim((string) ($row['Code'] ?? ''));
+
+        return new Relation(
+            id: (string) ($row['ID'] ?? ''),
+            name: (string) ($row['Name'] ?? ''),
+            roles: array_values(array_filter([
+                ($row['IsSales'] ?? false) ? Relation::ROLE_DEBTOR : null,
+                ($row['IsSupplier'] ?? false) ? Relation::ROLE_CREDITOR : null,
+            ])),
+            code: $code !== '' ? $code : null,
+            vatNumber: self::nullableString($row['VATNumber'] ?? null),
+            email: self::nullableString($row['Email'] ?? null),
+        );
+    }
+
+    private static function nullableString(mixed $value): ?string
+    {
+        $value = trim((string) ($value ?? ''));
+
+        return $value !== '' ? $value : null;
+    }
+
+    /**
+     * Bindt de Exact-SDK aan déze Connection (spiegel van ResolveExactAccount) zodat de
+     * reactieve token-refresh tegen de juiste koppeling loopt, en geeft de division terug.
+     *
+     * @return string de division van de Connection
+     *
+     * @throws AccountingMappingException wanneer de Connection geen division heeft
+     */
+    private function bindSdkFor(Connection $connection): string
+    {
+        $division = (string) $connection->administratie_id;
+
+        if ($division === '') {
+            throw new AccountingMappingException(
+                'Exact-Connection heeft geen division (administratie_id) — herkoppel de Account.'
+            );
+        }
+
+        app()->instance(ExactCredentialResolver::class, new HubExactCredentialResolver($connection));
+        app()->instance(TokenStore::class, new ConnectionTokenStore($connection));
+        app()->forgetInstance(Exact::class);
+
+        return $division;
+    }
+
+    private function connector(Connection $connection): ExactConnector
+    {
+        $division = $this->bindSdkFor($connection);
+
+        /** @var Exact $exact */
+        $exact = app(Exact::class);
+
+        return $exact->connector($division);
+    }
 
     /**
      * Capability `references.sync`. Spiegelen en afleiden horen bij elkaar; deze
@@ -77,17 +216,9 @@ final class ExactAccountingTarget implements AccountingTarget, EnrichesValidatio
 
     public function push(FinancialDocument $document, Connection $connection): AccountingResult
     {
-        $division = (string) $connection->administratie_id;
-
-        if ($division === '') {
-            throw new AccountingMappingException(
-                'Exact-Connection heeft geen division (administratie_id) — herkoppel de Account.'
-            );
-        }
-
-        app()->instance(ExactCredentialResolver::class, new HubExactCredentialResolver($connection));
-        app()->instance(TokenStore::class, new ConnectionTokenStore($connection));
-        app()->forgetInstance(Exact::class);
+        // Binden vóór ensureMapping: die synct zo nodig referentiedata en heeft de SDK
+        // dus al nodig. De connector pas daarná ophalen, want ensureMapping herbindt.
+        $division = $this->bindSdkFor($connection);
 
         $this->ensureMapping($connection);
 
