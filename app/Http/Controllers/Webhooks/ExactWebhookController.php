@@ -10,6 +10,7 @@ use App\Jobs\Webhooks\ForwardExactWebhookToConsumerJob;
 use App\Models\Connection;
 use App\Webhooks\InboundWebhookRecorder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -65,18 +66,31 @@ final class ExactWebhookController extends Controller
             return response('', 200);
         }
 
-        $connection = Connection::query()
+        // Eén administratie kan door meerdere Accounts gekoppeld zijn — de boekhouder
+        // via de ene Consumer-app, de ondernemer via de andere. Het schema staat dat
+        // toe: de unique zit op (account, provider), de index op (provider,
+        // administratie_id) is niet uniek. `->first()` leverde er dan één willekeurige,
+        // dus kreeg één partij de webhook en de ander niets — en over Consumer-grenzen
+        // heen is dat een levering aan de verkeerde partij.
+        /** @var list<Connection> $connections */
+        $connections = Connection::query()
             ->where('provider', Provider::Exact->value)
             ->where('administratie_id', $division)
             ->whereNull('revoked_at')
-            ->first();
+            ->orderBy('id')
+            ->get()
+            ->all();
 
-        if ($connection === null) {
+        if ($connections === []) {
             $this->recorder->record(Provider::Exact->value, $request, 200, InboundWebhookRecorder::OUTCOME_UNKNOWN_TENANT, $eventId, $topic, $action);
 
             return response('', 200);
         }
 
+        // `inbound_webhook_events` is uniek op (provider, event_id) — dat is de
+        // dedupe-sleutel voor retries — dus er is één auditrij per inkomende webhook,
+        // niet per ontvanger. Die rij wijst de laagste connectie aan; de volledige
+        // ontvangerslijst gaat naar de log zodat de fan-out traceerbaar blijft.
         $this->recorder->record(
             Provider::Exact->value,
             $request,
@@ -85,11 +99,22 @@ final class ExactWebhookController extends Controller
             $eventId,
             $topic,
             $action,
-            $connection,
+            $connections[0],
             InboundWebhookRecorder::FANOUT_DISPATCHED,
         );
 
-        ForwardExactWebhookToConsumerJob::dispatch($connection, $payload, $eventId);
+        if (count($connections) > 1) {
+            Log::info('webhook.fanout_multiple_connections', [
+                'provider' => Provider::Exact->value,
+                'event_id' => $eventId,
+                'division' => $division,
+                'connection_ids' => array_map(static fn (Connection $c): int => $c->id, $connections),
+            ]);
+        }
+
+        foreach ($connections as $connection) {
+            ForwardExactWebhookToConsumerJob::dispatch($connection, $payload, $eventId);
+        }
 
         return response('', 200);
     }

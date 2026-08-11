@@ -10,6 +10,7 @@ use App\Jobs\Webhooks\ForwardSnelstartWebhookToConsumerJob;
 use App\Models\Connection;
 use App\Webhooks\InboundWebhookRecorder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -50,13 +51,19 @@ final class SnelstartWebhookController extends Controller
             return response('', 200);
         }
 
-        $connection = Connection::query()
+        // Zelfde reden als bij Exact: één administratie kan door meerdere Accounts
+        // gekoppeld zijn, en `->first()` koos er dan willekeurig één — over
+        // Consumer-grenzen heen een levering aan de verkeerde partij.
+        /** @var list<Connection> $connections */
+        $connections = Connection::query()
             ->where('provider', Provider::Snelstart->value)
             ->where('administratie_id', $payload['administratieId'])
             ->whereNull('revoked_at')
-            ->first();
+            ->orderBy('id')
+            ->get()
+            ->all();
 
-        if ($connection === null) {
+        if ($connections === []) {
             $this->recorder->record(Provider::Snelstart->value, $request, 200, InboundWebhookRecorder::OUTCOME_UNKNOWN_TENANT, $eventId, $topic);
 
             return response('', 200);
@@ -70,11 +77,21 @@ final class SnelstartWebhookController extends Controller
             $eventId,
             $topic,
             null,
-            $connection,
+            $connections[0],
             InboundWebhookRecorder::FANOUT_DISPATCHED,
         );
 
-        ForwardSnelstartWebhookToConsumerJob::dispatch($connection, $payload, $eventId ?? 'no-id');
+        if (count($connections) > 1) {
+            Log::info('webhook.fanout_multiple_connections', [
+                'provider' => Provider::Snelstart->value,
+                'event_id' => $eventId,
+                'connection_ids' => array_map(static fn (Connection $c): int => $c->id, $connections),
+            ]);
+        }
+
+        foreach ($connections as $connection) {
+            ForwardSnelstartWebhookToConsumerJob::dispatch($connection, $payload, $eventId ?? 'no-id');
+        }
 
         return response('', 200);
     }

@@ -68,6 +68,31 @@ class ExactWebhookControllerTest extends TestCase
         );
     }
 
+    /**
+     * Twee Consumers kunnen dezelfde administratie gekoppeld hebben — de boekhouder
+     * via de ene app, de ondernemer via de andere. Het schema staat dat toe. De
+     * lookup pakte er één willekeurige, dus kreeg één partij de webhook en de ander
+     * niets; over Consumer-grenzen heen was dat een levering aan de verkeerde partij.
+     */
+    public function test_a_division_connected_by_two_consumers_fans_out_to_both(): void
+    {
+        Bus::fake([ForwardExactWebhookToConsumerJob::class]);
+
+        $first = $this->connectionForNewConsumer();
+        $second = $this->connectionForNewConsumer();
+
+        $this->postSignedWebhook($this->content())->assertStatus(200);
+
+        Bus::assertDispatchedTimes(ForwardExactWebhookToConsumerJob::class, 2);
+
+        foreach ([$first, $second] as $connection) {
+            Bus::assertDispatched(
+                ForwardExactWebhookToConsumerJob::class,
+                fn (ForwardExactWebhookToConsumerJob $job): bool => $job->exactConnection->is($connection),
+            );
+        }
+    }
+
     public function test_empty_body_validation_ping_returns_200_without_audit(): void
     {
         Bus::fake([ForwardExactWebhookToConsumerJob::class]);
@@ -197,6 +222,18 @@ class ExactWebhookControllerTest extends TestCase
     /**
      * @return array<string, mixed>
      */
+    private function connectionForNewConsumer(): Connection
+    {
+        $consumer = Consumer::factory()->withWebhookCallback()->create();
+        $account = Account::factory()->for($consumer)->create();
+
+        return Connection::factory()
+            ->forExact()
+            ->active()
+            ->for($account)
+            ->create(['administratie_id' => self::DIVISION]);
+    }
+
     private function content(int|string $division = self::DIVISION): array
     {
         return [
