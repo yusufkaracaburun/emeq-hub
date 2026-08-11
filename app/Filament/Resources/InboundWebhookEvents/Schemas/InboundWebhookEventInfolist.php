@@ -41,6 +41,9 @@ class InboundWebhookEventInfolist
                     TextEntry::make('connection.provider')->label('Connection')->badge()->placeholder('—'),
                     TextEntry::make('event_id')->label('Event ID')->copyable()->placeholder('—'),
                     TextEntry::make('request_fingerprint')->label('Request-fingerprint')->copyable()->placeholder('—'),
+                    // Correlatie-id: plakken in de logzoeker levert de hele keten
+                    // rond dit event.
+                    TextEntry::make('request_id')->label('Request ID')->copyable()->placeholder('—'),
                 ]),
         ]);
     }

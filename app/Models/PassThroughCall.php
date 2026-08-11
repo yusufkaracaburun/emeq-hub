@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\MassPrunable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Context;
 
 #[Fillable([
     'direction',
@@ -25,6 +26,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'request_fingerprint',
     'partner_token_fingerprint',
     'event_id',
+    'request_id',
     'response_size_bytes',
     'upstream_error',
     'response_body',
@@ -38,6 +40,17 @@ class PassThroughCall extends Model
     use MassPrunable;
 
     public $timestamps = false;
+
+    /**
+     * Er zijn zeven plekken die een audit-rij schrijven. Het correlatie-id hier
+     * ophalen in plaats van bij elke writer voorkomt dat de achtste hem vergeet.
+     */
+    protected static function booted(): void
+    {
+        static::creating(function (self $call): void {
+            $call->request_id ??= Context::get('request_id');
+        });
+    }
 
     /**
      * Rijen ouder dan het retentie-venster (config `hub.retention.pass_through_days`).

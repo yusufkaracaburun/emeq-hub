@@ -11,6 +11,7 @@ use App\Models\InboundWebhookEvent;
 use App\Webhooks\InboundWebhookRecorder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Context;
 use Tests\TestCase;
 
 /**
@@ -160,5 +161,40 @@ class InboundWebhookRecorderTest extends TestCase
         $this->assertTrue($this->recorder->isDuplicate('snelstart', 'evt-9'));
         // Andere provider met dezelfde event_id is geen duplicaat.
         $this->assertFalse($this->recorder->isDuplicate('exact', 'evt-9'));
+    }
+
+    /**
+     * De recorder kent het correlatie-id niet; de model-hook haalt 'm uit de
+     * request-context. Deze test bewaakt dat die hook blijft vuren.
+     */
+    public function test_records_the_request_id_from_the_context(): void
+    {
+        Context::add('request_id', '01HRECORDER00000000000000');
+
+        $this->recorder->record(
+            'exact',
+            $this->jsonRequest(),
+            200,
+            InboundWebhookRecorder::OUTCOME_PROCESSED,
+            eventId: 'evt-ctx',
+        );
+
+        $this->assertSame(
+            '01HRECORDER00000000000000',
+            InboundWebhookEvent::query()->sole()->request_id
+        );
+    }
+
+    public function test_request_id_stays_null_without_a_context(): void
+    {
+        $this->recorder->record(
+            'exact',
+            $this->jsonRequest(),
+            200,
+            InboundWebhookRecorder::OUTCOME_PROCESSED,
+            eventId: 'evt-no-ctx',
+        );
+
+        $this->assertNull(InboundWebhookEvent::query()->sole()->request_id);
     }
 }

@@ -4,6 +4,7 @@ namespace App\Jobs\Webhooks;
 
 use App\Enums\Provider;
 use App\Models\Connection;
+use App\Webhooks\ConsumerWebhookHeaders;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -55,6 +56,7 @@ class ForwardMollieWebhookToConsumerJob implements ShouldQueue
             ->url($consumer->webhook_callback_url)
             ->payload($this->payload)
             ->useSecret((string) $consumer->webhook_callback_secret)
+            ->withHeaders(ConsumerWebhookHeaders::make())
             ->dispatch();
     }
 }

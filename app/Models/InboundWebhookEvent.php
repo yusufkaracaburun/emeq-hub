@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\MassPrunable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Context;
 
 /**
  * Inbound partner→Hub webhook-event-audit (provider-agnostisch). Eigen concern,
@@ -32,6 +33,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'outcome',
     'fanout_status',
     'request_fingerprint',
+    'request_id',
     'received_at',
 ])]
 class InboundWebhookEvent extends Model
@@ -42,6 +44,18 @@ class InboundWebhookEvent extends Model
     use MassPrunable;
 
     public $timestamps = false;
+
+    /**
+     * Correlatie-id uit de request-context, zodat de recorder er niets van hoeft
+     * te weten. Werkt ook binnen een queued job: het framework hydrateert
+     * `Context` daar terug uit de job-payload.
+     */
+    protected static function booted(): void
+    {
+        static::creating(function (self $event): void {
+            $event->request_id ??= Context::get('request_id');
+        });
+    }
 
     /**
      * Rijen ouder dan het retentie-venster (config `hub.retention.webhook_days`).

@@ -3,7 +3,8 @@
 > Niets staat onder **IMPLEMENTED** zonder werkende code én tests. Bij twijfel gaat
 > het naar NEXT. Architectuur staat in `unified-api-architecture.md`.
 
-Laatste update: 2026-08-11 · testbaseline: 1120 passed, 1 incomplete, 0 failures.
+Laatste update: 2026-08-11 · suite: 1137 passed, 1 incomplete, 0 failures.
+Startbaseline vóór dit traject: 1120 passed.
 
 ---
 
@@ -63,6 +64,16 @@ Metadata-only registratie in `inbound_webhook_events` via `InboundWebhookRecorde
 (AVG: de Hub is verwerker, geen payload of headers opgeslagen).
 → `tests/Feature/Webhooks/InboundWebhookRecorderTest.php`
 
+### Correlation-id end-to-end
+Eén `request_id` (ULID, of een gevalideerde inbound `X-Request-Id`) van
+consumer-request tot consumer-webhook: in `Context` en dus in elke logregel en elke
+queued job, op `pass_through_calls.request_id` en `inbound_webhook_events.request_id`
+via een model-hook, terug op de response-header, en als `X-Emeq-Request-Id` op alle
+vijf de outbound fan-outs. Zichtbaar in beide Filament-infolists.
+→ `tests/Feature/Api/RequestIdTest.php`,
+`tests/Feature/Api/V1/Accounting/RequestIdCorrelationTest.php`,
+`tests/Unit/Webhooks/ConsumerWebhookHeadersTest.php`
+
 ### Statische analyse
 PHPStan/Larastan level 5 op `app/`, `database/factories/` en `routes/`, met een
 baseline van 206 bestaande hits. Nieuwe code moet schoon zijn; bestaande schuld
@@ -75,34 +86,29 @@ blokkeert de build niet. Draait in CI naast Pint, tests en `composer audit`.
 
 Gepland en ontworpen; volgorde is bindend vanwege harde afhankelijkheden.
 
-### 1. Correlation-id end-to-end
-Eén `request_id` (ULID) van consumer-request tot consumer-webhook, in logs, in
-`pass_through_calls` en `inbound_webhook_events`, en meereizend in queued jobs.
-Additief, geen gedragswijziging.
-
-### 2. Provider-entity-links + dedupe
+### 1. Provider-entity-links + dedupe
 `provider_entity_links` legt duurzaam vast welke canonieke document-`external_id` bij
 welke provider-entity hoort. Maakt een retry ná verlies van de idempotency-key
-detecteerbaar. **Moet vóór punt 3 landen**, anders opent de key-TTL een herboek-venster.
+detecteerbaar. **Moet vóór punt 2 landen**, anders opent de key-TTL een herboek-venster.
 Nieuwe responses: `200 deduplicated: true` en `409 document_already_posted`.
 
-### 3. Idempotency-hardening
+### 2. Idempotency-hardening
 Claim-first insert met de unique index als mutex; `in_flight`/`completed`-staat met
 lease en takeover; payload-fingerprint-guard; verval en pruning.
 Nieuwe responses: `409 idempotency_request_in_progress`, `422 idempotency_key_reuse`.
 **Breaking** — consumers moeten meebewegen.
 
-### 4. Capability-registry
+### 3. Capability-registry
 Providers declareren wat ze kunnen via `implements`, niet via config.
 `GET /v1/accounting/capabilities`. Haalt de laatste twee provider-conditionals uit de
 accounting-controllers en sluit het gat waarin de dry-run Exact belt terwijl de
 kill-switch uit staat.
 
-### 5. Error-normalisatie
+### 4. Error-normalisatie
 Canonieke foutcategorieën naast de bestaande `error`-sleutel; drie bijna-identieke
 `UpstreamErrorMapper`s achter één contract.
 
-### 6. Canonieke read-resources
+### 5. Canonieke read-resources
 `GET /v1/accounting/{ledger-accounts,tax-codes,customers,suppliers}` uit mirror en
 SDK. Daarna `GET /v1/accounting/invoices` — vereist eerst nieuwe read-requests in
 `emeq/exact-api` (die bestaan nog niet).

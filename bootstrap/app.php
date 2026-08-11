@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\AssignRequestId;
 use App\Http\Middleware\EnsureEmeqAdminToken;
 use App\Http\Middleware\EnsureIdempotency;
 use App\Http\Middleware\EnsureProviderEnabled;
@@ -50,6 +51,10 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->redirectGuestsTo(
             fn (Request $request): ?string => $request->is('v1/*') ? null : route('login'),
         );
+
+        // Als eerste in de globale stack: ook een 401 of een gethrottled request
+        // moet een correlatie-id dragen. Zie AssignRequestId.
+        $middleware->prepend(AssignRequestId::class);
 
         $middleware->append(SecurityHeaders::class);
         $middleware->append(SetNoIndexHeaders::class);

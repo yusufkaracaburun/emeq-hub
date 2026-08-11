@@ -8,6 +8,7 @@ use App\Accounting\AccountingSyncRunner;
 use App\Accounting\FinancialDocument;
 use App\Models\Account;
 use App\Models\Connection;
+use App\Webhooks\ConsumerWebhookHeaders;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -72,7 +73,7 @@ final class SyncAccountingDocumentJob implements ShouldQueue
             ->url($consumer->webhook_callback_url)
             ->payload(['event' => 'accounting.document.synced', ...$outcome->responseBody])
             ->useSecret((string) $consumer->webhook_callback_secret)
-            ->withHeaders(['X-Emeq-Event-Id' => (string) Str::uuid()])
+            ->withHeaders(ConsumerWebhookHeaders::make((string) Str::uuid()))
             ->dispatch();
     }
 }

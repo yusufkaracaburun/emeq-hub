@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Jobs\Webhooks;
 
 use App\Models\Connection;
+use App\Webhooks\ConsumerWebhookHeaders;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -66,7 +67,7 @@ final class ForwardConnectionRevokedToConsumerJob implements ShouldQueue
                 'revoked_at' => $this->revokedConnection->revoked_at?->toIso8601String(),
             ])
             ->useSecret((string) $consumer->webhook_callback_secret)
-            ->withHeaders(['X-Emeq-Event-Id' => $this->eventId])
+            ->withHeaders(ConsumerWebhookHeaders::make($this->eventId))
             ->dispatch();
     }
 }
