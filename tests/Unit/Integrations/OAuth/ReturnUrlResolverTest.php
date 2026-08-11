@@ -155,4 +155,33 @@ class ReturnUrlResolverTest extends TestCase
             $this->resolver->resolve($consumer, null, 'https://evil.example'),
         );
     }
+
+    public function test_handoff_returns_null_instead_of_falling_back_to_app_url(): void
+    {
+        $consumer = new Consumer(['app_url' => 'https://emeq.nl']);
+
+        $this->assertNull(
+            $this->resolver->resolveHandoff($consumer, 'https://demo.emeq:8890/configuration/integraties'),
+        );
+        $this->assertNull(
+            $this->resolver->resolveHandoff($consumer, null, 'https://evil.example'),
+        );
+        $this->assertNull(
+            $this->resolver->resolveHandoff($consumer, null),
+        );
+    }
+
+    public function test_handoff_still_accepts_matching_return_url_and_origin(): void
+    {
+        $consumer = new Consumer(['app_url' => 'https://admin.emeq.nl']);
+
+        $this->assertSame(
+            'https://bob.emeq.nl/instellingen',
+            $this->resolver->resolveHandoff($consumer, 'https://bob.emeq.nl/instellingen'),
+        );
+        $this->assertSame(
+            'https://bob.emeq.nl',
+            $this->resolver->resolveHandoff($consumer, null, 'https://bob.emeq.nl'),
+        );
+    }
 }

@@ -65,9 +65,12 @@ class ConnectSessionController extends Controller
             $account->update(['display_name' => $validated['display_name']]);
         }
 
+        // Handoff: geen bare app_url-fallback — die stuurt "Terug naar …" naar
+        // het marketingdomein wanneer de consumer-host buiten de guard valt
+        // (lokaal, eigen domein). De connect-pagina valt dan terug op referrer.
         $link = $links->mint(
             $account,
-            $returnUrls->resolve($consumer, $validated['return_url'] ?? null, $request->headers->get('Origin')),
+            $returnUrls->resolveHandoff($consumer, $validated['return_url'] ?? null, $request->headers->get('Origin')),
         );
 
         return [

@@ -13,7 +13,8 @@ use App\Models\Consumer;
  *  2. De browser-`Origin` van de init-call — die zet de browser automatisch op
  *     de CORS-fetch, dus een multi-tenant consumer-SPA hoeft niets mee te sturen
  *     en landt toch terug op het juiste tenant-subdomein (root).
- *  3. De geregistreerde `Consumer.app_url` (admin/server-initiated fallback).
+ *  3. De geregistreerde `Consumer.app_url` (admin/server-initiated fallback) —
+ *     alleen via {@see resolve()}; handoff gebruikt {@see resolveHandoff()}.
  *
  * (1) en (2) worden alleen geaccepteerd als de host de app_url-host is óf een
  * subdomein van hetzelfde basisdomein — open-redirect-guard op de publieke
@@ -24,6 +25,27 @@ class ReturnUrlResolver
 {
     public function resolve(Consumer $consumer, ?string $requested, ?string $origin = null): ?string
     {
+        return $this->resolveInternal($consumer, $requested, $origin, fallbackToAppUrl: true);
+    }
+
+    /**
+     * Voor de hosted `/connect`-handoff: geen stille terugval op bare `app_url`.
+     *
+     * Anders landt "Terug naar …" op het marketing-domein wanneer de consumer
+     * een lokale of eigen-domein `return_url` meestuurde die de guard weigert.
+     * Geen geldige URL → null; de pagina gebruikt dan `document.referrer`.
+     */
+    public function resolveHandoff(Consumer $consumer, ?string $requested, ?string $origin = null): ?string
+    {
+        return $this->resolveInternal($consumer, $requested, $origin, fallbackToAppUrl: false);
+    }
+
+    private function resolveInternal(
+        Consumer $consumer,
+        ?string $requested,
+        ?string $origin,
+        bool $fallbackToAppUrl,
+    ): ?string {
         $appUrl = $consumer->app_url;
 
         if ($appUrl === null) {
@@ -38,7 +60,7 @@ class ReturnUrlResolver
             return $origin;
         }
 
-        return $appUrl;
+        return $fallbackToAppUrl ? $appUrl : null;
     }
 
     /**
