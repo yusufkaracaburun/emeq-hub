@@ -55,7 +55,10 @@ class StoreDocumentRequest extends FormRequest
             'lines.*.cost_unit' => ['nullable', 'string', 'max:255'],
 
             // Bijlagen: inline base64. max ~1,4M chars base64 ≈ 1MB binair (ADR < 1MB).
-            'attachments' => ['nullable', 'array'],
+            // Begrensd omdat elke bijlage twee partner-calls van 30s kost: zonder
+            // plafond is de request-duur onbegrensd en is de idempotency-lease
+            // (config `hub.idempotency.lease_seconds`) niet te onderbouwen.
+            'attachments' => ['nullable', 'array', 'max:10'],
             'attachments.*.filename' => ['required', 'string', 'max:255'],
             'attachments.*.mime_type' => ['required', 'string', Rule::in(['application/pdf', 'image/png', 'image/jpeg'])],
             'attachments.*.content' => ['required', 'string', 'max:1400000'],

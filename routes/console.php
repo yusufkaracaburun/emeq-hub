@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\IdempotencyKey;
 use App\Models\InboundWebhookEvent;
 use App\Models\PassThroughCall;
 use Illuminate\Foundation\Inspiring;
@@ -18,7 +19,7 @@ Schedule::command('books:generate-recurring-invoices')->dailyAt('06:00');
 // Data-retentie + opschoning (VPS-hardening). Houdt de audit-tabellen en Redis-
 // job-records begrensd; venster in config/hub.php (issue #41 zet het beleid).
 Schedule::command('model:prune', [
-    '--model' => [PassThroughCall::class, InboundWebhookEvent::class],
+    '--model' => [PassThroughCall::class, InboundWebhookEvent::class, IdempotencyKey::class],
 ])->dailyAt('03:00');
 Schedule::command('queue:prune-failed', ['--hours' => 168])->weekly();
 Schedule::command('sanctum:prune-expired', ['--hours' => 24])->dailyAt('03:10');

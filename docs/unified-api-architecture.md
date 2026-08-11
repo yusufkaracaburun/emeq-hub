@@ -70,7 +70,7 @@ sub-namespace. Een DDD-prefix zou de enige in de boom zijn.
 
 ```
 POST /v1/accounting/documents
-  → EnsureIdempotency            claim-first, unique index als mutex   🚧
+  → EnsureIdempotency            claim-first, unique index als mutex
   → DocumentsController          resolve Consumer→Account→Connection
   → StoreDocumentRequest         edge-validatie (snake_case wire)
   → FinancialDocument::fromArray canoniek object
@@ -166,17 +166,40 @@ omgekeerde regels zijn een andere boeking.
 voor staleness-detectie, plus de read-back-probe voor het geval de partner commit
 maar de respons ons niet bereikt.
 
-## Idempotentie 🚧
+## Idempotentie
 
-De consumer stuurt een `Idempotency-Key`. De Hub claimt die met één INSERT; de
-unique index is de mutex. Wat de Hub wél en niet garandeert:
+De consumer stuurt een `Idempotency-Key`. De Hub claimt die met één INSERT vóórdat de
+handler draait; de unique index op `(consumer_id, key)` is de mutex. Geen transactie om
+de handler heen — die zou een DB-connectie vasthouden voor de duur van een HTTP-call
+naar de partner.
+
+```
+INSERT slaagt ────────────────────► in_flight ──2xx──► completed ──expires_at──► pruned
+     │                                  │  ▲               │
+     │ unique violation                 │  │ takeover      │ replay + Idempotent-Replayed
+     ▼                                  │  │ (lease weg)   ▼
+  bestaande rij bekijken ───────────────┴──┘          retry met zelfde key
+     ├─ completed              → replay
+     ├─ andere fingerprint     → 422 idempotency_key_reuse
+     ├─ in_flight, lease leeft → 409 + Retry-After
+     └─ rij verdwenen          → 409 + Retry-After: 1
+```
+
+Non-2xx **verwijdert** de rij: een mislukte poging mag opnieuw.
+
+De lease-invariant staat in `config/hub.php` en is niet vrijblijvend: te lang kost
+uitstel, te kort veroorzaakt dubbele boekingen. Daarom is het aantal bijlagen per
+document begrensd — anders is de maximale request-duur niet te bepalen.
+
+Wat de Hub wél en niet garandeert:
 
 | Garantie | Status |
 |---|---|
 | Twee gelijktijdige requests met dezelfde key boeken één keer | ja — 409 op de tweede |
-| Retry na netwerkfout replay't de eerste respons | ja, binnen de retentie |
-| Retry ná key-verlies boekt niet opnieuw | ja — via `provider_entity_links` |
+| Retry na netwerkfout replay't de eerste respons | ja, binnen de retentie (24u) |
+| Retry ná key-verval boekt niet opnieuw | ja — via `provider_entity_links` |
 | Zelfde key met een ander payload | 422, geen stille verkeerde replay |
+| Gecrasht request blokkeert de sleutel niet permanent | ja — lease-takeover, en prune als achtervang |
 | Provider commit + timeout richting Hub | **niet** gedekt zonder read-back-probe (fase 9) |
 
 Exactly-once bestaat niet zolang de partner het niet garandeert. Dit is wat we

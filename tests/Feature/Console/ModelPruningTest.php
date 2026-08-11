@@ -2,6 +2,8 @@
 
 namespace Tests\Feature\Console;
 
+use App\Models\Consumer;
+use App\Models\IdempotencyKey;
 use App\Models\InboundWebhookEvent;
 use App\Models\PassThroughCall;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -35,6 +37,42 @@ class ModelPruningTest extends TestCase
 
         $this->assertNull(InboundWebhookEvent::find($old->id));
         $this->assertNotNull(InboundWebhookEvent::find($recent->id));
+    }
+
+    /**
+     * Idempotency-keys werden nooit geprund en groeiden onbegrensd. Het verval staat
+     * nu op de rij zelf, gezet bij het claimen.
+     */
+    public function test_prunes_expired_idempotency_keys(): void
+    {
+        $consumer = Consumer::factory()->create();
+
+        $expired = IdempotencyKey::query()->create([
+            'consumer_id' => $consumer->getKey(),
+            'key' => 'verlopen',
+            'method' => 'POST',
+            'path' => 'v1/accounting/documents',
+            'state' => IdempotencyKey::STATE_COMPLETED,
+            'response_status' => 201,
+            'expires_at' => now()->subHour(),
+            'created_at' => now()->subDay(),
+        ]);
+
+        $live = IdempotencyKey::query()->create([
+            'consumer_id' => $consumer->getKey(),
+            'key' => 'nog-geldig',
+            'method' => 'POST',
+            'path' => 'v1/accounting/documents',
+            'state' => IdempotencyKey::STATE_COMPLETED,
+            'response_status' => 201,
+            'expires_at' => now()->addHour(),
+            'created_at' => now(),
+        ]);
+
+        $this->artisan('model:prune', ['--model' => [IdempotencyKey::class]])->assertExitCode(0);
+
+        $this->assertNull(IdempotencyKey::find($expired->id));
+        $this->assertNotNull(IdempotencyKey::find($live->id));
     }
 
     public function test_retention_zero_disables_pruning(): void

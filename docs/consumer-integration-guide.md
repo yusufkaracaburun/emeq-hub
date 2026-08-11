@@ -382,7 +382,17 @@ Idempotency-Key: factuur-2026-0042
 ```
 
 - **`Idempotency-Key` is verplicht** — bij retry herhaalt de Hub de eerste respons
-  i.p.v. dubbel te boeken. Gebruik een stabiele sleutel per document (bv. je `external_id`).
+  i.p.v. dubbel te boeken. Gebruik een stabiele sleutel per document (bv. je `external_id`),
+  1–255 printbare ASCII-tekens. Een herhaalde respons draagt de header
+  `Idempotent-Replayed: true`, zodat je replay van uitvoering kunt onderscheiden.
+  Drie situaties om af te vangen:
+  - `409 idempotency_request_in_progress` — er loopt nú een request met deze sleutel.
+    Dit is precies wat je wilt: zonder dit boekten twee gelijktijdige retries allebei.
+    Wacht `Retry-After` seconden en probeer opnieuw. **Geen fout.**
+  - `422 idempotency_key_reuse` — dezelfde sleutel, andere inhoud. Je client hergebruikt
+    een sleutel; gebruik er een nieuwe. **Niet retryen.**
+  - Sleutels vervallen na 24 uur. Een retry daarna wordt opnieuw uitgevoerd — maar de
+    dedupe hieronder houdt dubbel boeken alsnog tegen.
 - Synchroon (default): `201` `{ "provider": "exact", "status": "posted", "external_id": "…", "external_ref": "…", "external_number": 60001 }`.
   `external_ref` = de interne document-ID (GUID) bij het pakket; bewaar 'm. `external_number`
   = het mensleesbare boekstuknummer (bij Exact `EntryNumber`, voor verkoopfacturen het
@@ -421,6 +431,9 @@ relatie zelf aan (match op `vat_number`, anders `name`) en boekt door. Stuur dus
 altijd een nette `party.name` (+ `vat_number` indien bekend) mee.
 
 Foutcodes: `403 insufficient_ability` (PAT mist `{provider}:write`) ·
+`400 idempotency_key_required` / `400 idempotency_key_invalid` ·
+`409 idempotency_request_in_progress` (wacht `Retry-After`, dan retryen) ·
+`422 idempotency_key_reuse` (zelfde sleutel, ander document) ·
 `409 document_already_posted` (zie hierboven — corrigeer met een nieuw `external_id`) ·
 `422 mapping_failed` (onvolledige boekhoud-mapping óf onbekende relatie zonder
 auto-create — los op in de Hub-admin) · `422 upstream_rejected` (het pakket wees de

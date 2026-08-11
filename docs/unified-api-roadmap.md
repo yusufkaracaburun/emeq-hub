@@ -3,7 +3,7 @@
 > Niets staat onder **IMPLEMENTED** zonder werkende code én tests. Bij twijfel gaat
 > het naar NEXT. Architectuur staat in `unified-api-architecture.md`.
 
-Laatste update: 2026-08-11 · suite: 1165 passed, 1 incomplete, 0 failures.
+Laatste update: 2026-08-11 · suite: 1176 passed, 1 incomplete, 0 failures.
 Startbaseline vóór dit traject: 1120 passed · PHPStan-baseline 206 → 135.
 
 ---
@@ -46,13 +46,18 @@ overschrijven via `GET|PUT /v1/accounting/mapping`.
 Exact-specifieke enrichment. Rapporteert findings zonder te boeken.
 → `tests/Feature/Api/V1/Accounting/ValidateDocumentTest.php`
 
-### Basale idempotentie
-`Idempotency-Key` op `POST /v1/accounting/documents`; een tweede request met dezelfde
-key replay't de eerste 2xx-respons.
-**Beperkingen, eerlijk:** geen bescherming tegen gelijktijdige requests (race →
-dubbele boeking), geen payload-check bij key-hergebruik, geen verval, geen pruning.
-Zie NEXT.
-→ `StoreDocumentTest::test_retry_with_same_idempotency_key_books_once`
+### Idempotentie met claim-lock
+`Idempotency-Key` op `POST /v1/accounting/documents`. De rij wordt met één INSERT
+geclaimd vóórdat de handler draait; de unique index op `(consumer_id, key)` is de
+mutex. Twee gelijktijdige requests boeken dus één keer — de tweede krijgt `409
+idempotency_request_in_progress` met `Retry-After` in plaats van een tweede boeking
+gevolgd door een 500. Zelfde sleutel met een ander document → `422
+idempotency_key_reuse` in plaats van een stille verkeerde replay. Een herhaalde
+respons draagt `Idempotent-Replayed: true`. Een gecrasht request blokkeert de sleutel
+niet permanent: de lease is over te nemen, en `model:prune` ruimt vervallen rijen op —
+die groeiden voorheen onbegrensd.
+→ `tests/Feature/Api/V1/Accounting/IdempotencyTest.php`,
+`ModelPruningTest::test_prunes_expired_idempotency_keys`
 
 ### Provider-entity-links + dedupe
 `provider_entity_links` legt per Connection vast welk canoniek `external_id` bij welke
@@ -99,23 +104,17 @@ blokkeert de build niet. Draait in CI naast Pint, tests en `composer audit`.
 
 Gepland en ontworpen; volgorde is bindend vanwege harde afhankelijkheden.
 
-### 1. Idempotency-hardening
-Claim-first insert met de unique index als mutex; `in_flight`/`completed`-staat met
-lease en takeover; payload-fingerprint-guard; verval en pruning.
-Nieuwe responses: `409 idempotency_request_in_progress`, `422 idempotency_key_reuse`.
-**Breaking** — consumers moeten meebewegen.
-
-### 2. Capability-registry
+### 1. Capability-registry
 Providers declareren wat ze kunnen via `implements`, niet via config.
 `GET /v1/accounting/capabilities`. Haalt de laatste twee provider-conditionals uit de
 accounting-controllers en sluit het gat waarin de dry-run Exact belt terwijl de
 kill-switch uit staat.
 
-### 3. Error-normalisatie
+### 2. Error-normalisatie
 Canonieke foutcategorieën naast de bestaande `error`-sleutel; drie bijna-identieke
 `UpstreamErrorMapper`s achter één contract.
 
-### 4. Canonieke read-resources
+### 3. Canonieke read-resources
 `GET /v1/accounting/{ledger-accounts,tax-codes,customers,suppliers}` uit mirror en
 SDK. Daarna `GET /v1/accounting/invoices` — vereist eerst nieuwe read-requests in
 `emeq/exact-api` (die bestaan nog niet).
