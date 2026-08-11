@@ -8,7 +8,7 @@ use App\Accounting\AccountingTargetRegistry;
 use App\Accounting\Enums\Capability;
 use App\Http\Concerns\ResolvesAccountingConnection;
 use App\Http\Controllers\Controller;
-use App\Integrations\OAuth\Exceptions\ProviderDisabledException;
+use App\Integrations\Exceptions\ProviderDisabledException;
 use App\Models\Account;
 use App\Models\Connection;
 use App\Models\ConnectionAccountingRef;

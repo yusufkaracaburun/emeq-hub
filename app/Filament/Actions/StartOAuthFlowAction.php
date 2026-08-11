@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Actions;
 
 use App\Enums\Provider;
-use App\Integrations\OAuth\Exceptions\ProviderDisabledException;
+use App\Integrations\Exceptions\ProviderDisabledException;
 use App\Integrations\OAuth\OAuthFlowRegistry;
 use App\Models\Account;
 use App\Models\Connection;

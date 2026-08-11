@@ -64,6 +64,7 @@ Route::any('/api/emeq/{path}', function (Request $r, string $path) {
     return Http::withToken(config('services.emeq.pat'))
         ->withHeaders(array_filter([
             'Accept'          => 'application/json',
+            // Multi-tenant? Vervang dit door een server-side afleiding — zie hieronder.
             'X-Account-Id'    => $r->header('X-Account-Id'),
             'Idempotency-Key' => $r->header('Idempotency-Key'),
             'Prefer'          => $r->header('Prefer'),
@@ -86,6 +87,7 @@ app.use('/api/emeq', requireTenantAuth, async (req, res) => {
       Accept: 'application/json',
       'Content-Type': 'application/json',
       // forward zoals aangeleverd:
+      // Multi-tenant? Vervang dit door een server-side afleiding — zie hieronder.
       ...(req.get('X-Account-Id')    && { 'X-Account-Id': req.get('X-Account-Id') }),
       ...(req.get('Idempotency-Key') && { 'Idempotency-Key': req.get('Idempotency-Key') }),
       ...(req.get('Prefer')          && { Prefer: req.get('Prefer') }),
@@ -96,6 +98,37 @@ app.use('/api/emeq', requireTenantAuth, async (req, res) => {
 })
 ```
 
+### Multi-tenant: leid het Account server-side af
+
+De voorbeelden hierboven forwarden `X-Account-Id` zoals aangeleverd. Dat mag
+alleen als jouw proxy die waarde zelf zet of hem toetst aan de ingelogde
+gebruiker.
+
+De Hub kent jouw eindgebruikers niet en vertrouwt `X-Account-Id` en
+`account_external_id` op gezag van de PAT. Neem je die klakkeloos over uit een
+request-header, body of query, dan zet gebruiker van tenant A hem op tenant B en
+boekt in diens administratie.
+
+**Bepaal de Account-sleutel server-side, uit de geauthenticeerde sessie of de
+tenant-context:**
+
+| Tenancy-model | Afleiding |
+|---|---|
+| Subdomein per tenant | Host → tenant-lookup, server-side |
+| Pad-prefix (`/t/{slug}`) | Route-param → lookup **plus** check dat de gebruiker lid is van die tenant |
+| Eén DB, tenant aan de gebruiker | Tenant-id uit sessie/JWT-claim |
+| Single-tenant app | Vaste constante |
+
+In Laravel wordt de proxy dan bijvoorbeeld:
+
+```php
+->withHeaders(['X-Account-Id' => $this->resolveTenantId()])  // niet $r->header(...)
+```
+
+Zelfde regel bij loskoppelen: honoreer een `connection_id` uit de request pas
+nadat je hebt vastgesteld dat die Connection bij de tenant van de ingelogde
+gebruiker hoort.
+
 **🤖 Agent-prompt**
 
 ```text
@@ -103,7 +136,9 @@ Bouw in mijn {stack}-app een server-side proxy op `/api/emeq/{path}` die elke
 request 1-op-1 doorzet naar `{EMEQ_BASE}/v1/{path}`. Injecteer server-side
 `Authorization: Bearer {EMEQ_PAT}` (PAT uit env — NOOIT naar de browser sturen)
 en `Accept: application/json`. Forward query-string, JSON-body én de headers
-`X-Account-Id`, `Idempotency-Key` en `Prefer` ongewijzigd door. Beveilig de route
+`Idempotency-Key` en `Prefer` ongewijzigd door. Zet `X-Account-Id` NIET door
+vanaf de client: leid die server-side af uit {hoe mijn app de tenant bepaalt} —
+anders kan tenant A in de administratie van tenant B boeken. Beveilig de route
 met mijn bestaande tenant-auth. Geen cookies, geen credentials. Een directe
 browser→Hub-call is verboden (lekt de PAT).
 ```

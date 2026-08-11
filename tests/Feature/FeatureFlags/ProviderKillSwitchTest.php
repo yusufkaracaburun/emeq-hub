@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\FeatureFlags;
 
-use App\Integrations\OAuth\Exceptions\ProviderDisabledException;
+use App\Integrations\Exceptions\ProviderDisabledException;
 use App\Integrations\OAuth\OAuthFlowRegistry;
 use App\Models\Account;
 use App\Models\Consumer;

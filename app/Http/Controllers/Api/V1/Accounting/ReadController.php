@@ -22,7 +22,7 @@ use App\Http\Concerns\GuardsTokenAbility;
 use App\Http\Concerns\ResolvesAccountingConnection;
 use App\Http\Controllers\Controller;
 use App\Integrations\Errors\UpstreamErrorMapperRegistry;
-use App\Integrations\OAuth\Exceptions\ProviderDisabledException;
+use App\Integrations\Exceptions\ProviderDisabledException;
 use App\Sanctum\TokenAbilities;
 use Dedoc\Scramble\Attributes\Group;
 use Exception;

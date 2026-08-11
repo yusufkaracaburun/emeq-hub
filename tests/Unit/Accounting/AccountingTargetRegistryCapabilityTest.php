@@ -12,7 +12,7 @@ use App\Accounting\Enums\Capability;
 use App\Accounting\FinancialDocument;
 use App\Enums\Provider;
 use App\Integrations\Exact\Accounting\ExactAccountingTarget;
-use App\Integrations\OAuth\Exceptions\ProviderDisabledException;
+use App\Integrations\Exceptions\ProviderDisabledException;
 use App\Models\Connection;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Pennant\Feature;

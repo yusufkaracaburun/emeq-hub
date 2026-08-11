@@ -8,7 +8,7 @@ use App\Accounting\Contracts\AccountingTarget;
 use App\Accounting\Contracts\EnrichesValidation;
 use App\Accounting\Contracts\SyncsReferenceData;
 use App\Accounting\Enums\Capability;
-use App\Integrations\OAuth\Exceptions\ProviderDisabledException;
+use App\Integrations\Exceptions\ProviderDisabledException;
 use App\Models\Connection;
 use Illuminate\Contracts\Container\Container;
 use InvalidArgumentException;

@@ -3,7 +3,7 @@
 namespace App\Integrations\OAuth;
 
 use App\Integrations\Contracts\OAuthFlow;
-use App\Integrations\OAuth\Exceptions\ProviderDisabledException;
+use App\Integrations\Exceptions\ProviderDisabledException;
 use Illuminate\Contracts\Container\Container;
 use InvalidArgumentException;
 use Laravel\Pennant\Feature;

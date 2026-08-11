@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Integrations\Exact\Jobs;
 
 use App\Accounting\AccountingTargetRegistry;
+use App\Integrations\Exceptions\ProviderDisabledException;
 use App\Models\Connection;
-use App\Integrations\OAuth\Exceptions\ProviderDisabledException;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;

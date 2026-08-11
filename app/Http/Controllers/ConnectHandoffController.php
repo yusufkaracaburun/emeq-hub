@@ -8,7 +8,7 @@ use App\Actions\Connect\ProviderNotConnectableException;
 use App\Actions\Connect\RevokeConnection;
 use App\Actions\Connect\StartProviderConnection;
 use App\Enums\Provider;
-use App\Integrations\OAuth\Exceptions\ProviderDisabledException;
+use App\Integrations\Exceptions\ProviderDisabledException;
 use App\Jobs\Webhooks\ForwardConnectionRevokedToConsumerJob;
 use App\Models\Account;
 use App\Models\Connection;

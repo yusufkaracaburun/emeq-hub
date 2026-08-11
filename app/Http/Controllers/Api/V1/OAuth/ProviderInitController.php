@@ -6,7 +6,7 @@ use App\Actions\Connect\ProviderNotConnectableException;
 use App\Actions\Connect\StartProviderConnection;
 use App\Enums\Provider;
 use App\Http\Controllers\Controller;
-use App\Integrations\OAuth\Exceptions\ProviderDisabledException;
+use App\Integrations\Exceptions\ProviderDisabledException;
 use App\Integrations\OAuth\ReturnUrlResolver;
 use App\Models\Consumer;
 use Dedoc\Scramble\Attributes\Group;

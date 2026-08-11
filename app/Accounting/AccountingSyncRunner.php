@@ -8,7 +8,7 @@ use App\Accounting\Contracts\ProbesPostedDocuments;
 use App\Accounting\Enums\SyncStatus;
 use App\Accounting\Exceptions\AccountingMappingException;
 use App\Integrations\Errors\UpstreamErrorMapperRegistry;
-use App\Integrations\OAuth\Exceptions\ProviderDisabledException;
+use App\Integrations\Exceptions\ProviderDisabledException;
 use App\Integrations\PassThrough\PassThroughRecorder;
 use App\Jobs\Accounting\SyncAccountingDocumentJob;
 use App\Models\Account;

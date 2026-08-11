@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Integrations\OAuth\Exceptions;
+namespace App\Integrations\Exceptions;
 
 use RuntimeException;
 
