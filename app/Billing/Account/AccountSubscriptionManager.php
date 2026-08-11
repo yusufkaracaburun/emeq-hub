@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace App\Billing\Account;
 
 use App\Billing\Account\Dto\CreateAccountSubscriptionDto;
+use App\Integrations\Mollie\MollieConnectionContext;
 use App\Models\Account;
 use App\Models\AccountSubscription;
 use App\Models\Connection;
-use App\Mollie\MollieConnectionContext;
 use Emeq\MollieApi\Facades\Mollie;
 use Illuminate\Support\Facades\Log;
 use Mollie\Api\Exceptions\ApiException as MollieApiException;

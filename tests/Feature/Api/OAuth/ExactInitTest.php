@@ -2,10 +2,10 @@
 
 namespace Tests\Feature\Api\OAuth;
 
+use App\Integrations\Exact\OAuth\ExactOAuthFlow;
+use App\Integrations\OAuth\Testing\FakeOAuthFlow;
 use App\Models\Connection;
 use App\Models\Consumer;
-use App\OAuth\Exact\ExactOAuthFlow;
-use App\OAuth\Testing\FakeOAuthFlow;
 use App\Sanctum\TokenAbilities;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;

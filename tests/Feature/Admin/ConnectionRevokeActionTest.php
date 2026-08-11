@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace Tests\Feature\Admin;
 
 use App\Filament\Resources\Connections\Pages\ListConnections;
+use App\Integrations\Mollie\OAuth\MollieConnectOAuthFlow;
+use App\Integrations\OAuth\Testing\FakeOAuthFlow;
 use App\Models\Account;
 use App\Models\Connection;
 use App\Models\Consumer;
 use App\Models\User;
-use App\OAuth\Mollie\MollieConnectOAuthFlow;
-use App\OAuth\Testing\FakeOAuthFlow;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Spatie\Permission\Models\Permission;

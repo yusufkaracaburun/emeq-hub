@@ -6,9 +6,9 @@ namespace App\Http\Controllers\Webhooks;
 
 use App\Enums\Provider;
 use App\Http\Controllers\Controller;
+use App\Integrations\Webhooks\InboundWebhookRecorder;
 use App\Jobs\Webhooks\ForwardWebhookToConsumerJob;
 use App\Models\Connection;
-use App\Webhooks\InboundWebhookRecorder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;

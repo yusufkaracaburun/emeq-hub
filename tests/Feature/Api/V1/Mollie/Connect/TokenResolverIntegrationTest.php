@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Api\V1\Mollie\Connect;
 
-use App\Mollie\MollieAccessTokenResolver;
+use App\Integrations\Mollie\MollieAccessTokenResolver;
 use App\Sanctum\TokenAbilities;
 use Emeq\MollieApi\Mollie;
 use Illuminate\Foundation\Testing\RefreshDatabase;

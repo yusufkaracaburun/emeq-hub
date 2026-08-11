@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Support\Snelstart;
 
-use App\Support\Snelstart\HeaderForwarder;
+use App\Integrations\Snelstart\PassThrough\HeaderForwarder;
 use Illuminate\Http\Request;
 use PHPUnit\Framework\TestCase;
 

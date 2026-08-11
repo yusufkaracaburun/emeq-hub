@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Tests\Unit\Support\Errors;
 
 use App\Enums\Provider;
-use App\Support\Errors\UpstreamErrorMapperRegistry;
+use App\Integrations\Errors\UpstreamErrorMapperRegistry;
 use Emeq\ExactApi\Exceptions\AuthenticationException as ExactAuthenticationException;
 use Emeq\MollieApi\Exceptions\AuthenticationException as MollieAuthenticationException;
 use RuntimeException;

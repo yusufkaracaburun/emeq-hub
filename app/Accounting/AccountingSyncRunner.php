@@ -7,13 +7,13 @@ namespace App\Accounting;
 use App\Accounting\Contracts\ProbesPostedDocuments;
 use App\Accounting\Enums\SyncStatus;
 use App\Accounting\Exceptions\AccountingMappingException;
+use App\Integrations\Errors\UpstreamErrorMapperRegistry;
+use App\Integrations\OAuth\Exceptions\ProviderDisabledException;
+use App\Integrations\PassThrough\PassThroughRecorder;
 use App\Jobs\Accounting\SyncAccountingDocumentJob;
 use App\Models\Account;
 use App\Models\Connection;
 use App\Models\ProviderEntityLink;
-use App\OAuth\Exceptions\ProviderDisabledException;
-use App\Support\Errors\UpstreamErrorMapperRegistry;
-use App\Support\PassThrough\PassThroughRecorder;
 use Throwable;
 
 /**

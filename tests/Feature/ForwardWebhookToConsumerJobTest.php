@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace Tests\Feature;
 
 use App\Enums\Provider;
+use App\Integrations\Webhooks\CanonicalEvent;
+use App\Integrations\Webhooks\CanonicalEventRegistry;
 use App\Jobs\Webhooks\ForwardWebhookToConsumerJob;
 use App\Models\Account;
 use App\Models\Connection;
 use App\Models\Consumer;
-use App\Webhooks\CanonicalEvent;
-use App\Webhooks\CanonicalEventRegistry;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Log;

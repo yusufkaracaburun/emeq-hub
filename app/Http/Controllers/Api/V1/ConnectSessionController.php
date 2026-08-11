@@ -6,10 +6,10 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Concerns\GuardsTokenAbility;
 use App\Http\Controllers\Controller;
+use App\Integrations\OAuth\ReturnUrlResolver;
 use App\Models\Consumer;
 use App\Sanctum\TokenAbilities;
 use App\Support\Connect\ConnectLinkFactory;
-use App\Support\OAuth\ReturnUrlResolver;
 use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Http\Request;
 

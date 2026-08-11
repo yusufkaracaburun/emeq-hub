@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Support\Filament;
 
-use App\Webhooks\InboundWebhookRecorder;
+use App\Integrations\Webhooks\InboundWebhookRecorder;
 
 /**
  * Eén bron voor Filament-badge-kleuren van de raw (niet-enum) audit-velden, zodat

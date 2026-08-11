@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Webhooks;
 
+use App\Integrations\Webhooks\InboundWebhookRecorder;
 use App\Models\Account;
 use App\Models\Connection;
 use App\Models\Consumer;
 use App\Models\InboundWebhookEvent;
-use App\Webhooks\InboundWebhookRecorder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Context;

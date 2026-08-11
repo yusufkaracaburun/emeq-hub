@@ -6,9 +6,9 @@ namespace App\Jobs\Accounting;
 
 use App\Accounting\AccountingSyncRunner;
 use App\Accounting\FinancialDocument;
+use App\Integrations\Webhooks\ConsumerWebhookHeaders;
 use App\Models\Account;
 use App\Models\Connection;
-use App\Webhooks\ConsumerWebhookHeaders;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;

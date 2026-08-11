@@ -4,10 +4,10 @@ namespace Tests\Unit\Accounting;
 
 use App\Accounting\Enums\DocumentType;
 use App\Accounting\Enums\TaxTreatment;
-use App\Accounting\Exact\ConnectionMappingExactReferenceResolver;
-use App\Accounting\Exact\ExactRelationResolver;
 use App\Accounting\Exceptions\AccountingMappingException;
 use App\Accounting\Party;
+use App\Integrations\Exact\Accounting\ConnectionMappingExactReferenceResolver;
+use App\Integrations\Exact\Accounting\ExactRelationResolver;
 use App\Models\Account;
 use App\Models\Connection;
 use App\Models\ConnectionAccountingRef;

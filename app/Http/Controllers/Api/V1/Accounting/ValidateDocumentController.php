@@ -10,7 +10,7 @@ use App\Http\Concerns\GuardsTokenAbility;
 use App\Http\Concerns\ResolvesAccountingConnection;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Accounting\ValidateDocumentRequest;
-use App\OAuth\Exceptions\ProviderDisabledException;
+use App\Integrations\OAuth\Exceptions\ProviderDisabledException;
 use App\Sanctum\TokenAbilities;
 use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Http\JsonResponse;

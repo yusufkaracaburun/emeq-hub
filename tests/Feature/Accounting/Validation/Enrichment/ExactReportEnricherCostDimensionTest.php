@@ -2,11 +2,11 @@
 
 namespace Tests\Feature\Accounting\Validation\Enrichment;
 
-use App\Accounting\Exact\ConnectionMappingExactReferenceResolver;
-use App\Accounting\Exact\ExactRelationResolver;
-use App\Accounting\Validation\Enrichment\ExactReportEnricher;
 use App\Accounting\Validation\Finding;
 use App\Accounting\Validation\Severity;
+use App\Integrations\Exact\Accounting\ConnectionMappingExactReferenceResolver;
+use App\Integrations\Exact\Accounting\ExactRelationResolver;
+use App\Integrations\Exact\Accounting\ExactReportEnricher;
 use App\Models\Account;
 use App\Models\Connection;
 use App\Models\ConnectionAccountingRef;

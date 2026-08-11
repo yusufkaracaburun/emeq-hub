@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Accounting;
 
-use App\Accounting\Exact\ExactReferenceSync;
+use App\Integrations\Exact\Accounting\ExactReferenceSync;
 use App\Models\Account;
 use App\Models\Connection;
 use App\Models\ConnectionAccountingRef;

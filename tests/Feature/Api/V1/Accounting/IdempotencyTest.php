@@ -6,9 +6,9 @@ namespace Tests\Feature\Api\V1\Accounting;
 
 use App\Accounting\AccountingResult;
 use App\Accounting\Contracts\AccountingTarget;
-use App\Accounting\Exact\ExactAccountingTarget;
 use App\Accounting\FinancialDocument;
 use App\Http\Middleware\EnsureIdempotency;
+use App\Integrations\Exact\Accounting\ExactAccountingTarget;
 use App\Models\Connection;
 use App\Models\Consumer;
 use App\Models\IdempotencyKey;

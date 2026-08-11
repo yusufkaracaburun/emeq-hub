@@ -4,11 +4,11 @@ namespace App\Http\Controllers\Webhooks;
 
 use App\Enums\Provider;
 use App\Http\Controllers\Controller;
+use App\Integrations\Mollie\Webhooks\WebhookHandlerResult;
+use App\Integrations\Mollie\Webhooks\WebhookPayloadRouter;
+use App\Integrations\Webhooks\InboundWebhookRecorder;
 use App\Jobs\Webhooks\ForwardWebhookToConsumerJob;
 use App\Models\Connection;
-use App\Webhooks\InboundWebhookRecorder;
-use App\Webhooks\Mollie\WebhookHandlerResult;
-use App\Webhooks\Mollie\WebhookPayloadRouter;
 use Emeq\MollieApi\Webhooks\MollieWebhookSignature;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;

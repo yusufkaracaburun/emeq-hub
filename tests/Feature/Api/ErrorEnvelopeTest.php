@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Api;
 
+use App\Integrations\Errors\ErrorCode;
 use App\Models\Connection;
 use App\Models\Consumer;
 use App\Sanctum\TokenAbilities;
-use App\Support\Errors\ErrorCode;
 use Emeq\ExactApi\Http\Request\RawExactRequest;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Route;

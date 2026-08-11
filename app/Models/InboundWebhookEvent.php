@@ -19,7 +19,7 @@ use Illuminate\Support\Facades\Context;
  *
  * **Metadata-only — géén payload/headers** (AVG). Genoeg getypte velden voor
  * incident-triage (provider/topic/action/outcome/status/fanout), niet de inhoud.
- * Geschreven via `App\Webhooks\InboundWebhookRecorder` (één write-path).
+ * Geschreven via `App\Integrations\Webhooks\InboundWebhookRecorder` (één write-path).
  */
 #[Fillable([
     'provider',

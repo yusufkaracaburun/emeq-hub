@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Exact;
 
+use App\Integrations\Exact\ExactWebhookSubscriptionManager;
 use App\Models\Account;
 use App\Models\Connection;
 use App\Models\Consumer;
-use App\Services\Exact\ExactWebhookSubscriptionManager;
 use Emeq\ExactApi\Http\Request\Delete\DeleteWebhookSubscription;
 use Emeq\ExactApi\Http\Request\Read\ListWebhookSubscriptions;
 use Emeq\ExactApi\Http\Request\Write\CreateWebhookSubscription;

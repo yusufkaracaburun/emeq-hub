@@ -2,7 +2,7 @@
 
 namespace Tests\Feature\Api\V1;
 
-use App\Jobs\Exact\DeleteExactWebhookSubscriptionsJob;
+use App\Integrations\Exact\Jobs\DeleteExactWebhookSubscriptionsJob;
 use App\Models\Account;
 use App\Models\Connection;
 use App\Models\Consumer;

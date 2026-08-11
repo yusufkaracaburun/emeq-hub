@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Jobs\Webhooks;
 
 use App\Enums\Provider;
+use App\Integrations\Webhooks\CanonicalEventRegistry;
+use App\Integrations\Webhooks\ConsumerWebhookHeaders;
 use App\Models\Connection;
-use App\Webhooks\CanonicalEventRegistry;
-use App\Webhooks\ConsumerWebhookHeaders;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;

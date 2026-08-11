@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace Tests\Unit\Webhooks\Mollie;
 
 use App\Billing\Account\AccountSubscriptionManager;
+use App\Integrations\Mollie\MollieConnectionContext;
+use App\Integrations\Mollie\Webhooks\SubscriptionWebhookHandler;
 use App\Models\Account;
 use App\Models\AccountSubscription;
 use App\Models\Connection;
 use App\Models\Consumer;
-use App\Mollie\MollieConnectionContext;
-use App\Webhooks\Mollie\SubscriptionWebhookHandler;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Mockery;
 use Mockery\MockInterface;

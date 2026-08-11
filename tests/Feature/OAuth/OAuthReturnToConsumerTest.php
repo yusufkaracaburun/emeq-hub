@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Tests\Feature\OAuth;
 
+use App\Integrations\Exact\OAuth\ExactOAuthFlow;
+use App\Integrations\Mollie\OAuth\MollieConnectOAuthFlow;
+use App\Integrations\OAuth\Testing\FakeOAuthFlow;
 use App\Models\Connection;
 use App\Models\Consumer;
-use App\OAuth\Exact\ExactOAuthFlow;
-use App\OAuth\Mollie\MollieConnectOAuthFlow;
-use App\OAuth\Testing\FakeOAuthFlow;
 use App\Sanctum\TokenAbilities;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\URL;

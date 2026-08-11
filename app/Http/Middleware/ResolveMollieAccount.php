@@ -3,8 +3,8 @@
 namespace App\Http\Middleware;
 
 use App\Enums\Provider;
+use App\Integrations\Mollie\MollieConnectionContext;
 use App\Models\Connection;
-use App\Mollie\MollieConnectionContext;
 
 /**
  * Mollie-pass-through-context (zie ResolveProviderAccount). Verschilt in de binding:

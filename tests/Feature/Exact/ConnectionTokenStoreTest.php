@@ -2,8 +2,8 @@
 
 namespace Tests\Feature\Exact;
 
+use App\Integrations\Exact\ConnectionTokenStore;
 use App\Models\Connection;
-use App\Services\Exact\ConnectionTokenStore;
 use DateTimeImmutable;
 use Emeq\ExactApi\Data\AccessToken;
 use Emeq\ExactApi\Data\ExactCredentials;

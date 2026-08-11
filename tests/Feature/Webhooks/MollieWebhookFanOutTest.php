@@ -3,12 +3,12 @@
 namespace Tests\Feature\Webhooks;
 
 use App\Enums\Provider;
+use App\Integrations\Webhooks\CanonicalEvent;
+use App\Integrations\Webhooks\CanonicalEventRegistry;
 use App\Jobs\Webhooks\ForwardWebhookToConsumerJob;
 use App\Models\Account;
 use App\Models\Connection;
 use App\Models\Consumer;
-use App\Webhooks\CanonicalEvent;
-use App\Webhooks\CanonicalEventRegistry;
 use Emeq\MollieApi\Mollie;
 use Emeq\MollieApi\Webhooks\MollieWebhookSignature;
 use Illuminate\Foundation\Testing\RefreshDatabase;

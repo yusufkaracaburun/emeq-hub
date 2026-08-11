@@ -2,9 +2,9 @@
 
 namespace Tests\Feature\Exact;
 
+use App\Integrations\Exact\ExactReferenceData;
 use App\Models\Connection;
 use App\Models\Consumer;
-use App\Services\Exact\ExactReferenceData;
 use Emeq\ExactApi\Http\Request\Read\GetGlAccounts;
 use Emeq\ExactApi\Http\Request\Read\GetRelations;
 use Emeq\ExactApi\Http\Request\Read\GetVatCodes;

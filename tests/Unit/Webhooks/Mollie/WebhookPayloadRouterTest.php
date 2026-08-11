@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Webhooks\Mollie;
 
+use App\Integrations\Mollie\Webhooks\PaymentWebhookHandler;
+use App\Integrations\Mollie\Webhooks\SubscriptionWebhookHandler;
+use App\Integrations\Mollie\Webhooks\WebhookHandlerResult;
+use App\Integrations\Mollie\Webhooks\WebhookPayloadRouter;
 use App\Models\Connection;
-use App\Webhooks\Mollie\PaymentWebhookHandler;
-use App\Webhooks\Mollie\SubscriptionWebhookHandler;
-use App\Webhooks\Mollie\WebhookHandlerResult;
-use App\Webhooks\Mollie\WebhookPayloadRouter;
 use Mockery;
 use Mockery\MockInterface;
 use PHPUnit\Framework\TestCase;

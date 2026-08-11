@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Tests\Feature\FeatureFlags;
 
+use App\Integrations\OAuth\Exceptions\ProviderDisabledException;
+use App\Integrations\OAuth\OAuthFlowRegistry;
 use App\Models\Account;
 use App\Models\Consumer;
-use App\OAuth\Exceptions\ProviderDisabledException;
-use App\OAuth\OAuthFlowRegistry;
 use App\Sanctum\TokenAbilities;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Pennant\Feature;

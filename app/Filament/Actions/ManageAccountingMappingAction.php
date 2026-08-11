@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Filament\Actions;
 
 use App\Accounting\AccountingTargetRegistry;
+use App\Integrations\Exact\ExactReferenceData;
 use App\Models\Connection;
 use App\Models\ConnectionAccountingRef;
-use App\Services\Exact\ExactReferenceData;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Repeater;

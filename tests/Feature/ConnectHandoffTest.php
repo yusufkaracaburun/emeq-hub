@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Tests\Feature;
 
+use App\Integrations\Exact\OAuth\ExactOAuthFlow;
+use App\Integrations\Mollie\OAuth\MollieConnectOAuthFlow;
+use App\Integrations\OAuth\Testing\FakeOAuthFlow;
 use App\Jobs\Webhooks\ForwardConnectionRevokedToConsumerJob;
 use App\Models\Account;
 use App\Models\Connection;
 use App\Models\Consumer;
-use App\OAuth\Exact\ExactOAuthFlow;
-use App\OAuth\Mollie\MollieConnectOAuthFlow;
-use App\OAuth\Testing\FakeOAuthFlow;
 use App\Support\Connect\ConnectLinkFactory;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Queue;

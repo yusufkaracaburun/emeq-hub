@@ -6,9 +6,9 @@ namespace App\Http\Controllers\Api\V1\AccountSubscriptions\Concerns;
 
 use App\Billing\Account\Exceptions\InvalidStateTransitionException;
 use App\Enums\Provider;
+use App\Integrations\Mollie\Errors\UpstreamErrorMapper;
+use App\Integrations\PassThrough\PassThroughRecorder;
 use App\Models\AccountSubscription;
-use App\Support\Mollie\UpstreamErrorMapper;
-use App\Support\PassThrough\PassThroughRecorder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;

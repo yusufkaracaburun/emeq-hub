@@ -2,8 +2,8 @@
 
 namespace Tests\Concerns;
 
+use App\Integrations\Mollie\MollieConnectionContext;
 use App\Models\Connection;
-use App\Mollie\MollieConnectionContext;
 
 /**
  * Helper voor tests die de MollieConnectionContext direct moeten vullen

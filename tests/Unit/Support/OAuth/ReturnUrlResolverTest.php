@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Support\OAuth;
 
+use App\Integrations\OAuth\ReturnUrlResolver;
 use App\Models\Consumer;
-use App\Support\OAuth\ReturnUrlResolver;
 use Tests\TestCase;
 
 class ReturnUrlResolverTest extends TestCase

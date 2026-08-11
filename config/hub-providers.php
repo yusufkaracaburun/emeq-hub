@@ -21,9 +21,9 @@ declare(strict_types=1);
  *   wanneer provider géén OAuth-flow heeft (Snelstart's clientkey/subscription).
  * error_budget: optioneel per-provider — pass-through-circuit-breaker (enabled,
  *   threshold, window-seconden). Alleen Exact heeft een gedeelde error-key-limiet
- *   die een breaker rechtvaardigt; gelezen door App\Support\Exact\ExactErrorBudget.
+ *   die een breaker rechtvaardigt; gelezen door App\Integrations\Exact\PassThrough\ExactErrorBudget.
  * allowed_paths: optioneel — whitelist van OData-resource-paden die de generieke
- *   pass-through mag benaderen (App\Support\Exact\ExactPathWhitelist). Spiegelt de
+ *   pass-through mag benaderen (App\Integrations\Exact\PassThrough\ExactPathWhitelist). Spiegelt de
  *   App-Center-scope-matrix (docs/exact/data-security-answers.md). Lege lijst =
  *   whitelist uit (alles door) → kill-switch bij een consumer-breuk.
  */

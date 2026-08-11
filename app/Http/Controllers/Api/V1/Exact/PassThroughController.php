@@ -4,12 +4,12 @@ namespace App\Http\Controllers\Api\V1\Exact;
 
 use App\Http\Controllers\Api\V1\Concerns\GuardsPassThroughRequest;
 use App\Http\Controllers\Controller;
+use App\Integrations\Exact\PassThrough\ExactForwarder;
+use App\Integrations\Exact\PassThrough\ExactPathWhitelist;
+use App\Integrations\Exact\PassThrough\HeaderForwarder;
 use App\Models\Account;
 use App\Models\Connection;
 use App\Sanctum\TokenAbilities;
-use App\Support\Exact\ExactForwarder;
-use App\Support\Exact\ExactPathWhitelist;
-use App\Support\Exact\HeaderForwarder;
 use Dedoc\Scramble\Attributes\Group;
 use Emeq\ExactApi\Http\Request\RawExactRequest;
 use Illuminate\Http\Request;

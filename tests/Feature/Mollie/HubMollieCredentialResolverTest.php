@@ -2,11 +2,11 @@
 
 namespace Tests\Feature\Mollie;
 
+use App\Integrations\Mollie\HubMollieCredentialResolver;
+use App\Integrations\Mollie\MollieConnectionContext;
+use App\Integrations\Mollie\OAuth\MollieConnectOAuthFlow;
+use App\Integrations\OAuth\Testing\FakeOAuthFlow;
 use App\Models\Connection;
-use App\Mollie\HubMollieCredentialResolver;
-use App\Mollie\MollieConnectionContext;
-use App\OAuth\Mollie\MollieConnectOAuthFlow;
-use App\OAuth\Testing\FakeOAuthFlow;
 use Emeq\MollieApi\Data\MollieOAuthCredentials;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use RuntimeException;

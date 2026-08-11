@@ -2,11 +2,11 @@
 
 namespace Tests\Feature\OAuth;
 
-use App\Jobs\Exact\DeleteExactWebhookSubscriptionsJob;
-use App\Jobs\Exact\RegisterExactWebhookSubscriptionsJob;
+use App\Integrations\Exact\Jobs\DeleteExactWebhookSubscriptionsJob;
+use App\Integrations\Exact\Jobs\RegisterExactWebhookSubscriptionsJob;
+use App\Integrations\Exact\OAuth\ExactOAuthFlow;
 use App\Models\Account;
 use App\Models\Connection;
-use App\OAuth\Exact\ExactOAuthFlow;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Http;

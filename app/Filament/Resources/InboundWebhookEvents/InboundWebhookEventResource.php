@@ -21,7 +21,7 @@ use Illuminate\Database\Eloquent\Builder;
  * Read-only viewer voor de `inbound_webhook_events`-audit (Partner → Hub).
  * Metadata-only (géén payload/headers — AVG): genoeg voor incident-triage
  * (provider/topic/action/outcome/status/fanout), niet de inhoud. Geschreven door
- * `App\Webhooks\InboundWebhookRecorder`; geen Create/Edit/Delete.
+ * `App\Integrations\Webhooks\InboundWebhookRecorder`; geen Create/Edit/Delete.
  */
 class InboundWebhookEventResource extends Resource
 {

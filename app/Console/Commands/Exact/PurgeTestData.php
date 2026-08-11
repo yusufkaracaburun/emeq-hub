@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Console\Commands\Exact;
 
+use App\Integrations\Exact\ConnectionTokenStore;
+use App\Integrations\Exact\HubExactCredentialResolver;
 use App\Models\Connection;
-use App\Services\Exact\ConnectionTokenStore;
-use App\Services\Exact\HubExactCredentialResolver;
 use Emeq\ExactApi\Contracts\ExactCredentialResolver;
 use Emeq\ExactApi\Contracts\TokenStore;
 use Emeq\ExactApi\Exact;

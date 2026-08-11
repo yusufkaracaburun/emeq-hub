@@ -2,7 +2,7 @@
 
 namespace Tests\Unit\Support\Exact;
 
-use App\Support\Exact\UpstreamErrorMapper;
+use App\Integrations\Exact\Errors\UpstreamErrorMapper;
 use Emeq\ExactApi\Exceptions\AuthenticationException;
 use Emeq\ExactApi\Exceptions\NotFoundException;
 use Emeq\ExactApi\Exceptions\RateLimitException;

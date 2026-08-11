@@ -2,9 +2,9 @@
 
 namespace Tests\Feature\OAuth;
 
+use App\Integrations\Contracts\OAuthFlow;
+use App\Integrations\OAuth\Testing\FakeOAuthFlow;
 use App\Models\Connection;
-use App\OAuth\Contracts\OAuthFlow;
-use App\OAuth\Testing\FakeOAuthFlow;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 

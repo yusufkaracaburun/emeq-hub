@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Api\V1\OAuth;
 
 use App\Enums\Provider;
 use App\Http\Controllers\Controller;
+use App\Integrations\OAuth\OAuthFlowRegistry;
 use App\Models\Connection;
-use App\OAuth\OAuthFlowRegistry;
 use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;

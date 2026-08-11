@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Enums\Provider;
+use App\Integrations\Exact\ExactUserId;
+use App\Integrations\Exact\OAuth\ExactOAuthFlow;
+use App\Integrations\Webhooks\InboundWebhookRecorder;
 use App\Jobs\Webhooks\ForwardConnectionRevokedToConsumerJob;
 use App\Mail\ConnectionDeprovisioned;
 use App\Models\Connection;
-use App\OAuth\Exact\ExactOAuthFlow;
-use App\Support\Exact\ExactUserId;
 use App\Support\Seo\SeoMeta;
-use App\Webhooks\InboundWebhookRecorder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;

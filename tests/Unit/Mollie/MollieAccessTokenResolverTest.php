@@ -2,11 +2,11 @@
 
 namespace Tests\Unit\Mollie;
 
-use App\Exceptions\Mollie\MissingConnectionContextException;
-use App\Exceptions\Mollie\MissingPartnerTokenException;
+use App\Integrations\Mollie\Exceptions\MissingConnectionContextException;
+use App\Integrations\Mollie\Exceptions\MissingPartnerTokenException;
+use App\Integrations\Mollie\MollieAccessTokenResolver;
+use App\Integrations\Mollie\MollieConnectionContext;
 use App\Models\Connection;
-use App\Mollie\MollieAccessTokenResolver;
-use App\Mollie\MollieConnectionContext;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 

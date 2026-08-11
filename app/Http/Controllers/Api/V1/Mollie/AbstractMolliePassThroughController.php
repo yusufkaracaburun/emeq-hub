@@ -4,11 +4,11 @@ namespace App\Http\Controllers\Api\V1\Mollie;
 
 use App\Enums\Provider;
 use App\Http\Controllers\Controller;
+use App\Integrations\Mollie\Errors\UpstreamErrorMapper;
+use App\Integrations\PassThrough\PassThroughRecorder;
 use App\Models\Account;
 use App\Models\Connection;
 use App\Sanctum\TokenAbilities;
-use App\Support\Mollie\UpstreamErrorMapper;
-use App\Support\PassThrough\PassThroughRecorder;
 use Emeq\MollieApi\Facades\Mollie;
 use Illuminate\Http\Request;
 use Mollie\Api\MollieApiClient;

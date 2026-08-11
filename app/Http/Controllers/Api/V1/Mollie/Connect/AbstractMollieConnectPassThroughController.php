@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api\V1\Mollie\Connect;
 
 use App\Enums\Provider;
-use App\Exceptions\Mollie\MissingPartnerTokenException;
 use App\Http\Controllers\Controller;
-use App\Mollie\MollieAccessTokenResolver;
+use App\Integrations\Mollie\Errors\UpstreamErrorMapper;
+use App\Integrations\Mollie\Exceptions\MissingPartnerTokenException;
+use App\Integrations\Mollie\MollieAccessTokenResolver;
+use App\Integrations\PassThrough\PassThroughRecorder;
 use App\Sanctum\TokenAbilities;
-use App\Support\Mollie\UpstreamErrorMapper;
-use App\Support\PassThrough\PassThroughRecorder;
 use Emeq\MollieApi\Exceptions\MollieExceptionMapper;
 use Illuminate\Http\Request;
 use Mollie\Api\Exceptions\ApiException as MollieApiException;

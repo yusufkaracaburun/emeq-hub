@@ -2,10 +2,10 @@
 
 namespace Tests\Feature\Api\V1\Mollie;
 
+use App\Integrations\Mollie\MollieConnectionContext;
 use App\Models\Account;
 use App\Models\Connection;
 use App\Models\Consumer;
-use App\Mollie\MollieConnectionContext;
 use App\Sanctum\TokenAbilities;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;

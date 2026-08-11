@@ -2,7 +2,7 @@
 
 namespace Tests\Unit\Support\Mollie;
 
-use App\Support\Mollie\UpstreamErrorMapper;
+use App\Integrations\Mollie\Errors\UpstreamErrorMapper;
 use Emeq\MollieApi\Exceptions\AuthenticationException;
 use Emeq\MollieApi\Exceptions\MollieException;
 use Emeq\MollieApi\Exceptions\NotFoundException;

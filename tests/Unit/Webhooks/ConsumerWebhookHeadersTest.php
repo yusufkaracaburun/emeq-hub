@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Webhooks;
 
-use App\Webhooks\ConsumerWebhookHeaders;
+use App\Integrations\Webhooks\ConsumerWebhookHeaders;
 use Illuminate\Support\Facades\Context;
 use Tests\TestCase;
 

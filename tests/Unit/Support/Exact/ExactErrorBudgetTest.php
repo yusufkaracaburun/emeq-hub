@@ -2,8 +2,8 @@
 
 namespace Tests\Unit\Support\Exact;
 
+use App\Integrations\Exact\PassThrough\ExactErrorBudget;
 use App\Models\Connection;
-use App\Support\Exact\ExactErrorBudget;
 use Tests\TestCase;
 
 class ExactErrorBudgetTest extends TestCase

@@ -3,8 +3,8 @@
 namespace App\Http\Middleware;
 
 use App\Enums\Provider;
+use App\Integrations\Snelstart\HubSnelstartCredentialResolver;
 use App\Models\Connection;
-use App\Services\Snelstart\HubSnelstartCredentialResolver;
 use Emeq\SnelstartApi\Contracts\SnelstartCredentialResolver;
 use Emeq\SnelstartApi\Snelstart;
 

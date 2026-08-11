@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Middleware;
 
-use App\Support\Errors\ErrorCode;
+use App\Integrations\Errors\ErrorCode;
 use Closure;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;

@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace App\Actions\Connect;
 
 use App\Enums\Provider;
+use App\Integrations\OAuth\Exceptions\ProviderDisabledException;
+use App\Integrations\OAuth\OAuthFlowRegistry;
 use App\Models\Account;
 use App\Models\Connection;
-use App\OAuth\Exceptions\ProviderDisabledException;
-use App\OAuth\OAuthFlowRegistry;
 use App\Support\ProviderCredentialDescriptor;
 use Illuminate\Support\Str;
 use InvalidArgumentException;

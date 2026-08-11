@@ -2,8 +2,8 @@
 
 namespace Tests\Unit\Mollie;
 
-use App\Exceptions\Mollie\MissingPartnerTokenException;
-use App\Support\Mollie\UpstreamErrorMapper;
+use App\Integrations\Mollie\Errors\UpstreamErrorMapper;
+use App\Integrations\Mollie\Exceptions\MissingPartnerTokenException;
 use Emeq\MollieApi\Exceptions\NotFoundException;
 use PHPUnit\Framework\TestCase;
 

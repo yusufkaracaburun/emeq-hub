@@ -2,9 +2,9 @@
 
 namespace Tests\Feature\Api\OAuth;
 
+use App\Integrations\Mollie\OAuth\MollieConnectOAuthFlow;
+use App\Integrations\OAuth\Testing\FakeOAuthFlow;
 use App\Models\Connection;
-use App\OAuth\Mollie\MollieConnectOAuthFlow;
-use App\OAuth\Testing\FakeOAuthFlow;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 

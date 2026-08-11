@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Console\Commands\Exact;
 
 use App\Enums\Provider;
+use App\Integrations\Exact\OAuth\ExactOAuthFlow;
 use App\Models\Connection;
-use App\OAuth\Exact\ExactOAuthFlow;
 use Illuminate\Console\Command;
 use Throwable;
 

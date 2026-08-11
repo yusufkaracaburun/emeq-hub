@@ -2,7 +2,7 @@
 
 namespace Tests\Unit\Support\Exact;
 
-use App\Support\Exact\ExactPathWhitelist;
+use App\Integrations\Exact\PassThrough\ExactPathWhitelist;
 use Tests\TestCase;
 
 class ExactPathWhitelistTest extends TestCase

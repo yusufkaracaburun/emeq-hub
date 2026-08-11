@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Api\V1\Exact;
 
 use App\Http\Controllers\Controller;
+use App\Integrations\Exact\PassThrough\ExactForwarder;
 use App\Models\Account;
 use App\Models\Connection;
-use App\Support\Exact\ExactForwarder;
 use Dedoc\Scramble\Attributes\Group;
 use Emeq\ExactApi\Http\Request\Read\GetVatCodes;
 use Illuminate\Http\Request;

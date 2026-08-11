@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Exact;
 
-use App\Jobs\Exact\DeleteExactWebhookSubscriptionsJob;
+use App\Integrations\Exact\Jobs\DeleteExactWebhookSubscriptionsJob;
+use App\Integrations\Webhooks\InboundWebhookRecorder;
 use App\Jobs\Webhooks\ForwardConnectionRevokedToConsumerJob;
 use App\Mail\ConnectionDeprovisioned;
 use App\Models\Account;
 use App\Models\Connection;
 use App\Models\Consumer;
 use App\Models\InboundWebhookEvent;
-use App\Webhooks\InboundWebhookRecorder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Mail;

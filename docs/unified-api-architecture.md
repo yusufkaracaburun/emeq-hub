@@ -32,7 +32,7 @@ De scheiding die het systeem overeind houdt:
 | Canoniek domein | `App\Accounting\*` (DTO's + enums) | Provider-neutrale betekenis. Nul partner-termen |
 | Unified API | `App\Http\Controllers\Api\V1\Accounting\*` | HTTP-contract. Kent géén providernaam |
 | Capability-registry | `App\Accounting\AccountingTargetRegistry` | Wat kan deze provider? |
-| Provider-adapter | `App\Accounting\Exact\ExactAccountingTarget` | Canoniek ⇄ partner-payload |
+| Provider-adapter | `App\Integrations\Exact\Accounting\ExactAccountingTarget` | Canoniek ⇄ partner-payload |
 | Mapping / transformatie | in de adapter — zie hieronder | Canoniek → partner-payload |
 | Referentie-resolutie | `App\Accounting\Contracts\ReferenceResolver` | Canonieke sleutel → provider-identiteit |
 | Sync-state | `provider_entity_links` | Canonieke entity ⇄ provider-entity |

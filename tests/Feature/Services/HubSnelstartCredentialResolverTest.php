@@ -2,8 +2,8 @@
 
 namespace Tests\Feature\Services;
 
+use App\Integrations\Snelstart\HubSnelstartCredentialResolver;
 use App\Models\Connection;
-use App\Services\Snelstart\HubSnelstartCredentialResolver;
 use Emeq\SnelstartApi\Contracts\SnelstartCredentialResolver;
 use Emeq\SnelstartApi\Data\SnelstartCredentials;
 use Illuminate\Foundation\Testing\RefreshDatabase;
