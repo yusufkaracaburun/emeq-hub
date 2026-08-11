@@ -24,7 +24,7 @@ De hele stack draait lokaal in Docker (`docker compose up -d --build` → `http:
 | **Connection** | Eén koppeling tussen één Account en één Provider. Encrypted tokens + `expires_at` + scopes |
 | **PassThroughCall** | Immutable audit-rij per Consumer→Hub→Partner-request. Zie `.docs/decisions/pass-through-calls-table.md` |
 | **ProviderEntityLink** | Canoniek `external_id` ⇄ partner-entity per Connection, met payload-fingerprint. Houdt herboeking tegen wanneer de idempotency-key weg is; fundament voor sync-state. Zie `docs/unified-api-architecture.md` |
-| **InboundWebhookEvent** | Metadata-only audit van partner→Hub-webhooks via `App\Webhooks\InboundWebhookRecorder` — géén payload of headers (AVG: de Hub is processor). Outbound fan-out loopt via spatie webhook-server en persisteert geen rij |
+| **InboundWebhookEvent** | Metadata-only audit van partner→Hub-webhooks via `App\Integrations\Webhooks\InboundWebhookRecorder` — géén payload of headers (AVG: de Hub is processor). Outbound fan-out loopt via spatie webhook-server en persisteert geen rij |
 
 ## Invariants — niet doorbreken zonder approval
 
@@ -38,7 +38,8 @@ De hele stack draait lokaal in Docker (`docker compose up -d --build` → `http:
 
 Volledige versie met gotchas en `.docs/decisions`-links: `docs/agents/subsystems.md`.
 
-- **Werkdocumentatie** — `.docs/{decisions,plans,errors,stack}/` (lokaal, gitignored); indeling in `.docs/README.md`.
+- **Werkdocumentatie** — `.docs/{decisions,plans,todos,errors,stack,strategy}/` (lokaal, gitignored); indeling in `.docs/README.md`.
+- **Consumer-documentatie** — `docs/consumer-onboarding.md` is het startpunt: deel A = wat wij in de Hub inrichten per nieuwe Consumer (`app_url`, PAT-preset, rooktest), deel B = het stack-onafhankelijke contract dat elke consumer-app moet nakomen. Endpoints, payloads en de agent-prompts staan in `docs/consumer-integration-guide.md`. Bij elke wijziging aan het `/v1/*`-contract: beide bijwerken.
 - **Admin-paneel** — Filament v4 op `/admin`; Spatie-rollen `super-admin`/`staff`/`boekhouder`; 4 NL nav-groups; Books-module top-level, gated via `GatedToBoekhouding`.
 - **Provider-credential-laag** — `config/hub-providers.php` + `ProviderCredentialDescriptor` is de single source voor credential-metadata; provider-identiteit getypeerd via `App\Enums\Provider`.
 - **Feature-flags / kill-switch** — Pennant `feature.provider:{provider}` op `/v1/*`, auto-gedefinieerd uit `config('hub-providers')`.
@@ -89,7 +90,7 @@ Een SDK-change is edit + commit + push in de SDK-repo zelf, daarna `composer upd
 
 ai-kit draait als plugin (`.ai-kit-setup`: `tier=full`, `mode=solo-global`). Lifecycle-fase **development** — schema-migraties vrij te wijzigen, geen backwards-compat-eis vóór productie. Solo-repo: feature-/fix-branch → tests groen → ff-merge naar `master`, geen PR-ceremonie. Open en forward-werk staat in GitHub-issues (`P*`/`area/*`-labels; `/ai:next` rankt ze). Entrypoints: `/ai:tdd`, `/ai:diagnose`, `/ai:to-issues`, `/ai:review`. Detail in `docs/agents/workflow.md`.
 
-Project-skills: **docs-sync** (documentatie-drift; proactief na domein-wijzigingen en vóór commit) · **add-provider** (nieuwe partner-SDK bouwen + aan de Hub koppelen) · **change-sdk** (bestaande SDK wijzigen, met de tabel "raak ik de Hub aan?"). Authoritative conventies staan in `.ai/rules/` (auto-loaded: taal, engineering, security); ai-kit canonical rules in `.claude/rules/` (gitignored, aanvullend).
+Project-skills: **docs-sync** (documentatie-drift; proactief na domein-wijzigingen en vóór commit) · **add-provider** (nieuwe partner-SDK bouwen + aan de Hub koppelen) · **change-sdk** (bestaande SDK wijzigen, met de tabel "raak ik de Hub aan?") · **unified-api-review** (architectuurreview van de Unified-API-kern door de provider-#2-lens; schrijft rapport, wijzigt geen code). Authoritative conventies staan in `.ai/rules/` (auto-loaded: taal, engineering, security); ai-kit canonical rules in `.claude/rules/` (gitignored, aanvullend).
 
 Taal: code en identifiers Engels; commits, PRs, docs en conversatie Nederlands; partner-domeintermen volgen de partner-API (Snelstart Nederlands, Mollie Engels — niet vertalen).
 
