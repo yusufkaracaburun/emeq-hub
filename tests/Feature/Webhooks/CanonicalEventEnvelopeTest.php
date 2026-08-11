@@ -88,4 +88,26 @@ class CanonicalEventEnvelopeTest extends TestCase
                 && $job->payload['data'] === $payload;
         });
     }
+
+    /**
+     * De handleiding draagt consumers op om op `X-Emeq-Event-Id` te deduperen.
+     * Mollie levert zelf geen event-id en vuurt meerdere webhooks voor dezelfde
+     * resource — juist daar mag de header niet ontbreken.
+     */
+    public function test_de_dedupe_header_gaat_altijd_mee_ook_zonder_partner_event_id(): void
+    {
+        Bus::fake([CallWebhookJob::class]);
+
+        $consumer = Consumer::factory()->withWebhookCallback()->create();
+        $account = Account::factory()->for($consumer)->create(['external_id' => 'school1']);
+        $connection = Connection::factory()->forMollie()->active()->for($account)->create();
+
+        (new ForwardWebhookToConsumerJob(Provider::Mollie, $connection, ['id' => 'tr_abc'], null))
+            ->handle(app(CanonicalEventRegistry::class));
+
+        Bus::assertDispatched(CallWebhookJob::class, function (CallWebhookJob $job): bool {
+            return isset($job->headers['X-Emeq-Event-Id'])
+                && $job->headers['X-Emeq-Event-Id'] !== '';
+        });
+    }
 }

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Jobs\Webhooks;
 
+use App\Integrations\Webhooks\CanonicalEvent;
+use App\Integrations\Webhooks\ConsumerWebhookEnvelope;
 use App\Integrations\Webhooks\ConsumerWebhookHeaders;
 use App\Models\Connection;
 use Illuminate\Bus\Queueable;
@@ -58,14 +60,16 @@ final class ForwardConnectionRevokedToConsumerJob implements ShouldQueue
 
         WebhookCall::create()
             ->url($consumer->webhook_callback_url)
-            ->payload([
-                'event' => 'connection.revoked',
-                'provider' => $this->revokedConnection->provider->value,
-                'connection_id' => $this->revokedConnection->id,
-                'account_external_id' => $account->external_id,
-                'source' => $this->source,
-                'revoked_at' => $this->revokedConnection->revoked_at?->toIso8601String(),
-            ])
+            ->payload(ConsumerWebhookEnvelope::make(
+                CanonicalEvent::CONNECTION_REVOKED,
+                $this->revokedConnection->provider,
+                (string) $account->external_id,
+                [
+                    'connection_id' => $this->revokedConnection->id,
+                    'source' => $this->source,
+                    'revoked_at' => $this->revokedConnection->revoked_at?->toIso8601String(),
+                ],
+            ))
             ->useSecret((string) $consumer->webhook_callback_secret)
             ->withHeaders(ConsumerWebhookHeaders::make($this->eventId))
             ->dispatch();

@@ -6,6 +6,8 @@ namespace App\Jobs\Accounting;
 
 use App\Accounting\AccountingSyncRunner;
 use App\Accounting\FinancialDocument;
+use App\Integrations\Webhooks\CanonicalEvent;
+use App\Integrations\Webhooks\ConsumerWebhookEnvelope;
 use App\Integrations\Webhooks\ConsumerWebhookHeaders;
 use App\Models\Account;
 use App\Models\Connection;
@@ -71,7 +73,12 @@ final class SyncAccountingDocumentJob implements ShouldQueue
 
         WebhookCall::create()
             ->url($consumer->webhook_callback_url)
-            ->payload(['event' => 'accounting.document.synced', ...$outcome->responseBody])
+            ->payload(ConsumerWebhookEnvelope::make(
+                CanonicalEvent::DOCUMENT_SYNCED,
+                $this->accountingConnection->provider,
+                (string) $this->account->external_id,
+                $outcome->responseBody,
+            ))
             ->useSecret((string) $consumer->webhook_callback_secret)
             ->withHeaders(ConsumerWebhookHeaders::make((string) Str::uuid()))
             ->dispatch();

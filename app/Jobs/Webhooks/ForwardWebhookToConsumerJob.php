@@ -6,6 +6,7 @@ namespace App\Jobs\Webhooks;
 
 use App\Enums\Provider;
 use App\Integrations\Webhooks\CanonicalEventRegistry;
+use App\Integrations\Webhooks\ConsumerWebhookEnvelope;
 use App\Integrations\Webhooks\ConsumerWebhookHeaders;
 use App\Models\Connection;
 use Illuminate\Bus\Queueable;
@@ -14,6 +15,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Spatie\WebhookServer\WebhookCall;
 
 /**
@@ -42,6 +44,12 @@ final class ForwardWebhookToConsumerJob implements ShouldQueue
      * gelijknamige property. Niet "opschonen" naar de kortere naam.
      *
      * @param  array<string, mixed>  $payload
+     * @param  string|null  $eventId  de dedupe-sleutel die als `X-Emeq-Event-Id`
+     *                                meegaat. Levert de partner er geen, dan maakt de
+     *                                Hub er één: de handleiding draagt consumers op om
+     *                                op die header te deduperen, dus mag hij niet
+     *                                ontbreken. Wordt hier gezet en niet in `handle()`,
+     *                                zodat een job-retry dezelfde sleutel houdt.
      * @param  string|null  $queue  `webhooks` heeft een eigen Horizon-supervisor; `null`
      *                              zet de job op de default-queue. Dat is een
      *                              capaciteitskeuze en hoort daarom bij de aanroeper,
@@ -54,6 +62,8 @@ final class ForwardWebhookToConsumerJob implements ShouldQueue
         public ?string $eventId = null,
         ?string $queue = 'webhooks',
     ) {
+        $this->eventId = $eventId ?? (string) Str::uuid();
+
         if ($queue !== null) {
             $this->onQueue($queue);
         }
@@ -80,17 +90,12 @@ final class ForwardWebhookToConsumerJob implements ShouldQueue
 
         WebhookCall::create()
             ->url($consumer->webhook_callback_url)
-            ->payload([
-                'event' => $events->eventFor($this->provider, $this->payload),
-                'provider' => $this->provider->value,
-                // Het id dat de consumer zelf aanleverde bij het koppelen — die kent
-                // z'n eigen `X-Account-Id`, niet onze primary key.
-                'account_id' => $account->external_id,
-                // Wanneer de Hub het event uitstuurde. De partner levert zelden een
-                // eigen tijdstempel; doen alsof van wel zou liegen over de bron.
-                'occurred_at' => now()->toIso8601String(),
-                'data' => $this->payload,
-            ])
+            ->payload(ConsumerWebhookEnvelope::make(
+                $events->eventFor($this->provider, $this->payload),
+                $this->provider,
+                (string) $account->external_id,
+                $this->payload,
+            ))
             ->useSecret((string) $consumer->webhook_callback_secret)
             ->withHeaders(ConsumerWebhookHeaders::make($this->eventId))
             ->dispatch();

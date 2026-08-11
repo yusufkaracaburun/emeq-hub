@@ -67,7 +67,9 @@ final class PassThroughRecorder
             $attributes['direction'] = $direction;
         }
 
-        PassThroughCall::create([...$attributes, ...$extra]);
+        // `extra` eerst: wat deze klasse berekent (status, duur, fingerprint, tenant)
+        // is de reden dat ze bestaat en mag een aanroeper niet stilletjes vervangen.
+        PassThroughCall::create([...$extra, ...$attributes]);
     }
 
     /**

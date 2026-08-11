@@ -31,6 +31,9 @@ final class CanonicalEvent
 
     public const SUBSCRIPTION_CHANGED = 'billing.subscription.changed';
 
+    /** De koppeling is ingetrokken — publiceert ForwardConnectionRevokedToConsumerJob. */
+    public const CONNECTION_REVOKED = 'connection.revoked';
+
     /**
      * De partner stuurde iets waarvoor de Hub (nog) geen canonieke naam heeft.
      * De ruwe payload staat gewoon in `data`; bouw hier geen logica op.

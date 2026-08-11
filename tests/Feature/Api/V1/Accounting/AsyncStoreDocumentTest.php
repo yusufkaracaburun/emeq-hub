@@ -6,6 +6,7 @@ namespace Tests\Feature\Api\V1\Accounting;
 
 use App\Accounting\AccountingSyncRunner;
 use App\Accounting\FinancialDocument;
+use App\Integrations\Webhooks\CanonicalEvent;
 use App\Jobs\Accounting\SyncAccountingDocumentJob;
 use App\Models\Account;
 use App\Models\Connection;
@@ -185,15 +186,20 @@ class AsyncStoreDocumentTest extends TestCase
         // Push is daadwerkelijk gedaan vanuit de job.
         MockClient::global()->assertSent(CreateSalesEntry::class);
 
-        Bus::assertDispatched(CallWebhookJob::class, function (CallWebhookJob $job): bool {
+        Bus::assertDispatched(CallWebhookJob::class, function (CallWebhookJob $job) use ($account): bool {
             $signatureHeader = config('webhook-server.signature_header_name', 'Signature');
             $expectedSignature = hash_hmac('sha256', json_encode($job->payload), 'consumer-secret-xyz');
 
             return $job->webhookUrl === 'https://consumer.test/accounting'
-                && $job->payload['event'] === 'accounting.document.synced'
-                && $job->payload['status'] === 'posted'
-                && $job->payload['external_id'] === 'INV-2026-001'
-                && $job->payload['external_ref'] === 'inv-guid-9'
+                && $job->payload['event'] === CanonicalEvent::DOCUMENT_SYNCED
+                && $job->payload['provider'] === 'exact'
+                // Het resultaat draagt dezelfde envelope als elke andere consumer-webhook:
+                // de consumer routeert op `event` en leest zijn eigen `account_id`.
+                && $job->payload['account_id'] === $account->external_id
+                && is_string($job->payload['occurred_at'])
+                && $job->payload['data']['status'] === 'posted'
+                && $job->payload['data']['external_id'] === 'INV-2026-001'
+                && $job->payload['data']['external_ref'] === 'inv-guid-9'
                 && ($job->headers[$signatureHeader] ?? null) === $expectedSignature;
         });
 
@@ -225,9 +231,9 @@ class AsyncStoreDocumentTest extends TestCase
         );
 
         Bus::assertDispatched(CallWebhookJob::class, function (CallWebhookJob $job): bool {
-            return $job->payload['event'] === 'accounting.document.synced'
-                && $job->payload['status'] === 'failed'
-                && $job->payload['external_id'] === 'INV-2026-001';
+            return $job->payload['event'] === CanonicalEvent::DOCUMENT_SYNCED
+                && $job->payload['data']['status'] === 'failed'
+                && $job->payload['data']['external_id'] === 'INV-2026-001';
         });
     }
 
@@ -300,8 +306,8 @@ class AsyncStoreDocumentTest extends TestCase
 
         Bus::assertDispatched(
             CallWebhookJob::class,
-            fn (CallWebhookJob $job): bool => ($job->payload['deduplicated'] ?? false) === true
-                && $job->payload['status'] === 'posted'
+            fn (CallWebhookJob $job): bool => ($job->payload['data']['deduplicated'] ?? false) === true
+                && $job->payload['data']['status'] === 'posted'
         );
     }
 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature;
 
+use App\Integrations\Webhooks\CanonicalEvent;
 use App\Jobs\Webhooks\ForwardConnectionRevokedToConsumerJob;
 use App\Models\Account;
 use App\Models\Connection;
@@ -33,12 +34,15 @@ class ForwardConnectionRevokedToConsumerJobTest extends TestCase
 
         Bus::assertDispatched(CallWebhookJob::class, function (CallWebhookJob $job) use ($connection, $account): bool {
             return $job->webhookUrl === 'https://consumer.test/hooks'
-                && $job->payload['event'] === 'connection.revoked'
+                && $job->payload['event'] === CanonicalEvent::CONNECTION_REVOKED
                 && $job->payload['provider'] === 'exact'
-                && $job->payload['connection_id'] === $connection->id
-                && $job->payload['account_external_id'] === $account->external_id
-                && $job->payload['source'] === 'exact_app_center'
-                && $job->payload['revoked_at'] !== null
+                // Dezelfde envelope als elke andere consumer-webhook: de tenant-sleutel
+                // heet overal `account_id`, de eventspecifieke velden staan in `data`.
+                && $job->payload['account_id'] === $account->external_id
+                && is_string($job->payload['occurred_at'])
+                && $job->payload['data']['connection_id'] === $connection->id
+                && $job->payload['data']['source'] === 'exact_app_center'
+                && $job->payload['data']['revoked_at'] !== null
                 && ($job->headers['X-Emeq-Event-Id'] ?? null) === 'evt-revoked-1';
         });
     }
