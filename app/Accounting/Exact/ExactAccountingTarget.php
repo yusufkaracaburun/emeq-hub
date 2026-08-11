@@ -10,6 +10,7 @@ use App\Accounting\BankStatement;
 use App\Accounting\BankStatementLine;
 use App\Accounting\Contracts\AccountingTarget;
 use App\Accounting\Contracts\EnrichesValidation;
+use App\Accounting\Contracts\ProbesPostedDocuments;
 use App\Accounting\Contracts\ReadsBankStatements;
 use App\Accounting\Contracts\ReadsDocuments;
 use App\Accounting\Contracts\ReadsLedgerAccounts;
@@ -67,7 +68,7 @@ use Throwable;
  * De Exact-wire (endpoints, veldnamen, AmountFC/AmountDC, response-envelope) leeft in
  * de SDK; deze adapter levert alleen geresolvede waarden in een neutrale regel-vorm.
  */
-final class ExactAccountingTarget implements AccountingTarget, EnrichesValidation, ReadsBankStatements, ReadsDocuments, ReadsLedgerAccounts, ReadsRelations, ReadsTaxCodes, SyncsReferenceData, UploadsAttachments
+final class ExactAccountingTarget implements AccountingTarget, EnrichesValidation, ProbesPostedDocuments, ReadsBankStatements, ReadsDocuments, ReadsLedgerAccounts, ReadsRelations, ReadsTaxCodes, SyncsReferenceData, UploadsAttachments
 {
     public function __construct(
         private readonly ReferenceResolver $references,
@@ -184,6 +185,48 @@ final class ExactAccountingTarget implements AccountingTarget, EnrichesValidatio
             items: $this->toPostedDocuments($rows, $connection, $purchase, $collection, $partyField),
             nextCursor: $token === null ? null : Cursor::of($token),
         );
+    }
+
+    /**
+     * Capability `accounting.documents.probe`.
+     *
+     * Zoekt op `YourRef`, de herkomst die {@see self::provenance()} bij het boeken
+     * meeschrijft. Bewust een exacte `eq`-vergelijking op die volledige string en geen
+     * `substringof`: de gelijkheidsvergelijking is gegarandeerd door elke OData-provider
+     * ondersteund, een string-functie niet.
+     *
+     * Faalt bewust dicht. Is de consumer hernoemd tussen de boeking en de probe, dan
+     * wijkt de provenance af en vindt de probe niets — dan rapporteren we de
+     * oorspronkelijke fout in plaats van te doen alsof er niets gebeurd is. Dat is de
+     * veilige kant: liever een terechte foutmelding dan een gemiste dubbele boeking.
+     */
+    public function findPostedDocument(FinancialDocument $document, Connection $connection): ?PostedDocument
+    {
+        $purchase = in_array($document->type, [DocumentType::PurchaseInvoice, DocumentType::Expense], true);
+        $collection = $purchase ? 'PurchaseEntryLines' : 'SalesEntryLines';
+        $partyField = $purchase ? 'Supplier' : 'Customer';
+
+        $params = [
+            '$select' => "EntryID,EntryNumber,{$partyField},EntryDate,DueDate,Journal,Description,YourRef,Currency",
+            '$expand' => $collection,
+            '$filter' => "YourRef eq '".str_replace("'", "''", $this->provenance($document, $connection))."'",
+            '$top' => 1,
+        ];
+
+        $request = $purchase ? new GetPurchaseEntries($params) : new GetSalesEntries($params);
+        $response = $this->connector($connection)->send($request);
+
+        if ($response->failed()) {
+            return null;
+        }
+
+        $rows = Envelope::results((array) $response->json());
+
+        if ($rows === []) {
+            return null;
+        }
+
+        return $this->toPostedDocuments($rows, $connection, $purchase, $collection, $partyField)[0] ?? null;
     }
 
     /**

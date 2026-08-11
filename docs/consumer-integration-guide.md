@@ -1,4 +1,5 @@
-# emeq Hub — Consumer-integratiehandleiding
+| Geboekte documenten lezen | `GET /v1/accounting/documents` | `exact:read` |
+| Bank-/kasafschriften lezen | `GET /v1/accounting/bank-statements` | `exact:read` |# emeq Hub — Consumer-integratiehandleiding
 
 Voor ontwikkelaars die een (multi-tenant) consumer-app aan de emeq Hub koppelen.
 Eén integratie → alle huidige én toekomstige providers (Exact, Mollie, …). Nieuwe
@@ -332,6 +333,12 @@ X-Account-Id: bob
 - **`limit`** is 1–200, standaard 50.
 - Bij `customers`/`suppliers` draagt elke rij `roles` (`debtor` en/of `creditor`); een
   relatie kan allebei zijn. `/customers` en `/suppliers` filteren op één rol.
+
+**Bank- en kasafschriften** haal je op met `GET /v1/accounting/bank-statements?kind=bank|cash`.
+Dit is de resource waarover de bank-webhooks notificeren: krijg je zo'n melding, dan
+vind je hier de mutaties. Een afschrift draagt `opening_balance` en `closing_balance`
+waarmee je kunt controleren of je alle regels hebt, en per regel de tegenpartij, het
+bedrag, de datum en de grootboekrekening.
 
 **Geboekte documenten teruglezen** gaat via `GET /v1/accounting/documents` — hetzelfde
 pad als waar je op POST, want het is hetzelfde begrip. Filter met

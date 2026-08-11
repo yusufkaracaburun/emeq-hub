@@ -13,6 +13,7 @@ use App\Models\Consumer;
 use App\Models\IdempotencyKey;
 use App\Models\ProviderEntityLink;
 use App\Sanctum\TokenAbilities;
+use Emeq\ExactApi\Http\Request\Read\GetSalesEntries;
 use Emeq\ExactApi\Http\Request\Write\CreateSalesEntry;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
@@ -277,6 +278,83 @@ class ProviderEntityLinkTest extends TestCase
             'status' => 200,
             'upstream_error' => 'deduplicated',
         ]);
+    }
+
+    /**
+     * Het laatste herboek-venster: de partner commit, maar de respons bereikt ons niet.
+     * De Hub weet dan van niets en zou bij een retry opnieuw boeken. De probe vraagt na.
+     */
+    public function test_a_booking_that_landed_despite_a_timeout_is_recovered(): void
+    {
+        MockClient::global([
+            // De boeking zelf krijgt geen antwoord…
+            CreateSalesEntry::class => MockResponse::make([], 504),
+            // …maar bij navraag staat hij er wél.
+            GetSalesEntries::class => MockResponse::make(['d' => ['results' => [[
+                'EntryID' => 'recovered-guid',
+                'EntryNumber' => 91,
+                'SalesEntryLines' => ['results' => []],
+            ]]]], 200),
+        ]);
+        $this->bindFakeReferences();
+
+        [$consumer] = $this->consumerWithExactConnection();
+
+        $this->postDocument($consumer, $this->salesInvoicePayload())
+            ->assertStatus(200)
+            ->assertJsonPath('status', 'posted')
+            ->assertJsonPath('recovered', true)
+            ->assertJsonPath('external_ref', 'recovered-guid');
+
+        // De link is alsnog vastgelegd, dus een volgende poging dedupliceert.
+        $this->assertDatabaseHas('provider_entity_links', [
+            'external_id' => 'INV-2026-001',
+            'provider_entity_id' => 'recovered-guid',
+        ]);
+
+        $this->assertDatabaseHas('pass_through_calls', ['upstream_error' => 'recovered_after_timeout']);
+    }
+
+    /**
+     * Vindt de probe niets, dan blijft de fout staan. Doen alsof het goed ging zou
+     * erger zijn dan een terechte foutmelding.
+     */
+    public function test_a_timeout_without_a_landed_booking_still_reports_the_failure(): void
+    {
+        MockClient::global([
+            CreateSalesEntry::class => MockResponse::make([], 504),
+            GetSalesEntries::class => MockResponse::make(['d' => ['results' => []]], 200),
+        ]);
+        $this->bindFakeReferences();
+
+        [$consumer] = $this->consumerWithExactConnection();
+
+        $response = $this->postDocument($consumer, $this->salesInvoicePayload());
+
+        // Welke 5xx precies hangt af van hoe de partner faalt; wat telt is dat de fout
+        // blijft staan en er niets is vastgelegd.
+        $this->assertGreaterThanOrEqual(500, $response->status());
+        $response->assertJsonPath('status', 'failed');
+
+        $this->assertDatabaseCount('provider_entity_links', 0);
+    }
+
+    /**
+     * Een functionele weigering (422) is een definitief antwoord — daar valt niets na
+     * te vragen, en een probe zou alleen een nutteloze partner-call zijn.
+     */
+    public function test_a_functional_rejection_is_not_probed(): void
+    {
+        MockClient::global([
+            CreateSalesEntry::class => MockResponse::make(['error' => ['message' => ['value' => 'ongeldig btw-nummer']]], 500),
+        ]);
+        $this->bindFakeReferences();
+
+        [$consumer] = $this->consumerWithExactConnection();
+
+        $this->postDocument($consumer, $this->salesInvoicePayload())->assertStatus(422);
+
+        MockClient::global()->assertNotSent(GetSalesEntries::class);
     }
 
     public function test_a_rejected_repost_is_audited(): void

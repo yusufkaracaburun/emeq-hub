@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Accounting;
 
+use App\Accounting\Contracts\ProbesPostedDocuments;
 use App\Accounting\Enums\SyncStatus;
 use App\Accounting\Exceptions\AccountingMappingException;
 use App\Jobs\Accounting\SyncAccountingDocumentJob;
@@ -80,6 +81,13 @@ final readonly class AccountingSyncRunner
             $status = $mapped['status'];
             $upstreamError = $mapped['short_code'];
             $responseBody = ['status' => SyncStatus::Failed->value, 'external_id' => $document->externalId, ...$mapped['body']];
+
+            // 502/503/504 betekent dat we géén antwoord kregen — niet dat de partner
+            // weigerde. Dan is het onbekend of de boeking toch geland is, en precies
+            // daar ontstaat de dubbele boeking bij een retry. Even navragen.
+            if ($status >= 502 && ($probed = $this->probe($document, $connection, $fingerprint)) !== null) {
+                [$status, $upstreamError, $responseBody] = $probed;
+            }
         }
 
         $this->audit($account, $connection, $consumerId, $provider, $document, $status, $start, $upstreamError, $responseBody);
@@ -132,6 +140,63 @@ final readonly class AccountingSyncRunner
             'error' => 'document_already_posted',
             'message' => "Er is al een boeking met external_id '{$document->externalId}' op deze koppeling, met andere inhoud. Gebruik een nieuw external_id (een correctie is een creditnota).",
         ]];
+    }
+
+    /**
+     * Vraagt de partner na of de boeking tóch geland is.
+     *
+     * Dit dicht het laatste herboek-venster: `provider_entity_links` legt alleen vast
+     * wat de Hub heeft zien slagen, dus als de partner commit en de respons ons niet
+     * bereikt weet de Hub van niets en boekt een retry opnieuw.
+     *
+     * Vindt de probe het document, dan is de boeking geslaagd en wordt de link alsnog
+     * vastgelegd. Vindt hij niets — of ondersteunt de provider geen probe, of faalt de
+     * probe zelf — dan blijft de oorspronkelijke fout staan. Falen naar "rapporteer de
+     * fout" is de veilige kant.
+     *
+     * @return array{0: int, 1: string, 2: array<string, mixed>}|null
+     */
+    private function probe(FinancialDocument $document, Connection $connection, string $fingerprint): ?array
+    {
+        try {
+            $target = $this->registry->for($connection->provider->value);
+
+            if (! $target instanceof ProbesPostedDocuments) {
+                return null;
+            }
+
+            $found = $target->findPostedDocument($document, $connection);
+        } catch (Throwable $e) {
+            report($e);
+
+            return null;
+        }
+
+        if ($found === null) {
+            return null;
+        }
+
+        $this->rememberLink($document, $connection, new AccountingResult(
+            status: 201,
+            externalRef: $found->id,
+            externalNumber: $found->number === null ? null : (int) $found->number,
+            raw: [],
+            attachments: [],
+        ), $fingerprint);
+
+        $body = [
+            'provider' => $connection->provider->value,
+            'status' => SyncStatus::Posted->value,
+            'external_id' => $document->externalId,
+            'external_ref' => $found->id,
+            'recovered' => true,
+        ];
+
+        if ($found->number !== null) {
+            $body['external_number'] = $found->number;
+        }
+
+        return [200, 'recovered_after_timeout', $body];
     }
 
     /**

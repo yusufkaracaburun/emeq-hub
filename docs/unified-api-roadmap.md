@@ -3,7 +3,7 @@
 > Niets staat onder **IMPLEMENTED** zonder werkende code én tests. Bij twijfel gaat
 > het naar NEXT. Architectuur staat in `unified-api-architecture.md`.
 
-Laatste update: 2026-08-11 · suite: 1252 passed, 1 incomplete, 0 failures.
+Laatste update: 2026-08-11 · suite: 1255 passed, 1 incomplete, 0 failures.
 Startbaseline vóór dit traject: 1120 passed · PHPStan-baseline 206 → 125.
 
 ---
@@ -153,6 +153,17 @@ sluitsaldo laat een consumer controleren of hij alles heeft.
 → `ReadResourcesTest::test_bank_statements_expose_the_lines_the_webhook_notifies_about`
 en twee andere
 
+### Read-back-probe na een onbeslist antwoord
+Bij 502/503/504 kreeg de Hub géén antwoord van de partner — niet "geweigerd" maar
+"onbekend". Precies daar ontstond de laatste dubbele boeking: de partner commit, de
+respons gaat verloren, de Hub legt geen link vast en een retry boekt opnieuw. De runner
+vraagt nu na via `ProbesPostedDocuments` (zoekt op de herkomst in `YourRef`). Gevonden →
+`200` met `recovered: true` en de link alsnog vastgelegd. Niets gevonden, geen
+probe-capability of een falende probe → de oorspronkelijke fout blijft staan. Een
+functionele weigering (422) wordt niet geprobed; dat is een definitief antwoord.
+→ `ProviderEntityLinkTest::test_a_booking_that_landed_despite_a_timeout_is_recovered`
+en twee andere
+
 ### Statische analyse
 PHPStan/Larastan level 5 op `app/`, `database/factories/` en `routes/`, met een
 baseline van 125 bestaande hits. Nieuwe code moet schoon zijn; bestaande schuld
@@ -170,10 +181,6 @@ Canonieke event-envelope (`accounting.*`, `payment.*`), provider-event-adapters 
 nodig de volle resource ophalen, atomaire dedupe en loop-detectie.
 **Breaking** voor bestaande consumers — vereist coördinatie met emeq-app.
 
-### 2. Bidirectionele sync-state
-`provider_entity_links` uitgebreid met versies en staleness-detectie; read-back-probe
-die het herboek-venster dicht dat overblijft wanneer de partner commit maar de respons
-ons niet bereikt.
 
 ---
 

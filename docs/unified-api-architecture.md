@@ -250,9 +250,11 @@ de HTTP-bytes: sleutelvolgorde en `200` versus `200.00` mogen het antwoord niet
 veranderen. Regelvolgorde telt wél mee — de adapters kennen geen update-pad, dus
 omgekeerde regels zijn een andere boeking.
 
-🚧 Nog te komen (fase 9): `provider_version`, `canonical_version` en `last_seen_at`
-voor staleness-detectie, plus de read-back-probe voor het geval de partner commit
-maar de respons ons niet bereikt.
+Bij een onbeslist antwoord (502/503/504 — géén antwoord, niet "geweigerd") vraagt de
+runner de partner na via `ProbesPostedDocuments`, op de herkomst die de adapter bij het
+boeken meeschreef. Dat dicht het laatste herboek-venster. Bewust géén
+`provider_version`/`canonical_version`-kolommen: er is nog niets dat ze leest, en een
+kolom zonder lezer is schuld.
 
 ## Idempotentie
 
