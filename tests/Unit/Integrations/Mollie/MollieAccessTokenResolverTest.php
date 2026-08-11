@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit\Mollie;
+namespace Tests\Unit\Integrations\Mollie;
 
 use App\Integrations\Mollie\Exceptions\MissingConnectionContextException;
 use App\Integrations\Mollie\Exceptions\MissingPartnerTokenException;

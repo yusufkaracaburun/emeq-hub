@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Unit\Support\Errors;
+namespace Tests\Unit\Integrations\Errors;
 
 use App\Integrations\Errors\ErrorCode;
 use PHPUnit\Framework\Attributes\DataProvider;

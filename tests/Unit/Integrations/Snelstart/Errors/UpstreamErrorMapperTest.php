@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Unit\Support\Snelstart;
+namespace Tests\Unit\Integrations\Snelstart\Errors;
 
 use App\Integrations\Snelstart\Errors\UpstreamErrorMapper;
 use Emeq\SnelstartApi\Exceptions\AuthenticationException;

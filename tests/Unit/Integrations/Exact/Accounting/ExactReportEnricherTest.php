@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit\Accounting\Validation\Enrichment;
+namespace Tests\Unit\Integrations\Exact\Accounting;
 
 use App\Accounting\Validation\Severity;
 use App\Integrations\Exact\Accounting\ConnectionMappingExactReferenceResolver;

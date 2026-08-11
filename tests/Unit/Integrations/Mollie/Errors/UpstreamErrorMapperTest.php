@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit\Support\Mollie;
+namespace Tests\Unit\Integrations\Mollie\Errors;
 
 use App\Integrations\Mollie\Errors\UpstreamErrorMapper;
 use Emeq\MollieApi\Exceptions\AuthenticationException;

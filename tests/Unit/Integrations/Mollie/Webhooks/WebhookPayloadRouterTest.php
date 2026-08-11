@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Unit\Webhooks\Mollie;
+namespace Tests\Unit\Integrations\Mollie\Webhooks;
 
 use App\Integrations\Mollie\Webhooks\PaymentWebhookHandler;
 use App\Integrations\Mollie\Webhooks\SubscriptionWebhookHandler;

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Unit\Support\OAuth;
+namespace Tests\Unit\Integrations\OAuth;
 
 use App\Integrations\OAuth\ReturnUrlResolver;
 use App\Models\Consumer;

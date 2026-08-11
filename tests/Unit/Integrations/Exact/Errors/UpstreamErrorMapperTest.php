@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit\Support\Exact;
+namespace Tests\Unit\Integrations\Exact\Errors;
 
 use App\Integrations\Exact\Errors\UpstreamErrorMapper;
 use Emeq\ExactApi\Exceptions\AuthenticationException;

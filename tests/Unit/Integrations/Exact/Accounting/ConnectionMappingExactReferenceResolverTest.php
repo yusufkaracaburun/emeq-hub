@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit\Accounting;
+namespace Tests\Unit\Integrations\Exact\Accounting;
 
 use App\Accounting\Enums\DocumentType;
 use App\Accounting\Enums\TaxTreatment;

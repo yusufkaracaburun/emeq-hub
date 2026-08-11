@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Unit\Webhooks;
+namespace Tests\Unit\Integrations\Webhooks;
 
 use App\Integrations\Webhooks\ConsumerWebhookHeaders;
 use Illuminate\Support\Facades\Context;

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Unit\Webhooks\Mollie;
+namespace Tests\Unit\Integrations\Mollie\Webhooks;
 
 use App\Billing\Account\AccountSubscriptionManager;
 use App\Integrations\Mollie\MollieConnectionContext;

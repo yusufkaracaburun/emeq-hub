@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit\Support\Exact;
+namespace Tests\Unit\Integrations\Exact\PassThrough;
 
 use App\Integrations\Exact\PassThrough\ExactErrorBudget;
 use App\Models\Connection;

@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit\Mollie;
+namespace Tests\Unit\Integrations\Mollie\Errors;
 
 use App\Integrations\Mollie\Errors\UpstreamErrorMapper;
 use App\Integrations\Mollie\Exceptions\MissingPartnerTokenException;

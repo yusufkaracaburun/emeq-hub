@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Unit\Support\Snelstart;
+namespace Tests\Unit\Integrations\Snelstart\PassThrough;
 
 use App\Integrations\Snelstart\PassThrough\HeaderForwarder;
 use Illuminate\Http\Request;
