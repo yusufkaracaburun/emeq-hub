@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Support\Snelstart;
 
+use App\Support\Errors\MapsUpstreamExceptions;
 use Emeq\SnelstartApi\Exceptions\AuthenticationException;
 use Emeq\SnelstartApi\Exceptions\NotFoundException;
 use Emeq\SnelstartApi\Exceptions\RateLimitException;
@@ -20,7 +21,7 @@ use Throwable;
  * 401/403 worden bewust naar 502 gemapt om de Snelstart-auth-state niet
  * te onthullen (zie threat T-05b-10).
  */
-final class UpstreamErrorMapper
+final class UpstreamErrorMapper implements MapsUpstreamExceptions
 {
     /**
      * @return array{status: int, body: array<string, mixed>, headers: array<string, string>, short_code: ?string}

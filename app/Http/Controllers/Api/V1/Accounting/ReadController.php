@@ -23,7 +23,7 @@ use App\Http\Concerns\ResolvesAccountingConnection;
 use App\Http\Controllers\Controller;
 use App\OAuth\Exceptions\ProviderDisabledException;
 use App\Sanctum\TokenAbilities;
-use App\Support\Exact\UpstreamErrorMapper;
+use App\Support\Errors\UpstreamErrorMapperRegistry;
 use Dedoc\Scramble\Attributes\Group;
 use Exception;
 use Illuminate\Http\JsonResponse;
@@ -46,7 +46,10 @@ class ReadController extends Controller
     use GuardsTokenAbility;
     use ResolvesAccountingConnection;
 
-    public function __construct(private readonly AccountingTargetRegistry $registry) {}
+    public function __construct(
+        private readonly AccountingTargetRegistry $registry,
+        private readonly UpstreamErrorMapperRegistry $errors,
+    ) {}
 
     /**
      * Geboekte documenten uit de gekoppelde administratie.
@@ -195,7 +198,7 @@ class ReadController extends Controller
             // Bewust `Exception` en niet `Throwable`: een PHP-`Error` is onze bug en
             // hoort als 500 met stacktrace naar boven te komen, niet vermomd als
             // "partner onbereikbaar" — dat stuurt de zoektocht de verkeerde kant op.
-            $mapped = UpstreamErrorMapper::mapException($e);
+            $mapped = $this->errors->map($provider, $e);
 
             return response()->json($mapped['body'], $mapped['status'], $mapped['headers']);
         }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Support\Exact;
 
+use App\Support\Errors\MapsUpstreamExceptions;
 use Emeq\ExactApi\Exceptions\AuthenticationException;
 use Emeq\ExactApi\Exceptions\NotFoundException;
 use Emeq\ExactApi\Exceptions\RateLimitException;
@@ -25,7 +26,7 @@ use Throwable;
  *
  * @phpstan-type MappedError array{status: int, body: array<string, mixed>, headers: array<string, string>, short_code: ?string}
  */
-final class UpstreamErrorMapper
+final class UpstreamErrorMapper implements MapsUpstreamExceptions
 {
     /**
      * @return array{status: int, body: array<string, mixed>, headers: array<string, string>, short_code: ?string}

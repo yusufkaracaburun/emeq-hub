@@ -14,6 +14,10 @@ use App\Mollie\MollieConnectionContext;
 use App\OAuth\Exact\ExactOAuthFlow;
 use App\OAuth\Mollie\MollieConnectOAuthFlow;
 use App\OAuth\OAuthFlowRegistry;
+use App\Support\Errors\UpstreamErrorMapperRegistry;
+use App\Support\Exact\UpstreamErrorMapper as ExactUpstreamErrorMapper;
+use App\Support\Mollie\UpstreamErrorMapper as MollieUpstreamErrorMapper;
+use App\Support\Snelstart\UpstreamErrorMapper as SnelstartUpstreamErrorMapper;
 use Dedoc\Scramble\Scramble;
 use Dedoc\Scramble\Support\Generator\OpenApi;
 use Dedoc\Scramble\Support\Generator\SecurityScheme;
@@ -37,6 +41,18 @@ class AppServiceProvider extends ServiceProvider
             $registry = new OAuthFlowRegistry($app);
             $registry->register(Provider::Mollie->value, MollieConnectOAuthFlow::class);
             $registry->register(Provider::Exact->value, ExactOAuthFlow::class);
+
+            return $registry;
+        });
+
+        // Partner-exceptions → Hub-HTTP, per provider. Provider-neutrale code (de
+        // accounting-runner, de canonieke lees-endpoints) vraagt hier de juiste
+        // mapper op in plaats van er één te importeren.
+        $this->app->singleton(UpstreamErrorMapperRegistry::class, function (): UpstreamErrorMapperRegistry {
+            $registry = new UpstreamErrorMapperRegistry;
+            $registry->register(Provider::Exact->value, ExactUpstreamErrorMapper::class);
+            $registry->register(Provider::Mollie->value, MollieUpstreamErrorMapper::class);
+            $registry->register(Provider::Snelstart->value, SnelstartUpstreamErrorMapper::class);
 
             return $registry;
         });

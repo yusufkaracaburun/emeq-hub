@@ -13,7 +13,7 @@ use App\Models\Connection;
 use App\Models\PassThroughCall;
 use App\Models\ProviderEntityLink;
 use App\OAuth\Exceptions\ProviderDisabledException;
-use App\Support\Exact\UpstreamErrorMapper;
+use App\Support\Errors\UpstreamErrorMapperRegistry;
 use Throwable;
 
 /**
@@ -26,6 +26,7 @@ final readonly class AccountingSyncRunner
     public function __construct(
         private AccountingTargetRegistry $registry,
         private ProviderEntityLinkRecorder $links,
+        private UpstreamErrorMapperRegistry $errors,
     ) {}
 
     public function run(FinancialDocument $document, Connection $connection, Account $account, int $consumerId): AccountingSyncOutcome
@@ -84,7 +85,7 @@ final readonly class AccountingSyncRunner
             $upstreamError = 'mapping_failed';
             $responseBody = ['status' => SyncStatus::Failed->value, 'external_id' => $document->externalId, 'error' => 'mapping_failed', 'message' => $e->getMessage()];
         } catch (Throwable $e) {
-            $mapped = UpstreamErrorMapper::mapException($e);
+            $mapped = $this->errors->map($provider, $e);
             $status = $mapped['status'];
             $upstreamError = $mapped['short_code'];
             $responseBody = ['status' => SyncStatus::Failed->value, 'external_id' => $document->externalId, ...$mapped['body']];
