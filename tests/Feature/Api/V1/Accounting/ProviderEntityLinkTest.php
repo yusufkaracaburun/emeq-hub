@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Api\V1\Accounting;
 
+use App\Accounting\Contracts\ReferenceResolver;
 use App\Accounting\Enums\DocumentType;
 use App\Accounting\Enums\TaxTreatment;
-use App\Accounting\Exact\Contracts\ExactReferenceResolver;
 use App\Accounting\Party;
 use App\Models\Connection;
 use App\Models\Consumer;
@@ -52,9 +52,9 @@ class ProviderEntityLinkTest extends TestCase
 
     private function bindFakeReferences(): void
     {
-        $this->app->bind(ExactReferenceResolver::class, fn (): ExactReferenceResolver => new class implements ExactReferenceResolver
+        $this->app->bind(ReferenceResolver::class, fn (): ReferenceResolver => new class implements ReferenceResolver
         {
-            public function relationGuid(Party $party, Connection $connection): string
+            public function relationRef(Party $party, Connection $connection): string
             {
                 return 'cust-guid';
             }
@@ -64,7 +64,7 @@ class ProviderEntityLinkTest extends TestCase
                 return '4';
             }
 
-            public function glAccountGuid(?string $category, Connection $connection): ?string
+            public function glAccountRef(?string $category, Connection $connection): ?string
             {
                 return 'gl-guid';
             }

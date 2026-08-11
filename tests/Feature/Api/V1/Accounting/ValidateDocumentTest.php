@@ -7,6 +7,7 @@ use App\Models\Consumer;
 use App\Sanctum\TokenAbilities;
 use Emeq\ExactApi\Http\Request\Read\GetRelations;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Laravel\Pennant\Feature;
 use Saloon\Http\Faking\MockClient;
 use Saloon\Http\Faking\MockResponse;
 use Tests\TestCase;
@@ -193,5 +194,33 @@ class ValidateDocumentTest extends TestCase
             ])
             ->assertStatus(400)
             ->assertJson(['error' => 'missing_account_header']);
+    }
+
+    /**
+     * De enrichment doet een live Exact-call (relatie-lookup). Die liep vroeger óók
+     * met de kill-switch uit. Nu degradeert het rapport naar de agnostische findings
+     * in plaats van de partner te bellen — een dry-run hoort read-only én stil te zijn.
+     */
+    public function test_enrichment_is_skipped_and_no_partner_call_is_made_when_the_provider_is_off(): void
+    {
+        Feature::define('provider-exact-enabled', fn () => false);
+        MockClient::global([]);
+
+        [$consumer] = $this->consumerWithExactConnection();
+        $token = $consumer->createToken('t', [TokenAbilities::EXACT_READ])->plainTextToken;
+
+        $response = $this->withHeader('Authorization', "Bearer {$token}")
+            ->withHeader('X-Account-Id', 'school1')
+            ->postJson('/v1/accounting/documents/validate', [
+                'lines' => [['description' => 'A', 'amount' => 100, 'tax_rate' => 21]],
+            ]);
+
+        $response->assertOk();
+
+        MockClient::global()->assertNothingSent();
+
+        foreach ($response->json('findings') as $finding) {
+            $this->assertStringStartsNotWith('exact.', (string) $finding['code']);
+        }
     }
 }

@@ -4,6 +4,11 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Api\V1\Accounting;
 
+use App\Accounting\AccountingResult;
+use App\Accounting\AccountingTargetRegistry;
+use App\Accounting\Contracts\AccountingTarget;
+use App\Accounting\FinancialDocument;
+use App\Enums\Provider;
 use App\Models\Connection;
 use App\Models\ConnectionAccountingRef;
 use App\Models\Consumer;
@@ -12,6 +17,7 @@ use Emeq\ExactApi\Http\Request\Read\GetGlAccounts;
 use Emeq\ExactApi\Http\Request\Read\GetJournals;
 use Emeq\ExactApi\Http\Request\Read\GetVatCodes;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Laravel\Pennant\Feature;
 use Saloon\Http\Faking\MockClient;
 use Saloon\Http\Faking\MockResponse;
 use Tests\TestCase;
@@ -152,5 +158,52 @@ class MappingApiTest extends TestCase
             ->assertJsonPath('mapping.auto_create_relations', false);
 
         $this->assertFalse($connection->fresh()->metadata['accounting_mapping']['auto_create_relations']);
+    }
+
+    /**
+     * De 422 hangt aan de capability, niet aan de providernaam. Een adapter die alleen
+     * kan boeken krijgt hem — ook al is dat niet Exact. Zonder deze test zou een
+     * verplaatste `if ($provider !== Exact)` er nog steeds doorheen komen.
+     */
+    public function test_sync_returns_422_when_the_provider_cannot_sync_references(): void
+    {
+        app(AccountingTargetRegistry::class)->register(Provider::Snelstart->value, PushOnlySyncTarget::class);
+
+        $consumer = Consumer::factory()->create();
+        $account = $consumer->accounts()->create(['external_id' => 'school1', 'display_name' => 'School 1']);
+        Connection::factory()->forSnelstart()->for($account)->create();
+
+        $token = $consumer->createToken('t', [TokenAbilities::SNELSTART_WRITE])->plainTextToken;
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->withHeader('X-Account-Id', 'school1')
+            ->postJson('/v1/accounting/sync')
+            ->assertStatus(422)
+            ->assertJsonPath('error', 'sync_unsupported');
+    }
+
+    /**
+     * Sync liep vroeger langs de kill-switch heen; via de registry niet meer.
+     */
+    public function test_sync_returns_503_when_the_provider_is_switched_off(): void
+    {
+        Feature::define('provider-exact-enabled', fn () => false);
+
+        [$consumer] = $this->setupConnection();
+
+        $this->withHeader('Authorization', "Bearer {$this->token($consumer)}")
+            ->withHeader('X-Account-Id', 'school1')
+            ->postJson('/v1/accounting/sync')
+            ->assertStatus(503)
+            ->assertJsonPath('error', 'provider_disabled');
+    }
+}
+
+/** Boekt wel, spiegelt geen referentiedata — de vorm van een verse provider. */
+final class PushOnlySyncTarget implements AccountingTarget
+{
+    public function push(FinancialDocument $document, Connection $connection): AccountingResult
+    {
+        return new AccountingResult(201, 'ref', null, [], []);
     }
 }

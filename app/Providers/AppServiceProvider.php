@@ -3,8 +3,8 @@
 namespace App\Providers;
 
 use App\Accounting\AccountingTargetRegistry;
+use App\Accounting\Contracts\ReferenceResolver;
 use App\Accounting\Exact\ConnectionMappingExactReferenceResolver;
-use App\Accounting\Exact\Contracts\ExactReferenceResolver;
 use App\Accounting\Exact\ExactAccountingTarget;
 use App\Enums\Provider;
 use App\Models\User;
@@ -50,7 +50,13 @@ class AppServiceProvider extends ServiceProvider
             return $registry;
         });
 
-        $this->app->bind(ExactReferenceResolver::class, ConnectionMappingExactReferenceResolver::class);
+        // Eén resolver, want er is één accounting-provider. Zodra provider #2 landt
+        // wordt dit contextueel: ->when(ExactAccountingTarget::class)->needs(...)->give(...).
+        // Let op bij die stap: contextuele bindings winnen stilzwijgend van deze
+        // bind(), dus de `bind(ReferenceResolver::class, <fake>)`-seams in de
+        // accounting-tests stoppen dan met werken zónder rood te worden. Die moeten
+        // in dezelfde commit mee omgezet worden.
+        $this->app->bind(ReferenceResolver::class, ConnectionMappingExactReferenceResolver::class);
 
         $this->app->bind(MollieCredentialResolver::class, HubMollieCredentialResolver::class);
 

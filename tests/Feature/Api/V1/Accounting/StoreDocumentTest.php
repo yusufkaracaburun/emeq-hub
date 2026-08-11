@@ -2,9 +2,9 @@
 
 namespace Tests\Feature\Api\V1\Accounting;
 
+use App\Accounting\Contracts\ReferenceResolver;
 use App\Accounting\Enums\DocumentType;
 use App\Accounting\Enums\TaxTreatment;
-use App\Accounting\Exact\Contracts\ExactReferenceResolver;
 use App\Accounting\Party;
 use App\Models\Connection;
 use App\Models\ConnectionAccountingRef;
@@ -49,9 +49,9 @@ class StoreDocumentTest extends TestCase
 
     private function bindFakeReferences(): void
     {
-        $this->app->bind(ExactReferenceResolver::class, fn (): ExactReferenceResolver => new class implements ExactReferenceResolver
+        $this->app->bind(ReferenceResolver::class, fn (): ReferenceResolver => new class implements ReferenceResolver
         {
-            public function relationGuid(Party $party, Connection $connection): string
+            public function relationRef(Party $party, Connection $connection): string
             {
                 return $party->role === 'creditor' ? 'supp-guid' : 'cust-guid';
             }
@@ -65,7 +65,7 @@ class StoreDocumentTest extends TestCase
                 return $taxRate >= 21.0 ? '4' : '2';
             }
 
-            public function glAccountGuid(?string $category, Connection $connection): ?string
+            public function glAccountRef(?string $category, Connection $connection): ?string
             {
                 return 'gl-guid';
             }
@@ -1003,7 +1003,7 @@ class StoreDocumentTest extends TestCase
 
     public function test_unconfigured_reference_mapping_returns_422(): void
     {
-        // Geen fake gebonden → DefaultExactReferenceResolver gooit → mapping_failed.
+        // Geen fake gebonden → DefaultReferenceResolver gooit → mapping_failed.
         MockClient::global([
             CreateSalesEntry::class => MockResponse::make(['d' => ['ID' => 'x']], 201),
         ]);

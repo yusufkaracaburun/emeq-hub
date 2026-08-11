@@ -31,11 +31,11 @@ De scheiding die het systeem overeind houdt:
 |---|---|---|
 | Canoniek domein | `App\Accounting\*` (DTO's + enums) | Provider-neutrale betekenis. Nul partner-termen |
 | Unified API | `App\Http\Controllers\Api\V1\Accounting\*` | HTTP-contract. Kent géén providernaam |
-| Capability-registry | `App\Accounting\AccountingTargetRegistry` 🚧 | Wat kan deze provider? |
+| Capability-registry | `App\Accounting\AccountingTargetRegistry` | Wat kan deze provider? |
 | Provider-adapter | `App\Accounting\Exact\ExactAccountingTarget` | Canoniek ⇄ partner-payload |
 | Mapping / transformatie | `App\Accounting\Pipeline\*` 🚧 | Herhaalbare mechaniek; semantiek blijft in de adapter |
-| Referentie-resolutie | `App\Accounting\Contracts\ReferenceResolver` 🚧 | Canonieke sleutel → provider-identiteit |
-| Sync-state | `provider_entity_links` 🚧 | Canonieke entity ⇄ provider-entity |
+| Referentie-resolutie | `App\Accounting\Contracts\ReferenceResolver` | Canonieke sleutel → provider-identiteit |
+| Sync-state | `provider_entity_links` | Canonieke entity ⇄ provider-entity |
 | Event-normalisatie | `App\Webhooks\*` 🚧 | Partner-webhook → canoniek event |
 | Transport / auth | `emeq/*-api` SDK's + `Connection` | HTTP, OAuth, tokens |
 
@@ -74,13 +74,13 @@ POST /v1/accounting/documents
   → DocumentsController          resolve Consumer→Account→Connection
   → StoreDocumentRequest         edge-validatie (snake_case wire)
   → FinancialDocument::fromArray canoniek object
-  → AccountingSyncRunner         dedupe-check op provider_entity_links 🚧
+  → AccountingSyncRunner         dedupe-check op provider_entity_links
   → AccountingTargetRegistry     provider → adapter, Pennant kill-switch
   → ExactAccountingTarget        canoniek → Exact-payload
       → ReferenceResolver        canonieke sleutel → Exact-identiteit
       → emeq/exact-api (Saloon)  HTTP
   ← AccountingResult
-  → provider_entity_links        link vastleggen                       🚧
+  → provider_entity_links        link vastleggen
   → PassThroughCall              audit-rij (altijd, ook bij falen)
 ```
 
@@ -100,7 +100,7 @@ Fase 6. Twee bronnen:
 Paginatie is cursor-based (`?cursor=&limit=`) met een opaque cursor, omdat Exact
 OData `$skiptoken` gebruikt en offset-paginatie daar niet op mapt.
 
-## Capabilities 🚧
+## Capabilities
 
 Een capability is aanwezig **dan en slechts dan als** de geregistreerde adapter het
 bijbehorende interface implementeert. Declaratie en gedrag kunnen niet uit elkaar
@@ -120,7 +120,7 @@ GET /v1/accounting/capabilities
 `enabled` is de orthogonale as: de Pennant-kill-switch. Een uitgeschakelde provider
 *declareert* nog steeds wat hij kan.
 
-## Referentie-resolutie 🚧
+## Referentie-resolutie
 
 Canonieke sleutels zijn provider-onafhankelijk; de vertaling naar een
 partner-identiteit gebeurt per connectie.

@@ -266,11 +266,37 @@ een header, niet de query-param `account_external_id` van de connect-laag):
 
 | Doel | Request | Ability |
 |---|---|---|
+| Capabilities opvragen | `GET /v1/accounting/capabilities` | `exact:read` |
 | Valideren (dry-run) | `POST /v1/accounting/documents/validate` | `exact:read` |
 | Boeken | `POST /v1/accounting/documents` | `exact:write` |
 
 > Je backend-proxy moet de headers `X-Account-Id`, `Idempotency-Key` en `Prefer`
 > mee-forwarden — zorg dat je proxy headers doorzet (zie het proxy-voorbeeld).
+
+### Wat ondersteunt deze koppeling?
+
+Niet elke boekhoudprovider kan hetzelfde. In plaats van dat per provider te weten,
+vraag je het:
+
+```http
+GET /v1/accounting/capabilities
+X-Account-Id: bob
+```
+
+```json
+{
+  "provider": "exact",
+  "enabled": true,
+  "capabilities": ["documents.write", "documents.attachments",
+                   "references.sync", "validation.enrich"]
+}
+```
+
+`capabilities` is een **platte lijst** — behandel een onbekende waarde als iets wat je
+negeert, dan is uitbreiding voor jou niet-breaking. Ontbreekt
+`documents.attachments`, stuur dan geen bijlagen mee. `enabled: false` betekent dat de
+provider tijdelijk uitgezet is (onderhoud, incident); wat hij *kan* verandert daar niet
+door, maar schrijfacties geven dan `503 provider_disabled`.
 
 ### Canonical document
 

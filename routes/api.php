@@ -134,6 +134,8 @@ Route::middleware('auth:sanctum')->group(function (): void {
 
     // Consumer-beheer van de boekhoud-koppeling: (her)sync de referentie-mirror + de
     // optionele mapping-override. Account + Connection in de controller geresolved.
+    Route::get('/accounting/capabilities', [AccountingMappingController::class, 'capabilities'])
+        ->name('api.accounting.capabilities');
     Route::post('/accounting/sync', [AccountingMappingController::class, 'sync'])
         ->name('api.accounting.sync');
     Route::get('/accounting/reference-data', [AccountingMappingController::class, 'referenceData'])

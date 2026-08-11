@@ -6,9 +6,9 @@ namespace Tests\Feature\Api\V1\Accounting;
 
 use App\Accounting\AccountingResult;
 use App\Accounting\Contracts\AccountingTarget;
+use App\Accounting\Contracts\ReferenceResolver;
 use App\Accounting\Enums\DocumentType;
 use App\Accounting\Enums\TaxTreatment;
-use App\Accounting\Exact\Contracts\ExactReferenceResolver;
 use App\Accounting\Exact\ExactAccountingTarget;
 use App\Accounting\FinancialDocument;
 use App\Accounting\Party;
@@ -57,9 +57,9 @@ class IdempotencyTest extends TestCase
 
     private function bindFakeReferences(): void
     {
-        $this->app->bind(ExactReferenceResolver::class, fn (): ExactReferenceResolver => new class implements ExactReferenceResolver
+        $this->app->bind(ReferenceResolver::class, fn (): ReferenceResolver => new class implements ReferenceResolver
         {
-            public function relationGuid(Party $party, Connection $connection): string
+            public function relationRef(Party $party, Connection $connection): string
             {
                 return 'cust-guid';
             }
@@ -69,7 +69,7 @@ class IdempotencyTest extends TestCase
                 return '4';
             }
 
-            public function glAccountGuid(?string $category, Connection $connection): ?string
+            public function glAccountRef(?string $category, Connection $connection): ?string
             {
                 return 'gl-guid';
             }

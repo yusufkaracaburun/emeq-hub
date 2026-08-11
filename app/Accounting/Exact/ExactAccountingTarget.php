@@ -7,11 +7,16 @@ namespace App\Accounting\Exact;
 use App\Accounting\AccountingResult;
 use App\Accounting\Attachment;
 use App\Accounting\Contracts\AccountingTarget;
+use App\Accounting\Contracts\EnrichesValidation;
+use App\Accounting\Contracts\ReferenceResolver;
+use App\Accounting\Contracts\SyncsReferenceData;
+use App\Accounting\Contracts\UploadsAttachments;
 use App\Accounting\Enums\DocumentType;
-use App\Accounting\Exact\Contracts\ExactReferenceResolver;
 use App\Accounting\Exceptions\AccountingMappingException;
 use App\Accounting\FinancialDocument;
 use App\Accounting\FinancialDocumentLine;
+use App\Accounting\Validation\Enrichment\ExactReportEnricher;
+use App\Accounting\Validation\Finding;
 use App\Models\Connection;
 use App\Services\Exact\ConnectionTokenStore;
 use App\Services\Exact\HubExactCredentialResolver;
@@ -33,16 +38,42 @@ use Throwable;
  * emeq/exact-api write-request en schrijft die weg op de division van de Connection.
  * Bindt de Exact-SDK per-request (mirror ResolveExactAccount) zodat de reactieve
  * token-refresh tegen déze Connection loopt. Referentie-data (relatie/VATCode/
- * GLAccount/journaal) komt uit de ExactReferenceResolver-seam.
+ * GLAccount/journaal) komt uit de ReferenceResolver-seam.
  *
  * De Exact-wire (endpoints, veldnamen, AmountFC/AmountDC, response-envelope) leeft in
  * de SDK; deze adapter levert alleen geresolvede waarden in een neutrale regel-vorm.
  */
-final class ExactAccountingTarget implements AccountingTarget
+final class ExactAccountingTarget implements AccountingTarget, EnrichesValidation, SyncsReferenceData, UploadsAttachments
 {
     public function __construct(
-        private readonly ExactReferenceResolver $references,
+        private readonly ReferenceResolver $references,
+        private readonly ExactReferenceSync $referenceSync,
+        private readonly ExactMappingDeriver $mappingDeriver,
+        private readonly ExactReportEnricher $reportEnricher,
     ) {}
+
+    /**
+     * Capability `references.sync`. Spiegelen en afleiden horen bij elkaar; deze
+     * methode is de enige plek waar die volgorde nog staat.
+     */
+    public function syncReferences(Connection $connection): int
+    {
+        $mirrored = $this->referenceSync->sync($connection);
+        $this->mappingDeriver->deriveAndStore($connection);
+
+        return $mirrored;
+    }
+
+    /**
+     * Capability `validation.enrich`.
+     *
+     * @param  array<string, mixed>  $payload
+     * @return list<Finding>
+     */
+    public function enrichValidation(array $payload, Connection $connection): array
+    {
+        return $this->reportEnricher->enrich($payload, $connection);
+    }
 
     public function push(FinancialDocument $document, Connection $connection): AccountingResult
     {
@@ -140,7 +171,7 @@ final class ExactAccountingTarget implements AccountingTarget
                 $docResponse = $connector->send(new CreateDocument(
                     subject: $subject,
                     type: $type,
-                    account: $this->references->relationGuid($document->party, $connection),
+                    account: $this->references->relationRef($document->party, $connection),
                     financialTransactionEntryId: $entryId,
                 ));
 
@@ -199,8 +230,7 @@ final class ExactAccountingTarget implements AccountingTarget
             return;
         }
 
-        app(ExactReferenceSync::class)->sync($connection);
-        app(ExactMappingDeriver::class)->deriveAndStore($connection);
+        $this->syncReferences($connection);
         $connection->refresh();
     }
 
@@ -217,7 +247,7 @@ final class ExactAccountingTarget implements AccountingTarget
         // later via Exact-bankreconciliatie afgeletterd.
         return match ($document->type) {
             DocumentType::SalesInvoice, DocumentType::CreditNote, DocumentType::Income => new CreateSalesEntry(
-                customer: $this->references->relationGuid($document->party, $connection),
+                customer: $this->references->relationRef($document->party, $connection),
                 entryDate: $entryDate,
                 journal: $this->references->journal($document->type, $connection),
                 description: $description,
@@ -226,7 +256,7 @@ final class ExactAccountingTarget implements AccountingTarget
                 dueDate: $dueDate,
             ),
             DocumentType::PurchaseInvoice, DocumentType::Expense => new CreatePurchaseEntry(
-                supplier: $this->references->relationGuid($document->party, $connection),
+                supplier: $this->references->relationRef($document->party, $connection),
                 entryDate: $entryDate,
                 journal: $this->references->journal($document->type, $connection),
                 description: $description,
@@ -262,7 +292,7 @@ final class ExactAccountingTarget implements AccountingTarget
                 'description' => $line->description,
                 'amount' => $line->netAmount(),
                 'vatCode' => $this->references->vatCode($line->taxRate, $line->taxTreatment, $connection),
-                'glAccount' => $this->references->glAccountGuid($line->category, $connection),
+                'glAccount' => $this->references->glAccountRef($line->category, $connection),
                 'costCenter' => $this->references->costCenter($line->costCenter, $connection),
                 'costUnit' => $this->references->costUnit($line->costUnit, $connection),
             ],

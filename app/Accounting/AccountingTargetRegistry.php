@@ -5,6 +5,10 @@ declare(strict_types=1);
 namespace App\Accounting;
 
 use App\Accounting\Contracts\AccountingTarget;
+use App\Accounting\Contracts\EnrichesValidation;
+use App\Accounting\Contracts\SyncsReferenceData;
+use App\Accounting\Enums\Capability;
+use App\Models\Connection;
 use App\OAuth\Exceptions\ProviderDisabledException;
 use Illuminate\Contracts\Container\Container;
 use InvalidArgumentException;
@@ -39,7 +43,7 @@ final class AccountingTargetRegistry
             );
         }
 
-        if (! Feature::active("provider-{$provider}-enabled")) {
+        if (! $this->enabled($provider)) {
             throw new ProviderDisabledException($provider);
         }
 
@@ -55,5 +59,67 @@ final class AccountingTargetRegistry
     public function providers(): array
     {
         return array_keys($this->targets);
+    }
+
+    /**
+     * De kill-switch als vraag in plaats van als exception — `for()` gebruikt 'm ook,
+     * zodat er één plek is waar de vlagnaam staat.
+     */
+    public function enabled(string $provider): bool
+    {
+        return Feature::active("provider-{$provider}-enabled");
+    }
+
+    /**
+     * Wat de adapter van deze Connection kan.
+     *
+     * Reflectie over de geregistreerde class-string: geen instantiatie, geen
+     * container, geen kill-switch. Een uitgeschakelde provider *declareert* nog
+     * steeds wat hij kan — beschikbaarheid is de aparte as die `enabled()` beantwoordt.
+     *
+     * @return list<Capability>
+     */
+    public function capabilitiesFor(Connection $connection): array
+    {
+        $implementation = $this->targets[$connection->provider->value] ?? null;
+
+        if ($implementation === null) {
+            return [];
+        }
+
+        return array_values(array_filter(
+            Capability::cases(),
+            static fn (Capability $capability): bool => is_a($implementation, $capability->contract(), allow_string: true),
+        ));
+    }
+
+    /**
+     * `null` betekent "deze provider kan dit niet" — de aanroeper beslist wat dat
+     * oplevert. Loopt via `for()`, dus de kill-switch geldt gewoon.
+     *
+     * @throws ProviderDisabledException
+     */
+    public function syncsReferenceData(Connection $connection): ?SyncsReferenceData
+    {
+        $target = $this->targetFor($connection);
+
+        return $target instanceof SyncsReferenceData ? $target : null;
+    }
+
+    /**
+     * @throws ProviderDisabledException
+     */
+    public function enrichesValidation(Connection $connection): ?EnrichesValidation
+    {
+        $target = $this->targetFor($connection);
+
+        return $target instanceof EnrichesValidation ? $target : null;
+    }
+
+    private function targetFor(Connection $connection): ?AccountingTarget
+    {
+        $provider = $connection->provider->value;
+
+        return $this->supports($provider) ? $this->for($provider) : null;
     }
 }

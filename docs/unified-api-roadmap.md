@@ -3,7 +3,7 @@
 > Niets staat onder **IMPLEMENTED** zonder werkende code én tests. Bij twijfel gaat
 > het naar NEXT. Architectuur staat in `unified-api-architecture.md`.
 
-Laatste update: 2026-08-11 · suite: 1176 passed, 1 incomplete, 0 failures.
+Laatste update: 2026-08-11 · suite: 1195 passed, 1 incomplete, 0 failures.
 Startbaseline vóór dit traject: 1120 passed · PHPStan-baseline 206 → 135.
 
 ---
@@ -72,6 +72,24 @@ boeking voor één brondocument worden. Beide takken landen in `pass_through_cal
 `tests/Unit/Accounting/DocumentFingerprintTest.php`,
 `AsyncStoreDocumentTest::test_async_job_deduplicates_a_repeat_of_the_same_document`
 
+### Capability-laag
+`Capability` (gesloten enum) + drie 1-methode-contracten in `App\Accounting\Contracts`.
+Een capability is aanwezig dan en slechts dan als de geregistreerde adapter het
+contract implementeert — dus geen lijst in config die kan liegen tegen de code. De
+registry beantwoordt de vraag met reflectie, zonder de adapter te bouwen.
+`GET /v1/accounting/capabilities` geeft `{provider, enabled, capabilities[]}`; `enabled`
+is de losse Pennant-as, want een uitgeschakelde provider declareert nog steeds wat hij
+kan. Hiermee zijn beide provider-conditionals uit de accounting-controllers verdwenen,
+en belt de dry-run Exact niet meer terwijl de kill-switch uit staat.
+Bijvangst: `ExactReferenceResolver` → `App\Accounting\Contracts\ReferenceResolver` met
+`relationRef`/`glAccountRef` in plaats van `…Guid` (een GUID is een Exact-vorm, geen
+canonieke). Nul wijzigingen aan de mapping-key-formaten in
+`connections.metadata.accounting_mapping` — daar staat productiedata.
+→ `tests/Unit/Accounting/AccountingTargetRegistryCapabilityTest.php`,
+`tests/Feature/Api/V1/Accounting/CapabilitiesApiTest.php`,
+`MappingApiTest::test_sync_returns_422_when_the_provider_cannot_sync_references`,
+`ValidateDocumentTest::test_enrichment_is_skipped_and_no_partner_call_is_made_when_the_provider_is_off`
+
 ### Pass-through escape hatch
 `/v1/exact/*` en `/v1/snelstart/*` met path-whitelist, ability-guard en audit naar
 `pass_through_calls`. Bedoeld als uitzondering, niet als hoofdweg.
@@ -104,17 +122,11 @@ blokkeert de build niet. Draait in CI naast Pint, tests en `composer audit`.
 
 Gepland en ontworpen; volgorde is bindend vanwege harde afhankelijkheden.
 
-### 1. Capability-registry
-Providers declareren wat ze kunnen via `implements`, niet via config.
-`GET /v1/accounting/capabilities`. Haalt de laatste twee provider-conditionals uit de
-accounting-controllers en sluit het gat waarin de dry-run Exact belt terwijl de
-kill-switch uit staat.
-
-### 2. Error-normalisatie
+### 1. Error-normalisatie
 Canonieke foutcategorieën naast de bestaande `error`-sleutel; drie bijna-identieke
 `UpstreamErrorMapper`s achter één contract.
 
-### 3. Canonieke read-resources
+### 2. Canonieke read-resources
 `GET /v1/accounting/{ledger-accounts,tax-codes,customers,suppliers}` uit mirror en
 SDK. Daarna `GET /v1/accounting/invoices` — vereist eerst nieuwe read-requests in
 `emeq/exact-api` (die bestaan nog niet).

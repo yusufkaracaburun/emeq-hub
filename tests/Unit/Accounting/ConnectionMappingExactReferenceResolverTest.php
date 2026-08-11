@@ -65,8 +65,8 @@ class ConnectionMappingExactReferenceResolverTest extends TestCase
 
         $this->assertSame('4', $resolver->vatCode(21, TaxTreatment::Standard, $connection));
         $this->assertSame('2', $resolver->vatCode(9, TaxTreatment::Standard, $connection));
-        $this->assertSame('gl-omzet-id', $resolver->glAccountGuid('omzet', $connection));
-        $this->assertSame('cust-1', $resolver->relationGuid(new Party('debtor', 'Acme', externalId: 'ext-1'), $connection));
+        $this->assertSame('gl-omzet-id', $resolver->glAccountRef('omzet', $connection));
+        $this->assertSame('cust-1', $resolver->relationRef(new Party('debtor', 'Acme', externalId: 'ext-1'), $connection));
         $this->assertSame('70', $resolver->journal(DocumentType::SalesInvoice, $connection));
         $this->assertSame('20', $resolver->journal(DocumentType::PurchaseInvoice, $connection));
     }
@@ -99,8 +99,8 @@ class ConnectionMappingExactReferenceResolverTest extends TestCase
         $connection = $this->fullMapping();
         $this->seedRef($connection, ConnectionAccountingRef::KIND_GL, 'gl-def', 'gl-def-id');
 
-        $this->assertSame('gl-def-id', $resolver->glAccountGuid('onbekende-categorie', $connection));
-        $this->assertSame('gl-def-id', $resolver->glAccountGuid(null, $connection));
+        $this->assertSame('gl-def-id', $resolver->glAccountRef('onbekende-categorie', $connection));
+        $this->assertSame('gl-def-id', $resolver->glAccountRef(null, $connection));
     }
 
     public function test_throws_when_gl_code_not_in_mirror(): void
@@ -109,7 +109,7 @@ class ConnectionMappingExactReferenceResolverTest extends TestCase
 
         // Mapping verwijst naar een Code die niet (meer) in de mirror staat → drift-melding.
         $this->expectException(AccountingMappingException::class);
-        $resolver->glAccountGuid('omzet', $this->fullMapping());
+        $resolver->glAccountRef('omzet', $this->fullMapping());
     }
 
     public function test_vat_code_or_null_returns_code_or_null(): void

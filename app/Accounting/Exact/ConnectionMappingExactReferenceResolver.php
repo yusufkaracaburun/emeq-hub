@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Accounting\Exact;
 
+use App\Accounting\Contracts\ReferenceResolver;
 use App\Accounting\Enums\DocumentType;
 use App\Accounting\Enums\TaxTreatment;
-use App\Accounting\Exact\Contracts\ExactReferenceResolver;
 use App\Accounting\Exceptions\AccountingMappingException;
 use App\Accounting\Party;
 use App\Models\Connection;
@@ -36,11 +36,11 @@ use App\Models\ConnectionAccountingRef;
  * niet in de mapping opgeslagen maar lazy geleerd door ExactRelationResolver.
  * income/expense vallen terug op sales/purchase als geen eigen dagboek staat.
  */
-final class ConnectionMappingExactReferenceResolver implements ExactReferenceResolver
+final class ConnectionMappingExactReferenceResolver implements ReferenceResolver
 {
     public function __construct(private readonly ExactRelationResolver $relations) {}
 
-    public function relationGuid(Party $party, Connection $connection): string
+    public function relationRef(Party $party, Connection $connection): string
     {
         return $this->relations->resolve($party, $connection)
             ?? throw $this->missing("relatie '{$party->name}' (geen match op external_id/vat_number/naam)", 'relations');
@@ -70,7 +70,7 @@ final class ConnectionMappingExactReferenceResolver implements ExactReferenceRes
         return $treatment->vatCodeKey($this->rateKey($taxRate));
     }
 
-    public function glAccountGuid(?string $category, Connection $connection): ?string
+    public function glAccountRef(?string $category, Connection $connection): ?string
     {
         $accounts = $this->section($connection, 'gl_accounts');
         $code = $accounts[$category ?? '_default'] ?? $accounts['_default'] ?? null;

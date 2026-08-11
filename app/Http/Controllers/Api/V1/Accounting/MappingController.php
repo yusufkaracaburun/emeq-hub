@@ -5,13 +5,12 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api\V1\Accounting;
 
 use App\Accounting\AccountingTargetRegistry;
-use App\Accounting\Exact\ExactMappingDeriver;
-use App\Accounting\Exact\ExactReferenceSync;
-use App\Enums\Provider;
+use App\Accounting\Enums\Capability;
 use App\Http\Controllers\Controller;
 use App\Models\Account;
 use App\Models\Connection;
 use App\Models\ConnectionAccountingRef;
+use App\OAuth\Exceptions\ProviderDisabledException;
 use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -40,14 +39,48 @@ class MappingController extends Controller
 
         [, $connection] = $resolved;
 
-        if ($connection->provider !== Provider::Exact) {
+        try {
+            $sync = $this->registry->syncsReferenceData($connection);
+        } catch (ProviderDisabledException $e) {
+            return response()->json(['error' => 'provider_disabled', 'message' => $e->getMessage()], 503);
+        }
+
+        if ($sync === null) {
             return response()->json(['error' => 'sync_unsupported', 'message' => "Sync nog niet ondersteund voor provider '{$connection->provider->value}'."], 422);
         }
 
-        $count = app(ExactReferenceSync::class)->sync($connection);
-        app(ExactMappingDeriver::class)->deriveAndStore($connection);
+        return response()->json([
+            'provider' => $connection->provider->value,
+            'synced' => $sync->syncReferences($connection),
+        ]);
+    }
 
-        return response()->json(['provider' => $connection->provider->value, 'synced' => $count]);
+    /**
+     * Wat de gekoppelde boekhoudprovider ondersteunt.
+     *
+     * `capabilities` is een platte lijst, geen object van booleans: een capability
+     * toevoegen is dan additief voor consumers, terwijl `capabilities.foo === undefined`
+     * versus `false` een bugfabriek is. `enabled` is de losse as — een uitgeschakelde
+     * provider declareert nog steeds wat hij kan.
+     */
+    public function capabilities(Request $request): JsonResponse
+    {
+        $resolved = $this->resolve($request, write: false);
+
+        if ($resolved instanceof JsonResponse) {
+            return $resolved;
+        }
+
+        [, $connection] = $resolved;
+
+        return response()->json([
+            'provider' => $connection->provider->value,
+            'enabled' => $this->registry->enabled($connection->provider->value),
+            'capabilities' => array_map(
+                static fn (Capability $capability): string => $capability->value,
+                $this->registry->capabilitiesFor($connection),
+            ),
+        ]);
     }
 
     /**
