@@ -35,6 +35,8 @@ return new class extends Migration
             // dispatched | skipped_no_callback | not_applicable
             $table->string('fanout_status')->nullable();
             $table->string('request_fingerprint', 12)->nullable();
+            // Correlatie-id, zelfde vorm als op pass_through_calls.
+            $table->string('request_id', 64)->nullable()->index();
             $table->timestamp('received_at')->useCurrent();
 
             $table->index(['provider', 'received_at']);

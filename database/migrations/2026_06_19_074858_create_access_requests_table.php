@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('app_url')->nullable();
             $table->json('providers');
             $table->text('message')->nullable();
+            $table->timestamp('privacy_accepted_at')->nullable();
             $table->string('status')->default('new'); // new | handled | declined
             $table->timestamps();
 

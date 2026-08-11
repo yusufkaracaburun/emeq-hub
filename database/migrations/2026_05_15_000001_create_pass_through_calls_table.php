@@ -26,6 +26,11 @@ return new class extends Migration
             $table->string('request_fingerprint', 12)->nullable();
             $table->string('partner_token_fingerprint', 16)->nullable();
             $table->string('event_id')->nullable();
+            // Correlatie-id: één consumer-request van pass-through tot inkomende
+            // webhook met één query terug te vinden. Breedte 64 dekt een ULID (26),
+            // een UUID (36) en de langst geaccepteerde inbound waarde
+            // (zie App\Http\Middleware\AssignRequestId).
+            $table->string('request_id', 64)->nullable()->index();
             $table->integer('response_size_bytes')->nullable();
             $table->string('upstream_error')->nullable();
             // Errors-only response-body (status >= 400), capped + redacted. Geen
