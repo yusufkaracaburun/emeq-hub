@@ -11,6 +11,7 @@ use App\Models\Account;
 use App\Models\Connection;
 use App\Models\ConnectionAccountingRef;
 use App\OAuth\Exceptions\ProviderDisabledException;
+use App\Sanctum\TokenAbilities;
 use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -208,14 +209,15 @@ class MappingController extends Controller
         }
 
         $provider = $connection->provider->value;
-        $abilities = $write ? ["{$provider}:write"] : ["{$provider}:read", "{$provider}:write"];
 
-        foreach ($abilities as $ability) {
+        foreach (TokenAbilities::accounting($provider, $write) as $ability) {
             if ($request->user()?->tokenCan($ability)) {
                 return [$account, $connection];
             }
         }
 
-        return response()->json(['error' => 'insufficient_ability', 'message' => "Token mist vereiste ability '{$provider}:".($write ? 'write' : 'read')."'."], 403);
+        $required = $write ? TokenAbilities::ACCOUNTING_WRITE : TokenAbilities::ACCOUNTING_READ;
+
+        return response()->json(['error' => 'insufficient_ability', 'message' => "Token mist vereiste ability '{$required}'."], 403);
     }
 }

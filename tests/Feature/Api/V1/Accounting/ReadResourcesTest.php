@@ -108,6 +108,24 @@ class ReadResourcesTest extends TestCase
     }
 
     /**
+     * De canonieke lees-ability noemt geen provider en overleeft dus een migratie
+     * van de eindgebruiker naar een ander boekhoudpakket.
+     */
+    public function test_canonical_accounting_read_ability_is_accepted(): void
+    {
+        [$consumer, $connection] = $this->connected();
+        $this->seedMirror($connection, ConnectionAccountingRef::KIND_GL, 1);
+
+        $token = $consumer->createToken('t', [TokenAbilities::ACCOUNTING_READ])->plainTextToken;
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->withHeader('X-Account-Id', 'school1')
+            ->getJson('/v1/accounting/ledger-accounts')
+            ->assertOk()
+            ->assertJsonPath('data.0.code', '0100');
+    }
+
+    /**
      * Geen partner-call: de mirror is de bron. Een lees-endpoint dat Exact belt voor
      * stabiele referentiedata is verspilling én een extra faalpunt.
      */

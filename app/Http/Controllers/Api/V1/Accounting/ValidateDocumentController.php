@@ -38,7 +38,7 @@ class ValidateDocumentController extends Controller
 
         $provider = $connection->provider->value;
 
-        $this->guardAbility($request, ["{$provider}:read", "{$provider}:write", TokenAbilities::ADMIN]);
+        $this->guardAbility($request, TokenAbilities::accounting($provider, write: false));
 
         $payload = $request->validated();
         $report = $this->inspector->inspect($payload);

@@ -48,7 +48,7 @@ Browser (tenant-SPA)  →  jouw backend (/api/emeq/*)  →  emeq Hub (/v1/*)
 
 - PAT-ability: **`integrations:manage`** — één token koppelt + beheert alle
   providers. Aanvragen bij emeq (admin → Consumer → "Issue PAT" → preset
-  *Integraties*). Boeken vereist daarnaast `exact:write` (zie Boekhouden).
+  *Integraties*). Boeken vereist daarnaast `accounting:write` (zie Boekhouden).
 - Base-URL: `https://hub.emeq.nl` (prod) · `https://hub-dev.emeq.nl` (dev).
 - Alle requests: `Authorization: Bearer <PAT>`, `Accept: application/json`.
   Geen cookies.
@@ -258,23 +258,32 @@ Koppelen-flow (Stap 3) aan.
 
 Zodra een tenant een **boekhoud-provider** gekoppeld heeft (Stap 1–4, bv. Exact),
 kun je financiële documenten valideren en boeken. Deze endpoints lopen **niet** op
-`integrations:manage` maar op **provider-abilities**: `exact:read` (valideren) +
-`exact:write` (boeken) — vraag een PAT met die abilities.
+`integrations:manage` maar op de **canonieke boekhoud-abilities**:
+`accounting:read` (lezen + valideren) + `accounting:write` (boeken) — vraag een PAT
+met preset *Boekhouding (provider-onafhankelijk)*.
+
+Die twee noemen bewust geen provider. Verhuist een eindgebruiker van Exact naar een
+ander boekhoudpakket, dan blijft hetzelfde token geldig; bij een provider-ability
+(`exact:write`) zou je een nieuw token nodig hebben. Bestaande `{provider}:read`/
+`{provider}:write`-tokens blijven voorlopig geaccepteerd op deze endpoints, zodat je
+kunt migreren zonder onderbreking — plan de omzetting wel in. De provider-abilities
+blijven de juiste keuze voor de **ruwe pass-through** (`/v1/exact/*`), die per
+definitie providerspecifiek is.
 
 Beide identificeren de tenant via **header** `X-Account-Id: <external_id>` (let op:
 een header, niet de query-param `account_external_id` van de connect-laag):
 
 | Doel | Request | Ability |
 |---|---|---|
-| Capabilities opvragen | `GET /v1/accounting/capabilities` | `exact:read` |
-| Geboekte documenten lezen | `GET /v1/accounting/documents` | `exact:read` |
-| Bank-/kasafschriften lezen | `GET /v1/accounting/bank-statements` | `exact:read` |
-| Grootboek lezen | `GET /v1/accounting/ledger-accounts` | `exact:read` |
-| Btw-codes lezen | `GET /v1/accounting/tax-codes` | `exact:read` |
-| Klanten lezen | `GET /v1/accounting/customers` | `exact:read` |
-| Leveranciers lezen | `GET /v1/accounting/suppliers` | `exact:read` |
-| Valideren (dry-run) | `POST /v1/accounting/documents/validate` | `exact:read` |
-| Boeken | `POST /v1/accounting/documents` | `exact:write` |
+| Capabilities opvragen | `GET /v1/accounting/capabilities` | `accounting:read` |
+| Geboekte documenten lezen | `GET /v1/accounting/documents` | `accounting:read` |
+| Bank-/kasafschriften lezen | `GET /v1/accounting/bank-statements` | `accounting:read` |
+| Grootboek lezen | `GET /v1/accounting/ledger-accounts` | `accounting:read` |
+| Btw-codes lezen | `GET /v1/accounting/tax-codes` | `accounting:read` |
+| Klanten lezen | `GET /v1/accounting/customers` | `accounting:read` |
+| Leveranciers lezen | `GET /v1/accounting/suppliers` | `accounting:read` |
+| Valideren (dry-run) | `POST /v1/accounting/documents/validate` | `accounting:read` |
+| Boeken | `POST /v1/accounting/documents` | `accounting:write` |
 
 > Je backend-proxy moet de headers `X-Account-Id`, `Idempotency-Key` en `Prefer`
 > mee-forwarden — zorg dat je proxy headers doorzet (zie het proxy-voorbeeld).
@@ -539,7 +548,7 @@ Boekhoud-mapping → "Onbekende relaties automatisch aanmaken"), dan maakt de Hu
 relatie zelf aan (match op `vat_number`, anders `name`) en boekt door. Stuur dus
 altijd een nette `party.name` (+ `vat_number` indien bekend) mee.
 
-Foutcodes: `403 insufficient_ability` (PAT mist `{provider}:write`) ·
+Foutcodes: `403 insufficient_ability` (PAT mist `accounting:write`) ·
 `400 idempotency_key_required` / `400 idempotency_key_invalid` ·
 `409 idempotency_request_in_progress` (wacht `Retry-After`, dan retryen) ·
 `422 idempotency_key_reuse` (zelfde sleutel, ander document) ·

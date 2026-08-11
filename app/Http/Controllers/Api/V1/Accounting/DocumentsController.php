@@ -46,7 +46,7 @@ class DocumentsController extends Controller
         if (! $this->tokenCanWrite($request, $provider)) {
             return response()->json([
                 'error' => 'insufficient_ability',
-                'message' => "Token mist vereiste ability '{$provider}:write'.",
+                'message' => "Token mist vereiste ability '".TokenAbilities::ACCOUNTING_WRITE."'.",
             ], 403);
         }
 
@@ -105,6 +105,12 @@ class DocumentsController extends Controller
             return false;
         }
 
-        return $token->can("{$provider}:write") || $token->can(TokenAbilities::ADMIN);
+        foreach (TokenAbilities::accounting($provider, write: true) as $ability) {
+            if ($token->can($ability)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

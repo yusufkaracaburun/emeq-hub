@@ -172,7 +172,7 @@ class ReadController extends Controller
         [, $connection] = $this->resolveAccountingConnection($request, $this->registry->providers());
 
         $provider = $connection->provider->value;
-        $this->guardAbility($request, ["{$provider}:read", "{$provider}:write", TokenAbilities::ADMIN]);
+        $this->guardAbility($request, TokenAbilities::accounting($provider, write: false));
 
         if (! in_array($capability, $this->registry->capabilitiesFor($connection), true)) {
             return response()->json([

@@ -43,9 +43,38 @@ class ConsumerResource extends Resource
      * OAuth-flow starten (integrations:manage), daarna calls doen. Zonder die preset moest
      * je voor het meest voorkomende geval naar Custom.
      *
+     * Voor boekhouding staat de provider-onafhankelijke groep bovenaan: die tokens
+     * noemen geen provider en blijven daarom geldig als een eindgebruiker van Exact
+     * naar een ander pakket verhuist. De `exact-*`/`snelstart-*`-presets blijven voor
+     * de ruwe pass-through, die wél providerspecifiek is.
+     *
      * @var array<string, array{group: string, label: string, abilities: list<string>}>
      */
     public const PAT_PRESETS = [
+        'accounting-read' => [
+            'group' => 'Boekhouding (provider-onafhankelijk)',
+            'label' => 'Read-only',
+            'abilities' => [TokenAbilities::ACCOUNTING_READ],
+        ],
+        'accounting-write' => [
+            'group' => 'Boekhouding (provider-onafhankelijk)',
+            'label' => 'Read + write',
+            'abilities' => [
+                TokenAbilities::ACCOUNTING_READ,
+                TokenAbilities::ACCOUNTING_WRITE,
+                TokenAbilities::CONSUMER_MANAGE_ACCOUNTS,
+            ],
+        ],
+        'accounting-connect' => [
+            'group' => 'Boekhouding (provider-onafhankelijk)',
+            'label' => 'Koppelen + read/write',
+            'abilities' => [
+                TokenAbilities::INTEGRATIONS_MANAGE,
+                TokenAbilities::ACCOUNTING_READ,
+                TokenAbilities::ACCOUNTING_WRITE,
+                TokenAbilities::CONSUMER_MANAGE_ACCOUNTS,
+            ],
+        ],
         'exact-read' => [
             'group' => 'Exact Online',
             'label' => 'Read-only',

@@ -960,6 +960,41 @@ class StoreDocumentTest extends TestCase
             ->assertJson(['error' => 'insufficient_ability']);
     }
 
+    /**
+     * Het punt van de canonieke ability: dit token noemt geen enkele provider en
+     * blijft daarom geldig als de eindgebruiker naar een ander boekhoudpakket gaat.
+     */
+    public function test_canonical_accounting_write_ability_is_accepted(): void
+    {
+        MockClient::global([
+            CreateSalesEntry::class => MockResponse::make(['d' => ['ID' => 'inv-guid-1']], 201),
+        ]);
+        $this->bindFakeReferences();
+
+        [$consumer] = $this->consumerWithExactConnection();
+        $token = $consumer->createToken('t', [TokenAbilities::ACCOUNTING_WRITE])->plainTextToken;
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->withHeader('X-Account-Id', 'school1')
+            ->withHeader('Idempotency-Key', (string) Str::uuid())
+            ->postJson('/v1/accounting/documents', $this->salesInvoicePayload())
+            ->assertStatus(201)
+            ->assertJsonPath('external_ref', 'inv-guid-1');
+    }
+
+    public function test_canonical_read_ability_alone_cannot_write(): void
+    {
+        [$consumer] = $this->consumerWithExactConnection();
+        $token = $consumer->createToken('t', [TokenAbilities::ACCOUNTING_READ])->plainTextToken;
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->withHeader('X-Account-Id', 'school1')
+            ->withHeader('Idempotency-Key', (string) Str::uuid())
+            ->postJson('/v1/accounting/documents', $this->salesInvoicePayload())
+            ->assertStatus(403)
+            ->assertJson(['error' => 'insufficient_ability']);
+    }
+
     public function test_unconfigured_reference_mapping_returns_422(): void
     {
         // Geen fake gebonden → DefaultReferenceResolver gooit → mapping_failed.
