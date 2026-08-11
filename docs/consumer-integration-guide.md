@@ -9,11 +9,16 @@ providers verschijnen vanzelf; je past je code niet aan per provider.
 
 > 🤖 **Agent-prompts** — elke sectie sluit af met een copy-paste-prompt voor je
 > AI-coding-agent. Vervang `{…}`-placeholders, plak in je agent, en laat 'm dat
-> stuk in je consumer-app bouwen. De harde regels (PAT server-side, data-driven
-> rendering, snake_case-params) zitten in de prompts verwerkt.
+> stuk in je consumer-app bouwen. De harde regels (PAT server-side, account-id
+> server-side afleiden, data-driven rendering, snake_case-params) zitten in de
+> prompts verwerkt.
+>
+> Liever in één keer de hele koppel-flow? Gebruik
+> [Snelstart — één prompt voor je AI-agent](#snelstart--één-prompt-voor-je-ai-agent).
 
 ## Inhoudsopgave
 
+- [Snelstart — één prompt voor je AI-agent](#snelstart--één-prompt-voor-je-ai-agent)
 - [Concepten](#concepten)
 - [Auth — backend-proxy (aanbevolen)](#auth--backend-proxy-aanbevolen)
 - [Stap 1 — Account registreren](#stap-1--account-registreren-eenmalig-per-tenant)
@@ -25,6 +30,80 @@ providers verschijnen vanzelf; je past je code niet aan per provider.
   - [Boekhoud-mapping (zelf-service, optioneel)](#boekhoud-mapping-zelf-service-optioneel)
 - [Webhooks ontvangen](#webhooks-ontvangen)
 - [Valkuilen](#valkuilen)
+
+## Snelstart — één prompt voor je AI-agent
+
+Wil je de koppel-flow in één keer laten bouwen: vul de `{…}`-placeholders in en
+geef onderstaande prompt aan je coding-agent, samen met de URL van deze pagina.
+Het levert stap 1 t/m 5 op (registreren → tonen → koppelen → status → loskoppelen).
+
+Boeken, mapping-UI en webhooks staan bewust niet in deze prompt — die hebben hun
+eigen prompt verderop, en je wilt eerst een werkende koppeling zien.
+
+```text
+Bouw in mijn {stack}-app een integratie met de emeq Hub, zodat elke tenant zijn
+eigen boekhoudpakket (Exact Online, …) kan koppelen. Lees eerst
+{https://hub.emeq.nl/docs/api} voor de exacte request/response-shapes.
+
+CONTEXT
+- Base-URL: {https://hub.emeq.nl}. Auth: één Personal Access Token (PAT) voor
+  mijn hele app, uit env `{EMEQ_PAT}`. Alle calls: `Authorization: Bearer <PAT>`
+  + `Accept: application/json`. Geen cookies.
+- De Hub kent mijn eindgebruikers niet. Hij vertrouwt de Account-aanduiding op
+  gezag van de PAT. Mijn app bepaalt dus wie welke tenant mag aanraken.
+- Mijn tenants worden onderscheiden door: {beschrijf: subdomein / pad-prefix /
+  tenant-id op de ingelogde gebruiker / single-tenant}.
+- Als Account-sleutel (`external_id`) gebruik ik: {stabiele interne tenant-id —
+  geen e-mail, bedrijfsnaam of domein, want die wijzigen}.
+
+HARDE EISEN — hier niet van afwijken
+1. De PAT blijft server-side. Bouw een proxy in mijn backend; de browser praat
+   nooit rechtstreeks met de Hub. (CORS staat het toe — en lekt het token.)
+2. Leid `X-Account-Id` en `account_external_id` server-side af uit de
+   tenant-context hierboven. NOOIT overnemen uit een request-header, body of
+   query: anders boekt tenant A in de administratie van tenant B.
+3. Render de providerlijst volledig data-driven op de velden die de Hub
+   teruggeeft. Geen hardcoded providerlijst, geen `if (provider === 'exact')`.
+   Een provider die de Hub morgen toevoegt moet vanzelf verschijnen.
+4. Toon vóór het koppelen een verplichte akkoord-checkbox met een link naar
+   {https://hub.emeq.nl/privacy}. Zonder vinkje geen connect-call.
+5. Sla geen tokens, connection-state of provider-credentials op. De Hub is de
+   bron; status komt live uit `GET /v1/integrations`.
+
+TE BOUWEN
+a. Proxy-route `/api/emeq/{path}` → `{BASE}/v1/{path}`. Injecteer de PAT en
+   `Accept`. Forward query-string, JSON-body en de headers `Idempotency-Key` en
+   `Prefer`. Zet `X-Account-Id` zelf, server-side (eis 2). Beveilig de route met
+   mijn bestaande auth, plus een rolcheck: {wie mag koppelen/loskoppelen}.
+b. Bij de eerste koppel-actie van een tenant éénmalig
+   `POST /v1/accounts` met `{ external_id, display_name }`. Behandel `409` als
+   "bestaat al", geen fout.
+c. Instellingen-scherm: `GET /v1/integrations?account_external_id={tenant}` →
+   kaarten met `label`, `tagline`, `logo`, `brand`, `category`. Gebruik `status`
+   (connected/pending/disconnected) voor de knopstaat en toon `connectable:false`
+   zonder koppelknop.
+d. Koppelen: `POST /v1/oauth/{provider}/init` met body
+   `{ account_external_id, return_url }` — let op: snake_case. Bouw `return_url`
+   server-side uit mijn eigen host, niet uit de request-body. Redirect de browser
+   naar de `redirect_url` uit de respons; bewaar `connection_id`.
+e. Terugkomst: poll `GET /v1/connections/{id}` tot `status:"active"` en
+   `revoked_at:null`, werk de UI bij naar "gekoppeld". Toon een wachtstaat zolang
+   het `pending` is; stop na een redelijke timeout met "probeer opnieuw".
+f. Loskoppelen: `DELETE /v1/connections/{id}`, verwacht `204`, UI terug naar
+   niet-gekoppeld. Controleer eerst dat die Connection bij de tenant van de
+   ingelogde gebruiker hoort. Doe zelf geen token- of webhook-opruiming — de Hub
+   doet de volledige teardown.
+
+FOUTAFHANDELING
+Alle `/v1/*`-fouten zijn JSON met `{ code, message }`. Vertaal minstens:
+`401 unauthenticated` (PAT stuk/ontbreekt), `403 insufficient_ability` (PAT mist
+een ability), `404 unknown_provider` / `provider_not_connectable`,
+`503 provider_disabled` (provider staat uit) naar nette meldingen.
+
+TESTS
+Schrijf minstens een test die bewijst dat een meegestuurde `X-Account-Id`-header
+in de inkomende request wordt genegeerd en de server-side afleiding wint.
+```
 
 ## Concepten
 
@@ -751,6 +830,7 @@ Huidige `event`-waarden:
 | `accounting.document.synced` | de Hub heeft jouw document weggeschreven |
 | `billing.payment.changed` | betaling gewijzigd |
 | `billing.subscription.changed` | abonnement gewijzigd |
+| `connection.revoked` | de koppeling is ingetrokken — `data` draagt `connection_id`, `source` en `revoked_at`. Stop met pass-through-calls voor dit account en toon de koppelknop weer |
 | `unmapped` | de partner stuurde iets waar de Hub nog geen naam voor heeft — negeer, of kijk in `data` |
 
 Behandel een onbekende `event`-waarde als `unmapped`: de lijst groeit additief en
@@ -760,6 +840,35 @@ een nieuwe naam mag jouw handler niet laten crashen.
 > staat nu onder `data`. Migreren is dus `body` → `body.data`, en daarna kun je op
 > `body.event` gaan routeren in plaats van op provider-specifieke velden als
 > Exact's `Topic`.
+
+**🤖 Agent-prompt**
+
+```text
+Bouw in mijn {stack}-app een publiek webhook-endpoint op {pad} dat de emeq Hub
+aanroept. Verwerk als volgt:
+
+1. Verifieer eerst de HMAC-SHA256 in de `Signature`-header over de ruwe
+   request-body, met mijn `webhook_callback_secret` uit env. Vergelijk in
+   constante tijd. Mismatch → 401, niets verwerken, niets loggen van de body.
+2. Zet het endpoint buiten CSRF-bescherming en buiten mijn tenant-auth — de Hub
+   authentiseert met de signature, niet met een sessie.
+3. Body-vorm is altijd `{ event, provider, account_id, occurred_at, data }`.
+   Route op `event` — nooit op `provider` en nooit op iets uit `data`, want die
+   vorm verschilt per provider.
+4. `account_id` is mijn eigen tenant-sleutel (dezelfde die ik bij het koppelen
+   aanleverde). Zoek daarmee de tenant op; onbekende waarde → 200 + log, geen
+   crash.
+5. Onbekende `event`-waarde → behandel als `unmapped`: negeren en loggen, geen
+   exception. De lijst groeit additief; een nieuwe naam mag mijn handler niet
+   omleggen.
+6. Antwoord snel met 2xx en doe het echte werk in een background-job. De Hub
+   retryt bij een niet-2xx.
+7. Dedupliceer op de `X-Emeq-Event-Id`-header — bij een retry komt hetzelfde
+   event opnieuw binnen. Log `X-Emeq-Request-Id` mee, dat correleert met de
+   Hub-audit.
+
+Geef mij daarna de URL die ik als `webhook_callback_url` moet doorgeven.
+```
 
 ## Valkuilen
 
