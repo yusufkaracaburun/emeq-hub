@@ -9,13 +9,18 @@
 FROM dunglas/frankenphp:php8.4 AS base
 
 # predis = pure PHP → geen ext-redis nodig. pcntl: Octane/Horizon-signalen.
+# excimer: Sentry continuous profiling (SENTRY_PROFILES_SAMPLE_RATE).
 RUN install-php-extensions \
     pdo_pgsql \
     pcntl \
     intl \
     bcmath \
     zip \
-    opcache
+    opcache \
+    excimer
+
+# Stack-trace argumenten meenemen in Sentry (default production-ini zet dit On).
+COPY docker/php/zz-sentry.ini "$PHP_INI_DIR/conf.d/zz-sentry.ini"
 
 # postgresql-client-16 uit de PGDG-repo: spatie/laravel-backup draait `pg_dump`
 # vanuit deze container; die moet de major-versie van de pg16-server matchen
