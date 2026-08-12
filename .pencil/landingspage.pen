@@ -8332,7 +8332,8 @@
                           "fill": "$border",
                           "content": "›",
                           "fontFamily": "$font-body",
-                          "fontSize": 24
+                          "fontSize": 24,
+                          "fontWeight": "normal"
                         }
                       ]
                     },
@@ -8419,7 +8420,8 @@
                           "fill": "$border",
                           "content": "›",
                           "fontFamily": "$font-body",
-                          "fontSize": 24
+                          "fontSize": 24,
+                          "fontWeight": "normal"
                         }
                       ]
                     },
@@ -12124,7 +12126,8 @@
                               "fill": "$muted-foreground",
                               "content": "▾",
                               "fontFamily": "$font-body",
-                              "fontSize": 14
+                              "fontSize": 14,
+                              "fontWeight": "normal"
                             }
                           ]
                         }
@@ -13154,7 +13157,7 @@
                     {
                       "type": "frame",
                       "id": "tGc5o",
-                      "name": "Wat wil je koppelen?",
+                      "name": "Wanneer schikt het?",
                       "width": "fill_container",
                       "layout": "vertical",
                       "gap": "$space-xs",
@@ -13202,7 +13205,8 @@
                               "fill": "$muted-foreground",
                               "content": "▾",
                               "fontFamily": "$font-body",
-                              "fontSize": 14
+                              "fontSize": 14,
+                              "fontWeight": "normal"
                             }
                           ]
                         }
@@ -13211,11 +13215,8 @@
                     {
                       "type": "frame",
                       "id": "pYSoZ",
-                      "x": 32,
-                      "y": 406,
                       "name": "Toelichting",
-                      "enabled": false,
-                      "width": "fill_container(456)",
+                      "width": "fill_container",
                       "layout": "vertical",
                       "gap": "$space-xs",
                       "children": [
@@ -13249,7 +13250,68 @@
                               "id": "I28CN2",
                               "name": "ph",
                               "fill": "$muted-foreground",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
                               "content": "Welke systemen of processen wil je tijdens de demo bespreken?",
+                              "fontFamily": "$font-body",
+                              "fontSize": "$text-sm",
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "dawNE",
+                      "name": "Privacy",
+                      "width": "fill_container",
+                      "gap": "$space-xs",
+                      "children": [
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": "$radius-xs",
+                          "id": "SgqPV",
+                          "name": "Checkbox",
+                          "fill": "$background",
+                          "width": 16,
+                          "height": 16,
+                          "stroke": "$input",
+                          "strokeWidth": 1
+                        },
+                        {
+                          "type": "frame",
+                          "id": "zmjJ3",
+                          "name": "t",
+                          "gap": 4,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "yFnGu",
+                              "name": "a",
+                              "fill": "$muted-foreground",
+                              "content": "Ik ga akkoord met het",
+                              "fontFamily": "$font-body",
+                              "fontSize": "$text-sm",
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "text",
+                              "id": "f05JMS",
+                              "name": "link",
+                              "fill": "$foreground",
+                              "content": "privacybeleid",
+                              "fontFamily": "$font-body",
+                              "fontSize": "$text-sm",
+                              "fontWeight": "500"
+                            },
+                            {
+                              "type": "text",
+                              "id": "L5TsZb",
+                              "name": "b",
+                              "fill": "$muted-foreground",
+                              "content": ". *",
                               "fontFamily": "$font-body",
                               "fontSize": "$text-sm",
                               "fontWeight": "normal"
@@ -14276,7 +14338,8 @@
                           "fill": "$muted-foreground",
                           "content": "›",
                           "fontFamily": "$font-body",
-                          "fontSize": 14
+                          "fontSize": 14,
+                          "fontWeight": "normal"
                         },
                         {
                           "type": "text",
@@ -15171,7 +15234,8 @@
                                   "fill": "$muted-foreground",
                                   "content": "▾",
                                   "fontFamily": "$font-body",
-                                  "fontSize": 14
+                                  "fontSize": 14,
+                                  "fontWeight": "normal"
                                 }
                               ]
                             }
@@ -15497,7 +15561,7 @@
                           "id": "MI5KP",
                           "name": "Koltitel",
                           "fill": "$muted-foreground",
-                          "content": "Ook van Emeq Hub",
+                          "content": "Ook van Emeq",
                           "fontFamily": "$font-body",
                           "fontSize": "$text-sm",
                           "fontWeight": "500",
@@ -15522,7 +15586,7 @@
                                   "id": "NTBvf",
                                   "name": "n",
                                   "fill": "$foreground",
-                                  "content": "Emeq Hub",
+                                  "content": "Emeq",
                                   "fontFamily": "$font-body",
                                   "fontSize": "$text-sm",
                                   "fontWeight": "500"
@@ -18125,7 +18189,8 @@
                                   "fill": "$muted-foreground",
                                   "content": "▾",
                                   "fontFamily": "$font-body",
-                                  "fontSize": 14
+                                  "fontSize": 14,
+                                  "fontWeight": "normal"
                                 }
                               ]
                             }
@@ -26126,7 +26191,8 @@
                   "fill": "$foreground",
                   "content": "✕",
                   "fontFamily": "$font-body",
-                  "fontSize": 18
+                  "fontSize": 18,
+                  "fontWeight": "normal"
                 }
               ]
             },
@@ -27149,7 +27215,8 @@
                               "fill": "$muted-foreground",
                               "content": "▾",
                               "fontFamily": "$font-body",
-                              "fontSize": 14
+                              "fontSize": 14,
+                              "fontWeight": "normal"
                             }
                           ]
                         }
@@ -28070,7 +28137,7 @@
                     {
                       "type": "frame",
                       "id": "UP15y",
-                      "name": "Wat wil je koppelen?",
+                      "name": "Wanneer schikt het?",
                       "width": "fill_container",
                       "layout": "vertical",
                       "gap": "$space-xs",
@@ -28115,7 +28182,8 @@
                               "fill": "$muted-foreground",
                               "content": "▾",
                               "fontFamily": "$font-body",
-                              "fontSize": 14
+                              "fontSize": 14,
+                              "fontWeight": "normal"
                             }
                           ]
                         }
@@ -28124,11 +28192,8 @@
                     {
                       "type": "frame",
                       "id": "vMzsV",
-                      "x": 32,
-                      "y": 406,
                       "name": "Toelichting",
-                      "enabled": false,
-                      "width": "fill_container(456)",
+                      "width": "fill_container",
                       "layout": "vertical",
                       "gap": "$space-xs",
                       "children": [
@@ -28162,6 +28227,8 @@
                               "id": "wQghf",
                               "name": "ph",
                               "fill": "$muted-foreground",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
                               "content": "Welke systemen of processen wil je tijdens de demo bespreken?",
                               "fontFamily": "$font-body",
                               "fontSize": "$text-sm",
@@ -28170,6 +28237,16 @@
                           ]
                         }
                       ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "uVahn",
+                      "name": "Privacy",
+                      "fill": "$muted-foreground",
+                      "content": "Privacy",
+                      "fontFamily": "$font-body",
+                      "fontSize": "$text-xs2",
+                      "fontWeight": "normal"
                     },
                     {
                       "type": "frame",
@@ -29090,7 +29167,8 @@
                           "fill": "$muted-foreground",
                           "content": "›",
                           "fontFamily": "$font-body",
-                          "fontSize": 14
+                          "fontSize": 14,
+                          "fontWeight": "normal"
                         },
                         {
                           "type": "text",
@@ -29953,7 +30031,8 @@
                                   "fill": "$muted-foreground",
                                   "content": "▾",
                                   "fontFamily": "$font-body",
-                                  "fontSize": 14
+                                  "fontSize": 14,
+                                  "fontWeight": "normal"
                                 }
                               ]
                             }
@@ -30291,7 +30370,7 @@
                       "id": "Y8rrnl",
                       "name": "Koltitel",
                       "fill": "$muted-foreground",
-                      "content": "Ook van Emeq Hub",
+                      "content": "Ook van Emeq",
                       "fontFamily": "$font-body",
                       "fontSize": "$text-sm",
                       "fontWeight": "500",
@@ -30316,7 +30395,7 @@
                               "id": "Oz8Y0",
                               "name": "n",
                               "fill": "$foreground",
-                              "content": "Emeq Hub",
+                              "content": "Emeq",
                               "fontFamily": "$font-body",
                               "fontSize": "$text-sm",
                               "fontWeight": "500"
@@ -32857,7 +32936,8 @@
                                   "fill": "$muted-foreground",
                                   "content": "▾",
                                   "fontFamily": "$font-body",
-                                  "fontSize": 14
+                                  "fontSize": 14,
+                                  "fontWeight": "normal"
                                 }
                               ]
                             }
