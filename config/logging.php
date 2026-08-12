@@ -127,6 +127,12 @@ return [
             'path' => storage_path('logs/laravel.log'),
         ],
 
+        'sentry_logs' => [
+            'driver' => 'sentry_logs',
+            // Minimum level for Sentry structured logs (SENTRY_ENABLE_LOGS=true).
+            'level' => env('LOG_LEVEL', 'info'),
+        ],
+
     ],
 
 ];
