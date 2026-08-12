@@ -130,7 +130,7 @@ class OAuthReturnToConsumerTest extends TestCase
 
         $this->get($url)
             ->assertOk()
-            ->assertSee('Terug naar de app')
+            ->assertSee('Opnieuw proberen')
             ->assertSee('https://consumer.test/integraties/mislukt');
     }
 }

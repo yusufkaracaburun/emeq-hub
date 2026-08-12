@@ -8,26 +8,35 @@
 
     $providerLabel = $provider?->getLabel() ?? 'de partner';
 
-    // Filament-kleurnamen → hex (accent voor de provider-badge).
-    $palette = [
-        'success' => '#10b981',
-        'danger' => '#ef4444',
-        'info' => '#3b82f6',
-        'warning' => '#f59e0b',
-        'primary' => '#f59e0b',
-        'gray' => '#6b7280',
+    $eyebrows = [
+        'access_denied' => 'Geen toestemming gegeven',
+        'invalid_or_expired_state' => 'Sessie verlopen',
     ];
-    $accent = $provider ? ($palette[$provider->getColor()] ?? '#6b7280') : '#6b7280';
+    $eyebrow = $success ? 'Koppeling gelukt' : ($eyebrows[$reason] ?? 'Koppeling mislukt');
 
     $reasons = [
-        'access_denied' => 'Je hebt de koppeling geweigerd in het scherm van '.$providerLabel.'.',
-        'invalid_or_expired_state' => 'De sessie is verlopen of ongeldig. Start de koppeling opnieuw vanuit het admin-paneel.',
+        'access_denied' => 'Je hebt bij '.$providerLabel.' geen toestemming gegeven, of de sessie is afgebroken. Er is niets gewijzigd en er zijn geen gegevens uitgewisseld.',
+        'invalid_or_expired_state' => 'De sessie is verlopen of ongeldig. Start de koppeling opnieuw — je bent zo weer terug.',
         'exchange_failed' => 'De token-uitwisseling met '.$providerLabel.' is mislukt. Probeer het later opnieuw.',
-        'missing_parameters' => 'De callback van '.$providerLabel.' miste verplichte parameters.',
+        'missing_parameters' => 'De callback van '.$providerLabel.' miste verplichte parameters. Probeer het opnieuw.',
     ];
     $reasonText = $reasons[$reason] ?? 'Er ging iets mis bij het koppelen. Probeer het opnieuw.';
 
     $adminLabel = ['exact' => 'Division', 'snelstart' => 'Administratie'][$provider?->value] ?? 'Administratie';
+
+    $ctaLabel = match (true) {
+        $success && $isConsumerReturn => 'Terug naar de app',
+        $success => 'Terug naar Connections',
+        $isConsumerReturn => 'Opnieuw proberen',
+        default => 'Terug naar het admin-paneel',
+    };
+
+    $hint = match (true) {
+        $success && $isConsumerReturn => 'Je wordt automatisch teruggestuurd…',
+        $success => 'Je kunt dit venster ook sluiten.',
+        $reason === 'access_denied' => 'Wil je liever niet koppelen? Dan hoef je niets te doen — sluit dit venster.',
+        default => 'Blijft het misgaan? Neem contact op via support@emeq.nl.',
+    };
 @endphp
 <!DOCTYPE html>
 <html lang="nl">
@@ -35,117 +44,130 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="noindex, nofollow">
-    <title>{{ $success ? 'Verbonden' : 'Koppeling mislukt' }} · emeq hub</title>
+    <title>{{ $success ? 'Verbonden' : 'Koppeling niet voltooid' }} · emeq hub</title>
     @if ($success && $isConsumerReturn)
         {{-- Geslaagde consumer-connect: na een korte bevestiging automatisch
              terug naar de app (de "Terug naar de app"-knop blijft als fallback). --}}
         <meta http-equiv="refresh" content="3;url={{ $backUrl }}">
     @endif
     <style>
+        /* Design-tokens uit landingspage.pen — gelijk aan de publieke site. */
         :root {
-            --bg: #f9fafb;
+            --background: #fafafa;
             --card: #ffffff;
-            --text: #111827;
-            --muted: #6b7280;
-            --border: #e5e7eb;
-            --row: #f9fafb;
-            --primary: #f59e0b;
-            --primary-text: #422006;
-            --ok: #10b981;
-            --bad: #ef4444;
-        }
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --bg: #030712;
-                --card: #111827;
-                --text: #f9fafb;
-                --muted: #9ca3af;
-                --border: #1f2937;
-                --row: #0b1220;
-                --primary-text: #1c1207;
-            }
+            --foreground: #171717;
+            --muted: #f5f5f5;
+            --muted-foreground: #666666;
+            --border: #ebebeb;
+            --brand: #a23696;
+            --primary: #171717;
+            --primary-foreground: #ffffff;
+            --success: #15803d;
+            --success-soft: #dcfce7;
         }
         * { box-sizing: border-box; }
         html, body { height: 100%; margin: 0; }
         body {
-            font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Inter, sans-serif;
-            background-color: var(--bg);
-            background-image:
-                radial-gradient(40rem 40rem at 15% -12%, color-mix(in srgb, var(--primary) 16%, transparent), transparent 60%),
-                radial-gradient(34rem 34rem at 90% 0%, color-mix(in srgb, var(--primary) 9%, transparent), transparent 62%);
-            color: var(--text);
+            font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+            background: var(--background);
+            color: var(--foreground);
             display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 24px;
+            flex-direction: column;
             line-height: 1.5;
             -webkit-font-smoothing: antialiased;
         }
-        .card {
-            width: 100%;
-            max-width: 440px;
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            box-shadow: 0 24px 50px -12px rgba(0, 0, 0, .20), 0 8px 16px -8px rgba(0, 0, 0, .08);
-            overflow: hidden;
-            animation: rise .5s cubic-bezier(.21, .47, .32, .98) both;
-        }
-        @keyframes rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
-        @keyframes pop { from { opacity: 0; transform: scale(.82); } to { opacity: 1; transform: scale(1); } }
-        @media (prefers-reduced-motion: reduce) {
-            .card, .icon { animation: none !important; }
-        }
-        .head {
+        .mono { font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace; }
+        header {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 12px;
-            padding: 14px 20px;
-            border-bottom: 1px solid var(--border);
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--muted);
+            gap: 16px;
+            padding: 18px 24px;
         }
-        .brand { display: flex; align-items: center; gap: 8px; }
-        .brand .dot {
-            width: 10px; height: 10px; border-radius: 50%;
-            background: var(--primary);
-        }
-        .badge {
-            font-size: 11px;
-            font-weight: 600;
-            padding: 3px 10px;
+        .wordmark { display: flex; align-items: center; gap: 8px; }
+        .wordmark img { height: 18px; width: auto; display: block; }
+        .wordmark span { font-size: 24px; font-weight: 700; letter-spacing: -.3px; }
+        .secure {
+            display: flex; align-items: center; gap: 7px;
+            background: var(--muted);
             border-radius: 999px;
-            color: {{ $accent }};
-            background: color-mix(in srgb, {{ $accent }} 12%, transparent);
-            border: 1px solid color-mix(in srgb, {{ $accent }} 35%, transparent);
+            padding: 7px 12px;
+            font-size: 13px;
+            color: var(--muted-foreground);
         }
-        .body { padding: 32px 28px 28px; text-align: center; }
-        .icon {
-            width: 64px; height: 64px;
-            margin: 0 auto 20px;
+        .secure svg { width: 14px; height: 14px; }
+        main {
+            position: relative;
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 64px 24px;
+            overflow: hidden;
+        }
+        /* Dotgrid — zelfde patroon als de hero's van de publieke site. */
+        main::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            opacity: .3;
+            background-image: radial-gradient(circle, #17171720 1px, transparent 1px);
+            background-size: 24px 24px;
+            -webkit-mask-image: linear-gradient(to bottom, black, transparent 85%);
+            mask-image: linear-gradient(to bottom, black, transparent 85%);
+            pointer-events: none;
+        }
+        .column {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 32px;
+            width: 100%;
+            max-width: 560px;
+            text-align: center;
+            animation: rise .5s cubic-bezier(.21, .47, .32, .98) both;
+        }
+        @keyframes rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+        @media (prefers-reduced-motion: reduce) { .column { animation: none; } }
+        .handoff {
+            display: flex; align-items: center; gap: 8px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            padding: 7px 14px;
+            font-size: 13px;
+        }
+        .handoff .app { font-weight: 600; }
+        .handoff .glyph { color: var(--muted-foreground); }
+        .handoff img { height: 14px; width: auto; display: block; }
+        .handoff .hub { font-weight: 700; }
+        .state-icon {
+            width: 56px; height: 56px;
             border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
-            animation: pop .45s cubic-bezier(.34, 1.56, .64, 1) .12s both;
+            background: var(--muted);
+            color: var(--muted-foreground);
         }
-        .icon.ok {
-            background: color-mix(in srgb, var(--ok) 14%, transparent); color: var(--ok);
-            box-shadow: 0 0 0 6px color-mix(in srgb, var(--ok) 8%, transparent);
+        .state-icon.ok { background: var(--success-soft); color: var(--success); }
+        .state-icon svg { width: 24px; height: 24px; }
+        .header { display: flex; flex-direction: column; gap: 16px; align-items: center; }
+        .eyebrow {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--muted-foreground);
         }
-        .icon.bad {
-            background: color-mix(in srgb, var(--bad) 14%, transparent); color: var(--bad);
-            box-shadow: 0 0 0 6px color-mix(in srgb, var(--bad) 8%, transparent);
-        }
-        .icon svg { width: 32px; height: 32px; }
-        h1 { font-size: 20px; font-weight: 700; margin: 0 0 8px; letter-spacing: -.01em; }
-        .sub { color: var(--muted); font-size: 14px; margin: 0 auto 24px; max-width: 340px; }
+        h1 { font-size: 34px; font-weight: 700; letter-spacing: -1px; line-height: 1.15; margin: 0; }
+        .sub { font-size: 16px; line-height: 1.55; color: var(--muted-foreground); max-width: 480px; margin: 0; }
         .details {
+            width: 100%;
+            max-width: 400px;
             text-align: left;
+            background: var(--card);
             border: 1px solid var(--border);
             border-radius: 12px;
             overflow: hidden;
-            margin-bottom: 24px;
         }
         .details .r {
             display: flex; justify-content: space-between; gap: 16px;
@@ -154,66 +176,115 @@
             border-bottom: 1px solid var(--border);
         }
         .details .r:last-child { border-bottom: 0; }
-        .details .r:nth-child(odd) { background: var(--row); }
-        .details .k { color: var(--muted); }
+        .details .k { color: var(--muted-foreground); }
         .details .v { font-weight: 600; font-variant-numeric: tabular-nums; }
         .pill {
-            font-size: 11px; font-weight: 600;
+            font-size: 11px; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 1px;
             padding: 2px 8px; border-radius: 999px;
-            color: var(--ok);
-            background: color-mix(in srgb, var(--ok) 14%, transparent);
+            color: var(--success);
+            background: var(--success-soft);
         }
         .btn {
-            display: inline-block;
-            width: 100%;
-            padding: 12px 18px;
-            background: linear-gradient(180deg, color-mix(in srgb, var(--primary) 92%, white), var(--primary));
-            color: var(--primary-text);
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 12px 24px;
+            background: var(--primary);
+            color: var(--primary-foreground);
             font-size: 14px; font-weight: 600;
             text-decoration: none;
-            border-radius: 12px;
-            box-shadow: 0 8px 18px -8px color-mix(in srgb, var(--primary) 70%, transparent);
-            transition: filter .15s ease, transform .15s ease;
+            border-radius: 8px;
+            transition: opacity .15s ease;
         }
-        .btn:hover { filter: brightness(.97); transform: translateY(-1px); }
+        .btn:hover { opacity: .9; }
+        .hint { font-size: 13px; color: var(--muted-foreground); margin: 0; }
+        footer {
+            display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+            gap: 16px 24px;
+            border-top: 1px solid var(--border);
+            padding: 28px 24px;
+            font-size: 13px;
+            color: var(--muted-foreground);
+        }
+        footer nav { display: flex; flex-wrap: wrap; gap: 24px; }
+        footer a { color: inherit; text-decoration: none; }
+        footer a:hover { color: var(--foreground); }
+        @media (min-width: 768px) {
+            header { padding: 18px 48px; }
+            footer { padding: 28px 48px; }
+            h1 { font-size: 38px; }
+        }
     </style>
 </head>
 <body>
-    <main class="card">
-        <div class="head">
-            <span class="brand"><span class="dot"></span> emeq hub · Integraties</span>
-            @if ($provider)
-                <span class="badge">{{ $providerLabel }}</span>
-            @endif
+    <header>
+        <div class="wordmark">
+            <img src="{{ asset('img/logo.png') }}" alt="" aria-hidden="true">
+            <span>hub</span>
         </div>
-        <div class="body">
-            @if ($success)
-                <div class="icon ok" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-                </div>
-                <h1>Verbonden met {{ $providerLabel }}</h1>
-                <p class="sub">De koppeling is actief. @if ($isConsumerReturn)Je wordt teruggestuurd naar de app…@else Je kunt dit venster sluiten of teruggaan naar het paneel.@endif</p>
+        <div class="secure">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+            <span>Beveiligde koppeling</span>
+        </div>
+    </header>
 
+    <main>
+        <div class="column">
+            @if ($provider)
+                <div class="handoff">
+                    <span class="app">{{ $providerLabel }}</span>
+                    <span class="glyph" aria-hidden="true">⇄</span>
+                    <img src="{{ asset('img/logo.png') }}" alt="" aria-hidden="true">
+                    <span class="hub">emeq hub</span>
+                </div>
+            @endif
+
+            @if ($success)
+                <div class="state-icon ok" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                </div>
+            @else
+                <div class="state-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m15 9-6 6M9 9l6 6"/></svg>
+                </div>
+            @endif
+
+            <div class="header">
+                <p class="eyebrow mono">{{ $eyebrow }}</p>
+                @if ($success)
+                    <h1>Verbonden met {{ $providerLabel }}</h1>
+                    <p class="sub">De koppeling is actief. {{ $isConsumerReturn ? 'Je wordt teruggestuurd naar de app…' : 'Je kunt dit venster sluiten of teruggaan naar het paneel.' }}</p>
+                @else
+                    <h1>De koppeling is niet voltooid</h1>
+                    <p class="sub">{{ $reasonText }}</p>
+                @endif
+            </div>
+
+            @if ($success)
                 <div class="details">
                     <div class="r"><span class="k">Status</span><span class="v"><span class="pill">{{ $connection->status }}</span></span></div>
-                    <div class="r"><span class="k">Connection</span><span class="v">{{ \Illuminate\Support\Str::limit((string) $connection->id, 8, '…') }}</span></div>
+                    <div class="r"><span class="k">Connection</span><span class="v mono">{{ \Illuminate\Support\Str::limit((string) $connection->id, 8, '…') }}</span></div>
                     @if ($connection->administratie_id)
-                        <div class="r"><span class="k">{{ $adminLabel }}</span><span class="v">{{ $connection->administratie_id }}</span></div>
+                        <div class="r"><span class="k">{{ $adminLabel }}</span><span class="v mono">{{ $connection->administratie_id }}</span></div>
                     @endif
-                    <div class="r"><span class="k">Verbonden op</span><span class="v">{{ $connection->updated_at?->format('d-m-Y H:i') }}</span></div>
+                    <div class="r"><span class="k">Verbonden op</span><span class="v mono">{{ $connection->updated_at?->format('d-m-Y H:i') }}</span></div>
                 </div>
-
-                <a class="btn" href="{{ $backUrl }}">{{ $isConsumerReturn ? 'Terug naar de app' : 'Terug naar Connections' }}</a>
-            @else
-                <div class="icon bad" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
-                </div>
-                <h1>Koppeling mislukt</h1>
-                <p class="sub">{{ $reasonText }}</p>
-
-                <a class="btn" href="{{ $backUrl }}">{{ $isConsumerReturn ? 'Terug naar de app' : 'Terug naar het admin-paneel' }}</a>
             @endif
+
+            <a class="btn" href="{{ $backUrl }}">{{ $ctaLabel }} <span aria-hidden="true">→</span></a>
+
+            <p class="hint">{{ $hint }}</p>
         </div>
     </main>
+
+    <footer>
+        <p style="margin:0">© {{ now()->year }} emeq</p>
+        <nav>
+            <a href="{{ url('/partners') }}">Partners</a>
+            <a href="{{ url('/privacy') }}">Privacy</a>
+            <a href="{{ url('/voorwaarden') }}">Voorwaarden</a>
+            <a href="{{ url('/verwerkersovereenkomst') }}">Verwerkersovereenkomst</a>
+            <a href="{{ url('/support') }}">Support</a>
+        </nav>
+    </footer>
 </body>
 </html>

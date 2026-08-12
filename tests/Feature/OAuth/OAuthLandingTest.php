@@ -46,7 +46,7 @@ class OAuthLandingTest extends TestCase
         $this->get($url)
             ->assertOk()
             ->assertSee('Exact Online')
-            ->assertSee('mislukt');
+            ->assertSee('niet voltooid');
     }
 
     public function test_failed_page_rejects_unsigned_url(): void
