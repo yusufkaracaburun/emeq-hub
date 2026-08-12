@@ -1,6 +1,8 @@
 # Exact App Center — scopes versus code
 
-Momentopname 2026-08-11, tegen de scope-selectie van de live koppeling.
+Momentopname 2026-08-11, tegen de scope-selectie van de live koppeling. Bijgewerkt
+2026-08-12: `organization/administration` toegevoegd nadat de webhook-registratie er
+live op stuk liep — zie punt 3.
 
 Methode: elk endpoint dat de Hub kan aanroepen komt uit de SDK
 (`vendor/emeq/exact-api/src/Http/Request/**`) plus de pass-through-whitelist in
@@ -13,6 +15,9 @@ financial/accounting · organization/documents
 
 **Lezen** — financial/currencies · financial/costcenters · financial/generalledgers ·
 financial/cashflow
+
+**Aangevraagd, nog niet actief** — organization/administration (Beheren), ingediend
+2026-08-12. Wacht op goedkeuring door Exact.
 
 Al het overige staat op *Ongebruikt*.
 
@@ -29,11 +34,11 @@ Al het overige staat op *Ongebruikt*.
 | `financial/CostCenters` | kostenplaatsen spiegelen | financial/costcenters (Lezen) | ✅ alleen-lezen, klopt |
 | `financial/Journals` | dagboeken spiegelen | financial/accounting (Beheren) | ✅ |
 | `vat/VATCodes` | btw-codes spiegelen | financial/accounting (Beheren) | ✅ |
-| `webhooks/WebhookSubscriptions` · `WebhookTopics` | abonnementen beheren | app-niveau | ✅ |
+| `webhooks/WebhookSubscriptions` · `WebhookTopics` | abonnementen beheren | organization/administration (Beheren) | ⚠️ aangevraagd 2026-08-12, wacht op goedkeuring |
 | `generaljournalentry/GeneralJournalEntries` | — | financial/accounting (Beheren) | ⚠️ SDK heeft de request, de Hub roept 'm nergens aan |
 | `financial/CostUnits` | kostendragers spiegelen | **niet als aparte scope zichtbaar** | ⚠️ verifiëren |
 
-## Twee dingen om op te volgen
+## Drie dingen om op te volgen
 
 ### 1. `financial/CostUnits` heeft geen zichtbare scope
 
@@ -65,6 +70,35 @@ Twee uitwegen, allebei legitiem:
 - de topics uitzetten tot er een lees-pad is; of
 - `financial/BankEntries` aan de whitelist toevoegen en een canonieke
   `BankTransaction`-resource bouwen (past in het lees-pad van fase 6).
+
+### 3. Webhooks vielen niet onder "app-niveau"
+
+Deze audit noteerde `webhooks/WebhookSubscriptions` als app-niveau: geen aparte scope
+nodig. Dat is op 2026-08-12 weerlegd door productie.
+`RegisterExactWebhookSubscriptionsJob` faalde op division 4471372 met:
+
+```
+403 — Forbidden - Application Scope Violated.
+Cannot read 'organization.administration' scope.
+```
+
+`Application Scope Violated` is een uitspraak over de app-registratie, niet over het
+token. De koppeling zelf is gezond: pass-through en boeken lopen door op hun eigen
+scopes; alleen de inkomende change-notificaties liggen stil.
+
+`organization/administration` staat sinds 2026-08-12 op **Beheren** in het App Center.
+Beheren en niet Lezen, omdat `ExactWebhookSubscriptionManager` drie kanten op werkt:
+`ListWebhookSubscriptions` (GET), `CreateWebhookSubscription` (POST) en
+`DeleteWebhookSubscription` (DELETE). Lezen dekt alleen de eerste.
+
+Een retry ná het opslaan (18:21:30) gaf dezelfde 403 — de scope-wijziging wacht op
+goedkeuring door Exact. Zodra die er is: de gefaalde job opnieuw aanbieden
+(`php artisan queue:retry <uuid>`) en `ListWebhookSubscriptions` narekenen. Blijft het
+dan 403, dan is de scope tokengebonden en moet de Connection opnieuw geautoriseerd
+worden; dat weten we pas na die eerste retry, dus niet vooraf inplannen.
+
+Elke retry is een Exact-call en telt mee in de error-budget-kill-switch
+(`config/hub-providers.php`: 6 fouten per rollend uur). Niet in een poll-loop hangen.
 
 ### Ongebruikte toekenningen
 

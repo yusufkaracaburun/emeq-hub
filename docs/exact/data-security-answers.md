@@ -249,7 +249,9 @@ Ingevuld in Exact-portaal (2026-08-08). Tooltip `accounting` = *"Boekingen, sald
 | Organization → documents   | **Beheren**                                        |
 
 
-Rest: **Ongebruikt** — o.a. heel Sales/Purchase (Hub boekt via `salesentry`/`purchaseentry` onder accounting, niet via Sales/Purchase invoices).
+Naast deze zes staan ook `Sales → invoices`, `Purchase → invoices` en `Logistics → items` op **Beheren**; de rest op **Ongebruikt**. De volledige matrix, met per endpoint welke Hub-code eraan hangt, staat in [`scope-audit.md`](scope-audit.md).
+
+Sinds 2026-08-12 staat `Organization → administration` op **Beheren**, aangevraagd nadat de webhook-registratie live op die scope stukliep. Wacht op goedkeuring door Exact.
 
 DELETE via consumer-API is hard geblokkeerd (`405`).
 
