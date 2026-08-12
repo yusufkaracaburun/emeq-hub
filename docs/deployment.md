@@ -340,6 +340,49 @@ Migratie-rollback is **niet** automatisch (forward-only in prod). Een kapotte mi
 vereist een nieuwe corrigerende migratie, geen `migrate:rollback` — vandaar de dump
 vóór elke deploy.
 
+## Schone herstart (`migrate:fresh` op prod)
+
+`database/migrations` bevat sinds de consolidatie alleen `create`-bestanden: geen losse
+`add_*`/`alter_*` meer, elke schema-wijziging werkt de create bij. Laravel slaat een
+al-gedraaide migratie over, dus een kolom die je in zo'n bestand toevoegt landt op een
+bestaande database **nooit** — `migrate` meldt "Nothing to migrate" en de app breekt
+daarna op de ontbrekende kolom. Een schema-wijziging vraagt hier dus een volledige
+herstart:
+
+```bash
+make prod-backup                       # altijd eerst — de fresh is onomkeerbaar
+docker compose -f docker-compose.prod.yml --env-file .env.prod exec -T app \
+  php artisan migrate:fresh --force
+```
+
+Wat je daarna **niet** vanzelf terugkrijgt, en dus vóóraf regelt:
+
+| Weg | Terug via |
+|---|---|
+| Admin-user + rollen | [Bootstrap van de admin-user](#bootstrap-van-de-admin-user). `--seed` alleen doet niets op prod. |
+| Exact client_id/secret/redirect_uri/webhook_secret | Vóór de fresh uitlezen en terugzetten, of opnieuw invullen onder Beheer → Integratie-instellingen. De settings-migratie zet ze **leeg** aan. |
+| Consumers, PATs, Accounts, Connections | Opnieuw aanmaken in `/admin`; eindgebruikers koppelen opnieuw. |
+| Privacy/voorwaarden, permissies, schema | Komen wél uit de migraties. |
+
+De Exact-credentials oversteken zonder ze in je shell-history te zetten — schrijven en
+lezen gebeurt binnen de container, de host ziet alleen een `chmod 600`-bestand dat je
+achteraf wist:
+
+```bash
+docker compose … exec -T app php artisan tinker --execute \
+  '$s = app(App\Settings\ExactSettings::class);
+   file_put_contents("/tmp/x.json", json_encode(["client_id" => $s->client_id, …]));'
+docker compose … cp app:/tmp/x.json ./exact.restore.json && chmod 600 exact.restore.json
+# … fresh + seed …
+docker compose … cp ./exact.restore.json app:/tmp/x.json
+docker compose … exec -T app php artisan tinker --execute '/* terugzetten + save() */'
+docker compose … exec -T app rm /tmp/x.json && shred -u exact.restore.json
+```
+
+Verifieer na afloop dat het nieuwe schema er echt staat (`Schema::getColumnListing`) in
+plaats van alleen op een groene `/up` af te gaan: die controleert db-connectiviteit, niet
+of jouw kolom bestaat.
+
 ## Smoke-test na elke release
 
 ```bash
