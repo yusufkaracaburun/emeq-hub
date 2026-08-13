@@ -21,6 +21,10 @@ class ValidateDocumentRequest extends FormRequest
     }
 
     /**
+     * Let op bij uitbreiden: een veld zonder regel overleeft `validated()` niet en bereikt
+     * de inspector dus nooit. `issue_date` stond eerst niet in deze lijst, waarna de
+     * CompletenessValidator het als ontbrekend meldde terwijl het in de body zat.
+     *
      * @return array<string, mixed>
      */
     public function rules(): array
@@ -29,6 +33,10 @@ class ValidateDocumentRequest extends FormRequest
             'type' => ['nullable', 'string'],
             'external_id' => ['nullable', 'string', 'max:255'],
             'currency' => ['nullable', 'string'],
+
+            // Factuurdatum. Bewust zonder vormregel: een draft mag hier de rauwe
+            // OCR-waarde dragen, en het oordeel erover komt uit de findings.
+            'issue_date' => ['nullable'],
 
             'subtotal' => ['nullable', 'numeric'],
             'tax_total' => ['nullable', 'numeric'],

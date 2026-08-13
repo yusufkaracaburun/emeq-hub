@@ -5172,6 +5172,13 @@
                             "null"
                         ]
                     },
+                    "issue_date": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "Factuurdatum. Bewust zonder vormregel: een draft mag hier de rauwe\nOCR-waarde dragen, en het oordeel erover komt uit de findings."
+                    },
                     "subtotal": {
                         "type": [
                             "number",

@@ -116,6 +116,34 @@ class ValidateDocumentTest extends TestCase
             ->assertJsonFragment(['code' => 'document.lines.missing', 'severity' => 'error']);
     }
 
+    /**
+     * Een veld zonder regel in ValidateDocumentRequest overleeft `validated()` niet, dus
+     * zag de inspector `issue_date` nooit en meldde het als ontbrekend terwijl het in de
+     * body stond. Ontdekt op prod, niet in de unit-test — die voedt de validator direct.
+     */
+    public function test_a_field_present_in_the_body_is_not_reported_as_missing(): void
+    {
+        [$consumer] = $this->consumerWithExactConnection();
+        $token = $consumer->createToken('t', [TokenAbilities::EXACT_READ])->plainTextToken;
+
+        $response = $this->withHeader('Authorization', "Bearer {$token}")
+            ->withHeader('X-Account-Id', 'school1')
+            ->postJson('/v1/accounting/documents/validate', [
+                'type' => 'purchase_invoice',
+                'external_id' => 'invoice-1',
+                'issue_date' => '2026-08-13',
+                'party' => ['role' => 'creditor', 'name' => 'NL Leverancier BV'],
+                'lines' => [['description' => 'Dienst', 'amount' => 100, 'tax_rate' => 21]],
+            ]);
+
+        $response->assertStatus(200)->assertJsonPath('summary.warnings', 0);
+
+        $codes = array_column($response->json('findings'), 'code');
+
+        $this->assertNotContains('document.issue_date.missing', $codes);
+        $this->assertNotContains('document.external_id.missing', $codes);
+    }
+
     public function test_a_document_type_the_booking_rejects_is_an_error(): void
     {
         [$consumer] = $this->consumerWithExactConnection();
