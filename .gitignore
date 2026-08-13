@@ -63,3 +63,6 @@ frankenphp-worker.php
 
 # graphify knowledge graph — generated, large, rebuildable with `graphify .`
 /graphify-out
+
+# Dump van Exact-instellingen, met de hand op de server neergezet bij een restore
+exact-settings.restore.json
