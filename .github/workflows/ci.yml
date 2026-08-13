@@ -64,18 +64,15 @@ jobs:
           php artisan key:generate
 
       # api.json staat in git zodat elke contractwijziging een reviewbare diff is.
-      # Het script is deterministisch (servers vastgepind in config/scramble.php,
-      # API_VERSION hard gezet), dus een diff betekent een echte API-wijziging.
+      # Het script is hermetisch (servers, API_VERSION en database staan vast),
+      # dus een diff betekent een echte API-wijziging. Fouten in de generatie
+      # zelf laten `scramble:export` non-zero eindigen, dus een aparte
+      # `scramble:analyze` zou hier niets extra's bewaken.
       - name: OpenAPI spec in sync
         run: |
           bin/export-openapi.sh
           git diff --exit-code -- api.json \
             || { echo "::error::api.json is verouderd — draai bin/export-openapi.sh en commit het resultaat."; exit 1; }
-
-      # Vangt fouten in de generatie zelf (exit 1), die anders stilletjes een
-      # kapotte of onvolledige spec zouden opleveren. Staat vandaag op groen.
-      - name: Analyse OpenAPI generation
-        run: php artisan scramble:analyze
 
       - name: Check code style (Pint)
         run: vendor/bin/pint --test

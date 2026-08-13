@@ -7,16 +7,31 @@
 # consumers een stabiel artefact hebben om tegen te implementeren. CI draait dit
 # script en faalt op `git diff --exit-code -- api.json`.
 #
-# Daarom moet de output deterministisch zijn, los van de lokale omgeving:
-#   - `servers` is vastgepind in config/scramble.php (niet afgeleid van APP_URL).
-#   - API_VERSION wordt hier hard gezet; zonder dit bepaalt de .env (of de shell)
-#     van de ontwikkelaar het versienummer in de spec. Bewust géén
-#     `${API_VERSION:-...}`: een override zou de drift-check waardeloos maken.
+# Daarom moet de output deterministisch zijn, los van de omgeving waarin het
+# draait. Drie dingen zouden hem anders laten variëren:
+#
+#   - `servers` — was afgeleid van APP_URL; staat nu vastgepind in
+#     config/scramble.php.
+#   - `API_VERSION` — wordt hier hard gezet. Bewust géén `${API_VERSION:-...}`:
+#     een override zou de drift-check waardeloos maken.
+#   - De database — Scramble opent er een connectie tijdens het analyseren van
+#     routes die een Eloquent-model teruggeven. Zonder pin draait de export
+#     tegen de lokale .env: op een dev-machine een pgsql met wíllekeurig welk
+#     schema (ook een niet-gemigreerde), in CI helemaal niets. Daarom draait de
+#     export tegen een wegwerp-sqlite die hier vers gemigreerd wordt.
 #
 # Bump de versie hieronder bewust, samen met de API-release.
 
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
+
+DB_FILE="$(mktemp -t emeq-openapi.XXXXXX)"
+trap 'rm -f "$DB_FILE"' EXIT
+
+export DB_CONNECTION=sqlite
+export DB_DATABASE="$DB_FILE"
+
+php artisan migrate --force --quiet
 
 API_VERSION=0.2.0-dev php artisan scramble:export
