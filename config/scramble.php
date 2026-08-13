@@ -87,7 +87,15 @@ return [
      * ],
      * ```
      */
-    'servers' => null,
+    /*
+     * Bewust absolute URLs in plaats van `null`: `null` leidt de server-URL af van
+     * `APP_URL`, waardoor iedere machine een andere `api.json` exporteert en de
+     * drift-check in CI (`bin/export-openapi.sh`) altijd zou falen.
+     */
+    'servers' => [
+        'Production' => 'https://hub.emeq.nl/v1',
+        'Development' => 'https://hub-dev.emeq.nl/v1',
+    ],
 
     /**
      * Determines how Scramble stores the descriptions of enum cases.

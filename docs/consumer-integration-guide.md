@@ -900,4 +900,7 @@ Geef mij daarna de URL die ik als `webhook_callback_url` moet doorgeven.
   `account_external_id` van de connect-laag.
 - Snelstart is `connectable: false` (geen OAuth) — toon, maar bied geen
   OAuth-connect aan.
-- Volledige, altijd-actuele API-referentie: **`/docs/api`**.
+- Volledige, altijd-actuele API-referentie: **`/docs/api`** (live gegenereerd).
+  Dezelfde spec staat als `api.json` in de repo-root — versioneerd en diffbaar,
+  dus je ziet per commit wat er aan het contract wijzigde. CI faalt als die spec
+  achterloopt op de routes.

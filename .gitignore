@@ -20,7 +20,6 @@
 /.phpunit.cache
 /.vscode
 /.zed
-/api.json
 /auth.json
 /node_modules
 /.dev
