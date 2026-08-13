@@ -20,7 +20,6 @@ class ProviderAccessTest extends TestCase
 
     public function test_an_unknown_scope_is_still_listed_without_explanation(): void
     {
-        // Een scope verbergen omdat wij 'm niet kennen zou toegang verzwijgen.
         $described = ProviderAccess::describeScopes(['balances.read']);
 
         $this->assertArrayHasKey('balances.read', $described);
@@ -34,8 +33,6 @@ class ProviderAccessTest extends TestCase
 
     public function test_every_whitelisted_exact_resource_has_an_explanation(): void
     {
-        // Vangt drift: een pad toevoegen aan de pass-through-whitelist zonder
-        // uitleg laat de operator raden waar de Hub bij mag.
         $described = ProviderAccess::describeResources(Provider::Exact);
 
         $this->assertNotEmpty($described);

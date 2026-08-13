@@ -16,11 +16,6 @@ use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
-/**
- * De detailpagina bundelt overzicht, toegang, boekhoud-mapping en de relation
- * managers in één tabbalk. Bewijst dat elk tabblad zijn eigen inhoud toont en
- * dat de relation-manager-tabs niet verdwenen zijn toen we de balk overnamen.
- */
 class ConnectionDetailTabsTest extends TestCase
 {
     use RefreshDatabase;
@@ -51,7 +46,6 @@ class ConnectionDetailTabsTest extends TestCase
     {
         $this->actingAs($this->makeStaffUser());
 
-        // De referentiedata-tab verschijnt alleen met gespiegelde refs.
         $exact = $this->makeConnection('forExact');
         $exact->accountingRefs()->create([
             'kind' => ConnectionAccountingRef::KIND_GL,

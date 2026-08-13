@@ -21,11 +21,6 @@ use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
-/**
- * Handmatige token-refresh vanaf de Connection-detailpagina: zichtbaarheid,
- * delegation naar de OAuthFlow, en de eerlijke melding wanneer de provider de
- * refresh weigert omdat de access-token nog geldig is.
- */
 class ConnectionRefreshTokenActionTest extends TestCase
 {
     use RefreshDatabase;
@@ -105,8 +100,6 @@ class ConnectionRefreshTokenActionTest extends TestCase
 
     public function test_action_reports_honestly_when_the_provider_refuses_a_premature_refresh(): void
     {
-        // Exact weigert een refresh zolang de access-token nog geldig is; de flow
-        // slaat de token-call dan over. De UI moet dat melden, niet "ververst" liegen.
         Http::fake();
 
         $this->actingAs($this->makeStaffUser());
@@ -129,8 +122,6 @@ class ConnectionRefreshTokenActionTest extends TestCase
 
     public function test_action_shows_a_fingerprinted_failure_notification_on_throwable(): void
     {
-        // ExactOAuthFlow is final — een anonieme OAuthFlow die gooit, gebonden op de
-        // key die OAuthFlowRegistry resolvet, doet hetzelfde werk als een mock.
         $this->app->instance(ExactOAuthFlow::class, new class implements OAuthFlow
         {
             public function getAuthorizationUrl(Account $account, array $scopes, string $state): string
