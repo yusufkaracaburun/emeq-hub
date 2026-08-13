@@ -57,7 +57,7 @@ final class VatNumberValidator implements DocumentValidator
                 code: 'vat_number.malformed',
                 severity: $country === 'NL' ? Severity::Error : Severity::Warning,
                 path: 'party.vat_number',
-                message: "BTW-nummer heeft geen geldig {$country}-formaat.",
+                message: "Het btw-nummer heeft niet de vorm van een {$country}-btw-nummer. Controleer het nummer op de factuur.",
                 current: $raw,
                 suggestion: null,
             )];
@@ -75,7 +75,7 @@ final class VatNumberValidator implements DocumentValidator
                 code: 'vat_number.checksum',
                 severity: Severity::Error,
                 path: 'party.vat_number',
-                message: "{$subject} is ongeldig (controlecijfer klopt niet). Een Nederlands btw-nummer heeft de vorm NL + 9 cijfers + B + 2 cijfers (bijvoorbeeld NL000099998B57).",
+                message: "{$subject} klopt niet — het bestaat niet in deze vorm. Een Nederlands btw-nummer is NL + 9 cijfers + B + 2 cijfers (bijvoorbeeld NL000099998B57). De boeking wordt hierop geweigerd.",
                 current: $raw,
                 suggestion: 'Controleer en corrigeer het btw-nummer van de klant.',
             )];
@@ -86,7 +86,7 @@ final class VatNumberValidator implements DocumentValidator
                 code: 'vat_number.normalize',
                 severity: Severity::Info,
                 path: 'party.vat_number',
-                message: 'BTW-nummer is geldig maar niet genormaliseerd.',
+                message: 'Het btw-nummer klopt, maar staat met spaties of leestekens. Wij stellen de nette schrijfwijze voor.',
                 current: $raw,
                 suggestion: $normalized,
             )];

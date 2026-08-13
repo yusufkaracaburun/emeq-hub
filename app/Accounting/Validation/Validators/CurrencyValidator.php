@@ -34,7 +34,7 @@ final class CurrencyValidator implements DocumentValidator
             code: 'currency.foreign',
             severity: Severity::Info,
             path: 'currency',
-            message: "Vreemde valuta gedetecteerd ({$normalized}); controleer koers en valuta vóór het boeken.",
+            message: "Deze factuur staat in {$normalized}, niet in euro's. Controleer de valuta en de gehanteerde koers vóór het boeken.",
             current: $currency,
             suggestion: null,
         )];

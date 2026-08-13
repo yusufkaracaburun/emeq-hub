@@ -38,7 +38,7 @@ final class ArithmeticValidator implements DocumentValidator
                     code: 'arithmetic.amount_not_numeric',
                     severity: Severity::Warning,
                     path: "lines.{$index}.amount",
-                    message: 'Regelbedrag is niet numeriek.',
+                    message: 'Deze factuurregel heeft geen leesbaar bedrag. Controleer de regel op de factuur.',
                     current: $line['amount'] ?? null,
                     suggestion: null,
                 );
@@ -62,7 +62,7 @@ final class ArithmeticValidator implements DocumentValidator
                         code: 'arithmetic.line_amount_mismatch',
                         severity: Severity::Warning,
                         path: "lines.{$index}.amount",
-                        message: 'Regelbedrag wijkt af van aantal × stukprijs.',
+                        message: 'Het regelbedrag komt niet uit op aantal × stukprijs. Controleer welke van de drie klopt.',
                         current: $amount,
                         suggestion: $expected,
                     );
@@ -92,7 +92,7 @@ final class ArithmeticValidator implements DocumentValidator
                 code: 'arithmetic.subtotal_mismatch',
                 severity: Severity::Warning,
                 path: 'subtotal',
-                message: 'Opgegeven subtotaal wijkt af van de som van de regels (netto).',
+                message: 'Het subtotaal op de factuur komt niet overeen met de optelsom van de regels (excl. BTW).',
                 current: $subtotal,
                 suggestion: $net,
             );
@@ -104,7 +104,7 @@ final class ArithmeticValidator implements DocumentValidator
                 code: 'arithmetic.tax_total_mismatch',
                 severity: Severity::Warning,
                 path: 'tax_total',
-                message: 'Opgegeven BTW-totaal wijkt af van de berekende BTW over de regels.',
+                message: 'Het BTW-bedrag op de factuur komt niet overeen met de BTW over de regels.',
                 current: $taxTotal,
                 suggestion: $tax,
             );
@@ -120,7 +120,7 @@ final class ArithmeticValidator implements DocumentValidator
                     code: 'arithmetic.total_mismatch',
                     severity: Severity::Warning,
                     path: 'total',
-                    message: 'Opgegeven totaal wijkt af van netto + BTW − korting.',
+                    message: 'Het factuurtotaal komt niet overeen met subtotaal + BTW − korting.',
                     current: $total,
                     suggestion: $expected,
                 );

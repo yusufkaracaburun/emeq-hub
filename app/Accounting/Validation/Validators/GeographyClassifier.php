@@ -29,7 +29,7 @@ final class GeographyClassifier implements DocumentValidator
                 code: 'geography.country_mismatch',
                 severity: Severity::Warning,
                 path: 'party',
-                message: "Land uit BTW-nummer ({$vatCountry}) wijkt af van land uit IBAN ({$ibanCountry}).",
+                message: "Het btw-nummer hoort bij {$vatCountry}, het rekeningnummer bij {$ibanCountry}. Controleer of beide van dezelfde partij zijn.",
                 current: ['vat_country' => $vatCountry, 'iban_country' => $ibanCountry],
                 suggestion: null,
             )];

@@ -606,6 +606,15 @@ Een ongeldig NL-btw-nummer (fout formaat of fout controlecijfer/11-proef,
 zo'n boeking hard, dus `validate` houdt 'm tegen vóór je POST. Buitenlandse
 EU-formaten blijven `warning`.
 
+Let op bij de `exact.*`-warnings: die blokkeren `valid` niet, maar een ontbrekende
+mapping (`vat_code.unmapped`, `relation.new` zonder auto-create, `cost_center.unmapped`,
+`cost_unit.unmapped`) laat de daaropvolgende boek-POST wél met een `422` stranden.
+Behandel ze in je UI als "eerst oplossen", niet als vrijblijvend advies.
+
+De `message` is bedoeld om ongewijzigd aan de eindgebruiker te tonen — Nederlands,
+zonder Exact-jargon, met de consequentie en de handeling erin. Stuur je logica op
+`code` + `severity`; de tekst kan tussen releases wijzigen zonder breaking change.
+
 | Code | Severity | Betekenis |
 |---|---|---|
 | `arithmetic.amount_not_numeric` | warning | Regelbedrag niet numeriek |
@@ -623,8 +632,10 @@ EU-formaten blijven `warning`.
 | `geography.country_mismatch` | warning | Land uit BTW-nr ≠ land uit IBAN |
 | `currency.foreign` | info | Andere valuta dan EUR |
 | `exact.vat_code.unmapped` | warning | Tarief nog niet gekoppeld aan een Exact-VATCode (een gekoppeld tarief levert géén finding) |
-| `exact.relation.matched` | info | Relatie = bestaande Exact-relatie (`suggestion` = GUID) |
-| `exact.relation.new` | info | Relatie nog niet in Exact (wordt automatisch aangemaakt bij boeken als auto-create aan staat, anders `422`) |
+| `exact.relation.matched` | info | Relatie = bestaande Exact-relatie (`suggestion` = GUID). Match op `party.external_id` uit de mirror, anders op btw-nummer/naam |
+| `exact.relation.new` | info **of** warning | Relatie nog niet in Exact. `info` = auto-create staat aan op de koppeling, de boeking maakt 'm aan. **`warning` = auto-create staat uit — de boeking geeft dan een `422`.** Lees dus de severity, niet alleen de code |
+| `exact.cost_center.matched` / `exact.cost_unit.matched` | info | Opgegeven kostenplaats/-drager bestaat in de administratie |
+| `exact.cost_center.unmapped` / `exact.cost_unit.unmapped` | warning | Kostenplaats/-drager onbekend — de boeking weigert hierop. Corrigeer de Code of draai `POST /v1/accounting/sync` |
 
 > `exact.*` verschijnen alleen bij een Exact-connection; de rest is provider-agnostisch.
 

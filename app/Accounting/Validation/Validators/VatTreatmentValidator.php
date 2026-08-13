@@ -48,7 +48,7 @@ final class VatTreatmentValidator implements DocumentValidator
                     code: 'vat_treatment.reverse_charge_expected',
                     severity: Severity::Warning,
                     path: "lines.{$index}.tax_rate",
-                    message: 'Intra-EU B2B-leverancier met BTW-nummer: BTW verlegd verwacht (0%).',
+                    message: 'Leverancier binnen de EU met een eigen btw-nummer: hier hoort BTW verlegd (0%) op de factuur, geen BTW-tarief.',
                     current: $rate,
                     suggestion: 'reverse_charge',
                 );
@@ -61,7 +61,7 @@ final class VatTreatmentValidator implements DocumentValidator
                     code: 'vat_treatment.domestic_rate_on_non_eu',
                     severity: Severity::Error,
                     path: "lines.{$index}.tax_rate",
-                    message: 'Niet-EU leverancier met een binnenlands BTW-tarief; import-BTW loopt via de douane (0% op de factuur).',
+                    message: 'Leverancier buiten de EU rekent een binnenlands BTW-tarief. Bij invoer loopt de BTW via de douane — op de factuur hoort 0%.',
                     current: $rate,
                     suggestion: 0,
                 );

@@ -37,7 +37,7 @@ final class IbanValidator implements DocumentValidator
                 code: 'iban.checksum_invalid',
                 severity: Severity::Error,
                 path: 'party.iban',
-                message: 'Het IBAN is ongeldig. Controleer het rekeningnummer en probeer opnieuw.',
+                message: 'Het rekeningnummer (IBAN) is ongeldig. Controleer het nummer op de factuur.',
                 current: $raw,
                 suggestion: null,
             )];
@@ -48,7 +48,7 @@ final class IbanValidator implements DocumentValidator
                 code: 'iban.normalize',
                 severity: Severity::Info,
                 path: 'party.iban',
-                message: 'IBAN is geldig maar niet genormaliseerd.',
+                message: 'Het rekeningnummer klopt, maar staat met spaties of kleine letters. Wij stellen de nette schrijfwijze voor.',
                 current: $raw,
                 suggestion: $normalized,
             )];
