@@ -135,4 +135,35 @@ class ExactReportEnricherTest extends TestCase
             $this->assertStringStartsWith($label, $relation[0]->message);
         }
     }
+
+    public function test_unknown_relation_is_a_warning_without_auto_create(): void
+    {
+        // Zonder auto_create_relations weigert de boeking met een 422 — de dry-run moet die
+        // weigering spiegelen, niet als vrijblijvende info langskomen.
+        $findings = $this->enricher()->enrich(
+            ['party' => ['role' => 'creditor', 'name' => 'Acme BV'], 'lines' => []],
+            $this->connection(['21' => '4']),
+        );
+
+        $relation = array_values(array_filter($findings, fn ($f) => $f->code === 'exact.relation.new'));
+        $this->assertCount(1, $relation);
+        $this->assertSame(Severity::Warning, $relation[0]->severity);
+        $this->assertStringContainsString('geweigerd', $relation[0]->message);
+    }
+
+    public function test_unknown_relation_is_info_when_auto_create_is_enabled(): void
+    {
+        $connection = new Connection;
+        $connection->metadata = ['accounting_mapping' => ['vat_codes' => ['21' => '4'], 'auto_create_relations' => true]];
+
+        $findings = $this->enricher()->enrich(
+            ['party' => ['role' => 'creditor', 'name' => 'Acme BV'], 'lines' => []],
+            $connection,
+        );
+
+        $relation = array_values(array_filter($findings, fn ($f) => $f->code === 'exact.relation.new'));
+        $this->assertCount(1, $relation);
+        $this->assertSame(Severity::Info, $relation[0]->severity);
+        $this->assertStringContainsString('automatisch aangemaakt', $relation[0]->message);
+    }
 }

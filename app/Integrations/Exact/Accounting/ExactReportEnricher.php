@@ -16,9 +16,13 @@ use Throwable;
 /**
  * Exact-specifieke verrijking van het validate-rapport. Draait ná de provider-agnostische
  * DocumentInspector (gated op een Exact-connection) en voegt findings toe die de consumer
- * vóór de boek-POST laten zien of de mapping compleet is: per BTW-tarief de concrete
- * Exact-VATCode (of "nog niet gekoppeld"), en of de leverancier al als Exact-relatie bestaat
- * of nieuw is.
+ * vóór de boek-POST laten zien of de boeking gaat slagen: is het BTW-tarief ingericht, staat
+ * de relatie al in de administratie, en bestaan de opgegeven kostenplaats/-drager.
+ *
+ * Findings zijn geschreven voor de eindgebruiker die de factuur goedkeurt, niet voor de
+ * integrator: geen VATCode/GUID/mirror-jargon in de tekst, wél de consequentie ("de boeking
+ * wordt geweigerd") en de handeling die dat oplost. De machine-leesbare kant zit in `code`,
+ * `current` en `suggestion`.
  *
  * Findings krijgen het prefix `exact.` om provider-specifieke enrichment te onderscheiden van
  * de agnostische validators. Muteert niets — een dry-run hoort read-only te zijn.
@@ -95,7 +99,7 @@ final class ExactReportEnricher
                 code: 'exact.vat_code.unmapped',
                 severity: Severity::Warning,
                 path: "lines.{$index}.tax_rate",
-                message: "Tarief {$label} is nog niet gekoppeld aan een Exact-VATCode op deze koppeling.",
+                message: "BTW-tarief {$label} is nog niet ingericht voor deze administratie — de boeking wordt hierop geweigerd. Richt het tarief in of gebruik een tarief dat de administratie al kent.",
                 current: $line['tax_rate'] ?? null,
                 suggestion: null,
             );
@@ -105,15 +109,33 @@ final class ExactReportEnricher
     }
 
     /**
+     * Spiegelt de relatie-resolutie van het schrijfpad (ExactRelationResolver) zodat de dry-run
+     * hetzelfde oordeelt als de boeking: eerst de eerder geleerde koppeling op `external_id`,
+     * pas daarna een match op BTW-nummer/naam. Zonder die eerste stap meldt validate "nieuw"
+     * terwijl het boeken de relatie wél terugvindt.
+     *
      * @param  array<string, mixed>  $payload
      * @return list<Finding>
      */
     private function relationFindings(array $payload, Connection $connection): array
     {
         $party = is_array($payload['party'] ?? null) ? $payload['party'] : [];
+        $externalId = $this->scalarString($party['external_id'] ?? null);
         $vatNumber = is_string($party['vat_number'] ?? null) ? $party['vat_number'] : null;
         $name = is_string($party['name'] ?? null) ? $party['name'] : null;
-        $role = is_string($party['role'] ?? null) ? $party['role'] : null;
+        $label = $this->partyLabel(is_string($party['role'] ?? null) ? $party['role'] : null);
+
+        if ($externalId !== null) {
+            $known = ConnectionAccountingRef::query()
+                ->where('connection_id', $connection->getKey())
+                ->where('kind', ConnectionAccountingRef::KIND_RELATION)
+                ->where('code', $externalId)
+                ->first();
+
+            if ($known !== null) {
+                return [$this->relationMatched($label, $known->label ?? $name, (string) $known->native_id, $name)];
+            }
+        }
 
         if ($this->blank($vatNumber) && $this->blank($name)) {
             return [];
@@ -126,27 +148,48 @@ final class ExactReportEnricher
             return [];
         }
 
-        $label = $this->partyLabel($role);
-
         if ($match !== null) {
-            return [new Finding(
-                code: 'exact.relation.matched',
-                severity: Severity::Info,
-                path: 'party',
-                message: "{$label} gevonden als bestaande Exact-relatie '{$match['name']}'.",
-                current: $name,
-                suggestion: $match['id'],
-            )];
+            return [$this->relationMatched($label, $match['name'], $match['id'], $name)];
         }
 
-        return [new Finding(
-            code: 'exact.relation.new',
+        return [$this->relationNew($label, $name, $connection)];
+    }
+
+    private function relationMatched(string $label, ?string $matchedName, string $nativeId, ?string $current): Finding
+    {
+        $suffix = $this->blank($matchedName) ? '' : " '{$matchedName}'";
+
+        return new Finding(
+            code: 'exact.relation.matched',
             severity: Severity::Info,
             path: 'party',
-            message: "{$label} nog niet als eenduidige Exact-relatie gevonden — wordt bij het boeken als nieuw behandeld.",
+            message: "{$label} is herkend als bestaande relatie{$suffix} in de administratie — de boeking komt daarop te staan.",
+            current: $current,
+            suggestion: $nativeId,
+        );
+    }
+
+    /**
+     * De relatie ontbreekt. Of dat erg is hangt aan de koppeling: met automatisch aanmaken aan
+     * maakt de boeking 'm zelf (Info), zonder weigert die met een 422 (Warning). Beide gevallen
+     * dezelfde `code` — de severity draagt het verschil, zodat een consumer die alleen op codes
+     * filtert niet stilzwijgend in de weigering loopt.
+     */
+    private function relationNew(string $label, ?string $name, Connection $connection): Finding
+    {
+        $mapping = $connection->metadata['accounting_mapping'] ?? [];
+        $autoCreates = is_array($mapping) && ($mapping['auto_create_relations'] ?? false) === true;
+
+        return new Finding(
+            code: 'exact.relation.new',
+            severity: $autoCreates ? Severity::Info : Severity::Warning,
+            path: 'party',
+            message: $autoCreates
+                ? "{$label} staat nog niet in de administratie en wordt bij het boeken automatisch aangemaakt."
+                : "{$label} staat nog niet in de administratie — de boeking wordt geweigerd. Voeg de relatie toe in de administratie, of laat automatisch aanmaken inschakelen op deze koppeling.",
             current: $name,
             suggestion: null,
-        )];
+        );
     }
 
     /**
@@ -192,7 +235,7 @@ final class ExactReportEnricher
                         code: "exact.{$field}.matched",
                         severity: Severity::Info,
                         path: $path,
-                        message: "{$dimension['label']} '{$code}' bestaat in de gekoppelde administratie.",
+                        message: "{$dimension['label']} '{$code}' is bekend in de administratie.",
                         current: $code,
                         suggestion: $code,
                     )
@@ -200,7 +243,7 @@ final class ExactReportEnricher
                         code: "exact.{$field}.unmapped",
                         severity: Severity::Warning,
                         path: $path,
-                        message: "{$dimension['label']} '{$code}' is onbekend in de gekoppelde administratie — de boeking weigert hierop. Synchroniseer de referentiedata of corrigeer de Code.",
+                        message: "{$dimension['label']} '{$code}' bestaat niet in de administratie — de boeking wordt hierop geweigerd. Corrigeer de {$this->lowerLabel($dimension['label'])} of voeg 'm toe in de administratie; is die net aangemaakt, ververs dan eerst de gegevens.",
                         current: $code,
                         suggestion: null,
                     );
@@ -221,6 +264,11 @@ final class ExactReportEnricher
             'creditor' => 'Leverancier',
             default => 'Relatie',
         };
+    }
+
+    private function lowerLabel(string $label): string
+    {
+        return mb_strtolower($label);
     }
 
     private function rateLabel(float $rate): string
