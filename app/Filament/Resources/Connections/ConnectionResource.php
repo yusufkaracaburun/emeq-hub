@@ -11,6 +11,7 @@ use App\Filament\Widgets\OperationalHealthWidget;
 use App\Integrations\OAuth\OAuthFlowRegistry;
 use App\Models\Connection;
 use App\Support\Filament\BadgeColor;
+use App\Support\ProviderAccess;
 use App\Support\ProviderCredentialDescriptor;
 use BackedEnum;
 use Filament\Actions\Action;
@@ -135,37 +136,86 @@ class ConnectionResource extends Resource
                     TextEntry::make('created_at')->dateTime(),
                 ]),
 
+        ]);
+    }
+
+    /**
+     * Wat deze koppeling bij de partner mag — eigen tabblad op de detailpagina.
+     * Providers regelen dat verschillend, dus de uitleg-tekst hoort erbij: een
+     * lege scope-lijst betekent bij Exact en Snelstart niet "geen toegang".
+     *
+     * @return list<Section>
+     */
+    public static function accessSchema(Connection $record): array
+    {
+        $resources = ProviderAccess::describeResources($record->provider);
+
+        return [
+            Section::make('Verleende scopes')
+                ->description(ProviderAccess::note($record->provider))
+                ->schema([
+                    KeyValueEntry::make('granted_scopes')
+                        ->hiddenLabel()
+                        ->state(ProviderAccess::describeScopes($record->scopes))
+                        ->keyLabel('Scope')
+                        ->valueLabel('Wat dit toestaat')
+                        ->emptyMessage('Deze partner geeft geen scopes mee bij het koppelen.'),
+                ]),
+
+            Section::make('Resources die de Hub doorlaat')
+                ->description('Pass-through-whitelist uit config/hub-providers.php — alles daarbuiten weigert de Hub, ongeacht wat de partner zou toestaan.')
+                ->visible($resources !== [])
+                ->schema([
+                    KeyValueEntry::make('allowed_resources')
+                        ->hiddenLabel()
+                        ->state($resources)
+                        ->keyLabel('Resource')
+                        ->valueLabel('Waarvoor'),
+                ]),
+        ];
+    }
+
+    /**
+     * Per-Connection accounting-mapping uit `metadata.accounting_mapping` —
+     * eigen tabblad, want de sync leest deze waarden letterlijk.
+     *
+     * @return list<Section>
+     */
+    public static function accountingMappingSchema(Connection $record): array
+    {
+        $mapping = $record->metadata['accounting_mapping'] ?? [];
+
+        return [
             Section::make('Boekhoud-mapping')
-                ->description('Per-Connection mapping uit metadata.accounting_mapping — gebruikt door de accounting-sync.')
-                ->visible(fn (?Connection $record): bool => filled($record?->metadata['accounting_mapping'] ?? null))
+                ->description('Gebruikt door de accounting-sync. Wordt na het koppelen afgeleid uit de mirror en is te wijzigen via "Boekhoud-mapping" in de header.')
                 ->columns(2)
                 ->schema([
                     KeyValueEntry::make('vat_codes')
                         ->label('BTW-tarief → VATCode')
-                        ->state(fn (Connection $record): array => $record->metadata['accounting_mapping']['vat_codes'] ?? [])
+                        ->state($mapping['vat_codes'] ?? [])
                         ->keyLabel('Tarief')
                         ->valueLabel('VATCode')
                         ->emptyMessage('Geen tarieven gemapt'),
                     KeyValueEntry::make('journals')
                         ->label('Doc-type → dagboek')
-                        ->state(fn (Connection $record): array => $record->metadata['accounting_mapping']['journals'] ?? [])
+                        ->state($mapping['journals'] ?? [])
                         ->keyLabel('Type')
                         ->valueLabel('Dagboek')
                         ->emptyMessage('Geen dagboeken gemapt'),
                     KeyValueEntry::make('gl_accounts')
                         ->label('Categorie → GLAccount (GUID)')
-                        ->state(fn (Connection $record): array => $record->metadata['accounting_mapping']['gl_accounts'] ?? [])
+                        ->state($mapping['gl_accounts'] ?? [])
                         ->keyLabel('Categorie')
                         ->valueLabel('GLAccount')
                         ->emptyMessage('Geen grootboek gemapt'),
                     KeyValueEntry::make('relations')
                         ->label('Relatie → GUID')
-                        ->state(fn (Connection $record): array => $record->metadata['accounting_mapping']['relations'] ?? [])
+                        ->state($mapping['relations'] ?? [])
                         ->keyLabel('Relatie')
                         ->valueLabel('GUID')
                         ->emptyMessage('Geen relaties gemapt'),
                 ]),
-        ]);
+        ];
     }
 
     public static function table(Table $table): Table
