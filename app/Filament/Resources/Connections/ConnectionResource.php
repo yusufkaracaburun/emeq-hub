@@ -70,7 +70,7 @@ class ConnectionResource extends Resource
 
     public static function infolist(Schema $schema): Schema
     {
-        return $schema->components([
+        return $schema->columns(1)->components([
             Section::make('Mollie OAuth')
                 ->visible(fn (?Connection $record): bool => $record?->provider === Provider::Mollie)
                 ->columns(2)
