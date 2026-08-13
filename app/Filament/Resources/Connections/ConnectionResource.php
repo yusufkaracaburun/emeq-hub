@@ -26,6 +26,7 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Throwable;
 
 class ConnectionResource extends Resource
 {
@@ -242,19 +243,7 @@ class ConnectionResource extends Resource
             ->requiresConfirmation()
             ->modalHeading('Connection intrekken bij provider')
             ->modalDescription('Dit roept de upstream OAuth-revoke aan en zet revoked_at lokaal. Niet ongedaan te maken.')
-            ->visible(function (Connection $record): bool {
-                if ($record->revoked_at !== null) {
-                    return false;
-                }
-
-                try {
-                    $descriptor = ProviderCredentialDescriptor::for($record->provider->value);
-                } catch (\InvalidArgumentException) {
-                    return false;
-                }
-
-                return $descriptor->oauthFlowKey !== null;
-            })
+            ->visible(fn (Connection $record): bool => self::hasLiveOAuthLifecycle($record))
             ->action(function (Connection $record): void {
                 app(OAuthFlowRegistry::class)
                     ->for($record->provider->value)
@@ -265,6 +254,81 @@ class ConnectionResource extends Resource
                     ->success()
                     ->send();
             });
+    }
+
+    /**
+     * Handmatig de access-token verversen — de operator-tegenhanger van de
+     * lazy-refresh die een pass-through-call zelf doet. Alleen zichtbaar voor een
+     * nog-actieve OAuth-connection die een refresh-token heeft.
+     *
+     * De OAuthFlow beslist of er écht ververst wordt: zowel Exact als Mollie
+     * weigeren een refresh zolang de access-token nog ruim geldig is. Daarom
+     * vergelijken we `expires_at` vóór/ná en melden we eerlijk wat er gebeurde
+     * in plaats van blind "vernieuwd" te tonen.
+     */
+    public static function refreshTokenAction(): Action
+    {
+        return Action::make('refreshToken')
+            ->label('Token vernieuwen')
+            ->icon(Heroicon::OutlinedArrowPath)
+            ->color('gray')
+            ->visible(fn (Connection $record): bool => self::hasLiveOAuthLifecycle($record) && filled($record->refresh_token))
+            ->action(function (Connection $record): void {
+                $before = $record->expires_at;
+
+                try {
+                    $refreshed = app(OAuthFlowRegistry::class)
+                        ->for($record->provider->value)
+                        ->refreshToken($record);
+                } catch (Throwable $e) {
+                    report($e);
+
+                    Notification::make()
+                        ->title('Token verversen mislukt')
+                        ->body('Zie logs voor details — fingerprint: '.substr(hash('sha256', $e->getMessage()), 0, 12))
+                        ->danger()
+                        ->send();
+
+                    return;
+                }
+
+                $expiresAt = $refreshed->expires_at;
+
+                if ($before !== null && $expiresAt !== null && $expiresAt->equalTo($before)) {
+                    Notification::make()
+                        ->title('Token nog geldig — niets ververst')
+                        ->body('De provider staat een refresh pas rond de expiry toe. Geldig tot '.$expiresAt->format('d-m-Y H:i').'.')
+                        ->warning()
+                        ->send();
+
+                    return;
+                }
+
+                Notification::make()
+                    ->title('Token ververst')
+                    ->body($expiresAt !== null ? 'Nu geldig tot '.$expiresAt->format('d-m-Y H:i').'.' : null)
+                    ->success()
+                    ->send();
+            });
+    }
+
+    /**
+     * Een nog-actieve connection bij een provider die een OAuth-lifecycle heeft —
+     * de gedeelde zichtbaarheidsvoorwaarde voor revoke en token-refresh.
+     */
+    private static function hasLiveOAuthLifecycle(Connection $record): bool
+    {
+        if ($record->revoked_at !== null) {
+            return false;
+        }
+
+        try {
+            $descriptor = ProviderCredentialDescriptor::for($record->provider->value);
+        } catch (\InvalidArgumentException) {
+            return false;
+        }
+
+        return $descriptor->oauthFlowKey !== null;
     }
 
     public static function getRelations(): array
