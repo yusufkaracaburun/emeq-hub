@@ -201,10 +201,7 @@ GET /v1/accounting/capabilities
   "provider": "exact",
   "enabled": true,
   "capabilities": ["accounting.documents.write", "accounting.documents.attachments",
-                   "accounting.references.sync", "accounting.validation.enrich",
-                   "accounting.documents.probe", "accounting.bank_statements.read",
-                   "accounting.documents.read", "accounting.ledger_accounts.read",
-                   "accounting.tax_codes.read", "accounting.relations.read"]
+                   "accounting.ledger_accounts.read", "…"]
 }
 ```
 
