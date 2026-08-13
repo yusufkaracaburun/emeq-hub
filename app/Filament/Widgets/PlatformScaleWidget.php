@@ -83,8 +83,13 @@ class PlatformScaleWidget extends StatsOverviewWidget
     }
 
     /**
-     * @param  Builder<Connection>  $query
-     * @return Builder<Connection>
+     * Filtert op de connections-tabel; het builder-model is irrelevant, zodat dit
+     * zowel op `Connection::query()` als binnen een `whereHas`-subquery werkt.
+     *
+     * @template TModel of \Illuminate\Database\Eloquent\Model
+     *
+     * @param  Builder<TModel>  $query
+     * @return Builder<TModel>
      */
     private function scopeToActive(Builder $query): Builder
     {
