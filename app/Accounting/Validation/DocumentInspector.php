@@ -6,6 +6,7 @@ namespace App\Accounting\Validation;
 
 use App\Accounting\Validation\Contracts\DocumentValidator;
 use App\Accounting\Validation\Validators\ArithmeticValidator;
+use App\Accounting\Validation\Validators\CompletenessValidator;
 use App\Accounting\Validation\Validators\CurrencyValidator;
 use App\Accounting\Validation\Validators\GeographyClassifier;
 use App\Accounting\Validation\Validators\IbanValidator;
@@ -51,6 +52,8 @@ final class DocumentInspector
     private static function defaults(): array
     {
         return [
+            // Eerst: valt er iets te boeken? De rest oordeelt over de inhoud.
+            new CompletenessValidator,
             new ArithmeticValidator,
             new IbanValidator,
             new VatNumberValidator,

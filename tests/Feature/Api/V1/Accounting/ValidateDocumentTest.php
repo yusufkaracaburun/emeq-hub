@@ -94,6 +94,45 @@ class ValidateDocumentTest extends TestCase
             ->assertJsonFragment(['code' => 'exact.relation.matched', 'suggestion' => 'rel-guid-1']);
     }
 
+    /**
+     * Een lege body kwam terug als `valid: true` met nul findings. `/validate` laat
+     * per-veldproblemen bewust door de edge-validatie, omdat het vinden ervan de taak van
+     * de inspector is — en die keek niet of er überhaupt iets te boeken viel. Een consumer
+     * die de dry-run leest als "boekt dit?" kreeg groen voor een payload waar het boeken
+     * met een 422 op weigert.
+     */
+    public function test_an_empty_body_is_not_reported_as_bookable(): void
+    {
+        [$consumer] = $this->consumerWithExactConnection();
+        $token = $consumer->createToken('t', [TokenAbilities::EXACT_READ])->plainTextToken;
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->withHeader('X-Account-Id', 'school1')
+            ->postJson('/v1/accounting/documents/validate', [])
+            ->assertStatus(200)
+            ->assertJsonPath('valid', false)
+            ->assertJsonFragment(['code' => 'document.type.missing', 'severity' => 'error'])
+            ->assertJsonFragment(['code' => 'document.party.missing', 'severity' => 'error'])
+            ->assertJsonFragment(['code' => 'document.lines.missing', 'severity' => 'error']);
+    }
+
+    public function test_a_document_type_the_booking_rejects_is_an_error(): void
+    {
+        [$consumer] = $this->consumerWithExactConnection();
+        $token = $consumer->createToken('t', [TokenAbilities::EXACT_READ])->plainTextToken;
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->withHeader('X-Account-Id', 'school1')
+            ->postJson('/v1/accounting/documents/validate', [
+                'type' => 'not_a_type',
+                'party' => ['role' => 'creditor', 'name' => 'NL Leverancier BV'],
+                'lines' => [['description' => 'Dienst', 'amount' => 100, 'tax_rate' => 21]],
+            ])
+            ->assertStatus(200)
+            ->assertJsonPath('valid', false)
+            ->assertJsonFragment(['code' => 'document.type.unknown', 'severity' => 'error']);
+    }
+
     public function test_invalid_vat_checksum_blocks_as_error(): void
     {
         [$consumer] = $this->consumerWithExactConnection();
