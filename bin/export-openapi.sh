@@ -32,6 +32,6 @@ trap 'rm -f "$DB_FILE"' EXIT
 export DB_CONNECTION=sqlite
 export DB_DATABASE="$DB_FILE"
 
-php artisan migrate --force --quiet
+php artisan migrate --force --no-interaction
 
 API_VERSION=0.2.0-dev php artisan scramble:export
