@@ -12,6 +12,15 @@ use Illuminate\Http\Resources\Json\JsonResource;
 class ConnectionResource extends JsonResource
 {
     /**
+     * Geen `data`-envelope: elk ander enkelvoudig /v1-antwoord dat een consumer
+     * krijgt is plat (integrations, connect-sessions, oauth/init), dus wrappen
+     * maakte dit een van de twee endpoints waar een SDK-gebruiker `['data']`
+     * moest schrijven. Gepagineerde collecties (account-subscriptions,
+     * accounting) houden hun envelope — daar draagt die `meta` / `next_cursor`.
+     */
+    public static $wrap = null;
+
+    /**
      * @return array<string, mixed>
      */
     public function toArray(Request $request): array

@@ -36,10 +36,10 @@ class StoreConnectionTest extends TestCase
 
         $response->assertCreated();
 
-        $expectedKeys = ['id', 'account_id', 'provider', 'status', 'fingerprint', 'revoked_at', 'created_at'];
+        $expectedKeys = ['id', 'public_id', 'account_id', 'provider', 'status', 'fingerprint', 'revoked_at', 'created_at'];
         $forbiddenKeys = ['client_key', 'subscription_key', 'subscription_id', 'access_token', 'refresh_token'];
 
-        $data = $response->json('data');
+        $data = $response->json();
         foreach ($expectedKeys as $key) {
             $this->assertArrayHasKey($key, $data, "Missing key {$key} in response");
         }

@@ -23,11 +23,11 @@ class ShowConnectionTest extends TestCase
             ->getJson("/v1/connections/{$connection->id}");
 
         $response->assertOk()
-            ->assertJsonPath('data.id', $connection->id)
-            ->assertJsonPath('data.provider', 'snelstart');
+            ->assertJsonPath('id', $connection->id)
+            ->assertJsonPath('provider', 'snelstart');
 
-        $this->assertMatchesRegularExpression('/^[a-f0-9]{12}$/', (string) $response->json('data.fingerprint'));
-        $this->assertArrayNotHasKey('client_key', (array) $response->json('data'));
+        $this->assertMatchesRegularExpression('/^[a-f0-9]{12}$/', (string) $response->json('fingerprint'));
+        $this->assertArrayNotHasKey('client_key', (array) $response->json());
     }
 
     public function test_public_id_from_the_connect_flow_resolves(): void
@@ -44,8 +44,8 @@ class ShowConnectionTest extends TestCase
         $this->withHeader('Authorization', "Bearer {$token}")
             ->getJson("/v1/connections/{$connection->public_id}")
             ->assertOk()
-            ->assertJsonPath('data.id', $connection->id)
-            ->assertJsonPath('data.public_id', $connection->public_id);
+            ->assertJsonPath('id', $connection->id)
+            ->assertJsonPath('public_id', $connection->public_id);
     }
 
     public function test_unknown_connection_id_returns_404_not_500(): void
@@ -107,8 +107,8 @@ class ShowConnectionTest extends TestCase
         $this->withHeader('Authorization', "Bearer {$token}")
             ->getJson("/v1/connections/{$connection->id}")
             ->assertOk()
-            ->assertJsonPath('data.id', $connection->id)
-            ->assertJsonPath('data.provider', 'exact');
+            ->assertJsonPath('id', $connection->id)
+            ->assertJsonPath('provider', 'exact');
     }
 
     public function test_integrations_manage_token_can_read_any_connection(): void
@@ -120,7 +120,7 @@ class ShowConnectionTest extends TestCase
         $this->withHeader('Authorization', "Bearer {$token}")
             ->getJson("/v1/connections/{$connection->id}")
             ->assertOk()
-            ->assertJsonPath('data.id', $connection->id);
+            ->assertJsonPath('id', $connection->id);
     }
 
     public function test_revoked_connection_is_still_returnable_via_show(): void
@@ -136,9 +136,9 @@ class ShowConnectionTest extends TestCase
             ->getJson("/v1/connections/{$connection->id}");
 
         $response->assertOk()
-            ->assertJsonPath('data.id', $connection->id);
+            ->assertJsonPath('id', $connection->id);
 
-        $this->assertNotNull($response->json('data.revoked_at'));
+        $this->assertNotNull($response->json('revoked_at'));
     }
 
     /**

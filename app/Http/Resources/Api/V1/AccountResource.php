@@ -11,6 +11,9 @@ use Illuminate\Http\Resources\Json\JsonResource;
  */
 class AccountResource extends JsonResource
 {
+    /** Geen `data`-envelope — zie {@see ConnectionResource::$wrap}. */
+    public static $wrap = null;
+
     /**
      * @return array<string, mixed>
      */

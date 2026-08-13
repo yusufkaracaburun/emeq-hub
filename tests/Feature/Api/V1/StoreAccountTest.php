@@ -22,13 +22,13 @@ class StoreAccountTest extends TestCase
             ]);
 
         $response->assertCreated()
-            ->assertJsonPath('data.external_id', 'school-007')
-            ->assertJsonPath('data.display_name', 'School 7');
+            ->assertJsonPath('external_id', 'school-007')
+            ->assertJsonPath('display_name', 'School 7');
 
-        $this->assertIsInt($response->json('data.id'));
+        $this->assertIsInt($response->json('id'));
         $this->assertMatchesRegularExpression(
             '/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/',
-            (string) $response->json('data.created_at'),
+            (string) $response->json('created_at'),
         );
         $this->assertDatabaseHas('accounts', [
             'consumer_id' => $consumer->id,

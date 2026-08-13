@@ -339,9 +339,9 @@ terug naar je return/Origin. Bevestig de status:
 
 ```http
 GET /v1/connections/con_01JQZ8F4XK2N7RVB3TDW6MPYAC
-→ { "data": { "id": 12, "public_id": "con_01JQZ8F4XK2N7RVB3TDW6MPYAC",
-              "provider": "exact", "status": "active",
-              "revoked_at": null, "fingerprint": "…" } }
+→ { "id": 12, "public_id": "con_01JQZ8F4XK2N7RVB3TDW6MPYAC",
+    "provider": "exact", "status": "active",
+    "revoked_at": null, "fingerprint": "…" }
 ```
 
 Gebruik de `connection_id` die je uit `/v1/integrations` of de OAuth-init kreeg —
