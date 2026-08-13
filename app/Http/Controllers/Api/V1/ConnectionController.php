@@ -66,7 +66,7 @@ class ConnectionController extends Controller
             ->setStatusCode(Response::HTTP_CREATED);
     }
 
-    public function show(Request $request, int $connection): JsonResponse|ConnectionResource
+    public function show(Request $request, string $connection): JsonResponse|ConnectionResource
     {
         $this->guardAbility($request, [
             TokenAbilities::SNELSTART_READ,
@@ -87,7 +87,7 @@ class ConnectionController extends Controller
         return new ConnectionResource($model);
     }
 
-    public function destroy(Request $request, int $connection): JsonResponse|HttpResponse
+    public function destroy(Request $request, string $connection): JsonResponse|HttpResponse
     {
         $this->guardAbility($request, [
             TokenAbilities::INTEGRATIONS_MANAGE,
@@ -108,13 +108,29 @@ class ConnectionController extends Controller
         return response()->noContent();
     }
 
-    private function findOwnedConnection(Request $request, int $connectionId): ?Connection
+    /**
+     * Scoped op de Consumer achter de PAT, niet op Account — een consumer beheert
+     * zijn eigen koppelingen over al zijn accounts heen. De account-check hoort
+     * bij de consumer (zie de integratiehandleiding, stap "Loskoppelen").
+     *
+     * Accepteert beide sleutels: elke connection-id die de Hub een consumer
+     * teruggeeft is de `public_id` (`con_…`) — de integrations-lijst, de
+     * OAuth-init-respons en de connection_revoked-webhook sturen alle drie die.
+     * De numerieke primary key blijft werken omdat ConnectionResource 'm altijd
+     * als `id` heeft teruggegeven.
+     */
+    private function findOwnedConnection(Request $request, string $connectionId): ?Connection
     {
         $consumerId = (int) $request->user()->getKey();
 
-        return Connection::query()
-            ->whereHas('account', fn ($q) => $q->where('consumer_id', $consumerId))
-            ->find($connectionId);
+        $query = Connection::query()
+            ->whereHas('account', fn ($q) => $q->where('consumer_id', $consumerId));
+
+        if (ctype_digit($connectionId)) {
+            return $query->find((int) $connectionId);
+        }
+
+        return $query->where('public_id', $connectionId)->first();
     }
 
     private function notFound(string $error, string $message): JsonResponse

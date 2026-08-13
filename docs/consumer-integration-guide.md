@@ -259,7 +259,8 @@ GET /v1/integrations?account_external_id=bob
 [
   { "key": "exact", "label": "Exact Online", "tagline": "Boekhouden — NL/BE",
     "category": "Boekhouden", "logo": "/img/partners/exact.svg", "brand": "#e1141d",
-    "connectable": true, "status": "connected", "connection_id": "12" },
+    "connectable": true, "status": "connected",
+    "connection_id": "con_01JQZ8F4XK2N7RVB3TDW6MPYAC" },
   { "key": "mollie", "label": "Mollie", "connectable": true,
     "status": "disconnected", "connection_id": null },
   { "key": "snelstart", "label": "SnelStart", "connectable": false,
@@ -292,7 +293,7 @@ als niet-koppelbaar (geen connect-knop) en gebruik `status`
 POST /v1/oauth/{provider}/init
 { "account_external_id": "bob" }
 ```
-→ `{ "connection_id": "12", "redirect_url": "https://…partner-consent…" }`
+→ `{ "connection_id": "con_01JQZ8F4XK2N7RVB3TDW6MPYAC", "redirect_url": "https://…partner-consent…" }`
 
 Stuur de browser naar `redirect_url`. **`return_url` is optioneel** — laat je 'm
 weg, dan stuurt de Hub de gebruiker na consent terug naar de **Origin** van de
@@ -337,10 +338,15 @@ Na consent toont de Hub een bevestigingspagina en **redirect automatisch (±3s)*
 terug naar je return/Origin. Bevestig de status:
 
 ```http
-GET /v1/connections/12
-→ { "data": { "id": 12, "provider": "exact", "status": "active",
+GET /v1/connections/con_01JQZ8F4XK2N7RVB3TDW6MPYAC
+→ { "data": { "id": 12, "public_id": "con_01JQZ8F4XK2N7RVB3TDW6MPYAC",
+              "provider": "exact", "status": "active",
               "revoked_at": null, "fingerprint": "…" } }
 ```
+
+Gebruik de `connection_id` die je uit `/v1/integrations` of de OAuth-init kreeg —
+dat is de `public_id` (`con_…`). De numerieke `id` blijft werken, maar is de
+interne sleutel; bewaar 'm niet.
 
 of her-poll `GET /v1/integrations?account_external_id=bob`. Verbonden =
 `status: "active"` & `revoked_at: null`.
@@ -358,7 +364,7 @@ timeout met een "probeer opnieuw".
 ## Stap 5 — Loskoppelen
 
 ```http
-DELETE /v1/connections/12   → 204
+DELETE /v1/connections/con_01JQZ8F4XK2N7RVB3TDW6MPYAC   → 204
 ```
 
 De Hub doet de volledige provider-teardown (token-revoke + webhook-subscriptions).

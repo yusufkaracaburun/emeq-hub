@@ -18,6 +18,11 @@ class ConnectionResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            // De sleutel die overal élders naar de consumer gaat: de
+            // integrations-lijst, de OAuth-init-respons, de
+            // connection_revoked-webhook en X-Connection-Id. Zonder deze kon een
+            // consumer die waarde nergens terugvinden op dit endpoint.
+            'public_id' => $this->public_id,
             'account_id' => $this->account_id,
             'provider' => $this->provider,
             'status' => $this->status,

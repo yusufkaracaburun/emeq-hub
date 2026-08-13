@@ -30,6 +30,32 @@ class DestroyConnectionTest extends TestCase
         $this->assertNotNull($connection->fresh()->revoked_at);
     }
 
+    public function test_public_id_from_the_connect_flow_revokes(): void
+    {
+        // Zie ShowConnectionTest: de gedocumenteerde loskoppel-flow geeft de
+        // public_id door, en die typefout gaf hier dezelfde 500.
+        [$consumer, $token] = $this->consumerWithToken([TokenAbilities::CONSUMER_MANAGE_ACCOUNTS]);
+        $account = Account::factory()->for($consumer)->create();
+        $connection = Connection::factory()->forSnelstart()->for($account)->create();
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->deleteJson("/v1/connections/{$connection->public_id}")
+            ->assertNoContent();
+
+        $this->assertNotNull($connection->fresh()->revoked_at);
+    }
+
+    public function test_unknown_connection_id_returns_404_not_500_on_delete(): void
+    {
+        [$consumer, $token] = $this->consumerWithToken([TokenAbilities::CONSUMER_MANAGE_ACCOUNTS]);
+        Account::factory()->for($consumer)->create();
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->deleteJson('/v1/connections/con_DOESNOTEXIST')
+            ->assertNotFound()
+            ->assertJsonPath('error', 'connection_not_found');
+    }
+
     public function test_other_consumers_connection_returns_404_on_delete(): void
     {
         $consumerA = Consumer::factory()->create();

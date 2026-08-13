@@ -30,6 +30,49 @@ class ShowConnectionTest extends TestCase
         $this->assertArrayNotHasKey('client_key', (array) $response->json('data'));
     }
 
+    public function test_public_id_from_the_connect_flow_resolves(): void
+    {
+        // Regressie: elke connection-id die de Hub uitdeelt is de public_id —
+        // /v1/integrations, de OAuth-init-respons en de connection_revoked-webhook
+        // sturen alle drie die. Dit endpoint typte z'n parameter als int, dus de
+        // gedocumenteerde flow ("bewaar connection_id, poll dan
+        // GET /v1/connections/{id}") gaf een TypeError → 500.
+        [$consumer, $token] = $this->consumerWithToken([TokenAbilities::INTEGRATIONS_MANAGE]);
+        $account = Account::factory()->for($consumer)->create();
+        $connection = Connection::factory()->forExact()->for($account)->create();
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->getJson("/v1/connections/{$connection->public_id}")
+            ->assertOk()
+            ->assertJsonPath('data.id', $connection->id)
+            ->assertJsonPath('data.public_id', $connection->public_id);
+    }
+
+    public function test_unknown_connection_id_returns_404_not_500(): void
+    {
+        [$consumer, $token] = $this->consumerWithToken([TokenAbilities::INTEGRATIONS_MANAGE]);
+        Account::factory()->for($consumer)->create();
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->getJson('/v1/connections/con_DOESNOTEXIST')
+            ->assertNotFound()
+            ->assertJsonPath('error', 'connection_not_found');
+    }
+
+    public function test_other_consumers_public_id_returns_404(): void
+    {
+        $consumerA = Consumer::factory()->create();
+        $accountA = Account::factory()->for($consumerA)->create();
+        $connectionA = Connection::factory()->forSnelstart()->for($accountA)->create();
+
+        [, $tokenB] = $this->consumerWithToken([TokenAbilities::INTEGRATIONS_MANAGE]);
+
+        $this->withHeader('Authorization', "Bearer {$tokenB}")
+            ->getJson("/v1/connections/{$connectionA->public_id}")
+            ->assertNotFound()
+            ->assertJsonPath('error', 'connection_not_found');
+    }
+
     public function test_other_consumers_connection_returns_404_with_connection_not_found(): void
     {
         $consumerA = Consumer::factory()->create();
