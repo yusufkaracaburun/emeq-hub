@@ -14,11 +14,16 @@
 #     config/scramble.php.
 #   - `API_VERSION` — wordt hier hard gezet. Bewust géén `${API_VERSION:-...}`:
 #     een override zou de drift-check waardeloos maken.
-#   - De database — Scramble opent er een connectie tijdens het analyseren van
-#     routes die een Eloquent-model teruggeven. Zonder pin draait de export
+#   - De database — Scramble leest de kolomtypes uit het live schema om
+#     model-attributen te typeren. Tegen een leeg schema wordt élk attribuut
+#     `string` in plaats van `integer` of `["string","null"]`, dus het schema
+#     bepaalt de output en moet overal gelijk zijn. Zonder pin draait de export
 #     tegen de lokale .env: op een dev-machine een pgsql met wíllekeurig welk
 #     schema (ook een niet-gemigreerde), in CI helemaal niets. Daarom draait de
 #     export tegen een wegwerp-sqlite die hier vers gemigreerd wordt.
+#
+# De cache staat op `array` omdat de spatie/permission-migratie `Cache::forget()`
+# aanroept; met de default zou de export een draaiende Redis nodig hebben.
 #
 # Bump de versie hieronder bewust, samen met de API-release.
 
@@ -31,6 +36,7 @@ trap 'rm -f "$DB_FILE"' EXIT
 
 export DB_CONNECTION=sqlite
 export DB_DATABASE="$DB_FILE"
+export CACHE_STORE=array
 
 php artisan migrate --force --no-interaction
 
