@@ -439,16 +439,35 @@ X-Account-Id: bob
 {
   "provider": "exact",
   "enabled": true,
-  "capabilities": ["documents.write", "documents.attachments",
-                   "references.sync", "validation.enrich"]
+  "capabilities": ["accounting.documents.write", "accounting.documents.attachments",
+                   "accounting.references.sync", "accounting.validation.enrich",
+                   "accounting.documents.probe", "accounting.bank_statements.read",
+                   "accounting.documents.read", "accounting.ledger_accounts.read",
+                   "accounting.tax_codes.read", "accounting.relations.read"]
 }
 ```
 
+De volledige set die een koppeling kan melden:
+
+| Capability | Wat het betekent |
+|---|---|
+| `accounting.documents.write` | Een canoniek document boeken |
+| `accounting.documents.attachments` | Bijlagen meesturen bij een boeking |
+| `accounting.documents.probe` | Nagaan of een boeking tóch geland is na een onbeslist antwoord |
+| `accounting.documents.read` | Geboekte documenten uitlezen |
+| `accounting.references.sync` | Referentiedata spiegelen en de default-mapping afleiden |
+| `accounting.validation.enrich` | Provider-specifieke findings toevoegen aan een dry-run |
+| `accounting.bank_statements.read` | Bank- en kasafschriften uitlezen |
+| `accounting.ledger_accounts.read` | Grootboekrekeningen uitlezen |
+| `accounting.tax_codes.read` | Btw-codes uitlezen |
+| `accounting.relations.read` | Debiteuren en crediteuren uitlezen |
+
 `capabilities` is een **platte lijst** — behandel een onbekende waarde als iets wat je
-negeert, dan is uitbreiding voor jou niet-breaking. Ontbreekt
-`documents.attachments`, stuur dan geen bijlagen mee. `enabled: false` betekent dat de
-provider tijdelijk uitgezet is (onderhoud, incident); wat hij *kan* verandert daar niet
-door, maar schrijfacties geven dan `503 provider_disabled`.
+negeert, dan is uitbreiding voor jou niet-breaking. Match op de volledige string
+inclusief het `accounting.`-voorvoegsel. Ontbreekt
+`accounting.documents.attachments`, stuur dan geen bijlagen mee. `enabled: false`
+betekent dat de provider tijdelijk uitgezet is (onderhoud, incident); wat hij *kan*
+verandert daar niet door, maar schrijfacties geven dan `503 provider_disabled`.
 
 ### Lezen uit de boekhouding
 
