@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\Provider;
 use App\Http\Middleware\AssignRequestId;
 use App\Http\Middleware\EnsureEmeqAdminToken;
 use App\Http\Middleware\EnsureIdempotency;
@@ -12,7 +13,9 @@ use App\Http\Middleware\ResolveMollieAccount;
 use App\Http\Middleware\ResolveSnelstartAccount;
 use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\SetNoIndexHeaders;
+use App\Models\Connection;
 use App\Support\Seo\SeoMeta;
+use Emeq\ExactApi\Exceptions\AuthenticationException as ExactAuthenticationException;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -89,6 +92,17 @@ return Application::configure(basePath: dirname(__DIR__))
             }
 
             return null;
+        });
+
+        $exceptions->report(function (ExactAuthenticationException $e): void {
+            if (! $e->requiresReconsent || $e->connectionRef === null) {
+                return;
+            }
+
+            Connection::query()
+                ->whereKey($e->connectionRef)
+                ->where('provider', Provider::Exact->value)
+                ->update(['status' => 'needs_consent']);
         });
 
         // Een verlopen of gemanipuleerde handoff-link is voor de eindgebruiker

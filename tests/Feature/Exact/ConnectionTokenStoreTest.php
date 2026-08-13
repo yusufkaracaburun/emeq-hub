@@ -52,6 +52,44 @@ class ConnectionTokenStoreTest extends TestCase
         $this->assertFalse($token->isExpired());
     }
 
+    public function test_get_reads_the_rotation_written_by_a_parallel_process(): void
+    {
+        $connection = Connection::factory()->forExact()->create([
+            'access_token' => 'acc_old',
+            'refresh_token' => 'ref_old',
+            'expires_at' => now()->subMinute(),
+        ]);
+
+        $winner = new ConnectionTokenStore(Connection::findOrFail($connection->id));
+        $loser = new ConnectionTokenStore(Connection::findOrFail($connection->id));
+
+        $winner->put($this->credentials($connection), new AccessToken(
+            accessToken: 'acc_new',
+            refreshToken: 'ref_new',
+            expiresAt: new DateTimeImmutable('+600 seconds'),
+        ));
+
+        $token = $loser->get($this->credentials($connection));
+
+        $this->assertSame('ref_new', $token->refreshToken);
+        $this->assertSame('acc_new', $token->accessToken);
+        $this->assertFalse($token->isExpired());
+    }
+
+    public function test_get_returns_null_when_the_connection_row_is_gone(): void
+    {
+        $connection = Connection::factory()->forExact()->create([
+            'access_token' => 'acc',
+            'refresh_token' => 'ref',
+            'expires_at' => now()->addSeconds(600),
+        ]);
+
+        $store = new ConnectionTokenStore($connection);
+        Connection::whereKey($connection->id)->delete();
+
+        $this->assertNull($store->get($this->credentials($connection)));
+    }
+
     public function test_put_persists_rotated_tokens_to_connection(): void
     {
         $connection = Connection::factory()->forExact()->create([

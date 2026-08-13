@@ -25,17 +25,21 @@ final class ConnectionTokenStore implements TokenStore
 
     public function get(ExactCredentials $credentials): ?AccessToken
     {
-        if (empty($this->connection->access_token) || empty($this->connection->refresh_token)) {
+        $row = Connection::query()
+            ->whereKey($this->connection->getKey())
+            ->first(['id', 'access_token', 'refresh_token', 'expires_at']);
+
+        if ($row === null || empty($row->access_token) || empty($row->refresh_token)) {
             return null;
         }
 
-        $expiresAt = $this->connection->expires_at !== null
-            ? DateTimeImmutable::createFromInterface($this->connection->expires_at)
+        $expiresAt = $row->expires_at !== null
+            ? DateTimeImmutable::createFromInterface($row->expires_at)
             : new DateTimeImmutable('-1 second'); // onbekende expiry → behandel als verlopen
 
         return new AccessToken(
-            accessToken: (string) $this->connection->access_token,
-            refreshToken: (string) $this->connection->refresh_token,
+            accessToken: (string) $row->access_token,
+            refreshToken: (string) $row->refresh_token,
             expiresAt: $expiresAt,
         );
     }
