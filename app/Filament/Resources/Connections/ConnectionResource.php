@@ -140,10 +140,6 @@ class ConnectionResource extends Resource
     }
 
     /**
-     * Wat deze koppeling bij de partner mag — eigen tabblad op de detailpagina.
-     * Providers regelen dat verschillend, dus de uitleg-tekst hoort erbij: een
-     * lege scope-lijst betekent bij Exact en Snelstart niet "geen toegang".
-     *
      * @return list<Section>
      */
     public static function accessSchema(Connection $record): array
@@ -176,9 +172,6 @@ class ConnectionResource extends Resource
     }
 
     /**
-     * Per-Connection accounting-mapping uit `metadata.accounting_mapping` —
-     * eigen tabblad, want de sync leest deze waarden letterlijk.
-     *
      * @return list<Section>
      */
     public static function accountingMappingSchema(Connection $record): array
@@ -306,16 +299,6 @@ class ConnectionResource extends Resource
             });
     }
 
-    /**
-     * Handmatig de access-token verversen — de operator-tegenhanger van de
-     * lazy-refresh die een pass-through-call zelf doet. Alleen zichtbaar voor een
-     * nog-actieve OAuth-connection die een refresh-token heeft.
-     *
-     * De OAuthFlow beslist of er écht ververst wordt: zowel Exact als Mollie
-     * weigeren een refresh zolang de access-token nog ruim geldig is. Daarom
-     * vergelijken we `expires_at` vóór/ná en melden we eerlijk wat er gebeurde
-     * in plaats van blind "vernieuwd" te tonen.
-     */
     public static function refreshTokenAction(): Action
     {
         return Action::make('refreshToken')
@@ -362,10 +345,6 @@ class ConnectionResource extends Resource
             });
     }
 
-    /**
-     * Een nog-actieve connection bij een provider die een OAuth-lifecycle heeft —
-     * de gedeelde zichtbaarheidsvoorwaarde voor revoke en token-refresh.
-     */
     private static function hasLiveOAuthLifecycle(Connection $record): bool
     {
         if ($record->revoked_at !== null) {

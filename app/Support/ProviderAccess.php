@@ -6,21 +6,6 @@ namespace App\Support;
 
 use App\Enums\Provider;
 
-/**
- * Leesbare uitleg bij wat een koppeling bij de partner mag. Twee bronnen, want
- * de providers regelen toegang verschillend:
- *
- *  - Mollie geeft de goedgekeurde scopes mee in de token; die staan per
- *    Connection in `scopes`.
- *  - Exact geeft géén scopes mee. Wat bereikbaar is volgt uit de App-Center-
- *    registratie en de rechten van de gebruiker die koppelde; de Hub beperkt
- *    zichzelf daarbovenop tot de whitelist in `config/hub-providers.php`.
- *  - Snelstart authenticeert met clientkey + subscriptionkey en kent geen
- *    scopes.
- *
- * De resource-lijst komt uit dezelfde config die de pass-through afdwingt, zodat
- * het scherm niet uit de pas kan lopen met wat er werkelijk doorgelaten wordt.
- */
 final class ProviderAccess
 {
     /** @var array<string, string> */
@@ -54,10 +39,6 @@ final class ProviderAccess
     ];
 
     /**
-     * Verleende scopes met hun uitleg, in de volgorde waarin de partner ze
-     * teruggaf. Een onbekende scope verdwijnt niet: die krijgt een lege uitleg,
-     * anders zou het scherm toegang verbergen die wél verleend is.
-     *
      * @param  list<string>|null  $scopes
      * @return array<string, string>
      */
@@ -73,10 +54,6 @@ final class ProviderAccess
     }
 
     /**
-     * De partner-resources die de pass-through voor deze provider doorlaat, met
-     * uitleg. Leeg wanneer er geen whitelist is (dan geldt geen beperking vanuit
-     * de Hub) of wanneer de provider geen pass-through kent.
-     *
      * @return array<string, string>
      */
     public static function describeResources(Provider $provider): array
@@ -93,10 +70,6 @@ final class ProviderAccess
         return $described;
     }
 
-    /**
-     * Uitleg over hoe deze partner toegang regelt — zonder die zin leest een
-     * lege scope-lijst als "geen toegang", wat bij Exact en Snelstart onjuist is.
-     */
     public static function note(Provider $provider): string
     {
         return match ($provider) {

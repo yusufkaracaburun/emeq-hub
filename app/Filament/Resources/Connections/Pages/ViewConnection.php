@@ -19,7 +19,6 @@ class ViewConnection extends ViewRecord
 
     protected function getHeaderActions(): array
     {
-        // Dezelfde acties als de lijst-rij, nu ook vanaf de detailpagina bereikbaar.
         return [
             StartOAuthFlowAction::forConnection(),
             ManageAccountingMappingAction::make(),
@@ -28,12 +27,6 @@ class ViewConnection extends ViewRecord
         ];
     }
 
-    /**
-     * Eén tabbalk voor de hele koppeling. Filament bouwt zelf alleen tabs uit
-     * relation managers, dus stellen we de balk hier samen: het infolist-overzicht
-     * en de twee schema-tabs (toegang, mapping) staan naast de relation managers
-     * in plaats van erboven.
-     */
     public function content(Schema $schema): Schema
     {
         /** @var Connection $record */
@@ -48,8 +41,6 @@ class ViewConnection extends ViewRecord
                         ->icon(Heroicon::OutlinedIdentification)
                         ->schema([$this->getInfolistContentComponent()]),
 
-                    // Het page-schema draagt zelf geen record; deze twee tabs
-                    // lezen de Connection, dus krijgen ze 'm expliciet mee.
                     Tab::make('Toegang')
                         ->icon(Heroicon::OutlinedKey)
                         ->schema(ConnectionResource::accessSchema($record)),
