@@ -973,6 +973,7 @@
         "/accounting/documents": {
             "post": {
                 "operationId": "accounting.documents.store",
+                "summary": "`AccountingSyncRunner::run()` levert bij succes (posted, deduplicated of\nrecovered-after-timeout) altijd deze vorm; `external_number`/`attachments`/\n`deduplicated`/`recovered` komen er alleen bij als die van toepassing zijn",
                 "tags": [
                     "Accounting Sync"
                 ],
@@ -992,7 +993,71 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "string"
+                                    "type": "object",
+                                    "properties": {
+                                        "provider": {
+                                            "type": "string"
+                                        },
+                                        "status": {
+                                            "type": "string"
+                                        },
+                                        "external_id": {
+                                            "type": "string"
+                                        },
+                                        "external_ref": {
+                                            "type": [
+                                                "string",
+                                                "null"
+                                            ]
+                                        },
+                                        "external_number": {
+                                            "type": "integer"
+                                        },
+                                        "attachments": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "filename": {
+                                                        "type": "string"
+                                                    },
+                                                    "status": {
+                                                        "type": "string"
+                                                    },
+                                                    "document_ref": {
+                                                        "type": [
+                                                            "string",
+                                                            "null"
+                                                        ]
+                                                    },
+                                                    "error": {
+                                                        "type": [
+                                                            "string",
+                                                            "null"
+                                                        ]
+                                                    }
+                                                },
+                                                "required": [
+                                                    "filename",
+                                                    "status",
+                                                    "document_ref",
+                                                    "error"
+                                                ]
+                                            }
+                                        },
+                                        "deduplicated": {
+                                            "type": "boolean"
+                                        },
+                                        "recovered": {
+                                            "type": "boolean"
+                                        }
+                                    },
+                                    "required": [
+                                        "provider",
+                                        "status",
+                                        "external_id",
+                                        "external_ref"
+                                    ]
                                 }
                             }
                         }
@@ -1104,7 +1169,163 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "string"
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "string"
+                                                    },
+                                                    "type": {
+                                                        "type": "string"
+                                                    },
+                                                    "number": {
+                                                        "type": [
+                                                            "string",
+                                                            "null"
+                                                        ]
+                                                    },
+                                                    "external_id": {
+                                                        "type": [
+                                                            "string",
+                                                            "null"
+                                                        ]
+                                                    },
+                                                    "issue_date": {
+                                                        "type": [
+                                                            "string",
+                                                            "null"
+                                                        ]
+                                                    },
+                                                    "due_date": {
+                                                        "type": [
+                                                            "string",
+                                                            "null"
+                                                        ]
+                                                    },
+                                                    "reference": {
+                                                        "type": [
+                                                            "string",
+                                                            "null"
+                                                        ]
+                                                    },
+                                                    "party": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": [
+                                                                    "string",
+                                                                    "null"
+                                                                ]
+                                                            },
+                                                            "name": {
+                                                                "type": [
+                                                                    "string",
+                                                                    "null"
+                                                                ]
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "id",
+                                                            "name"
+                                                        ]
+                                                    },
+                                                    "journal": {
+                                                        "type": [
+                                                            "string",
+                                                            "null"
+                                                        ]
+                                                    },
+                                                    "currency": {
+                                                        "type": "string"
+                                                    },
+                                                    "net_total": {
+                                                        "type": "number"
+                                                    },
+                                                    "lines": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "type": "object",
+                                                            "properties": {
+                                                                "description": {
+                                                                    "type": [
+                                                                        "string",
+                                                                        "null"
+                                                                    ]
+                                                                },
+                                                                "amount": {
+                                                                    "type": "number"
+                                                                },
+                                                                "tax_code": {
+                                                                    "type": [
+                                                                        "string",
+                                                                        "null"
+                                                                    ]
+                                                                },
+                                                                "ledger_account_id": {
+                                                                    "type": [
+                                                                        "string",
+                                                                        "null"
+                                                                    ]
+                                                                },
+                                                                "cost_center": {
+                                                                    "type": [
+                                                                        "string",
+                                                                        "null"
+                                                                    ]
+                                                                },
+                                                                "cost_unit": {
+                                                                    "type": [
+                                                                        "string",
+                                                                        "null"
+                                                                    ]
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "description",
+                                                                "amount",
+                                                                "tax_code",
+                                                                "ledger_account_id",
+                                                                "cost_center",
+                                                                "cost_unit"
+                                                            ]
+                                                        }
+                                                    }
+                                                },
+                                                "required": [
+                                                    "id",
+                                                    "type",
+                                                    "number",
+                                                    "external_id",
+                                                    "issue_date",
+                                                    "due_date",
+                                                    "reference",
+                                                    "party",
+                                                    "journal",
+                                                    "currency",
+                                                    "net_total",
+                                                    "lines"
+                                                ]
+                                            }
+                                        },
+                                        "next_cursor": {
+                                            "type": [
+                                                "string",
+                                                "null"
+                                            ]
+                                        },
+                                        "has_more": {
+                                            "type": "boolean"
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "next_cursor",
+                                        "has_more"
+                                    ]
                                 }
                             }
                         }
@@ -1327,7 +1548,19 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object"
+                                    "type": "object",
+                                    "properties": {
+                                        "provider": {
+                                            "type": "string"
+                                        },
+                                        "synced": {
+                                            "type": "integer"
+                                        }
+                                    },
+                                    "required": [
+                                        "provider",
+                                        "synced"
+                                    ]
                                 }
                             }
                         }
@@ -1351,7 +1584,83 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object"
+                                    "type": "object",
+                                    "properties": {
+                                        "gl": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "code": {
+                                                        "type": "string"
+                                                    },
+                                                    "label": {
+                                                        "type": [
+                                                            "string",
+                                                            "null"
+                                                        ]
+                                                    },
+                                                    "attrs": {}
+                                                },
+                                                "required": [
+                                                    "code",
+                                                    "label",
+                                                    "attrs"
+                                                ]
+                                            }
+                                        },
+                                        "vat": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "code": {
+                                                        "type": "string"
+                                                    },
+                                                    "label": {
+                                                        "type": [
+                                                            "string",
+                                                            "null"
+                                                        ]
+                                                    },
+                                                    "attrs": {}
+                                                },
+                                                "required": [
+                                                    "code",
+                                                    "label",
+                                                    "attrs"
+                                                ]
+                                            }
+                                        },
+                                        "journal": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "code": {
+                                                        "type": "string"
+                                                    },
+                                                    "label": {
+                                                        "type": [
+                                                            "string",
+                                                            "null"
+                                                        ]
+                                                    },
+                                                    "attrs": {}
+                                                },
+                                                "required": [
+                                                    "code",
+                                                    "label",
+                                                    "attrs"
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "gl",
+                                        "vat",
+                                        "journal"
+                                    ]
                                 }
                             }
                         }
@@ -1375,7 +1684,35 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object"
+                                    "type": "object",
+                                    "properties": {
+                                        "mapping": {
+                                            "type": "object",
+                                            "properties": {
+                                                "vat_codes": {
+                                                    "type": "object",
+                                                    "additionalProperties": {
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "gl_accounts": {
+                                                    "type": "object",
+                                                    "additionalProperties": {
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "journals": {
+                                                    "type": "object",
+                                                    "additionalProperties": {
+                                                        "type": "string"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "mapping"
+                                    ]
                                 }
                             }
                         }
@@ -1397,9 +1734,6 @@
                             "schema": {
                                 "type": "object",
                                 "properties": {
-                                    "auto_create_relations": {
-                                        "type": "boolean"
-                                    },
                                     "vat_codes": {
                                         "type": "array",
                                         "items": {
@@ -1429,7 +1763,35 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object"
+                                    "type": "object",
+                                    "properties": {
+                                        "mapping": {
+                                            "type": "object",
+                                            "properties": {
+                                                "vat_codes": {
+                                                    "type": "object",
+                                                    "additionalProperties": {
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "gl_accounts": {
+                                                    "type": "object",
+                                                    "additionalProperties": {
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "journals": {
+                                                    "type": "object",
+                                                    "additionalProperties": {
+                                                        "type": "string"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "mapping"
+                                    ]
                                 }
                             }
                         }
@@ -1480,12 +1842,16 @@
                                                 },
                                                 "infos": {
                                                     "type": "integer"
+                                                },
+                                                "blocking": {
+                                                    "type": "integer"
                                                 }
                                             },
                                             "required": [
                                                 "errors",
                                                 "warnings",
-                                                "infos"
+                                                "infos",
+                                                "blocking"
                                             ]
                                         },
                                         "findings": {
@@ -5025,6 +5391,82 @@
                                 "maxLength": 64
                             },
                             "external_id": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "maxLength": 255
+                            },
+                            "create_if_missing": {
+                                "type": "boolean"
+                            },
+                            "chamber_of_commerce": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "description": "Relatiekaart \u2014 optioneel, en alleen van belang wanneer de Hub de\nrelatie aanmaakt. Lengtes volgen de Exact-velden.",
+                                "maxLength": 20
+                            },
+                            "address_line_1": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "maxLength": 255
+                            },
+                            "address_line_2": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "maxLength": 255
+                            },
+                            "postcode": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "maxLength": 20
+                            },
+                            "city": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "maxLength": 255
+                            },
+                            "state": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "maxLength": 64
+                            },
+                            "country": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "minLength": 2,
+                                "maxLength": 2
+                            },
+                            "email": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "format": "email",
+                                "maxLength": 255
+                            },
+                            "phone": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "maxLength": 64
+                            },
+                            "website": {
                                 "type": [
                                     "string",
                                     "null"
