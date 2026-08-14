@@ -231,6 +231,41 @@ Idempotency-Key: {{$guid}}
   ]
 }
 
+### Nieuwe relatie mét volledige relatiekaart.
+#   De kaartvelden tellen alleen bij het aanmaken; een bestaande relatie raakt de
+#   Hub niet aan. Wat je niet zeker weet, laat je weg.
+POST {{baseUrl}}/v1/accounting/documents
+Authorization: Bearer {{token}}
+Content-Type: application/json
+Accept: application/json
+X-Account-Id: {{accountId}}
+Idempotency-Key: {{$guid}}
+
+{
+  "type": "sales_invoice",
+  "external_id": "NEW-003",
+  "number": "Nieuwe klant met kaart",
+  "issue_date": "2026-08-14",
+  "party": {
+    "role": "debtor",
+    "name": "Volledige Klant BV",
+    "external_id": "KLANT-NIEUW-003",
+    "create_if_missing": true,
+    "vat_number": "NL000099998B57",
+    "chamber_of_commerce": "12345678",
+    "address_line_1": "Dorpsstraat 1",
+    "postcode": "1234 AB",
+    "city": "Amsterdam",
+    "country": "NL",
+    "email": "facturen@volledigeklant.nl",
+    "phone": "+31201234567",
+    "website": "https://volledigeklant.nl"
+  },
+  "lines": [
+    { "description": "Consultancy", "amount": 100, "tax_rate": 21 }
+  ]
+}
+
 ### Zelfde partij MET create_if_missing → 201 + één nieuwe relatie in Exact.
 #   `external_id` is verplicht zodra je deze vlag zet: zonder die sleutel kan de
 #   Hub de aangemaakte relatie niet stabiel terugvinden en zou een tweede boeking

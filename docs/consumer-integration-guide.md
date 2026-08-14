@@ -560,6 +560,13 @@ de provider:
   `sales_invoice`. De Hub muteert je bedragen **niet** en keert het teken **niet** om: lever
   zelf negatieve `amount`-waarden aan als je een creditboeking wilt. Wat je stuurt, boekt de Hub.
 - `party.role`: `debtor` (verkoop) of `creditor` (inkoop). `vat_number`/`iban`/`external_id` optioneel.
+- **Relatiekaart** (allemaal optioneel): `chamber_of_commerce`, `address_line_1`,
+  `address_line_2`, `postcode`, `city`, `state`, `country` (ISO-landcode, 2 letters),
+  `email`, `phone`, `website`. Deze velden tellen alleen wanneer de Hub de relatie
+  aanmaakt (`create_if_missing`) — bestaat 'ie al, dan is de administratie leidend en
+  raakt de Hub 'm niet aan. Stuur wat je hebt: een relatie met alleen een naam is voor
+  de boekhouder onbruikbaar. Weet je een veld niet zeker, laat het weg in plaats van te
+  gokken — een fout adres is erger dan geen adres.
 - `party.external_id` = jouw stabiele klant-/leverancier-sleutel. Stuur 'm consistent
   mee: de Hub onthoudt 'm (relatie-mirror) zodat een volgende boeking direct matcht.
 - `party.create_if_missing` (optioneel, default `false`) = laat de Hub een onbekende

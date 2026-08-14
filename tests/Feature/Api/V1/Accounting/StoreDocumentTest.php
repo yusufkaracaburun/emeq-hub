@@ -550,6 +550,81 @@ class StoreDocumentTest extends TestCase
         MockClient::global()->assertSent(fn (CreatePurchaseEntry $request): bool => $request->body()->all()['PurchaseEntryLines'][0]['GLAccount'] === 'gl-kosten-guid');
     }
 
+    public function test_auto_created_relation_carries_the_whole_relation_card(): void
+    {
+        // Wat de consumer weet van de relatie, hoort in de administratie te staan —
+        // een boekhouder heeft aan een losse naam niets.
+        MockClient::global([
+            GetRelations::class => MockResponse::make(['d' => ['results' => []]], 200),
+            CreateAccount::class => MockResponse::make(['d' => ['ID' => 'new-rel-guid']], 201),
+            CreateSalesEntry::class => MockResponse::make(['d' => ['ID' => 'inv-1']], 201),
+        ]);
+
+        [$consumer, $connection] = $this->consumerWithExactConnection([
+            'metadata' => ['accounting_mapping' => [
+                'vat_codes' => ['21' => '4'],
+                'gl_accounts' => ['_default' => 'gl-def'],
+                'journals' => ['sales' => '70'],
+            ]],
+        ]);
+
+        ConnectionAccountingRef::query()->create([
+            'connection_id' => $connection->getKey(),
+            'kind' => ConnectionAccountingRef::KIND_GL,
+            'code' => 'gl-def',
+            'native_id' => 'gl-def-guid',
+        ]);
+
+        $token = $consumer->createToken('t', [TokenAbilities::EXACT_WRITE])->plainTextToken;
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->withHeader('X-Account-Id', 'school1')
+            ->withHeader('Idempotency-Key', (string) Str::uuid())
+            ->postJson('/v1/accounting/documents', $this->salesInvoicePayload([
+                'party' => [
+                    'role' => 'debtor',
+                    'name' => 'Nieuwe Klant BV',
+                    'external_id' => 'nieuw-1',
+                    'create_if_missing' => true,
+                    'vat_number' => 'NL000099998B57',
+                    'chamber_of_commerce' => '12345678',
+                    'address_line_1' => 'Dorpsstraat 1',
+                    'address_line_2' => 'Unit 4',
+                    'postcode' => '1234 AB',
+                    'city' => 'Amsterdam',
+                    'state' => 'NH',
+                    'country' => 'nl',
+                    'email' => 'facturen@nieuweklant.nl',
+                    'phone' => '+31201234567',
+                    'website' => 'https://nieuweklant.nl',
+                ],
+            ]))
+            ->assertStatus(201);
+
+        MockClient::global()->assertSent(function ($request): bool {
+            if (! $request instanceof CreateAccount) {
+                return false;
+            }
+
+            return $request->body()->all() === [
+                'Name' => 'Nieuwe Klant BV',
+                'Status' => 'C',
+                'IsSales' => true,
+                'VATNumber' => 'NL000099998B57',
+                'ChamberOfCommerce' => '12345678',
+                'AddressLine1' => 'Dorpsstraat 1',
+                'AddressLine2' => 'Unit 4',
+                'Postcode' => '1234 AB',
+                'City' => 'Amsterdam',
+                'State' => 'NH',
+                'Country' => 'NL',
+                'Email' => 'facturen@nieuweklant.nl',
+                'Phone' => '+31201234567',
+                'Website' => 'https://nieuweklant.nl',
+            ];
+        });
+    }
+
     public function test_auto_creates_relation_when_document_requests_it_and_no_match(): void
     {
         // Geen fake → de echte resolver. Document vraagt create_if_missing aan + geen match →
