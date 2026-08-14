@@ -562,6 +562,14 @@ de provider:
 - `party.role`: `debtor` (verkoop) of `creditor` (inkoop). `vat_number`/`iban`/`external_id` optioneel.
 - `party.external_id` = jouw stabiele klant-/leverancier-sleutel. Stuur 'm consistent
   mee: de Hub onthoudt 'm (relatie-mirror) zodat een volgende boeking direct matcht.
+- `party.create_if_missing` (optioneel, default `false`) = laat de Hub een onbekende
+  relatie aanmaken in de boekhouding in plaats van `422` te geven (zie "Onbekende
+  relatie?" verderop). Vereist `party.external_id` — zonder sleutel kan de Hub de
+  aangemaakte relatie niet terugvinden bij de volgende boeking, en zet een tweede
+  boeking voor dezelfde partij een dubbele relatie in de administratie. Zet 'm alleen
+  wanneer de eindgebruiker net bewust een nieuwe klant of leverancier heeft ingevoerd,
+  niet standaard op elke boeking: het is een onomkeerbare schrijfactie in andermans
+  boekhouding.
 - `lines[].amount` = **netto** regelbedrag (leidend); `tax_rate` = percentage (0/9/21).
   `quantity`/`unit_price` optioneel/informatief; `category` = GL-hint.
 - `lines[].tax_treatment` (optioneel, default `standard`) = BTW-behandeling. Zet
@@ -638,7 +646,7 @@ zonder Exact-jargon, met de consequentie en de handeling erin. Stuur je logica o
 | `currency.foreign` | info | Andere valuta dan EUR |
 | `exact.vat_code.unmapped` | warning | Tarief nog niet gekoppeld aan een Exact-VATCode (een gekoppeld tarief levert géén finding) |
 | `exact.relation.matched` | info | Relatie = bestaande Exact-relatie (`suggestion` = GUID). Match op `party.external_id` uit de mirror, anders op btw-nummer/naam |
-| `exact.relation.new` | info **of** warning | Relatie nog niet in Exact. `info` = auto-create staat aan op de koppeling, de boeking maakt 'm aan. **`warning` = auto-create staat uit — de boeking geeft dan een `422`.** Lees dus de severity, niet alleen de code |
+| `exact.relation.new` | info **of** warning | Relatie nog niet in Exact. `info` = het document zet `party.create_if_missing: true` en auto-create staat niet uit op de koppeling — de boeking maakt 'm aan. **`warning` = `create_if_missing` ontbreekt of staat uit, óf de koppeling zet auto-create expliciet uit — de boeking geeft dan een `422`.** Lees dus de severity, niet alleen de code |
 | `exact.cost_center.matched` / `exact.cost_unit.matched` | info | Opgegeven kostenplaats/-drager bestaat in de administratie |
 | `exact.cost_center.unmapped` / `exact.cost_unit.unmapped` | warning | Kostenplaats/-drager onbekend — de boeking weigert hierop. Corrigeer de Code of draai `POST /v1/accounting/sync` |
 
@@ -703,10 +711,20 @@ sleutelvolgorde en `200` versus `200.00` maken geen verschil. Een gewijzigd bedr
 tarief, regel, datum of factuurnummer wél.
 
 **Onbekende relatie?** Standaard geeft een party die niet in Exact bestaat
-`422 mapping_failed`. Staat **auto-create** aan op de Connection (Hub-admin →
-Boekhoud-mapping → "Onbekende relaties automatisch aanmaken"), dan maakt de Hub de
-relatie zelf aan (match op `vat_number`, anders `name`) en boekt door. Stuur dus
-altijd een nette `party.name` (+ `vat_number` indien bekend) mee.
+`422 mapping_failed`. Zet je op het document `party.create_if_missing: true` (met
+`party.external_id` gevuld), dan maakt de Hub de relatie aan — pas ná een echte miss
+op mirror én `vat_number`/`name` — en boekt door. Stuur dus altijd een nette
+`party.name` (+ `vat_number` indien bekend) mee.
+
+De Connection-instelling **auto-create** (Hub-admin → Boekhoud-mapping → "Onbekende
+relaties automatisch aanmaken") blijft de organisatie-brede kill-switch: staat die
+expliciet uit, dan blijft het `422`, ook mét `create_if_missing: true` op het
+document.
+
+Zet `create_if_missing` alleen wanneer de eindgebruiker net bewust een nieuwe klant
+of leverancier heeft ingevoerd, niet standaard op elke boeking — elke typefout in de
+partijnaam zet anders een nieuwe, onomkeerbare relatie in de boekhouding van je
+klant.
 
 Foutcodes: `403 insufficient_ability` (PAT mist `accounting:write`) ·
 `400 idempotency_key_required` / `400 idempotency_key_invalid` ·
@@ -758,8 +776,9 @@ aan onze kant misging — dat onderscheid bepaalt bij wie je moet zijn.
 Implementeer de boekhoud-sync naar de emeq Hub (provider-agnostisch, ik lever het
 Hub-canonical formaat — buig niets naar Exact). Voor elk boekbaar document:
 1. Bouw het canonical document (snake_case): type, external_id (mijn stabiele
-   document-sleutel), issue_date, party{role,name,vat_number?,external_id}, lines[]
-   met netto `amount` + `tax_rate`, optioneel attachments (base64).
+   document-sleutel), issue_date, party{role,name,vat_number?,external_id,
+   create_if_missing?}, lines[] met netto `amount` + `tax_rate`, optioneel
+   attachments (base64).
 2. Stuur optioneel eerst `POST /v1/accounting/documents/validate` (header
    `X-Account-Id: {tenant}`), toon de findings en laat de gebruiker bevestigen.
 3. Boek met `POST /v1/accounting/documents`, headers `X-Account-Id: {tenant}` +
@@ -769,11 +788,15 @@ Hub-canonical formaat — buig niets naar Exact). Voor elk boekbaar document:
    (leesbaar boekstuknummer, toon dít aan de gebruiker) in mijn sync-ledger naast
    mijn external_id. Behandel `200` met `deduplicated: true` net zo — dat is
    dezelfde boeking, niet opnieuw uitgevoerd. Behandel `422 mapping_failed` als
-   "actie vereist in de Hub-admin", niet als retrybare fout. `409
-   document_already_posted` betekent dat ik hetzelfde external_id met andere inhoud
-   stuurde: nooit retryen, maar een creditnota + nieuw external_id maken. Retry
-   nooit een 5xx zonder dezelfde Idempotency-Key.
-Stuur `party.external_id` consistent mee zodat relaties gecachet worden.
+   "actie vereist in de Hub-admin" — tenzij de gebruiker net bewust een nieuwe klant
+   of leverancier heeft ingevoerd: boek dan opnieuw met `party.create_if_missing:
+   true` (en `party.external_id` gevuld). `409 document_already_posted` betekent dat
+   ik hetzelfde external_id met andere inhoud stuurde: nooit retryen, maar een
+   creditnota + nieuw external_id maken. Retry nooit een 5xx zonder dezelfde
+   Idempotency-Key.
+Stuur `party.external_id` consistent mee zodat relaties gecachet worden. Zet
+`party.create_if_missing` alleen wanneer de gebruiker zelf bewust een nieuwe relatie
+aanmaakt, nooit standaard bij elke boeking.
 ```
 
 ### Boekhoud-mapping (zelf-service, optioneel)
@@ -803,9 +826,10 @@ PUT-body — alle velden optioneel, **merge** (bestaande waarden blijven):
 
 - `vat_codes`/`gl_accounts`/`journals` = stabiele **Codes** uit `reference-data`
   (geen GUIDs — de Hub resolvet die lokaal).
-- `auto_create_relations`: `true` → een onbekende party wordt automatisch als relatie
-  aangemaakt bij het boeken (anders `422`). `false`/weglaten = uit. Deze toggle wordt
-  **gedeeld met de Hub-admin** — wie het laatst schrijft, wint.
+- `auto_create_relations`: organisatie-brede kill-switch voor `party.create_if_missing`
+  op het document (zie Boeken). Staat 'ie expliciet op `false`, dan blijft een
+  onbekende relatie `422`, ook als een document `create_if_missing: true` stuurt.
+  Deze toggle wordt **gedeeld met de Hub-admin** — wie het laatst schrijft, wint.
 - `GET /v1/accounting/mapping` geeft de hele mapping terug (incl. `auto_create_relations`).
 
 > Merge-only: een bestaande key verwijderen kan niet via PUT — stuur een nieuwe waarde.
@@ -817,7 +841,9 @@ Bouw (optioneel) een instellingen-scherm voor de boekhoud-koppeling tegen de eme
 Hub. Lees de keuzes met `GET /v1/accounting/reference-data` (header `X-Account-Id`)
 en de huidige mapping met `GET /v1/accounting/mapping`. Laat de tenant per BTW-tarief
 een VATCode, per categorie een GL-Code en per dagboek-type een Journal kiezen (alles
-Codes, geen GUIDs) plus een toggle "onbekende relaties automatisch aanmaken". Sla op
+Codes, geen GUIDs) plus een toggle "onbekende relaties automatisch aanmaken" — leg uit
+dat dit de organisatie-brede kill-switch is: staat 'ie uit, dan blokkeert dat ook een
+document dat zelf `party.create_if_missing: true` stuurt. Sla op
 met `PUT /v1/accounting/mapping` (merge), body `{ vat_codes, gl_accounts, journals,
 auto_create_relations }` — stuur alleen de gewijzigde velden. Optioneel een knop
 "hersynchroniseren" → `POST /v1/accounting/sync`. Default hoeft de tenant niets in te
