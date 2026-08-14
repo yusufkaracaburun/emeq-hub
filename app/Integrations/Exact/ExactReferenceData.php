@@ -327,33 +327,96 @@ final class ExactReferenceData
      * eerste match, of null. De rol-vlaggen laten de caller een relatie naar de juiste rol
      * promoveren (debiteur ↔ crediteur) vóór de boeking.
      *
+     * Exact's `$filter` kan niet normaliseren, dus een btw-nummer-match haalt de kandidaten
+     * met een ingevuld VATNumber op en vergelijkt lokaal genormaliseerd (hoofdletters, geen
+     * spaties/punten/streepjes) — anders mist `NL8037.25.802.B01` op `NL803725802B01`. Een
+     * ambigu btw-nummer (2+ treffers) stopt hard: nooit terugvallen op naam, dat zou een
+     * andere relatie kunnen kiezen dan de btw-treffers bedoelen. Levert het btw-nummer géén
+     * of geen enkele treffer op (of ontbreekt het), dan valt de zoekopdracht terug op een
+     * exacte Name-match.
+     *
      * @return array{id: string, code: string, name: string, is_sales: bool, is_supplier: bool, status: ?string}|null
      */
     public function findRelation(?string $vatNumber, ?string $name): ?array
     {
-        $filter = $this->relationFilter($vatNumber, $name);
+        $normalizedVat = self::normalizeVatNumber($vatNumber);
 
-        if ($filter === null) {
+        if ($normalizedVat !== '') {
+            $vatMatches = $this->matchesByVatNumber($normalizedVat);
+
+            if (count($vatMatches) === 1) {
+                return $this->mapRelationRow($vatMatches[0]);
+            }
+
+            if (count($vatMatches) > 1) {
+                return null;
+            }
+        }
+
+        return $this->matchByName($name);
+    }
+
+    /**
+     * @return list<array<string, mixed>>
+     */
+    private function matchesByVatNumber(string $normalizedVat): array
+    {
+        $rows = $this->fetch(new GetRelations([
+            '$select' => 'ID,Code,Name,IsSales,IsSupplier,Status,VATNumber',
+            '$filter' => "VATNumber ne ''",
+        ]));
+
+        return array_values(array_filter(
+            $rows,
+            fn (array $row) => self::normalizeVatNumber($row['VATNumber'] ?? null) === $normalizedVat
+        ));
+    }
+
+    private function matchByName(?string $name): ?array
+    {
+        $name = trim((string) $name);
+
+        if ($name === '') {
             return null;
         }
 
-        $rows = $this->fetch(new GetRelations(['$select' => 'ID,Code,Name,IsSales,IsSupplier,Status', '$filter' => $filter, '$top' => '2']));
+        $rows = $this->fetch(new GetRelations([
+            '$select' => 'ID,Code,Name,IsSales,IsSupplier,Status',
+            '$filter' => "Name eq '".$this->escapeOData($name)."'",
+            '$top' => '2',
+        ]));
 
-        if (count($rows) !== 1) {
-            // Geen of meerdere matches → niet automatisch kiezen (ambigu).
-            return null;
-        }
+        // Geen of meerdere matches → niet automatisch kiezen (ambigu).
+        return count($rows) === 1 ? $this->mapRelationRow($rows[0]) : null;
+    }
 
-        $id = (string) ($rows[0]['ID'] ?? '');
+    /**
+     * @param  array<string, mixed>  $row
+     * @return array{id: string, code: string, name: string, is_sales: bool, is_supplier: bool, status: ?string}|null
+     */
+    private function mapRelationRow(array $row): ?array
+    {
+        $id = (string) ($row['ID'] ?? '');
 
         return $id === '' ? null : [
             'id' => $id,
-            'code' => trim((string) ($rows[0]['Code'] ?? '')),
-            'name' => (string) ($rows[0]['Name'] ?? ''),
-            'is_sales' => (bool) ($rows[0]['IsSales'] ?? false),
-            'is_supplier' => (bool) ($rows[0]['IsSupplier'] ?? false),
-            'status' => isset($rows[0]['Status']) ? (string) $rows[0]['Status'] : null,
+            'code' => trim((string) ($row['Code'] ?? '')),
+            'name' => (string) ($row['Name'] ?? ''),
+            'is_sales' => (bool) ($row['IsSales'] ?? false),
+            'is_supplier' => (bool) ($row['IsSupplier'] ?? false),
+            'status' => isset($row['Status']) ? (string) $row['Status'] : null,
         ];
+    }
+
+    private static function normalizeVatNumber(?string $vatNumber): string
+    {
+        $vatNumber = trim((string) $vatNumber);
+
+        if ($vatNumber === '') {
+            return '';
+        }
+
+        return mb_strtoupper(preg_replace('/[\s.\-]+/', '', $vatNumber) ?? $vatNumber);
     }
 
     /**
@@ -387,19 +450,6 @@ final class ExactReferenceData
             'is_supplier' => (bool) ($rows[0]['IsSupplier'] ?? false),
             'status' => isset($rows[0]['Status']) ? (string) $rows[0]['Status'] : null,
         ];
-    }
-
-    private function relationFilter(?string $vatNumber, ?string $name): ?string
-    {
-        $vatNumber = trim((string) $vatNumber);
-
-        if ($vatNumber !== '') {
-            return "VATNumber eq '".$this->escapeOData($vatNumber)."'";
-        }
-
-        $name = trim((string) $name);
-
-        return $name !== '' ? "Name eq '".$this->escapeOData($name)."'" : null;
     }
 
     private function escapeOData(string $value): string

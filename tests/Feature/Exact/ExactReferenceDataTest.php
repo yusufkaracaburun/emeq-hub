@@ -11,6 +11,7 @@ use Emeq\ExactApi\Http\Request\Read\GetVatCodes;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Saloon\Http\Faking\MockClient;
 use Saloon\Http\Faking\MockResponse;
+use Saloon\Http\PendingRequest;
 use Tests\TestCase;
 
 class ExactReferenceDataTest extends TestCase
@@ -99,5 +100,124 @@ class ExactReferenceDataTest extends TestCase
         ]);
 
         $this->assertSame([], (new ExactReferenceData($this->exactConnection()))->glAccounts());
+    }
+
+    public function test_find_relation_matches_exact_vat_number_without_punctuation_differences(): void
+    {
+        MockClient::global([
+            GetRelations::class => $this->fakeRelationsBackend([
+                ['ID' => 'guid-1', 'Code' => '1', 'Name' => 'Klant BV', 'VATNumber' => 'NL803725802B01', 'IsSales' => true, 'IsSupplier' => false, 'Status' => 'C'],
+            ]),
+        ]);
+
+        $match = (new ExactReferenceData($this->exactConnection()))->findRelation('NL803725802B01', 'Klant BV');
+
+        $this->assertNotNull($match);
+        $this->assertSame('guid-1', $match['id']);
+    }
+
+    public function test_find_relation_matches_dotted_input_against_normalized_stored_vat_number(): void
+    {
+        MockClient::global([
+            GetRelations::class => $this->fakeRelationsBackend([
+                ['ID' => 'guid-1', 'Code' => '1', 'Name' => 'Klant BV', 'VATNumber' => 'NL803725802B01', 'IsSales' => true, 'IsSupplier' => false, 'Status' => 'C'],
+            ]),
+        ]);
+
+        $match = (new ExactReferenceData($this->exactConnection()))->findRelation('NL8037.25.802.B01', 'Klant BV');
+
+        $this->assertNotNull($match);
+        $this->assertSame('guid-1', $match['id']);
+    }
+
+    public function test_find_relation_matches_normalized_input_against_dotted_stored_vat_number(): void
+    {
+        MockClient::global([
+            GetRelations::class => $this->fakeRelationsBackend([
+                ['ID' => 'guid-1', 'Code' => '1', 'Name' => 'Klant BV', 'VATNumber' => 'NL8037.25.802.B01', 'IsSales' => true, 'IsSupplier' => false, 'Status' => 'C'],
+            ]),
+        ]);
+
+        $match = (new ExactReferenceData($this->exactConnection()))->findRelation('NL803725802B01', 'Klant BV');
+
+        $this->assertNotNull($match);
+        $this->assertSame('guid-1', $match['id']);
+    }
+
+    public function test_find_relation_falls_back_to_name_when_no_relation_has_the_vat_number(): void
+    {
+        MockClient::global([
+            GetRelations::class => $this->fakeRelationsBackend([
+                ['ID' => 'guid-2', 'Code' => '2', 'Name' => 'Klant Zonder Btw BV', 'VATNumber' => '', 'IsSales' => true, 'IsSupplier' => false, 'Status' => 'C'],
+            ]),
+        ]);
+
+        $match = (new ExactReferenceData($this->exactConnection()))->findRelation('NL803725802B01', 'Klant Zonder Btw BV');
+
+        $this->assertNotNull($match);
+        $this->assertSame('guid-2', $match['id']);
+    }
+
+    public function test_find_relation_returns_null_when_two_relations_share_the_same_name(): void
+    {
+        MockClient::global([
+            GetRelations::class => $this->fakeRelationsBackend([
+                ['ID' => 'guid-1', 'Code' => '1', 'Name' => 'Dubbel BV', 'VATNumber' => '', 'IsSales' => true, 'IsSupplier' => false, 'Status' => 'C'],
+                ['ID' => 'guid-2', 'Code' => '2', 'Name' => 'Dubbel BV', 'VATNumber' => '', 'IsSales' => true, 'IsSupplier' => false, 'Status' => 'C'],
+            ]),
+        ]);
+
+        $match = (new ExactReferenceData($this->exactConnection()))->findRelation(null, 'Dubbel BV');
+
+        $this->assertNull($match);
+    }
+
+    public function test_find_relation_returns_null_on_ambiguous_vat_number_without_falling_back_to_name(): void
+    {
+        MockClient::global([
+            GetRelations::class => $this->fakeRelationsBackend([
+                ['ID' => 'guid-1', 'Code' => '1', 'Name' => 'Klant BV', 'VATNumber' => 'NL803725802B01', 'IsSales' => true, 'IsSupplier' => false, 'Status' => 'C'],
+                ['ID' => 'guid-2', 'Code' => '2', 'Name' => 'Klant BV Filiaal', 'VATNumber' => 'NL8037.25.802.B01', 'IsSales' => true, 'IsSupplier' => false, 'Status' => 'C'],
+                // Zou op naam wél uniek matchen — mag niet gebruikt worden ná een ambigu btw-nummer.
+                ['ID' => 'guid-3', 'Code' => '3', 'Name' => 'Klant BV', 'VATNumber' => '', 'IsSales' => true, 'IsSupplier' => false, 'Status' => 'C'],
+            ]),
+        ]);
+
+        $match = (new ExactReferenceData($this->exactConnection()))->findRelation('NL803725802B01', 'Klant BV');
+
+        $this->assertNull($match);
+    }
+
+    /**
+     * Simuleert Exact's OData `$filter`-gedrag (letterlijke, hoofdlettergevoelige
+     * string-equality — géén normalisatie) tegen een vaste set relaties, zodat de
+     * mock hetzelfde onderscheid maakt als de echte API tussen een `eq`-filter op
+     * de rauwe input en een brede `ne ''`-candidate-fetch.
+     *
+     * @param  list<array<string, mixed>>  $relations
+     */
+    private function fakeRelationsBackend(array $relations): \Closure
+    {
+        return function (PendingRequest $pendingRequest) use ($relations) {
+            $filter = (string) $pendingRequest->query()->get('$filter');
+
+            $results = array_values(array_filter($relations, function (array $relation) use ($filter) {
+                if ($filter === "VATNumber ne ''") {
+                    return (string) ($relation['VATNumber'] ?? '') !== '';
+                }
+
+                if (preg_match("/^VATNumber eq '(.*)'\$/", $filter, $matches) === 1) {
+                    return (string) ($relation['VATNumber'] ?? '') === str_replace("''", "'", $matches[1]);
+                }
+
+                if (preg_match("/^Name eq '(.*)'\$/", $filter, $matches) === 1) {
+                    return (string) ($relation['Name'] ?? '') === str_replace("''", "'", $matches[1]);
+                }
+
+                return false;
+            }));
+
+            return MockResponse::make(['d' => ['results' => $results]], 200);
+        };
     }
 }
