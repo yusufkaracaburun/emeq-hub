@@ -17,6 +17,7 @@ class CurrencyValidatorTest extends TestCase
         $this->assertCount(1, $findings);
         $this->assertSame('currency.foreign', $findings[0]->code);
         $this->assertSame(Severity::Info, $findings[0]->severity);
+        $this->assertFalse($findings[0]->blocking);
     }
 
     public function test_euro_produces_no_finding(): void

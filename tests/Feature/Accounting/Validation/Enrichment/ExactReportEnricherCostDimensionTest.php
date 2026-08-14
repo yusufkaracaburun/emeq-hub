@@ -71,6 +71,7 @@ class ExactReportEnricherCostDimensionTest extends TestCase
         $this->assertContains('exact.cost_unit.matched', $codes);
         $this->assertSame(Severity::Info, $findings[0]->severity);
         $this->assertSame('lines.0.cost_center', $findings[0]->path);
+        $this->assertFalse($findings[0]->blocking);
     }
 
     public function test_unknown_cost_center_becomes_unmapped_warning(): void
@@ -86,6 +87,7 @@ class ExactReportEnricherCostDimensionTest extends TestCase
         $this->assertSame('exact.cost_center.unmapped', $findings[0]->code);
         $this->assertSame(Severity::Warning, $findings[0]->severity);
         $this->assertNull($findings[0]->suggestion);
+        $this->assertTrue($findings[0]->blocking); // Exact weigert de boeking op een onbekende Code
     }
 
     public function test_dedupes_per_distinct_field_and_code(): void

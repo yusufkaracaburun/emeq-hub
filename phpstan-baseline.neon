@@ -295,6 +295,12 @@ parameters:
 			path: app/Console/Commands/Exact/PurgeTestData.php
 
 		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$consumer_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Console/Commands/HubResetConnection.php
+
+		-
 			message: '#^Parameter \#1 \$values of static method App\\Filament\\Actions\\ManageAccountingMappingAction\:\:scalarMap\(\) expects array\<string, mixed\>, array\<int\|string, mixed\> given\.$#'
 			identifier: argument.type
 			count: 1

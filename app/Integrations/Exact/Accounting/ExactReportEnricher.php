@@ -98,6 +98,7 @@ final class ExactReportEnricher
             $findings[] = new Finding(
                 code: 'exact.vat_code.unmapped',
                 severity: Severity::Warning,
+                blocking: true, // Exact weigert de boeking op een niet-ingericht tarief
                 path: "lines.{$index}.tax_rate",
                 message: "BTW-tarief {$label} is nog niet ingericht voor deze administratie — de boeking wordt hierop geweigerd. Richt het tarief in of gebruik een tarief dat de administratie al kent.",
                 current: $line['tax_rate'] ?? null,
@@ -163,6 +164,7 @@ final class ExactReportEnricher
         return new Finding(
             code: 'exact.relation.matched',
             severity: Severity::Info,
+            blocking: false,
             path: 'party',
             message: "{$label} is herkend als bestaande relatie{$suffix} in de administratie — de boeking komt daarop te staan.",
             current: $current,
@@ -183,6 +185,7 @@ final class ExactReportEnricher
         return new Finding(
             code: 'exact.relation.new',
             severity: $createIfMissing ? Severity::Info : Severity::Warning,
+            blocking: ! $createIfMissing,
             path: 'party',
             message: $message,
             current: $name,
@@ -232,6 +235,7 @@ final class ExactReportEnricher
                     ? new Finding(
                         code: "exact.{$field}.matched",
                         severity: Severity::Info,
+                        blocking: false,
                         path: $path,
                         message: "{$dimension['label']} '{$code}' is bekend in de administratie.",
                         current: $code,
@@ -240,6 +244,7 @@ final class ExactReportEnricher
                     : new Finding(
                         code: "exact.{$field}.unmapped",
                         severity: Severity::Warning,
+                        blocking: true, // Exact weigert de boeking op een onbekende Code
                         path: $path,
                         message: "{$dimension['label']} '{$code}' bestaat niet in de administratie — de boeking wordt hierop geweigerd. Corrigeer de {$this->lowerLabel($dimension['label'])} of voeg 'm toe in de administratie; is die net aangemaakt, ververs dan eerst de gegevens.",
                         current: $code,

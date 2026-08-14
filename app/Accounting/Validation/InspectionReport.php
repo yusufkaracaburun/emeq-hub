@@ -46,6 +46,7 @@ final readonly class InspectionReport
                 'errors' => $this->count(Severity::Error),
                 'warnings' => $this->count(Severity::Warning),
                 'infos' => $this->count(Severity::Info),
+                'blocking' => count(array_filter($this->findings, fn (Finding $f): bool => $f->blocking)),
             ],
             'findings' => array_map(fn (Finding $f): array => $f->toArray(), $sorted),
         ];

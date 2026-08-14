@@ -53,6 +53,16 @@ class CompletenessValidatorTest extends TestCase
             ['document.external_id.missing', 'document.issue_date.missing'],
             $bySeverity['warning'] ?? [],
         );
+
+        // Not blocking: the consumer fills these in during the booking review step,
+        // regardless of what the message text implies.
+        foreach ($findings as $finding) {
+            if ($finding->severity === Severity::Warning) {
+                $this->assertFalse($finding->blocking, "{$finding->code} should not be blocking");
+            } else {
+                $this->assertTrue($finding->blocking, "{$finding->code} should be blocking");
+            }
+        }
     }
 
     public function test_a_draft_without_the_fields_added_at_booking_time_stays_valid(): void
@@ -69,6 +79,7 @@ class CompletenessValidatorTest extends TestCase
 
         foreach ($findings as $finding) {
             $this->assertSame(Severity::Warning, $finding->severity);
+            $this->assertFalse($finding->blocking);
         }
     }
 
@@ -82,6 +93,7 @@ class CompletenessValidatorTest extends TestCase
         $this->assertCount(1, $findings);
         $this->assertSame('document.lines.missing', $findings[0]->code);
         $this->assertSame(Severity::Error, $findings[0]->severity);
+        $this->assertTrue($findings[0]->blocking);
     }
 
     public function test_a_type_outside_the_canonical_set_is_an_error(): void
@@ -95,6 +107,7 @@ class CompletenessValidatorTest extends TestCase
         $this->assertSame('document.type.unknown', $findings[0]->code);
         $this->assertSame('not_a_type', $findings[0]->current);
         $this->assertStringContainsString('sales_invoice', (string) $findings[0]->suggestion);
+        $this->assertTrue($findings[0]->blocking);
     }
 
     public function test_a_party_without_a_name_is_an_error(): void
@@ -106,6 +119,7 @@ class CompletenessValidatorTest extends TestCase
 
         $this->assertCount(1, $findings);
         $this->assertSame('document.party.name.missing', $findings[0]->code);
+        $this->assertTrue($findings[0]->blocking);
     }
 
     public function test_a_party_role_outside_the_canonical_set_is_an_error(): void
@@ -117,6 +131,21 @@ class CompletenessValidatorTest extends TestCase
 
         $this->assertCount(1, $findings);
         $this->assertSame('document.party.role.unknown', $findings[0]->code);
+        $this->assertTrue($findings[0]->blocking);
+    }
+
+    public function test_a_missing_party_role_is_a_warning_and_not_blocking(): void
+    {
+        // The role is still supplied at booking time, like external_id/issue_date.
+        $document = $this->document();
+        unset($document['party']['role']);
+
+        $findings = (new CompletenessValidator)->validate($document);
+
+        $this->assertCount(1, $findings);
+        $this->assertSame('document.party.role.missing', $findings[0]->code);
+        $this->assertSame(Severity::Warning, $findings[0]->severity);
+        $this->assertFalse($findings[0]->blocking);
     }
 
     public function test_a_line_missing_what_the_booking_needs_is_an_error_per_field(): void

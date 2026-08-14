@@ -33,6 +33,7 @@ final class CurrencyValidator implements DocumentValidator
         return [new Finding(
             code: 'currency.foreign',
             severity: Severity::Info,
+            blocking: false, // elke 3-letter code passeert `currency` bij het boeken
             path: 'currency',
             message: "Deze factuur staat in {$normalized}, niet in euro's. Controleer de valuta en de gehanteerde koers vóór het boeken.",
             current: $currency,

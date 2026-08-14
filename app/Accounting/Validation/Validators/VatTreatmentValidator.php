@@ -47,6 +47,7 @@ final class VatTreatmentValidator implements DocumentValidator
                 $findings[] = new Finding(
                     code: 'vat_treatment.reverse_charge_expected',
                     severity: Severity::Warning,
+                    blocking: false, // advies; het boekpad valideert tax_rate niet tegen de regio
                     path: "lines.{$index}.tax_rate",
                     message: 'Leverancier binnen de EU met een eigen btw-nummer: hier hoort BTW verlegd (0%) op de factuur, geen BTW-tarief.',
                     current: $rate,
@@ -60,6 +61,7 @@ final class VatTreatmentValidator implements DocumentValidator
                 $findings[] = new Finding(
                     code: 'vat_treatment.domestic_rate_on_non_eu',
                     severity: Severity::Error,
+                    blocking: true,
                     path: "lines.{$index}.tax_rate",
                     message: 'Leverancier buiten de EU rekent een binnenlands BTW-tarief. Bij invoer loopt de BTW via de douane — op de factuur hoort 0%.',
                     current: $rate,

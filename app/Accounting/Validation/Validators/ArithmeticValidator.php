@@ -37,6 +37,8 @@ final class ArithmeticValidator implements DocumentValidator
                 $findings[] = new Finding(
                     code: 'arithmetic.amount_not_numeric',
                     severity: Severity::Warning,
+                    // Het boekpad eist `lines.*.amount` numeriek — dit exacte bedrag faalt daarop.
+                    blocking: true,
                     path: "lines.{$index}.amount",
                     message: 'Deze factuurregel heeft geen leesbaar bedrag. Controleer de regel op de factuur.',
                     current: $line['amount'] ?? null,
@@ -61,6 +63,9 @@ final class ArithmeticValidator implements DocumentValidator
                     $findings[] = new Finding(
                         code: 'arithmetic.line_amount_mismatch',
                         severity: Severity::Warning,
+                        // Het boekpad valideert alleen dat `amount` numeriek is, niet dat
+                        // die uit aantal × stukprijs volgt — puur advies.
+                        blocking: false,
                         path: "lines.{$index}.amount",
                         message: 'Het regelbedrag komt niet uit op aantal × stukprijs. Controleer welke van de drie klopt.',
                         current: $amount,
@@ -84,6 +89,9 @@ final class ArithmeticValidator implements DocumentValidator
      */
     private function reconcileTotals(array $payload, float $net, float $tax): array
     {
+        // subtotal/tax_total/total/discount zijn OCR-samenvattingsvelden: het boekpad
+        // kent ze niet (StoreDocumentRequest heeft geen regels voor deze keys), dus een
+        // mismatch hier kan de boek-POST nooit doen weigeren — puur advies.
         $findings = [];
 
         $subtotal = Money::toFloat($payload['subtotal'] ?? null);
@@ -91,6 +99,7 @@ final class ArithmeticValidator implements DocumentValidator
             $findings[] = new Finding(
                 code: 'arithmetic.subtotal_mismatch',
                 severity: Severity::Warning,
+                blocking: false,
                 path: 'subtotal',
                 message: 'Het subtotaal op de factuur komt niet overeen met de optelsom van de regels (excl. BTW).',
                 current: $subtotal,
@@ -103,6 +112,7 @@ final class ArithmeticValidator implements DocumentValidator
             $findings[] = new Finding(
                 code: 'arithmetic.tax_total_mismatch',
                 severity: Severity::Warning,
+                blocking: false,
                 path: 'tax_total',
                 message: 'Het BTW-bedrag op de factuur komt niet overeen met de BTW over de regels.',
                 current: $taxTotal,
@@ -119,6 +129,7 @@ final class ArithmeticValidator implements DocumentValidator
                 $findings[] = new Finding(
                     code: 'arithmetic.total_mismatch',
                     severity: Severity::Warning,
+                    blocking: false,
                     path: 'total',
                     message: 'Het factuurtotaal komt niet overeen met subtotaal + BTW − korting.',
                     current: $total,

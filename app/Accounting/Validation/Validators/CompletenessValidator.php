@@ -39,10 +39,14 @@ final class CompletenessValidator implements DocumentValidator
     {
         return [
             ...$this->typeFindings($payload),
+            // Niet-blocking: de consumer vult external_id/issue_date/party.role nog in
+            // tijdens het boeken, ook al zegt de tekst "de boeking wordt geweigerd".
             ...$this->missing($payload, 'external_id', 'document.external_id.missing',
-                'Het kenmerk waarmee jij deze factuur zelf kent ontbreekt. De boeking wordt hierop geweigerd: de boekhouding heeft het nodig om de boeking terug te vinden, en het voorkomt dat een tweede poging hetzelfde document nog een keer boekt.'),
+                'Het kenmerk waarmee jij deze factuur zelf kent ontbreekt. De boeking wordt hierop geweigerd: de boekhouding heeft het nodig om de boeking terug te vinden, en het voorkomt dat een tweede poging hetzelfde document nog een keer boekt.',
+                blocking: false),
             ...$this->missing($payload, 'issue_date', 'document.issue_date.missing',
-                'De factuurdatum ontbreekt. De boeking wordt hierop geweigerd — de datum bepaalt in welke periode de boeking valt.'),
+                'De factuurdatum ontbreekt. De boeking wordt hierop geweigerd — de datum bepaalt in welke periode de boeking valt.',
+                blocking: false),
             ...$this->partyFindings($payload),
             ...$this->lineFindings($payload),
         ];
@@ -101,11 +105,13 @@ final class CompletenessValidator implements DocumentValidator
         $role = $party['role'] ?? null;
 
         if ($this->blank($role)) {
+            // Niet-blocking: de rol wordt bij het boeken nog ingevuld, ondanks de tekst.
             $findings[] = $this->finding(
                 'document.party.role.missing',
                 Severity::Warning,
-                'party.role',
-                'Onbekend of de tegenpartij een klant of een leverancier is. Dat bepaalt op welke kant van de boekhouding de boeking komt; zonder rol wordt de boeking geweigerd.',
+                blocking: false,
+                path: 'party.role',
+                message: 'Onbekend of de tegenpartij een klant of een leverancier is. Dat bepaalt op welke kant van de boekhouding de boeking komt; zonder rol wordt de boeking geweigerd.',
                 suggestion: $this->list(self::ROLES),
             );
         } elseif (! in_array($role, self::ROLES, true)) {
@@ -191,10 +197,10 @@ final class CompletenessValidator implements DocumentValidator
      * @param  array<string, mixed>  $payload
      * @return list<Finding>
      */
-    private function missing(array $payload, string $key, string $code, string $message): array
+    private function missing(array $payload, string $key, string $code, string $message, bool $blocking): array
     {
         return $this->blank($payload[$key] ?? null)
-            ? [$this->finding($code, Severity::Warning, $key, $message)]
+            ? [$this->finding($code, Severity::Warning, $blocking, $key, $message)]
             : [];
     }
 
@@ -219,16 +225,21 @@ final class CompletenessValidator implements DocumentValidator
         return implode(', ', $values);
     }
 
+    /**
+     * Elke error is per definitie blocking (zie Finding-docblock) — geen aparte
+     * $blocking-parameter nodig aan deze aanroepplekken.
+     */
     private function error(string $code, string $path, string $message, mixed $current = null, mixed $suggestion = null): Finding
     {
-        return $this->finding($code, Severity::Error, $path, $message, $current, $suggestion);
+        return $this->finding($code, Severity::Error, blocking: true, path: $path, message: $message, current: $current, suggestion: $suggestion);
     }
 
-    private function finding(string $code, Severity $severity, string $path, string $message, mixed $current = null, mixed $suggestion = null): Finding
+    private function finding(string $code, Severity $severity, bool $blocking, string $path, string $message, mixed $current = null, mixed $suggestion = null): Finding
     {
         return new Finding(
             code: $code,
             severity: $severity,
+            blocking: $blocking,
             path: $path,
             message: $message,
             current: $current,

@@ -56,6 +56,7 @@ class ExactReportEnricherRelationTest extends TestCase
         $this->assertSame(Severity::Info, $findings[0]->severity);
         $this->assertSame('11111111-2222-3333-4444-555555555555', $findings[0]->suggestion);
         $this->assertStringContainsString('Acme BV', $findings[0]->message);
+        $this->assertFalse($findings[0]->blocking);
     }
 
     public function test_external_id_of_another_connection_does_not_match(): void
@@ -77,5 +78,10 @@ class ExactReportEnricherRelationTest extends TestCase
 
         $this->assertCount(1, $findings);
         $this->assertSame('exact.relation.new', $findings[0]->code);
+        $this->assertSame(Severity::Warning, $findings[0]->severity);
+        // Dit is het gerapporteerde productiegedrag: severity=warning terwijl valid=true blijft
+        // (InspectionReport::valid() kijkt alleen naar Severity::Error) — blocking maakt het
+        // onderscheid expliciet dat message-tekst en severity alleen niet dragen.
+        $this->assertTrue($findings[0]->blocking);
     }
 }
