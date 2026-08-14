@@ -102,6 +102,7 @@ class ReadController extends Controller
      * Filter met `?kind=bank|cash`; standaard bank. Dit is de resource waarover de
      * bank-webhooks notificeren — zonder dit endpoint is zo'n melding onbruikbaar.
      */
+    #[Response(200, type: 'array{data: list<array{id: string, kind: string, number: string|null, journal: string|null, financial_year: int|null, financial_period: int|null, opening_balance: float|null, closing_balance: float|null, currency: string, lines: list<array{id: string, date: string|null, amount: float, description: string|null, relation: array{id: string|null, name: string|null}, ledger_account_id: string|null, ledger_account_code: string|null, tax_code: string|null, document_number: string|null}>}>, next_cursor: string|null, has_more: bool}')]
     public function bankStatements(Request $request): JsonResponse
     {
         $kind = $request->query('kind', BankStatement::KIND_BANK);
@@ -127,6 +128,7 @@ class ReadController extends Controller
     /**
      * Grootboekrekeningen van de gekoppelde administratie.
      */
+    #[Response(200, type: 'array{data: list<array{id: string, code: string, name: string|null, attributes: mixed}>, next_cursor: string|null, has_more: bool}')]
     public function ledgerAccounts(Request $request): JsonResponse
     {
         return $this->read(
@@ -142,6 +144,7 @@ class ReadController extends Controller
     /**
      * Btw-codes van de gekoppelde administratie.
      */
+    #[Response(200, type: 'array{data: list<array{id: string, code: string, name: string|null, rate: float|null, attributes: mixed}>, next_cursor: string|null, has_more: bool}')]
     public function taxCodes(Request $request): JsonResponse
     {
         return $this->read(
@@ -157,6 +160,7 @@ class ReadController extends Controller
     /**
      * Debiteuren (klanten) van de gekoppelde administratie.
      */
+    #[Response(200, type: 'array{data: list<array{id: string, name: string, roles: list<string>, code: string|null, vat_number: string|null, email: string|null, attributes: mixed}>, next_cursor: string|null, has_more: bool}')]
     public function customers(Request $request): JsonResponse
     {
         return $this->relations($request, Relation::ROLE_DEBTOR);
@@ -165,6 +169,7 @@ class ReadController extends Controller
     /**
      * Crediteuren (leveranciers) van de gekoppelde administratie.
      */
+    #[Response(200, type: 'array{data: list<array{id: string, name: string, roles: list<string>, code: string|null, vat_number: string|null, email: string|null, attributes: mixed}>, next_cursor: string|null, has_more: bool}')]
     public function suppliers(Request $request): JsonResponse
     {
         return $this->relations($request, Relation::ROLE_CREDITOR);
