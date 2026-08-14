@@ -209,6 +209,51 @@ Idempotency-Key: {{$guid}}
 }
 
 
+### ─── Ontvangsten en uitgaven ────────────────────────────────────────────────
+#
+# `income` en `expense` zijn géén memoriaal: ze dragen een relatie en een
+# categorie en boeken daarom als gewone verkoop- respectievelijk inkoopboeking,
+# met een openstaande post die later via de bankreconciliatie wordt afgeletterd.
+
+### Ontvangst — debiteur, verkoopdagboek
+POST {{baseUrl}}/v1/accounting/documents
+Authorization: Bearer {{token}}
+Content-Type: application/json
+Accept: application/json
+X-Account-Id: {{accountId}}
+Idempotency-Key: {{$guid}}
+
+{
+  "type": "income",
+  "external_id": "INC-001",
+  "number": "Ontvangst 001",
+  "issue_date": "2026-08-14",
+  "party": { "role": "debtor", "name": "Hub Test Klant", "external_id": "KLANT-001" },
+  "lines": [
+    { "description": "Doorbelasting materiaal", "amount": 150, "tax_rate": 21, "category": "omzet" }
+  ]
+}
+
+### Uitgave — crediteur, inkoopdagboek
+POST {{baseUrl}}/v1/accounting/documents
+Authorization: Bearer {{token}}
+Content-Type: application/json
+Accept: application/json
+X-Account-Id: {{accountId}}
+Idempotency-Key: {{$guid}}
+
+{
+  "type": "expense",
+  "external_id": "EXP-001",
+  "number": "Uitgave 001",
+  "issue_date": "2026-08-14",
+  "party": { "role": "creditor", "name": "Hub Test Leverancier", "external_id": "LEV-001" },
+  "lines": [
+    { "description": "Gereedschap", "amount": 80, "tax_rate": 21, "category": "kosten" }
+  ]
+}
+
+
 ### ─── Onbekende relatie ──────────────────────────────────────────────────────
 
 ### Onbekende partij ZONDER create_if_missing → 422 REFERENCE_MAPPING_MISSING.
