@@ -11,20 +11,25 @@ use Emeq\ExactApi\Contracts\ExactCredentialResolver;
 use Emeq\ExactApi\Contracts\TokenStore;
 use Emeq\ExactApi\Exact;
 use Emeq\ExactApi\Http\Request\Delete\DeleteAccount;
+use Emeq\ExactApi\Http\Request\Delete\DeleteDocument;
 use Emeq\ExactApi\Http\Request\Delete\DeletePurchaseEntry;
 use Emeq\ExactApi\Http\Request\Delete\DeleteSalesEntry;
 use Emeq\ExactApi\Http\Request\RawExactRequest;
 use Emeq\ExactApi\OData\Envelope;
 use Illuminate\Console\Command;
 use Saloon\Enums\Method;
+use Saloon\Http\Response;
 use Throwable;
 
 /**
- * Ruimt test-boekingen en (expliciet opgegeven) test-relaties op in een Exact-division
- * zodat de boekhoud-koppeling opnieuw end-to-end getest kan worden.
+ * Ruimt test-boekingen, hun Documents en (expliciet opgegeven) test-relaties op in een
+ * Exact-division zodat de boekhoud-koppeling opnieuw end-to-end getest kan worden.
  *
- * Boekingen (sales/purchase) worden áltijd verwijderd — die zet de Hub zelf neer. Relaties
- * worden NOOIT automatisch verwijderd (een division draagt Exact-default-relaties zoals
+ * Boekingen (sales/purchase) en Documents worden áltijd verwijderd — beide zet de Hub
+ * (of Exact zelf, bij elke PurchaseEntry) zelf neer. Documents gaan vóór de relaties weg:
+ * Exact weigert een relatie te verwijderen zolang er nog een gekoppeld Document bestaat
+ * ("Kan niet verwijderen: Relatie - Gebruikt in: Documenten"). Relaties worden NOOIT
+ * automatisch verwijderd (een division draagt Exact-default-relaties zoals
  * "Belastingdienst Omzetbelasting"); geef de te wissen relatie-GUID's expliciet via
  * --relations. Default is dry-run; --force voert daadwerkelijk uit.
  */
@@ -35,7 +40,7 @@ final class PurgeTestData extends Command
                             {--force : Daadwerkelijk verwijderen (zonder = dry-run)}
                             {--relations= : Comma-separated relatie-GUID(s) om óók te verwijderen}';
 
-    protected $description = 'Verwijder test-boekingen (en opgegeven relaties) in een Exact-division voor een schone her-test';
+    protected $description = 'Verwijder test-boekingen, hun Documents (en opgegeven relaties) in een Exact-division voor een schone her-test';
 
     public function handle(): int
     {
@@ -66,6 +71,7 @@ final class PurgeTestData extends Command
 
         $sales = $get('/salesentry/SalesEntries', ['$select' => 'EntryID,EntryNumber,YourRef']);
         $purchase = $get('/purchaseentry/PurchaseEntries', ['$select' => 'EntryID,EntryNumber,YourRef']);
+        $documents = $get('/documents/Documents', ['$select' => 'ID,Subject']);
         $accounts = $get('/crm/Accounts', ['$select' => 'ID,Code,Name']);
 
         $relationIds = array_values(array_filter(array_map('trim', explode(',', (string) $this->option('relations')))));
@@ -80,6 +86,13 @@ final class PurgeTestData extends Command
             }
         }
         $this->line('  totaal: '.(count($sales) + count($purchase)));
+        $this->newLine();
+
+        $this->line('<comment>Documents (worden verwijderd — bijproduct van de boekingen, blokkeren anders de relaties):</comment>');
+        foreach ($documents as $row) {
+            $this->line("  {$row['ID']}  ".($row['Subject'] ?? '-'));
+        }
+        $this->line('  totaal: '.count($documents));
         $this->newLine();
 
         $this->line('<comment>Relaties in de division (verwijder alleen wat je opgeeft via --relations):</comment>');
@@ -98,47 +111,107 @@ final class PurgeTestData extends Command
             return self::SUCCESS;
         }
 
-        $ok = 0;
-        $failed = 0;
+        $tally = [
+            'Sales' => ['ok' => 0, 'failed' => 0],
+            'Purchase' => ['ok' => 0, 'failed' => 0],
+            'Documents' => ['ok' => 0, 'failed' => 0],
+            'Relaties' => ['ok' => 0, 'failed' => 0],
+        ];
+        $failures = [];
 
         foreach ($sales as $row) {
-            [$ok, $failed] = $this->delete($connector, new DeleteSalesEntry($row['EntryID']), "Sales {$row['EntryID']}", $ok, $failed);
+            $this->recordResult($tally, $failures, 'Sales', "Sales {$row['EntryID']}", $connector, new DeleteSalesEntry($row['EntryID']));
         }
         foreach ($purchase as $row) {
-            [$ok, $failed] = $this->delete($connector, new DeletePurchaseEntry($row['EntryID']), "Purchase {$row['EntryID']}", $ok, $failed);
+            $this->recordResult($tally, $failures, 'Purchase', "Purchase {$row['EntryID']}", $connector, new DeletePurchaseEntry($row['EntryID']));
+        }
+        foreach ($documents as $row) {
+            $this->recordResult($tally, $failures, 'Documents', "Document {$row['ID']}", $connector, new DeleteDocument($row['ID']));
         }
         foreach ($relationIds as $id) {
-            [$ok, $failed] = $this->delete($connector, new DeleteAccount($id), "Relatie {$id}", $ok, $failed);
+            $this->recordResult($tally, $failures, 'Relaties', "Relatie {$id}", $connector, new DeleteAccount($id));
         }
+
+        $ok = array_sum(array_column($tally, 'ok'));
+        $failed = array_sum(array_column($tally, 'failed'));
 
         $this->newLine();
         $this->info("Klaar — {$ok} verwijderd, {$failed} mislukt.");
+        foreach ($tally as $category => $counts) {
+            $this->line("  {$category}: {$counts['ok']} verwijderd, {$counts['failed']} mislukt");
+        }
+
+        if ($failures !== []) {
+            $this->newLine();
+            $this->line('<comment>Mislukte deletes:</comment>');
+            foreach ($failures as $failure) {
+                $this->line("  ✗ {$failure}");
+            }
+        }
 
         return $failed > 0 ? self::FAILURE : self::SUCCESS;
     }
 
     /**
-     * @param  array{0: int, 1: int}  ...
-     * @return array{0: int, 1: int}
+     * Voert één delete uit, telt 'm mee in $tally onder $category en bewaart de
+     * Exact-foutmelding in $failures bij een mislukking — zonder de rest van de purge
+     * te stoppen.
+     *
+     * @param  array<string, array{ok: int, failed: int}>  $tally
+     * @param  list<string>  $failures
      */
-    private function delete(object $connector, object $request, string $label, int $ok, int $failed): array
+    private function recordResult(array &$tally, array &$failures, string $category, string $label, object $connector, object $request): void
+    {
+        $result = $this->delete($connector, $request, $label);
+
+        if ($result['ok']) {
+            $tally[$category]['ok']++;
+
+            return;
+        }
+
+        $tally[$category]['failed']++;
+        $failures[] = "{$label} — {$result['message']}";
+    }
+
+    /**
+     * @return array{ok: bool, message: ?string}
+     */
+    private function delete(object $connector, object $request, string $label): array
     {
         try {
             $response = $connector->send($request);
 
             if ($response->failed()) {
-                $this->error("  ✗ {$label} — HTTP {$response->status()}");
+                $message = $this->exactErrorMessage($response);
+                $this->error("  ✗ {$label} — {$message}");
 
-                return [$ok, $failed + 1];
+                return ['ok' => false, 'message' => $message];
             }
 
             $this->line("  <info>✓</info> {$label}");
 
-            return [$ok + 1, $failed];
+            return ['ok' => true, 'message' => null];
         } catch (Throwable $e) {
             $this->error("  ✗ {$label} — {$e->getMessage()}");
 
-            return [$ok, $failed + 1];
+            return ['ok' => false, 'message' => $e->getMessage()];
         }
+    }
+
+    /**
+     * Exact's functionele OData-foutmelding (`error.message.value`) — dezelfde tekst die
+     * de boekhouder in de Exact-UI ziet. Valt terug op de HTTP-status wanneer de body geen
+     * bruikbare melding bevat (bijv. een Akamai-blockpagina in plaats van JSON).
+     */
+    private function exactErrorMessage(Response $response): string
+    {
+        try {
+            $message = $response->json('error.message.value');
+        } catch (Throwable) {
+            return "HTTP {$response->status()}";
+        }
+
+        return is_string($message) && $message !== '' ? $message : "HTTP {$response->status()}";
     }
 }
