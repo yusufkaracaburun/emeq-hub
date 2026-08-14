@@ -10,7 +10,7 @@
         "akaunting/laravel-money": "^6.0",
         "barryvdh/laravel-dompdf": "^3.1",
         "dedoc/scramble": "^0.13.22",
-        "emeq/exact-api": "^0.4.0",
+        "emeq/exact-api": "^0.5.0",
         "emeq/mollie-api": "^0.1.0-alpha.1",
         "emeq/snelstart-api": "^0.2.0",
         "filament/filament": "^4.0",
