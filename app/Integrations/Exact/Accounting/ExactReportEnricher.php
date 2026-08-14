@@ -124,6 +124,7 @@ final class ExactReportEnricher
         $vatNumber = is_string($party['vat_number'] ?? null) ? $party['vat_number'] : null;
         $name = is_string($party['name'] ?? null) ? $party['name'] : null;
         $label = $this->partyLabel(is_string($party['role'] ?? null) ? $party['role'] : null);
+        $createIfMissing = ($party['create_if_missing'] ?? false) === true;
 
         if ($externalId !== null) {
             $known = ConnectionAccountingRef::query()
@@ -152,7 +153,7 @@ final class ExactReportEnricher
             return [$this->relationMatched($label, $match['name'], $match['id'], $name)];
         }
 
-        return [$this->relationNew($label, $name, $connection)];
+        return [$this->relationNew($label, $name, $connection, $createIfMissing)];
     }
 
     private function relationMatched(string $label, ?string $matchedName, string $nativeId, ?string $current): Finding
@@ -170,23 +171,30 @@ final class ExactReportEnricher
     }
 
     /**
-     * De relatie ontbreekt. Of dat erg is hangt aan de koppeling: met automatisch aanmaken aan
-     * maakt de boeking 'm zelf (Info), zonder weigert die met een 422 (Warning). Beide gevallen
-     * dezelfde `code` — de severity draagt het verschil, zodat een consumer die alleen op codes
-     * filtert niet stilzwijgend in de weigering loopt.
+     * De relatie ontbreekt. Of dat erg is hangt af van dezelfde twee vlaggen als het
+     * schrijfpad ({@see ExactRelationResolver}): `party.create_if_missing` vraagt aan, de
+     * Connection kan alleen nog vetoën (`auto_create_relations === false`). Vraagt het
+     * document niet aan, of vetoot de Connection, dan weigert de boeking (Warning); anders
+     * maakt de boeking de relatie zelf aan (Info). Beide gevallen dezelfde `code` — de
+     * severity draagt het verschil, zodat een consumer die alleen op codes filtert niet
+     * stilzwijgend in de weigering loopt.
      */
-    private function relationNew(string $label, ?string $name, Connection $connection): Finding
+    private function relationNew(string $label, ?string $name, Connection $connection, bool $createIfMissing): Finding
     {
-        $mapping = $connection->metadata['accounting_mapping'] ?? [];
-        $autoCreates = is_array($mapping) && ($mapping['auto_create_relations'] ?? false) === true;
+        $vetoed = $connection->autoCreateRelationsVetoed();
+        $autoCreates = $createIfMissing && ! $vetoed;
+
+        $message = match (true) {
+            $autoCreates => "{$label} staat nog niet in de administratie en wordt bij het boeken automatisch aangemaakt.",
+            $createIfMissing && $vetoed => "{$label} staat nog niet in de administratie — deze koppeling staat automatisch aanmaken niet toe, dus de boeking wordt geweigerd. Voeg de relatie zelf toe in de administratie.",
+            default => "{$label} staat nog niet in de administratie — de boeking wordt geweigerd. Zet party.create_if_missing op true om 'm automatisch te laten aanmaken, of voeg de relatie zelf toe in de administratie.",
+        };
 
         return new Finding(
             code: 'exact.relation.new',
             severity: $autoCreates ? Severity::Info : Severity::Warning,
             path: 'party',
-            message: $autoCreates
-                ? "{$label} staat nog niet in de administratie en wordt bij het boeken automatisch aangemaakt."
-                : "{$label} staat nog niet in de administratie — de boeking wordt geweigerd. Voeg de relatie toe in de administratie, of laat automatisch aanmaken inschakelen op deze koppeling.",
+            message: $message,
             current: $name,
             suggestion: null,
         );

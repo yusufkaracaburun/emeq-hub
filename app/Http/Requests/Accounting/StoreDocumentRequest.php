@@ -9,6 +9,7 @@ use App\Accounting\Enums\TaxTreatment;
 use App\Rules\ValidVatNumber;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Validator;
 
 /**
  * Edge-validatie van het canonical FinancialDocument (Hub-conventie: dunne SDK's,
@@ -42,6 +43,7 @@ class StoreDocumentRequest extends FormRequest
             'party.vat_number' => ['nullable', 'string', 'max:64', new ValidVatNumber],
             'party.iban' => ['nullable', 'string', 'max:64'],
             'party.external_id' => ['nullable', 'string', 'max:255'],
+            'party.create_if_missing' => ['boolean'],
 
             'lines' => ['required', 'array', 'min:1'],
             'lines.*.description' => ['required', 'string', 'max:1000'],
@@ -63,5 +65,20 @@ class StoreDocumentRequest extends FormRequest
             'attachments.*.mime_type' => ['required', 'string', Rule::in(['application/pdf', 'image/png', 'image/jpeg'])],
             'attachments.*.content' => ['required', 'string', 'max:1400000'],
         ];
+    }
+
+    public function withValidator(Validator $validator): void
+    {
+        $validator->after(function (Validator $validator): void {
+            // Zonder external_id slaat ExactRelationResolver::learn() de mirror-link over: de
+            // volgende boeking leunt dan volledig op findRelation(), die bij een ambigue naam
+            // zonder btw-nummer bewust null teruggeeft — een tweede aangemaakte relatie.
+            if ($this->boolean('party.create_if_missing') && trim((string) $this->input('party.external_id')) === '') {
+                $validator->errors()->add(
+                    'party.external_id',
+                    'party.external_id is verplicht wanneer party.create_if_missing = true — anders kan de Hub de aangemaakte relatie niet herkennen bij een volgende boeking.',
+                );
+            }
+        });
     }
 }

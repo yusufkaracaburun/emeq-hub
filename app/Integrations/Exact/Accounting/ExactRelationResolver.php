@@ -23,9 +23,11 @@ use Emeq\ExactApi\OData\Envelope;
  * → Exact-relatie-GUID via de mirror; bij een miss match op de party-data (VATNumber, anders
  * Name) en leer de link in de mirror. Niet gevonden → null (de caller geeft een 422).
  *
- * Auto-create van een ontbrekende relatie is opt-in per Connection
- * (`metadata.accounting_mapping.auto_create_relations === true`): geen match én opt-in aan
- * → maak de relatie in Exact (`crm/Accounts`) en leer 'm. Default uit → blijft 422.
+ * Auto-create van een ontbrekende relatie vraagt de consumer expliciet aan per document
+ * (`party.create_if_missing === true`) — een Connection-brede opt-in zou elke typefout in
+ * een partijnaam onomkeerbaar in andermans administratie zetten. De Connection behoudt enkel
+ * een veto: staat `metadata.accounting_mapping.auto_create_relations` expliciet op `false`,
+ * dan blijft het 422 ongeacht de document-intentie. Onbezet (of `true`) vetoot niet.
  */
 final class ExactRelationResolver
 {
@@ -56,21 +58,14 @@ final class ExactRelationResolver
             return $match['id'];
         }
 
-        if ($this->autoCreateEnabled($connection)) {
+        if ($party->createIfMissing && ! $connection->autoCreateRelationsVetoed()) {
             $guid = $this->createRelation($party, $connection);
-            $this->learn($connection, $externalId, $guid, $party->name);
+            $this->learn($connection, $externalId, $guid, $party->name, createdByHub: true);
 
             return $guid;
         }
 
         return null;
-    }
-
-    private function autoCreateEnabled(Connection $connection): bool
-    {
-        $mapping = $connection->metadata['accounting_mapping'] ?? [];
-
-        return is_array($mapping) && ($mapping['auto_create_relations'] ?? false) === true;
     }
 
     /**
@@ -174,10 +169,24 @@ final class ExactRelationResolver
         }
     }
 
-    private function learn(Connection $connection, ?string $externalId, string $guid, string $name): void
+    /**
+     * `$createdByHub` markeert `attrs.created_by_hub` — het onderscheid tussen een relatie die
+     * de Hub zelf in andermans administratie heeft gezet en een die enkel gematcht is.
+     */
+    private function learn(Connection $connection, ?string $externalId, string $guid, string $name, bool $createdByHub = false): void
     {
         if ($externalId === null || $externalId === '') {
             return;
+        }
+
+        $values = [
+            'native_id' => $guid,
+            'label' => $name !== '' ? $name : null,
+            'synced_at' => now(),
+        ];
+
+        if ($createdByHub) {
+            $values['attrs'] = ['created_by_hub' => true];
         }
 
         ConnectionAccountingRef::query()->updateOrCreate(
@@ -186,11 +195,7 @@ final class ExactRelationResolver
                 'kind' => ConnectionAccountingRef::KIND_RELATION,
                 'code' => $externalId,
             ],
-            [
-                'native_id' => $guid,
-                'label' => $name !== '' ? $name : null,
-                'synced_at' => now(),
-            ],
+            $values,
         );
     }
 }

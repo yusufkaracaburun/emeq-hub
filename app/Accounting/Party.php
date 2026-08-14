@@ -16,6 +16,7 @@ final readonly class Party
         public ?string $vatNumber = null,
         public ?string $iban = null,
         public ?string $externalId = null,
+        public bool $createIfMissing = false,
     ) {}
 
     /**
@@ -29,6 +30,7 @@ final readonly class Party
             vatNumber: isset($data['vat_number']) ? (string) $data['vat_number'] : null,
             iban: isset($data['iban']) ? (string) $data['iban'] : null,
             externalId: isset($data['external_id']) ? (string) $data['external_id'] : null,
+            createIfMissing: (bool) ($data['create_if_missing'] ?? false),
         );
     }
 }

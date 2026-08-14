@@ -51,9 +51,10 @@ class ValidateDocumentTest extends TestCase
     }
 
     /**
+     * @param  array<string, mixed>  $mappingOverrides
      * @return array{0: Consumer}
      */
-    private function consumerWithExactConnection(): array
+    private function consumerWithExactConnection(array $mappingOverrides = []): array
     {
         $consumer = Consumer::factory()->create();
         $account = $consumer->accounts()->create([
@@ -65,7 +66,7 @@ class ValidateDocumentTest extends TestCase
             'account_id' => $account->id,
             'status' => 'active',
             'expires_at' => now()->addSeconds(600),
-            'metadata' => ['accounting_mapping' => ['vat_codes' => ['21' => '4']]],
+            'metadata' => ['accounting_mapping' => array_merge(['vat_codes' => ['21' => '4']], $mappingOverrides)],
         ]);
 
         return [$consumer];
@@ -222,6 +223,7 @@ class ValidateDocumentTest extends TestCase
 
     public function test_new_supplier_when_no_exact_match(): void
     {
+        // Geen party.create_if_missing → dezelfde uitkomst als de boeking (422): warning.
         [$consumer] = $this->consumerWithExactConnection();
         $token = $consumer->createToken('t', [TokenAbilities::EXACT_READ])->plainTextToken;
         $this->mockRelations([]); // geen treffer
@@ -234,7 +236,43 @@ class ValidateDocumentTest extends TestCase
                 'lines' => [['description' => 'Dienst', 'amount' => 100, 'tax_rate' => 21]],
             ])
             ->assertStatus(200)
-            ->assertJsonFragment(['code' => 'exact.relation.new']);
+            ->assertJsonFragment(['code' => 'exact.relation.new', 'severity' => 'warning']);
+    }
+
+    public function test_new_supplier_is_info_when_create_if_missing_requested_and_not_vetoed(): void
+    {
+        // Spiegelt het schrijfpad: create_if_missing aan + geen Connection-veto → de boeking
+        // maakt de relatie zelf aan, dus de dry-run mag dit niet als een weigering melden.
+        [$consumer] = $this->consumerWithExactConnection();
+        $token = $consumer->createToken('t', [TokenAbilities::EXACT_READ])->plainTextToken;
+        $this->mockRelations([]); // geen treffer
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->withHeader('X-Account-Id', 'school1')
+            ->postJson('/v1/accounting/documents/validate', [
+                'type' => 'purchase_invoice',
+                'party' => ['role' => 'creditor', 'name' => 'Onbekende BV', 'vat_number' => 'NL000099998B57', 'create_if_missing' => true],
+                'lines' => [['description' => 'Dienst', 'amount' => 100, 'tax_rate' => 21]],
+            ])
+            ->assertStatus(200)
+            ->assertJsonFragment(['code' => 'exact.relation.new', 'severity' => 'info']);
+    }
+
+    public function test_new_supplier_stays_warning_when_connection_vetoes_despite_create_if_missing(): void
+    {
+        [$consumer] = $this->consumerWithExactConnection(['auto_create_relations' => false]);
+        $token = $consumer->createToken('t', [TokenAbilities::EXACT_READ])->plainTextToken;
+        $this->mockRelations([]); // geen treffer
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->withHeader('X-Account-Id', 'school1')
+            ->postJson('/v1/accounting/documents/validate', [
+                'type' => 'purchase_invoice',
+                'party' => ['role' => 'creditor', 'name' => 'Onbekende BV', 'vat_number' => 'NL000099998B57', 'create_if_missing' => true],
+                'lines' => [['description' => 'Dienst', 'amount' => 100, 'tax_rate' => 21]],
+            ])
+            ->assertStatus(200)
+            ->assertJsonFragment(['code' => 'exact.relation.new', 'severity' => 'warning']);
     }
 
     public function test_without_exact_ability_returns_403(): void

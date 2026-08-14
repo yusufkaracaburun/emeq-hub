@@ -550,10 +550,11 @@ class StoreDocumentTest extends TestCase
         MockClient::global()->assertSent(fn (CreatePurchaseEntry $request): bool => $request->body()->all()['PurchaseEntryLines'][0]['GLAccount'] === 'gl-kosten-guid');
     }
 
-    public function test_auto_creates_relation_when_opt_in_and_no_match(): void
+    public function test_auto_creates_relation_when_document_requests_it_and_no_match(): void
     {
-        // Geen fake → de echte resolver. Opt-in aan + geen match → relatie wordt in Exact
-        // aangemaakt (crm/Accounts) en geleerd, daarna boekt de verkoopboeking erop.
+        // Geen fake → de echte resolver. Document vraagt create_if_missing aan + geen match →
+        // relatie wordt in Exact aangemaakt (crm/Accounts) en geleerd als 'door de Hub
+        // aangemaakt', daarna boekt de verkoopboeking erop.
         MockClient::global([
             GetRelations::class => MockResponse::make(['d' => ['results' => []]], 200),
             CreateAccount::class => MockResponse::make(['d' => ['ID' => 'new-rel-guid']], 201),
@@ -565,7 +566,6 @@ class StoreDocumentTest extends TestCase
                 'vat_codes' => ['21' => '4'],
                 'gl_accounts' => ['_default' => 'gl-def'],
                 'journals' => ['sales' => '70'],
-                'auto_create_relations' => true,
             ]],
         ]);
 
@@ -582,7 +582,7 @@ class StoreDocumentTest extends TestCase
             ->withHeader('X-Account-Id', 'school1')
             ->withHeader('Idempotency-Key', (string) Str::uuid())
             ->postJson('/v1/accounting/documents', $this->salesInvoicePayload([
-                'party' => ['role' => 'debtor', 'name' => 'Nieuwe Klant', 'external_id' => 'nieuw-1'],
+                'party' => ['role' => 'debtor', 'name' => 'Nieuwe Klant', 'external_id' => 'nieuw-1', 'create_if_missing' => true],
             ]))
             ->assertStatus(201)
             ->assertJsonPath('external_ref', 'inv-1');
@@ -607,11 +607,70 @@ class StoreDocumentTest extends TestCase
             'code' => 'nieuw-1',
             'native_id' => 'new-rel-guid',
         ]);
+
+        // Onderscheid in de mirror: deze relatie is door de Hub aangemaakt, niet gematcht.
+        $ref = ConnectionAccountingRef::query()
+            ->where('connection_id', $connection->getKey())
+            ->where('kind', ConnectionAccountingRef::KIND_RELATION)
+            ->where('code', 'nieuw-1')
+            ->first();
+
+        $this->assertSame(['created_by_hub' => true], $ref->attrs);
     }
 
-    public function test_unknown_relation_without_opt_in_returns_422(): void
+    public function test_auto_creates_creditor_relation_with_is_supplier_flag(): void
     {
-        // Opt-in staat default uit → geen match blijft een 422; er wordt géén relatie aangemaakt.
+        MockClient::global([
+            GetRelations::class => MockResponse::make(['d' => ['results' => []]], 200),
+            CreateAccount::class => MockResponse::make(['d' => ['ID' => 'new-supp-guid']], 201),
+            CreatePurchaseEntry::class => MockResponse::make(['d' => ['ID' => 'pe-1']], 201),
+        ]);
+
+        [$consumer, $connection] = $this->consumerWithExactConnection([
+            'metadata' => ['accounting_mapping' => [
+                'vat_codes' => ['21' => '4'],
+                'gl_accounts' => ['_default' => 'gl-def'],
+                'journals' => ['purchase' => '70'],
+            ]],
+        ]);
+
+        ConnectionAccountingRef::query()->create([
+            'connection_id' => $connection->getKey(),
+            'kind' => ConnectionAccountingRef::KIND_GL,
+            'code' => 'gl-def',
+            'native_id' => 'gl-def-guid',
+        ]);
+
+        $token = $consumer->createToken('t', [TokenAbilities::EXACT_WRITE])->plainTextToken;
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->withHeader('X-Account-Id', 'school1')
+            ->withHeader('Idempotency-Key', (string) Str::uuid())
+            ->postJson('/v1/accounting/documents', $this->salesInvoicePayload([
+                'type' => 'purchase_invoice',
+                'party' => ['role' => 'creditor', 'name' => 'Nieuwe Leverancier', 'external_id' => 'nieuw-supp-1', 'create_if_missing' => true],
+            ]))
+            ->assertStatus(201);
+
+        MockClient::global()->assertSent(function ($request): bool {
+            if (! $request instanceof CreateAccount) {
+                return false;
+            }
+
+            $body = $request->body()->all();
+
+            return $body['Name'] === 'Nieuwe Leverancier'
+                && $body['IsSupplier'] === true
+                && ! array_key_exists('IsSales', $body)
+                && ! array_key_exists('Status', $body);
+        });
+
+        MockClient::global()->assertSent(fn ($request): bool => $request instanceof CreatePurchaseEntry && $request->body()->all()['Supplier'] === 'new-supp-guid');
+    }
+
+    public function test_unknown_relation_without_create_if_missing_returns_422(): void
+    {
+        // Geen document-intentie → geen match blijft een 422; er wordt géén relatie aangemaakt.
         MockClient::global([
             GetRelations::class => MockResponse::make(['d' => ['results' => []]], 200),
         ]);
@@ -649,6 +708,157 @@ class StoreDocumentTest extends TestCase
             'kind' => ConnectionAccountingRef::KIND_RELATION,
             'code' => 'onbekend-1',
         ]);
+    }
+
+    public function test_connection_flag_alone_no_longer_auto_creates_without_document_intent(): void
+    {
+        // Regressie-guard: vóór #58 was `auto_create_relations: true` op zichzelf genoeg.
+        // Sinds #58 is de Connection-vlag alleen nog een veto — zonder party.create_if_missing
+        // blijft het 422, ook als de Connection auto-create expliciet toestaat.
+        MockClient::global([
+            GetRelations::class => MockResponse::make(['d' => ['results' => []]], 200),
+        ]);
+
+        [$consumer, $connection] = $this->consumerWithExactConnection([
+            'metadata' => ['accounting_mapping' => [
+                'vat_codes' => ['21' => '4'],
+                'gl_accounts' => ['_default' => 'gl-def'],
+                'journals' => ['sales' => '70'],
+                'auto_create_relations' => true,
+            ]],
+        ]);
+
+        ConnectionAccountingRef::query()->create([
+            'connection_id' => $connection->getKey(),
+            'kind' => ConnectionAccountingRef::KIND_GL,
+            'code' => 'gl-def',
+            'native_id' => 'gl-def-guid',
+        ]);
+
+        $token = $consumer->createToken('t', [TokenAbilities::EXACT_WRITE])->plainTextToken;
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->withHeader('X-Account-Id', 'school1')
+            ->withHeader('Idempotency-Key', (string) Str::uuid())
+            ->postJson('/v1/accounting/documents', $this->salesInvoicePayload([
+                'party' => ['role' => 'debtor', 'name' => 'Onbekende Klant', 'external_id' => 'onbekend-2'],
+            ]))
+            ->assertStatus(422)
+            ->assertJsonPath('error', 'mapping_failed');
+
+        MockClient::global()->assertNotSent(CreateAccount::class);
+    }
+
+    public function test_connection_veto_wins_over_create_if_missing(): void
+    {
+        // De operator heeft auto-create expliciet uitgezet — dat wint altijd, ook als het
+        // document create_if_missing aanvraagt.
+        MockClient::global([
+            GetRelations::class => MockResponse::make(['d' => ['results' => []]], 200),
+        ]);
+
+        [$consumer, $connection] = $this->consumerWithExactConnection([
+            'metadata' => ['accounting_mapping' => [
+                'vat_codes' => ['21' => '4'],
+                'gl_accounts' => ['_default' => 'gl-def'],
+                'journals' => ['sales' => '70'],
+                'auto_create_relations' => false,
+            ]],
+        ]);
+
+        ConnectionAccountingRef::query()->create([
+            'connection_id' => $connection->getKey(),
+            'kind' => ConnectionAccountingRef::KIND_GL,
+            'code' => 'gl-def',
+            'native_id' => 'gl-def-guid',
+        ]);
+
+        $token = $consumer->createToken('t', [TokenAbilities::EXACT_WRITE])->plainTextToken;
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->withHeader('X-Account-Id', 'school1')
+            ->withHeader('Idempotency-Key', (string) Str::uuid())
+            ->postJson('/v1/accounting/documents', $this->salesInvoicePayload([
+                'party' => ['role' => 'debtor', 'name' => 'Onbekende Klant', 'external_id' => 'onbekend-3', 'create_if_missing' => true],
+            ]))
+            ->assertStatus(422)
+            ->assertJsonPath('error', 'mapping_failed');
+
+        MockClient::global()->assertNotSent(CreateAccount::class);
+    }
+
+    public function test_create_if_missing_without_external_id_is_rejected_at_edge(): void
+    {
+        [$consumer] = $this->consumerWithExactConnection();
+        $token = $consumer->createToken('t', [TokenAbilities::EXACT_WRITE])->plainTextToken;
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->withHeader('X-Account-Id', 'school1')
+            ->withHeader('Idempotency-Key', (string) Str::uuid())
+            ->postJson('/v1/accounting/documents', $this->salesInvoicePayload([
+                'party' => ['role' => 'debtor', 'name' => 'Nieuwe Klant Zonder ID', 'create_if_missing' => true],
+            ]))
+            ->assertStatus(422)
+            ->assertJsonValidationErrors('party.external_id');
+
+        $this->assertDatabaseCount('pass_through_calls', 0);
+    }
+
+    public function test_booking_same_party_twice_creates_one_relation_even_with_duplicate_name_and_no_vat(): void
+    {
+        // Naam komt dubbel voor in de administratie én geen btw-nummer → findRelation() is
+        // ambigu en geeft null. Zonder de external_id-verplichting op create_if_missing zou
+        // dat een tweede CreateAccount opleveren; de mirror-hit op external_id voorkomt dat.
+        MockClient::global([
+            GetRelations::class => MockResponse::make(['d' => ['results' => [
+                ['ID' => 'dup-rel-1', 'Code' => 'C001', 'Name' => 'Dubbele Naam BV', 'IsSales' => true, 'IsSupplier' => false, 'Status' => 'C'],
+                ['ID' => 'dup-rel-2', 'Code' => 'C002', 'Name' => 'Dubbele Naam BV', 'IsSales' => true, 'IsSupplier' => false, 'Status' => 'C'],
+            ]]], 200),
+            CreateAccount::class => MockResponse::make(['d' => ['ID' => 'new-dup-guid']], 201),
+            CreateSalesEntry::class => MockResponse::make(['d' => ['ID' => 'inv-1']], 201),
+        ]);
+
+        [$consumer, $connection] = $this->consumerWithExactConnection([
+            'metadata' => ['accounting_mapping' => [
+                'vat_codes' => ['21' => '4'],
+                'gl_accounts' => ['_default' => 'gl-def'],
+                'journals' => ['sales' => '70'],
+            ]],
+        ]);
+
+        ConnectionAccountingRef::query()->create([
+            'connection_id' => $connection->getKey(),
+            'kind' => ConnectionAccountingRef::KIND_GL,
+            'code' => 'gl-def',
+            'native_id' => 'gl-def-guid',
+        ]);
+
+        $token = $consumer->createToken('t', [TokenAbilities::EXACT_WRITE])->plainTextToken;
+        $party = ['role' => 'debtor', 'name' => 'Dubbele Naam BV', 'external_id' => 'dup-1', 'create_if_missing' => true];
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->withHeader('X-Account-Id', 'school1')
+            ->withHeader('Idempotency-Key', (string) Str::uuid())
+            ->postJson('/v1/accounting/documents', $this->salesInvoicePayload([
+                'external_id' => 'INV-DUP-1',
+                'party' => $party,
+            ]))
+            ->assertStatus(201);
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->withHeader('X-Account-Id', 'school1')
+            ->withHeader('Idempotency-Key', (string) Str::uuid())
+            ->postJson('/v1/accounting/documents', $this->salesInvoicePayload([
+                'external_id' => 'INV-DUP-2',
+                'party' => $party,
+            ]))
+            ->assertStatus(201);
+
+        MockClient::global()->assertSentCount(1, CreateAccount::class);
+
+        $this->assertDatabaseCount('connection_accounting_refs', 2); // 1× GL (seed) + 1× relatie
+
+        MockClient::global()->assertSent(fn ($request): bool => $request instanceof CreateSalesEntry && $request->body()->all()['Customer'] === 'new-dup-guid');
     }
 
     public function test_line_amount_drives_booking_without_quantity_or_price(): void
