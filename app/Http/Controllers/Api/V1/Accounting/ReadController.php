@@ -25,6 +25,7 @@ use App\Integrations\Errors\UpstreamErrorMapperRegistry;
 use App\Integrations\Exceptions\ProviderDisabledException;
 use App\Sanctum\TokenAbilities;
 use Dedoc\Scramble\Attributes\Group;
+use Dedoc\Scramble\Attributes\Response;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -63,6 +64,7 @@ class ReadController extends Controller
      * eigen cursor, dus "alles" is niet in één pagina te leveren zonder te liegen
      * over de volgorde.
      */
+    #[Response(200, type: 'array{data: list<array{id: string, type: string, number: string|null, external_id: string|null, issue_date: string|null, due_date: string|null, reference: string|null, party: array{id: string|null, name: string|null}, journal: string|null, currency: string, net_total: float, lines: list<array{description: string|null, amount: float, tax_code: string|null, ledger_account_id: string|null, cost_center: string|null, cost_unit: string|null}>}>, next_cursor: string|null, has_more: bool}')]
     public function documents(Request $request): JsonResponse
     {
         $type = $request->query('type');
