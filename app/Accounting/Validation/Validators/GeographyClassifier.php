@@ -28,6 +28,7 @@ final class GeographyClassifier implements DocumentValidator
             return [new Finding(
                 code: 'geography.country_mismatch',
                 severity: Severity::Warning,
+                blocking: false, // advies; het boekpad kent geen kruischeck btw-land/iban-land
                 path: 'party',
                 message: "Het btw-nummer hoort bij {$vatCountry}, het rekeningnummer bij {$ibanCountry}. Controleer of beide van dezelfde partij zijn.",
                 current: ['vat_country' => $vatCountry, 'iban_country' => $ibanCountry],

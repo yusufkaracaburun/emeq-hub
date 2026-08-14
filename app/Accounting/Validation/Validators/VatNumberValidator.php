@@ -52,10 +52,13 @@ final class VatNumberValidator implements DocumentValidator
         if (! $this->matchesFormat($country, $normalized)) {
             // NL valideert Exact strikt op formaat → een misvormd NL-nummer faalt de boeking
             // deterministisch en is dus een harde fout. Overige EU-formaten houden we advisory
-            // (Exact's gedrag per land minder zeker).
+            // (Exact's gedrag per land minder zeker) — en het boekpad (ValidVatNumber-rule)
+            // controleert niet-NL alleen op het generieke EU-formaat, dus zo'n waarde passeert
+            // daar vaak alsnog: niet blocking.
             return [new Finding(
                 code: 'vat_number.malformed',
                 severity: $country === 'NL' ? Severity::Error : Severity::Warning,
+                blocking: $country === 'NL',
                 path: 'party.vat_number',
                 message: "Het btw-nummer heeft niet de vorm van een {$country}-btw-nummer. Controleer het nummer op de factuur.",
                 current: $raw,
@@ -74,6 +77,7 @@ final class VatNumberValidator implements DocumentValidator
             return [new Finding(
                 code: 'vat_number.checksum',
                 severity: Severity::Error,
+                blocking: true,
                 path: 'party.vat_number',
                 message: "{$subject} klopt niet — het bestaat niet in deze vorm. Een Nederlands btw-nummer is NL + 9 cijfers + B + 2 cijfers (bijvoorbeeld NL000099998B57). De boeking wordt hierop geweigerd.",
                 current: $raw,
@@ -85,6 +89,7 @@ final class VatNumberValidator implements DocumentValidator
             return [new Finding(
                 code: 'vat_number.normalize',
                 severity: Severity::Info,
+                blocking: false, // het boekpad normaliseert intern vóór de formaatcheck
                 path: 'party.vat_number',
                 message: 'Het btw-nummer klopt, maar staat met spaties of leestekens. Wij stellen de nette schrijfwijze voor.',
                 current: $raw,

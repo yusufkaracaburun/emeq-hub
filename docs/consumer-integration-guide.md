@@ -608,9 +608,9 @@ X-Account-Id: bob
 ```json
 {
   "valid": false,
-  "summary": { "errors": 1, "warnings": 2, "infos": 1 },
+  "summary": { "errors": 1, "warnings": 2, "infos": 1, "blocking": 2 },
   "findings": [
-    { "code": "vat_treatment.domestic_rate_on_non_eu", "severity": "error",
+    { "code": "vat_treatment.domestic_rate_on_non_eu", "severity": "error", "blocking": true,
       "path": "lines.0.tax_rate", "message": "…", "current": 21, "suggestion": 0 }
   ]
 }
@@ -621,41 +621,54 @@ X-Account-Id: bob
 daarná. Elke finding draagt `current` (aangeleverd) + `suggestion` (voorgestelde
 correctie of `null`) — pas een suggestie alleen toe na bevestiging.
 
+**Stuur je "mag dit geboekt worden?"-logica op `blocking`, niet op `severity` of
+`valid`.** Sommige `warning`-findings (bv. `exact.relation.new` zonder auto-create,
+`exact.vat_code.unmapped`) laten `valid` op `true` staan terwijl de daaropvolgende
+boek-POST gegarandeerd een `422` teruggeeft — `severity` zegt hoe ernstig een bevinding
+is, `blocking` zegt of ze de boeking tegenhoudt, en de twee kantelen niet automatisch
+in elkaar. Andere warnings (bv. `arithmetic.total_mismatch`, de drie velden die je
+tijdens het boeken nog aanvult: `external_id`, `issue_date`, `party.role`) zijn puur
+advies en blokkeren niets. `summary.blocking` telt hoeveel findings dat zijn.
+
 Een ongeldig NL-btw-nummer (fout formaat of fout controlecijfer/11-proef,
 `vat_number.malformed` / `vat_number.checksum`) is een **`error`** — Exact weigert
 zo'n boeking hard, dus `validate` houdt 'm tegen vóór je POST. Buitenlandse
-EU-formaten blijven `warning`.
+EU-formaten blijven `warning` en zijn niet blocking (het boekpad valideert niet-NL
+alleen generiek).
 
 Let op bij de `exact.*`-warnings: die blokkeren `valid` niet, maar een ontbrekende
 mapping (`vat_code.unmapped`, `relation.new` zonder auto-create, `cost_center.unmapped`,
-`cost_unit.unmapped`) laat de daaropvolgende boek-POST wél met een `422` stranden.
-Behandel ze in je UI als "eerst oplossen", niet als vrijblijvend advies.
+`cost_unit.unmapped`) laat de daaropvolgende boek-POST wél met een `422` stranden —
+`blocking` staat op deze findings op `true`. Behandel ze in je UI als "eerst oplossen",
+niet als vrijblijvend advies.
 
 De `message` is bedoeld om ongewijzigd aan de eindgebruiker te tonen — Nederlands,
 zonder Exact-jargon, met de consequentie en de handeling erin. Stuur je logica op
-`code` + `severity`; de tekst kan tussen releases wijzigen zonder breaking change.
+`code` + `blocking`; de tekst kan tussen releases wijzigen zonder breaking change.
 
-| Code | Severity | Betekenis |
-|---|---|---|
-| `arithmetic.amount_not_numeric` | warning | Regelbedrag niet numeriek |
-| `arithmetic.line_amount_mismatch` | warning | `amount` ≠ `quantity × unit_price` |
-| `arithmetic.subtotal_mismatch` | warning | `subtotal` ≠ som van de regels |
-| `arithmetic.tax_total_mismatch` | warning | `tax_total` ≠ berekende BTW |
-| `arithmetic.total_mismatch` | warning | `total` ≠ netto + BTW − korting |
-| `iban.checksum_invalid` | error | IBAN faalt mod-97/lengte |
-| `iban.normalize` | info | IBAN geldig maar niet genormaliseerd |
-| `vat_number.malformed` | warning | BTW-nummer matcht landpatroon niet |
-| `vat_number.checksum` | warning | NL BTW-nummer faalt de 11-proef (controlecijfer) — het pakket weigert dit |
-| `vat_number.normalize` | info | BTW-nummer geldig maar niet genormaliseerd |
-| `vat_treatment.reverse_charge_expected` | warning | Intra-EU B2B met BTW-nr → verlegd verwacht (zet `tax_treatment: reverse_charge`) |
-| `vat_treatment.domestic_rate_on_non_eu` | error | Niet-EU leverancier met binnenlands tarief |
-| `geography.country_mismatch` | warning | Land uit BTW-nr ≠ land uit IBAN |
-| `currency.foreign` | info | Andere valuta dan EUR |
-| `exact.vat_code.unmapped` | warning | Tarief nog niet gekoppeld aan een Exact-VATCode (een gekoppeld tarief levert géén finding) |
-| `exact.relation.matched` | info | Relatie = bestaande Exact-relatie (`suggestion` = GUID). Match op `party.external_id` uit de mirror, anders op btw-nummer/naam |
-| `exact.relation.new` | info **of** warning | Relatie nog niet in Exact. `info` = het document zet `party.create_if_missing: true` en auto-create staat niet uit op de koppeling — de boeking maakt 'm aan. **`warning` = `create_if_missing` ontbreekt of staat uit, óf de koppeling zet auto-create expliciet uit — de boeking geeft dan een `422`.** Lees dus de severity, niet alleen de code |
-| `exact.cost_center.matched` / `exact.cost_unit.matched` | info | Opgegeven kostenplaats/-drager bestaat in de administratie |
-| `exact.cost_center.unmapped` / `exact.cost_unit.unmapped` | warning | Kostenplaats/-drager onbekend — de boeking weigert hierop. Corrigeer de Code of draai `POST /v1/accounting/sync` |
+| Code | Severity | Blocking | Betekenis |
+|---|---|---|---|
+| `arithmetic.amount_not_numeric` | warning | ja | Regelbedrag niet numeriek — `lines.*.amount` moet numeriek zijn om te boeken |
+| `arithmetic.line_amount_mismatch` | warning | nee | `amount` ≠ `quantity × unit_price` — advies |
+| `arithmetic.subtotal_mismatch` | warning | nee | `subtotal` ≠ som van de regels — bestaat niet op het boekcontract |
+| `arithmetic.tax_total_mismatch` | warning | nee | `tax_total` ≠ berekende BTW — bestaat niet op het boekcontract |
+| `arithmetic.total_mismatch` | warning | nee | `total` ≠ netto + BTW − korting — bestaat niet op het boekcontract |
+| `iban.checksum_invalid` | error | ja | IBAN faalt mod-97/lengte |
+| `iban.normalize` | info | nee | IBAN geldig maar niet genormaliseerd |
+| `vat_number.malformed` | error (NL) / warning (overig) | ja (NL) / nee (overig) | BTW-nummer matcht landpatroon niet |
+| `vat_number.checksum` | error | ja | NL BTW-nummer faalt de 11-proef (controlecijfer) — het pakket weigert dit |
+| `vat_number.normalize` | info | nee | BTW-nummer geldig maar niet genormaliseerd |
+| `vat_treatment.reverse_charge_expected` | warning | nee | Intra-EU B2B met BTW-nr → verlegd verwacht (zet `tax_treatment: reverse_charge`) — advies |
+| `vat_treatment.domestic_rate_on_non_eu` | error | ja | Niet-EU leverancier met binnenlands tarief |
+| `geography.country_mismatch` | warning | nee | Land uit BTW-nr ≠ land uit IBAN — advies |
+| `currency.foreign` | info | nee | Andere valuta dan EUR |
+| `document.*` (type/party/lines) | error | ja | Zonder deze velden valt er niets te boeken |
+| `document.external_id.missing` / `document.issue_date.missing` / `document.party.role.missing` | warning | nee | Vul je alsnog in tijdens het boeken |
+| `exact.vat_code.unmapped` | warning | ja | Tarief nog niet gekoppeld aan een Exact-VATCode (een gekoppeld tarief levert géén finding) |
+| `exact.relation.matched` | info | nee | Relatie = bestaande Exact-relatie (`suggestion` = GUID). Match op `party.external_id` uit de mirror, anders op btw-nummer/naam |
+| `exact.relation.new` | info **of** warning | nee (info) / ja (warning) | Relatie nog niet in Exact. `info` = het document zet `party.create_if_missing: true` en auto-create staat niet uit op de koppeling — de boeking maakt 'm aan. **`warning` = `create_if_missing` ontbreekt of staat uit, óf de koppeling zet auto-create expliciet uit — de boeking geeft dan een `422`.** Lees `blocking`, niet de severity of de tekst |
+| `exact.cost_center.matched` / `exact.cost_unit.matched` | info | nee | Opgegeven kostenplaats/-drager bestaat in de administratie |
+| `exact.cost_center.unmapped` / `exact.cost_unit.unmapped` | warning | ja | Kostenplaats/-drager onbekend — de boeking weigert hierop. Corrigeer de Code of draai `POST /v1/accounting/sync` |
 
 > `exact.*` verschijnen alleen bij een Exact-connection; de rest is provider-agnostisch.
 

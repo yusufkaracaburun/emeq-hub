@@ -28,6 +28,7 @@ class IbanValidatorTest extends TestCase
         $this->assertCount(1, $findings);
         $this->assertSame('iban.checksum_invalid', $findings[0]->code);
         $this->assertSame(Severity::Error, $findings[0]->severity);
+        $this->assertTrue($findings[0]->blocking);
     }
 
     public function test_unnormalized_iban_suggests_normalized_form(): void
@@ -39,6 +40,7 @@ class IbanValidatorTest extends TestCase
         $this->assertCount(1, $findings);
         $this->assertSame('iban.normalize', $findings[0]->code);
         $this->assertSame('NL91ABNA0417164300', $findings[0]->suggestion);
+        $this->assertFalse($findings[0]->blocking); // het boekpad valideert de IBAN-vorm niet
     }
 
     public function test_absent_iban_is_skipped(): void

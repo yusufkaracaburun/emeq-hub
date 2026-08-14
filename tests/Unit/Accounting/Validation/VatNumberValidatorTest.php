@@ -30,6 +30,21 @@ class VatNumberValidatorTest extends TestCase
         $this->assertCount(1, $findings);
         $this->assertSame('vat_number.malformed', $findings[0]->code);
         $this->assertSame(Severity::Error, $findings[0]->severity);
+        $this->assertTrue($findings[0]->blocking);
+    }
+
+    public function test_malformed_non_nl_vat_number_is_warning_and_not_blocking(): void
+    {
+        // Het boekpad (ValidVatNumber-rule) checkt niet-NL alleen op het generieke
+        // EU-formaat — een misvormd DE-nummer zoals dit passeert daar alsnog.
+        $findings = (new VatNumberValidator)->validate([
+            'party' => ['vat_number' => 'DE12'],
+        ]);
+
+        $this->assertCount(1, $findings);
+        $this->assertSame('vat_number.malformed', $findings[0]->code);
+        $this->assertSame(Severity::Warning, $findings[0]->severity);
+        $this->assertFalse($findings[0]->blocking);
     }
 
     public function test_invalid_nl_checksum_is_error(): void

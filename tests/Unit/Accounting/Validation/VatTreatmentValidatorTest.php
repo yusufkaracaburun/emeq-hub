@@ -31,6 +31,7 @@ class VatTreatmentValidatorTest extends TestCase
         $this->assertSame('vat_treatment.reverse_charge_expected', $findings[0]->code);
         $this->assertSame('reverse_charge', $findings[0]->suggestion);
         $this->assertSame(Severity::Warning, $findings[0]->severity);
+        $this->assertFalse($findings[0]->blocking); // advies; het boekpad valideert tax_rate niet tegen de regio
     }
 
     public function test_non_eu_supplier_with_domestic_rate_is_error(): void
@@ -44,6 +45,7 @@ class VatTreatmentValidatorTest extends TestCase
         $this->assertSame('vat_treatment.domestic_rate_on_non_eu', $findings[0]->code);
         $this->assertSame(0, $findings[0]->suggestion);
         $this->assertSame(Severity::Error, $findings[0]->severity);
+        $this->assertTrue($findings[0]->blocking);
     }
 
     public function test_zero_rated_lines_produce_no_finding(): void

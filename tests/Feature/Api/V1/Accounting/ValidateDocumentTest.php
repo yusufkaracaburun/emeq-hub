@@ -199,9 +199,13 @@ class ValidateDocumentTest extends TestCase
             ])
             ->assertStatus(200)
             ->assertJsonPath('valid', false)
-            ->assertJsonFragment(['code' => 'iban.checksum_invalid'])
-            ->assertJsonFragment(['code' => 'vat_treatment.domestic_rate_on_non_eu'])
-            ->assertJsonFragment(['code' => 'arithmetic.total_mismatch', 'suggestion' => 121]);
+            // Gemengd geval: 2 errors (altijd blocking) + 1 advisory warning
+            // (arithmetic.total_mismatch, niet blocking — `total` bestaat niet op het
+            // boekcontract) → blocking telt de 2 errors, niet de warning erbij.
+            ->assertJsonPath('summary.blocking', 2)
+            ->assertJsonFragment(['code' => 'iban.checksum_invalid', 'blocking' => true])
+            ->assertJsonFragment(['code' => 'vat_treatment.domestic_rate_on_non_eu', 'blocking' => true])
+            ->assertJsonFragment(['code' => 'arithmetic.total_mismatch', 'suggestion' => 121, 'blocking' => false]);
     }
 
     public function test_unmapped_vat_rate_is_flagged(): void
@@ -218,12 +222,15 @@ class ValidateDocumentTest extends TestCase
             ])
             ->assertStatus(200)
             ->assertJsonPath('valid', true) // warning blokkeert niet
-            ->assertJsonFragment(['code' => 'exact.vat_code.unmapped', 'severity' => 'warning']);
+            ->assertJsonPath('summary.blocking', 1) // maar blocking wél — Exact weigert een niet-ingericht tarief
+            ->assertJsonFragment(['code' => 'exact.vat_code.unmapped', 'severity' => 'warning', 'blocking' => true]);
     }
 
     public function test_new_supplier_when_no_exact_match(): void
     {
         // Geen party.create_if_missing → dezelfde uitkomst als de boeking (422): warning.
+        // `valid` blijft true (geen error), dus `blocking` is het enige veld dat een
+        // consumer die op severity/valid filtert nog voor de 422 waarschuwt.
         [$consumer] = $this->consumerWithExactConnection();
         $token = $consumer->createToken('t', [TokenAbilities::EXACT_READ])->plainTextToken;
         $this->mockRelations([]); // geen treffer
@@ -236,7 +243,9 @@ class ValidateDocumentTest extends TestCase
                 'lines' => [['description' => 'Dienst', 'amount' => 100, 'tax_rate' => 21]],
             ])
             ->assertStatus(200)
-            ->assertJsonFragment(['code' => 'exact.relation.new', 'severity' => 'warning']);
+            ->assertJsonPath('valid', true)
+            ->assertJsonPath('summary.blocking', 1)
+            ->assertJsonFragment(['code' => 'exact.relation.new', 'severity' => 'warning', 'blocking' => true]);
     }
 
     public function test_new_supplier_is_info_when_create_if_missing_requested(): void
@@ -255,7 +264,8 @@ class ValidateDocumentTest extends TestCase
                 'lines' => [['description' => 'Dienst', 'amount' => 100, 'tax_rate' => 21]],
             ])
             ->assertStatus(200)
-            ->assertJsonFragment(['code' => 'exact.relation.new', 'severity' => 'info']);
+            ->assertJsonPath('summary.blocking', 0)
+            ->assertJsonFragment(['code' => 'exact.relation.new', 'severity' => 'info', 'blocking' => false]);
     }
 
     public function test_without_exact_ability_returns_403(): void
