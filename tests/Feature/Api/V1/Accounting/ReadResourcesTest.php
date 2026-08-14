@@ -415,6 +415,20 @@ class ReadResourcesTest extends TestCase
      * Eén query voor alle relatienamen op de pagina; per document opzoeken zou een
      * N+1 zijn tegen de mirror.
      */
+    /**
+     * `external_id`, `number`, `from` en `issued_after` werden stil genegeerd: de
+     * consumer kreeg 200 met dezelfde ongefilterde lijst terug. Eerlijk falen is
+     * beter dan een leugen op 200.
+     */
+    public function test_an_unsupported_filter_parameter_is_rejected_instead_of_silently_ignored(): void
+    {
+        [$consumer] = $this->connected();
+
+        $this->fetch($consumer, 'documents', ['type' => 'sales_invoice', 'external_id' => 'INV-001'])
+            ->assertStatus(400)
+            ->assertJsonPath('error', 'invalid_query');
+    }
+
     public function test_relation_names_are_resolved_in_a_single_query(): void
     {
         MockClient::global([

@@ -90,6 +90,7 @@ class ReadController extends Controller
                 ? $target->readDocuments($connection, $query, $documentType)
                 : null,
             static fn (PostedDocument $item): array => $item->toArray(),
+            allowedExtraQuery: ['type'],
         );
     }
 
@@ -117,6 +118,7 @@ class ReadController extends Controller
                 ? $target->readBankStatements($connection, $query, (string) $kind)
                 : null,
             static fn (BankStatement $item): array => $item->toArray(),
+            allowedExtraQuery: ['kind'],
         );
     }
 
@@ -181,8 +183,11 @@ class ReadController extends Controller
     /**
      * Eén vorm voor alle lees-endpoints: connectie resolven, ability checken,
      * capability opvragen, pagineren, partner-fouten normaliseren.
+     *
+     * @param  list<string>  $allowedExtraQuery  endpoint-eigen parameters die naast
+     *                                           `limit`/`cursor` toegestaan zijn
      */
-    private function read(Request $request, Capability $capability, callable $fetch, callable $transform): JsonResponse
+    private function read(Request $request, Capability $capability, callable $fetch, callable $transform, array $allowedExtraQuery = []): JsonResponse
     {
         // Ability vóór resolutie: nu de canonieke abilities niet meer van de
         // gekoppelde provider afhangen, hoeft een token zonder recht niet eerst te
@@ -201,7 +206,7 @@ class ReadController extends Controller
         }
 
         try {
-            $query = ReadQuery::fromRequest($request->query());
+            $query = ReadQuery::fromRequest($request->query(), $allowedExtraQuery);
         } catch (InvalidArgumentException $e) {
             return response()->json(['error' => 'invalid_query', 'message' => $e->getMessage()], 400);
         }
