@@ -65,7 +65,7 @@ class ConnectionMappingExactReferenceResolverTest extends TestCase
 
         $this->assertSame('4', $resolver->vatCode(21, TaxTreatment::Standard, $connection));
         $this->assertSame('2', $resolver->vatCode(9, TaxTreatment::Standard, $connection));
-        $this->assertSame('gl-omzet-id', $resolver->glAccountRef('omzet', $connection));
+        $this->assertSame('gl-omzet-id', $resolver->glAccountRef('omzet', DocumentType::SalesInvoice, $connection));
         $this->assertSame('cust-1', $resolver->relationRef(new Party('debtor', 'Acme', externalId: 'ext-1'), $connection));
         $this->assertSame('70', $resolver->journal(DocumentType::SalesInvoice, $connection));
         $this->assertSame('20', $resolver->journal(DocumentType::PurchaseInvoice, $connection));
@@ -99,8 +99,8 @@ class ConnectionMappingExactReferenceResolverTest extends TestCase
         $connection = $this->fullMapping();
         $this->seedRef($connection, ConnectionAccountingRef::KIND_GL, 'gl-def', 'gl-def-id');
 
-        $this->assertSame('gl-def-id', $resolver->glAccountRef('onbekende-categorie', $connection));
-        $this->assertSame('gl-def-id', $resolver->glAccountRef(null, $connection));
+        $this->assertSame('gl-def-id', $resolver->glAccountRef('onbekende-categorie', DocumentType::SalesInvoice, $connection));
+        $this->assertSame('gl-def-id', $resolver->glAccountRef(null, DocumentType::SalesInvoice, $connection));
     }
 
     public function test_throws_when_gl_code_not_in_mirror(): void
@@ -109,7 +109,48 @@ class ConnectionMappingExactReferenceResolverTest extends TestCase
 
         // Mapping verwijst naar een Code die niet (meer) in de mirror staat → drift-melding.
         $this->expectException(AccountingMappingException::class);
-        $resolver->glAccountRef('omzet', $this->fullMapping());
+        $resolver->glAccountRef('omzet', DocumentType::SalesInvoice, $this->fullMapping());
+    }
+
+    public function test_gl_code_uses_document_type_default_before_falling_back_to_shared_default(): void
+    {
+        $resolver = $this->resolver();
+        $connection = $this->connection([
+            'gl_accounts' => ['_default' => 'gl-def', 'sales_default' => 'gl-sales', 'purchase_default' => 'gl-purchase'],
+        ]);
+        $this->seedRef($connection, ConnectionAccountingRef::KIND_GL, 'gl-sales', 'gl-sales-id');
+        $this->seedRef($connection, ConnectionAccountingRef::KIND_GL, 'gl-purchase', 'gl-purchase-id');
+
+        $this->assertSame('gl-sales-id', $resolver->glAccountRef(null, DocumentType::SalesInvoice, $connection));
+        $this->assertSame('gl-sales-id', $resolver->glAccountRef(null, DocumentType::CreditNote, $connection));
+        $this->assertSame('gl-sales-id', $resolver->glAccountRef(null, DocumentType::Income, $connection));
+        $this->assertSame('gl-purchase-id', $resolver->glAccountRef(null, DocumentType::PurchaseInvoice, $connection));
+        $this->assertSame('gl-purchase-id', $resolver->glAccountRef(null, DocumentType::Expense, $connection));
+    }
+
+    public function test_explicit_category_wins_over_document_type_default(): void
+    {
+        $resolver = $this->resolver();
+        $connection = $this->connection([
+            'gl_accounts' => ['omzet' => 'gl-omzet', 'sales_default' => 'gl-sales', 'purchase_default' => 'gl-purchase'],
+        ]);
+        $this->seedRef($connection, ConnectionAccountingRef::KIND_GL, 'gl-omzet', 'gl-omzet-id');
+
+        $this->assertSame('gl-omzet-id', $resolver->glAccountRef('omzet', DocumentType::PurchaseInvoice, $connection));
+    }
+
+    public function test_gl_code_falls_back_to_shared_default_when_no_document_type_default_is_mapped(): void
+    {
+        // Regressie: een bestaande mapping die alleen `_default` kent (geen sales_default/
+        // purchase_default) moet exact blijven werken zoals vóór deze doctype-terugval.
+        $resolver = $this->resolver();
+        $connection = $this->connection(['gl_accounts' => ['_default' => 'gl-def']]);
+        $this->seedRef($connection, ConnectionAccountingRef::KIND_GL, 'gl-def', 'gl-def-id');
+
+        $this->assertSame('gl-def-id', $resolver->glAccountRef(null, DocumentType::SalesInvoice, $connection));
+        $this->assertSame('gl-def-id', $resolver->glAccountRef(null, DocumentType::PurchaseInvoice, $connection));
+        $this->assertSame('gl-def-id', $resolver->glAccountRef(null, DocumentType::Income, $connection));
+        $this->assertSame('gl-def-id', $resolver->glAccountRef(null, DocumentType::Expense, $connection));
     }
 
     public function test_vat_code_or_null_returns_code_or_null(): void

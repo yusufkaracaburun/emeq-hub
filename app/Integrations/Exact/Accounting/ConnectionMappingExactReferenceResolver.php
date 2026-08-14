@@ -23,7 +23,8 @@ use App\Models\ConnectionAccountingRef;
  *   "accounting_mapping": {
  *     "vat_codes":  { "21": "3", "9": "1", "0": "0",            // standard: tarief → VATCode (plat)
  *                     "reverse_charge:21": "6", "reverse_charge:9": "7" }, // verlegd: behandeling:tarief → VATCode
- *     "gl_accounts": { "_default": "<gl-code>", "omzet": "<gl-code>" }, // categorie → GL-Code
+ *     "gl_accounts": { "_default": "<gl-code>", "omzet": "<gl-code>",  // categorie → GL-Code
+ *                      "sales_default": "<gl-code>", "purchase_default": "<gl-code>" }, // doctype-fallback
  *     "journals":   { "sales": "80", "purchase": "70" }         // doc-type → dagboek-Code (direct)
  *   }
  *
@@ -35,6 +36,11 @@ use App\Models\ConnectionAccountingRef;
  * (`connection_accounting_refs`) — geen live partner-call op het schrijfpad. Relaties zijn
  * niet in de mapping opgeslagen maar lazy geleerd door ExactRelationResolver.
  * income/expense vallen terug op sales/purchase als geen eigen dagboek staat.
+ *
+ * Grootboek-resolutie per regel: categorie → doctype-default (`sales_default` voor
+ * SalesEntry-doctypes, `purchase_default` voor PurchaseEntry-doctypes) → `_default` →
+ * null. `_default` is dus de laatste terugval, niet de enige — anders belandt omzet
+ * zonder categorie op dezelfde rekening als een inkoopregel zonder categorie.
  */
 final class ConnectionMappingExactReferenceResolver implements ReferenceResolver
 {
@@ -70,10 +76,11 @@ final class ConnectionMappingExactReferenceResolver implements ReferenceResolver
         return $treatment->vatCodeKey($this->rateKey($taxRate));
     }
 
-    public function glAccountRef(?string $category, Connection $connection): ?string
+    public function glAccountRef(?string $category, DocumentType $type, Connection $connection): ?string
     {
         $accounts = $this->section($connection, 'gl_accounts');
-        $code = $accounts[$category ?? '_default'] ?? $accounts['_default'] ?? null;
+        $defaultKey = $this->glAccountDefaultKey($type);
+        $code = $accounts[$category ?? $defaultKey] ?? $accounts[$defaultKey] ?? $accounts['_default'] ?? null;
 
         if ($code === null) {
             return null;
@@ -183,11 +190,29 @@ final class ConnectionMappingExactReferenceResolver implements ReferenceResolver
     private function journalKeys(DocumentType $type): array
     {
         return match ($type) {
-            DocumentType::SalesInvoice, DocumentType::CreditNote => ['sales'],
-            DocumentType::PurchaseInvoice => ['purchase'],
-            DocumentType::Income => ['income', 'sales'],
-            DocumentType::Expense => ['expense', 'purchase'],
+            DocumentType::SalesInvoice, DocumentType::CreditNote => [$this->journalFamily($type)],
+            DocumentType::PurchaseInvoice => [$this->journalFamily($type)],
+            DocumentType::Income => ['income', $this->journalFamily($type)],
+            DocumentType::Expense => ['expense', $this->journalFamily($type)],
         };
+    }
+
+    /**
+     * SalesEntry- of PurchaseEntry-kant van een doc-type — dezelfde groepering als
+     * {@see self::journalKeys()}, hier gedeeld zodat het GL-default niet een tweede
+     * doctype-classificatie nodig heeft.
+     */
+    private function journalFamily(DocumentType $type): string
+    {
+        return match ($type) {
+            DocumentType::SalesInvoice, DocumentType::CreditNote, DocumentType::Income => 'sales',
+            DocumentType::PurchaseInvoice, DocumentType::Expense => 'purchase',
+        };
+    }
+
+    private function glAccountDefaultKey(DocumentType $type): string
+    {
+        return $this->journalFamily($type).'_default';
     }
 
     private function missing(string $what, string $section): AccountingMappingException

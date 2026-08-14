@@ -15,7 +15,9 @@ use Illuminate\Support\Collection;
  *  - BTW (standard): tarief → VATCode-Code waar `percentage == tarief` (voorkeur: exclusief).
  *  - BTW (verlegd): reverse_charge:tarief → VATCode-Code waar `percentage == tarief` én label "verlegd".
  *  - Dagboek: verkoop → eerste Type-20-dagboek, inkoop → eerste Type-22-dagboek.
- *  - Grootboek: omzet → eerste 8xxx-rekening, kosten/_default → eerste 4xxx-rekening.
+ *  - Grootboek: omzet/sales_default → eerste 8xxx-rekening, kosten/purchase_default/
+ *    _default → eerste 4xxx-rekening. Vindt de mirror geen 8xxx- of 4xxx-rekening, dan
+ *    blijft de bijbehorende default leeg — geraden in plaats van afgeleid is een bug.
  *
  * Vult alléén ontbrekende keys aan (`merge` zonder overschrijven) — een handmatige
  * override via de mapping-API of admin-UI blijft staan.
@@ -120,10 +122,12 @@ final class ExactMappingDeriver
 
         if ($omzet !== null) {
             $out['omzet'] = $omzet->code;
+            $out['sales_default'] = $omzet->code;
         }
 
         if ($kosten !== null) {
             $out['kosten'] = $kosten->code;
+            $out['purchase_default'] = $kosten->code;
             $out['_default'] = $kosten->code;
         } elseif ($omzet !== null) {
             $out['_default'] = $omzet->code;

@@ -460,6 +460,96 @@ class StoreDocumentTest extends TestCase
         });
     }
 
+    public function test_sales_invoice_line_without_category_uses_sales_default_not_purchase_default(): void
+    {
+        // Regressie voor emeq-hub#60: een regel zonder categorie mag niet stil op de
+        // gedeelde `_default` (hier bewust de kostenrekening) belanden — de verkoop
+        // hoort op `sales_default`.
+        MockClient::global([
+            CreateSalesEntry::class => MockResponse::make(['d' => ['ID' => 'inv-1']], 201),
+        ]);
+
+        [$consumer, $connection] = $this->consumerWithExactConnection([
+            'metadata' => ['accounting_mapping' => [
+                'vat_codes' => ['21' => '4'],
+                'gl_accounts' => ['_default' => 'gl-kosten-guid', 'sales_default' => 'gl-omzet'],
+                'journals' => ['sales' => '70'],
+            ]],
+        ]);
+
+        ConnectionAccountingRef::query()->create([
+            'connection_id' => $connection->getKey(),
+            'kind' => ConnectionAccountingRef::KIND_GL,
+            'code' => 'gl-omzet',
+            'native_id' => 'gl-omzet-guid',
+        ]);
+        ConnectionAccountingRef::query()->create([
+            'connection_id' => $connection->getKey(),
+            'kind' => ConnectionAccountingRef::KIND_RELATION,
+            'code' => 'acme-1',
+            'native_id' => 'cust-real',
+        ]);
+
+        $token = $consumer->createToken('t', [TokenAbilities::EXACT_WRITE])->plainTextToken;
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->withHeader('X-Account-Id', 'school1')
+            ->withHeader('Idempotency-Key', (string) Str::uuid())
+            ->postJson('/v1/accounting/documents', $this->salesInvoicePayload([
+                'party' => ['role' => 'debtor', 'name' => 'Acme BV', 'external_id' => 'acme-1'],
+                'lines' => [
+                    ['description' => 'Consultancy', 'amount' => 200, 'tax_rate' => 21],
+                ],
+            ]))
+            ->assertStatus(201);
+
+        MockClient::global()->assertSent(fn (CreateSalesEntry $request): bool => $request->body()->all()['SalesEntryLines'][0]['GLAccount'] === 'gl-omzet-guid');
+    }
+
+    public function test_purchase_invoice_line_without_category_uses_purchase_default(): void
+    {
+        MockClient::global([
+            CreatePurchaseEntry::class => MockResponse::make(['d' => ['ID' => 'pe-1']], 201),
+        ]);
+
+        [$consumer, $connection] = $this->consumerWithExactConnection([
+            'metadata' => ['accounting_mapping' => [
+                'vat_codes' => ['21' => '4'],
+                'gl_accounts' => ['_default' => 'gl-omzet-guid', 'purchase_default' => 'gl-kosten'],
+                'journals' => ['purchase' => '20'],
+            ]],
+        ]);
+
+        ConnectionAccountingRef::query()->create([
+            'connection_id' => $connection->getKey(),
+            'kind' => ConnectionAccountingRef::KIND_GL,
+            'code' => 'gl-kosten',
+            'native_id' => 'gl-kosten-guid',
+        ]);
+        ConnectionAccountingRef::query()->create([
+            'connection_id' => $connection->getKey(),
+            'kind' => ConnectionAccountingRef::KIND_RELATION,
+            'code' => 'leverancier-1',
+            'native_id' => 'supp-real',
+        ]);
+
+        $token = $consumer->createToken('t', [TokenAbilities::EXACT_WRITE])->plainTextToken;
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->withHeader('X-Account-Id', 'school1')
+            ->withHeader('Idempotency-Key', (string) Str::uuid())
+            ->postJson('/v1/accounting/documents', $this->salesInvoicePayload([
+                'type' => 'purchase_invoice',
+                'party' => ['role' => 'creditor', 'name' => 'Leverancier BV', 'external_id' => 'leverancier-1'],
+                'lines' => [
+                    ['description' => 'Inkoop', 'amount' => 100, 'tax_rate' => 21],
+                ],
+            ]))
+            ->assertStatus(201);
+
+        MockClient::global()->assertSent(fn (CreatePurchaseEntry $request): bool => $request->body()->all()['PurchaseEntryLines'][0]['GLAccount'] === 'gl-kosten-guid');
+    }
+
     public function test_auto_creates_relation_when_opt_in_and_no_match(): void
     {
         // Geen fake → de echte resolver. Opt-in aan + geen match → relatie wordt in Exact

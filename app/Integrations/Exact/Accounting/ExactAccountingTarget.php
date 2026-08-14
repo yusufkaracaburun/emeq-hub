@@ -703,7 +703,7 @@ final class ExactAccountingTarget implements AccountingTarget, EnrichesValidatio
                 'description' => $line->description,
                 'amount' => $line->netAmount(),
                 'vatCode' => $this->references->vatCode($line->taxRate, $line->taxTreatment, $connection),
-                'glAccount' => $this->references->glAccountRef($line->category, $connection),
+                'glAccount' => $this->references->glAccountRef($line->category, $document->type, $connection),
                 'costCenter' => $this->references->costCenter($line->costCenter, $connection),
                 'costUnit' => $this->references->costUnit($line->costUnit, $connection),
             ],

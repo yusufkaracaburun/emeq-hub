@@ -57,8 +57,11 @@ class ExactMappingDeriverTest extends TestCase
         );
         // Dagboek op Type: 20 → verkoop, 22 → inkoop.
         $this->assertSame(['sales' => '80', 'purchase' => '70'], $mapping['journals']);
-        // GL-default: 8xxx omzet, 4xxx kosten/_default.
-        $this->assertSame(['omzet' => '8000', 'kosten' => '4000', '_default' => '4000'], $mapping['gl_accounts']);
+        // GL-default: 8xxx omzet/sales_default, 4xxx kosten/purchase_default/_default.
+        $this->assertSame(
+            ['omzet' => '8000', 'sales_default' => '8000', 'kosten' => '4000', 'purchase_default' => '4000', '_default' => '4000'],
+            $mapping['gl_accounts'],
+        );
     }
 
     public function test_does_not_overwrite_existing_override(): void
@@ -79,5 +82,29 @@ class ExactMappingDeriverTest extends TestCase
         $this->assertSame('4000', $mapping['gl_accounts']['kosten']);
         $this->assertSame('4', $mapping['vat_codes']['21']);
         $this->assertSame('1', $mapping['vat_codes']['9']);
+    }
+
+    public function test_leaves_missing_default_empty_instead_of_guessing(): void
+    {
+        // Mirror kent alleen een 8xxx-rekening (geen 4xxx) → purchase_default mag niet
+        // geraden worden op de omzetrekening; een fout grootboek is precies de bug (#60).
+        $account = Account::factory()->for(Consumer::factory()->create())->create();
+        $connection = Connection::factory()->forExact()->for($account)->create();
+
+        ConnectionAccountingRef::query()->create([
+            'connection_id' => $connection->getKey(),
+            'kind' => 'gl',
+            'code' => '8000',
+            'native_id' => 'gl-8000',
+            'label' => 'Omzet',
+            'attrs' => [],
+        ]);
+
+        app(ExactMappingDeriver::class)->deriveAndStore($connection);
+
+        $mapping = $connection->fresh()->metadata['accounting_mapping'];
+
+        $this->assertSame('8000', $mapping['gl_accounts']['sales_default']);
+        $this->assertArrayNotHasKey('purchase_default', $mapping['gl_accounts']);
     }
 }
