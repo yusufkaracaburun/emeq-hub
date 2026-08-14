@@ -139,7 +139,10 @@ Idempotency-Key: {{$guid}}
   ]
 }
 
-### Creditnota — bedrag negatief in Exact
+### Creditnota — regelbedragen zelf negatief aanleveren.
+#   De Hub keert het teken niet om: `credit_note` gaat als verkoopboeking naar het
+#   verkoopdagboek, precies met de bedragen die je stuurt. Stuur je 50 positief, dan
+#   staat er 50 méér omzet in de administratie in plaats van minder.
 POST {{baseUrl}}/v1/accounting/documents
 Authorization: Bearer {{token}}
 Content-Type: application/json
@@ -154,7 +157,7 @@ Idempotency-Key: {{$guid}}
   "issue_date": "2026-08-14",
   "party": { "role": "debtor", "name": "Hub Test Klant", "external_id": "KLANT-001" },
   "lines": [
-    { "description": "Correctie", "amount": 50, "tax_rate": 21, "category": "omzet" }
+    { "description": "Correctie", "amount": -50, "tax_rate": 21, "category": "omzet" }
   ]
 }
 
