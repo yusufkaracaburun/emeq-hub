@@ -97,6 +97,16 @@ final class ExactRelationResolver
             isSales: $isCreditor ? null : true,
             isSupplier: $isCreditor ? true : null,
             vatNumber: $vatNumber,
+            chamberOfCommerce: $party->chamberOfCommerce,
+            addressLine1: $party->addressLine1,
+            addressLine2: $party->addressLine2,
+            postcode: $party->postcode,
+            city: $party->city,
+            state: $party->state,
+            country: $party->country,
+            email: $party->email,
+            phone: $party->phone,
+            website: $party->website,
         ));
 
         if ($response->failed()) {

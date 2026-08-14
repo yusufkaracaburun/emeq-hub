@@ -45,6 +45,19 @@ class StoreDocumentRequest extends FormRequest
             'party.external_id' => ['nullable', 'string', 'max:255'],
             'party.create_if_missing' => ['boolean'],
 
+            // Relatiekaart — optioneel, en alleen van belang wanneer de Hub de
+            // relatie aanmaakt. Lengtes volgen de Exact-velden.
+            'party.chamber_of_commerce' => ['nullable', 'string', 'max:20'],
+            'party.address_line_1' => ['nullable', 'string', 'max:255'],
+            'party.address_line_2' => ['nullable', 'string', 'max:255'],
+            'party.postcode' => ['nullable', 'string', 'max:20'],
+            'party.city' => ['nullable', 'string', 'max:255'],
+            'party.state' => ['nullable', 'string', 'max:64'],
+            'party.country' => ['nullable', 'string', 'size:2'],
+            'party.email' => ['nullable', 'email', 'max:255'],
+            'party.phone' => ['nullable', 'string', 'max:64'],
+            'party.website' => ['nullable', 'string', 'max:255'],
+
             'lines' => ['required', 'array', 'min:1'],
             'lines.*.description' => ['required', 'string', 'max:1000'],
             'lines.*.amount' => ['required', 'numeric'],
