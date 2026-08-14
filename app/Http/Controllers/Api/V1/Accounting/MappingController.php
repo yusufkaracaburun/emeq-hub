@@ -155,7 +155,6 @@ class MappingController extends Controller
             'gl_accounts.*' => ['string'],
             'journals' => ['array'],
             'journals.*' => ['string'],
-            'auto_create_relations' => ['boolean'],
         ]);
 
         $metadata = $connection->metadata ?? [];
@@ -165,11 +164,6 @@ class MappingController extends Controller
             if (isset($validated[$section])) {
                 $mapping[$section] = array_merge($mapping[$section] ?? [], $validated[$section]);
             }
-        }
-
-        // Opt-in voor relatie-auto-create — deelt de key met de admin-toggle (laatste schrijver wint).
-        if (array_key_exists('auto_create_relations', $validated)) {
-            $mapping['auto_create_relations'] = (bool) $validated['auto_create_relations'];
         }
 
         $metadata['accounting_mapping'] = $mapping;

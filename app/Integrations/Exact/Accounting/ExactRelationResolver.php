@@ -25,9 +25,7 @@ use Emeq\ExactApi\OData\Envelope;
  *
  * Auto-create van een ontbrekende relatie vraagt de consumer expliciet aan per document
  * (`party.create_if_missing === true`) — een Connection-brede opt-in zou elke typefout in
- * een partijnaam onomkeerbaar in andermans administratie zetten. De Connection behoudt enkel
- * een veto: staat `metadata.accounting_mapping.auto_create_relations` expliciet op `false`,
- * dan blijft het 422 ongeacht de document-intentie. Onbezet (of `true`) vetoot niet.
+ * een partijnaam onomkeerbaar in andermans administratie zetten.
  */
 final class ExactRelationResolver
 {
@@ -58,7 +56,7 @@ final class ExactRelationResolver
             return $match['id'];
         }
 
-        if ($party->createIfMissing && ! $connection->autoCreateRelationsVetoed()) {
+        if ($party->createIfMissing) {
             $guid = $this->createRelation($party, $connection);
             $this->learn($connection, $externalId, $guid, $party->name, createdByHub: true);
 

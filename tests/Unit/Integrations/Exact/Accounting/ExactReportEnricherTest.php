@@ -136,9 +136,9 @@ class ExactReportEnricherTest extends TestCase
         }
     }
 
-    public function test_unknown_relation_is_a_warning_without_auto_create(): void
+    public function test_unknown_relation_is_a_warning_without_create_if_missing(): void
     {
-        // Zonder auto_create_relations weigert de boeking met een 422 — de dry-run moet die
+        // Zonder party.create_if_missing weigert de boeking met een 422 — de dry-run moet die
         // weigering spiegelen, niet als vrijblijvende info langskomen.
         $findings = $this->enricher()->enrich(
             ['party' => ['role' => 'creditor', 'name' => 'Acme BV'], 'lines' => []],
@@ -151,7 +151,7 @@ class ExactReportEnricherTest extends TestCase
         $this->assertStringContainsString('geweigerd', $relation[0]->message);
     }
 
-    public function test_unknown_relation_is_info_when_create_if_missing_and_not_vetoed(): void
+    public function test_unknown_relation_is_info_when_create_if_missing_requested(): void
     {
         $connection = new Connection;
         $connection->metadata = ['accounting_mapping' => ['vat_codes' => ['21' => '4']]];
@@ -165,39 +165,5 @@ class ExactReportEnricherTest extends TestCase
         $this->assertCount(1, $relation);
         $this->assertSame(Severity::Info, $relation[0]->severity);
         $this->assertStringContainsString('automatisch aangemaakt', $relation[0]->message);
-    }
-
-    public function test_unknown_relation_stays_warning_when_connection_flag_alone_is_set(): void
-    {
-        // Regressie-guard voor #58: vóór de wijziging was de Connection-vlag op zichzelf
-        // genoeg om automatisch aan te maken. Zonder party.create_if_missing blijft het nu
-        // een warning, ook met auto_create_relations expliciet aan.
-        $connection = new Connection;
-        $connection->metadata = ['accounting_mapping' => ['vat_codes' => ['21' => '4'], 'auto_create_relations' => true]];
-
-        $findings = $this->enricher()->enrich(
-            ['party' => ['role' => 'creditor', 'name' => 'Acme BV'], 'lines' => []],
-            $connection,
-        );
-
-        $relation = array_values(array_filter($findings, fn ($f) => $f->code === 'exact.relation.new'));
-        $this->assertCount(1, $relation);
-        $this->assertSame(Severity::Warning, $relation[0]->severity);
-    }
-
-    public function test_unknown_relation_stays_warning_when_connection_vetoes_despite_create_if_missing(): void
-    {
-        $connection = new Connection;
-        $connection->metadata = ['accounting_mapping' => ['vat_codes' => ['21' => '4'], 'auto_create_relations' => false]];
-
-        $findings = $this->enricher()->enrich(
-            ['party' => ['role' => 'creditor', 'name' => 'Acme BV', 'create_if_missing' => true], 'lines' => []],
-            $connection,
-        );
-
-        $relation = array_values(array_filter($findings, fn ($f) => $f->code === 'exact.relation.new'));
-        $this->assertCount(1, $relation);
-        $this->assertSame(Severity::Warning, $relation[0]->severity);
-        $this->assertStringContainsString('staat automatisch aanmaken niet toe', $relation[0]->message);
     }
 }

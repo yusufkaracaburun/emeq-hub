@@ -128,38 +128,6 @@ class MappingApiTest extends TestCase
             ->assertJsonPath('mapping.gl_accounts.kosten', '4000');
     }
 
-    public function test_put_mapping_sets_auto_create_relations(): void
-    {
-        [$consumer, $connection] = $this->setupConnection();
-        $connection->metadata = ['accounting_mapping' => ['gl_accounts' => ['omzet' => 'auto']]];
-        $connection->save();
-
-        $this->withHeader('Authorization', "Bearer {$this->token($consumer)}")
-            ->withHeader('X-Account-Id', 'school1')
-            ->putJson('/v1/accounting/mapping', ['auto_create_relations' => true])
-            ->assertOk()
-            ->assertJsonPath('mapping.auto_create_relations', true)
-            // bestaande sectie blijft bewaard (merge, geen replace).
-            ->assertJsonPath('mapping.gl_accounts.omzet', 'auto');
-
-        $this->assertTrue($connection->fresh()->metadata['accounting_mapping']['auto_create_relations']);
-    }
-
-    public function test_put_mapping_can_disable_auto_create_relations(): void
-    {
-        [$consumer, $connection] = $this->setupConnection();
-        $connection->metadata = ['accounting_mapping' => ['auto_create_relations' => true]];
-        $connection->save();
-
-        $this->withHeader('Authorization', "Bearer {$this->token($consumer)}")
-            ->withHeader('X-Account-Id', 'school1')
-            ->putJson('/v1/accounting/mapping', ['auto_create_relations' => false])
-            ->assertOk()
-            ->assertJsonPath('mapping.auto_create_relations', false);
-
-        $this->assertFalse($connection->fresh()->metadata['accounting_mapping']['auto_create_relations']);
-    }
-
     /**
      * De 422 hangt aan de capability, niet aan de providernaam. Een adapter die alleen
      * kan boeken krijgt hem — ook al is dat niet Exact. Zonder deze test zou een

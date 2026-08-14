@@ -153,7 +153,7 @@ final class ExactReportEnricher
             return [$this->relationMatched($label, $match['name'], $match['id'], $name)];
         }
 
-        return [$this->relationNew($label, $name, $connection, $createIfMissing)];
+        return [$this->relationNew($label, $name, $createIfMissing)];
     }
 
     private function relationMatched(string $label, ?string $matchedName, string $nativeId, ?string $current): Finding
@@ -171,28 +171,18 @@ final class ExactReportEnricher
     }
 
     /**
-     * De relatie ontbreekt. Of dat erg is hangt af van dezelfde twee vlaggen als het
-     * schrijfpad ({@see ExactRelationResolver}): `party.create_if_missing` vraagt aan, de
-     * Connection kan alleen nog vetoën (`auto_create_relations === false`). Vraagt het
-     * document niet aan, of vetoot de Connection, dan weigert de boeking (Warning); anders
-     * maakt de boeking de relatie zelf aan (Info). Beide gevallen dezelfde `code` — de
-     * severity draagt het verschil, zodat een consumer die alleen op codes filtert niet
-     * stilzwijgend in de weigering loopt.
+     * De relatie ontbreekt. Vraagt het document erom (`party.create_if_missing === true`),
+     * dan maakt de boeking de relatie zelf aan (Info); anders weigert de boeking (Warning).
      */
-    private function relationNew(string $label, ?string $name, Connection $connection, bool $createIfMissing): Finding
+    private function relationNew(string $label, ?string $name, bool $createIfMissing): Finding
     {
-        $vetoed = $connection->autoCreateRelationsVetoed();
-        $autoCreates = $createIfMissing && ! $vetoed;
-
-        $message = match (true) {
-            $autoCreates => "{$label} staat nog niet in de administratie en wordt bij het boeken automatisch aangemaakt.",
-            $createIfMissing && $vetoed => "{$label} staat nog niet in de administratie — deze koppeling staat automatisch aanmaken niet toe, dus de boeking wordt geweigerd. Voeg de relatie zelf toe in de administratie.",
-            default => "{$label} staat nog niet in de administratie — de boeking wordt geweigerd. Zet party.create_if_missing op true om 'm automatisch te laten aanmaken, of voeg de relatie zelf toe in de administratie.",
-        };
+        $message = $createIfMissing
+            ? "{$label} staat nog niet in de administratie en wordt bij het boeken automatisch aangemaakt."
+            : "{$label} staat nog niet in de administratie — de boeking wordt geweigerd. Zet party.create_if_missing op true om 'm automatisch te laten aanmaken, of voeg de relatie zelf toe in de administratie.";
 
         return new Finding(
             code: 'exact.relation.new',
-            severity: $autoCreates ? Severity::Info : Severity::Warning,
+            severity: $createIfMissing ? Severity::Info : Severity::Warning,
             path: 'party',
             message: $message,
             current: $name,

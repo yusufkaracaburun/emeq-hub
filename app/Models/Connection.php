@@ -144,20 +144,6 @@ class Connection extends Model
     }
 
     /**
-     * Veto op het automatisch aanmaken van relaties. Alleen een expliciete `false`
-     * blokkeert; niet gezet is geen verbod, want de intentie komt per document mee
-     * via `party.create_if_missing`. Zowel het schrijfpad als het validate-rapport
-     * lezen dit — één bron, anders voorspelt de dry-run iets anders dan de boeking.
-     */
-    public function autoCreateRelationsVetoed(): bool
-    {
-        $mapping = $this->metadata['accounting_mapping'] ?? [];
-        $flag = is_array($mapping) ? ($mapping['auto_create_relations'] ?? null) : null;
-
-        return $flag === false;
-    }
-
-    /**
      * @return array<string, string>
      */
     protected function casts(): array
