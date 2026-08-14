@@ -716,11 +716,6 @@ tarief, regel, datum of factuurnummer wél.
 op mirror én `vat_number`/`name` — en boekt door. Stuur dus altijd een nette
 `party.name` (+ `vat_number` indien bekend) mee.
 
-De Connection-instelling **auto-create** (Hub-admin → Boekhoud-mapping → "Onbekende
-relaties automatisch aanmaken") blijft de organisatie-brede kill-switch: staat die
-expliciet uit, dan blijft het `422`, ook mét `create_if_missing: true` op het
-document.
-
 Zet `create_if_missing` alleen wanneer de eindgebruiker net bewust een nieuwe klant
 of leverancier heeft ingevoerd, niet standaard op elke boeking — elke typefout in de
 partijnaam zet anders een nieuwe, onomkeerbare relatie in de boekhouding van je
@@ -731,10 +726,11 @@ Foutcodes: `403 insufficient_ability` (PAT mist `accounting:write`) ·
 `409 idempotency_request_in_progress` (wacht `Retry-After`, dan retryen) ·
 `422 idempotency_key_reuse` (zelfde sleutel, ander document) ·
 `409 document_already_posted` (zie hierboven — corrigeer met een nieuw `external_id`) ·
-`422 mapping_failed` (onvolledige boekhoud-mapping óf onbekende relatie zonder
-auto-create — los op in de Hub-admin) · `422 upstream_rejected` (het pakket wees de
-boeking functioneel af, bv. een ongeldig btw-nummer — **niet retryen**, corrigeer het
-document: `message` is een leesbare uitleg, `provider_message` de rauwe pakket-tekst) ·
+`422 mapping_failed` (onvolledige boekhoud-mapping óf onbekende relatie — zet
+`party.create_if_missing: true` of voeg de relatie zelf toe in de administratie) ·
+`422 upstream_rejected` (het pakket wees de boeking functioneel af, bv. een ongeldig
+btw-nummer — **niet retryen**, corrigeer het document: `message` is een leesbare
+uitleg, `provider_message` de rauwe pakket-tekst) ·
 `503 provider_disabled` · `502/503/504` upstream (pakket onbereikbaar/onderhoud/timeout —
 echt transient, mét `Retry-After` waar relevant; **wél** retrybaar).
 Elke fout draagt `{ "status": "failed", "external_id": "…", "error": "…", "message": "…" }`.
@@ -802,16 +798,15 @@ aanmaakt, nooit standaard bij elke boeking.
 ### Boekhoud-mapping (zelf-service, optioneel)
 
 De Hub synct + auto-derivet de mapping al bij connect — **standaard hoef je hier
-niets**. Deze endpoints zijn er voor consumers die de mapping willen tonen/verfijnen
-of relatie-auto-create zelf willen sturen. Alle op header `X-Account-Id` +
-`exact:read` (lezen) / `exact:write` (schrijven).
+niets**. Deze endpoints zijn er voor consumers die de mapping willen tonen/verfijnen.
+Alle op header `X-Account-Id` + `exact:read` (lezen) / `exact:write` (schrijven).
 
 | Doel | Request | Ability |
 |---|---|---|
 | Mirror (her)synchroniseren + auto-derive | `POST /v1/accounting/sync` | `exact:write` |
 | Beschikbare codes (GL/BTW/dagboek) | `GET /v1/accounting/reference-data` | `exact:read` |
 | Huidige mapping lezen | `GET /v1/accounting/mapping` | `exact:read` |
-| Mapping + auto-create zetten (merge) | `PUT /v1/accounting/mapping` | `exact:write` |
+| Mapping overschrijven (merge) | `PUT /v1/accounting/mapping` | `exact:write` |
 
 PUT-body — alle velden optioneel, **merge** (bestaande waarden blijven):
 
@@ -819,18 +814,12 @@ PUT-body — alle velden optioneel, **merge** (bestaande waarden blijven):
 {
   "vat_codes":   { "21": "3", "9": "1", "0": "0" },
   "gl_accounts": { "_default": "4000", "omzet": "8000" },
-  "journals":    { "sales": "70", "purchase": "20" },
-  "auto_create_relations": true
+  "journals":    { "sales": "70", "purchase": "20" }
 }
 ```
 
 - `vat_codes`/`gl_accounts`/`journals` = stabiele **Codes** uit `reference-data`
   (geen GUIDs — de Hub resolvet die lokaal).
-- `auto_create_relations`: organisatie-brede kill-switch voor `party.create_if_missing`
-  op het document (zie Boeken). Staat 'ie expliciet op `false`, dan blijft een
-  onbekende relatie `422`, ook als een document `create_if_missing: true` stuurt.
-  Deze toggle wordt **gedeeld met de Hub-admin** — wie het laatst schrijft, wint.
-- `GET /v1/accounting/mapping` geeft de hele mapping terug (incl. `auto_create_relations`).
 
 > Merge-only: een bestaande key verwijderen kan niet via PUT — stuur een nieuwe waarde.
 
@@ -841,13 +830,10 @@ Bouw (optioneel) een instellingen-scherm voor de boekhoud-koppeling tegen de eme
 Hub. Lees de keuzes met `GET /v1/accounting/reference-data` (header `X-Account-Id`)
 en de huidige mapping met `GET /v1/accounting/mapping`. Laat de tenant per BTW-tarief
 een VATCode, per categorie een GL-Code en per dagboek-type een Journal kiezen (alles
-Codes, geen GUIDs) plus een toggle "onbekende relaties automatisch aanmaken" — leg uit
-dat dit de organisatie-brede kill-switch is: staat 'ie uit, dan blokkeert dat ook een
-document dat zelf `party.create_if_missing: true` stuurt. Sla op
-met `PUT /v1/accounting/mapping` (merge), body `{ vat_codes, gl_accounts, journals,
-auto_create_relations }` — stuur alleen de gewijzigde velden. Optioneel een knop
-"hersynchroniseren" → `POST /v1/accounting/sync`. Default hoeft de tenant niets in te
-stellen; de Hub auto-derivet bij connect.
+Codes, geen GUIDs). Sla op met `PUT /v1/accounting/mapping` (merge), body
+`{ vat_codes, gl_accounts, journals }` — stuur alleen de gewijzigde velden. Optioneel
+een knop "hersynchroniseren" → `POST /v1/accounting/sync`. Default hoeft de tenant
+niets in te stellen; de Hub auto-derivet bij connect.
 ```
 
 ## Webhooks ontvangen
