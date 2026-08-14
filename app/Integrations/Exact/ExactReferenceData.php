@@ -9,6 +9,7 @@ use App\Models\ConnectionAccountingRef;
 use Emeq\ExactApi\Contracts\ExactCredentialResolver;
 use Emeq\ExactApi\Contracts\TokenStore;
 use Emeq\ExactApi\Exact;
+use Emeq\ExactApi\Http\ExactConnector;
 use Emeq\ExactApi\Http\Request\Read\GetCostCenters;
 use Emeq\ExactApi\Http\Request\Read\GetCostUnits;
 use Emeq\ExactApi\Http\Request\Read\GetGlAccounts;
@@ -32,6 +33,9 @@ use Throwable;
  */
 final class ExactReferenceData
 {
+    // Voorkomt dat een oneindige `__next`-lus een Octane-worker op het boekingspad vastpint.
+    private const MAX_PAGES = 500;
+
     public function __construct(private readonly Connection $connection) {}
 
     /**
@@ -333,7 +337,9 @@ final class ExactReferenceData
      * ambigu btw-nummer (2+ treffers) stopt hard: nooit terugvallen op naam, dat zou een
      * andere relatie kunnen kiezen dan de btw-treffers bedoelen. Levert het btw-nummer géén
      * of geen enkele treffer op (of ontbreekt het), dan valt de zoekopdracht terug op een
-     * exacte Name-match.
+     * exacte Name-match. Beide kandidaten-ophalen doorpagineren tot Exact geen `__next`
+     * meer teruggeeft — anders staat de tweede helft van een ambigu paar buiten beeld en
+     * kiest de code stilletjes de enige treffer die het wél zag.
      *
      * @return array{id: string, code: string, name: string, is_sales: bool, is_supplier: bool, status: ?string}|null
      */
@@ -361,10 +367,10 @@ final class ExactReferenceData
      */
     private function matchesByVatNumber(string $normalizedVat): array
     {
-        $rows = $this->fetch(new GetRelations([
+        $rows = $this->fetchAllPages([
             '$select' => 'ID,Code,Name,IsSales,IsSupplier,Status,VATNumber',
             '$filter' => "VATNumber ne ''",
-        ]));
+        ]);
 
         return array_values(array_filter(
             $rows,
@@ -380,11 +386,10 @@ final class ExactReferenceData
             return null;
         }
 
-        $rows = $this->fetch(new GetRelations([
+        $rows = $this->fetchAllPages([
             '$select' => 'ID,Code,Name,IsSales,IsSupplier,Status',
             '$filter' => "Name eq '".$this->escapeOData($name)."'",
-            '$top' => '2',
-        ]));
+        ]);
 
         // Geen of meerdere matches → niet automatisch kiezen (ambigu).
         return count($rows) === 1 ? $this->mapRelationRow($rows[0]) : null;
@@ -469,14 +474,7 @@ final class ExactReferenceData
         }
 
         try {
-            app()->instance(ExactCredentialResolver::class, new HubExactCredentialResolver($this->connection));
-            app()->instance(TokenStore::class, new ConnectionTokenStore($this->connection));
-            app()->forgetInstance(Exact::class);
-
-            /** @var Exact $exact */
-            $exact = app(Exact::class);
-
-            $response = $exact->connector($division)->send($request);
+            $response = $this->connector($division)->send($request);
 
             if ($response->failed()) {
                 return [];
@@ -486,6 +484,78 @@ final class ExactReferenceData
         } catch (Throwable) {
             return [];
         }
+    }
+
+    /**
+     * Haalt een `GetRelations`-lees volledig op, pagina voor pagina, via Exact's OData-
+     * continuation-token (`$skiptoken`) — zelfde patroon als
+     * `ExactAccountingTarget::readPage()`. Faalt zacht als `fetch()`: elke fout (ook op een
+     * latere pagina, een `MAX_PAGES`-overschrijding, of een herhaald skiptoken) levert een
+     * lege lijst op, nooit een onvolledige set — een onvolledige set zou de
+     * ambiguïteitsdetectie in `findRelation()` een treffer laten missen.
+     *
+     * @param  array<string, scalar|null>  $params
+     * @return list<array<string, mixed>>
+     */
+    private function fetchAllPages(array $params): array
+    {
+        $division = (string) $this->connection->administratie_id;
+
+        if ($division === '') {
+            return [];
+        }
+
+        $rows = [];
+
+        try {
+            $connector = $this->connector($division);
+            $skipToken = null;
+            $seenSkipTokens = [];
+
+            for ($page = 0; $page < self::MAX_PAGES; $page++) {
+                $pageParams = $params;
+
+                if ($skipToken !== null) {
+                    $pageParams['$skiptoken'] = $skipToken;
+                }
+
+                $response = $connector->send(new GetRelations($pageParams));
+
+                if ($response->failed()) {
+                    return [];
+                }
+
+                $json = (array) $response->json();
+                array_push($rows, ...Envelope::results($json));
+                $skipToken = Envelope::nextSkipToken($json);
+
+                if ($skipToken === null) {
+                    return $rows;
+                }
+
+                if (isset($seenSkipTokens[$skipToken])) {
+                    return [];
+                }
+
+                $seenSkipTokens[$skipToken] = true;
+            }
+
+            return [];
+        } catch (Throwable) {
+            return [];
+        }
+    }
+
+    private function connector(string $division): ExactConnector
+    {
+        app()->instance(ExactCredentialResolver::class, new HubExactCredentialResolver($this->connection));
+        app()->instance(TokenStore::class, new ConnectionTokenStore($this->connection));
+        app()->forgetInstance(Exact::class);
+
+        /** @var Exact $exact */
+        $exact = app(Exact::class);
+
+        return $exact->connector($division);
     }
 
     private function label(string $code, ?string $description): string
