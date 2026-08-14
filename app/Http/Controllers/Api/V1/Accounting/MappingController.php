@@ -14,6 +14,7 @@ use App\Models\Connection;
 use App\Models\ConnectionAccountingRef;
 use App\Sanctum\TokenAbilities;
 use Dedoc\Scramble\Attributes\Group;
+use Dedoc\Scramble\Attributes\Response;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -33,6 +34,7 @@ class MappingController extends Controller
     /**
      * (Her)synchroniseer de referentiedata (grootboek/BTW/dagboeken) naar de mirror.
      */
+    #[Response(200, type: 'array{provider: string, synced: int}')]
     public function sync(Request $request): JsonResponse
     {
         $resolved = $this->resolve($request, write: true);
@@ -90,6 +92,7 @@ class MappingController extends Controller
     /**
      * De beschikbare referentie-codes uit de mirror — waaruit een override gekozen kan worden.
      */
+    #[Response(200, type: 'array{gl: list<array{code: string, label: string|null, attrs: mixed}>, vat: list<array{code: string, label: string|null, attrs: mixed}>, journal: list<array{code: string, label: string|null, attrs: mixed}>}')]
     public function referenceData(Request $request): JsonResponse
     {
         $resolved = $this->resolve($request, write: false);
@@ -122,6 +125,7 @@ class MappingController extends Controller
     /**
      * De huidige (auto-derived of overschreven) mapping van de koppeling.
      */
+    #[Response(200, type: 'array{mapping: array{vat_codes?: array<string, string>, gl_accounts?: array<string, string>, journals?: array<string, string>}}')]
     public function show(Request $request): JsonResponse
     {
         $resolved = $this->resolve($request, write: false);
@@ -138,6 +142,7 @@ class MappingController extends Controller
     /**
      * Overschrijf (merge) de mapping — voor wie de auto-default wil verfijnen.
      */
+    #[Response(200, type: 'array{mapping: array{vat_codes?: array<string, string>, gl_accounts?: array<string, string>, journals?: array<string, string>}}')]
     public function update(Request $request): JsonResponse
     {
         $resolved = $this->resolve($request, write: true);

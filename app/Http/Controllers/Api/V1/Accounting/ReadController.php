@@ -25,6 +25,7 @@ use App\Integrations\Errors\UpstreamErrorMapperRegistry;
 use App\Integrations\Exceptions\ProviderDisabledException;
 use App\Sanctum\TokenAbilities;
 use Dedoc\Scramble\Attributes\Group;
+use Dedoc\Scramble\Attributes\Response;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -63,6 +64,7 @@ class ReadController extends Controller
      * eigen cursor, dus "alles" is niet in één pagina te leveren zonder te liegen
      * over de volgorde.
      */
+    #[Response(200, type: 'array{data: list<array{id: string, type: string, number: string|null, external_id: string|null, issue_date: string|null, due_date: string|null, reference: string|null, party: array{id: string|null, name: string|null}, journal: string|null, currency: string, net_total: float, lines: list<array{description: string|null, amount: float, tax_code: string|null, ledger_account_id: string|null, cost_center: string|null, cost_unit: string|null}>}>, next_cursor: string|null, has_more: bool}')]
     public function documents(Request $request): JsonResponse
     {
         $type = $request->query('type');
@@ -90,6 +92,7 @@ class ReadController extends Controller
                 ? $target->readDocuments($connection, $query, $documentType)
                 : null,
             static fn (PostedDocument $item): array => $item->toArray(),
+            allowedExtraQuery: ['type'],
         );
     }
 
@@ -117,6 +120,7 @@ class ReadController extends Controller
                 ? $target->readBankStatements($connection, $query, (string) $kind)
                 : null,
             static fn (BankStatement $item): array => $item->toArray(),
+            allowedExtraQuery: ['kind'],
         );
     }
 
@@ -181,8 +185,11 @@ class ReadController extends Controller
     /**
      * Eén vorm voor alle lees-endpoints: connectie resolven, ability checken,
      * capability opvragen, pagineren, partner-fouten normaliseren.
+     *
+     * @param  list<string>  $allowedExtraQuery  endpoint-eigen parameters die naast
+     *                                           `limit`/`cursor` toegestaan zijn
      */
-    private function read(Request $request, Capability $capability, callable $fetch, callable $transform): JsonResponse
+    private function read(Request $request, Capability $capability, callable $fetch, callable $transform, array $allowedExtraQuery = []): JsonResponse
     {
         // Ability vóór resolutie: nu de canonieke abilities niet meer van de
         // gekoppelde provider afhangen, hoeft een token zonder recht niet eerst te
@@ -201,7 +208,7 @@ class ReadController extends Controller
         }
 
         try {
-            $query = ReadQuery::fromRequest($request->query());
+            $query = ReadQuery::fromRequest($request->query(), $allowedExtraQuery);
         } catch (InvalidArgumentException $e) {
             return response()->json(['error' => 'invalid_query', 'message' => $e->getMessage()], 400);
         }

@@ -12,6 +12,7 @@ use App\Enums\Provider;
 use App\Models\Connection;
 use App\Models\ConnectionAccountingRef;
 use App\Models\Consumer;
+use App\Models\ProviderEntityLink;
 use App\Sanctum\TokenAbilities;
 use Emeq\ExactApi\Http\Request\Read\GetBankEntries;
 use Emeq\ExactApi\Http\Request\Read\GetCashEntries;
@@ -368,6 +369,92 @@ class ReadResourcesTest extends TestCase
             ->assertJsonPath('data.0.net_total', 0);
     }
 
+    /**
+     * `YourRef` kapt op 50 tekens af (`provenance()`), dus een uuid komt er verminkt
+     * uit. `provider_entity_links` draagt de volledige waarde, geschreven toen de Hub
+     * dit document zelf boekte — de leeskant moet die raadplegen in plaats van de
+     * afgekapte provenance te geloven.
+     */
+    public function test_external_id_is_resolved_from_the_provider_entity_link_when_present(): void
+    {
+        MockClient::global([
+            GetSalesEntries::class => MockResponse::make(['d' => ['results' => [[
+                'EntryID' => 'entry-1',
+                // 'Emeq Hub · ' (11) + 39 tekens van de uuid = 50, afgekapt door provenance().
+                'YourRef' => 'Emeq Hub · 91dd0bf3-1d3a-4a3e-86a9-dec359140b',
+                'SalesEntryLines' => ['results' => []],
+            ]]]], 200),
+        ]);
+        [$consumer, $connection] = $this->connected();
+
+        ProviderEntityLink::factory()->create([
+            'connection_id' => $connection->getKey(),
+            'entity_subtype' => 'sales_invoice',
+            'external_id' => '91dd0bf3-1d3a-4a3e-86a9-dec359140b40',
+            'provider_entity_id' => 'entry-1',
+        ]);
+
+        $this->fetch($consumer, 'documents', ['type' => 'sales_invoice'])
+            ->assertOk()
+            ->assertJsonPath('data.0.external_id', '91dd0bf3-1d3a-4a3e-86a9-dec359140b40');
+    }
+
+    /**
+     * Een document dat de Hub wél zelf boekte maar waarvoor de link-rij ontbreekt (nog
+     * niet gemigreerd, handmatig verwijderd) valt terug op de afgekapte provenance —
+     * beter dan niets, expliciet als noodgreep.
+     */
+    public function test_external_id_falls_back_to_truncated_provenance_without_a_link_row(): void
+    {
+        MockClient::global([
+            GetSalesEntries::class => MockResponse::make(['d' => ['results' => [[
+                'EntryID' => 'entry-1',
+                'YourRef' => 'Emeq Hub · 91dd0bf3-1d3a-4a3e-86a9-dec359140b',
+                'SalesEntryLines' => ['results' => []],
+            ]]]], 200),
+        ]);
+        [$consumer] = $this->connected();
+
+        $this->fetch($consumer, 'documents', ['type' => 'sales_invoice'])
+            ->assertOk()
+            ->assertJsonPath('data.0.external_id', '91dd0bf3-1d3a-4a3e-86a9-dec359140b');
+    }
+
+    /**
+     * Eén query voor de hele pagina, niet één opzoeking per document.
+     */
+    public function test_external_ids_are_resolved_in_a_single_query(): void
+    {
+        MockClient::global([
+            GetSalesEntries::class => MockResponse::make(['d' => ['results' => [
+                ['EntryID' => 'entry-1', 'YourRef' => 'Emeq Hub · UUID-1', 'SalesEntryLines' => ['results' => []]],
+                ['EntryID' => 'entry-2', 'YourRef' => 'Emeq Hub · UUID-2', 'SalesEntryLines' => ['results' => []]],
+            ]]], 200),
+        ]);
+        [$consumer, $connection] = $this->connected();
+
+        ProviderEntityLink::factory()->create([
+            'connection_id' => $connection->getKey(),
+            'entity_subtype' => 'sales_invoice',
+            'external_id' => 'UUID-1-VOLLEDIG',
+            'provider_entity_id' => 'entry-1',
+        ]);
+
+        $queries = 0;
+        DB::listen(function ($q) use (&$queries): void {
+            if (str_contains($q->sql, 'provider_entity_links')) {
+                $queries++;
+            }
+        });
+
+        $this->fetch($consumer, 'documents', ['type' => 'sales_invoice'])
+            ->assertOk()
+            ->assertJsonPath('data.0.external_id', 'UUID-1-VOLLEDIG')
+            ->assertJsonPath('data.1.external_id', 'UUID-2');
+
+        $this->assertSame(1, $queries, 'External-ids horen in één query opgehaald te worden.');
+    }
+
     public function test_the_purchase_filter_reads_the_purchase_resource(): void
     {
         MockClient::global([
@@ -415,6 +502,20 @@ class ReadResourcesTest extends TestCase
      * Eén query voor alle relatienamen op de pagina; per document opzoeken zou een
      * N+1 zijn tegen de mirror.
      */
+    /**
+     * `external_id`, `number`, `from` en `issued_after` werden stil genegeerd: de
+     * consumer kreeg 200 met dezelfde ongefilterde lijst terug. Eerlijk falen is
+     * beter dan een leugen op 200.
+     */
+    public function test_an_unsupported_filter_parameter_is_rejected_instead_of_silently_ignored(): void
+    {
+        [$consumer] = $this->connected();
+
+        $this->fetch($consumer, 'documents', ['type' => 'sales_invoice', 'external_id' => 'INV-001'])
+            ->assertStatus(400)
+            ->assertJsonPath('error', 'invalid_query');
+    }
+
     public function test_relation_names_are_resolved_in_a_single_query(): void
     {
         MockClient::global([

@@ -30,10 +30,24 @@ final readonly class ReadQuery
     }
 
     /**
+     * Onbekende parameters worden geweigerd in plaats van genegeerd: een consumer die
+     * filtert op bijvoorbeeld `external_id` kreeg anders stil de ongefilterde lijst
+     * terug — 200 met een leugen is het slechtste faalgedrag van de twee.
+     *
      * @param  array<string, mixed>  $query
+     * @param  list<string>  $allowedExtra  endpoint-eigen parameters (`type`, `kind`)
      */
-    public static function fromRequest(array $query): self
+    public static function fromRequest(array $query, array $allowedExtra = []): self
     {
+        $allowed = ['limit', 'cursor', ...$allowedExtra];
+        $unknown = array_diff(array_keys($query), $allowed);
+
+        if ($unknown !== []) {
+            throw new InvalidArgumentException(
+                'Onbekende query-parameter(s): '.implode(', ', $unknown).'. Ondersteund: '.implode(', ', $allowed).'.'
+            );
+        }
+
         return new self(
             limit: (int) ($query['limit'] ?? self::DEFAULT_LIMIT),
             cursor: isset($query['cursor']) ? Cursor::decode((string) $query['cursor']) : null,

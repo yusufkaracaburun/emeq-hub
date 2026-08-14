@@ -16,6 +16,7 @@ use App\Models\Account;
 use App\Models\Connection;
 use App\Sanctum\TokenAbilities;
 use Dedoc\Scramble\Attributes\Group;
+use Dedoc\Scramble\Attributes\Response;
 use Illuminate\Http\JsonResponse;
 
 /**
@@ -37,6 +38,12 @@ class DocumentsController extends Controller
         private readonly AccountingSyncRunner $runner,
     ) {}
 
+    /**
+     * `AccountingSyncRunner::run()` levert bij succes (posted, deduplicated of
+     * recovered-after-timeout) altijd deze vorm; `external_number`/`attachments`/
+     * `deduplicated`/`recovered` komen er alleen bij als die van toepassing zijn.
+     */
+    #[Response(200, type: 'array{provider: string, status: string, external_id: string, external_ref: string|null, external_number?: int, attachments?: list<array{filename: string, status: string, document_ref: string|null, error: string|null}>, deduplicated?: bool, recovered?: bool}')]
     public function store(StoreDocumentRequest $request): JsonResponse
     {
         if (! $this->tokenCanWrite($request)) {

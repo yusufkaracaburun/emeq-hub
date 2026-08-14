@@ -38,6 +38,7 @@ use App\Integrations\Exact\ExactReferenceData;
 use App\Integrations\Exact\HubExactCredentialResolver;
 use App\Models\Connection;
 use App\Models\ConnectionAccountingRef;
+use App\Models\ProviderEntityLink;
 use Carbon\CarbonImmutable;
 use Emeq\ExactApi\Contracts\ExactCredentialResolver;
 use Emeq\ExactApi\Contracts\TokenStore;
@@ -278,15 +279,22 @@ final class ExactAccountingTarget implements AccountingTarget, EnrichesValidatio
             $rows,
         ))));
 
-        return array_map(function (array $row) use ($names, $purchase, $collection, $partyField): PostedDocument {
+        $externalIds = $this->externalIdsByEntryId($connection, array_values(array_filter(array_map(
+            static fn (array $row): ?string => self::nullableString($row['EntryID'] ?? null),
+            $rows,
+        ))));
+
+        return array_map(function (array $row) use ($names, $externalIds, $purchase, $collection, $partyField): PostedDocument {
             $partyId = self::nullableString($row[$partyField] ?? null);
+            $entryId = self::nullableString($row['EntryID'] ?? null);
 
             return new PostedDocument(
                 id: (string) ($row['EntryID'] ?? ''),
                 type: $purchase ? DocumentType::PurchaseInvoice : DocumentType::SalesInvoice,
                 lines: self::toPostedLines($row[$collection] ?? null),
                 number: self::nullableString($row['EntryNumber'] ?? null),
-                externalId: self::externalIdFromProvenance(self::nullableString($row['YourRef'] ?? null)),
+                externalId: ($entryId === null ? null : ($externalIds[$entryId] ?? null))
+                    ?? self::externalIdFromProvenance(self::nullableString($row['YourRef'] ?? null)),
                 issueDate: self::toDate($row['EntryDate'] ?? null),
                 dueDate: self::toDate($row['DueDate'] ?? null),
                 reference: self::nullableString($row['Description'] ?? null),
@@ -317,6 +325,31 @@ final class ExactAccountingTarget implements AccountingTarget, EnrichesValidatio
             ->whereIn('native_id', array_unique($ids))
             ->pluck('label', 'native_id')
             ->filter()
+            ->all();
+    }
+
+    /**
+     * De volledige `external_id` per `EntryID`, één query voor de hele pagina.
+     *
+     * `provenance()` kapt af op 50 tekens vóór verzending naar `YourRef`; de eigen
+     * ledger draagt de ongekapte waarde onder de Exact-`EntryID` (`provider_entity_id`,
+     * uniek per connectie+entity_type — geen subtype nodig om te matchen). Een document
+     * dat de Hub niet zelf boekte heeft geen rij en valt terug op `YourRef`.
+     *
+     * @param  list<string>  $entryIds
+     * @return array<string, string>
+     */
+    private function externalIdsByEntryId(Connection $connection, array $entryIds): array
+    {
+        if ($entryIds === []) {
+            return [];
+        }
+
+        return ProviderEntityLink::query()
+            ->where('connection_id', $connection->getKey())
+            ->where('entity_type', ProviderEntityLink::ENTITY_FINANCIAL_DOCUMENT)
+            ->whereIn('provider_entity_id', array_unique($entryIds))
+            ->pluck('external_id', 'provider_entity_id')
             ->all();
     }
 

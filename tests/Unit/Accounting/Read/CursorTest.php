@@ -67,4 +67,22 @@ class CursorTest extends TestCase
 
         ReadQuery::fromRequest(['limit' => 0]);
     }
+
+    /**
+     * `external_id`, `number`, `from` en `issued_after` werden stil genegeerd —
+     * een consumer die filtert kreeg 200 met de ongefilterde lijst terug.
+     */
+    public function test_an_unsupported_query_parameter_is_rejected(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        ReadQuery::fromRequest(['external_id' => 'INV-001']);
+    }
+
+    public function test_an_endpoint_specific_parameter_is_allowed_when_declared(): void
+    {
+        $query = ReadQuery::fromRequest(['type' => 'sales_invoice'], allowedExtra: ['type']);
+
+        $this->assertSame(ReadQuery::DEFAULT_LIMIT, $query->limit);
+    }
 }
