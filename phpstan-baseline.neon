@@ -289,12 +289,6 @@ parameters:
 			path: app/Console/Commands/AccountingSmoke.php
 
 		-
-			message: '#^PHPDoc tag @param has invalid value \(array\{0\: int, 1\: int\}  \.\.\.\)\: Unexpected token "\\n     \* ", expected variable at offset 45 on line 2$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: app/Console/Commands/Exact/PurgeTestData.php
-
-		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$consumer_id\.$#'
 			identifier: property.notFound
 			count: 1

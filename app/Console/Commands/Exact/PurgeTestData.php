@@ -159,10 +159,14 @@ final class PurgeTestData extends Command
      *
      * @param  array<string, array{ok: int, failed: int}>  $tally
      * @param  list<string>  $failures
+     *
+     * @param-out array<string, array{ok: int, failed: int}>  $tally
      */
     private function recordResult(array &$tally, array &$failures, string $category, string $label, object $connector, object $request): void
     {
         $result = $this->delete($connector, $request, $label);
+
+        $tally[$category] ??= ['ok' => 0, 'failed' => 0];
 
         if ($result['ok']) {
             $tally[$category]['ok']++;
