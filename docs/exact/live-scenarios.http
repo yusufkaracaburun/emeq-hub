@@ -18,8 +18,11 @@
 # ── Let op ───────────────────────────────────────────────────────────────────
 #
 #  - Deze calls raken een ECHTE administratie. Een boeking is niet met één klik
-#    terug te draaien; opruimen gaat via `php artisan exact:purge-test-data`,
-#    dry-run eerst.
+#    terug te draaien; opruimen gaat via `php artisan exact:purge-test-data`
+#    (Exact-kant), dry-run eerst. Ruimt de Exact-boekingen op, niet de Hub-eigen
+#    state — draai daarna óók `php artisan hub:reset-connection {connection}`
+#    (idempotency-keys, entity-links, relatie-mirror), anders geeft herboeken
+#    `422 idempotency_key_reuse`.
 #  - `Idempotency-Key` is verplicht op /v1/accounting/documents. Varieer 'm per
 #    logisch document — dezelfde sleutel is een replay en geeft het eerdere
 #    antwoord terug, ook als je de payload wijzigt.
