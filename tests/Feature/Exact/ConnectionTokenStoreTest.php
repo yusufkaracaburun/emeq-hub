@@ -8,6 +8,7 @@ use DateTimeImmutable;
 use Emeq\ExactApi\Data\AccessToken;
 use Emeq\ExactApi\Data\ExactCredentials;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Log;
 use Tests\TestCase;
 
 class ConnectionTokenStoreTest extends TestCase
@@ -107,5 +108,34 @@ class ConnectionTokenStoreTest extends TestCase
         $connection->refresh();
         $this->assertSame('acc_new', $connection->access_token);
         $this->assertSame('ref_new', $connection->refresh_token);
+    }
+
+    public function test_put_logs_the_rotation_with_fingerprints_never_the_raw_tokens(): void
+    {
+        $connection = Connection::factory()->forExact()->create([
+            'access_token' => 'acc_old',
+            'refresh_token' => 'ref_old',
+        ]);
+
+        Log::shouldReceive('info')
+            ->once()
+            ->withArgs(function (string $message, array $context) use ($connection): bool {
+                $serialized = $message.json_encode($context);
+
+                return $message === 'exact.oauth.refresh_token_rotated'
+                    && $context['connection_id'] === $connection->id
+                    && $context['old_refresh_token_fingerprint'] === substr(hash('sha256', 'ref_old'), 0, 12)
+                    && $context['new_refresh_token_fingerprint'] === substr(hash('sha256', 'ref_new'), 0, 12)
+                    && ! str_contains($serialized, 'ref_old')
+                    && ! str_contains($serialized, 'ref_new')
+                    && ! str_contains($serialized, 'acc_old')
+                    && ! str_contains($serialized, 'acc_new');
+            });
+
+        (new ConnectionTokenStore($connection))->put($this->credentials($connection), new AccessToken(
+            accessToken: 'acc_new',
+            refreshToken: 'ref_new',
+            expiresAt: new DateTimeImmutable('+600 seconds'),
+        ));
     }
 }

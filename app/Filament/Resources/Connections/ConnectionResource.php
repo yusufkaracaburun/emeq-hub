@@ -27,7 +27,6 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Throwable;
 
 class ConnectionResource extends Resource
 {
@@ -294,52 +293,6 @@ class ConnectionResource extends Resource
 
                 Notification::make()
                     ->title('Connection ingetrokken')
-                    ->success()
-                    ->send();
-            });
-    }
-
-    public static function refreshTokenAction(): Action
-    {
-        return Action::make('refreshToken')
-            ->label('Token vernieuwen')
-            ->icon(Heroicon::OutlinedArrowPath)
-            ->color('gray')
-            ->visible(fn (Connection $record): bool => self::hasLiveOAuthLifecycle($record) && filled($record->refresh_token))
-            ->action(function (Connection $record): void {
-                $before = $record->expires_at;
-
-                try {
-                    $refreshed = app(OAuthFlowRegistry::class)
-                        ->for($record->provider->value)
-                        ->refreshToken($record);
-                } catch (Throwable $e) {
-                    report($e);
-
-                    Notification::make()
-                        ->title('Token verversen mislukt')
-                        ->body('Zie logs voor details — fingerprint: '.substr(hash('sha256', $e->getMessage()), 0, 12))
-                        ->danger()
-                        ->send();
-
-                    return;
-                }
-
-                $expiresAt = $refreshed->expires_at;
-
-                if ($before !== null && $expiresAt !== null && $expiresAt->equalTo($before)) {
-                    Notification::make()
-                        ->title('Token nog geldig — niets ververst')
-                        ->body('De provider staat een refresh pas rond de expiry toe. Geldig tot '.$expiresAt->format('d-m-Y H:i').'.')
-                        ->warning()
-                        ->send();
-
-                    return;
-                }
-
-                Notification::make()
-                    ->title('Token ververst')
-                    ->body($expiresAt !== null ? 'Nu geldig tot '.$expiresAt->format('d-m-Y H:i').'.' : null)
                     ->success()
                     ->send();
             });

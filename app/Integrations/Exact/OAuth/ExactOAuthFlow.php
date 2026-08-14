@@ -3,24 +3,32 @@
 namespace App\Integrations\Exact\OAuth;
 
 use App\Integrations\Contracts\OAuthFlow;
+use App\Integrations\Exact\ConnectionTokenStore;
 use App\Integrations\Exact\ExactUserId;
+use App\Integrations\Exact\HubExactCredentialResolver;
 use App\Integrations\Exact\Jobs\DeleteExactWebhookSubscriptionsJob;
 use App\Integrations\Exact\Jobs\RegisterExactWebhookSubscriptionsJob;
 use App\Integrations\Exact\Jobs\SyncExactReferenceJob;
 use App\Models\Account;
 use App\Models\Connection;
+use Emeq\ExactApi\Contracts\ExactCredentialResolver;
+use Emeq\ExactApi\Contracts\TokenStore;
+use Emeq\ExactApi\Exact;
 use Emeq\ExactApi\OData\Envelope;
 use Illuminate\Contracts\Config\Repository as ConfigRepository;
 use Illuminate\Http\Client\Factory as HttpFactory;
-use Illuminate\Support\Facades\Cache;
 
 /**
  * Exact Online OAuth2 (authorization_code, Seamless). Gemodelleerd op
  * MollieConnectOAuthFlow, met de empirisch-geverifieerde Exact-afwijkingen:
  *
  *  - Roterend single-use refresh-token: élke refresh geeft een NIEUW refresh_token;
- *    het oude vervalt direct. refreshToken() persisteert het geroteerde token onder
- *    een per-connection lock — mis je dat, dan is de koppeling na 10 min dood.
+ *    het oude vervalt direct. Biedt een tweede aanvrager het inmiddels-verbruikte
+ *    token nogmaals aan, dan trekt Exact de hele chain in (`invalid_grant`) en is
+ *    herstel alleen mogelijk via een nieuwe consent. refreshToken() loopt daarom
+ *    door dezelfde SDK-authenticator (`Emeq\ExactApi\Auth\OAuthAuthenticator`) als
+ *    elke pass-through-call — één lock, één rotatie-implementatie, geen tweede pad
+ *    dat een verbruikt token kan aanbieden (#61).
  *  - Refresh PAS ná expiry: Exact weigert een refresh zolang de access_token nog
  *    geldig is (HTTP 400 "Rate limit exceeded: access_token not expired"). Dus géén
  *    proactieve 5-min-marge zoals Mollie; alleen refreshen wanneer écht verlopen.
@@ -99,44 +107,18 @@ final class ExactOAuthFlow implements OAuthFlow
 
     public function refreshToken(Connection $connection): Connection
     {
-        return Cache::lock("oauth:refresh:{$connection->id}", 30)->block(15, function () use ($connection) {
-            $connection->refresh();
+        app()->instance(ExactCredentialResolver::class, new HubExactCredentialResolver($connection));
+        app()->instance(TokenStore::class, new ConnectionTokenStore($connection));
+        app()->forgetInstance(Exact::class);
 
-            // Exact weigert refresh zolang de access_token nog geldig is, dus we
-            // refreshen alleen wanneer die écht verlopen is (geen proactieve marge).
-            if ($connection->expires_at && $connection->expires_at->gt(now())) {
-                return $connection;
-            }
+        /** @var Exact $exact */
+        $exact = app(Exact::class);
 
-            $response = $this->http->asForm()->post($this->tokenUrl(), [
-                'grant_type' => 'refresh_token',
-                'refresh_token' => $connection->refresh_token,
-                'client_id' => $this->config->get('services.exact.client_id'),
-                'client_secret' => $this->config->get('services.exact.client_secret'),
-            ]);
+        // forceRefresh() bewaakt zelf de lock, de expiry-check en de clock-skew-guard
+        // (Exact-400 "not expired" → huidige token blijft bruikbaar, geen fout).
+        $exact->authenticator()->forceRefresh();
 
-            if ($response->failed()) {
-                // Clock-skew: onze klok zei "verlopen", maar Exact vindt de token nog
-                // geldig → huidige token is nog bruikbaar, niet falen.
-                if ($response->status() === 400 && str_contains($response->body(), 'not expired')) {
-                    return $connection;
-                }
-
-                $response->throw();
-            }
-
-            $body = $response->json();
-
-            $connection->fill([
-                'access_token' => $body['access_token'],
-                // Roterend: nieuw refresh_token persisteren (fallback op oud als Exact
-                // er geen teruggeeft — defensief, hoort niet voor te komen).
-                'refresh_token' => $body['refresh_token'] ?? $connection->refresh_token,
-                'expires_at' => now()->addSeconds((int) $body['expires_in']),
-            ])->save();
-
-            return $connection;
-        });
+        return $connection->refresh();
     }
 
     public function revoke(Connection $connection): void

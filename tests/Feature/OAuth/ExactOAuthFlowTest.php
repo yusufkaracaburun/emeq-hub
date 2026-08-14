@@ -7,9 +7,12 @@ use App\Integrations\Exact\Jobs\RegisterExactWebhookSubscriptionsJob;
 use App\Integrations\Exact\OAuth\ExactOAuthFlow;
 use App\Models\Account;
 use App\Models\Connection;
+use Emeq\ExactApi\Auth\RefreshTokenRequest;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Http;
+use Saloon\Http\Faking\MockClient;
+use Saloon\Http\Faking\MockResponse;
 use Tests\TestCase;
 
 class ExactOAuthFlowTest extends TestCase
@@ -27,6 +30,13 @@ class ExactOAuthFlowTest extends TestCase
             'services.exact.auth_base_url' => 'https://start.exactonline.nl',
             'services.exact.api_base_url' => 'https://start.exactonline.nl',
         ]);
+    }
+
+    protected function tearDown(): void
+    {
+        MockClient::destroyGlobal();
+
+        parent::tearDown();
     }
 
     public function test_exchange_code_writes_tokens_and_division(): void
@@ -157,7 +167,7 @@ class ExactOAuthFlowTest extends TestCase
 
     public function test_refresh_is_skipped_while_token_still_valid(): void
     {
-        Http::fake();
+        $mock = MockClient::global([]);
 
         $connection = Connection::factory()->forExact()->create([
             'expires_at' => now()->addMinutes(5),
@@ -166,13 +176,13 @@ class ExactOAuthFlowTest extends TestCase
         $this->app->make(ExactOAuthFlow::class)->refreshToken($connection);
 
         // Exact weigert refresh op een geldige token — dus we mogen niet refreshen.
-        Http::assertNothingSent();
+        $mock->assertNothingSent();
     }
 
     public function test_refresh_rotates_and_persists_new_refresh_token(): void
     {
-        Http::fake([
-            'start.exactonline.nl/api/oauth2/token' => Http::response([
+        MockClient::global([
+            RefreshTokenRequest::class => MockResponse::make([
                 'access_token' => 'acc_new',
                 'token_type' => 'bearer',
                 'expires_in' => '600',
@@ -196,8 +206,8 @@ class ExactOAuthFlowTest extends TestCase
 
     public function test_refresh_keeps_current_token_on_not_expired_refusal(): void
     {
-        Http::fake([
-            'start.exactonline.nl/api/oauth2/token' => Http::response([
+        MockClient::global([
+            RefreshTokenRequest::class => MockResponse::make([
                 'error' => 'access_denied',
                 'error_description' => 'Rate limit exceeded: access_token not expired',
             ], 400),

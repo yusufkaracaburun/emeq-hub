@@ -18,6 +18,7 @@ class BackfillUserIdsTest extends TestCase
         config([
             'services.exact.client_id' => 'app_test_id',
             'services.exact.client_secret' => 'app_test_secret',
+            'services.exact.redirect_uri' => 'https://hub.test/v1/oauth/exact/callback',
             'services.exact.auth_base_url' => 'https://start.exactonline.nl',
             'services.exact.api_base_url' => 'https://start.exactonline.nl',
         ]);

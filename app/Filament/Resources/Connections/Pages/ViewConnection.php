@@ -22,7 +22,6 @@ class ViewConnection extends ViewRecord
         return [
             StartOAuthFlowAction::forConnection(),
             ManageAccountingMappingAction::make(),
-            ConnectionResource::refreshTokenAction(),
             ConnectionResource::revokeAction(),
         ];
     }
