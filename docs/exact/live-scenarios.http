@@ -1,0 +1,342 @@
+# Emeq Hub × Exact Online — live scenario's tegen productie
+#
+# Werkt met de VS Code "REST Client"- of JetBrains HTTP-client-extensie.
+# Dit test de HUB-endpoints (/v1/*), niet de SDK direct.
+#
+# ── Setup ────────────────────────────────────────────────────────────────────
+#
+# 1. PAT aanmaken in /admin op de Consumer, preset "Boekhouding · Read + write"
+#    (abilities: accounting:read, accounting:write, consumer:manage-accounts).
+#    Het plain token is éénmalig zichtbaar — zet 'm meteen in je `.env`:
+#
+#      EMEQ_HUB_PAT=1|xxxxxxxx
+#
+#    Zet 'm NIET in dit bestand. Dit bestand staat in git.
+#
+# 2. X-Account-Id is de `external_id` van het Account, niet het interne id.
+#
+# ── Let op ───────────────────────────────────────────────────────────────────
+#
+#  - Deze calls raken een ECHTE administratie. Een boeking is niet met één klik
+#    terug te draaien; opruimen gaat via `php artisan exact:purge-test-data`,
+#    dry-run eerst.
+#  - `Idempotency-Key` is verplicht op /v1/accounting/documents. Varieer 'm per
+#    logisch document — dezelfde sleutel is een replay en geeft het eerdere
+#    antwoord terug, ook als je de payload wijzigt.
+#  - In de testadministratie 4471372 staat alleen boekjaar 2026 open. Een datum
+#    uit 2025 of eerder wordt geweigerd met `Verplicht: Boekjaar`.
+
+@baseUrl = https://hub.emeq.nl
+@token = {{$dotenv EMEQ_HUB_PAT}}
+@accountId = 47
+
+# Minimale geldige PDF (base64), voor de bijlage-scenario's.
+@pdfBase64 = JVBERi0xLjEKMSAwIG9iajw8L1R5cGUvQ2F0YWxvZy9QYWdlcyAyIDAgUj4+ZW5kb2JqCjIgMCBvYmo8PC9UeXBlL1BhZ2VzL0tpZHNbMyAwIFJdL0NvdW50IDE+PmVuZG9iagozIDAgb2JqPDwvVHlwZS9QYWdlL1BhcmVudCAyIDAgUi9NZWRpYUJveFswIDAgMjAwIDIwMF0+PmVuZG9iagp0cmFpbGVyPDwvUm9vdCAxIDAgUj4+CiUlRU9GCg==
+
+
+### ─── Verkenning ─────────────────────────────────────────────────────────────
+
+### Welke providers zijn gekoppeld voor dit Account?
+GET {{baseUrl}}/v1/integrations
+Authorization: Bearer {{token}}
+Accept: application/json
+X-Account-Id: {{accountId}}
+
+### Wat kan het gekoppelde pakket? (capabilities per provider)
+GET {{baseUrl}}/v1/accounting/capabilities
+Authorization: Bearer {{token}}
+Accept: application/json
+X-Account-Id: {{accountId}}
+
+### Grootboekrekeningen uit de mirror — de codes die je in `category` kunt gebruiken
+GET {{baseUrl}}/v1/accounting/ledger-accounts
+Authorization: Bearer {{token}}
+Accept: application/json
+X-Account-Id: {{accountId}}
+
+
+### ─── Droogzwemmen ───────────────────────────────────────────────────────────
+
+### Validate — findings-rapport zonder te boeken.
+#   Draai dit vóór elke nieuwe payload-vorm. Het voorspelt hetzelfde als de
+#   echte boeking: onbekende relatie, ontbrekende btw-code, grootboek-terugval.
+POST {{baseUrl}}/v1/accounting/documents/validate
+Authorization: Bearer {{token}}
+Content-Type: application/json
+Accept: application/json
+X-Account-Id: {{accountId}}
+
+{
+  "type": "sales_invoice",
+  "external_id": "DRYRUN-001",
+  "number": "Droogzwemmen 001",
+  "issue_date": "2026-08-14",
+  "party": { "role": "debtor", "name": "Nog Onbekende Klant", "external_id": "KLANT-001" },
+  "lines": [
+    { "description": "Consultancy", "amount": 200, "tax_rate": 21 }
+  ]
+}
+
+
+### ─── Verkoopfacturen ────────────────────────────────────────────────────────
+
+### Verkoopfactuur — bestaande relatie, expliciete grootboek-categorie
+POST {{baseUrl}}/v1/accounting/documents
+Authorization: Bearer {{token}}
+Content-Type: application/json
+Accept: application/json
+X-Account-Id: {{accountId}}
+Idempotency-Key: {{$guid}}
+
+{
+  "type": "sales_invoice",
+  "external_id": "INV-001",
+  "number": "Factuur 001",
+  "issue_date": "2026-08-14",
+  "party": { "role": "debtor", "name": "Hub Test Klant", "external_id": "KLANT-001" },
+  "lines": [
+    { "description": "Consultancy", "amount": 200, "tax_rate": 21, "category": "omzet" }
+  ]
+}
+
+### Verkoopfactuur — zonder `category`.
+#   Valt terug op gl_accounts.sales_default (niet op _default): een verkoopregel
+#   hoort op de omzetrekening, niet op de kostenrekening.
+POST {{baseUrl}}/v1/accounting/documents
+Authorization: Bearer {{token}}
+Content-Type: application/json
+Accept: application/json
+X-Account-Id: {{accountId}}
+Idempotency-Key: {{$guid}}
+
+{
+  "type": "sales_invoice",
+  "external_id": "INV-002",
+  "number": "Factuur 002 zonder category",
+  "issue_date": "2026-08-14",
+  "party": { "role": "debtor", "name": "Hub Test Klant", "external_id": "KLANT-001" },
+  "lines": [
+    { "description": "Consultancy", "amount": 200, "tax_rate": 21 }
+  ]
+}
+
+### Verkoopfactuur met btw verlegd — levert VATCode 6 (21%) of 7 (9%), niet 0
+POST {{baseUrl}}/v1/accounting/documents
+Authorization: Bearer {{token}}
+Content-Type: application/json
+Accept: application/json
+X-Account-Id: {{accountId}}
+Idempotency-Key: {{$guid}}
+
+{
+  "type": "sales_invoice",
+  "external_id": "INV-003",
+  "number": "Factuur 003 verlegd",
+  "issue_date": "2026-08-14",
+  "party": { "role": "debtor", "name": "Hub Test Klant", "external_id": "KLANT-001" },
+  "lines": [
+    { "description": "Onderaanneming", "amount": 1000, "tax_rate": 21, "tax_treatment": "reverse_charge", "category": "omzet" }
+  ]
+}
+
+### Creditnota — bedrag negatief in Exact
+POST {{baseUrl}}/v1/accounting/documents
+Authorization: Bearer {{token}}
+Content-Type: application/json
+Accept: application/json
+X-Account-Id: {{accountId}}
+Idempotency-Key: {{$guid}}
+
+{
+  "type": "credit_note",
+  "external_id": "CN-001",
+  "number": "Creditnota 001",
+  "issue_date": "2026-08-14",
+  "party": { "role": "debtor", "name": "Hub Test Klant", "external_id": "KLANT-001" },
+  "lines": [
+    { "description": "Correctie", "amount": 50, "tax_rate": 21, "category": "omzet" }
+  ]
+}
+
+### Verkoopfactuur met bijlage.
+#   Let op: dit laat een Document in Exact achter. Dat blokkeert het verwijderen
+#   van de relatie totdat het Document weg is — de purge doet dat in de goede
+#   volgorde, maar handmatig opruimen in de Exact-UI gaat hierop stuk.
+POST {{baseUrl}}/v1/accounting/documents
+Authorization: Bearer {{token}}
+Content-Type: application/json
+Accept: application/json
+X-Account-Id: {{accountId}}
+Idempotency-Key: {{$guid}}
+
+{
+  "type": "sales_invoice",
+  "external_id": "INV-004",
+  "number": "Factuur 004 met bijlage",
+  "issue_date": "2026-08-14",
+  "party": { "role": "debtor", "name": "Hub Test Klant", "external_id": "KLANT-001" },
+  "lines": [
+    { "description": "Consultancy", "amount": 200, "tax_rate": 21, "category": "omzet" }
+  ],
+  "attachments": [
+    { "filename": "factuur-004.pdf", "mime_type": "application/pdf", "content": "{{pdfBase64}}" }
+  ]
+}
+
+
+### ─── Inkoop en self-billing ─────────────────────────────────────────────────
+
+### Inkoopfactuur / self-billing — party.role = creditor
+POST {{baseUrl}}/v1/accounting/documents
+Authorization: Bearer {{token}}
+Content-Type: application/json
+Accept: application/json
+X-Account-Id: {{accountId}}
+Idempotency-Key: {{$guid}}
+
+{
+  "type": "purchase_invoice",
+  "external_id": "PINV-001",
+  "number": "Inkoop 001",
+  "issue_date": "2026-08-14",
+  "party": { "role": "creditor", "name": "Hub Test Leverancier", "external_id": "LEV-001" },
+  "lines": [
+    { "description": "Onderaanneming", "amount": 500, "tax_rate": 21, "category": "kosten" }
+  ]
+}
+
+
+### ─── Onbekende relatie ──────────────────────────────────────────────────────
+
+### Onbekende partij ZONDER create_if_missing → 422 REFERENCE_MAPPING_MISSING.
+#   De Hub maakt niets aan tenzij het document erom vraagt.
+POST {{baseUrl}}/v1/accounting/documents
+Authorization: Bearer {{token}}
+Content-Type: application/json
+Accept: application/json
+X-Account-Id: {{accountId}}
+Idempotency-Key: {{$guid}}
+
+{
+  "type": "sales_invoice",
+  "external_id": "NEW-001",
+  "number": "Nieuwe klant zonder vlag",
+  "issue_date": "2026-08-14",
+  "party": { "role": "debtor", "name": "Gloednieuwe Klant BV", "external_id": "KLANT-NIEUW-001" },
+  "lines": [
+    { "description": "Consultancy", "amount": 100, "tax_rate": 21 }
+  ]
+}
+
+### Zelfde partij MET create_if_missing → 201 + één nieuwe relatie in Exact.
+#   `external_id` is verplicht zodra je deze vlag zet: zonder die sleutel kan de
+#   Hub de aangemaakte relatie niet stabiel terugvinden en zou een tweede boeking
+#   een duplicaat opleveren. Weigert op de edge.
+#
+#   Zet deze vlag alleen wanneer de gebruiker bewust een nieuwe relatie aanmaakt.
+#   Standaard aanzetten betekent dat elke typefout in een partijnaam een nieuwe
+#   relatie in de administratie van de klant zet.
+POST {{baseUrl}}/v1/accounting/documents
+Authorization: Bearer {{token}}
+Content-Type: application/json
+Accept: application/json
+X-Account-Id: {{accountId}}
+Idempotency-Key: {{$guid}}
+
+{
+  "type": "sales_invoice",
+  "external_id": "NEW-002",
+  "number": "Nieuwe klant met vlag",
+  "issue_date": "2026-08-14",
+  "party": {
+    "role": "debtor",
+    "name": "Gloednieuwe Klant BV",
+    "external_id": "KLANT-NIEUW-001",
+    "create_if_missing": true
+  },
+  "lines": [
+    { "description": "Consultancy", "amount": 100, "tax_rate": 21 }
+  ]
+}
+
+
+### ─── Foutpaden ──────────────────────────────────────────────────────────────
+
+### Zonder X-Account-Id → 400 missing_account_header
+POST {{baseUrl}}/v1/accounting/documents
+Authorization: Bearer {{token}}
+Content-Type: application/json
+Accept: application/json
+Idempotency-Key: {{$guid}}
+
+{
+  "type": "sales_invoice",
+  "external_id": "ERR-001",
+  "number": "Zonder account-header",
+  "issue_date": "2026-08-14",
+  "party": { "role": "debtor", "name": "Hub Test Klant", "external_id": "KLANT-001" },
+  "lines": [{ "description": "Consultancy", "amount": 100, "tax_rate": 21 }]
+}
+
+### Onbekend account → 404 account_not_found
+POST {{baseUrl}}/v1/accounting/documents
+Authorization: Bearer {{token}}
+Content-Type: application/json
+Accept: application/json
+X-Account-Id: bestaat-niet
+Idempotency-Key: {{$guid}}
+
+{
+  "type": "sales_invoice",
+  "external_id": "ERR-002",
+  "number": "Onbekend account",
+  "issue_date": "2026-08-14",
+  "party": { "role": "debtor", "name": "Hub Test Klant", "external_id": "KLANT-001" },
+  "lines": [{ "description": "Consultancy", "amount": 100, "tax_rate": 21 }]
+}
+
+### Zonder PAT → 401 unauthenticated, JSON (geen login-redirect)
+POST {{baseUrl}}/v1/accounting/documents
+Content-Type: application/json
+Accept: application/json
+X-Account-Id: {{accountId}}
+
+
+### ─── Controleren in Exact ───────────────────────────────────────────────────
+
+### Wat is er geboekt? Verkoopboekingen met regels
+GET {{baseUrl}}/v1/exact/salesentry/SalesEntries?$top=5&$expand=SalesEntryLines
+Authorization: Bearer {{token}}
+Accept: application/json
+X-Account-Id: {{accountId}}
+
+### Inkoopboekingen met regels
+GET {{baseUrl}}/v1/exact/purchaseentry/PurchaseEntries?$top=5&$expand=PurchaseEntryLines
+Authorization: Bearer {{token}}
+Accept: application/json
+X-Account-Id: {{accountId}}
+
+### Hangt er een bijlage aan?
+GET {{baseUrl}}/v1/exact/documents/DocumentAttachments?$top=5&$select=ID,FileName,Document
+Authorization: Bearer {{token}}
+Accept: application/json
+X-Account-Id: {{accountId}}
+
+### Welke relaties staan er nu?
+GET {{baseUrl}}/v1/exact/crm/Accounts?$top=20&$select=ID,Code,Name,VATNumber,IsSales,IsSupplier
+Authorization: Bearer {{token}}
+Accept: application/json
+X-Account-Id: {{accountId}}
+
+
+### ─── Opruimen ───────────────────────────────────────────────────────────────
+#
+# Niet via de API — DELETE is op de pass-through bewust geblokkeerd.
+# Op de server, dry-run eerst:
+#
+#   php artisan exact:purge-test-data <connection-id>
+#   php artisan exact:purge-test-data <connection-id> --force --relations=<guid>,<guid>
+#
+# Boekingen en Documents gaan er onvoorwaardelijk af; relaties alleen wat je
+# expliciet opgeeft. Geef nooit de Exact-standaardrelatie
+# "Belastingdienst Omzetbelasting" mee — die hoort bij de administratie.
