@@ -11,6 +11,8 @@ use App\Accounting\Validation\Support\Money;
 use App\Integrations\Exact\ExactReferenceData;
 use App\Models\Connection;
 use App\Models\ConnectionAccountingRef;
+use DateTimeImmutable;
+use DateTimeZone;
 use Throwable;
 
 /**
@@ -54,7 +56,73 @@ final class ExactReportEnricher
             ...$this->vatCodeFindings($payload, $connection),
             ...$this->relationFindings($payload, $connection),
             ...$this->costDimensionFindings($payload, $connection),
+            ...$this->periodFindings($payload, $connection),
         ];
+    }
+
+    /**
+     * Een datum buiten elke boekperiode van de administratie levert bij het boeken
+     * `Verplicht: Boekjaar` op. Dat oordeel valt volledig aan Exact-kant, dus zonder deze
+     * finding meldt validate `valid: true` voor een document dat gegarandeerd geweigerd wordt.
+     *
+     * Zwijgt zodra de periodelijst onbekend is — een lege lijst betekent hier "niet kunnen
+     * kijken", niet "niets is boekbaar", en een blokkerende finding op een mislukte
+     * Exact-call zou elk document tegenhouden.
+     *
+     * @param  array<string, mixed>  $payload
+     * @return list<Finding>
+     */
+    private function periodFindings(array $payload, Connection $connection): array
+    {
+        $issueDate = $this->scalarString($payload['issue_date'] ?? null);
+
+        if ($issueDate === null) {
+            return [];
+        }
+
+        $date = self::dateOrNull($issueDate);
+
+        if ($date === null) {
+            return [];
+        }
+
+        try {
+            $periods = (new ExactReferenceData($connection))->financialPeriods();
+        } catch (Throwable) {
+            return [];
+        }
+
+        if ($periods === []) {
+            return [];
+        }
+
+        foreach ($periods as $period) {
+            if ($date >= $period['start'] && $date <= $period['end']) {
+                return [];
+            }
+        }
+
+        $from = min(array_column($periods, 'start'))->format('d-m-Y');
+        $until = max(array_column($periods, 'end'))->format('d-m-Y');
+
+        return [
+            new Finding(
+                code: 'exact.period.closed',
+                severity: Severity::Warning,
+                blocking: true,
+                path: 'issue_date',
+                message: "De administratie kent geen boekperiode voor deze datum — de boeking wordt geweigerd. Boekbaar is {$from} t/m {$until}. Open het boekjaar in de administratie of gebruik een datum binnen dat bereik.",
+                current: $issueDate,
+                suggestion: null,
+            ),
+        ];
+    }
+
+    private static function dateOrNull(string $value): ?DateTimeImmutable
+    {
+        $date = DateTimeImmutable::createFromFormat('!Y-m-d', substr($value, 0, 10), new DateTimeZone('UTC'));
+
+        return $date === false ? null : $date;
     }
 
     /**

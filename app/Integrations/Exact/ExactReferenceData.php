@@ -10,6 +10,7 @@ use Emeq\ExactApi\Contracts\ExactCredentialResolver;
 use Emeq\ExactApi\Contracts\TokenStore;
 use Emeq\ExactApi\Exact;
 use Emeq\ExactApi\Http\ExactConnector;
+use Emeq\ExactApi\Http\Request\RawExactRequest;
 use Emeq\ExactApi\Http\Request\Read\GetCostCenters;
 use Emeq\ExactApi\Http\Request\Read\GetCostUnits;
 use Emeq\ExactApi\Http\Request\Read\GetGlAccounts;
@@ -17,6 +18,8 @@ use Emeq\ExactApi\Http\Request\Read\GetJournals;
 use Emeq\ExactApi\Http\Request\Read\GetRelations;
 use Emeq\ExactApi\Http\Request\Read\GetVatCodes;
 use Emeq\ExactApi\OData\Envelope;
+use Illuminate\Support\Facades\Cache;
+use Saloon\Enums\Method;
 use Saloon\Http\Request as SdkRequest;
 use Throwable;
 
@@ -35,6 +38,10 @@ final class ExactReferenceData
 {
     // Voorkomt dat een oneindige `__next`-lus een Octane-worker op het boekingspad vastpint.
     private const MAX_PAGES = 500;
+
+    // Kort genoeg dat een nieuw boekjaar dezelfde dag doorkomt, lang genoeg dat een
+    // backlog-run van honderden validaties er één Exact-call over doet.
+    private const PERIOD_CACHE_SECONDS = 3600;
 
     public function __construct(private readonly Connection $connection) {}
 
@@ -168,6 +175,77 @@ final class ExactReferenceData
         }
 
         return $out;
+    }
+
+    /**
+     * De boekperioden die de administratie kent, als datumbereiken.
+     *
+     * Exact levert `FinancialPeriods` zonder status-veld: een periode die er staat is
+     * boekbaar, een datum die in geen enkele periode valt levert bij het boeken
+     * `Verplicht: Boekjaar` op. De lijst wisselt hooguit bij een jaarwisseling, dus hij
+     * wordt kort gecachet in plaats van gespiegeld — een gespiegelde lijst die niemand
+     * ververst zou in januari elk document van het nieuwe jaar onterecht blokkeren.
+     *
+     * @return list<array{start: \DateTimeImmutable, end: \DateTimeImmutable, fiscal_year: int, period: int}>
+     */
+    public function financialPeriods(): array
+    {
+        $division = (string) $this->connection->administratie_id;
+
+        if ($division === '') {
+            return [];
+        }
+
+        return Cache::remember(
+            "exact:financial-periods:{$this->connection->getKey()}:{$division}",
+            self::PERIOD_CACHE_SECONDS,
+            fn (): array => $this->readFinancialPeriods(),
+        );
+    }
+
+    /**
+     * @return list<array{start: \DateTimeImmutable, end: \DateTimeImmutable, fiscal_year: int, period: int}>
+     */
+    private function readFinancialPeriods(): array
+    {
+        $request = new RawExactRequest(
+            method: Method::GET,
+            endpoint: '/financial/FinancialPeriods',
+            query: ['$select' => 'FinYear,FinPeriod,StartDate,EndDate'],
+        );
+
+        $out = [];
+
+        foreach ($this->fetch($request) as $row) {
+            $start = self::odataDate($row['StartDate'] ?? null);
+            $end = self::odataDate($row['EndDate'] ?? null);
+
+            if ($start === null || $end === null) {
+                continue;
+            }
+
+            $out[] = [
+                'start' => $start,
+                'end' => $end,
+                'fiscal_year' => (int) ($row['FinYear'] ?? 0),
+                'period' => (int) ($row['FinPeriod'] ?? 0),
+            ];
+        }
+
+        return $out;
+    }
+
+    /**
+     * Exact serialiseert OData-datums als `/Date(1793491200000)/` — milliseconden sinds epoch.
+     */
+    private static function odataDate(mixed $value): ?\DateTimeImmutable
+    {
+        if (! is_string($value) || preg_match('/\/Date\((-?\d+)/', $value, $matches) !== 1) {
+            return null;
+        }
+
+        return (new \DateTimeImmutable('@'.intdiv((int) $matches[1], 1000)))
+            ->setTimezone(new \DateTimeZone('UTC'));
     }
 
     /**
