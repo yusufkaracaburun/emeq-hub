@@ -6,6 +6,7 @@ use App\Accounting\Validation\Severity;
 use App\Integrations\Exact\Accounting\ConnectionMappingExactReferenceResolver;
 use App\Integrations\Exact\Accounting\ExactRelationResolver;
 use App\Integrations\Exact\Accounting\ExactReportEnricher;
+use App\Integrations\Exact\ExactReferenceData;
 use App\Models\Account;
 use App\Models\Connection;
 use App\Models\Consumer;
@@ -155,6 +156,50 @@ class ExactReportEnricherPeriodTest extends TestCase
         );
 
         $this->assertSame([], $findings);
+    }
+
+    /**
+     * De cache serialiseert wat erin gaat. Een `DateTimeImmutable` kwam op productie als
+     * incomplete object terug en liet elke tweede validate met een 500 stranden; de
+     * array-store in tests serialiseert niet en verborg dat. Vandaar de eis op de inhoud.
+     */
+    public function test_the_cached_period_list_holds_only_scalars(): void
+    {
+        $this->mockOpenYear2026();
+        $connection = $this->connection();
+
+        (new ExactReferenceData($connection))->financialPeriods();
+
+        $cached = Cache::get("exact:financial-periods:{$connection->getKey()}:{$connection->administratie_id}");
+
+        $this->assertIsArray($cached);
+        $this->assertNotEmpty($cached);
+
+        foreach ($cached as $row) {
+            foreach ($row as $key => $value) {
+                $this->assertTrue(
+                    is_string($value) || is_int($value),
+                    "cached period field {$key} must be a scalar, got ".get_debug_type($value),
+                );
+            }
+        }
+    }
+
+    public function test_a_second_call_reads_the_cache_and_still_judges_the_date(): void
+    {
+        $this->mockOpenYear2026();
+        $connection = $this->connection();
+
+        $this->enricher()->enrich($this->payload(), $connection);
+
+        $findings = $this->enricher()->enrich(
+            $this->payload(['issue_date' => '2025-10-15']),
+            $connection,
+        );
+
+        $this->assertCount(1, $findings);
+        $this->assertSame('exact.period.closed', $findings[0]->code);
+        $this->assertStringContainsString('01-01-2026', $findings[0]->message);
     }
 
     public function test_a_document_without_a_date_is_left_to_the_agnostic_validator(): void

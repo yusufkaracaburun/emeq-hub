@@ -6,6 +6,8 @@ namespace App\Integrations\Exact;
 
 use App\Models\Connection;
 use App\Models\ConnectionAccountingRef;
+use DateTimeImmutable;
+use DateTimeZone;
 use Emeq\ExactApi\Contracts\ExactCredentialResolver;
 use Emeq\ExactApi\Contracts\TokenStore;
 use Emeq\ExactApi\Exact;
@@ -186,7 +188,7 @@ final class ExactReferenceData
      * wordt kort gecachet in plaats van gespiegeld — een gespiegelde lijst die niemand
      * ververst zou in januari elk document van het nieuwe jaar onterecht blokkeren.
      *
-     * @return list<array{start: \DateTimeImmutable, end: \DateTimeImmutable, fiscal_year: int, period: int}>
+     * @return list<array{start: DateTimeImmutable, end: DateTimeImmutable, fiscal_year: int, period: int}>
      */
     public function financialPeriods(): array
     {
@@ -196,15 +198,29 @@ final class ExactReferenceData
             return [];
         }
 
-        return Cache::remember(
+        $cached = Cache::remember(
             "exact:financial-periods:{$this->connection->getKey()}:{$division}",
             self::PERIOD_CACHE_SECONDS,
             fn (): array => $this->readFinancialPeriods(),
         );
+
+        return array_map(
+            static fn (array $row): array => [
+                'start' => new DateTimeImmutable($row['start'].' 00:00:00', new DateTimeZone('UTC')),
+                'end' => new DateTimeImmutable($row['end'].' 00:00:00', new DateTimeZone('UTC')),
+                'fiscal_year' => $row['fiscal_year'],
+                'period' => $row['period'],
+            ],
+            $cached,
+        );
     }
 
     /**
-     * @return list<array{start: \DateTimeImmutable, end: \DateTimeImmutable, fiscal_year: int, period: int}>
+     * Alleen scalars: de cache serialiseert wat hier uit komt, en een teruggelezen
+     * `DateTimeImmutable` kwam als incomplete object terug zodra de store écht
+     * serialiseert (Redis op productie; de array-store in tests niet).
+     *
+     * @return list<array{start: string, end: string, fiscal_year: int, period: int}>
      */
     private function readFinancialPeriods(): array
     {
@@ -238,14 +254,15 @@ final class ExactReferenceData
     /**
      * Exact serialiseert OData-datums als `/Date(1793491200000)/` — milliseconden sinds epoch.
      */
-    private static function odataDate(mixed $value): ?\DateTimeImmutable
+    private static function odataDate(mixed $value): ?string
     {
         if (! is_string($value) || preg_match('/\/Date\((-?\d+)/', $value, $matches) !== 1) {
             return null;
         }
 
-        return (new \DateTimeImmutable('@'.intdiv((int) $matches[1], 1000)))
-            ->setTimezone(new \DateTimeZone('UTC'));
+        return (new DateTimeImmutable('@'.intdiv((int) $matches[1], 1000)))
+            ->setTimezone(new DateTimeZone('UTC'))
+            ->format('Y-m-d');
     }
 
     /**
