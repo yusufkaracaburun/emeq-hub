@@ -12,8 +12,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
 
 /**
- * Claim per (Consumer, Idempotency-Key). De unique index op die twee kolommen is de
- * mutex: {@see EnsureIdempotency} claimt de rij vóór de handler
+ * Claim per (Consumer, Account, Idempotency-Key). De unique index op die drie kolommen
+ * is de mutex: {@see EnsureIdempotency} claimt de rij vóór de handler
  * draait en rondt hem daarna af met de respons.
  *
  * Twee staten. `in_flight` betekent dat er nú een request loopt; `completed` dat de
@@ -39,6 +39,7 @@ class IdempotencyKey extends Model
 
     protected $fillable = [
         'consumer_id',
+        'account_id',
         'key',
         'method',
         'path',

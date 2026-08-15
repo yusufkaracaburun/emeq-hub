@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Middleware;
 
+use App\Models\Account;
 use App\Models\IdempotencyKey;
 use Closure;
 use Illuminate\Database\UniqueConstraintViolationException;
@@ -69,11 +70,12 @@ class EnsureIdempotency
         }
 
         $fingerprint = hash('sha256', $request->method()."\n".$request->path()."\n".$request->getContent());
+        $accountId = $this->accountId($request, (int) $consumerId);
 
-        $claim = $this->claim($request, (int) $consumerId, $key, $fingerprint);
+        $claim = $this->claim($request, (int) $consumerId, $accountId, $key, $fingerprint);
 
         if ($claim === null) {
-            $claim = $this->resolveConflict((int) $consumerId, $key, $fingerprint);
+            $claim = $this->resolveConflict((int) $consumerId, $accountId, $key, $fingerprint);
         }
 
         // Een terminale respons: replay, hergebruik-conflict of "er loopt er al een".
@@ -87,11 +89,26 @@ class EnsureIdempotency
     /**
      * Eén INSERT, geen SELECT ervoor. Slaagt hij, dan is de claim van ons.
      */
-    private function claim(Request $request, int $consumerId, string $key, string $fingerprint): ?IdempotencyKey
+    private function accountId(Request $request, int $consumerId): ?int
+    {
+        $header = $request->header('X-Account-Id');
+
+        if (! is_string($header) || $header === '') {
+            return null;
+        }
+
+        return Account::query()
+            ->where('consumer_id', $consumerId)
+            ->where('external_id', $header)
+            ->value('id');
+    }
+
+    private function claim(Request $request, int $consumerId, ?int $accountId, string $key, string $fingerprint): ?IdempotencyKey
     {
         try {
             return IdempotencyKey::query()->create([
                 'consumer_id' => $consumerId,
+                'account_id' => $accountId,
                 'key' => $key,
                 'method' => $request->method(),
                 'path' => $request->path(),
@@ -112,11 +129,16 @@ class EnsureIdempotency
      * `Response` is terminaal, een `IdempotencyKey` betekent "claim is nu van ons,
      * draai de handler".
      */
-    private function resolveConflict(int $consumerId, string $key, string $fingerprint): Response|IdempotencyKey
+    private function resolveConflict(int $consumerId, ?int $accountId, string $key, string $fingerprint): Response|IdempotencyKey
     {
         $existing = IdempotencyKey::query()
             ->where('consumer_id', $consumerId)
             ->where('key', $key)
+            ->when(
+                $accountId === null,
+                fn ($query) => $query->whereNull('account_id'),
+                fn ($query) => $query->where('account_id', $accountId),
+            )
             ->first();
 
         // De rij is tussen onze INSERT en deze SELECT verdwenen: de winnaar faalde en

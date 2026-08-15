@@ -187,6 +187,7 @@ class IdempotencyTest extends TestCase
         // Deterministische stand-in voor de race: de claim staat er al, lease leeft.
         IdempotencyKey::query()->create([
             'consumer_id' => $consumer->getKey(),
+            'account_id' => $consumer->accounts()->where('external_id', 'school1')->value('id'),
             'key' => $key,
             'method' => 'POST',
             'path' => 'v1/accounting/documents',
@@ -217,6 +218,7 @@ class IdempotencyTest extends TestCase
 
         IdempotencyKey::query()->create([
             'consumer_id' => $consumer->getKey(),
+            'account_id' => $consumer->accounts()->where('external_id', 'school1')->value('id'),
             'key' => $key,
             'method' => 'POST',
             'path' => 'v1/accounting/documents',
@@ -304,6 +306,44 @@ class IdempotencyTest extends TestCase
         $this->app['auth']->forgetGuards();
 
         $this->postDocument($this->consumerWithExactConnection(), $key, $this->payload())->assertStatus(201);
+
+        MockClient::global()->assertSentCount(2);
+        $this->assertDatabaseCount('idempotency_keys', 2);
+    }
+
+    public function test_two_administrations_of_one_consumer_do_not_share_a_key_pool(): void
+    {
+        MockClient::global([
+            CreateSalesEntry::class => MockResponse::make(['d' => ['ID' => 'inv-guid-7']], 201),
+        ]);
+        $this->bindFakeReferences();
+
+        $consumer = $this->consumerWithExactConnection();
+        $second = $consumer->accounts()->create(['external_id' => 'school2', 'display_name' => 'School 2']);
+        Connection::factory()->forExact()->create([
+            'account_id' => $second->id,
+            'status' => 'active',
+            'expires_at' => now()->addSeconds(600),
+        ]);
+
+        $key = (string) Str::uuid();
+        $token = $consumer->createToken('t', [TokenAbilities::EXACT_WRITE])->plainTextToken;
+
+        $first = $this->withHeader('Authorization', "Bearer {$token}")
+            ->withHeader('X-Account-Id', 'school1')
+            ->withHeader('Idempotency-Key', $key)
+            ->postJson('/v1/accounting/documents', $this->payload());
+
+        $this->app['auth']->forgetGuards();
+
+        $other = $this->withHeader('Authorization', "Bearer {$token}")
+            ->withHeader('X-Account-Id', 'school2')
+            ->withHeader('Idempotency-Key', $key)
+            ->postJson('/v1/accounting/documents', $this->payload());
+
+        $first->assertStatus(201);
+        $other->assertStatus(201);
+        $this->assertNull($other->headers->get(EnsureIdempotency::REPLAY_HEADER));
 
         MockClient::global()->assertSentCount(2);
         $this->assertDatabaseCount('idempotency_keys', 2);

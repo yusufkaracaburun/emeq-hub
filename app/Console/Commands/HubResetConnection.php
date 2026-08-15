@@ -55,8 +55,13 @@ final class HubResetConnection extends Command
 
         $plan = [
             'idempotency_keys' => [
-                'scope' => "consumer_id={$consumerId}",
-                'query' => IdempotencyKey::query()->where('consumer_id', $consumerId),
+                'scope' => "account_id={$connection->account_id} OR (consumer_id={$consumerId} AND account_id IS NULL)",
+                'query' => IdempotencyKey::query()
+                    ->where(fn (Builder $query) => $query
+                        ->where('account_id', $connection->account_id)
+                        ->orWhere(fn (Builder $legacy) => $legacy
+                            ->where('consumer_id', $consumerId)
+                            ->whereNull('account_id'))),
             ],
             'provider_entity_links' => [
                 'scope' => "connection_id={$connection->id}",
@@ -86,11 +91,17 @@ final class HubResetConnection extends Command
         $this->line("  ({$retained} gl/vat/journal/cost_center/cost_unit-rij(en) blijven altijd staan — echte Exact-referentiedata.)");
         $this->newLine();
 
-        if ($otherConnections->isNotEmpty()) {
-            $this->warn("Let op: consumer #{$consumerId} heeft {$otherConnections->count()} andere connection(s). `idempotency_keys` kent geen connection-kolom (consumer-scoped) — ALLE idempotency-sleutels van deze consumer worden meegeteld/verwijderd, ook die van:");
+        $legacyKeys = IdempotencyKey::query()
+            ->where('consumer_id', $consumerId)
+            ->whereNull('account_id')
+            ->count();
+
+        if ($otherConnections->isNotEmpty() && $legacyKeys > 0) {
+            $this->warn("Let op: {$legacyKeys} idempotency-sleutel(s) van consumer #{$consumerId} dateren van vóór de account-scoping en horen bij geen enkel account. Die worden meegeteld/verwijderd en kunnen van deze connection(s) zijn:");
             foreach ($otherConnections as $other) {
                 $this->line("    - {$other->public_id} ({$other->provider->value})");
             }
+            $this->line('  Ze verlopen vanzelf binnen de TTL; wacht die af als je ze wilt ontzien.');
             $this->newLine();
         }
 
