@@ -46,6 +46,7 @@ final readonly class ProviderEntityLinkRecorder
                 'entity_subtype' => $document->type->value,
                 'external_id' => $document->externalId,
                 'provider' => $connection->provider->value,
+                'administratie_id' => self::administratieId($connection),
                 'provider_entity_id' => null,
                 'payload_fingerprint' => null,
                 'origin' => ProviderEntityLink::ORIGIN_HUB,
@@ -54,6 +55,54 @@ final readonly class ProviderEntityLinkRecorder
         } catch (UniqueConstraintViolationException) {
             return null;
         }
+    }
+
+    /**
+     * Een geslaagde boeking van precies dit document in dezelfde échte administratie,
+     * via een ándere Connection.
+     *
+     * De canonieke unique index sluit per Connection af, maar één administratie mag
+     * door meerdere Accounts gekoppeld zijn — de boekhouder via de ene Consumer-app,
+     * de ondernemer via de andere. {@see \App\Http\Controllers\Webhooks\ExactWebhookController}
+     * rekent daar expliciet op. Aan de boekkant deelden die twee geen grendel.
+     *
+     * Gelijke fingerprint is voorwaarde, niet alleen gelijk `external_id`. Twee apps
+     * met een eigen nummerreeks gebruiken allebei "2026-001" voor verschillende
+     * documenten; alleen op het nummer weigeren zou een echte boeking tegenhouden.
+     * Gelijke fingerprint betekent gelijk type, nummer, datum, partij én regels — dan
+     * is het hetzelfde document en is tweemaal boeken nooit gewenst.
+     *
+     * Een lege administratie-id betekent dat de provider er geen levert. Dan valt
+     * "dezelfde administratie" niet vast te stellen en doet deze check niets: alle
+     * lege waarden op één hoop gooien zou losstaande administraties als één
+     * behandelen en echte boekingen weigeren.
+     */
+    public function findPostedOnSameAdministration(
+        Connection $connection,
+        FinancialDocument $document,
+        string $fingerprint,
+    ): ?ProviderEntityLink {
+        $administratieId = self::administratieId($connection);
+
+        if ($administratieId === '') {
+            return null;
+        }
+
+        return ProviderEntityLink::query()
+            ->where('provider', $connection->provider->value)
+            ->where('administratie_id', $administratieId)
+            ->where('entity_type', ProviderEntityLink::ENTITY_FINANCIAL_DOCUMENT)
+            ->where('entity_subtype', $document->type->value)
+            ->where('external_id', $document->externalId)
+            ->where('payload_fingerprint', $fingerprint)
+            ->whereNotNull('provider_entity_id')
+            ->where('connection_id', '!=', $connection->getKey())
+            ->first();
+    }
+
+    private static function administratieId(Connection $connection): string
+    {
+        return (string) ($connection->administratie_id ?? '');
     }
 
     /**
@@ -118,6 +167,7 @@ final readonly class ProviderEntityLinkRecorder
             ],
             [
                 'provider' => $connection->provider->value,
+                'administratie_id' => self::administratieId($connection),
                 'provider_entity_id' => $result->externalRef,
                 'provider_entity_number' => $result->externalNumber === null ? null : (string) $result->externalNumber,
                 'payload_fingerprint' => $fingerprint,

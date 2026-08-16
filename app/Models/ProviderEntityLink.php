@@ -30,6 +30,7 @@ use Illuminate\Support\Carbon;
 #[Fillable([
     'connection_id',
     'provider',
+    'administratie_id',
     'entity_type',
     'entity_subtype',
     'external_id',

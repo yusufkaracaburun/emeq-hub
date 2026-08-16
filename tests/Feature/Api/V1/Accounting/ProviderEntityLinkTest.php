@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Api\V1\Accounting;
 
+use App\Accounting\DocumentFingerprint;
+use App\Accounting\FinancialDocument;
+use App\Accounting\ProviderEntityLinkRecorder;
 use App\Models\Connection;
 use App\Models\Consumer;
 use App\Models\IdempotencyKey;
@@ -94,6 +97,12 @@ class ProviderEntityLinkTest extends TestCase
     private function postDocument(Consumer $consumer, array $payload, ?string $idempotencyKey = null, string $accountExternalId = 'school1'): TestResponse
     {
         $token = $consumer->createToken('t', [TokenAbilities::EXACT_WRITE])->plainTextToken;
+
+        // De auth-manager is een singleton binnen één test en memoiseert de opgeloste
+        // user. Zonder dit komt een tweede request met een ánder token nog steeds als
+        // de eerste consumer binnen — waarmee elke test over twee tenants stilletjes
+        // over één tenant gaat. Zelfde reden als in IdempotencyTest.
+        $this->app['auth']->forgetGuards();
 
         return $this->withHeader('Authorization', "Bearer {$token}")
             ->withHeader('X-Account-Id', $accountExternalId)
@@ -235,6 +244,12 @@ class ProviderEntityLinkTest extends TestCase
     /**
      * Twee administraties mogen hetzelfde factuurnummer voeren. De dedupe-sleutel
      * bevat de connectie, dus dit is geen duplicaat.
+     *
+     * De tweede connectie krijgt expliciet een eigen `administratie_id`. De factory
+     * deelt er standaard één uit, waardoor deze opzet twee koppelingen naar dezelfde
+     * échte administratie maakte — precies het tegenovergestelde van wat de naam
+     * belooft, en sinds de kruis-connectie-guard ook een 409. Dat geval staat in
+     * {@see self::test_a_second_tenant_cannot_rebook_one_document_into_one_administration()}.
      */
     public function test_dedupe_is_scoped_per_connection(): void
     {
@@ -249,6 +264,7 @@ class ProviderEntityLinkTest extends TestCase
             'account_id' => $secondAccount->id,
             'status' => 'active',
             'expires_at' => now()->addSeconds(600),
+            'administratie_id' => '9990001',
         ]);
 
         $this->postDocument($consumer, $this->salesInvoicePayload(), accountExternalId: 'school1')->assertStatus(201);
@@ -256,6 +272,114 @@ class ProviderEntityLinkTest extends TestCase
 
         MockClient::global()->assertSentCount(2);
         $this->assertDatabaseCount('provider_entity_links', 2);
+    }
+
+    /**
+     * Eén administratie mag door meerdere Consumers gekoppeld zijn — de boekhouder via
+     * de ene app, de ondernemer via de andere. De canonieke unique index sluit alleen
+     * per Connection af, dus zonder kruis-connectie-guard boeken die twee hetzelfde
+     * document tweemaal in hetzelfde grootboek.
+     */
+    public function test_a_second_tenant_cannot_rebook_one_document_into_one_administration(): void
+    {
+        MockClient::global([
+            CreateSalesEntry::class => MockResponse::make(['d' => ['ID' => 'inv-guid-shared']], 201),
+        ]);
+        $this->bindFakeReferences();
+
+        [$accountant] = $this->consumerWithExactConnection('school1');
+        [$entrepreneur] = $this->consumerWithExactConnection('school1');
+
+        $this->postDocument($accountant, $this->salesInvoicePayload())->assertStatus(201);
+
+        $response = $this->postDocument($entrepreneur, $this->salesInvoicePayload())
+            ->assertStatus(409)
+            ->assertJsonPath('error', 'document_already_posted');
+
+        // De partner is niet nog eens aangesproken: één push, niet twee.
+        MockClient::global()->assertSentCount(1);
+        $this->assertDatabaseCount('provider_entity_links', 1);
+
+        // Niets van de andere tenant lekt mee. De referentie is door een andere
+        // Consumer aangemaakt; wie hem nodig heeft leest hem in de administratie.
+        $body = $response->json();
+        $this->assertArrayNotHasKey('external_ref', $body);
+        $this->assertArrayNotHasKey('external_number', $body);
+        $this->assertStringNotContainsString('inv-guid-shared', $response->getContent());
+    }
+
+    /**
+     * De keerzijde, en de reden dat de guard op de fingerprint beslist en niet op
+     * `external_id` alleen: twee apps met een eigen nummerreeks gebruiken allebei
+     * "INV-2026-001" voor een ánder document. Dat weigeren zou een echte boeking
+     * tegenhouden — een fout die erger is dan die hij voorkomt.
+     */
+    public function test_a_different_document_sharing_a_number_still_books(): void
+    {
+        MockClient::global([
+            CreateSalesEntry::class => MockResponse::make(['d' => ['ID' => 'inv-guid-other']], 201),
+        ]);
+        $this->bindFakeReferences();
+
+        [$accountant] = $this->consumerWithExactConnection('school1');
+        [$entrepreneur] = $this->consumerWithExactConnection('school1');
+
+        $this->postDocument($accountant, $this->salesInvoicePayload())->assertStatus(201);
+
+        $different = $this->salesInvoicePayload([
+            'lines' => [
+                ['description' => 'Iets heel anders', 'amount' => 999, 'tax_rate' => 21, 'category' => 'omzet'],
+            ],
+        ]);
+
+        $this->postDocument($entrepreneur, $different)->assertStatus(201);
+
+        MockClient::global()->assertSentCount(2);
+        $this->assertDatabaseCount('provider_entity_links', 2);
+    }
+
+    /**
+     * Zonder administratie-id valt "dezelfde administratie" niet vast te stellen. Alle
+     * lege waarden op één hoop gooien zou losstaande administraties als één behandelen
+     * en echte boekingen weigeren — de guard hoort dan uit te staan, niet aan.
+     *
+     * Rechtstreeks op de recorder: Exact weigert een boeking zonder division, dus via
+     * de API is dit pad niet te bereiken. Een volgende provider die géén administratie-
+     * id levert komt er wél langs, en dan moet dit kloppen.
+     */
+    public function test_an_empty_administration_id_disables_the_cross_connection_guard(): void
+    {
+        [, $first] = $this->consumerWithExactConnection('school1');
+        [, $second] = $this->consumerWithExactConnection('school1');
+
+        $first->forceFill(['administratie_id' => null])->save();
+        $second->forceFill(['administratie_id' => null])->save();
+
+        $document = FinancialDocument::fromArray($this->salesInvoicePayload());
+        $fingerprint = DocumentFingerprint::for($document);
+
+        ProviderEntityLink::query()->create([
+            'connection_id' => $first->getKey(),
+            'entity_type' => ProviderEntityLink::ENTITY_FINANCIAL_DOCUMENT,
+            'entity_subtype' => 'sales_invoice',
+            'external_id' => $document->externalId,
+            'provider' => 'exact',
+            'administratie_id' => '',
+            'provider_entity_id' => 'inv-guid-blank',
+            'payload_fingerprint' => $fingerprint,
+            'origin' => ProviderEntityLink::ORIGIN_HUB,
+            'last_synced_at' => now(),
+        ]);
+
+        $recorder = app(ProviderEntityLinkRecorder::class);
+
+        $this->assertNull($recorder->findPostedOnSameAdministration($second, $document, $fingerprint));
+
+        // Controle dat de opzet verder klopt: mét een administratie-id vindt hij hem wél.
+        $second->forceFill(['administratie_id' => '4471372'])->save();
+        ProviderEntityLink::query()->where('connection_id', $first->getKey())->update(['administratie_id' => '4471372']);
+
+        $this->assertNotNull($recorder->findPostedOnSameAdministration($second, $document, $fingerprint));
     }
 
     /**

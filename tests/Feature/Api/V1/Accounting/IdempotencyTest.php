@@ -53,7 +53,14 @@ class IdempotencyTest extends TestCase
         parent::tearDown();
     }
 
-    private function consumerWithExactConnection(): Consumer
+    /**
+     * De administratie is expliciet, want de factory deelt één vaste `administratie_id`
+     * uit. Twee consumers kwamen daardoor op dezelfde échte administratie uit — een
+     * topologie die deze tests niet bedoelen en die sinds de kruis-connectie-guard een
+     * 409 geeft in plaats van de 201 waar hun onderwerp om draait. Dat geval hoort in
+     * ProviderEntityLinkTest, niet hier.
+     */
+    private function consumerWithExactConnection(string $administratieId = '4471372'): Consumer
     {
         $consumer = Consumer::factory()->create();
         $account = $consumer->accounts()->create(['external_id' => 'school1', 'display_name' => 'School 1']);
@@ -62,6 +69,7 @@ class IdempotencyTest extends TestCase
             'account_id' => $account->id,
             'status' => 'active',
             'expires_at' => now()->addSeconds(600),
+            'administratie_id' => $administratieId,
         ]);
 
         return $consumer;
@@ -305,7 +313,7 @@ class IdempotencyTest extends TestCase
         // zou deze test zijn eigen onderwerp niet raken.
         $this->app['auth']->forgetGuards();
 
-        $this->postDocument($this->consumerWithExactConnection(), $key, $this->payload())->assertStatus(201);
+        $this->postDocument($this->consumerWithExactConnection('9990002'), $key, $this->payload())->assertStatus(201);
 
         MockClient::global()->assertSentCount(2);
         $this->assertDatabaseCount('idempotency_keys', 2);
@@ -324,6 +332,7 @@ class IdempotencyTest extends TestCase
             'account_id' => $second->id,
             'status' => 'active',
             'expires_at' => now()->addSeconds(600),
+            'administratie_id' => '9990003',
         ]);
 
         $key = (string) Str::uuid();

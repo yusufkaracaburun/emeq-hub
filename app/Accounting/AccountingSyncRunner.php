@@ -55,6 +55,20 @@ final readonly class AccountingSyncRunner
             return new AccountingSyncOutcome($status, $responseBody, $headers);
         }
 
+        // De claim is van ons, maar die grendel zit per Connection. Staat dit document
+        // al in dezelfde échte administratie via een andere koppeling, dan levert
+        // boeken een tweede journaalpost in hetzelfde grootboek op.
+        $elsewhere = $this->links->findPostedOnSameAdministration($connection, $document, $fingerprint);
+
+        if ($elsewhere !== null) {
+            $this->links->releaseClaim($claim);
+
+            [$status, $upstreamError, $responseBody, $headers] = $this->alreadyPostedElsewhere($document, $provider);
+            $this->audit($account, $connection, $consumerId, $provider, $document, $status, $start, $upstreamError, $responseBody);
+
+            return new AccountingSyncOutcome($status, $responseBody, $headers);
+        }
+
         $booked = false;
 
         try {
@@ -154,6 +168,33 @@ final readonly class AccountingSyncRunner
         // EnsureIdempotency::takeOver() bij hetzelfde "een ander won net"-geval.
         return $this->links->claim($document, $connection)
             ?? $this->syncInProgress($document, $connection->provider->value, 1);
+    }
+
+    /**
+     * Dit document staat al in deze administratie, geboekt via een andere Connection.
+     *
+     * Geeft bewust géén `external_ref` of `external_number` mee, anders dan
+     * {@see replayExistingLink()} doet. Die referentie is aangemaakt door een andere
+     * Consumer, en de Hub geeft over een tenantgrens heen niets terug wat deze
+     * consumer niet zelf heeft geschreven — ook niet wanneer beide op dezelfde
+     * administratie mogen. Wie de referentie nodig heeft, leest hem uit de
+     * administratie waar hij toch al toegang toe heeft.
+     *
+     * Hergebruikt `document_already_posted`: consumers behandelen dat al als een
+     * definitieve weigering die niet opnieuw geprobeerd moet worden, en dat is precies
+     * wat dit is. Alleen het bericht verschilt, zodat een mens de twee uit elkaar houdt.
+     *
+     * @return array{0: int, 1: string, 2: array<string, mixed>, 3: array<string, string>}
+     */
+    private function alreadyPostedElsewhere(FinancialDocument $document, string $provider): array
+    {
+        return [409, 'already_posted_other_connection', [
+            'provider' => $provider,
+            'status' => SyncStatus::Rejected->value,
+            'external_id' => $document->externalId,
+            'error' => 'document_already_posted',
+            'message' => "Dit document staat al in deze administratie, geboekt via een andere koppeling. Boek het niet nogmaals; een correctie is een creditnota met een eigen external_id.",
+        ], []];
     }
 
     /**
