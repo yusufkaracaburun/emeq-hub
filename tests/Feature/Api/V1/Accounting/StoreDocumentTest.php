@@ -388,7 +388,7 @@ class StoreDocumentTest extends TestCase
             ->assertJsonPath('external_id', 'INV-2026-001');
     }
 
-    public function test_stamps_consumer_provenance_in_yourref(): void
+    public function test_yourref_leads_with_the_document_number_a_bookkeeper_reads(): void
     {
         MockClient::global([
             CreateSalesEntry::class => MockResponse::make(['d' => ['ID' => 'inv-1']], 201),
@@ -404,10 +404,76 @@ class StoreDocumentTest extends TestCase
             ->postJson('/v1/accounting/documents', $this->salesInvoicePayload())
             ->assertStatus(201);
 
-        // YourRef stempelt de herkomst: "{consumer-app} · {external_id}" (max 50 tekens).
+        // YourRef is de kolom die Exact als factuurnummer toont, dus draagt het
+        // documentnummer voorop; de external_id blijft erachter staan zodat de
+        // probe erop kan blijven filteren (max 50 tekens).
+        $expected = mb_substr('2026-001 · INV-2026-001', 0, 50);
+        MockClient::global()->assertSent(fn ($request): bool => $request instanceof CreateSalesEntry
+            && ($request->body()->all()['YourRef'] ?? null) === $expected);
+    }
+
+    public function test_yourref_falls_back_to_the_consumer_when_a_document_has_no_number(): void
+    {
+        MockClient::global([
+            CreateSalesEntry::class => MockResponse::make(['d' => ['ID' => 'inv-1']], 201),
+        ]);
+        $this->bindFakeReferences();
+
+        [$consumer] = $this->consumerWithExactConnection();
+        $token = $consumer->createToken('t', [TokenAbilities::EXACT_WRITE])->plainTextToken;
+
+        $payload = $this->salesInvoicePayload();
+        unset($payload['number']);
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->withHeader('X-Account-Id', 'school1')
+            ->withHeader('Idempotency-Key', (string) Str::uuid())
+            ->postJson('/v1/accounting/documents', $payload)
+            ->assertStatus(201);
+
         $expected = mb_substr($consumer->name.' · INV-2026-001', 0, 50);
         MockClient::global()->assertSent(fn ($request): bool => $request instanceof CreateSalesEntry
             && ($request->body()->all()['YourRef'] ?? null) === $expected);
+    }
+
+    public function test_description_carries_the_consumers_own_reference(): void
+    {
+        MockClient::global([
+            CreateSalesEntry::class => MockResponse::make(['d' => ['ID' => 'inv-1']], 201),
+        ]);
+        $this->bindFakeReferences();
+
+        [$consumer] = $this->consumerWithExactConnection();
+        $token = $consumer->createToken('t', [TokenAbilities::EXACT_WRITE])->plainTextToken;
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->withHeader('X-Account-Id', 'school1')
+            ->withHeader('Idempotency-Key', (string) Str::uuid())
+            ->postJson('/v1/accounting/documents', $this->salesInvoicePayload(['reference' => 'BOB260684']))
+            ->assertStatus(201);
+
+        MockClient::global()->assertSent(fn ($request): bool => $request instanceof CreateSalesEntry
+            && ($request->body()->all()['Description'] ?? null) === 'BOB260684');
+    }
+
+    public function test_description_falls_back_to_the_number_without_a_reference(): void
+    {
+        MockClient::global([
+            CreateSalesEntry::class => MockResponse::make(['d' => ['ID' => 'inv-1']], 201),
+        ]);
+        $this->bindFakeReferences();
+
+        [$consumer] = $this->consumerWithExactConnection();
+        $token = $consumer->createToken('t', [TokenAbilities::EXACT_WRITE])->plainTextToken;
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->withHeader('X-Account-Id', 'school1')
+            ->withHeader('Idempotency-Key', (string) Str::uuid())
+            ->postJson('/v1/accounting/documents', $this->salesInvoicePayload())
+            ->assertStatus(201);
+
+        MockClient::global()->assertSent(fn ($request): bool => $request instanceof CreateSalesEntry
+            && ($request->body()->all()['Description'] ?? null) === '2026-001');
     }
 
     public function test_uses_connection_metadata_mapping(): void
@@ -1355,7 +1421,10 @@ class StoreDocumentTest extends TestCase
             && $request->resolveEndpoint() === '/documents/Documents'
             && $request->body()->all()['Type'] === 10
             && $request->body()->all()['Account'] === 'cust-guid'
-            && $request->body()->all()['FinancialTransactionEntryID'] === 'inv-guid-1');
+            && $request->body()->all()['FinancialTransactionEntryID'] === 'inv-guid-1'
+            // Zonder datum stempelt Exact de dag van uploaden en staat een factuur uit
+            // juni in het documentenoverzicht onder vandaag.
+            && $request->body()->all()['DocumentDate'] === '2026-06-16');
 
         MockClient::global()->assertSent(fn ($request): bool => $request instanceof CreateDocumentAttachment
             && $request->body()->all()['Document'] === 'doc-guid-1'

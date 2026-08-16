@@ -617,6 +617,10 @@ final class ExactAccountingTarget implements AccountingTarget, EnrichesValidatio
                     type: $type,
                     account: $this->references->relationRef($document->party, $connection),
                     financialTransactionEntryId: $entryId,
+                    // Inkoop erft de datum van het Document dat Exact zelf aanmaakt;
+                    // verkoop heeft er geen, dus zonder dit staat het stuk in het
+                    // documentenoverzicht onder de dag van boeken.
+                    documentDate: $document->issueDate->format('Y-m-d'),
                 ));
 
                 if ($docResponse->failed()) {
@@ -682,7 +686,10 @@ final class ExactAccountingTarget implements AccountingTarget, EnrichesValidatio
     {
         $entryDate = $document->issueDate->format('Y-m-d');
         $dueDate = $document->dueDate?->format('Y-m-d');
-        $description = $document->number ?? $document->externalId;
+        // `reference` is het nummer waaronder de consumer het document zelf kent en dat
+        // hij op zijn betalingen zet; daarop wordt een bankregel afgeletterd. Het nummer
+        // van de tegenpartij staat al in YourRef, dus die twee botsen niet.
+        $description = $document->reference ?? $document->number ?? $document->externalId;
         $yourRef = $this->provenance($document, $connection);
 
         // income = ontvangst met relatie-debiteur → SalesEntry; expense = declaratie/
@@ -712,15 +719,22 @@ final class ExactAccountingTarget implements AccountingTarget, EnrichesValidatio
     }
 
     /**
-     * Herkomst-stempel voor Exact `YourRef`: "{consumer-app} · {external_id}" — zo ziet
-     * de boekhouder per boeking welke consumer-app + bron-document 'm aanmaakte. Max 50
-     * tekens (Exact kapt YourRef af); de consumer-naam houdt voorrang.
+     * Exact `YourRef`: "{nummer} · {external_id}", max 50 tekens.
+     *
+     * Exact toont dit veld als factuurnummer, dus staat het nummer van het document
+     * voorop — op een inkoopboeking is dat het factuurnummer van de leverancier, wat
+     * daar hoort. De consumer-naam stond hier eerder, maar zegt een boekhouder niets.
+     *
+     * De external_id blijft erachter staan omdat dit veld ook een sleutel is:
+     * {@see self::findPostedDocument()} filtert erop met een exacte vergelijking en
+     * {@see self::externalIdFromProvenance()} leest 'm er weer uit. Een nummer alleen
+     * kan dat niet dragen — het is uniek per relatie, niet per administratie.
      */
     private function provenance(FinancialDocument $document, Connection $connection): string
     {
-        $consumer = $connection->account?->consumer?->name ?? 'Emeq Hub';
+        $lead = $document->number ?? $connection->account?->consumer?->name ?? 'Emeq Hub';
 
-        return mb_substr($consumer.' · '.$document->externalId, 0, 50);
+        return mb_substr($lead.' · '.$document->externalId, 0, 50);
     }
 
     /**
