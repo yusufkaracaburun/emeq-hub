@@ -81,6 +81,25 @@ final readonly class ProviderEntityLinkRecorder
     }
 
     /**
+     * Seconden tot deze claim als gestorven telt (zie {@see self::claimIsStale()}),
+     * minimaal 1 en afgetopt op {@see IdempotencyKey::retryAfterCeilingSeconds()} —
+     * bruikbaar als `Retry-After`. Zelfde grenzen als
+     * {@see IdempotencyKey::secondsUntilLeaseExpires()}: hetzelfde antwoord op "hoe
+     * lang kan één boeking duren?", toegepast op `last_synced_at` in plaats van
+     * `locked_at`, en om dezelfde reden afgetopt.
+     */
+    public function secondsUntilClaimStale(ProviderEntityLink $link): int
+    {
+        if ($link->last_synced_at === null) {
+            return 1;
+        }
+
+        $remaining = (int) ceil(now()->diffInSeconds($link->last_synced_at->addSeconds(IdempotencyKey::leaseSeconds()), false));
+
+        return max(1, min($remaining, IdempotencyKey::retryAfterCeilingSeconds()));
+    }
+
+    /**
      * `updateOrCreate` op de canonieke sleutel: een geforceerde herboeking of een
      * latere ontdekking aan partnerzijde moet op dezelfde rij landen, niet naast.
      */

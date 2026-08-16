@@ -85,7 +85,23 @@ class IdempotencyKey extends Model
     }
 
     /**
-     * Seconden tot de lease verloopt, minimaal 1 — bruikbaar als `Retry-After`.
+     * Bovengrens voor `Retry-After` bij "er loopt er al een".
+     *
+     * De lease is het worst case (~730s met tien bijlagen) en beantwoordt "wanneer
+     * verklaren we het vorige request dood?" — een heel andere vraag dan "wanneer
+     * mag je terugkomen?". Een normale boeking is in seconden klaar, dus de lease
+     * als Retry-After zou een document een kwartier laten stilstaan voor een
+     * boeking die na twee seconden af is. Te vroeg terugkomen kost één goedkope
+     * 409 met een verse Retry-After; te laat laat het document staan.
+     *
+     * Werd pas schadelijk toen consumers de header gingen honoreren: de SDK doet
+     * dat sinds 0.16.0.
+     */
+    private const RETRY_AFTER_CEILING_SECONDS = 10;
+
+    /**
+     * Seconden tot de lease verloopt, minimaal 1 en afgetopt op
+     * {@see self::RETRY_AFTER_CEILING_SECONDS} — bruikbaar als `Retry-After`.
      */
     public function secondsUntilLeaseExpires(): int
     {
@@ -93,7 +109,14 @@ class IdempotencyKey extends Model
             return 1;
         }
 
-        return max(1, (int) ceil(now()->diffInSeconds($this->locked_at->addSeconds(self::leaseSeconds()), false)));
+        $remaining = (int) ceil(now()->diffInSeconds($this->locked_at->addSeconds(self::leaseSeconds()), false));
+
+        return max(1, min($remaining, self::RETRY_AFTER_CEILING_SECONDS));
+    }
+
+    public static function retryAfterCeilingSeconds(): int
+    {
+        return self::RETRY_AFTER_CEILING_SECONDS;
     }
 
     public static function leaseSeconds(): int

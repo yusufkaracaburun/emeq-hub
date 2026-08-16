@@ -67,7 +67,7 @@ class DocumentsController extends Controller
 
         $outcome = $this->runner->run($document, $connection, $account, $consumerId);
 
-        return response()->json($outcome->responseBody, $outcome->httpStatus);
+        return response()->json($outcome->responseBody, $outcome->httpStatus, $outcome->headers);
     }
 
     private function dispatchAsync(

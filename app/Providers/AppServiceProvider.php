@@ -114,10 +114,22 @@ class AppServiceProvider extends ServiceProvider
 
         Gate::define('manage-staff', fn (User $user): bool => $user->hasRole('super-admin'));
 
+        // Eén limiter-naam volstaat: een tweede named limiter zou per HTTP-methode
+        // een andere `throttle:`-alias op de route vergen, maar de Exact/Snelstart
+        // pass-through (`Route::any('/{path}', ...)`) bedient lezen én schrijven op
+        // dezelfde route — daar valt geen route-group-grens te trekken. In plaats
+        // daarvan split de `by()`-sleutel op methode, zodat lezen en schrijven een
+        // los budget per consumer krijgen zonder elkaar te verdringen.
         RateLimiter::for('api', function (Request $request): Limit {
             $consumerId = $request->user()?->getKey();
+            $scope = $consumerId ? "consumer:{$consumerId}" : "ip:{$request->ip()}";
 
-            return Limit::perMinute(60)->by($consumerId ? "consumer:{$consumerId}" : "ip:{$request->ip()}");
+            $isWrite = ! $request->isMethodSafe();
+            $limit = (int) config($isWrite ? 'hub.rate_limits.writes_per_minute' : 'hub.rate_limits.reads_per_minute');
+
+            // Een leeggelaten env-var casat naar 0, en perMinute(0) sluit de hele
+            // API af. Een tikfout in .env mag geen totale storing worden.
+            return Limit::perMinute(max(1, $limit))->by($scope.':'.($isWrite ? 'write' : 'read'));
         });
 
         Scramble::configure()

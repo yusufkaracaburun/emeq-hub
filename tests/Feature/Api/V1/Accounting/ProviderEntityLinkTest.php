@@ -393,6 +393,81 @@ class ProviderEntityLinkTest extends TestCase
     }
 
     /**
+     * Dezelfde instructie als de idempotency-laag bij "er loopt al iets" (409):
+     * een consumer die op Retry-After pace't mag ook op déze 409 kunnen wachten
+     * in plaats van te pollen.
+     */
+    public function test_a_concurrent_attempt_carries_a_retry_after_header(): void
+    {
+        MockClient::global([
+            CreateSalesEntry::class => MockResponse::make(['d' => ['ID' => 'inv-race']], 201),
+        ]);
+        $this->bindFakeReferences();
+
+        [$consumer, $connection] = $this->consumerWithExactConnection();
+
+        $lockedAt = now()->subSeconds(100);
+        ProviderEntityLink::query()->create([
+            'connection_id' => $connection->getKey(),
+            'entity_type' => ProviderEntityLink::ENTITY_FINANCIAL_DOCUMENT,
+            'entity_subtype' => 'sales_invoice',
+            'external_id' => 'INV-2026-001',
+            'provider' => 'exact',
+            'provider_entity_id' => null,
+            'origin' => ProviderEntityLink::ORIGIN_HUB,
+            'last_synced_at' => $lockedAt,
+        ]);
+
+        $response = $this->postDocument($consumer, $this->salesInvoicePayload())
+            ->assertStatus(409)
+            ->assertJsonPath('error', 'document_sync_in_progress');
+
+        // Niet het resterende lease-venster (hier 800s): dat beantwoordt "wanneer
+        // verklaren we de andere poging dood?", niet "wanneer mag je terugkomen?".
+        // Een normale boeking is in seconden klaar, dus het lease-venster als
+        // Retry-After legt dit document een kwartier stil bij een consumer die de
+        // header honoreert — en sinds hub-sdk 0.16.0 doet die dat.
+        $this->assertSame(
+            (string) IdempotencyKey::retryAfterCeilingSeconds(),
+            $response->headers->get('Retry-After'),
+        );
+
+        MockClient::global()->assertNothingSent();
+    }
+
+    /**
+     * Vlak voor het einde van de lease is het resterende venster kleiner dan het
+     * plafond, en dan wint het venster: verder vooruit wijzen dan de claim zelf
+     * bestaat heeft geen zin.
+     */
+    public function test_retry_after_never_points_past_the_end_of_the_claim(): void
+    {
+        MockClient::global([
+            CreateSalesEntry::class => MockResponse::make(['d' => ['ID' => 'inv-race']], 201),
+        ]);
+        $this->bindFakeReferences();
+
+        [$consumer, $connection] = $this->consumerWithExactConnection();
+
+        ProviderEntityLink::query()->create([
+            'connection_id' => $connection->getKey(),
+            'entity_type' => ProviderEntityLink::ENTITY_FINANCIAL_DOCUMENT,
+            'entity_subtype' => 'sales_invoice',
+            'external_id' => 'INV-2026-001',
+            'provider' => 'exact',
+            'provider_entity_id' => null,
+            'origin' => ProviderEntityLink::ORIGIN_HUB,
+            'last_synced_at' => now()->subSeconds(IdempotencyKey::leaseSeconds() - 3),
+        ]);
+
+        $response = $this->postDocument($consumer, $this->salesInvoicePayload())
+            ->assertStatus(409)
+            ->assertJsonPath('error', 'document_sync_in_progress');
+
+        $this->assertSame('3', $response->headers->get('Retry-After'));
+    }
+
+    /**
      * Een claim van een gecrashte worker mag dit document niet voorgoed blokkeren.
      */
     public function test_a_stale_claim_is_taken_over(): void

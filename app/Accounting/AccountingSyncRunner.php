@@ -49,10 +49,10 @@ final readonly class AccountingSyncRunner
         $claim = $this->claimOrExplain($document, $connection, $fingerprint);
 
         if (! $claim instanceof ProviderEntityLink) {
-            [$status, $upstreamError, $responseBody] = $claim;
+            [$status, $upstreamError, $responseBody, $headers] = $claim;
             $this->audit($account, $connection, $consumerId, $provider, $document, $status, $start, $upstreamError, $responseBody);
 
-            return new AccountingSyncOutcome($status, $responseBody);
+            return new AccountingSyncOutcome($status, $responseBody, $headers);
         }
 
         $booked = false;
@@ -120,7 +120,7 @@ final readonly class AccountingSyncRunner
      * — die laatste nemen we over, want anders blokkeert een gecrashte worker dit
      * document tot iemand handmatig ingrijpt.
      *
-     * @return ProviderEntityLink|array{0: int, 1: string, 2: array<string, mixed>}
+     * @return ProviderEntityLink|array{0: int, 1: string, 2: array<string, mixed>, 3: array<string, string>}
      */
     private function claimOrExplain(FinancialDocument $document, Connection $connection, string $fingerprint): ProviderEntityLink|array
     {
@@ -133,9 +133,10 @@ final readonly class AccountingSyncRunner
         $existing = $this->links->find($connection, $document);
 
         // Tussen onze INSERT en deze SELECT is de rij weer weg: een gelijktijdige poging
-        // faalde en gaf zijn claim vrij. De consumer mag het gewoon opnieuw proberen.
+        // faalde en gaf zijn claim vrij. Geen rij om een venster van af te leiden — vaste
+        // waarde, zoals EnsureIdempotency::resolveConflict() bij hetzelfde "net verdwenen"-geval.
         if ($existing === null) {
-            return $this->syncInProgress($document, $connection->provider->value);
+            return $this->syncInProgress($document, $connection->provider->value, 1);
         }
 
         if ($existing->provider_entity_id !== null) {
@@ -143,22 +144,25 @@ final readonly class AccountingSyncRunner
         }
 
         if (! $this->links->claimIsStale($existing)) {
-            return $this->syncInProgress($document, $connection->provider->value);
+            return $this->syncInProgress($document, $connection->provider->value, $this->links->secondsUntilClaimStale($existing));
         }
 
         $this->links->releaseClaim($existing);
 
+        // De race is verloren: iemand anders claimde net na onze release. Diens claim is
+        // hier niet zichtbaar, dus geen venster om van af te leiden — vaste waarde, zoals
+        // EnsureIdempotency::takeOver() bij hetzelfde "een ander won net"-geval.
         return $this->links->claim($document, $connection)
-            ?? $this->syncInProgress($document, $connection->provider->value);
+            ?? $this->syncInProgress($document, $connection->provider->value, 1);
     }
 
     /**
      * Er loopt op dit moment een boeking voor dit document. Geen fout van de consumer —
      * wachten en opnieuw proberen is het juiste antwoord.
      *
-     * @return array{0: int, 1: string, 2: array<string, mixed>}
+     * @return array{0: int, 1: string, 2: array<string, mixed>, 3: array<string, string>}
      */
-    private function syncInProgress(FinancialDocument $document, string $provider): array
+    private function syncInProgress(FinancialDocument $document, string $provider, int $retryAfterSeconds): array
     {
         return [409, 'sync_in_progress', [
             'provider' => $provider,
@@ -166,7 +170,7 @@ final readonly class AccountingSyncRunner
             'external_id' => $document->externalId,
             'error' => 'document_sync_in_progress',
             'message' => "Er loopt al een boeking voor external_id '{$document->externalId}' op deze koppeling. Probeer het zo opnieuw.",
-        ]];
+        ], ['Retry-After' => (string) $retryAfterSeconds]];
     }
 
     /**
@@ -182,7 +186,9 @@ final readonly class AccountingSyncRunner
      * Een NULL-fingerprint (alleen mogelijk na handmatige DB-bewerking) telt als
      * afwijkend: niet kunnen verifiëren is geen reden om te herboeken.
      *
-     * @return array{0: int, 1: string, 2: array<string, mixed>}
+     * Definitieve uitkomsten, geen "probeer straks opnieuw" — geen Retry-After.
+     *
+     * @return array{0: int, 1: string, 2: array<string, mixed>, 3: array<string, string>}
      */
     private function replayExistingLink(
         ProviderEntityLink $link,
@@ -205,7 +211,7 @@ final readonly class AccountingSyncRunner
                 ...$body,
                 'status' => SyncStatus::Posted->value,
                 'deduplicated' => true,
-            ]];
+            ], []];
         }
 
         return [409, 'already_posted', [
@@ -213,7 +219,7 @@ final readonly class AccountingSyncRunner
             'status' => SyncStatus::Rejected->value,
             'error' => 'document_already_posted',
             'message' => "Er is al een boeking met external_id '{$document->externalId}' op deze koppeling, met andere inhoud. Gebruik een nieuw external_id (een correctie is een creditnota).",
-        ]];
+        ], []];
     }
 
     /**
