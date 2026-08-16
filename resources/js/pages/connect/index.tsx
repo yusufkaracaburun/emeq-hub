@@ -136,7 +136,7 @@ function ProviderRow({ provider }: { provider: ConnectProvider }) {
     }
 
     return (
-        <div className="flex flex-col gap-4 rounded-lg border border-border bg-card px-[22px] py-[18px] sm:flex-row sm:items-center sm:gap-4">
+        <div className="flex flex-col gap-4 rounded-lg border border-border bg-card px-[22px] py-[18px] text-left sm:flex-row sm:items-center sm:gap-4">
             <div className="flex w-full items-center gap-4 sm:w-40 sm:shrink-0">
                 {provider.logo ? (
                     <img src={provider.logo} alt={provider.label} className="h-7 w-auto" />
