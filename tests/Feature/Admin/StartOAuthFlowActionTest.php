@@ -6,7 +6,7 @@ namespace Tests\Feature\Admin;
 
 use App\Filament\Actions\StartOAuthFlowAction;
 use App\Filament\Resources\Accounts\Pages\ListAccounts;
-use App\Filament\Resources\Connections\Pages\ListConnections;
+use App\Filament\Resources\Connections\Pages\ViewConnection;
 use App\Integrations\Contracts\OAuthFlow;
 use App\Integrations\Mollie\OAuth\MollieConnectOAuthFlow;
 use App\Integrations\OAuth\Testing\FakeOAuthFlow;
@@ -346,8 +346,8 @@ class StartOAuthFlowActionTest extends TestCase
         $account = $this->makeAccount();
         $pending = Connection::factory()->pending()->for($account)->create();
 
-        Livewire::test(ListConnections::class)
-            ->assertTableActionVisible('startOAuthFlow', $pending);
+        Livewire::test(ViewConnection::class, ['record' => $pending->getRouteKey()])
+            ->assertActionVisible('startOAuthFlow');
     }
 
     public function test_connection_resource_start_oauth_flow_hidden_when_access_token_present(): void
@@ -358,8 +358,8 @@ class StartOAuthFlowActionTest extends TestCase
         $account = $this->makeAccount();
         $active = Connection::factory()->forMollie()->for($account)->create();
 
-        Livewire::test(ListConnections::class)
-            ->assertTableActionHidden('startOAuthFlow', $active);
+        Livewire::test(ViewConnection::class, ['record' => $active->getRouteKey()])
+            ->assertActionHidden('startOAuthFlow');
     }
 
     public function test_connection_resource_revoke_action_remains_intact_after_mount(): void
@@ -372,8 +372,8 @@ class StartOAuthFlowActionTest extends TestCase
 
         // Bestaande Phase-9 revoke-action moet zichtbaar blijven naast nieuwe
         // startOAuthFlow-action — regressie-bewijs voor 09-06 wiring.
-        Livewire::test(ListConnections::class)
-            ->assertTableActionVisible('revoke', $mollie);
+        Livewire::test(ViewConnection::class, ['record' => $mollie->getRouteKey()])
+            ->assertActionVisible('revoke');
     }
 
     public function test_account_resource_mounts_start_oauth_flow_action_for_staff(): void

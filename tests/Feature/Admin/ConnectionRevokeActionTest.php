@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Admin;
 
-use App\Filament\Resources\Connections\Pages\ListConnections;
+use App\Filament\Resources\Connections\Pages\ViewConnection;
 use App\Integrations\Mollie\OAuth\MollieConnectOAuthFlow;
 use App\Integrations\OAuth\Testing\FakeOAuthFlow;
 use App\Models\Account;
@@ -68,8 +68,8 @@ class ConnectionRevokeActionTest extends TestCase
         $this->actingAs($this->makeStaffUser());
         $mollie = $this->makeMollieConnection();
 
-        Livewire::test(ListConnections::class)
-            ->assertTableActionVisible('revoke', $mollie);
+        Livewire::test(ViewConnection::class, ['record' => $mollie->getRouteKey()])
+            ->assertActionVisible('revoke');
     }
 
     public function test_revoke_action_hidden_for_snelstart_connection(): void
@@ -77,8 +77,8 @@ class ConnectionRevokeActionTest extends TestCase
         $this->actingAs($this->makeStaffUser());
         $snelstart = $this->makeSnelstartConnection();
 
-        Livewire::test(ListConnections::class)
-            ->assertTableActionHidden('revoke', $snelstart);
+        Livewire::test(ViewConnection::class, ['record' => $snelstart->getRouteKey()])
+            ->assertActionHidden('revoke');
     }
 
     public function test_revoke_action_hidden_for_already_revoked_connection(): void
@@ -91,8 +91,8 @@ class ConnectionRevokeActionTest extends TestCase
             'status' => 'revoked',
         ]);
 
-        Livewire::test(ListConnections::class)
-            ->assertTableActionHidden('revoke', $revoked);
+        Livewire::test(ViewConnection::class, ['record' => $revoked->getRouteKey()])
+            ->assertActionHidden('revoke');
     }
 
     public function test_revoke_action_calls_oauth_flow_revoke(): void
@@ -106,9 +106,9 @@ class ConnectionRevokeActionTest extends TestCase
         $this->actingAs($this->makeStaffUser());
         $mollie = $this->makeMollieConnection();
 
-        Livewire::test(ListConnections::class)
-            ->callTableAction('revoke', $mollie)
-            ->assertHasNoTableActionErrors();
+        Livewire::test(ViewConnection::class, ['record' => $mollie->getRouteKey()])
+            ->callAction('revoke')
+            ->assertHasNoActionErrors();
 
         $this->assertSame(1, $fake->wasCalled('revoke'));
 

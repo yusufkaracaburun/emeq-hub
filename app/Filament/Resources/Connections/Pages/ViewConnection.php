@@ -2,10 +2,11 @@
 
 namespace App\Filament\Resources\Connections\Pages;
 
-use App\Filament\Actions\ManageAccountingMappingAction;
+use App\Enums\Provider;
 use App\Filament\Actions\StartOAuthFlowAction;
 use App\Filament\Resources\Connections\ConnectionResource;
 use App\Models\Connection;
+use Filament\Actions\ActionGroup;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Schemas\Components\Livewire;
 use Filament\Schemas\Components\Tabs;
@@ -21,8 +22,9 @@ class ViewConnection extends ViewRecord
     {
         return [
             StartOAuthFlowAction::forConnection(),
-            ManageAccountingMappingAction::make(),
-            ConnectionResource::revokeAction(),
+            ActionGroup::make([
+                ConnectionResource::revokeAction(),
+            ]),
         ];
     }
 
@@ -32,6 +34,8 @@ class ViewConnection extends ViewRecord
         $record = $this->getRecord();
 
         return $schema->components([
+            ...ConnectionResource::statusStripSchema($record),
+
             Tabs::make()
                 ->contained(false)
                 ->persistTabInQueryString()
@@ -47,6 +51,11 @@ class ViewConnection extends ViewRecord
                     Tab::make('Boekhoud-mapping')
                         ->icon(Heroicon::OutlinedArrowsRightLeft)
                         ->schema(ConnectionResource::accountingMappingSchema($record)),
+
+                    Tab::make('Webhooks')
+                        ->icon(Heroicon::OutlinedBell)
+                        ->visible($record->provider === Provider::Exact)
+                        ->schema(ConnectionResource::webhookSubscriptionsSchema($record)),
 
                     ...$this->getRelationManagerTabs(),
                 ]),

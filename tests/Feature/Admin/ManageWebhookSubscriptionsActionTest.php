@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Admin;
 
-use App\Filament\Resources\Connections\Pages\ListConnections;
+use App\Filament\Resources\Connections\Pages\ViewConnection;
 use App\Models\Account;
 use App\Models\Connection;
 use App\Models\Consumer;
 use App\Models\User;
+use Filament\Actions\Testing\TestAction;
 use Emeq\ExactApi\Http\Request\Delete\DeleteWebhookSubscription;
 use Emeq\ExactApi\Http\Request\Read\ListWebhookSubscriptions;
 use Emeq\ExactApi\Http\Request\Write\CreateWebhookSubscription;
@@ -48,8 +49,8 @@ class ManageWebhookSubscriptionsActionTest extends TestCase
     {
         $this->actingAs($this->makeStaffUser());
 
-        Livewire::test(ListConnections::class)
-            ->assertTableActionVisible('webhookSubscriptions', $this->makeExactConnection());
+        Livewire::test(ViewConnection::class, ['record' => $this->makeExactConnection()->getRouteKey()])
+            ->assertActionVisible(TestAction::make('webhookSubscriptions')->schemaComponent('webhooks', 'content'));
     }
 
     public function test_action_is_hidden_for_a_revoked_connection(): void
@@ -57,8 +58,8 @@ class ManageWebhookSubscriptionsActionTest extends TestCase
         $this->actingAs($this->makeStaffUser());
         $revoked = $this->makeExactConnection(['revoked_at' => now()]);
 
-        Livewire::test(ListConnections::class)
-            ->assertTableActionHidden('webhookSubscriptions', $revoked);
+        Livewire::test(ViewConnection::class, ['record' => $revoked->getRouteKey()])
+            ->assertActionDoesNotExist(TestAction::make('webhookSubscriptions')->schemaComponent('webhooks', 'content'));
     }
 
     public function test_ticking_a_topic_creates_the_subscription_at_exact(): void
@@ -74,11 +75,11 @@ class ManageWebhookSubscriptionsActionTest extends TestCase
 
         $connection = $this->makeExactConnection();
 
-        Livewire::test(ListConnections::class)
-            ->callTableAction('webhookSubscriptions', $connection, data: [
+        Livewire::test(ViewConnection::class, ['record' => $connection->getRouteKey()])
+            ->callAction(TestAction::make('webhookSubscriptions')->schemaComponent('webhooks', 'content'), data: [
                 'topics' => ['BankEntries' => true, 'CashEntries' => true],
             ])
-            ->assertHasNoTableActionErrors();
+            ->assertHasNoActionErrors();
 
         $connection->refresh();
         $this->assertSame(
@@ -103,11 +104,11 @@ class ManageWebhookSubscriptionsActionTest extends TestCase
             'metadata' => ['exact_webhooks' => ['BankEntries' => 'sub-A', 'CashEntries' => 'sub-B']],
         ]);
 
-        Livewire::test(ListConnections::class)
-            ->callTableAction('webhookSubscriptions', $connection, data: [
+        Livewire::test(ViewConnection::class, ['record' => $connection->getRouteKey()])
+            ->callAction(TestAction::make('webhookSubscriptions')->schemaComponent('webhooks', 'content'), data: [
                 'topics' => ['BankEntries' => true, 'CashEntries' => false],
             ])
-            ->assertHasNoTableActionErrors();
+            ->assertHasNoActionErrors();
 
         $connection->refresh();
         $this->assertSame(['BankEntries' => 'sub-A'], $connection->metadata['exact_webhooks']);
@@ -128,9 +129,9 @@ class ManageWebhookSubscriptionsActionTest extends TestCase
 
         $connection = $this->makeExactConnection();
 
-        Livewire::test(ListConnections::class)
-            ->mountTableAction('webhookSubscriptions', $connection)
-            ->assertHasNoTableActionErrors();
+        Livewire::test(ViewConnection::class, ['record' => $connection->getRouteKey()])
+            ->mountAction(TestAction::make('webhookSubscriptions')->schemaComponent('webhooks', 'content'))
+            ->assertHasNoActionErrors();
     }
 
     private function makeStaffUser(): User

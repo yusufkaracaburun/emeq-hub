@@ -5,10 +5,10 @@ namespace App\Filament\Resources\Connections;
 use App\Enums\Provider;
 use App\Filament\Actions\ManageAccountingMappingAction;
 use App\Filament\Actions\ManageWebhookSubscriptionsAction;
-use App\Filament\Actions\StartOAuthFlowAction;
 use App\Filament\Resources\Connections\Pages\ListConnections;
 use App\Filament\Resources\Connections\Pages\ViewConnection;
 use App\Filament\Widgets\OperationalHealthWidget;
+use App\Integrations\Exact\ExactWebhookSubscriptionManager;
 use App\Integrations\OAuth\OAuthFlowRegistry;
 use App\Models\Connection;
 use App\Support\Filament\BadgeColor;
@@ -22,12 +22,14 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Filament\Support\Enums\FontWeight;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Carbon;
 
 class ConnectionResource extends Resource
 {
@@ -140,6 +142,53 @@ class ConnectionResource extends Resource
     }
 
     /**
+     * Kopstrip op de detailpagina: de vier feiten waarop je een koppeling beoordeelt,
+     * zonder een tab te hoeven openen.
+     *
+     * @return list<Section>
+     */
+    public static function statusStripSchema(Connection $record): array
+    {
+        $expiresAt = $record->expires_at;
+        $lastInboundAt = $record->inboundWebhookEvents()->max('created_at');
+        $lastInboundAt = $lastInboundAt === null ? null : Carbon::parse($lastInboundAt);
+
+        return [
+            Section::make()
+                ->columns(4)
+                ->schema([
+                    TextEntry::make('strip_status')
+                        ->label('Status')
+                        ->state($record->revoked_at !== null ? 'revoked' : $record->status)
+                        ->badge()
+                        ->color(fn (string $state): string => BadgeColor::connectionStatus($state)),
+
+                    TextEntry::make('strip_division')
+                        ->label($record->provider === Provider::Exact ? 'Division' : 'Administratie')
+                        ->state($record->administratie_id)
+                        ->weight(FontWeight::SemiBold)
+                        ->copyable()
+                        ->placeholder('—'),
+
+                    TextEntry::make('strip_expires')
+                        ->label('Token verloopt')
+                        ->state($expiresAt?->diffForHumans())
+                        ->tooltip($expiresAt?->toDateTimeString())
+                        ->color($expiresAt === null || $expiresAt->isFuture() ? null : 'danger')
+                        ->weight(FontWeight::SemiBold)
+                        ->placeholder('—'),
+
+                    TextEntry::make('strip_last_inbound')
+                        ->label('Laatste inbound webhook')
+                        ->state($lastInboundAt?->diffForHumans())
+                        ->tooltip($lastInboundAt?->toDateTimeString())
+                        ->weight(FontWeight::SemiBold)
+                        ->placeholder('Nog geen'),
+                ]),
+        ];
+    }
+
+    /**
      * @return list<Section>
      */
     public static function accessSchema(Connection $record): array
@@ -180,7 +229,9 @@ class ConnectionResource extends Resource
 
         return [
             Section::make('Boekhoud-mapping')
-                ->description('Gebruikt door de accounting-sync. Wordt na het koppelen afgeleid uit de mirror en is te wijzigen via "Boekhoud-mapping" in de header.')
+                ->key('accountingMapping')
+                ->description('Gebruikt door de accounting-sync. Wordt na het koppelen afgeleid uit de mirror.')
+                ->afterHeader([ManageAccountingMappingAction::make()])
                 ->columns(2)
                 ->schema([
                     KeyValueEntry::make('vat_codes')
@@ -207,6 +258,49 @@ class ConnectionResource extends Resource
                         ->keyLabel('Relatie')
                         ->valueLabel('GUID')
                         ->emptyMessage('Geen relaties gemapt'),
+                ]),
+        ];
+    }
+
+    /**
+     * Webhook-tab. Toont de stand zoals de Hub die kent — geen live-call bij het
+     * openen van de pagina; het beheer-modal haalt de stand bij Exact op.
+     *
+     * @return list<Section>
+     */
+    public static function webhookSubscriptionsSchema(Connection $record): array
+    {
+        $stored = (array) (($record->metadata ?? [])['exact_webhooks'] ?? []);
+        $configured = (array) config('services.exact.webhook_topics', []);
+
+        $topics = array_unique(array_merge($configured, array_keys($stored)));
+        sort($topics);
+
+        $state = [];
+
+        foreach ($topics as $topic) {
+            $state[$topic] = isset($stored[$topic])
+                ? "Geabonneerd — {$stored[$topic]}"
+                : 'Niet geabonneerd';
+        }
+
+        return [
+            Section::make('Webhook-abonnementen')
+                ->key('webhooks')
+                ->description('Bepaalt waarover Exact deze koppeling een seintje stuurt. Onderstaande stand komt uit de Hub; "Abonnementen beheren" haalt de live-stand bij Exact op en schrijft wijzigingen daar door.')
+                ->afterHeader([ManageWebhookSubscriptionsAction::make()])
+                ->schema([
+                    TextEntry::make('webhook_callback_url')
+                        ->label('Callback-URL')
+                        ->state(app(ExactWebhookSubscriptionManager::class)->callbackUrl())
+                        ->copyable(),
+
+                    KeyValueEntry::make('webhook_topics')
+                        ->hiddenLabel()
+                        ->state($state)
+                        ->keyLabel('Topic')
+                        ->valueLabel('Stand in de Hub')
+                        ->emptyMessage('Geen topics geconfigureerd en geen abonnementen bekend.'),
                 ]),
         ];
     }
@@ -264,12 +358,7 @@ class ConnectionResource extends Resource
                     ),
             ])
             ->recordUrl(fn (Connection $record): string => self::getUrl('view', ['record' => $record]))
-            ->recordActions([
-                StartOAuthFlowAction::forConnection()->iconButton(),
-                ManageAccountingMappingAction::make()->iconButton(),
-                ManageWebhookSubscriptionsAction::make()->iconButton(),
-                self::revokeAction()->iconButton(),
-            ])
+            ->recordActions([])
             ->toolbarActions([]);
     }
 

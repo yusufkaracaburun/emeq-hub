@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Admin;
 
-use App\Filament\Resources\Connections\Pages\ListConnections;
+use App\Filament\Resources\Connections\Pages\ViewConnection;
+use Filament\Actions\Testing\TestAction;
 use App\Models\Account;
 use App\Models\Connection;
 use App\Models\Consumer;
@@ -82,8 +83,8 @@ class ManageAccountingMappingActionTest extends TestCase
     {
         $this->actingAs($this->makeStaffUser());
 
-        Livewire::test(ListConnections::class)
-            ->assertTableActionVisible('accountingMapping', $this->makeExactConnection());
+        Livewire::test(ViewConnection::class, ['record' => $this->makeExactConnection()->getRouteKey()])
+            ->assertActionVisible(TestAction::make('accountingMapping')->schemaComponent('accountingMapping', 'content'));
     }
 
     public function test_action_hidden_for_mollie_connection(): void
@@ -92,8 +93,8 @@ class ManageAccountingMappingActionTest extends TestCase
         $account = Account::factory()->for(Consumer::factory()->create())->create();
         $mollie = Connection::factory()->forMollie()->for($account)->create();
 
-        Livewire::test(ListConnections::class)
-            ->assertTableActionHidden('accountingMapping', $mollie);
+        Livewire::test(ViewConnection::class, ['record' => $mollie->getRouteKey()])
+            ->assertActionDoesNotExist(TestAction::make('accountingMapping')->schemaComponent('accountingMapping', 'content'));
     }
 
     public function test_action_saves_mapping_to_metadata(): void
@@ -102,8 +103,8 @@ class ManageAccountingMappingActionTest extends TestCase
         $this->mockExactReference();
         $connection = $this->makeExactConnection();
 
-        Livewire::test(ListConnections::class)
-            ->callTableAction('accountingMapping', $connection, data: [
+        Livewire::test(ViewConnection::class, ['record' => $connection->getRouteKey()])
+            ->callAction(TestAction::make('accountingMapping')->schemaComponent('accountingMapping', 'content'), data: [
                 'vat_21' => '4',
                 'vat_9' => '2',
                 'vat_0' => '1',
@@ -116,7 +117,7 @@ class ManageAccountingMappingActionTest extends TestCase
                 'journal_income' => '71',
                 'journal_expense' => '21',
             ])
-            ->assertHasNoTableActionErrors();
+            ->assertHasNoActionErrors();
 
         $connection->refresh();
 
@@ -138,9 +139,9 @@ class ManageAccountingMappingActionTest extends TestCase
             ]],
         ]);
 
-        Livewire::test(ListConnections::class)
-            ->mountTableAction('accountingMapping', $connection)
-            ->assertTableActionDataSet([
+        Livewire::test(ViewConnection::class, ['record' => $connection->getRouteKey()])
+            ->mountAction(TestAction::make('accountingMapping')->schemaComponent('accountingMapping', 'content'))
+            ->assertActionDataSet([
                 'vat_21' => '4',
                 'journal_sales' => '70',
             ]);
@@ -152,13 +153,13 @@ class ManageAccountingMappingActionTest extends TestCase
         $this->mockExactReference();
         $connection = $this->makeExactConnection();
 
-        Livewire::test(ListConnections::class)
-            ->callTableAction('accountingMapping', $connection, data: [
+        Livewire::test(ViewConnection::class, ['record' => $connection->getRouteKey()])
+            ->callAction(TestAction::make('accountingMapping')->schemaComponent('accountingMapping', 'content'), data: [
                 'vat_21' => '3',
                 'reverse_charge_vat_21' => '6',
                 'reverse_charge_vat_9' => '7',
             ])
-            ->assertHasNoTableActionErrors();
+            ->assertHasNoActionErrors();
 
         $connection->refresh();
 
@@ -179,9 +180,9 @@ class ManageAccountingMappingActionTest extends TestCase
             ]],
         ]);
 
-        Livewire::test(ListConnections::class)
-            ->mountTableAction('accountingMapping', $connection)
-            ->assertTableActionDataSet([
+        Livewire::test(ViewConnection::class, ['record' => $connection->getRouteKey()])
+            ->mountAction(TestAction::make('accountingMapping')->schemaComponent('accountingMapping', 'content'))
+            ->assertActionDataSet([
                 'vat_21' => '3',
                 'reverse_charge_vat_21' => '6',
             ]);
@@ -198,12 +199,12 @@ class ManageAccountingMappingActionTest extends TestCase
 
         // Met live VATCodes is vat_* een Select; een gekozen Code rondt correct af
         // naar de opslag-vorm die de resolver leest.
-        Livewire::test(ListConnections::class)
-            ->callTableAction('accountingMapping', $connection, data: [
+        Livewire::test(ViewConnection::class, ['record' => $connection->getRouteKey()])
+            ->callAction(TestAction::make('accountingMapping')->schemaComponent('accountingMapping', 'content'), data: [
                 'vat_21' => '4',
                 'vat_9' => '2',
             ])
-            ->assertHasNoTableActionErrors();
+            ->assertHasNoActionErrors();
 
         $connection->refresh();
 

@@ -62,7 +62,50 @@ class ConnectionDetailTabsTest extends TestCase
             ->assertSee('Boekhoud-mapping')
             ->assertSee('Boekhoud-referentiedata')
             ->assertSee('Pass-through calls')
-            ->assertSee('Inbound webhooks');
+            ->assertSee('Inbound webhooks')
+            ->assertSee('Webhooks');
+    }
+
+    public function test_status_strip_shows_the_headline_facts_above_the_tabs(): void
+    {
+        $this->actingAs($this->makeStaffUser());
+
+        $exact = $this->makeConnection('forExact', [
+            'administratie_id' => '4471372',
+            'expires_at' => now()->addMinutes(58),
+        ]);
+
+        Livewire::test(ViewConnection::class, ['record' => $exact->getKey()])
+            ->assertSuccessful()
+            ->assertSee('Division')
+            ->assertSee('4471372')
+            ->assertSee('Token verloopt')
+            ->assertSee('Laatste inbound webhook')
+            ->assertSee('Nog geen');
+    }
+
+    public function test_webhook_tab_lists_the_topics_the_hub_knows_about(): void
+    {
+        $this->actingAs($this->makeStaffUser());
+        config(['services.exact.webhook_topics' => ['BankEntries', 'CashEntries']]);
+
+        $exact = $this->makeConnection('forExact', [
+            'metadata' => ['exact_webhooks' => ['BankEntries' => 'sub-A']],
+        ]);
+
+        Livewire::test(ViewConnection::class, ['record' => $exact->getKey()])
+            ->assertSee('Webhook-abonnementen')
+            ->assertSee('Geabonneerd — sub-A', escape: false)
+            ->assertSee('CashEntries')
+            ->assertSee('Niet geabonneerd');
+    }
+
+    public function test_webhook_tab_is_absent_for_a_non_exact_connection(): void
+    {
+        $this->actingAs($this->makeStaffUser());
+
+        Livewire::test(ViewConnection::class, ['record' => $this->makeConnection('forMollie')->getKey()])
+            ->assertDontSee('Webhook-abonnementen');
     }
 
     public function test_exact_access_tab_explains_the_absent_scopes_and_lists_the_whitelist(): void
