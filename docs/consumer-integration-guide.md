@@ -866,26 +866,48 @@ koppelde:
 
 ```json
 {
-  "event": "accounting.bank_statement.changed",
+  "event": "accounting.sales_invoice.changed",
   "provider": "exact",
   "account_id": "school1",
+  "entity_id": "9f1c8e2a-…",
+  "action": "updated",
   "occurred_at": "2026-08-11T14:22:03+00:00",
+  "hub_authored": true,
+  "hub_last_wrote_at": "2026-08-11T14:21:58+00:00",
   "data": { "…": "de ruwe payload van de partner" }
 }
 ```
+
+Vier velden staan er altijd: `event`, `provider`, `account_id`, `occurred_at` en
+`data`. De rest staat er alleen als de Hub het kon vaststellen — een veld dat
+ontbreekt betekent "weet ik niet", nooit "nee".
 
 - **`event`** — canonieke naam uit het Hub-vocabulaire. Route hierop, niet op
   `provider` en niet op iets uit `data`.
 - **`account_id`** — hetzelfde id dat jij bij het koppelen aanleverde (je
   `X-Account-Id`), niet een Hub-intern nummer.
+- **`entity_id`** — het id dat het boekhoudpakket zelf aan de gewijzigde entity
+  geeft. Dit is hetzelfde id dat je terugkreeg toen je die boeking via de Hub
+  wegschreef, dus hiermee vind je je eigen record terug. Vandaag levert alleen
+  Exact het; bij Snelstart ontbreekt het veld (hun payload-vorm staat nog open bij
+  de partner) en bij Mollie is het de resource-id uit de notificatie.
+- **`action`** — wat er met de entity gebeurde: `created`, `updated`, `deleted` of
+  `unmapped`. Los van `event`, dat zegt wélk soort entity het is. Mollie levert
+  geen actie mee, dus daar ontbreekt het veld.
 - **`occurred_at`** — wanneer de Hub het event uitstuurde. De meeste partners
   leveren geen eigen tijdstempel; doen alsof van wel zou liegen over de bron.
-- **`caused_by_hub`** — staat er alleen als hij `true` is, en betekent: deze
-  wijziging is te herleiden tot een schrijfactie die jij zelf via de Hub hebt
-  aangevraagd. Je boekt een factuur, het boekhoudpakket meldt die wijziging, en
-  die melding komt bij jou terug. **Schrijf hier niet op terug** — dat is een lus.
-  Ontbreekt het veld, dan weten we het niet zeker; ga er dan van uit dat de
-  wijziging van de boekhouder komt.
+- **`hub_authored`** — staat er alleen als hij `true` is, en betekent: **de Hub
+  heeft deze entity ooit zelf weggeschreven.** Dus niet: deze wijziging komt van de
+  Hub. Een boekhouder die jouw via de Hub geboekte factuur met de hand corrigeert,
+  levert óók `hub_authored: true` — dat is precies een wijziging die je wél wilt
+  zien. Gebruik dit veld dus niet in je eentje als filter.
+- **`hub_last_wrote_at`** — wannéér de Hub deze entity voor het laatst schreef.
+  Samen met `hub_authored` kun je hiermee je eigen echo herkennen: komt het event
+  binnen kort ná dit tijdstip, dan is het vrijwel zeker het boekhoudpakket dat jouw
+  eigen schrijfactie terugkaatst — daar hoef je niets mee. Zit er meer tijd tussen,
+  dan heeft een mens iets gewijzigd. Wij kiezen dat venster niet voor je; een paar
+  minuten is in de praktijk ruim. **Schrijf binnen dat venster niet terug** — dat is
+  een lus.
 - **`data`** — bij een event dat van de partner komt: diens payload, ongewijzigd.
   Handig om te debuggen; bouw er geen routering op, want die vorm verschilt per
   provider. Bij de twee events die de Hub zélf publiceert —
@@ -918,6 +940,14 @@ een nieuwe naam mag jouw handler niet laten crashen.
 > `body.event` gaan routeren in plaats van op provider-specifieke velden als
 > Exact's `Topic`.
 
+> **Wijziging — `caused_by_hub` is vervallen.** Dat veld beloofde causaliteit maar
+> mat auteurschap: het stond ook op `true` bij een handmatige correctie door de
+> boekhouder. Vervangen door `hub_authored` (hetzelfde feit, eerlijke naam) plus
+> `hub_last_wrote_at` (het tijdstip dat er ontbrak). Gebruikte je `caused_by_hub`
+> als echo-filter, vervang dat door "`hub_authored` én binnen N minuten na
+> `hub_last_wrote_at`" — dat filtert de echo weg zonder de handmatige correcties
+> mee te wissen.
+
 **🤖 Agent-prompt**
 
 ```text
@@ -929,9 +959,11 @@ aanroept. Verwerk als volgt:
    constante tijd. Mismatch → 401, niets verwerken, niets loggen van de body.
 2. Zet het endpoint buiten CSRF-bescherming en buiten mijn tenant-auth — de Hub
    authentiseert met de signature, niet met een sessie.
-3. Body-vorm is altijd `{ event, provider, account_id, occurred_at, data }`.
-   Route op `event` — nooit op `provider` en nooit op iets uit `data`, want die
-   vorm verschilt per provider.
+3. Body-vorm is altijd `{ event, provider, account_id, occurred_at, data }`, met
+   optioneel `entity_id`, `action`, `hub_authored` en `hub_last_wrote_at`. Route op
+   `event` — nooit op `provider` en nooit op iets uit `data`, want die vorm
+   verschilt per provider. Behandel een ontbrekend optioneel veld als "onbekend",
+   niet als "nee".
 4. `account_id` is mijn eigen tenant-sleutel (dezelfde die ik bij het koppelen
    aanleverde). Zoek daarmee de tenant op; onbekende waarde → 200 + log, geen
    crash.
