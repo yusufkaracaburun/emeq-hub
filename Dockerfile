@@ -118,7 +118,8 @@ COPY docker/Caddyfile /etc/frankenphp/Caddyfile
 COPY composer.json composer.lock /app/
 RUN --mount=type=cache,target=/tmp/composer-cache \
     COMPOSER_CACHE_DIR=/tmp/composer-cache \
-    composer install --no-dev --no-scripts --no-autoloader --no-interaction
+    composer install --no-dev --no-scripts --no-autoloader --no-interaction \
+    || composer install --no-dev --no-scripts --no-autoloader --no-interaction --prefer-source
 COPY . /app
 COPY --from=assets /app/public/build /app/public/build
 # De SSR-bundel draait in de `ssr`-service, maar Inertia's
