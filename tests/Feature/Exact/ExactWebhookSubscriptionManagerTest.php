@@ -58,8 +58,6 @@ class ExactWebhookSubscriptionManagerTest extends TestCase
         $this->assertSame(self::TOPICS, array_keys($stored));
         $this->assertSame('sub-new', $stored['FinancialTransactions']);
 
-        // CallbackURL deelt scheme+domein met de redirect_uri (Exact-constraint),
-        // niet de lokale APP_URL.
         MockClient::global()->assertSent(fn (CreateWebhookSubscription $request): bool => $request->body()->all()['CallbackURL'] === 'https://hub.test/webhooks/exact');
     }
 
@@ -82,7 +80,6 @@ class ExactWebhookSubscriptionManagerTest extends TestCase
             $connection->metadata['exact_webhooks'],
         );
 
-        // Alle topics bestonden al → géén create-call.
         MockClient::global()->assertNotSent(CreateWebhookSubscription::class);
     }
 
@@ -95,7 +92,6 @@ class ExactWebhookSubscriptionManagerTest extends TestCase
 
         $connection = $this->exactConnection();
 
-        // Geen exception: duplicate is idempotent. Geen ID → niets opgeslagen.
         $this->app->make(ExactWebhookSubscriptionManager::class)->register($connection);
 
         $connection->refresh();
@@ -130,6 +126,128 @@ class ExactWebhookSubscriptionManagerTest extends TestCase
         $this->app->make(ExactWebhookSubscriptionManager::class)->register($connection);
 
         MockClient::global()->assertNothingSent();
+    }
+
+    public function test_apply_creates_selected_topics_and_cancels_deselected_ones(): void
+    {
+        MockClient::global([
+            ListWebhookSubscriptions::class => MockResponse::make(['d' => ['results' => [
+                ['Topic' => 'Documents', 'ID' => 'sub-B'],
+                ['Topic' => 'StockPositions', 'ID' => 'sub-legacy'],
+            ]]], 200),
+            CreateWebhookSubscription::class => MockResponse::make(['d' => ['ID' => 'sub-new']], 201),
+            DeleteWebhookSubscription::class => MockResponse::make([], 204),
+        ]);
+
+        $connection = $this->exactConnection([
+            'metadata' => ['exact_webhooks' => ['Documents' => 'sub-B', 'StockPositions' => 'sub-legacy']],
+        ]);
+
+        $result = $this->app->make(ExactWebhookSubscriptionManager::class)
+            ->apply($connection, ['FinancialTransactions', 'Documents']);
+
+        $this->assertSame(['FinancialTransactions'], $result['added']);
+        $this->assertSame(['StockPositions'], $result['removed']);
+
+        $connection->refresh();
+        $this->assertSame(
+            ['Documents' => 'sub-B', 'FinancialTransactions' => 'sub-new'],
+            $connection->metadata['exact_webhooks'],
+        );
+    }
+
+    public function test_apply_with_an_empty_selection_cancels_everything(): void
+    {
+        MockClient::global([
+            ListWebhookSubscriptions::class => MockResponse::make(['d' => ['results' => [
+                ['Topic' => 'Documents', 'ID' => 'sub-B'],
+            ]]], 200),
+            DeleteWebhookSubscription::class => MockResponse::make([], 204),
+        ]);
+
+        $connection = $this->exactConnection([
+            'metadata' => ['exact_webhooks' => ['Documents' => 'sub-B']],
+        ]);
+
+        $result = $this->app->make(ExactWebhookSubscriptionManager::class)->apply($connection, []);
+
+        $this->assertSame(['Documents'], $result['removed']);
+        $connection->refresh();
+        $this->assertArrayNotHasKey('exact_webhooks', $connection->metadata ?? []);
+    }
+
+    public function test_plan_reports_what_register_would_create(): void
+    {
+        MockClient::global([
+            ListWebhookSubscriptions::class => MockResponse::make(['d' => ['results' => [
+                ['Topic' => 'FinancialTransactions', 'ID' => 'sub-A'],
+            ]]], 200),
+        ]);
+
+        $plan = $this->app->make(ExactWebhookSubscriptionManager::class)->plan($this->exactConnection());
+
+        $this->assertSame(self::TOPICS, $plan['configured']);
+        $this->assertSame(['FinancialTransactions' => 'sub-A'], $plan['remote']);
+        $this->assertSame(['Documents'], $plan['missing']);
+        $this->assertSame('https://hub.test/webhooks/exact', $plan['callback_url']);
+
+        MockClient::global()->assertSentCount(1);
+        MockClient::global()->assertNotSent(CreateWebhookSubscription::class);
+    }
+
+    public function test_plan_flags_remote_subscriptions_the_hub_does_not_configure(): void
+    {
+        MockClient::global([
+            ListWebhookSubscriptions::class => MockResponse::make(['d' => ['results' => [
+                ['Topic' => 'FinancialTransactions', 'ID' => 'sub-A'],
+                ['Topic' => 'Documents', 'ID' => 'sub-B'],
+                ['Topic' => 'StockPositions', 'ID' => 'sub-legacy'],
+            ]]], 200),
+        ]);
+
+        $plan = $this->app->make(ExactWebhookSubscriptionManager::class)->plan($this->exactConnection());
+
+        $this->assertSame([], $plan['missing']);
+        $this->assertSame(['StockPositions' => 'sub-legacy'], $plan['orphans']);
+    }
+
+    public function test_plan_flags_stored_ids_that_no_longer_exist_remotely(): void
+    {
+        MockClient::global([
+            ListWebhookSubscriptions::class => MockResponse::make(['d' => ['results' => [
+                ['Topic' => 'FinancialTransactions', 'ID' => 'sub-A'],
+            ]]], 200),
+        ]);
+
+        $connection = $this->exactConnection([
+            'metadata' => ['exact_webhooks' => ['FinancialTransactions' => 'sub-A', 'Documents' => 'sub-gone']],
+        ]);
+
+        $plan = $this->app->make(ExactWebhookSubscriptionManager::class)->plan($connection);
+
+        $this->assertSame(
+            ['FinancialTransactions' => 'sub-A', 'Documents' => 'sub-gone'],
+            $plan['stored'],
+        );
+        $this->assertSame(['Documents'], $plan['stale']);
+    }
+
+    public function test_register_reuses_a_supplied_plan_without_listing_again(): void
+    {
+        MockClient::global([
+            ListWebhookSubscriptions::class => MockResponse::make(['d' => ['results' => []]], 200),
+            CreateWebhookSubscription::class => MockResponse::make(['d' => ['ID' => 'sub-new']], 201),
+        ]);
+
+        $manager = $this->app->make(ExactWebhookSubscriptionManager::class);
+        $connection = $this->exactConnection();
+
+        $manager->register($connection, $manager->plan($connection));
+
+        MockClient::global()->assertSentCount(3);
+
+        $connection->refresh();
+        $this->assertSame(self::TOPICS, array_keys($connection->metadata['exact_webhooks']));
     }
 
     /**

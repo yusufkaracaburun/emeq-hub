@@ -30,30 +30,59 @@ final class ExactWebhookSubscriptionManager
     public function __construct(private readonly ConfigRepository $config) {}
 
     /**
-     * Idempotent: leest bestaande subscriptions, maakt alleen ontbrekende topics aan.
+     * @return array{callback_url: string, configured: list<string>, remote: array<string, string>, stored: array<string, string>, missing: list<string>, orphans: array<string, string>, stale: list<string>}
      */
-    public function register(Connection $connection): void
+    public function plan(Connection $connection): array
     {
         $division = (string) $connection->administratie_id;
         $topics = $this->topics();
+        $stored = $this->storedSubscriptions($connection);
 
-        if ($division === '' || $topics === []) {
+        $remote = ($division === '')
+            ? []
+            : $this->existingSubscriptions($this->connector($connection, $division));
+
+        return [
+            'callback_url' => $this->callbackUrl(),
+            'configured' => $topics,
+            'remote' => $remote,
+            'stored' => $stored,
+            'missing' => array_values(array_filter(
+                $topics,
+                static fn (string $topic): bool => ! isset($remote[$topic]),
+            )),
+            'orphans' => array_diff_key($remote, array_flip($topics)),
+            'stale' => array_values(array_filter(
+                array_keys($stored),
+                static fn (string $topic): bool => ! isset($remote[$topic]),
+            )),
+        ];
+    }
+
+    /**
+     * @param  array{callback_url: string, configured: list<string>, remote: array<string, string>, stored: array<string, string>, missing: list<string>, orphans: array<string, string>, stale: list<string>}|null  $plan
+     */
+    public function register(Connection $connection, ?array $plan = null): void
+    {
+        $division = (string) $connection->administratie_id;
+
+        if ($division === '' || $this->topics() === []) {
             return;
         }
 
-        $connector = $this->connector($connection, $division);
-        $callbackUrl = $this->callbackUrl();
-        $stored = $this->storedSubscriptions($connection);
-        $existing = $this->existingSubscriptions($connector);
+        $plan ??= $this->plan($connection);
 
-        foreach ($topics as $topic) {
-            if (isset($existing[$topic])) {
-                $stored[$topic] = $existing[$topic];
+        $connector = $this->connector($connection, $division);
+        $stored = $plan['stored'];
+
+        foreach ($plan['configured'] as $topic) {
+            if (isset($plan['remote'][$topic])) {
+                $stored[$topic] = $plan['remote'][$topic];
 
                 continue;
             }
 
-            $id = $this->createSubscription($connector, $topic, $callbackUrl);
+            $id = $this->createSubscription($connector, $topic, $plan['callback_url']);
 
             if ($id !== null) {
                 $stored[$topic] = $id;
@@ -61,6 +90,62 @@ final class ExactWebhookSubscriptionManager
         }
 
         $this->persist($connection, $stored);
+    }
+
+    /**
+     * @param  list<string>  $topics
+     * @return array{added: list<string>, removed: list<string>}
+     */
+    public function apply(Connection $connection, array $topics, ?array $plan = null): array
+    {
+        $division = (string) $connection->administratie_id;
+
+        if ($division === '') {
+            return ['added' => [], 'removed' => []];
+        }
+
+        $plan ??= $this->plan($connection);
+
+        $connector = $this->connector($connection, $division);
+        $stored = $plan['stored'];
+        $added = [];
+        $removed = [];
+
+        foreach ($topics as $topic) {
+            if (isset($plan['remote'][$topic])) {
+                $stored[$topic] = $plan['remote'][$topic];
+
+                continue;
+            }
+
+            $id = $this->createSubscription($connector, $topic, $plan['callback_url']);
+
+            if ($id !== null) {
+                $stored[$topic] = $id;
+                $added[] = $topic;
+            }
+        }
+
+        foreach ($plan['remote'] as $topic => $id) {
+            if (in_array($topic, $topics, true)) {
+                continue;
+            }
+
+            try {
+                $connector->send(new DeleteWebhookSubscription((string) $id));
+                $removed[] = $topic;
+            } catch (Throwable $e) {
+                report($e);
+
+                continue;
+            }
+
+            unset($stored[$topic]);
+        }
+
+        $this->persist($connection, array_intersect_key($stored, array_flip($topics)));
+
+        return ['added' => $added, 'removed' => $removed];
     }
 
     /**
@@ -207,7 +292,7 @@ final class ExactWebhookSubscriptionManager
      * (niet-publieke, http) host is. Zo kan de CallbackURL nooit van de
      * Exact-constraint afdrijven. Geen redirect_uri (standalone/tests) → route().
      */
-    private function callbackUrl(): string
+    public function callbackUrl(): string
     {
         $redirectUri = (string) $this->config->get('services.exact.redirect_uri');
         $parts = $redirectUri !== '' ? parse_url($redirectUri) : false;
