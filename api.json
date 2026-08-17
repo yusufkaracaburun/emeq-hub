@@ -5664,6 +5664,13 @@
                             "snelstart"
                         ]
                     },
+                    "administratie_id": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "maxLength": 255
+                    },
                     "credentials": {
                         "type": "object",
                         "properties": {
