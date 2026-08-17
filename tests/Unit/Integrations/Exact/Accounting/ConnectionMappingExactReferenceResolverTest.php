@@ -2,6 +2,7 @@
 
 namespace Tests\Unit\Integrations\Exact\Accounting;
 
+use App\Accounting\BookingWarnings;
 use App\Accounting\Enums\DocumentType;
 use App\Accounting\Enums\TaxTreatment;
 use App\Accounting\Exceptions\AccountingMappingException;
@@ -21,7 +22,7 @@ class ConnectionMappingExactReferenceResolverTest extends TestCase
 
     private function resolver(): ConnectionMappingExactReferenceResolver
     {
-        return new ConnectionMappingExactReferenceResolver(new ExactRelationResolver);
+        return new ConnectionMappingExactReferenceResolver(new ExactRelationResolver(new BookingWarnings));
     }
 
     /**

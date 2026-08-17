@@ -91,6 +91,9 @@ class ExactReferenceDataTest extends TestCase
         $connection = $this->exactConnection(['administratie_id' => null]);
 
         $this->assertSame([], (new ExactReferenceData($connection))->journals());
+        $this->assertSame([], (new ExactReferenceData($connection))->relationsByChamberOfCommerce('12345678'));
+        $this->assertSame([], (new ExactReferenceData($connection))->relationsByVatNumber('NL803725802B01'));
+        $this->assertSame([], (new ExactReferenceData($connection))->relationsByName('Klant BV'));
     }
 
     public function test_fails_soft_to_empty_on_upstream_error(): void
@@ -102,7 +105,66 @@ class ExactReferenceDataTest extends TestCase
         $this->assertSame([], (new ExactReferenceData($this->exactConnection()))->glAccounts());
     }
 
-    public function test_find_relation_matches_exact_vat_number_without_punctuation_differences(): void
+    public function test_chamber_of_commerce_matches_the_raw_value(): void
+    {
+        MockClient::global([
+            GetRelations::class => $this->fakeRelationsBackend([
+                ['ID' => 'guid-1', 'Code' => '1', 'Name' => 'Klant BV', 'ChamberOfCommerce' => '12345678', 'IsSales' => true, 'IsSupplier' => false, 'Status' => 'C'],
+            ]),
+        ]);
+
+        $matches = (new ExactReferenceData($this->exactConnection()))->relationsByChamberOfCommerce('12345678');
+
+        $this->assertCount(1, $matches);
+        $this->assertSame('guid-1', $matches[0]['id']);
+    }
+
+    public function test_chamber_of_commerce_matches_the_digits_only_variant(): void
+    {
+        // Exact draagt de KvK soms met spaties — de tweede probe strip alles behalve cijfers.
+        MockClient::global([
+            GetRelations::class => $this->fakeRelationsBackend([
+                ['ID' => 'guid-1', 'Code' => '1', 'Name' => 'Klant BV', 'ChamberOfCommerce' => '12345678', 'IsSales' => true, 'IsSupplier' => false, 'Status' => 'C'],
+            ]),
+        ]);
+
+        $matches = (new ExactReferenceData($this->exactConnection()))->relationsByChamberOfCommerce('1234 5678');
+
+        $this->assertCount(1, $matches);
+        $this->assertSame('guid-1', $matches[0]['id']);
+    }
+
+    public function test_chamber_of_commerce_never_falls_back_to_a_full_scan(): void
+    {
+        // Twee kandidaten die alléén op naam zouden matchen — de KvK-stap mag ze niet
+        // vinden zonder een server-side treffer op ChamberOfCommerce.
+        MockClient::global([
+            GetRelations::class => $this->fakeRelationsBackend([
+                ['ID' => 'guid-1', 'Code' => '1', 'Name' => 'Andere Klant BV', 'ChamberOfCommerce' => '', 'IsSales' => true, 'IsSupplier' => false, 'Status' => 'C'],
+            ]),
+        ]);
+
+        $matches = (new ExactReferenceData($this->exactConnection()))->relationsByChamberOfCommerce('99999999');
+
+        $this->assertSame([], $matches);
+    }
+
+    public function test_chamber_of_commerce_returns_every_candidate_when_ambiguous(): void
+    {
+        MockClient::global([
+            GetRelations::class => $this->fakeRelationsBackend([
+                ['ID' => 'guid-1', 'Code' => '1', 'Name' => 'Klant BV', 'ChamberOfCommerce' => '12345678', 'IsSales' => true, 'IsSupplier' => false, 'Status' => 'C'],
+                ['ID' => 'guid-2', 'Code' => '2', 'Name' => 'Klant BV Filiaal', 'ChamberOfCommerce' => '12345678', 'IsSales' => true, 'IsSupplier' => false, 'Status' => 'C'],
+            ]),
+        ]);
+
+        $matches = (new ExactReferenceData($this->exactConnection()))->relationsByChamberOfCommerce('12345678');
+
+        $this->assertCount(2, $matches);
+        $this->assertEqualsCanonicalizing(['guid-1', 'guid-2'], array_column($matches, 'id'));
+    }
+
+    public function test_vat_number_matches_exact_without_punctuation_differences(): void
     {
         MockClient::global([
             GetRelations::class => $this->fakeRelationsBackend([
@@ -110,85 +172,83 @@ class ExactReferenceDataTest extends TestCase
             ]),
         ]);
 
-        $match = (new ExactReferenceData($this->exactConnection()))->findRelation('NL803725802B01', 'Klant BV');
+        $matches = (new ExactReferenceData($this->exactConnection()))->relationsByVatNumber('NL803725802B01');
 
-        $this->assertNotNull($match);
-        $this->assertSame('guid-1', $match['id']);
+        $this->assertCount(1, $matches);
+        $this->assertSame('guid-1', $matches[0]['id']);
     }
 
-    public function test_find_relation_matches_dotted_input_against_normalized_stored_vat_number(): void
+    public function test_vat_number_matches_dotted_input_via_the_normalized_probe(): void
     {
+        // De normalized-probe-variant (input zonder punten) matcht de rauwe waarde
+        // rechtstreeks — geen vangnet-scan nodig.
         MockClient::global([
             GetRelations::class => $this->fakeRelationsBackend([
                 ['ID' => 'guid-1', 'Code' => '1', 'Name' => 'Klant BV', 'VATNumber' => 'NL803725802B01', 'IsSales' => true, 'IsSupplier' => false, 'Status' => 'C'],
             ]),
         ]);
 
-        $match = (new ExactReferenceData($this->exactConnection()))->findRelation('NL8037.25.802.B01', 'Klant BV');
+        $matches = (new ExactReferenceData($this->exactConnection()))->relationsByVatNumber('NL8037.25.802.B01');
 
-        $this->assertNotNull($match);
-        $this->assertSame('guid-1', $match['id']);
+        $this->assertCount(1, $matches);
+        $this->assertSame('guid-1', $matches[0]['id']);
     }
 
-    public function test_find_relation_matches_normalized_input_against_dotted_stored_vat_number(): void
+    public function test_vat_number_matches_normalized_input_against_dotted_stored_value_via_the_fallback_scan(): void
     {
+        // Hier missen beide server-side probes (rauw én genormaliseerd input, geen van
+        // beide is de gestippelde opgeslagen waarde): pas het vangnet — volledige scan
+        // + lokale normalisatie aan beide kanten — vindt de treffer.
         MockClient::global([
             GetRelations::class => $this->fakeRelationsBackend([
                 ['ID' => 'guid-1', 'Code' => '1', 'Name' => 'Klant BV', 'VATNumber' => 'NL8037.25.802.B01', 'IsSales' => true, 'IsSupplier' => false, 'Status' => 'C'],
             ]),
         ]);
 
-        $match = (new ExactReferenceData($this->exactConnection()))->findRelation('NL803725802B01', 'Klant BV');
+        $matches = (new ExactReferenceData($this->exactConnection()))->relationsByVatNumber('NL803725802B01');
 
-        $this->assertNotNull($match);
-        $this->assertSame('guid-1', $match['id']);
+        $this->assertCount(1, $matches);
+        $this->assertSame('guid-1', $matches[0]['id']);
     }
 
-    public function test_find_relation_falls_back_to_name_when_no_relation_has_the_vat_number(): void
+    public function test_vat_number_returns_every_candidate_when_ambiguous(): void
     {
-        MockClient::global([
-            GetRelations::class => $this->fakeRelationsBackend([
-                ['ID' => 'guid-2', 'Code' => '2', 'Name' => 'Klant Zonder Btw BV', 'VATNumber' => '', 'IsSales' => true, 'IsSupplier' => false, 'Status' => 'C'],
-            ]),
-        ]);
-
-        $match = (new ExactReferenceData($this->exactConnection()))->findRelation('NL803725802B01', 'Klant Zonder Btw BV');
-
-        $this->assertNotNull($match);
-        $this->assertSame('guid-2', $match['id']);
-    }
-
-    public function test_find_relation_returns_null_when_two_relations_share_the_same_name(): void
-    {
-        MockClient::global([
-            GetRelations::class => $this->fakeRelationsBackend([
-                ['ID' => 'guid-1', 'Code' => '1', 'Name' => 'Dubbel BV', 'VATNumber' => '', 'IsSales' => true, 'IsSupplier' => false, 'Status' => 'C'],
-                ['ID' => 'guid-2', 'Code' => '2', 'Name' => 'Dubbel BV', 'VATNumber' => '', 'IsSales' => true, 'IsSupplier' => false, 'Status' => 'C'],
-            ]),
-        ]);
-
-        $match = (new ExactReferenceData($this->exactConnection()))->findRelation(null, 'Dubbel BV');
-
-        $this->assertNull($match);
-    }
-
-    public function test_find_relation_returns_null_on_ambiguous_vat_number_without_falling_back_to_name(): void
-    {
+        // Twee relaties dragen letterlijk hetzelfde btw-nummer — de server-side probe
+        // vindt ze allebei, dus dit hoeft het vangnet niet in.
         MockClient::global([
             GetRelations::class => $this->fakeRelationsBackend([
                 ['ID' => 'guid-1', 'Code' => '1', 'Name' => 'Klant BV', 'VATNumber' => 'NL803725802B01', 'IsSales' => true, 'IsSupplier' => false, 'Status' => 'C'],
-                ['ID' => 'guid-2', 'Code' => '2', 'Name' => 'Klant BV Filiaal', 'VATNumber' => 'NL8037.25.802.B01', 'IsSales' => true, 'IsSupplier' => false, 'Status' => 'C'],
-                // Zou op naam wél uniek matchen — mag niet gebruikt worden ná een ambigu btw-nummer.
-                ['ID' => 'guid-3', 'Code' => '3', 'Name' => 'Klant BV', 'VATNumber' => '', 'IsSales' => true, 'IsSupplier' => false, 'Status' => 'C'],
+                ['ID' => 'guid-2', 'Code' => '2', 'Name' => 'Klant BV Filiaal', 'VATNumber' => 'NL803725802B01', 'IsSales' => true, 'IsSupplier' => false, 'Status' => 'C'],
             ]),
         ]);
 
-        $match = (new ExactReferenceData($this->exactConnection()))->findRelation('NL803725802B01', 'Klant BV');
+        $matches = (new ExactReferenceData($this->exactConnection()))->relationsByVatNumber('NL803725802B01');
 
-        $this->assertNull($match);
+        $this->assertCount(2, $matches);
+        $this->assertEqualsCanonicalizing(['guid-1', 'guid-2'], array_column($matches, 'id'));
     }
 
-    public function test_find_relation_matches_vat_number_found_on_second_page(): void
+    /**
+     * De vangnet-scan (getriggerd omdat de probes op de rauwe/genormaliseerde input
+     * niets vinden) hertoetst wél lokaal genormaliseerd, en kan zo tóch twee
+     * verschillend gestileerde opslagvormen van hetzelfde nummer allebei terugvinden.
+     */
+    public function test_vat_number_fallback_scan_also_returns_every_candidate_when_ambiguous(): void
+    {
+        MockClient::global([
+            GetRelations::class => $this->fakeRelationsBackend([
+                ['ID' => 'guid-1', 'Code' => '1', 'Name' => 'Klant BV', 'VATNumber' => 'NL80.37.25.802.B01', 'IsSales' => true, 'IsSupplier' => false, 'Status' => 'C'],
+                ['ID' => 'guid-2', 'Code' => '2', 'Name' => 'Klant BV Filiaal', 'VATNumber' => 'NL8037.25.802.B01', 'IsSales' => true, 'IsSupplier' => false, 'Status' => 'C'],
+            ]),
+        ]);
+
+        $matches = (new ExactReferenceData($this->exactConnection()))->relationsByVatNumber('NL803725802B01');
+
+        $this->assertCount(2, $matches);
+        $this->assertEqualsCanonicalizing(['guid-1', 'guid-2'], array_column($matches, 'id'));
+    }
+
+    public function test_vat_number_matches_found_on_second_page(): void
     {
         MockClient::global([
             GetRelations::class => $this->fakeRelationsBackend([
@@ -197,102 +257,101 @@ class ExactReferenceDataTest extends TestCase
             ], pageSize: 1),
         ]);
 
-        $match = (new ExactReferenceData($this->exactConnection()))->findRelation('NL803725802B01', 'Klant BV');
+        $matches = (new ExactReferenceData($this->exactConnection()))->relationsByVatNumber('NL803725802B01');
 
-        $this->assertNotNull($match);
-        $this->assertSame('guid-2', $match['id']);
+        $this->assertCount(1, $matches);
+        $this->assertSame('guid-2', $matches[0]['id']);
     }
 
-    public function test_find_relation_returns_null_when_two_relations_share_the_same_vat_number_split_across_pages(): void
+    public function test_vat_number_fallback_returns_no_candidates_when_the_skiptoken_repeats(): void
     {
-        MockClient::global([
-            GetRelations::class => $this->fakeRelationsBackend([
-                ['ID' => 'guid-1', 'Code' => '1', 'Name' => 'Klant BV', 'VATNumber' => 'NL803725802B01', 'IsSales' => true, 'IsSupplier' => false, 'Status' => 'C'],
-                ['ID' => 'guid-2', 'Code' => '2', 'Name' => 'Klant BV Filiaal', 'VATNumber' => 'NL8037.25.802.B01', 'IsSales' => true, 'IsSupplier' => false, 'Status' => 'C'],
-            ], pageSize: 1),
-        ]);
-
-        $match = (new ExactReferenceData($this->exactConnection()))->findRelation('NL803725802B01', 'Klant BV');
-
-        $this->assertNull($match);
-    }
-
-    public function test_find_relation_falls_back_to_name_match_found_on_second_page(): void
-    {
-        MockClient::global([
-            GetRelations::class => $this->fakeRelationsBackend([
-                ['ID' => 'guid-1', 'Code' => '1', 'Name' => 'Andere Klant BV', 'VATNumber' => '', 'IsSales' => true, 'IsSupplier' => false, 'Status' => 'C'],
-                ['ID' => 'guid-2', 'Code' => '2', 'Name' => 'Klant Zonder Btw BV', 'VATNumber' => '', 'IsSales' => true, 'IsSupplier' => false, 'Status' => 'C'],
-            ], pageSize: 1),
-        ]);
-
-        $match = (new ExactReferenceData($this->exactConnection()))->findRelation(null, 'Klant Zonder Btw BV');
-
-        $this->assertNotNull($match);
-        $this->assertSame('guid-2', $match['id']);
-    }
-
-    public function test_find_relation_returns_null_when_two_relations_share_the_same_name_split_across_pages(): void
-    {
-        MockClient::global([
-            GetRelations::class => $this->fakeRelationsBackend([
-                ['ID' => 'guid-1', 'Code' => '1', 'Name' => 'Dubbel BV', 'VATNumber' => '', 'IsSales' => true, 'IsSupplier' => false, 'Status' => 'C'],
-                ['ID' => 'guid-2', 'Code' => '2', 'Name' => 'Dubbel BV', 'VATNumber' => '', 'IsSales' => true, 'IsSupplier' => false, 'Status' => 'C'],
-            ], pageSize: 1),
-        ]);
-
-        $match = (new ExactReferenceData($this->exactConnection()))->findRelation(null, 'Dubbel BV');
-
-        $this->assertNull($match);
-    }
-
-    public function test_find_relation_returns_null_when_the_next_page_stream_never_converges(): void
-    {
-        // Zonder de MAX_PAGES-grens zou dit request voor eeuwig `__next` blijven volgen —
-        // ook al staat de treffer al op pagina 1.
-        MockClient::global([
-            GetRelations::class => $this->fakeRelationsBackend([
-                ['ID' => 'guid-1', 'Code' => '1', 'Name' => 'Klant BV', 'VATNumber' => 'NL803725802B01', 'IsSales' => true, 'IsSupplier' => false, 'Status' => 'C'],
-            ], pageSize: 1, neverConverges: true),
-        ]);
-
-        $match = (new ExactReferenceData($this->exactConnection()))->findRelation('NL803725802B01', 'Klant BV');
-
-        $this->assertNull($match);
-    }
-
-    public function test_find_relation_returns_null_when_the_skiptoken_repeats(): void
-    {
+        // Zonder een geldige server-side treffer valt de VAT-stap terug op de volledige
+        // scan (fetchAllPages) — die moet zich ook aan de skiptoken/MAX_PAGES-grenzen houden.
         $mockClient = MockClient::global([
             GetRelations::class => $this->fakeRelationsBackend([
                 ['ID' => 'guid-1', 'Code' => '1', 'Name' => 'Klant BV', 'VATNumber' => 'NL803725802B01', 'IsSales' => true, 'IsSupplier' => false, 'Status' => 'C'],
             ], pageSize: 1, repeatsSkipToken: true),
         ]);
 
-        $match = (new ExactReferenceData($this->exactConnection()))->findRelation('NL803725802B01', 'Klant BV');
+        $matches = (new ExactReferenceData($this->exactConnection()))->relationsByVatNumber('NL999999999B99');
 
-        $this->assertNull($match);
-        // Herhaling wordt meteen herkend — geen 500 requests nodig om de grens te raken.
+        $this->assertSame([], $matches);
         $this->assertLessThan(10, count($mockClient->getRecordedResponses()));
+    }
+
+    public function test_name_matches_after_normalizing_legal_form_and_punctuation(): void
+    {
+        MockClient::global([
+            GetRelations::class => $this->fakeRelationsBackend([
+                ['ID' => 'guid-1', 'Code' => '1', 'Name' => 'Acme B.V.', 'IsSales' => true, 'IsSupplier' => false, 'Status' => 'C'],
+            ]),
+        ]);
+
+        $matches = (new ExactReferenceData($this->exactConnection()))->relationsByName('Acme BV');
+
+        $this->assertCount(1, $matches);
+        $this->assertSame('guid-1', $matches[0]['id']);
+    }
+
+    public function test_name_returns_every_candidate_when_two_relations_share_the_normalized_name(): void
+    {
+        MockClient::global([
+            GetRelations::class => $this->fakeRelationsBackend([
+                ['ID' => 'guid-1', 'Code' => '1', 'Name' => 'Dubbel BV', 'IsSales' => true, 'IsSupplier' => false, 'Status' => 'C'],
+                ['ID' => 'guid-2', 'Code' => '2', 'Name' => 'Dubbel B.V.', 'IsSales' => true, 'IsSupplier' => false, 'Status' => 'C'],
+            ]),
+        ]);
+
+        $matches = (new ExactReferenceData($this->exactConnection()))->relationsByName('Dubbel BV');
+
+        $this->assertCount(2, $matches);
+        $this->assertEqualsCanonicalizing(['guid-1', 'guid-2'], array_column($matches, 'id'));
+    }
+
+    public function test_name_finds_a_match_split_across_pages(): void
+    {
+        MockClient::global([
+            GetRelations::class => $this->fakeRelationsBackend([
+                ['ID' => 'guid-1', 'Code' => '1', 'Name' => 'Andere Klant BV', 'IsSales' => true, 'IsSupplier' => false, 'Status' => 'C'],
+                ['ID' => 'guid-2', 'Code' => '2', 'Name' => 'Klant Zonder Btw BV', 'IsSales' => true, 'IsSupplier' => false, 'Status' => 'C'],
+            ], pageSize: 1),
+        ]);
+
+        $matches = (new ExactReferenceData($this->exactConnection()))->relationsByName('Klant Zonder Btw BV');
+
+        $this->assertCount(1, $matches);
+        $this->assertSame('guid-2', $matches[0]['id']);
+    }
+
+    public function test_name_returns_no_candidates_when_the_next_page_stream_never_converges(): void
+    {
+        // Zonder de MAX_PAGES-grens zou dit request voor eeuwig `__next` blijven volgen —
+        // ook al staat de treffer al op pagina 1.
+        MockClient::global([
+            GetRelations::class => $this->fakeRelationsBackend([
+                ['ID' => 'guid-1', 'Code' => '1', 'Name' => 'Klant BV', 'IsSales' => true, 'IsSupplier' => false, 'Status' => 'C'],
+            ], pageSize: 1, neverConverges: true),
+        ]);
+
+        $matches = (new ExactReferenceData($this->exactConnection()))->relationsByName('Klant BV');
+
+        $this->assertSame([], $matches);
     }
 
     /**
      * Simuleert Exact's OData `$filter`-gedrag (letterlijke, hoofdlettergevoelige
-     * string-equality — géén normalisatie) tegen een vaste set relaties, zodat de
-     * mock hetzelfde onderscheid maakt als de echte API tussen een `eq`-filter op
-     * de rauwe input en een brede `ne ''`-candidate-fetch.
+     * string-equality — géén normalisatie) tegen een vaste set relaties, zodat de mock
+     * hetzelfde onderscheid maakt als de echte API tussen een `eq`-filter op de rauwe
+     * input en een filterloze `relationsByName`-full-scan.
      *
-     * Met `$pageSize` simuleert de mock ook paginatie: de rauwe lijst wordt in
-     * vensters van `$pageSize` opgeknipt en pas per venster gefilterd, met een
-     * `d.__next`-envelope zolang er nog rauwe rijen resten. Zo kan een venster nul
-     * treffers opleveren terwijl er verderop nog wél een match ligt — precies het
-     * geval waarin doorpagineren het verschil maakt tussen een gemiste of een
-     * stilletjes verkeerd gekozen relatie.
+     * Met `$pageSize` simuleert de mock ook paginatie: de rauwe lijst wordt in vensters
+     * van `$pageSize` opgeknipt en pas per venster gefilterd, met een `d.__next`-envelope
+     * zolang er nog rauwe rijen resten. Zo kan een venster nul treffers opleveren terwijl
+     * er verderop nog wél een match ligt.
      *
      * `$neverConverges` blijft `__next` sturen voorbij het einde van `$relations` (een
-     * server die nooit "klaar" meldt); `$repeatsSkipToken` stuurt telkens hetzelfde
-     * token terug (een vastgelopen continuation). Beide simuleren een andere
-     * paginatie-storing dan de gewone `$pageSize`-vensters hierboven.
+     * server die nooit "klaar" meldt); `$repeatsSkipToken` stuurt telkens hetzelfde token
+     * terug (een vastgelopen continuation).
      *
      * @param  list<array<string, mixed>>  $relations
      */
@@ -310,21 +369,23 @@ class ExactReferenceDataTest extends TestCase
                 ? array_slice($relations, $offset)
                 : array_slice($relations, $offset, $pageSize);
 
-            $results = array_values(array_filter($window, function (array $relation) use ($filter) {
-                if ($filter === "VATNumber ne ''") {
-                    return (string) ($relation['VATNumber'] ?? '') !== '';
-                }
+            $results = $filter === ''
+                ? $window
+                : array_values(array_filter($window, function (array $relation) use ($filter) {
+                    if ($filter === "VATNumber ne ''") {
+                        return (string) ($relation['VATNumber'] ?? '') !== '';
+                    }
 
-                if (preg_match("/^VATNumber eq '(.*)'\$/", $filter, $matches) === 1) {
-                    return (string) ($relation['VATNumber'] ?? '') === str_replace("''", "'", $matches[1]);
-                }
+                    if (preg_match("/^VATNumber eq '(.*)'\$/", $filter, $matches) === 1) {
+                        return (string) ($relation['VATNumber'] ?? '') === str_replace("''", "'", $matches[1]);
+                    }
 
-                if (preg_match("/^Name eq '(.*)'\$/", $filter, $matches) === 1) {
-                    return (string) ($relation['Name'] ?? '') === str_replace("''", "'", $matches[1]);
-                }
+                    if (preg_match("/^ChamberOfCommerce eq '(.*)'\$/", $filter, $matches) === 1) {
+                        return (string) ($relation['ChamberOfCommerce'] ?? '') === str_replace("''", "'", $matches[1]);
+                    }
 
-                return false;
-            }));
+                    return false;
+                }));
 
             $envelope = ['results' => $results];
             $nextOffset = $offset + ($pageSize ?? 0);

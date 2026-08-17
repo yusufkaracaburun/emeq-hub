@@ -76,7 +76,7 @@ class ErrorEnvelopeTest extends TestCase
                 'type' => 'sales_invoice',
                 'external_id' => 'INV-1',
                 'issue_date' => '2026-06-16',
-                'party' => ['role' => 'debtor', 'name' => 'Acme BV'],
+                'party' => ['role' => 'debtor', 'name' => 'Acme BV', 'kind' => 'company', 'external_id' => 'acme-1', 'vat_number' => 'NL000099998B57'],
                 'lines' => [['description' => 'A', 'amount' => 1, 'tax_rate' => 0]],
             ])
             ->assertStatus(403)
@@ -121,7 +121,7 @@ class ErrorEnvelopeTest extends TestCase
                 'type' => 'sales_invoice',
                 'external_id' => 'INV-MAP',
                 'issue_date' => '2026-06-16',
-                'party' => ['role' => 'debtor', 'name' => 'Acme BV'],
+                'party' => ['role' => 'debtor', 'name' => 'Acme BV', 'kind' => 'company', 'external_id' => 'acme-1', 'vat_number' => 'NL000099998B57'],
                 'lines' => [['description' => 'A', 'amount' => 1, 'tax_rate' => 0]],
             ])
             ->assertStatus(422)
@@ -201,7 +201,7 @@ class ErrorEnvelopeTest extends TestCase
                 'type' => 'sales_invoice',
                 'external_id' => 'INV-SECRET',
                 'issue_date' => '2026-06-16',
-                'party' => ['role' => 'debtor', 'name' => 'Acme BV'],
+                'party' => ['role' => 'debtor', 'name' => 'Acme BV', 'kind' => 'company', 'external_id' => 'acme-1', 'vat_number' => 'NL000099998B57'],
                 'lines' => [['description' => 'A', 'amount' => 1, 'tax_rate' => 0]],
             ]);
 

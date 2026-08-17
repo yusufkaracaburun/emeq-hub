@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Accounting\AccountingTargetRegistry;
+use App\Accounting\BookingWarnings;
 use App\Accounting\Contracts\ReferenceResolver;
 use App\Enums\Provider;
 use App\Integrations\Errors\UpstreamErrorMapperRegistry;
@@ -46,6 +47,7 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->scoped(MollieConnectionContext::class);
+        $this->app->scoped(BookingWarnings::class);
 
         $this->app->singleton(OAuthFlowRegistry::class, function (Application $app): OAuthFlowRegistry {
             $registry = new OAuthFlowRegistry($app);

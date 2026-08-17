@@ -48,12 +48,7 @@ final class ConnectionMappingExactReferenceResolver implements ReferenceResolver
 
     public function relationRef(Party $party, Connection $connection): string
     {
-        return $this->relations->resolve($party, $connection)
-            ?? throw new AccountingMappingException(
-                "Relatie '{$party->name}' bestaat niet in de administratie en is niet te matchen op external_id, ".
-                "btw-nummer of naam. Zet party.create_if_missing op true om 'm te laten aanmaken, of voeg 'm zelf ".
-                'toe in de administratie.'
-            );
+        return $this->relations->resolve($party, $connection);
     }
 
     public function vatCode(float $taxRate, TaxTreatment $treatment, Connection $connection): string

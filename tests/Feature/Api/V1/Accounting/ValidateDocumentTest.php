@@ -133,7 +133,7 @@ class ValidateDocumentTest extends TestCase
                 'type' => 'purchase_invoice',
                 'external_id' => 'invoice-1',
                 'issue_date' => '2026-08-13',
-                'party' => ['role' => 'creditor', 'name' => 'NL Leverancier BV'],
+                'party' => ['role' => 'creditor', 'name' => 'NL Leverancier BV', 'kind' => 'person', 'external_id' => 'nl-lev-1'],
                 'lines' => [['description' => 'Dienst', 'amount' => 100, 'tax_rate' => 21]],
             ]);
 
@@ -226,11 +226,10 @@ class ValidateDocumentTest extends TestCase
             ->assertJsonFragment(['code' => 'exact.vat_code.unmapped', 'severity' => 'warning', 'blocking' => true]);
     }
 
-    public function test_new_supplier_when_no_exact_match(): void
+    public function test_new_supplier_is_reported_as_info_since_the_hub_creates_it(): void
     {
-        // Geen party.create_if_missing → dezelfde uitkomst als de boeking (422): warning.
-        // `valid` blijft true (geen error), dus `blocking` is het enige veld dat een
-        // consumer die op severity/valid filtert nog voor de 422 waarschuwt.
+        // De ladder maakt de relatie zelf aan wanneer niets matcht — geen 422 meer op
+        // "onbekende relatie", dus de dry-run meldt dat als Info, niet blocking.
         [$consumer] = $this->consumerWithExactConnection();
         $token = $consumer->createToken('t', [TokenAbilities::EXACT_READ])->plainTextToken;
         $this->mockRelations([]); // geen treffer
@@ -244,26 +243,6 @@ class ValidateDocumentTest extends TestCase
             ])
             ->assertStatus(200)
             ->assertJsonPath('valid', true)
-            ->assertJsonPath('summary.blocking', 1)
-            ->assertJsonFragment(['code' => 'exact.relation.new', 'severity' => 'warning', 'blocking' => true]);
-    }
-
-    public function test_new_supplier_is_info_when_create_if_missing_requested(): void
-    {
-        // Spiegelt het schrijfpad: create_if_missing aan → de boeking maakt de relatie zelf
-        // aan, dus de dry-run mag dit niet als een weigering melden.
-        [$consumer] = $this->consumerWithExactConnection();
-        $token = $consumer->createToken('t', [TokenAbilities::EXACT_READ])->plainTextToken;
-        $this->mockRelations([]); // geen treffer
-
-        $this->withHeader('Authorization', "Bearer {$token}")
-            ->withHeader('X-Account-Id', 'school1')
-            ->postJson('/v1/accounting/documents/validate', [
-                'type' => 'purchase_invoice',
-                'party' => ['role' => 'creditor', 'name' => 'Onbekende BV', 'vat_number' => 'NL000099998B57', 'create_if_missing' => true],
-                'lines' => [['description' => 'Dienst', 'amount' => 100, 'tax_rate' => 21]],
-            ])
-            ->assertStatus(200)
             ->assertJsonPath('summary.blocking', 0)
             ->assertJsonFragment(['code' => 'exact.relation.new', 'severity' => 'info', 'blocking' => false]);
     }

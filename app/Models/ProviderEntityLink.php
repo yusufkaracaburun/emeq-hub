@@ -47,6 +47,9 @@ class ProviderEntityLink extends Model
 
     public const ENTITY_FINANCIAL_DOCUMENT = 'financial_document';
 
+    /** Een relatie (debiteur/crediteur) waarop de Hub geschreven heeft — aanmaken, sleutel-writeback of rolpromotie. */
+    public const ENTITY_RELATION = 'relation';
+
     /** De Hub schreef deze entity naar de partner. */
     public const ORIGIN_HUB = 'hub';
 

@@ -84,7 +84,7 @@ class ProviderEntityLinkTest extends TestCase
             'external_id' => 'INV-2026-001',
             'number' => '2026-001',
             'issue_date' => '2026-06-16',
-            'party' => ['role' => 'debtor', 'name' => 'Acme BV', 'vat_number' => 'NL000099998B57'],
+            'party' => ['role' => 'debtor', 'name' => 'Acme BV', 'kind' => 'company', 'external_id' => 'acme-1', 'vat_number' => 'NL000099998B57'],
             'lines' => [
                 ['description' => 'Consultancy', 'amount' => 200, 'tax_rate' => 21, 'category' => 'omzet'],
             ],
@@ -133,7 +133,7 @@ class ProviderEntityLinkTest extends TestCase
 
         $this->postDocument($consumer, $this->salesInvoicePayload([
             'type' => 'purchase_invoice',
-            'party' => ['role' => 'creditor', 'name' => 'Leverancier BV', 'vat_number' => 'NL000099998B57'],
+            'party' => ['role' => 'creditor', 'name' => 'Leverancier BV', 'kind' => 'company', 'external_id' => 'leverancier-1', 'vat_number' => 'NL000099998B57'],
             'lines' => [
                 ['description' => 'Inkoop', 'amount' => 200, 'tax_rate' => 21, 'category' => 'inkoop'],
             ],

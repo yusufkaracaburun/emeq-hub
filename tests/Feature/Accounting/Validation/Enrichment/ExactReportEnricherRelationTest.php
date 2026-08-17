@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Accounting\Validation\Enrichment;
 
+use App\Accounting\BookingWarnings;
 use App\Accounting\Validation\Severity;
 use App\Integrations\Exact\Accounting\ConnectionMappingExactReferenceResolver;
 use App\Integrations\Exact\Accounting\ExactRelationResolver;
@@ -24,7 +25,7 @@ class ExactReportEnricherRelationTest extends TestCase
 
     private function enricher(): ExactReportEnricher
     {
-        return new ExactReportEnricher(new ConnectionMappingExactReferenceResolver(new ExactRelationResolver));
+        return new ExactReportEnricher(new ConnectionMappingExactReferenceResolver(new ExactRelationResolver(new BookingWarnings)));
     }
 
     private function connection(): Connection
@@ -78,10 +79,8 @@ class ExactReportEnricherRelationTest extends TestCase
 
         $this->assertCount(1, $findings);
         $this->assertSame('exact.relation.new', $findings[0]->code);
-        $this->assertSame(Severity::Warning, $findings[0]->severity);
-        // Dit is het gerapporteerde productiegedrag: severity=warning terwijl valid=true blijft
-        // (InspectionReport::valid() kijkt alleen naar Severity::Error) — blocking maakt het
-        // onderscheid expliciet dat message-tekst en severity alleen niet dragen.
-        $this->assertTrue($findings[0]->blocking);
+        // De ladder maakt de relatie zelf aan wanneer niets matcht — Info, niet blocking.
+        $this->assertSame(Severity::Info, $findings[0]->severity);
+        $this->assertFalse($findings[0]->blocking);
     }
 }

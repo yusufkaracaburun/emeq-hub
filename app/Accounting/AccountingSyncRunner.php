@@ -7,6 +7,7 @@ namespace App\Accounting;
 use App\Accounting\Contracts\ProbesPostedDocuments;
 use App\Accounting\Enums\SyncStatus;
 use App\Accounting\Exceptions\AccountingMappingException;
+use App\Accounting\Exceptions\RelationAmbiguousException;
 use App\Integrations\Errors\UpstreamErrorMapperRegistry;
 use App\Integrations\Exceptions\ProviderDisabledException;
 use App\Integrations\PassThrough\PassThroughRecorder;
@@ -29,6 +30,7 @@ final readonly class AccountingSyncRunner
         private ProviderEntityLinkRecorder $links,
         private UpstreamErrorMapperRegistry $errors,
         private PassThroughRecorder $recorder,
+        private BookingWarnings $warnings,
     ) {}
 
     public function run(FinancialDocument $document, Connection $connection, Account $account, int $consumerId): AccountingSyncOutcome
@@ -89,6 +91,10 @@ final readonly class AccountingSyncRunner
         ProviderEntityLink $claim,
         float $start,
     ): AccountingSyncOutcome {
+        // Request-scoped en gedeeld met de resolver — flushen zodat een eerdere push
+        // binnen hetzelfde proces (async-job-hergebruik, AccountingSmoke) niet meelekt.
+        $this->warnings->flush();
+
         $provider = $connection->provider->value;
         $upstreamError = null;
         $responseBody = [];
@@ -133,6 +139,16 @@ final readonly class AccountingSyncRunner
             $status = 503;
             $upstreamError = 'provider_disabled';
             $responseBody = ['status' => SyncStatus::Failed->value, 'external_id' => $document->externalId, 'error' => 'provider_disabled', 'message' => $e->getMessage()];
+        } catch (RelationAmbiguousException $e) {
+            $status = 409;
+            $upstreamError = 'relation_ambiguous';
+            $responseBody = [
+                'status' => SyncStatus::Failed->value,
+                'external_id' => $document->externalId,
+                'error' => 'relation_ambiguous',
+                'message' => $e->getMessage(),
+                'candidates' => $e->candidates,
+            ];
         } catch (AccountingMappingException $e) {
             $status = 422;
             $upstreamError = 'mapping_failed';
@@ -157,6 +173,12 @@ final readonly class AccountingSyncRunner
             if (! $booked) {
                 $this->links->releaseClaim($claim);
             }
+        }
+
+        $warnings = $this->warnings->all();
+
+        if ($warnings !== []) {
+            $responseBody['warnings'] = $warnings;
         }
 
         $this->audit($account, $connection, $consumerId, $provider, $document, $status, $start, $upstreamError, $responseBody);

@@ -6,7 +6,6 @@ namespace App\Integrations\Exact\Webhooks;
 
 use App\Integrations\Contracts\DetectsHubOrigin;
 use App\Models\Connection;
-use App\Models\ConnectionAccountingRef;
 use App\Models\ProviderEntityLink;
 use Carbon\CarbonInterface;
 
@@ -15,21 +14,17 @@ final class ExactHubOriginDetector implements DetectsHubOrigin
     public function __construct(private readonly ExactEntityResolver $entities) {}
 
     /**
+     * Eén pad voor elke entity-soort: een `ProviderEntityLink` met `origin=hub` op
+     * deze `provider_entity_id`. Voor relaties is dat elke Hub-write (aanmaken,
+     * sleutel-writeback, rolpromotie) — zie `ExactRelationResolver::recordOrigin()`.
+     *
      * @param  array<string, mixed>  $payload
      */
     public function hubAuthored(Connection $connection, array $payload): bool
     {
         $key = $this->entities->entityId($payload);
 
-        if ($key === null) {
-            return false;
-        }
-
-        if ($this->hasHubAuthoredLink($connection, $key)) {
-            return true;
-        }
-
-        return $this->hasHubCreatedRelation($connection, $key);
+        return $key !== null && $this->hasHubAuthoredLink($connection, $key);
     }
 
     /**
@@ -58,16 +53,5 @@ final class ExactHubOriginDetector implements DetectsHubOrigin
             ->where('provider_entity_id', $key)
             ->where('origin', ProviderEntityLink::ORIGIN_HUB)
             ->exists();
-    }
-
-    private function hasHubCreatedRelation(Connection $connection, string $key): bool
-    {
-        $ref = ConnectionAccountingRef::query()
-            ->where('connection_id', $connection->id)
-            ->where('kind', ConnectionAccountingRef::KIND_RELATION)
-            ->where('native_id', $key)
-            ->first();
-
-        return ($ref?->attrs['created_by_hub'] ?? false) === true;
     }
 }

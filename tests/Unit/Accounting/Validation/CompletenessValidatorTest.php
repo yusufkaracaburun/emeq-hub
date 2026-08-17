@@ -19,7 +19,13 @@ class CompletenessValidatorTest extends TestCase
             'type' => 'sales_invoice',
             'external_id' => 'invoice-1',
             'issue_date' => '2026-08-13',
-            'party' => ['role' => 'debtor', 'name' => 'Voorbeeld Debiteur B.V.'],
+            'party' => [
+                'role' => 'debtor',
+                'name' => 'Voorbeeld Debiteur B.V.',
+                'kind' => 'company',
+                'external_id' => 'debtor-1',
+                'chamber_of_commerce' => '12345678',
+            ],
             'lines' => [['description' => 'Advieswerk', 'amount' => 100.0, 'tax_rate' => 21]],
         ];
     }
@@ -113,7 +119,7 @@ class CompletenessValidatorTest extends TestCase
     public function test_a_party_without_a_name_is_an_error(): void
     {
         $document = $this->document();
-        $document['party'] = ['role' => 'debtor'];
+        $document['party'] = ['role' => 'debtor', 'kind' => 'company', 'external_id' => 'debtor-1', 'chamber_of_commerce' => '12345678'];
 
         $findings = (new CompletenessValidator)->validate($document);
 
@@ -163,6 +169,71 @@ class CompletenessValidatorTest extends TestCase
 
         $this->assertSame(['document.line.description.missing', 'document.line.tax_rate.missing'], $codes);
         $this->assertSame(['lines.1.description', 'lines.1.tax_rate'], $paths);
+    }
+
+    public function test_a_missing_party_kind_is_a_warning_and_not_blocking(): void
+    {
+        // The kind is still supplied at booking time, like role/external_id.
+        $document = $this->document();
+        unset($document['party']['kind']);
+
+        $findings = (new CompletenessValidator)->validate($document);
+
+        $this->assertCount(1, $findings);
+        $this->assertSame('document.party.kind.missing', $findings[0]->code);
+        $this->assertSame(Severity::Warning, $findings[0]->severity);
+        $this->assertFalse($findings[0]->blocking);
+    }
+
+    public function test_a_missing_party_external_id_is_a_warning_and_not_blocking(): void
+    {
+        $document = $this->document();
+        unset($document['party']['external_id']);
+
+        $findings = (new CompletenessValidator)->validate($document);
+
+        $this->assertCount(1, $findings);
+        $this->assertSame('document.party.external_id.missing', $findings[0]->code);
+        $this->assertSame(Severity::Warning, $findings[0]->severity);
+        $this->assertFalse($findings[0]->blocking);
+    }
+
+    public function test_a_company_party_without_chamber_of_commerce_or_vat_number_is_a_warning(): void
+    {
+        // The resolver can only match a company on a strong key; without one, the
+        // booking is refused — but a draft may legitimately not have it yet.
+        $document = $this->document();
+        unset($document['party']['chamber_of_commerce']);
+
+        $findings = (new CompletenessValidator)->validate($document);
+
+        $this->assertCount(1, $findings);
+        $this->assertSame('document.party.identifier.missing', $findings[0]->code);
+        $this->assertSame(Severity::Warning, $findings[0]->severity);
+        $this->assertFalse($findings[0]->blocking);
+    }
+
+    public function test_a_company_party_with_a_vat_number_but_no_chamber_of_commerce_produces_no_identifier_finding(): void
+    {
+        $document = $this->document();
+        unset($document['party']['chamber_of_commerce']);
+        $document['party']['vat_number'] = 'NL000099998B57';
+
+        $findings = (new CompletenessValidator)->validate($document);
+
+        $this->assertSame([], $findings);
+    }
+
+    public function test_a_person_party_without_chamber_of_commerce_or_vat_number_produces_no_identifier_finding(): void
+    {
+        // person has no strong key by design (see the ADR) — nothing to warn about.
+        $document = $this->document();
+        unset($document['party']['chamber_of_commerce']);
+        $document['party']['kind'] = 'person';
+
+        $findings = (new CompletenessValidator)->validate($document);
+
+        $this->assertSame([], $findings);
     }
 
     public function test_an_ocr_draft_summary_is_not_mistaken_for_a_document(): void

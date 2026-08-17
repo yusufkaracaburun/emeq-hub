@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Integrations\Exact\Accounting;
 
 use App\Accounting\Enums\TaxTreatment;
+use App\Accounting\Party;
 use App\Accounting\Validation\Finding;
 use App\Accounting\Validation\Severity;
 use App\Accounting\Validation\Support\Money;
@@ -178,10 +179,12 @@ final class ExactReportEnricher
     }
 
     /**
-     * Spiegelt de relatie-resolutie van het schrijfpad (ExactRelationResolver) zodat de dry-run
-     * hetzelfde oordeelt als de boeking: eerst de eerder geleerde koppeling op `external_id`,
-     * pas daarna een match op BTW-nummer/naam. Zonder die eerste stap meldt validate "nieuw"
-     * terwijl het boeken de relatie wél terugvindt.
+     * Spiegelt de relatie-resolutie-ladder van het schrijfpad (ExactRelationResolver) zodat
+     * de dry-run hetzelfde oordeelt als de boeking: pin → mirror op `external_id` → (company:
+     * KvK → btw → naam) → aanmaken. `person` slaat KvK/btw/naam over, net als de resolver.
+     *
+     * Read-only: deze methode schrijft nooit terug naar Exact — geen sleutel-writeback, geen
+     * rolpromotie, geen aanmaken. Een dry-run hoort geen bijwerking te hebben.
      *
      * @param  array<string, mixed>  $payload
      * @return list<Finding>
@@ -190,10 +193,16 @@ final class ExactReportEnricher
     {
         $party = is_array($payload['party'] ?? null) ? $payload['party'] : [];
         $externalId = $this->scalarString($party['external_id'] ?? null);
+        $relationId = $this->scalarString($party['relation_id'] ?? null);
+        $chamberOfCommerce = $this->scalarString($party['chamber_of_commerce'] ?? null);
         $vatNumber = is_string($party['vat_number'] ?? null) ? $party['vat_number'] : null;
         $name = is_string($party['name'] ?? null) ? $party['name'] : null;
+        $kind = is_string($party['kind'] ?? null) ? $party['kind'] : Party::KIND_COMPANY;
         $label = $this->partyLabel(is_string($party['role'] ?? null) ? $party['role'] : null);
-        $createIfMissing = ($party['create_if_missing'] ?? false) === true;
+
+        if ($relationId !== null) {
+            return [$this->relationMatched($label, null, $relationId, $name)];
+        }
 
         if ($externalId !== null) {
             $known = ConnectionAccountingRef::query()
@@ -207,22 +216,48 @@ final class ExactReportEnricher
             }
         }
 
-        if ($this->blank($vatNumber) && $this->blank($name)) {
+        if ($kind === Party::KIND_PERSON) {
+            return [$this->relationNew($label, $name)];
+        }
+
+        if ($this->blank($chamberOfCommerce) && $this->blank($vatNumber) && $this->blank($name)) {
             return [];
         }
 
         try {
-            $match = (new ExactReferenceData($connection))->findRelation($vatNumber, $name);
+            $data = new ExactReferenceData($connection);
+
+            $kvkMatches = $data->relationsByChamberOfCommerce($chamberOfCommerce);
+
+            if (count($kvkMatches) > 1) {
+                return [$this->relationAmbiguous($label, 'KvK-nummer', $kvkMatches)];
+            }
+
+            if (count($kvkMatches) === 1) {
+                return [$this->relationMatched($label, $kvkMatches[0]['name'], $kvkMatches[0]['id'], $name)];
+            }
+
+            $vatMatches = $data->relationsByVatNumber($vatNumber);
+
+            if (count($vatMatches) > 1) {
+                return [$this->relationAmbiguous($label, 'btw-nummer', $vatMatches)];
+            }
+
+            if (count($vatMatches) === 1) {
+                return [$this->relationMatched($label, $vatMatches[0]['name'], $vatMatches[0]['id'], $name)];
+            }
+
+            $nameMatches = $data->relationsByName($name);
+
+            if (count($nameMatches) === 1) {
+                return [$this->relationMatched($label, $nameMatches[0]['name'], $nameMatches[0]['id'], $name)];
+            }
         } catch (Throwable) {
             // Een dry-run mag nooit breken op een live Exact-call → geen finding.
             return [];
         }
 
-        if ($match !== null) {
-            return [$this->relationMatched($label, $match['name'], $match['id'], $name)];
-        }
-
-        return [$this->relationNew($label, $name, $createIfMissing)];
+        return [$this->relationNew($label, $name)];
     }
 
     private function relationMatched(string $label, ?string $matchedName, string $nativeId, ?string $current): Finding
@@ -241,21 +276,40 @@ final class ExactReportEnricher
     }
 
     /**
-     * De relatie ontbreekt. Vraagt het document erom (`party.create_if_missing === true`),
-     * dan maakt de boeking de relatie zelf aan (Info); anders weigert de boeking (Warning).
+     * Meer dan één treffer op KvK of btw-nummer — dezelfde grens als de resolver, die
+     * daar hard op stopt (409 `relation.ambiguous`). De dry-run spiegelt dat als
+     * blocking, met de kandidaatnamen in de tekst zodat de consument meteen ziet
+     * waartussen te kiezen.
+     *
+     * @param  list<array{id: string, name: string}>  $matches
      */
-    private function relationNew(string $label, ?string $name, bool $createIfMissing): Finding
+    private function relationAmbiguous(string $label, string $on, array $matches): Finding
     {
-        $message = $createIfMissing
-            ? "{$label} staat nog niet in de administratie en wordt bij het boeken automatisch aangemaakt."
-            : "{$label} staat nog niet in de administratie — de boeking wordt geweigerd. Zet party.create_if_missing op true om 'm automatisch te laten aanmaken, of voeg de relatie zelf toe in de administratie.";
+        $names = implode(', ', array_map(fn (array $match): string => $match['name'], $matches));
 
         return new Finding(
-            code: 'exact.relation.new',
-            severity: $createIfMissing ? Severity::Info : Severity::Warning,
-            blocking: ! $createIfMissing,
+            code: 'exact.relation.ambiguous',
+            severity: Severity::Warning,
+            blocking: true,
             path: 'party',
-            message: $message,
+            message: "{$label} matcht meerdere relaties op {$on} in de administratie ({$names}) — de boeking wordt geweigerd. Kies er één en stuur die mee als party.relation_id.",
+            current: null,
+            suggestion: null,
+        );
+    }
+
+    /**
+     * De relatie ontbreekt — de Hub maakt 'm bij het boeken zelf aan. Info, niet
+     * blocking: dat is de ladder z'n laatste stap, geen weigering.
+     */
+    private function relationNew(string $label, ?string $name): Finding
+    {
+        return new Finding(
+            code: 'exact.relation.new',
+            severity: Severity::Info,
+            blocking: false,
+            path: 'party',
+            message: "{$label} staat nog niet in de administratie en wordt bij het boeken automatisch aangemaakt.",
             current: $name,
             suggestion: null,
         );

@@ -87,7 +87,7 @@ class AsyncStoreDocumentTest extends TestCase
             'external_id' => 'INV-2026-001',
             'number' => '2026-001',
             'issue_date' => '2026-06-16',
-            'party' => ['role' => 'debtor', 'name' => 'Acme BV', 'vat_number' => 'NL000099998B57'],
+            'party' => ['role' => 'debtor', 'name' => 'Acme BV', 'kind' => 'company', 'external_id' => 'acme-1', 'vat_number' => 'NL000099998B57'],
             'lines' => [
                 ['description' => 'Consultancy', 'amount' => 200, 'quantity' => 2, 'unit_price' => 100, 'tax_rate' => 21, 'category' => 'omzet'],
             ],

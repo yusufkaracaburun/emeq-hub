@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Accounting\Validation\Validators;
 
+use App\Accounting\Party;
 use App\Accounting\Validation\Contracts\DocumentValidator;
 use App\Accounting\Validation\Finding;
 use App\Accounting\Validation\Severity;
@@ -129,6 +130,39 @@ final class CompletenessValidator implements DocumentValidator
                 'document.party.name.missing',
                 'party.name',
                 'De naam van de tegenpartij ontbreekt. Zonder naam is de relatie in de administratie niet terug te vinden.',
+            );
+        }
+
+        $kind = $party['kind'] ?? null;
+
+        if ($this->blank($kind)) {
+            // Niet-blocking, net als role/external_id hierboven: een OCR-draft kent het
+            // onderscheid bedrijf/particulier nog niet. De ladder eist dit pas bij het boeken.
+            $findings[] = $this->finding(
+                'document.party.kind.missing',
+                Severity::Warning,
+                blocking: false,
+                path: 'party.kind',
+                message: 'Onbekend of de tegenpartij een bedrijf of een particulier is. Dat bepaalt hoe de boeking de relatie herkent; zonder kind wordt de boeking geweigerd.',
+                suggestion: $this->list([Party::KIND_COMPANY, Party::KIND_PERSON]),
+            );
+        } elseif ($kind === Party::KIND_COMPANY && $this->blank($party['chamber_of_commerce'] ?? null) && $this->blank($party['vat_number'] ?? null)) {
+            $findings[] = $this->finding(
+                'document.party.identifier.missing',
+                Severity::Warning,
+                blocking: false,
+                path: 'party.chamber_of_commerce',
+                message: 'Een zakelijke tegenpartij zonder KvK- of btw-nummer kan de boekhouding niet met zekerheid herkennen; de boeking wordt hierop geweigerd.',
+            );
+        }
+
+        if ($this->blank($party['external_id'] ?? null)) {
+            $findings[] = $this->finding(
+                'document.party.external_id.missing',
+                Severity::Warning,
+                blocking: false,
+                path: 'party.external_id',
+                message: 'Het kenmerk waarmee jij deze tegenpartij zelf kent ontbreekt. De boeking wordt hierop geweigerd: zonder deze sleutel kan de boekhouding een eerder herkende relatie niet hergebruiken.',
             );
         }
 

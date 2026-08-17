@@ -45,6 +45,10 @@ final class ExactReferenceData
     // backlog-run van honderden validaties er één Exact-call over doet.
     private const PERIOD_CACHE_SECONDS = 3600;
 
+    // ChamberOfCommerce erbij t.o.v. de eerdere relatie-select: alle drie de
+    // ladder-stappen (KvK/btw/naam) mappen naar dezelfde kandidaat-vorm.
+    private const RELATION_SELECT = 'ID,Code,Name,IsSales,IsSupplier,Status,VATNumber,ChamberOfCommerce';
+
     public function __construct(private readonly Connection $connection) {}
 
     /**
@@ -421,78 +425,144 @@ final class ExactReferenceData
     }
 
     /**
-     * Zoekt één Exact-relatie op een stabiele sleutel (VATNumber, anders exacte Name) voor de
-     * lazy relatie-resolutie. Geeft `{id, code, name, is_sales, is_supplier, status}` van de
-     * eerste match, of null. De rol-vlaggen laten de caller een relatie naar de juiste rol
-     * promoveren (debiteur ↔ crediteur) vóór de boeking.
+     * KvK-stap van de relatie-resolutie ({@see \App\Integrations\Exact\Accounting\ExactRelationResolver}).
+     * Twee server-side `$filter`-probes — de rauwe waarde en de alleen-cijfers-variant
+     * (Exact draagt een KvK-nummer soms met spaties/streepjes) — nooit een volledige scan:
+     * deze stap moet goedkoop blijven, hij loopt bij elke boeking op een `company`-party.
      *
-     * Exact's `$filter` kan niet normaliseren, dus een btw-nummer-match haalt de kandidaten
-     * met een ingevuld VATNumber op en vergelijkt lokaal genormaliseerd (hoofdletters, geen
-     * spaties/punten/streepjes) — anders mist `NL8037.25.802.B01` op `NL803725802B01`. Een
-     * ambigu btw-nummer (2+ treffers) stopt hard: nooit terugvallen op naam, dat zou een
-     * andere relatie kunnen kiezen dan de btw-treffers bedoelen. Levert het btw-nummer géén
-     * of geen enkele treffer op (of ontbreekt het), dan valt de zoekopdracht terug op een
-     * exacte Name-match. Beide kandidaten-ophalen doorpagineren tot Exact geen `__next`
-     * meer teruggeeft — anders staat de tweede helft van een ambigu paar buiten beeld en
-     * kiest de code stilletjes de enige treffer die het wél zag.
+     * Geeft alle kandidaten terug (0, 1 of meer) — de caller beslist wat "ambigu" betekent.
      *
-     * @return array{id: string, code: string, name: string, is_sales: bool, is_supplier: bool, status: ?string}|null
+     * @return list<array{id: string, code: string, name: string, is_sales: bool, is_supplier: bool, status: ?string, chamber_of_commerce: ?string, vat_number: ?string}>
      */
-    public function findRelation(?string $vatNumber, ?string $name): ?array
+    public function relationsByChamberOfCommerce(?string $chamberOfCommerce): array
     {
-        $normalizedVat = self::normalizeVatNumber($vatNumber);
+        $chamberOfCommerce = trim((string) $chamberOfCommerce);
 
-        if ($normalizedVat !== '') {
-            $vatMatches = $this->matchesByVatNumber($normalizedVat);
-
-            if (count($vatMatches) === 1) {
-                return $this->mapRelationRow($vatMatches[0]);
-            }
-
-            if (count($vatMatches) > 1) {
-                return null;
-            }
+        if ($chamberOfCommerce === '') {
+            return [];
         }
 
-        return $this->matchByName($name);
+        $rows = [];
+
+        foreach ($this->probeVariants($chamberOfCommerce) as $variant) {
+            $rows[] = $this->fetchAllPages([
+                '$select' => self::RELATION_SELECT,
+                '$filter' => "ChamberOfCommerce eq '".$this->escapeOData($variant)."'",
+            ]);
+        }
+
+        return $this->mapRelationRows($this->dedupeById(array_merge(...$rows)));
     }
 
     /**
-     * @return list<array<string, mixed>>
+     * Btw-stap: eerst dezelfde twee goedkope server-side probes (rauw + genormaliseerd),
+     * en alleen wanneer die niets opleveren de bestaande volledige scan met lokale
+     * normalisatie als vangnet — nodig voor `NL8037.25.802.B01` vs `NL803725802B01`,
+     * waar Exact's `$filter` (letterlijke string-equality) niet voor normaliseert.
+     *
+     * @return list<array{id: string, code: string, name: string, is_sales: bool, is_supplier: bool, status: ?string, chamber_of_commerce: ?string, vat_number: ?string}>
      */
-    private function matchesByVatNumber(string $normalizedVat): array
+    public function relationsByVatNumber(?string $vatNumber): array
     {
-        $rows = $this->fetchAllPages([
-            '$select' => 'ID,Code,Name,IsSales,IsSupplier,Status,VATNumber',
+        $normalized = self::normalizeVatNumber($vatNumber);
+
+        if ($normalized === '') {
+            return [];
+        }
+
+        $rows = [];
+
+        foreach ($this->probeVariants((string) $vatNumber, $normalized) as $variant) {
+            $rows[] = $this->fetchAllPages([
+                '$select' => self::RELATION_SELECT,
+                '$filter' => "VATNumber eq '".$this->escapeOData($variant)."'",
+            ]);
+        }
+
+        $candidates = $this->dedupeById(array_merge(...$rows));
+
+        if ($candidates !== []) {
+            return $this->mapRelationRows($candidates);
+        }
+
+        $all = $this->fetchAllPages([
+            '$select' => self::RELATION_SELECT,
             '$filter' => "VATNumber ne ''",
         ]);
 
-        return array_values(array_filter(
-            $rows,
-            fn (array $row) => self::normalizeVatNumber($row['VATNumber'] ?? null) === $normalizedVat
-        ));
+        return $this->mapRelationRows(array_values(array_filter(
+            $all,
+            fn (array $row) => self::normalizeVatNumber($row['VATNumber'] ?? null) === $normalized
+        )));
     }
 
-    private function matchByName(?string $name): ?array
+    /**
+     * Naam-stap: volledige scan (Exact's `$filter` kan geen rechtsvorm/interpunctie
+     * negeren) + lokale genormaliseerde vergelijking — lowercase, interpunctie weg,
+     * rechtsvorm-suffixen weg ("Acme B.V." matcht zo "Acme BV"). Laatste en duurste
+     * stap van de ladder, bewust: hij draait vlak vóór het enige onomkeerbare moment
+     * (aanmaken in andermans administratie).
+     *
+     * @return list<array{id: string, code: string, name: string, is_sales: bool, is_supplier: bool, status: ?string, chamber_of_commerce: ?string, vat_number: ?string}>
+     */
+    public function relationsByName(?string $name): array
     {
-        $name = trim((string) $name);
+        $normalized = self::normalizeName((string) $name);
 
-        if ($name === '') {
-            return null;
+        if ($normalized === '') {
+            return [];
         }
 
-        $rows = $this->fetchAllPages([
-            '$select' => 'ID,Code,Name,IsSales,IsSupplier,Status',
-            '$filter' => "Name eq '".$this->escapeOData($name)."'",
-        ]);
+        $all = $this->fetchAllPages(['$select' => self::RELATION_SELECT]);
 
-        // Geen of meerdere matches → niet automatisch kiezen (ambigu).
-        return count($rows) === 1 ? $this->mapRelationRow($rows[0]) : null;
+        return $this->mapRelationRows(array_values(array_filter(
+            $all,
+            fn (array $row) => self::normalizeName((string) ($row['Name'] ?? '')) === $normalized
+        )));
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function probeVariants(string $raw, ?string $normalized = null): array
+    {
+        $raw = trim($raw);
+        $normalized ??= preg_replace('/\D+/', '', $raw) ?? '';
+
+        return array_values(array_unique(array_filter([$raw, $normalized], fn (string $v): bool => $v !== '')));
+    }
+
+    /**
+     * @param  list<array<string, mixed>>  $rows
+     * @return list<array<string, mixed>>
+     */
+    private function dedupeById(array $rows): array
+    {
+        $byId = [];
+
+        foreach ($rows as $row) {
+            $id = (string) ($row['ID'] ?? '');
+
+            if ($id !== '') {
+                $byId[$id] = $row;
+            }
+        }
+
+        return array_values($byId);
+    }
+
+    /**
+     * @param  list<array<string, mixed>>  $rows
+     * @return list<array{id: string, code: string, name: string, is_sales: bool, is_supplier: bool, status: ?string, chamber_of_commerce: ?string, vat_number: ?string}>
+     */
+    private function mapRelationRows(array $rows): array
+    {
+        return array_values(array_filter(array_map($this->mapRelationRow(...), $rows)));
     }
 
     /**
      * @param  array<string, mixed>  $row
-     * @return array{id: string, code: string, name: string, is_sales: bool, is_supplier: bool, status: ?string}|null
+     * @return array{id: string, code: string, name: string, is_sales: bool, is_supplier: bool, status: ?string, chamber_of_commerce: ?string, vat_number: ?string}|null
      */
     private function mapRelationRow(array $row): ?array
     {
@@ -505,7 +575,16 @@ final class ExactReferenceData
             'is_sales' => (bool) ($row['IsSales'] ?? false),
             'is_supplier' => (bool) ($row['IsSupplier'] ?? false),
             'status' => isset($row['Status']) ? (string) $row['Status'] : null,
+            'chamber_of_commerce' => $this->nullableString($row['ChamberOfCommerce'] ?? null),
+            'vat_number' => $this->nullableString($row['VATNumber'] ?? null),
         ];
+    }
+
+    private function nullableString(mixed $value): ?string
+    {
+        $value = trim((string) ($value ?? ''));
+
+        return $value !== '' ? $value : null;
     }
 
     private static function normalizeVatNumber(?string $vatNumber): string
@@ -517,6 +596,29 @@ final class ExactReferenceData
         }
 
         return mb_strtoupper(preg_replace('/[\s.\-]+/', '', $vatNumber) ?? $vatNumber);
+    }
+
+    /**
+     * Rechtsvorm-suffixen die de dedupe-vergelijking negeert — "Acme B.V." en "Acme
+     * Holding" moeten allebei op "Acme" matchen. Vaste lijst i.p.v. een regex-heuristiek:
+     * expliciet houdt de aannames zichtbaar en voorkomt dat een gewone bedrijfsnaam met
+     * bv. "inc" erin per ongeluk wordt afgeknipt.
+     *
+     * @var list<string>
+     */
+    private const LEGAL_FORM_SUFFIXES = ['bv', 'nv', 'vof', 'cv', 'bvba', 'gmbh', 'ltd', 'inc', 'holding', 'beheer'];
+
+    private static function normalizeName(string $name): string
+    {
+        $name = mb_strtolower(trim($name));
+        // Punten eerst apart weghalen (zonder spatie): "B.V." moet als één token "bv"
+        // overblijven, niet als de twee losse tokens "b" en "v".
+        $name = str_replace('.', '', $name);
+        $name = preg_replace('/[^\p{L}\p{N}\s]+/u', ' ', $name) ?? $name;
+        $words = preg_split('/\s+/', trim($name), -1, PREG_SPLIT_NO_EMPTY) ?: [];
+        $words = array_values(array_filter($words, fn (string $word): bool => ! in_array($word, self::LEGAL_FORM_SUFFIXES, true)));
+
+        return implode(' ', $words);
     }
 
     /**
@@ -587,7 +689,8 @@ final class ExactReferenceData
      * `ExactAccountingTarget::readPage()`. Faalt zacht als `fetch()`: elke fout (ook op een
      * latere pagina, een `MAX_PAGES`-overschrijding, of een herhaald skiptoken) levert een
      * lege lijst op, nooit een onvolledige set — een onvolledige set zou de
-     * ambiguïteitsdetectie in `findRelation()` een treffer laten missen.
+     * ambiguïteitsdetectie in de relatie-resolutie ({@see \App\Integrations\Exact\Accounting\ExactRelationResolver})
+     * een treffer laten missen.
      *
      * @param  array<string, scalar|null>  $params
      * @return list<array<string, mixed>>

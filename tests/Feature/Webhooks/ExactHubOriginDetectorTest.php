@@ -8,7 +8,6 @@ use App\Integrations\Exact\Webhooks\ExactEntityResolver;
 use App\Integrations\Exact\Webhooks\ExactHubOriginDetector;
 use App\Models\Account;
 use App\Models\Connection;
-use App\Models\ConnectionAccountingRef;
 use App\Models\Consumer;
 use App\Models\ProviderEntityLink;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -57,32 +56,43 @@ class ExactHubOriginDetectorTest extends TestCase
         $this->assertFalse($this->detect($theirs, 'guid-hub'));
     }
 
+    /**
+     * Elke Hub-write op een relatie (aanmaken, sleutel-writeback, rolpromotie) legt een
+     * `ProviderEntityLink` met `origin=hub` vast — zie `ExactRelationResolver::recordOrigin()`.
+     * Dat is het enige pad dat de detector nog leest; het losse `created_by_hub`-attribuut
+     * op `ConnectionAccountingRef` is geen tweede bron meer.
+     */
     public function test_it_recognises_a_relation_the_hub_created(): void
     {
         $connection = $this->exactConnection();
-        ConnectionAccountingRef::query()->create([
+        ProviderEntityLink::factory()->create([
             'connection_id' => $connection->id,
-            'kind' => ConnectionAccountingRef::KIND_RELATION,
-            'code' => 'party-1',
-            'native_id' => 'guid-relation',
-            'attrs' => ['created_by_hub' => true],
+            'entity_type' => ProviderEntityLink::ENTITY_RELATION,
+            'provider_entity_id' => 'guid-relation',
+            'origin' => ProviderEntityLink::ORIGIN_HUB,
         ]);
 
         $this->assertTrue($this->detect($connection, 'guid-relation'));
     }
 
-    public function test_it_does_not_flag_a_relation_that_was_only_learned(): void
+    public function test_it_does_not_flag_a_relation_that_was_only_matched_at_the_provider(): void
     {
         $connection = $this->exactConnection();
-        ConnectionAccountingRef::query()->create([
+        ProviderEntityLink::factory()->create([
             'connection_id' => $connection->id,
-            'kind' => ConnectionAccountingRef::KIND_RELATION,
-            'code' => 'party-2',
-            'native_id' => 'guid-learned',
-            'attrs' => [],
+            'entity_type' => ProviderEntityLink::ENTITY_RELATION,
+            'provider_entity_id' => 'guid-matched',
+            'origin' => ProviderEntityLink::ORIGIN_PROVIDER,
         ]);
 
-        $this->assertFalse($this->detect($connection, 'guid-learned'));
+        $this->assertFalse($this->detect($connection, 'guid-matched'));
+    }
+
+    public function test_it_does_not_flag_a_relation_the_hub_never_touched(): void
+    {
+        $connection = $this->exactConnection();
+
+        $this->assertFalse($this->detect($connection, 'guid-untouched'));
     }
 
     public function test_it_returns_false_without_a_usable_key(): void

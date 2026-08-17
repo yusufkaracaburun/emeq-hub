@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Accounting\Validation\Enrichment;
 
+use App\Accounting\BookingWarnings;
 use App\Accounting\Validation\Finding;
 use App\Accounting\Validation\Severity;
 use App\Integrations\Exact\Accounting\ConnectionMappingExactReferenceResolver;
@@ -24,7 +25,7 @@ class ExactReportEnricherCostDimensionTest extends TestCase
 
     private function enricher(): ExactReportEnricher
     {
-        return new ExactReportEnricher(new ConnectionMappingExactReferenceResolver(new ExactRelationResolver));
+        return new ExactReportEnricher(new ConnectionMappingExactReferenceResolver(new ExactRelationResolver(new BookingWarnings)));
     }
 
     private function connection(): Connection

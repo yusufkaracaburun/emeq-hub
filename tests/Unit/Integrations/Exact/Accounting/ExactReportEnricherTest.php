@@ -2,6 +2,7 @@
 
 namespace Tests\Unit\Integrations\Exact\Accounting;
 
+use App\Accounting\BookingWarnings;
 use App\Accounting\Validation\Severity;
 use App\Integrations\Exact\Accounting\ConnectionMappingExactReferenceResolver;
 use App\Integrations\Exact\Accounting\ExactRelationResolver;
@@ -13,7 +14,7 @@ class ExactReportEnricherTest extends TestCase
 {
     private function enricher(): ExactReportEnricher
     {
-        return new ExactReportEnricher(new ConnectionMappingExactReferenceResolver(new ExactRelationResolver));
+        return new ExactReportEnricher(new ConnectionMappingExactReferenceResolver(new ExactRelationResolver(new BookingWarnings)));
     }
 
     /**
@@ -136,10 +137,10 @@ class ExactReportEnricherTest extends TestCase
         }
     }
 
-    public function test_unknown_relation_is_a_warning_without_create_if_missing(): void
+    public function test_unknown_relation_is_info_and_gets_auto_created(): void
     {
-        // Zonder party.create_if_missing weigert de boeking met een 422 — de dry-run moet die
-        // weigering spiegelen, niet als vrijblijvende info langskomen.
+        // De ladder maakt de relatie zelf aan wanneer niets matcht — geen 422 meer op
+        // "onbekende relatie", dus de dry-run meldt dat als Info, niet blocking.
         $findings = $this->enricher()->enrich(
             ['party' => ['role' => 'creditor', 'name' => 'Acme BV'], 'lines' => []],
             $this->connection(['21' => '4']),
@@ -147,23 +148,20 @@ class ExactReportEnricherTest extends TestCase
 
         $relation = array_values(array_filter($findings, fn ($f) => $f->code === 'exact.relation.new'));
         $this->assertCount(1, $relation);
-        $this->assertSame(Severity::Warning, $relation[0]->severity);
-        $this->assertStringContainsString('geweigerd', $relation[0]->message);
+        $this->assertSame(Severity::Info, $relation[0]->severity);
+        $this->assertFalse($relation[0]->blocking);
+        $this->assertStringContainsString('automatisch aangemaakt', $relation[0]->message);
     }
 
-    public function test_unknown_relation_is_info_when_create_if_missing_requested(): void
+    public function test_a_person_party_skips_the_company_matching_steps(): void
     {
-        $connection = new Connection;
-        $connection->metadata = ['accounting_mapping' => ['vat_codes' => ['21' => '4']]];
-
         $findings = $this->enricher()->enrich(
-            ['party' => ['role' => 'creditor', 'name' => 'Acme BV', 'create_if_missing' => true], 'lines' => []],
-            $connection,
+            ['party' => ['role' => 'debtor', 'name' => 'Jan Jansen', 'kind' => 'person'], 'lines' => []],
+            $this->connection(['21' => '4']),
         );
 
         $relation = array_values(array_filter($findings, fn ($f) => $f->code === 'exact.relation.new'));
         $this->assertCount(1, $relation);
         $this->assertSame(Severity::Info, $relation[0]->severity);
-        $this->assertStringContainsString('automatisch aangemaakt', $relation[0]->message);
     }
 }

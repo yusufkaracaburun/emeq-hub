@@ -6,6 +6,7 @@ namespace App\Http\Requests\Accounting;
 
 use App\Accounting\Enums\DocumentType;
 use App\Accounting\Enums\TaxTreatment;
+use App\Accounting\Party;
 use App\Rules\ValidVatNumber;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -39,11 +40,12 @@ class StoreDocumentRequest extends FormRequest
 
             'party' => ['required', 'array'],
             'party.role' => ['required', Rule::in(['debtor', 'creditor'])],
+            'party.kind' => ['required', Rule::in([Party::KIND_COMPANY, Party::KIND_PERSON])],
             'party.name' => ['required', 'string', 'max:255'],
             'party.vat_number' => ['nullable', 'string', 'max:64', new ValidVatNumber],
             'party.iban' => ['nullable', 'string', 'max:64'],
-            'party.external_id' => ['nullable', 'string', 'max:255'],
-            'party.create_if_missing' => ['boolean'],
+            'party.external_id' => ['required', 'string', 'max:255'],
+            'party.relation_id' => ['nullable', 'string', 'max:255'],
 
             // Relatiekaart — optioneel, en alleen van belang wanneer de Hub de
             // relatie aanmaakt. Lengtes volgen de Exact-velden.
@@ -83,13 +85,26 @@ class StoreDocumentRequest extends FormRequest
     public function withValidator(Validator $validator): void
     {
         $validator->after(function (Validator $validator): void {
-            // Zonder external_id slaat ExactRelationResolver::learn() de mirror-link over: de
-            // volgende boeking leunt dan volledig op findRelation(), die bij een ambigue naam
-            // zonder btw-nummer bewust null teruggeeft — een tweede aangemaakte relatie.
-            if ($this->boolean('party.create_if_missing') && trim((string) $this->input('party.external_id')) === '') {
+            // Een zakelijke partij zonder KvK én zonder btw-nummer kan de resolver alleen op
+            // naam herkennen, en een naam-miss maakt een duplicaat aan in de administratie van
+            // de klant. Liever hier weigeren dan daar opruimen.
+            if ($this->input('party.kind') !== Party::KIND_COMPANY) {
+                return;
+            }
+
+            // Met een gepinde relatie doet de ladder geen enkele zoekstap meer, dus valt de
+            // reden voor de sleutel-eis weg.
+            if (trim((string) $this->input('party.relation_id')) !== '') {
+                return;
+            }
+
+            $hasChamber = trim((string) $this->input('party.chamber_of_commerce')) !== '';
+            $hasVat = trim((string) $this->input('party.vat_number')) !== '';
+
+            if (! $hasChamber && ! $hasVat) {
                 $validator->errors()->add(
-                    'party.external_id',
-                    'party.external_id is verplicht wanneer party.create_if_missing = true — anders kan de Hub de aangemaakte relatie niet herkennen bij een volgende boeking.',
+                    'party.chamber_of_commerce',
+                    'Een zakelijke tegenpartij heeft een KvK-nummer of een btw-nummer nodig. Zonder een van beide kan de boekhouding de relatie niet met zekerheid herkennen. Gaat het om een particulier, stuur dan party.kind = person.',
                 );
             }
         });
