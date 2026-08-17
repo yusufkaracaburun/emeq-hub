@@ -75,6 +75,19 @@ final class BadgeColor
      * Connection-status → kleur. 'revoked' wordt door de table afgeleid uit
      * revoked_at; active/pending komen rechtstreeks uit de status-kolom.
      */
+    /**
+     * Status van een binnengekomen aanvraag (toegang, demo): afgehandeld = klaar,
+     * afgewezen = neutraal, al het andere wacht nog op actie.
+     */
+    public static function requestStatus(?string $status): string
+    {
+        return match ($status) {
+            'handled' => 'success',
+            'declined' => 'gray',
+            default => 'warning',
+        };
+    }
+
     public static function connectionStatus(?string $status): string
     {
         return match ($status) {

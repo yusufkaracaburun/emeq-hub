@@ -9,8 +9,11 @@ use App\Filament\Resources\DemoRequests\Pages\ViewDemoRequest;
 use App\Filament\Resources\DemoRequests\Schemas\DemoRequestInfolist;
 use App\Filament\Resources\DemoRequests\Tables\DemoRequestsTable;
 use App\Models\DemoRequest;
+use App\Support\Filament\BadgeColor;
+use App\Support\Filament\StatusStrip;
 use BackedEnum;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 
@@ -73,6 +76,19 @@ class DemoRequestResource extends Resource
     public static function infolist(Schema $schema): Schema
     {
         return DemoRequestInfolist::configure($schema);
+    }
+
+    /**
+     * @return list<Section>
+     */
+    public static function statusStripSchema(DemoRequest $record): array
+    {
+        return StatusStrip::make([
+            StatusStrip::badge('Status', $record->status, fn (?string $state): string => BadgeColor::requestStatus($state)),
+            StatusStrip::fact('Bedrijf', $record->company),
+            StatusStrip::fact('Voorkeursmoment', $record->preferred_slot),
+            StatusStrip::moment('Ontvangen', $record->created_at),
+        ]);
     }
 
     public static function table(Table $table): Table

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\AccessRequests\Schemas;
 
+use App\Support\Filament\BadgeColor;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -22,11 +23,7 @@ class AccessRequestInfolist
                     TextEntry::make('app_url')->label('App-URL')->placeholder('—')->copyable(),
                     TextEntry::make('providers')->label('Integraties')->badge(),
                     TextEntry::make('status')->label('Status')->badge()
-                        ->color(fn (string $state): string => match ($state) {
-                            'handled' => 'success',
-                            'declined' => 'gray',
-                            default => 'warning',
-                        }),
+                        ->color(fn (?string $state): string => BadgeColor::requestStatus($state)),
                     TextEntry::make('consumer.slug')->label('Ge-onboard als')->placeholder('— nog niet'),
                     TextEntry::make('created_at')->label('Ontvangen')->dateTime(),
                 ]),

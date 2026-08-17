@@ -6,12 +6,16 @@ namespace App\Filament\Resources\AccessRequests\Pages;
 
 use App\Filament\Pages\OnboardConsumer;
 use App\Filament\Resources\AccessRequests\AccessRequestResource;
+use App\Filament\Support\HasDetailLayout;
 use App\Models\AccessRequest;
 use Filament\Actions\Action;
 use Filament\Resources\Pages\ViewRecord;
+use Filament\Schemas\Schema;
 
 class ViewAccessRequest extends ViewRecord
 {
+    use HasDetailLayout;
+
     protected static string $resource = AccessRequestResource::class;
 
     protected function getHeaderActions(): array
@@ -33,5 +37,13 @@ class ViewAccessRequest extends ViewRecord
                     $this->record->update(['status' => 'handled']);
                 }),
         ];
+    }
+
+    public function content(Schema $schema): Schema
+    {
+        /** @var AccessRequest $record */
+        $record = $this->getRecord();
+
+        return $this->detailSchema($schema, AccessRequestResource::statusStripSchema($record));
     }
 }

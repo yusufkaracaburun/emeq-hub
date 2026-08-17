@@ -6,8 +6,11 @@ use App\Filament\Resources\CashierSubscriptions\Pages\ListCashierSubscriptions;
 use App\Filament\Resources\CashierSubscriptions\Pages\ViewCashierSubscription;
 use App\Filament\Resources\CashierSubscriptions\Schemas\CashierSubscriptionInfolist;
 use App\Filament\Resources\CashierSubscriptions\Tables\CashierSubscriptionsTable;
+use App\Support\Filament\BadgeColor;
+use App\Support\Filament\StatusStrip;
 use BackedEnum;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
@@ -42,6 +45,23 @@ class CashierSubscriptionResource extends Resource
     public static function infolist(Schema $schema): Schema
     {
         return CashierSubscriptionInfolist::configure($schema);
+    }
+
+    /**
+     * @return list<Section>
+     */
+    public static function statusStripSchema(Subscription $record): array
+    {
+        return StatusStrip::make([
+            StatusStrip::badge(
+                'Status',
+                CashierSubscriptionInfolist::deriveStatus($record),
+                fn (?string $state): string => BadgeColor::cashierStatus($state),
+            ),
+            StatusStrip::fact('Consumer', $record->owner?->slug),
+            StatusStrip::fact('Plan', $record->plan),
+            StatusStrip::moment('Cycle eindigt', $record->cycle_ends_at),
+        ]);
     }
 
     public static function table(Table $table): Table

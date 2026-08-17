@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\DemoRequests\Schemas;
 
+use App\Support\Filament\BadgeColor;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -21,11 +22,7 @@ class DemoRequestInfolist
                     TextEntry::make('email')->label('E-mail')->copyable(),
                     TextEntry::make('preferred_slot')->label('Voorkeursmoment')->badge(),
                     TextEntry::make('status')->label('Status')->badge()
-                        ->color(fn (string $state): string => match ($state) {
-                            'handled' => 'success',
-                            'declined' => 'gray',
-                            default => 'warning',
-                        }),
+                        ->color(fn (?string $state): string => BadgeColor::requestStatus($state)),
                     TextEntry::make('privacy_accepted_at')->label('Akkoord privacybeleid')->dateTime(),
                     TextEntry::make('created_at')->label('Ontvangen')->dateTime(),
                 ]),

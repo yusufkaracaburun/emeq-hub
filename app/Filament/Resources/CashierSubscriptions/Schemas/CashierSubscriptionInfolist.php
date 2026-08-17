@@ -50,7 +50,7 @@ class CashierSubscriptionInfolist
             ]);
     }
 
-    private static function deriveStatus(Subscription $record): string
+    public static function deriveStatus(Subscription $record): string
     {
         if ($record->onTrial()) {
             return 'trialing';

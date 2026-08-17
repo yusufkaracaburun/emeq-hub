@@ -11,6 +11,7 @@ use App\Enums\Provider;
 use App\Filament\Resources\AccountSubscriptions\Pages\ListAccountSubscriptions;
 use App\Filament\Resources\AccountSubscriptions\Pages\ViewAccountSubscription;
 use App\Models\AccountSubscription;
+use App\Support\Filament\StatusStrip;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Infolists\Components\TextEntry;
@@ -106,6 +107,19 @@ class AccountSubscriptionResource extends Resource
                         ->columnSpanFull(),
                 ])
                 ->collapsed(),
+        ]);
+    }
+
+    /**
+     * @return list<Section>
+     */
+    public static function statusStripSchema(AccountSubscription $record): array
+    {
+        return StatusStrip::make([
+            StatusStrip::badge('Status', $record->status?->value, fn (?string $state): string => $record->status?->getColor() ?? 'gray'),
+            StatusStrip::fact('Bedrag', $record->amount_value.' '.$record->amount_currency),
+            StatusStrip::fact('Interval', $record->interval),
+            StatusStrip::moment('Laatste webhook', $record->last_webhook_event_at, emptyText: 'Nog geen'),
         ]);
     }
 

@@ -9,8 +9,11 @@ use App\Filament\Resources\AccessRequests\Pages\ViewAccessRequest;
 use App\Filament\Resources\AccessRequests\Schemas\AccessRequestInfolist;
 use App\Filament\Resources\AccessRequests\Tables\AccessRequestsTable;
 use App\Models\AccessRequest;
+use App\Support\Filament\BadgeColor;
+use App\Support\Filament\StatusStrip;
 use BackedEnum;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -81,6 +84,19 @@ class AccessRequestResource extends Resource
     public static function infolist(Schema $schema): Schema
     {
         return AccessRequestInfolist::configure($schema);
+    }
+
+    /**
+     * @return list<Section>
+     */
+    public static function statusStripSchema(AccessRequest $record): array
+    {
+        return StatusStrip::make([
+            StatusStrip::badge('Status', $record->status, fn (?string $state): string => BadgeColor::requestStatus($state)),
+            StatusStrip::fact('Bedrijf', $record->company),
+            StatusStrip::fact('Ge-onboard als', $record->consumer?->slug),
+            StatusStrip::moment('Ontvangen', $record->created_at),
+        ]);
     }
 
     public static function table(Table $table): Table
