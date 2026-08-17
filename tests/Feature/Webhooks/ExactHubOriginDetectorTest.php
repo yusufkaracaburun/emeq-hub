@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Webhooks;
 
-use App\Integrations\Exact\Webhooks\ExactEchoDetector;
 use App\Integrations\Exact\Webhooks\ExactEntityResolver;
+use App\Integrations\Exact\Webhooks\ExactHubOriginDetector;
 use App\Models\Account;
 use App\Models\Connection;
 use App\Models\ConnectionAccountingRef;
@@ -14,7 +14,7 @@ use App\Models\ProviderEntityLink;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
-class ExactEchoDetectorTest extends TestCase
+class ExactHubOriginDetectorTest extends TestCase
 {
     use RefreshDatabase;
 
@@ -89,8 +89,8 @@ class ExactEchoDetectorTest extends TestCase
     {
         $connection = $this->exactConnection();
 
-        $this->assertFalse($this->detector()->causedByHub($connection, ['Content' => []]));
-        $this->assertFalse($this->detector()->causedByHub($connection, []));
+        $this->assertFalse($this->detector()->hubAuthored($connection, ['Content' => []]));
+        $this->assertFalse($this->detector()->hubAuthored($connection, []));
     }
 
     public function test_it_reports_when_the_hub_last_wrote_the_entity(): void
@@ -124,12 +124,12 @@ class ExactEchoDetectorTest extends TestCase
 
     private function detect(Connection $connection, string $key): bool
     {
-        return $this->detector()->causedByHub($connection, ['Content' => ['Key' => $key]]);
+        return $this->detector()->hubAuthored($connection, ['Content' => ['Key' => $key]]);
     }
 
-    private function detector(): ExactEchoDetector
+    private function detector(): ExactHubOriginDetector
     {
-        return new ExactEchoDetector(new ExactEntityResolver);
+        return new ExactHubOriginDetector(new ExactEntityResolver);
     }
 
     private function exactConnection(): Connection

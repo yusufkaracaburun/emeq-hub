@@ -10,9 +10,9 @@ use App\Integrations\Exact\Accounting\ConnectionMappingExactReferenceResolver;
 use App\Integrations\Exact\Accounting\ExactAccountingTarget;
 use App\Integrations\Exact\Errors\UpstreamErrorMapper as ExactUpstreamErrorMapper;
 use App\Integrations\Exact\OAuth\ExactOAuthFlow;
-use App\Integrations\Exact\Webhooks\ExactEchoDetector;
 use App\Integrations\Exact\Webhooks\ExactEntityResolver;
 use App\Integrations\Exact\Webhooks\ExactEventResolver;
+use App\Integrations\Exact\Webhooks\ExactHubOriginDetector;
 use App\Integrations\Mollie\Errors\UpstreamErrorMapper as MollieUpstreamErrorMapper;
 use App\Integrations\Mollie\HubMollieCredentialResolver;
 use App\Integrations\Mollie\MollieAccessTokenResolver;
@@ -80,7 +80,7 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->singleton(HubOriginRegistry::class, function (): HubOriginRegistry {
             $registry = new HubOriginRegistry;
-            $registry->register(Provider::Exact, ExactEchoDetector::class);
+            $registry->register(Provider::Exact, ExactHubOriginDetector::class);
 
             return $registry;
         });

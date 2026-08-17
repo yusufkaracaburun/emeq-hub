@@ -10,14 +10,14 @@ use App\Models\ConnectionAccountingRef;
 use App\Models\ProviderEntityLink;
 use Carbon\CarbonInterface;
 
-final class ExactEchoDetector implements DetectsHubOrigin
+final class ExactHubOriginDetector implements DetectsHubOrigin
 {
     public function __construct(private readonly ExactEntityResolver $entities) {}
 
     /**
      * @param  array<string, mixed>  $payload
      */
-    public function causedByHub(Connection $connection, array $payload): bool
+    public function hubAuthored(Connection $connection, array $payload): bool
     {
         $key = $this->entities->entityId($payload);
 

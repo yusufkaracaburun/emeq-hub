@@ -91,7 +91,7 @@ final class ForwardWebhookToConsumerJob implements ShouldQueue
         }
 
         $entityId = $entities->entityIdFor($this->provider, $this->payload);
-        $hubAuthored = $origins->causedByHub($this->provider, $this->providerConnection, $this->payload);
+        $hubAuthored = $origins->hubAuthored($this->provider, $this->providerConnection, $this->payload);
         $hubLastWroteAt = $origins->hubLastWroteAt($this->provider, $this->providerConnection, $this->payload);
 
         Log::info($hubAuthored ? 'webhook.hub_authored' : 'webhook.hub_not_authored', [

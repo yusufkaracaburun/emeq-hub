@@ -99,7 +99,7 @@ class ForwardWebhookToConsumerJobTest extends TestCase
         });
     }
 
-    public function test_handle_marks_a_change_the_hub_itself_caused(): void
+    public function test_handle_marks_an_entity_the_hub_authored(): void
     {
         Bus::fake([CallWebhookJob::class]);
 
@@ -123,15 +123,14 @@ class ForwardWebhookToConsumerJobTest extends TestCase
             ->handle(app(CanonicalEventRegistry::class), app(HubOriginRegistry::class), app(CanonicalEntityRegistry::class));
 
         Bus::assertDispatched(CallWebhookJob::class, function (CallWebhookJob $job): bool {
-            return ($job->payload['caused_by_hub'] ?? null) === true
-                && ($job->payload['hub_authored'] ?? null) === true
+            return ($job->payload['hub_authored'] ?? null) === true
                 && ($job->payload['hub_last_wrote_at'] ?? null) === '2026-08-01T10:00:00+00:00'
                 && ($job->payload['entity_id'] ?? null) === 'guid-hub'
                 && ($job->payload['action'] ?? null) === CanonicalAction::UPDATED;
         });
     }
 
-    public function test_handle_omits_the_marker_for_a_change_the_hub_did_not_cause(): void
+    public function test_handle_omits_the_marker_for_an_entity_the_hub_never_wrote(): void
     {
         Bus::fake([CallWebhookJob::class]);
 
@@ -148,8 +147,7 @@ class ForwardWebhookToConsumerJobTest extends TestCase
             ->handle(app(CanonicalEventRegistry::class), app(HubOriginRegistry::class), app(CanonicalEntityRegistry::class));
 
         Bus::assertDispatched(CallWebhookJob::class, function (CallWebhookJob $job): bool {
-            return ! array_key_exists('caused_by_hub', $job->payload)
-                && ! array_key_exists('hub_authored', $job->payload)
+            return ! array_key_exists('hub_authored', $job->payload)
                 && ! array_key_exists('hub_last_wrote_at', $job->payload)
                 && ($job->payload['entity_id'] ?? null) === 'guid-theirs';
         });

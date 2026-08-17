@@ -41,32 +41,43 @@ class ConsumerWebhookEnvelopeTest extends TestCase
         $this->assertSame(CanonicalAction::UPDATED, $envelope['action']);
     }
 
-    public function test_hub_authored_mirrors_caused_by_hub_when_true(): void
+    public function test_hub_authored_is_carried_when_true(): void
     {
         $envelope = ConsumerWebhookEnvelope::make(
             CanonicalEvent::SALES_INVOICE_CHANGED,
             Provider::Exact,
             'school1',
             [],
-            causedByHub: true,
+            hubAuthored: true,
         );
 
-        $this->assertTrue($envelope['caused_by_hub']);
         $this->assertTrue($envelope['hub_authored']);
     }
 
-    public function test_hub_authored_and_caused_by_hub_are_both_absent_when_false(): void
+    public function test_hub_authored_is_absent_when_false(): void
     {
         $envelope = ConsumerWebhookEnvelope::make(
             CanonicalEvent::SALES_INVOICE_CHANGED,
             Provider::Exact,
             'school1',
             [],
-            causedByHub: false,
+            hubAuthored: false,
+        );
+
+        $this->assertArrayNotHasKey('hub_authored', $envelope);
+    }
+
+    public function test_the_retired_caused_by_hub_key_is_gone(): void
+    {
+        $envelope = ConsumerWebhookEnvelope::make(
+            CanonicalEvent::SALES_INVOICE_CHANGED,
+            Provider::Exact,
+            'school1',
+            [],
+            hubAuthored: true,
         );
 
         $this->assertArrayNotHasKey('caused_by_hub', $envelope);
-        $this->assertArrayNotHasKey('hub_authored', $envelope);
     }
 
     public function test_hub_last_wrote_at_is_absent_without_a_known_write(): void

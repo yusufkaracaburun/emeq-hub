@@ -30,7 +30,7 @@ final class HubOriginRegistry
     /**
      * @param  array<string, mixed>  $payload
      */
-    public function causedByHub(Provider $provider, Connection $connection, array $payload): bool
+    public function hubAuthored(Provider $provider, Connection $connection, array $payload): bool
     {
         $detector = $this->detectors[$provider->value] ?? null;
 
@@ -38,7 +38,7 @@ final class HubOriginRegistry
             return false;
         }
 
-        return app($detector)->causedByHub($connection, $payload);
+        return app($detector)->hubAuthored($connection, $payload);
     }
 
     /**

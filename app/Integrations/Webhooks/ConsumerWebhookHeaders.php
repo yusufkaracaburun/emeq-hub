@@ -22,10 +22,8 @@ final class ConsumerWebhookHeaders
     public static function make(?string $eventId = null): array
     {
         return array_filter([
-            // Zonder dit accepteert een consumer die een ValidationException gooit
-            // met een 302-redirect i.p.v. een 4xx/5xx — spatie/laravel-webhook-server
-            // telt een 3xx als geleverd, dus een infra-fout wordt dan stilletjes een
-            // permanent verloren webhook zonder retry.
+            // Houdt een falende consumer op 4xx/5xx in plaats van een 3xx die als
+            // geleverd telt. Zie `.docs/decisions/webhook-fanout-retry-policy.md`.
             'Accept' => 'application/json',
             'X-Emeq-Event-Id' => $eventId,
             'X-Emeq-Request-Id' => Context::get('request_id'),
