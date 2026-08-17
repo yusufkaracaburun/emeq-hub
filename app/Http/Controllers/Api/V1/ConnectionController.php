@@ -52,6 +52,13 @@ class ConnectionController extends Controller
                 'client_key' => $request->input('credentials.client_key'),
                 'subscription_key' => $request->input('credentials.subscription_key'),
                 'subscription_id' => $request->input('credentials.subscription_id'),
+                // De key-based shape kent geen OAuth-callback die de administratie
+                // ophaalt zoals ExactOAuthFlow dat doet, dus de consumer levert 'm mee.
+                // Zonder deze waarde vindt SnelstartWebhookController de Connection niet
+                // (die resolveert op `administratie_id`) en valt élke inkomende webhook
+                // als unknown_tenant weg; de kruis-koppeling-guard in
+                // ProviderEntityLinkRecorder staat dan ook uit.
+                'administratie_id' => $request->input('administratie_id'),
                 'metadata' => null,
             ]);
         } catch (UniqueConstraintViolationException) {

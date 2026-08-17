@@ -167,6 +167,56 @@ class StoreConnectionTest extends TestCase
             ->assertCreated();
     }
 
+    /**
+     * De key-based shape kent geen OAuth-callback die de administratie ophaalt, dus de
+     * consumer levert 'm mee. Zonder deze waarde resolveert SnelstartWebhookController
+     * de Connection niet en valt elke inkomende webhook als unknown_tenant weg.
+     */
+    public function test_administratie_id_is_persisted_so_snelstart_webhooks_resolve(): void
+    {
+        [$consumer, $token] = $this->consumerWithToken([TokenAbilities::SNELSTART_WRITE]);
+        $account = Account::factory()->for($consumer)->create();
+
+        $response = $this->withHeader('Authorization', "Bearer {$token}")
+            ->postJson('/v1/connections', [
+                'account_id' => $account->id,
+                'provider' => 'snelstart',
+                'administratie_id' => '11111111-2222-4333-8444-555555555555',
+                'credentials' => [
+                    'client_key' => self::CLIENT_KEY,
+                    'subscription_key' => self::SUBSCRIPTION_KEY,
+                ],
+            ])
+            ->assertCreated();
+
+        $this->assertDatabaseHas('connections', [
+            'id' => $response->json('id'),
+            'administratie_id' => '11111111-2222-4333-8444-555555555555',
+        ]);
+    }
+
+    public function test_a_connection_without_an_administratie_id_is_still_created(): void
+    {
+        [$consumer, $token] = $this->consumerWithToken([TokenAbilities::SNELSTART_WRITE]);
+        $account = Account::factory()->for($consumer)->create();
+
+        $response = $this->withHeader('Authorization', "Bearer {$token}")
+            ->postJson('/v1/connections', [
+                'account_id' => $account->id,
+                'provider' => 'snelstart',
+                'credentials' => [
+                    'client_key' => self::CLIENT_KEY,
+                    'subscription_key' => self::SUBSCRIPTION_KEY,
+                ],
+            ])
+            ->assertCreated();
+
+        $this->assertDatabaseHas('connections', [
+            'id' => $response->json('id'),
+            'administratie_id' => null,
+        ]);
+    }
+
     public function test_validation_error_for_missing_credentials_returns_422(): void
     {
         [$consumer, $token] = $this->consumerWithToken([TokenAbilities::SNELSTART_WRITE]);

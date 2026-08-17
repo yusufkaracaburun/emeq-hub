@@ -31,6 +31,7 @@ class StoreConnectionRequest extends FormRequest
             'credentials.client_key' => ['required_if:provider,'.Provider::Snelstart->value, 'string', 'min:10'],
             'credentials.subscription_key' => ['required_if:provider,'.Provider::Snelstart->value, 'string', 'min:10'],
             'credentials.subscription_id' => ['nullable', 'string', 'max:255'],
+            'administratie_id' => ['nullable', 'string', 'max:255'],
         ];
     }
 }
