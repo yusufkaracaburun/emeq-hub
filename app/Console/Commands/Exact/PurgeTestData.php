@@ -32,6 +32,17 @@ use Throwable;
  * automatisch verwijderd (een division draagt Exact-default-relaties zoals
  * "Belastingdienst Omzetbelasting"); geef de te wissen relatie-GUID's expliciet via
  * --relations. Default is dry-run; --force voert daadwerkelijk uit.
+ *
+ * LET OP — dit laat `provider_entity_links` achter. Die tabel legt vast wat de Hub in
+ * deze administratie heeft zien slagen, en weet niet dat de boekingen buiten de Hub om
+ * verdwenen zijn. Biedt een consumer zo'n `external_id` daarna opnieuw aan, dan
+ * antwoordt de Hub `200 deduplicated` of `409 document_already_posted` en landt het
+ * document nooit in Exact. Ruim ná een purge dus ook de links van die Connection op,
+ * anders lopen grootboek en administratie stil uiteen.
+ *
+ * Exact throttelt op ~60 calls/minuut per division en elke entry en elk Document is één
+ * DELETE. Een volle administratie vergt daarom meerdere passes met een minuut ertussen;
+ * de command is herhaalbaar en pakt bij elke run op wat er nog staat.
  */
 final class PurgeTestData extends Command
 {
