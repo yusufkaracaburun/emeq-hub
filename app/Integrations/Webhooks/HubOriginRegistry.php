@@ -7,6 +7,7 @@ namespace App\Integrations\Webhooks;
 use App\Enums\Provider;
 use App\Integrations\Contracts\DetectsHubOrigin;
 use App\Models\Connection;
+use Carbon\CarbonInterface;
 
 final class HubOriginRegistry
 {
@@ -38,5 +39,19 @@ final class HubOriginRegistry
         }
 
         return app($detector)->causedByHub($connection, $payload);
+    }
+
+    /**
+     * @param  array<string, mixed>  $payload
+     */
+    public function hubLastWroteAt(Provider $provider, Connection $connection, array $payload): ?CarbonInterface
+    {
+        $detector = $this->detectors[$provider->value] ?? null;
+
+        if ($detector === null) {
+            return null;
+        }
+
+        return app($detector)->hubLastWroteAt($connection, $payload);
     }
 }

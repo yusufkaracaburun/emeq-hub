@@ -3,6 +3,7 @@
 namespace Tests\Feature\Webhooks;
 
 use App\Enums\Provider;
+use App\Integrations\Webhooks\CanonicalEntityRegistry;
 use App\Integrations\Webhooks\CanonicalEvent;
 use App\Integrations\Webhooks\CanonicalEventRegistry;
 use App\Integrations\Webhooks\HubOriginRegistry;
@@ -75,14 +76,16 @@ class MollieWebhookFanOutTest extends TestCase
         $connection = Connection::factory()->forMollie()->active()->for($account)->create();
 
         $job = new ForwardWebhookToConsumerJob(Provider::Mollie, $connection, ['id' => 'tr_handle_1']);
-        $job->handle(app(CanonicalEventRegistry::class), app(HubOriginRegistry::class));
+        $job->handle(app(CanonicalEventRegistry::class), app(HubOriginRegistry::class), app(CanonicalEntityRegistry::class));
 
         // Spatie's webhook-server dispatcht intern een CallWebhookJob.
         Queue::assertPushed(CallWebhookJob::class, function (CallWebhookJob $pushed) {
             return $pushed->webhookUrl === 'https://consumer.test/hooks'
                 && is_array($pushed->payload)
                 && $pushed->payload['event'] === CanonicalEvent::PAYMENT_CHANGED
-                && ($pushed->payload['data']['id'] ?? null) === 'tr_handle_1';
+                && ($pushed->payload['data']['id'] ?? null) === 'tr_handle_1'
+                && ($pushed->payload['entity_id'] ?? null) === 'tr_handle_1'
+                && ! array_key_exists('action', $pushed->payload);
         });
     }
 
@@ -101,7 +104,7 @@ class MollieWebhookFanOutTest extends TestCase
         $connection = Connection::factory()->forMollie()->active()->for($account)->create();
 
         $job = new ForwardWebhookToConsumerJob(Provider::Mollie, $connection, ['id' => 'tr_no_callback']);
-        $job->handle(app(CanonicalEventRegistry::class), app(HubOriginRegistry::class));
+        $job->handle(app(CanonicalEventRegistry::class), app(HubOriginRegistry::class), app(CanonicalEntityRegistry::class));
 
         Queue::assertNothingPushed();
     }

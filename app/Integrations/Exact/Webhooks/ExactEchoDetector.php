@@ -8,17 +8,20 @@ use App\Integrations\Contracts\DetectsHubOrigin;
 use App\Models\Connection;
 use App\Models\ConnectionAccountingRef;
 use App\Models\ProviderEntityLink;
+use Carbon\CarbonInterface;
 
 final class ExactEchoDetector implements DetectsHubOrigin
 {
+    public function __construct(private readonly ExactEntityResolver $entities) {}
+
     /**
      * @param  array<string, mixed>  $payload
      */
     public function causedByHub(Connection $connection, array $payload): bool
     {
-        $key = $payload['Content']['Key'] ?? $payload['Key'] ?? null;
+        $key = $this->entities->entityId($payload);
 
-        if (! is_string($key) || $key === '') {
+        if ($key === null) {
             return false;
         }
 
@@ -27,6 +30,25 @@ final class ExactEchoDetector implements DetectsHubOrigin
         }
 
         return $this->hasHubCreatedRelation($connection, $key);
+    }
+
+    /**
+     * @param  array<string, mixed>  $payload
+     */
+    public function hubLastWroteAt(Connection $connection, array $payload): ?CarbonInterface
+    {
+        $key = $this->entities->entityId($payload);
+
+        if ($key === null) {
+            return null;
+        }
+
+        return ProviderEntityLink::query()
+            ->where('connection_id', $connection->id)
+            ->where('provider_entity_id', $key)
+            ->where('origin', ProviderEntityLink::ORIGIN_HUB)
+            ->latest('last_synced_at')
+            ->value('last_synced_at');
     }
 
     private function hasHubAuthoredLink(Connection $connection, string $key): bool

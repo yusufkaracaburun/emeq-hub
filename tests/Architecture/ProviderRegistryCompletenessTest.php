@@ -8,6 +8,7 @@ use App\Accounting\AccountingTargetRegistry;
 use App\Enums\Provider;
 use App\Integrations\Errors\UpstreamErrorMapperRegistry;
 use App\Integrations\OAuth\OAuthFlowRegistry;
+use App\Integrations\Webhooks\CanonicalEntityRegistry;
 use App\Integrations\Webhooks\CanonicalEventRegistry;
 use Tests\TestCase;
 
@@ -69,6 +70,24 @@ final class ProviderRegistryCompletenessTest extends TestCase
             $this->assertTrue($registry->supports($provider), sprintf(
                 'Provider %s heeft geen ResolvesCanonicalEvent. Zonder resolver levert '
                 .'elke webhook van deze partner het canonieke event `unmapped`.',
+                $provider->name,
+            ));
+        }
+    }
+
+    /**
+     * Zonder resolver levert elke webhook van deze partner `entity_id` en `action`
+     * als `null` — geen crash, maar wel een consumer die weer zelf moet gaan
+     * gissen naar wélk record wijzigde.
+     */
+    public function test_elke_provider_beschrijft_zijn_gewijzigde_entity(): void
+    {
+        $registry = $this->app->make(CanonicalEntityRegistry::class);
+
+        foreach (Provider::cases() as $provider) {
+            $this->assertTrue($registry->supports($provider), sprintf(
+                'Provider %s heeft geen ResolvesCanonicalEntity. Zonder resolver levert '
+                .'elke webhook van deze partner `entity_id` en `action` als `null`.',
                 $provider->name,
             ));
         }

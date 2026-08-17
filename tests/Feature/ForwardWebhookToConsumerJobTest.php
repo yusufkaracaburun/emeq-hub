@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Tests\Feature;
 
 use App\Enums\Provider;
+use App\Integrations\Webhooks\CanonicalAction;
+use App\Integrations\Webhooks\CanonicalEntityRegistry;
 use App\Integrations\Webhooks\CanonicalEvent;
 use App\Integrations\Webhooks\CanonicalEventRegistry;
 use App\Integrations\Webhooks\HubOriginRegistry;
@@ -64,7 +66,7 @@ class ForwardWebhookToConsumerJobTest extends TestCase
             $connection,
             ['administratieId' => $connection->administratie_id],
             'evt-no-callback',
-        ))->handle(app(CanonicalEventRegistry::class), app(HubOriginRegistry::class));
+        ))->handle(app(CanonicalEventRegistry::class), app(HubOriginRegistry::class), app(CanonicalEntityRegistry::class));
 
         Bus::assertNotDispatched(CallWebhookJob::class);
     }
@@ -82,7 +84,7 @@ class ForwardWebhookToConsumerJobTest extends TestCase
 
         $payload = ['administratieId' => $connection->administratie_id, 'type' => 'Verkoopfactuur.Created'];
 
-        (new ForwardWebhookToConsumerJob(Provider::Snelstart, $connection, $payload, 'evt-with-secret'))->handle(app(CanonicalEventRegistry::class), app(HubOriginRegistry::class));
+        (new ForwardWebhookToConsumerJob(Provider::Snelstart, $connection, $payload, 'evt-with-secret'))->handle(app(CanonicalEventRegistry::class), app(HubOriginRegistry::class), app(CanonicalEntityRegistry::class));
 
         Bus::assertDispatched(CallWebhookJob::class, function (CallWebhookJob $job) use ($payload): bool {
             $signatureHeader = config('webhook-server.signature_header_name', 'Signature');
@@ -112,14 +114,21 @@ class ForwardWebhookToConsumerJobTest extends TestCase
             'connection_id' => $connection->id,
             'provider_entity_id' => 'guid-hub',
             'origin' => ProviderEntityLink::ORIGIN_HUB,
+            'last_synced_at' => '2026-08-01T10:00:00+00:00',
         ]);
 
-        $payload = ['Content' => ['Topic' => 'SalesEntries', 'Key' => 'guid-hub']];
+        $payload = ['Content' => ['Topic' => 'SalesEntries', 'Action' => 'Update', 'Key' => 'guid-hub']];
 
         (new ForwardWebhookToConsumerJob(Provider::Exact, $connection, $payload, 'evt-echo'))
-            ->handle(app(CanonicalEventRegistry::class), app(HubOriginRegistry::class));
+            ->handle(app(CanonicalEventRegistry::class), app(HubOriginRegistry::class), app(CanonicalEntityRegistry::class));
 
-        Bus::assertDispatched(CallWebhookJob::class, fn (CallWebhookJob $job): bool => ($job->payload['caused_by_hub'] ?? null) === true);
+        Bus::assertDispatched(CallWebhookJob::class, function (CallWebhookJob $job): bool {
+            return ($job->payload['caused_by_hub'] ?? null) === true
+                && ($job->payload['hub_authored'] ?? null) === true
+                && ($job->payload['hub_last_wrote_at'] ?? null) === '2026-08-01T10:00:00+00:00'
+                && ($job->payload['entity_id'] ?? null) === 'guid-hub'
+                && ($job->payload['action'] ?? null) === CanonicalAction::UPDATED;
+        });
     }
 
     public function test_handle_omits_the_marker_for_a_change_the_hub_did_not_cause(): void
@@ -136,9 +145,14 @@ class ForwardWebhookToConsumerJobTest extends TestCase
         $payload = ['Content' => ['Topic' => 'BankEntries', 'Key' => 'guid-theirs']];
 
         (new ForwardWebhookToConsumerJob(Provider::Exact, $connection, $payload, 'evt-no-echo'))
-            ->handle(app(CanonicalEventRegistry::class), app(HubOriginRegistry::class));
+            ->handle(app(CanonicalEventRegistry::class), app(HubOriginRegistry::class), app(CanonicalEntityRegistry::class));
 
-        Bus::assertDispatched(CallWebhookJob::class, fn (CallWebhookJob $job): bool => ! array_key_exists('caused_by_hub', $job->payload));
+        Bus::assertDispatched(CallWebhookJob::class, function (CallWebhookJob $job): bool {
+            return ! array_key_exists('caused_by_hub', $job->payload)
+                && ! array_key_exists('hub_authored', $job->payload)
+                && ! array_key_exists('hub_last_wrote_at', $job->payload)
+                && ($job->payload['entity_id'] ?? null) === 'guid-theirs';
+        });
     }
 
     public function test_handle_includes_event_id_header(): void
@@ -154,7 +168,7 @@ class ForwardWebhookToConsumerJobTest extends TestCase
             $connection,
             ['administratieId' => $connection->administratie_id],
             'evt-001',
-        ))->handle(app(CanonicalEventRegistry::class), app(HubOriginRegistry::class));
+        ))->handle(app(CanonicalEventRegistry::class), app(HubOriginRegistry::class), app(CanonicalEntityRegistry::class));
 
         Bus::assertDispatched(CallWebhookJob::class, function (CallWebhookJob $job): bool {
             return ($job->headers['X-Emeq-Event-Id'] ?? null) === 'evt-001';
@@ -174,7 +188,7 @@ class ForwardWebhookToConsumerJobTest extends TestCase
             $connection,
             ['administratieId' => $connection->administratie_id],
             'evt-retry-policy',
-        ))->handle(app(CanonicalEventRegistry::class), app(HubOriginRegistry::class));
+        ))->handle(app(CanonicalEventRegistry::class), app(HubOriginRegistry::class), app(CanonicalEntityRegistry::class));
 
         Bus::assertDispatched(CallWebhookJob::class, function (CallWebhookJob $job): bool {
             return $job->tries === 5
@@ -198,7 +212,7 @@ class ForwardWebhookToConsumerJobTest extends TestCase
 
         $payload = ['administratieId' => $connection->administratie_id];
 
-        (new ForwardWebhookToConsumerJob(Provider::Snelstart, $connection, $payload, 'evt-anti-corr'))->handle(app(CanonicalEventRegistry::class), app(HubOriginRegistry::class));
+        (new ForwardWebhookToConsumerJob(Provider::Snelstart, $connection, $payload, 'evt-anti-corr'))->handle(app(CanonicalEventRegistry::class), app(HubOriginRegistry::class), app(CanonicalEntityRegistry::class));
 
         Bus::assertDispatched(CallWebhookJob::class, function (CallWebhookJob $job): bool {
             $signatureHeader = config('webhook-server.signature_header_name', 'Signature');

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Feature\Webhooks;
 
 use App\Enums\Provider;
+use App\Integrations\Webhooks\CanonicalEntityRegistry;
 use App\Integrations\Webhooks\CanonicalEvent;
 use App\Integrations\Webhooks\CanonicalEventRegistry;
 use App\Integrations\Webhooks\HubOriginRegistry;
@@ -78,7 +79,7 @@ class CanonicalEventEnvelopeTest extends TestCase
         $payload = ['Topic' => 'BankEntries', 'Action' => 'Update', 'Content' => ['Division' => 4471372]];
 
         (new ForwardWebhookToConsumerJob(Provider::Exact, $connection, $payload, 'evt-1'))
-            ->handle(app(CanonicalEventRegistry::class), app(HubOriginRegistry::class));
+            ->handle(app(CanonicalEventRegistry::class), app(HubOriginRegistry::class), app(CanonicalEntityRegistry::class));
 
         Bus::assertDispatched(CallWebhookJob::class, function (CallWebhookJob $job) use ($payload): bool {
             return $job->payload['event'] === CanonicalEvent::BANK_STATEMENT_CHANGED
@@ -86,7 +87,9 @@ class CanonicalEventEnvelopeTest extends TestCase
                 // Het id dat de consumer zelf aanleverde, niet onze primary key.
                 && $job->payload['account_id'] === 'school1'
                 && is_string($job->payload['occurred_at'])
-                && $job->payload['data'] === $payload;
+                && $job->payload['data'] === $payload
+                && ! array_key_exists('entity_id', $job->payload)
+                && ($job->payload['action'] ?? null) === 'updated';
         });
     }
 
@@ -104,7 +107,7 @@ class CanonicalEventEnvelopeTest extends TestCase
         $connection = Connection::factory()->forMollie()->active()->for($account)->create();
 
         (new ForwardWebhookToConsumerJob(Provider::Mollie, $connection, ['id' => 'tr_abc'], null))
-            ->handle(app(CanonicalEventRegistry::class), app(HubOriginRegistry::class));
+            ->handle(app(CanonicalEventRegistry::class), app(HubOriginRegistry::class), app(CanonicalEntityRegistry::class));
 
         Bus::assertDispatched(CallWebhookJob::class, function (CallWebhookJob $job): bool {
             return isset($job->headers['X-Emeq-Event-Id'])

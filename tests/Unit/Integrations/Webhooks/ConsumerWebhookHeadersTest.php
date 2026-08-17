@@ -15,6 +15,7 @@ class ConsumerWebhookHeadersTest extends TestCase
         Context::add('request_id', '01HTESTREQ0000000000000000');
 
         $this->assertSame([
+            'Accept' => 'application/json',
             'X-Emeq-Event-Id' => 'evt-1',
             'X-Emeq-Request-Id' => '01HTESTREQ0000000000000000',
         ], ConsumerWebhookHeaders::make('evt-1'));
@@ -29,7 +30,7 @@ class ConsumerWebhookHeadersTest extends TestCase
         Context::add('request_id', '01HTESTREQ0000000000000000');
 
         $this->assertSame(
-            ['X-Emeq-Request-Id' => '01HTESTREQ0000000000000000'],
+            ['Accept' => 'application/json', 'X-Emeq-Request-Id' => '01HTESTREQ0000000000000000'],
             ConsumerWebhookHeaders::make()
         );
     }
@@ -41,8 +42,18 @@ class ConsumerWebhookHeadersTest extends TestCase
     public function test_omits_the_request_id_outside_a_request_context(): void
     {
         $this->assertSame(
-            ['X-Emeq-Event-Id' => 'evt-2'],
+            ['Accept' => 'application/json', 'X-Emeq-Event-Id' => 'evt-2'],
             ConsumerWebhookHeaders::make('evt-2')
         );
+    }
+
+    /**
+     * Zonder deze header rendert een consumer die een ValidationException gooit
+     * een 302-redirect, en spatie/laravel-webhook-server telt een 3xx als
+     * geleverd — een infra-fout wordt dan een stille, permanente drop.
+     */
+    public function test_always_asks_for_json(): void
+    {
+        $this->assertSame('application/json', ConsumerWebhookHeaders::make()['Accept']);
     }
 }

@@ -11,16 +11,20 @@ use App\Integrations\Exact\Accounting\ExactAccountingTarget;
 use App\Integrations\Exact\Errors\UpstreamErrorMapper as ExactUpstreamErrorMapper;
 use App\Integrations\Exact\OAuth\ExactOAuthFlow;
 use App\Integrations\Exact\Webhooks\ExactEchoDetector;
+use App\Integrations\Exact\Webhooks\ExactEntityResolver;
 use App\Integrations\Exact\Webhooks\ExactEventResolver;
 use App\Integrations\Mollie\Errors\UpstreamErrorMapper as MollieUpstreamErrorMapper;
 use App\Integrations\Mollie\HubMollieCredentialResolver;
 use App\Integrations\Mollie\MollieAccessTokenResolver;
 use App\Integrations\Mollie\MollieConnectionContext;
 use App\Integrations\Mollie\OAuth\MollieConnectOAuthFlow;
+use App\Integrations\Mollie\Webhooks\MollieEntityResolver;
 use App\Integrations\Mollie\Webhooks\MollieEventResolver;
 use App\Integrations\OAuth\OAuthFlowRegistry;
 use App\Integrations\Snelstart\Errors\UpstreamErrorMapper as SnelstartUpstreamErrorMapper;
+use App\Integrations\Snelstart\Webhooks\SnelstartEntityResolver;
 use App\Integrations\Snelstart\Webhooks\SnelstartEventResolver;
+use App\Integrations\Webhooks\CanonicalEntityRegistry;
 use App\Integrations\Webhooks\CanonicalEventRegistry;
 use App\Integrations\Webhooks\HubOriginRegistry;
 use App\Models\User;
@@ -77,6 +81,18 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(HubOriginRegistry::class, function (): HubOriginRegistry {
             $registry = new HubOriginRegistry;
             $registry->register(Provider::Exact, ExactEchoDetector::class);
+
+            return $registry;
+        });
+
+        // Partner-payload → canonieke entity-id + actie. Zelfde vangnet als
+        // CanonicalEventRegistry hierboven, voor "wélk record wijzigde" in plaats
+        // van "wat voor soort event was dit".
+        $this->app->singleton(CanonicalEntityRegistry::class, function (): CanonicalEntityRegistry {
+            $registry = new CanonicalEntityRegistry;
+            $registry->register(Provider::Exact, ExactEntityResolver::class);
+            $registry->register(Provider::Mollie, MollieEntityResolver::class);
+            $registry->register(Provider::Snelstart, SnelstartEntityResolver::class);
 
             return $registry;
         });

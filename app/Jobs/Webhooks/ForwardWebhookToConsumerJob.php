@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Jobs\Webhooks;
 
 use App\Enums\Provider;
+use App\Integrations\Webhooks\CanonicalEntityRegistry;
 use App\Integrations\Webhooks\CanonicalEventRegistry;
 use App\Integrations\Webhooks\ConsumerWebhookEnvelope;
 use App\Integrations\Webhooks\ConsumerWebhookHeaders;
@@ -70,7 +71,7 @@ final class ForwardWebhookToConsumerJob implements ShouldQueue
         }
     }
 
-    public function handle(CanonicalEventRegistry $events, HubOriginRegistry $origins): void
+    public function handle(CanonicalEventRegistry $events, HubOriginRegistry $origins, CanonicalEntityRegistry $entities): void
     {
         $account = $this->providerConnection->account;
         $consumer = $account?->consumer;
@@ -89,13 +90,15 @@ final class ForwardWebhookToConsumerJob implements ShouldQueue
             return;
         }
 
-        $causedByHub = $origins->causedByHub($this->provider, $this->providerConnection, $this->payload);
+        $entityId = $entities->entityIdFor($this->provider, $this->payload);
+        $hubAuthored = $origins->causedByHub($this->provider, $this->providerConnection, $this->payload);
+        $hubLastWroteAt = $origins->hubLastWroteAt($this->provider, $this->providerConnection, $this->payload);
 
-        Log::info($causedByHub ? 'webhook.echo_detected' : 'webhook.echo_not_detected', [
+        Log::info($hubAuthored ? 'webhook.hub_authored' : 'webhook.hub_not_authored', [
             'provider' => $this->provider->value,
             'connection_id' => $this->providerConnection->id,
             'event_id' => $this->eventId,
-            'key' => $this->payload['Content']['Key'] ?? null,
+            'entity_id' => $entityId,
         ]);
 
         WebhookCall::create()
@@ -105,7 +108,10 @@ final class ForwardWebhookToConsumerJob implements ShouldQueue
                 $this->provider,
                 (string) $account->external_id,
                 $this->payload,
-                $causedByHub,
+                $hubAuthored,
+                $entityId,
+                $entities->actionFor($this->provider, $this->payload),
+                $hubLastWroteAt,
             ))
             ->useSecret((string) $consumer->webhook_callback_secret)
             ->withHeaders(ConsumerWebhookHeaders::make($this->eventId))
