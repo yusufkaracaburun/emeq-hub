@@ -74,7 +74,7 @@ X-Account-Id: {{accountId}}
   "external_id": "DRYRUN-001",
   "number": "Droogzwemmen 001",
   "issue_date": "2026-08-14",
-  "party": { "role": "debtor", "name": "Nog Onbekende Klant", "external_id": "KLANT-001" },
+  "party": { "role": "debtor", "kind": "company", "name": "Nog Onbekende Klant", "external_id": "KLANT-001", "chamber_of_commerce": "12345678" },
   "lines": [
     { "description": "Consultancy", "amount": 200, "tax_rate": 21 }
   ]
@@ -96,7 +96,7 @@ Idempotency-Key: {{$guid}}
   "external_id": "INV-001",
   "number": "Factuur 001",
   "issue_date": "2026-08-14",
-  "party": { "role": "debtor", "name": "Hub Test Klant", "external_id": "KLANT-001" },
+  "party": { "role": "debtor", "kind": "company", "name": "Hub Test Klant", "external_id": "KLANT-001", "chamber_of_commerce": "12345678" },
   "lines": [
     { "description": "Consultancy", "amount": 200, "tax_rate": 21, "category": "omzet" }
   ]
@@ -117,7 +117,7 @@ Idempotency-Key: {{$guid}}
   "external_id": "INV-002",
   "number": "Factuur 002 zonder category",
   "issue_date": "2026-08-14",
-  "party": { "role": "debtor", "name": "Hub Test Klant", "external_id": "KLANT-001" },
+  "party": { "role": "debtor", "kind": "company", "name": "Hub Test Klant", "external_id": "KLANT-001", "chamber_of_commerce": "12345678" },
   "lines": [
     { "description": "Consultancy", "amount": 200, "tax_rate": 21 }
   ]
@@ -136,7 +136,7 @@ Idempotency-Key: {{$guid}}
   "external_id": "INV-003",
   "number": "Factuur 003 verlegd",
   "issue_date": "2026-08-14",
-  "party": { "role": "debtor", "name": "Hub Test Klant", "external_id": "KLANT-001" },
+  "party": { "role": "debtor", "kind": "company", "name": "Hub Test Klant", "external_id": "KLANT-001", "chamber_of_commerce": "12345678" },
   "lines": [
     { "description": "Onderaanneming", "amount": 1000, "tax_rate": 21, "tax_treatment": "reverse_charge", "category": "omzet" }
   ]
@@ -158,7 +158,7 @@ Idempotency-Key: {{$guid}}
   "external_id": "CN-001",
   "number": "Creditnota 001",
   "issue_date": "2026-08-14",
-  "party": { "role": "debtor", "name": "Hub Test Klant", "external_id": "KLANT-001" },
+  "party": { "role": "debtor", "kind": "company", "name": "Hub Test Klant", "external_id": "KLANT-001", "chamber_of_commerce": "12345678" },
   "lines": [
     { "description": "Correctie", "amount": -50, "tax_rate": 21, "category": "omzet" }
   ]
@@ -180,7 +180,7 @@ Idempotency-Key: {{$guid}}
   "external_id": "INV-004",
   "number": "Factuur 004 met bijlage",
   "issue_date": "2026-08-14",
-  "party": { "role": "debtor", "name": "Hub Test Klant", "external_id": "KLANT-001" },
+  "party": { "role": "debtor", "kind": "company", "name": "Hub Test Klant", "external_id": "KLANT-001", "chamber_of_commerce": "12345678" },
   "lines": [
     { "description": "Consultancy", "amount": 200, "tax_rate": 21, "category": "omzet" }
   ],
@@ -205,7 +205,7 @@ Idempotency-Key: {{$guid}}
   "external_id": "PINV-001",
   "number": "Inkoop 001",
   "issue_date": "2026-08-14",
-  "party": { "role": "creditor", "name": "Hub Test Leverancier", "external_id": "LEV-001" },
+  "party": { "role": "creditor", "kind": "company", "name": "Hub Test Leverancier", "external_id": "LEV-001", "chamber_of_commerce": "87651234" },
   "lines": [
     { "description": "Onderaanneming", "amount": 500, "tax_rate": 21, "category": "kosten" }
   ]
@@ -231,7 +231,7 @@ Idempotency-Key: {{$guid}}
   "external_id": "INC-001",
   "number": "Ontvangst 001",
   "issue_date": "2026-08-14",
-  "party": { "role": "debtor", "name": "Hub Test Klant", "external_id": "KLANT-001" },
+  "party": { "role": "debtor", "kind": "company", "name": "Hub Test Klant", "external_id": "KLANT-001", "chamber_of_commerce": "12345678" },
   "lines": [
     { "description": "Doorbelasting materiaal", "amount": 150, "tax_rate": 21, "category": "omzet" }
   ]
@@ -250,7 +250,7 @@ Idempotency-Key: {{$guid}}
   "external_id": "EXP-001",
   "number": "Uitgave 001",
   "issue_date": "2026-08-14",
-  "party": { "role": "creditor", "name": "Hub Test Leverancier", "external_id": "LEV-001" },
+  "party": { "role": "creditor", "kind": "company", "name": "Hub Test Leverancier", "external_id": "LEV-001", "chamber_of_commerce": "87651234" },
   "lines": [
     { "description": "Gereedschap", "amount": 80, "tax_rate": 21, "category": "kosten" }
   ]
@@ -259,8 +259,9 @@ Idempotency-Key: {{$guid}}
 
 ### ─── Onbekende relatie ──────────────────────────────────────────────────────
 
-### Onbekende partij ZONDER create_if_missing → 422 REFERENCE_MAPPING_MISSING.
-#   De Hub maakt niets aan tenzij het document erom vraagt.
+### Zakelijke partij ZONDER KvK én ZONDER btw-nummer → 422 op de edge.
+#   De Hub zou zo'n relatie alleen op naam kunnen herkennen, en een naam-miss zet
+#   een duplicaat in de administratie van de klant. Vul het aan in de bron.
 POST {{baseUrl}}/v1/accounting/documents
 Authorization: Bearer {{token}}
 Content-Type: application/json
@@ -271,9 +272,9 @@ Idempotency-Key: {{$guid}}
 {
   "type": "sales_invoice",
   "external_id": "NEW-001",
-  "number": "Nieuwe klant zonder vlag",
+  "number": "Zakelijke klant zonder sleutel",
   "issue_date": "2026-08-14",
-  "party": { "role": "debtor", "name": "Gloednieuwe Klant BV", "external_id": "KLANT-NIEUW-001" },
+  "party": { "role": "debtor", "kind": "company", "name": "Gloednieuwe Klant BV", "external_id": "KLANT-NIEUW-001" },
   "lines": [
     { "description": "Consultancy", "amount": 100, "tax_rate": 21 }
   ]
@@ -296,9 +297,9 @@ Idempotency-Key: {{$guid}}
   "issue_date": "2026-08-14",
   "party": {
     "role": "debtor",
+    "kind": "company",
     "name": "Volledige Klant BV",
     "external_id": "KLANT-NIEUW-003",
-    "create_if_missing": true,
     "vat_number": "NL000099998B57",
     "chamber_of_commerce": "12345678",
     "address_line_1": "Dorpsstraat 1",
@@ -314,14 +315,10 @@ Idempotency-Key: {{$guid}}
   ]
 }
 
-### Zelfde partij MET create_if_missing → 201 + één nieuwe relatie in Exact.
-#   `external_id` is verplicht zodra je deze vlag zet: zonder die sleutel kan de
-#   Hub de aangemaakte relatie niet stabiel terugvinden en zou een tweede boeking
-#   een duplicaat opleveren. Weigert op de edge.
-#
-#   Zet deze vlag alleen wanneer de gebruiker bewust een nieuwe relatie aanmaakt.
-#   Standaard aanzetten betekent dat elke typefout in een partijnaam een nieuwe
-#   relatie in de administratie van de klant zet.
+### Zelfde partij MET KvK → 201 + één nieuwe relatie in Exact.
+#   De ladder zoekt eerst op de mirror, dan KvK, dan btw, dan genormaliseerde naam,
+#   en maakt de relatie pas aan als alle vier missen. `warnings[]` in het antwoord
+#   draagt `relation.created`.
 POST {{baseUrl}}/v1/accounting/documents
 Authorization: Bearer {{token}}
 Content-Type: application/json
@@ -332,13 +329,40 @@ Idempotency-Key: {{$guid}}
 {
   "type": "sales_invoice",
   "external_id": "NEW-002",
-  "number": "Nieuwe klant met vlag",
+  "number": "Nieuwe klant met KvK",
   "issue_date": "2026-08-14",
   "party": {
     "role": "debtor",
+    "kind": "company",
     "name": "Gloednieuwe Klant BV",
     "external_id": "KLANT-NIEUW-001",
-    "create_if_missing": true
+    "chamber_of_commerce": "87654321"
+  },
+  "lines": [
+    { "description": "Consultancy", "amount": 100, "tax_rate": 21 }
+  ]
+}
+
+### Particulier → geen sterke sleutel nodig, wordt aangemaakt na een mirror-miss.
+#   De ladder slaat KvK, btw en de naam-probe over: twee gelijknamige personen
+#   zouden anders aan elkaars factuur gekoppeld worden.
+POST {{baseUrl}}/v1/accounting/documents
+Authorization: Bearer {{token}}
+Content-Type: application/json
+Accept: application/json
+X-Account-Id: {{accountId}}
+Idempotency-Key: {{$guid}}
+
+{
+  "type": "sales_invoice",
+  "external_id": "NEW-004",
+  "number": "Particuliere klant",
+  "issue_date": "2026-08-14",
+  "party": {
+    "role": "debtor",
+    "kind": "person",
+    "name": "Jan Jansen",
+    "external_id": "KLANT-NIEUW-004"
   },
   "lines": [
     { "description": "Consultancy", "amount": 100, "tax_rate": 21 }
@@ -360,7 +384,7 @@ Idempotency-Key: {{$guid}}
   "external_id": "ERR-001",
   "number": "Zonder account-header",
   "issue_date": "2026-08-14",
-  "party": { "role": "debtor", "name": "Hub Test Klant", "external_id": "KLANT-001" },
+  "party": { "role": "debtor", "kind": "company", "name": "Hub Test Klant", "external_id": "KLANT-001", "chamber_of_commerce": "12345678" },
   "lines": [{ "description": "Consultancy", "amount": 100, "tax_rate": 21 }]
 }
 
@@ -377,7 +401,7 @@ Idempotency-Key: {{$guid}}
   "external_id": "ERR-002",
   "number": "Onbekend account",
   "issue_date": "2026-08-14",
-  "party": { "role": "debtor", "name": "Hub Test Klant", "external_id": "KLANT-001" },
+  "party": { "role": "debtor", "kind": "company", "name": "Hub Test Klant", "external_id": "KLANT-001", "chamber_of_commerce": "12345678" },
   "lines": [{ "description": "Consultancy", "amount": 100, "tax_rate": 21 }]
 }
 

@@ -559,24 +559,27 @@ de provider:
 - `credit_note` wordt als verkoopboeking (debiteur, verkoopdagboek) doorgestuurd — net als
   `sales_invoice`. De Hub muteert je bedragen **niet** en keert het teken **niet** om: lever
   zelf negatieve `amount`-waarden aan als je een creditboeking wilt. Wat je stuurt, boekt de Hub.
-- `party.role`: `debtor` (verkoop) of `creditor` (inkoop). `vat_number`/`iban`/`external_id` optioneel.
-- **Relatiekaart** (allemaal optioneel): `chamber_of_commerce`, `address_line_1`,
-  `address_line_2`, `postcode`, `city`, `state`, `country` (ISO-landcode, 2 letters),
-  `email`, `phone`, `website`. Deze velden tellen alleen wanneer de Hub de relatie
-  aanmaakt (`create_if_missing`) — bestaat 'ie al, dan is de administratie leidend en
-  raakt de Hub 'm niet aan. Stuur wat je hebt: een relatie met alleen een naam is voor
-  de boekhouder onbruikbaar. Weet je een veld niet zeker, laat het weg in plaats van te
-  gokken — een fout adres is erger dan geen adres.
-- `party.external_id` = jouw stabiele klant-/leverancier-sleutel. Stuur 'm consistent
-  mee: de Hub onthoudt 'm (relatie-mirror) zodat een volgende boeking direct matcht.
-- `party.create_if_missing` (optioneel, default `false`) = laat de Hub een onbekende
-  relatie aanmaken in de boekhouding in plaats van `422` te geven (zie "Onbekende
-  relatie?" verderop). Vereist `party.external_id` — zonder sleutel kan de Hub de
-  aangemaakte relatie niet terugvinden bij de volgende boeking, en zet een tweede
-  boeking voor dezelfde partij een dubbele relatie in de administratie. Zet 'm alleen
-  wanneer de eindgebruiker net bewust een nieuwe klant of leverancier heeft ingevoerd,
-  niet standaard op elke boeking: het is een onomkeerbare schrijfactie in andermans
-  boekhouding.
+- `party.role`: `debtor` (verkoop) of `creditor` (inkoop).
+- `party.kind` (**verplicht**): `company` of `person`. Dit zegt wélke sleutels bestaan,
+  niet wat de Hub mag doen. Een `company` wordt herkend op KvK of btw-nummer; een
+  `person` heeft geen van beide en leunt volledig op `party.external_id`.
+- `party.external_id` (**verplicht**) = jouw stabiele klant-/leverancier-sleutel. De Hub
+  onthoudt 'm (relatie-mirror) zodat een volgende boeking direct matcht, zonder de
+  boekhouding te bevragen.
+- **Bij `kind: company` is `chamber_of_commerce` of `vat_number` verplicht.** Zonder een
+  van beide kan de Hub de relatie alleen op naam herkennen, en een naam-miss zet een
+  duplicaat in de administratie van je klant. Ontbreken ze allebei, dan volgt een `422`
+  en werk je het bij in je eigen app.
+- `party.relation_id` (optioneel) = de relatie in de boekhouding, rechtstreeks aangewezen.
+  Hiermee slaat de Hub de hele zoekladder over. Gebruik dit om een `409 relation_ambiguous`
+  op te lossen: je gebruiker kiest de juiste relatie, jij pint 'm één keer, de Hub onthoudt 'm.
+- **Relatiekaart** (allemaal optioneel): `address_line_1`, `address_line_2`, `postcode`,
+  `city`, `state`, `country` (ISO-landcode, 2 letters), `email`, `phone`, `website`,
+  plus `iban`. Deze velden tellen alleen wanneer de Hub de relatie aanmaakt — bestaat 'ie
+  al, dan is de administratie leidend en raakt de Hub alleen een leeg KvK- of btw-veld
+  aan (zodat de volgende boeking sterker matcht). Stuur wat je hebt: een relatie met
+  alleen een naam is voor de boekhouder onbruikbaar. Weet je een veld niet zeker, laat het
+  weg in plaats van te gokken — een fout adres is erger dan geen adres.
 - `lines[].amount` = **netto** regelbedrag (leidend); `tax_rate` = percentage (0/9/21).
   `quantity`/`unit_price` optioneel/informatief; `category` = GL-hint.
 - `lines[].tax_treatment` (optioneel, default `standard`) = BTW-behandeling. Zet
@@ -664,9 +667,12 @@ zonder Exact-jargon, met de consequentie en de handeling erin. Stuur je logica o
 | `currency.foreign` | info | nee | Andere valuta dan EUR |
 | `document.*` (type/party/lines) | error | ja | Zonder deze velden valt er niets te boeken |
 | `document.external_id.missing` / `document.issue_date.missing` / `document.party.role.missing` | warning | nee | Vul je alsnog in tijdens het boeken |
+| `document.party.kind.missing` / `document.party.external_id.missing` | warning | nee | Vul je alsnog in tijdens het boeken; het boeken weigert er wél op |
+| `document.party.identifier.missing` | warning | nee | `kind: company` zonder KvK én zonder btw-nummer. Het boeken weigert hierop met een `422` |
 | `exact.vat_code.unmapped` | warning | ja | Tarief nog niet gekoppeld aan een Exact-VATCode (een gekoppeld tarief levert géén finding) |
-| `exact.relation.matched` | info | nee | Relatie = bestaande Exact-relatie (`suggestion` = GUID). Match op `party.external_id` uit de mirror, anders op btw-nummer/naam |
-| `exact.relation.new` | info **of** warning | nee (info) / ja (warning) | Relatie nog niet in Exact. `info` = het document zet `party.create_if_missing: true` en auto-create staat niet uit op de koppeling — de boeking maakt 'm aan. **`warning` = `create_if_missing` ontbreekt of staat uit, óf de koppeling zet auto-create expliciet uit — de boeking geeft dan een `422`.** Lees `blocking`, niet de severity of de tekst |
+| `exact.relation.matched` | info | nee | Relatie = bestaande Exact-relatie (`suggestion` = GUID). Herkend via `party.relation_id`, de mirror op `external_id`, KvK, btw-nummer of genormaliseerde naam |
+| `exact.relation.new` | info | nee | Relatie nog niet in Exact — de boeking maakt 'm aan en meldt dat terug via `warnings[]` |
+| `exact.relation.ambiguous` | warning | ja | Meerdere relaties met hetzelfde KvK- of btw-nummer. Het boeken geeft een `409`; laat je gebruiker kiezen en stuur `party.relation_id` |
 | `exact.cost_center.matched` / `exact.cost_unit.matched` | info | nee | Opgegeven kostenplaats/-drager bestaat in de administratie |
 | `exact.cost_center.unmapped` / `exact.cost_unit.unmapped` | warning | ja | Kostenplaats/-drager onbekend — de boeking weigert hierop. Corrigeer de Code of draai `POST /v1/accounting/sync` |
 
@@ -730,24 +736,38 @@ De vergelijking kijkt naar de betekenis van het document, niet naar de exacte by
 sleutelvolgorde en `200` versus `200.00` maken geen verschil. Een gewijzigd bedrag,
 tarief, regel, datum of factuurnummer wél.
 
-**Onbekende relatie?** Standaard geeft een party die niet in Exact bestaat
-`422 mapping_failed`. Zet je op het document `party.create_if_missing: true` (met
-`party.external_id` gevuld), dan maakt de Hub de relatie aan — pas ná een echte miss
-op mirror én `vat_number`/`name` — en boekt door. Stuur dus altijd een nette
-`party.name` (+ `vat_number` indien bekend) mee.
+**Onbekende relatie?** Daar hoef je niets voor te zetten. De Hub loopt een vaste
+ladder af en maakt de relatie pas aan als elke stap misgaat:
 
-Zet `create_if_missing` alleen wanneer de eindgebruiker net bewust een nieuwe klant
-of leverancier heeft ingevoerd, niet standaard op elke boeking — elke typefout in de
-partijnaam zet anders een nieuwe, onomkeerbare relatie in de boekhouding van je
-klant.
+1. `party.relation_id`, als je die meestuurt — dan slaat de Hub de rest over
+2. de mirror op `party.external_id`
+3. KvK-nummer (alleen bij `kind: company`)
+4. btw-nummer (alleen bij `kind: company`)
+5. genormaliseerde naam (alleen bij `kind: company`) — bij een treffer vult de Hub een
+   leeg KvK-/btw-veld in de administratie aan, zodat stap 3 of 4 het de volgende keer doet
+6. aanmaken
+
+Een `person` slaat stap 3 tot 5 over: particulieren hebben geen sterke sleutel, en twee
+gelijknamige personen zouden een factuur aan de verkeerde klant koppelen.
+
+Wat de Hub in de administratie heeft gedaan lees je terug in `warnings[]` op het
+antwoord: `relation.created`, `relation.matched_by_name`, `relation.name_differs`. Toon
+die aan je gebruiker — het is de enige plek waar zichtbaar wordt dat er iets in zijn
+boekhouding is bijgekomen.
+
+Vinden stap 3 of 4 méér dan één relatie, dan volgt `409 relation_ambiguous` met de
+kandidaten in de body. De Hub kiest dan niet: twee relaties met hetzelfde KvK-nummer
+betekent dat de administratie al vervuild is, en er een derde bij zetten maakt het erger.
+Laat je gebruiker kiezen en boek opnieuw met `party.relation_id`.
 
 Foutcodes: `403 insufficient_ability` (PAT mist `accounting:write`) ·
 `400 idempotency_key_required` / `400 idempotency_key_invalid` ·
 `409 idempotency_request_in_progress` (wacht `Retry-After`, dan retryen) ·
 `422 idempotency_key_reuse` (zelfde sleutel, ander document) ·
 `409 document_already_posted` (zie hierboven — corrigeer met een nieuw `external_id`) ·
-`422 mapping_failed` (onvolledige boekhoud-mapping óf onbekende relatie — zet
-`party.create_if_missing: true` of voeg de relatie zelf toe in de administratie) ·
+`422 mapping_failed` (onvolledige boekhoud-mapping) ·
+`409 relation_ambiguous` (meerdere relaties met hetzelfde KvK- of btw-nummer; `candidates`
+staat in de body — laat je gebruiker kiezen en stuur `party.relation_id`) ·
 `422 upstream_rejected` (het pakket wees de boeking functioneel af, bv. een ongeldig
 btw-nummer — **niet retryen**, corrigeer het document: `message` is een leesbare
 uitleg, `provider_message` de rauwe pakket-tekst) ·
@@ -792,9 +812,10 @@ aan onze kant misging — dat onderscheid bepaalt bij wie je moet zijn.
 Implementeer de boekhoud-sync naar de emeq Hub (provider-agnostisch, ik lever het
 Hub-canonical formaat — buig niets naar Exact). Voor elk boekbaar document:
 1. Bouw het canonical document (snake_case): type, external_id (mijn stabiele
-   document-sleutel), issue_date, party{role,name,vat_number?,external_id,
-   create_if_missing?}, lines[] met netto `amount` + `tax_rate`, optioneel
-   attachments (base64).
+   document-sleutel), issue_date, party{role,kind,name,external_id,
+   chamber_of_commerce?,vat_number?,relation_id?}, lines[] met netto `amount` +
+   `tax_rate`, optioneel attachments (base64). `kind` is `company` of `person`; bij
+   `company` is een KvK- of btw-nummer verplicht.
 2. Stuur optioneel eerst `POST /v1/accounting/documents/validate` (header
    `X-Account-Id: {tenant}`), toon de findings en laat de gebruiker bevestigen.
 3. Boek met `POST /v1/accounting/documents`, headers `X-Account-Id: {tenant}` +
@@ -804,15 +825,15 @@ Hub-canonical formaat — buig niets naar Exact). Voor elk boekbaar document:
    (leesbaar boekstuknummer, toon dít aan de gebruiker) in mijn sync-ledger naast
    mijn external_id. Behandel `200` met `deduplicated: true` net zo — dat is
    dezelfde boeking, niet opnieuw uitgevoerd. Behandel `422 mapping_failed` als
-   "actie vereist in de Hub-admin" — tenzij de gebruiker net bewust een nieuwe klant
-   of leverancier heeft ingevoerd: boek dan opnieuw met `party.create_if_missing:
-   true` (en `party.external_id` gevuld). `409 document_already_posted` betekent dat
+   "actie vereist in de Hub-admin". `409 document_already_posted` betekent dat
    ik hetzelfde external_id met andere inhoud stuurde: nooit retryen, maar een
    creditnota + nieuw external_id maken. Retry nooit een 5xx zonder dezelfde
    Idempotency-Key.
-Stuur `party.external_id` consistent mee zodat relaties gecachet worden. Zet
-`party.create_if_missing` alleen wanneer de gebruiker zelf bewust een nieuwe relatie
-aanmaakt, nooit standaard bij elke boeking.
+5. Toon `warnings[]` uit het antwoord aan de gebruiker — daar staat wat er in zijn
+   boekhouding is gebeurd (relatie aangemaakt, op naam gekoppeld, naam wijkt af).
+6. Bij `409 relation_ambiguous`: toon de `candidates` uit de body, laat de gebruiker
+   de juiste relatie kiezen en boek opnieuw met `party.relation_id`.
+Stuur `party.external_id` consistent mee zodat relaties gecachet worden.
 ```
 
 ### Boekhoud-mapping (zelf-service, optioneel)
