@@ -12,6 +12,7 @@ use App\Integrations\Exact\ExactWebhookSubscriptionManager;
 use App\Integrations\OAuth\OAuthFlowRegistry;
 use App\Models\Connection;
 use App\Support\Filament\BadgeColor;
+use App\Support\Filament\StatusStrip;
 use App\Support\ProviderAccess;
 use App\Support\ProviderCredentialDescriptor;
 use BackedEnum;
@@ -22,14 +23,12 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
-use Filament\Support\Enums\FontWeight;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Carbon;
 
 class ConnectionResource extends Resource
 {
@@ -149,43 +148,24 @@ class ConnectionResource extends Resource
      */
     public static function statusStripSchema(Connection $record): array
     {
-        $expiresAt = $record->expires_at;
-        $lastInboundAt = $record->inboundWebhookEvents()->max('received_at');
-        $lastInboundAt = $lastInboundAt === null ? null : Carbon::parse($lastInboundAt);
-
-        return [
-            Section::make()
-                ->columns(4)
-                ->schema([
-                    TextEntry::make('strip_status')
-                        ->label('Status')
-                        ->state($record->revoked_at !== null ? 'revoked' : $record->status)
-                        ->badge()
-                        ->color(fn (string $state): string => BadgeColor::connectionStatus($state)),
-
-                    TextEntry::make('strip_division')
-                        ->label($record->provider === Provider::Exact ? 'Division' : 'Administratie')
-                        ->state($record->administratie_id)
-                        ->weight(FontWeight::SemiBold)
-                        ->copyable()
-                        ->placeholder('—'),
-
-                    TextEntry::make('strip_expires')
-                        ->label('Token verloopt')
-                        ->state($expiresAt?->diffForHumans())
-                        ->tooltip($expiresAt?->toDateTimeString())
-                        ->color($expiresAt === null || $expiresAt->isFuture() ? null : 'danger')
-                        ->weight(FontWeight::SemiBold)
-                        ->placeholder('—'),
-
-                    TextEntry::make('strip_last_inbound')
-                        ->label('Laatste inbound webhook')
-                        ->state($lastInboundAt?->diffForHumans())
-                        ->tooltip($lastInboundAt?->toDateTimeString())
-                        ->weight(FontWeight::SemiBold)
-                        ->placeholder('Nog geen'),
-                ]),
-        ];
+        return StatusStrip::make([
+            StatusStrip::badge(
+                'Status',
+                $record->revoked_at !== null ? 'revoked' : $record->status,
+                fn (string $state): string => BadgeColor::connectionStatus($state),
+            ),
+            StatusStrip::fact(
+                $record->provider === Provider::Exact ? 'Division' : 'Administratie',
+                $record->administratie_id,
+                copyable: true,
+            ),
+            StatusStrip::moment('Token verloopt', $record->expires_at, pastIsProblem: true),
+            StatusStrip::moment(
+                'Laatste inbound webhook',
+                $record->inboundWebhookEvents()->max('received_at'),
+                emptyText: 'Nog geen',
+            ),
+        ]);
     }
 
     /**
