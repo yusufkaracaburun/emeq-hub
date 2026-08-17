@@ -315,11 +315,11 @@ Event-types per domein: `accounting.document.*`, `accounting.customer.*`,
 ## Error-normalisatie
 
 Een consumer hoeft Exact's foutvormen niet te kennen. Elke `/v1/*`-fout draagt naast
-de bestaande `error`-sleutel een `category` en het `request_id`:
+de bestaande `error`-sleutel een `category`, een `retryable` en het `request_id`:
 
 ```json
 { "error": "mapping_failed", "category": "REFERENCE_MAPPING_MISSING",
-  "message": "…", "request_id": "01H…" }
+  "retryable": false, "message": "…", "request_id": "01H…" }
 ```
 
 Categorieën: `VALIDATION_ERROR`, `AUTHENTICATION_ERROR`, `AUTHORIZATION_ERROR`,
@@ -331,6 +331,22 @@ die van de partner sturen een consumer een andere kant op.
 De categorie volgt in de regel uit de HTTP-status; alleen waar de code méér zegt dan
 de status staat een override (`mapping_failed` is geen invoerfout, `upstream_rejected`
 is de partner die weigert, `idempotency_key_reuse` is een conflict).
+
+`retryable` beantwoordt de enige vraag die een consumer echt moet stellen: heeft
+hetzelfde request nog eens sturen zin? Het staat in de envelope omdat het antwoord
+hier hoort en niet daar — een SDK die het zelf afleidt houdt een lijst foutcodes bij
+die stilzwijgend veroudert zodra de Hub er één toevoegt, in de richting van "voorgoed
+mislukt" voor een document dat niemand geweigerd heeft.
+
+Ook hier wint de code van de categorie waar hij meer weet:
+`idempotency_request_in_progress` en `document_sync_in_progress` zijn 409's, dus
+`CONFLICT`, dus normaal definitief — maar ze betekenen "wacht even". Zie
+`ErrorCode::retryableFor()`.
+
+De `message` is de zin die de eindgebruiker leest, en die hoort hier omdat de Hub
+weet wélke relatie of grootboekcode ontbreekt en wat eraan te doen is. Een SDK-regel
+kan dat niet, en zou elke herformulering bovendien een release plus een update per
+consumer kosten. Zie `docs/architecture-boundaries.md`.
 
 `NormalizeApiErrors` legt de envelope er buitenom overheen, dus ook over
 framework-fouten (validatie, 404, throttle) en over `abort_unless`-paden die alleen
