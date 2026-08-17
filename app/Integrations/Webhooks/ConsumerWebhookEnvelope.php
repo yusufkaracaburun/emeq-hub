@@ -24,16 +24,17 @@ final class ConsumerWebhookEnvelope
      * @param  array<string, mixed>  $data
      * @return array<string, mixed>
      */
-    public static function make(string $event, Provider $provider, string $accountId, array $data): array
+    public static function make(string $event, Provider $provider, string $accountId, array $data, bool $causedByHub = false): array
     {
-        return [
+        return array_filter([
             'event' => $event,
             'provider' => $provider->value,
             'account_id' => $accountId,
             // Wanneer de Hub het event uitstuurde. De partner levert zelden een eigen
             // tijdstempel; doen alsof van wel zou liegen over de bron.
             'occurred_at' => now()->toIso8601String(),
+            'caused_by_hub' => $causedByHub ?: null,
             'data' => $data,
-        ];
+        ], static fn (mixed $value): bool => $value !== null);
     }
 }

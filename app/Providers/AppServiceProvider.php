@@ -10,6 +10,7 @@ use App\Integrations\Exact\Accounting\ConnectionMappingExactReferenceResolver;
 use App\Integrations\Exact\Accounting\ExactAccountingTarget;
 use App\Integrations\Exact\Errors\UpstreamErrorMapper as ExactUpstreamErrorMapper;
 use App\Integrations\Exact\OAuth\ExactOAuthFlow;
+use App\Integrations\Exact\Webhooks\ExactEchoDetector;
 use App\Integrations\Exact\Webhooks\ExactEventResolver;
 use App\Integrations\Mollie\Errors\UpstreamErrorMapper as MollieUpstreamErrorMapper;
 use App\Integrations\Mollie\HubMollieCredentialResolver;
@@ -21,6 +22,7 @@ use App\Integrations\OAuth\OAuthFlowRegistry;
 use App\Integrations\Snelstart\Errors\UpstreamErrorMapper as SnelstartUpstreamErrorMapper;
 use App\Integrations\Snelstart\Webhooks\SnelstartEventResolver;
 use App\Integrations\Webhooks\CanonicalEventRegistry;
+use App\Integrations\Webhooks\HubOriginRegistry;
 use App\Models\User;
 use Dedoc\Scramble\Scramble;
 use Dedoc\Scramble\Support\Generator\OpenApi;
@@ -68,6 +70,13 @@ class AppServiceProvider extends ServiceProvider
             $registry->register(Provider::Exact, ExactEventResolver::class);
             $registry->register(Provider::Mollie, MollieEventResolver::class);
             $registry->register(Provider::Snelstart, SnelstartEventResolver::class);
+
+            return $registry;
+        });
+
+        $this->app->singleton(HubOriginRegistry::class, function (): HubOriginRegistry {
+            $registry = new HubOriginRegistry;
+            $registry->register(Provider::Exact, ExactEchoDetector::class);
 
             return $registry;
         });

@@ -5,6 +5,7 @@ namespace Tests\Feature\Webhooks;
 use App\Enums\Provider;
 use App\Integrations\Webhooks\CanonicalEvent;
 use App\Integrations\Webhooks\CanonicalEventRegistry;
+use App\Integrations\Webhooks\HubOriginRegistry;
 use App\Jobs\Webhooks\ForwardWebhookToConsumerJob;
 use App\Models\Account;
 use App\Models\Connection;
@@ -74,7 +75,7 @@ class MollieWebhookFanOutTest extends TestCase
         $connection = Connection::factory()->forMollie()->active()->for($account)->create();
 
         $job = new ForwardWebhookToConsumerJob(Provider::Mollie, $connection, ['id' => 'tr_handle_1']);
-        $job->handle(app(CanonicalEventRegistry::class));
+        $job->handle(app(CanonicalEventRegistry::class), app(HubOriginRegistry::class));
 
         // Spatie's webhook-server dispatcht intern een CallWebhookJob.
         Queue::assertPushed(CallWebhookJob::class, function (CallWebhookJob $pushed) {
@@ -100,7 +101,7 @@ class MollieWebhookFanOutTest extends TestCase
         $connection = Connection::factory()->forMollie()->active()->for($account)->create();
 
         $job = new ForwardWebhookToConsumerJob(Provider::Mollie, $connection, ['id' => 'tr_no_callback']);
-        $job->handle(app(CanonicalEventRegistry::class));
+        $job->handle(app(CanonicalEventRegistry::class), app(HubOriginRegistry::class));
 
         Queue::assertNothingPushed();
     }

@@ -7,6 +7,7 @@ namespace Tests\Feature\Webhooks;
 use App\Enums\Provider;
 use App\Integrations\Webhooks\CanonicalEvent;
 use App\Integrations\Webhooks\CanonicalEventRegistry;
+use App\Integrations\Webhooks\HubOriginRegistry;
 use App\Jobs\Webhooks\ForwardWebhookToConsumerJob;
 use App\Models\Account;
 use App\Models\Connection;
@@ -77,7 +78,7 @@ class CanonicalEventEnvelopeTest extends TestCase
         $payload = ['Topic' => 'BankEntries', 'Action' => 'Update', 'Content' => ['Division' => 4471372]];
 
         (new ForwardWebhookToConsumerJob(Provider::Exact, $connection, $payload, 'evt-1'))
-            ->handle(app(CanonicalEventRegistry::class));
+            ->handle(app(CanonicalEventRegistry::class), app(HubOriginRegistry::class));
 
         Bus::assertDispatched(CallWebhookJob::class, function (CallWebhookJob $job) use ($payload): bool {
             return $job->payload['event'] === CanonicalEvent::BANK_STATEMENT_CHANGED
@@ -103,7 +104,7 @@ class CanonicalEventEnvelopeTest extends TestCase
         $connection = Connection::factory()->forMollie()->active()->for($account)->create();
 
         (new ForwardWebhookToConsumerJob(Provider::Mollie, $connection, ['id' => 'tr_abc'], null))
-            ->handle(app(CanonicalEventRegistry::class));
+            ->handle(app(CanonicalEventRegistry::class), app(HubOriginRegistry::class));
 
         Bus::assertDispatched(CallWebhookJob::class, function (CallWebhookJob $job): bool {
             return isset($job->headers['X-Emeq-Event-Id'])

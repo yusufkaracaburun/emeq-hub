@@ -8,6 +8,7 @@ use App\Enums\Provider;
 use App\Integrations\Webhooks\CanonicalEventRegistry;
 use App\Integrations\Webhooks\ConsumerWebhookEnvelope;
 use App\Integrations\Webhooks\ConsumerWebhookHeaders;
+use App\Integrations\Webhooks\HubOriginRegistry;
 use App\Models\Connection;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -69,7 +70,7 @@ final class ForwardWebhookToConsumerJob implements ShouldQueue
         }
     }
 
-    public function handle(CanonicalEventRegistry $events): void
+    public function handle(CanonicalEventRegistry $events, HubOriginRegistry $origins): void
     {
         $account = $this->providerConnection->account;
         $consumer = $account?->consumer;
@@ -88,6 +89,15 @@ final class ForwardWebhookToConsumerJob implements ShouldQueue
             return;
         }
 
+        $causedByHub = $origins->causedByHub($this->provider, $this->providerConnection, $this->payload);
+
+        Log::info($causedByHub ? 'webhook.echo_detected' : 'webhook.echo_not_detected', [
+            'provider' => $this->provider->value,
+            'connection_id' => $this->providerConnection->id,
+            'event_id' => $this->eventId,
+            'key' => $this->payload['Content']['Key'] ?? null,
+        ]);
+
         WebhookCall::create()
             ->url($consumer->webhook_callback_url)
             ->payload(ConsumerWebhookEnvelope::make(
@@ -95,6 +105,7 @@ final class ForwardWebhookToConsumerJob implements ShouldQueue
                 $this->provider,
                 (string) $account->external_id,
                 $this->payload,
+                $causedByHub,
             ))
             ->useSecret((string) $consumer->webhook_callback_secret)
             ->withHeaders(ConsumerWebhookHeaders::make($this->eventId))
