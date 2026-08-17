@@ -150,7 +150,7 @@ class ConnectionResource extends Resource
     public static function statusStripSchema(Connection $record): array
     {
         $expiresAt = $record->expires_at;
-        $lastInboundAt = $record->inboundWebhookEvents()->max('created_at');
+        $lastInboundAt = $record->inboundWebhookEvents()->max('received_at');
         $lastInboundAt = $lastInboundAt === null ? null : Carbon::parse($lastInboundAt);
 
         return [

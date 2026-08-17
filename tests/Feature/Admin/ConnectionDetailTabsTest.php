@@ -9,6 +9,7 @@ use App\Models\Account;
 use App\Models\Connection;
 use App\Models\ConnectionAccountingRef;
 use App\Models\Consumer;
+use App\Models\InboundWebhookEvent;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
@@ -82,6 +83,19 @@ class ConnectionDetailTabsTest extends TestCase
             ->assertSee('Token verloopt')
             ->assertSee('Laatste inbound webhook')
             ->assertSee('Nog geen');
+    }
+
+    public function test_status_strip_dates_the_last_inbound_webhook(): void
+    {
+        $this->actingAs($this->makeStaffUser());
+
+        $exact = $this->makeConnection('forExact');
+        InboundWebhookEvent::factory()->for($exact)->create(['received_at' => now()->subHours(3)]);
+
+        Livewire::test(ViewConnection::class, ['record' => $exact->getKey()])
+            ->assertSuccessful()
+            ->assertDontSee('Nog geen')
+            ->assertSee('3 uur geleden');
     }
 
     public function test_webhook_tab_lists_the_topics_the_hub_knows_about(): void
