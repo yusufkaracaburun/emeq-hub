@@ -56,7 +56,7 @@ Volledige versie met gotchas en `.docs/decisions`-links: `docs/agents/subsystems
 ## Routes
 
 ```
-routes/web.php       /up; signed OAuth-landing /oauth/{connected/{connection},failed}; indexeerbare marketing-surface / · /partners{,/{provider}} · /koppelen · /demo · /support · /privacy · /voorwaarden · /verwerkersovereenkomst; crawler-routes /sitemap.xml · /robots.txt · /llms.txt
+routes/web.php       /up; signed OAuth-landing /oauth/{connected/{connection},failed}; signed consumer-handoff /connect/{account}{,/{provider}} incl. beheerdrawer (payload, mapping, relatie herkoppelen/ontkoppelen/zoeken); indexeerbare marketing-surface / · /partners{,/{provider}} · /koppelen · /demo · /support · /privacy · /voorwaarden · /verwerkersovereenkomst; crawler-routes /sitemap.xml · /robots.txt · /llms.txt
 routes/api.php       /v1/* — consumer-API (Bearer Sanctum + throttle:api)
 routes/webhooks.php  /webhooks/{provider}/{...} + /cashier/webhook* — publiek, signature-verified
 routes/console.php   artisan-only commands

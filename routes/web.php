@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AccessRequestController;
 use App\Http\Controllers\ConnectHandoffController;
+use App\Http\Controllers\ConnectManageController;
 use App\Http\Controllers\DemoRequestController;
 use App\Http\Controllers\Dev\ExactOAuthTracerController;
 use App\Http\Controllers\ExactDeprovisionController;
@@ -57,7 +58,36 @@ Route::middleware('signed')->group(function (): void {
         ->where('provider', '[a-z][a-z0-9_-]*')
         ->middleware('throttle:12,1')
         ->name('connect.disconnect');
+
+    // Beheerdrawer per koppeling (zie .docs/decisions/connection-management-drawer.md):
+    // JSON-endpoints, zelfde signed+Account-bewijslast als hierboven. Alleen relevant
+    // voor providers met een AccountingTarget (nu Exact) — ConnectManageController
+    // weigert de rest met 404.
+    Route::get('/connect/{account}/{provider}/manage', [ConnectManageController::class, 'show'])
+        ->where('provider', '[a-z][a-z0-9_-]*')
+        ->name('connect.manage.show');
+    Route::put('/connect/{account}/{provider}/manage/mapping', [ConnectManageController::class, 'updateMapping'])
+        ->where('provider', '[a-z][a-z0-9_-]*')
+        ->middleware('throttle:12,1')
+        ->name('connect.manage.mapping');
+    Route::patch('/connect/{account}/{provider}/manage/relations/{ref}', [ConnectManageController::class, 'relinkRelation'])
+        ->where('provider', '[a-z][a-z0-9_-]*')
+        ->middleware('throttle:12,1')
+        ->name('connect.manage.relations.relink');
+    Route::delete('/connect/{account}/{provider}/manage/relations/{ref}', [ConnectManageController::class, 'unlinkRelation'])
+        ->where('provider', '[a-z][a-z0-9_-]*')
+        ->middleware('throttle:12,1')
+        ->name('connect.manage.relations.unlink');
 });
+
+// Los van de groep hierboven: de zoekterm (`q`) is niet bekend op het moment dat
+// deze URL gemint wordt, dus die kan niet in de handtekening zitten. `signed:q`
+// negeert alleen dát ene queryparameter bij de signature-check — account/provider
+// blijven volledig gedekt.
+Route::get('/connect/{account}/{provider}/manage/relations/search', [ConnectManageController::class, 'searchRelations'])
+    ->where('provider', '[a-z][a-z0-9_-]*')
+    ->middleware(['signed:q', 'throttle:20,1'])
+    ->name('connect.manage.relations.search');
 
 // Exact App Center Seamless-deprovisioning ("Niet meer gebruiken"): Exact
 // redirect de gebruiker naar deze URL met ?Country=&Language=&UserId=. Publiek

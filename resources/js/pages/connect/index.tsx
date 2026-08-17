@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Eyebrow } from '@/components/ui/eyebrow';
 import { PadlockGlyph } from '@/components/ui/glyphs';
 import { type SeoMeta } from '@/lib/types';
+import { ConnectManageDrawer } from './manage-drawer';
 
 type ConnectState = 'manage' | 'expired';
 
@@ -23,6 +24,7 @@ interface ConnectProvider {
     status: ProviderStatus;
     start_url: string;
     disconnect_url: string | null;
+    manage_url: string | null;
 }
 
 interface ConnectProps {
@@ -76,7 +78,7 @@ function HandoffSignal({ consumerName }: { consumerName: string | null }) {
     );
 }
 
-function ProviderRow({ provider }: { provider: ConnectProvider }) {
+function ProviderRow({ provider, onManage }: { provider: ConnectProvider; onManage: (provider: ConnectProvider) => void }) {
     const isConnected = provider.status === 'connected';
     const [confirming, setConfirming] = useState(false);
     const [working, setWorking] = useState(false);
@@ -175,6 +177,11 @@ function ProviderRow({ provider }: { provider: ConnectProvider }) {
                         →
                     </span>
                 </Button>
+                {isConnected && provider.manage_url && (
+                    <Button type="button" size="sm" variant="outline" onClick={() => onManage(provider)}>
+                        Beheren
+                    </Button>
+                )}
                 {isConnected && provider.disconnect_url && (
                     <Button type="button" size="sm" variant="outline" onClick={() => setConfirming(true)}>
                         Ontkoppelen
@@ -247,6 +254,7 @@ function useHandoffBackUrl(returnUrl: string | null): string | null {
 export default function Connect({ state, consumerName, accountName, providers, returnUrl, seo }: ConnectProps) {
     const app = consumerName ?? APP_FALLBACK;
     const backUrl = useHandoffBackUrl(returnUrl);
+    const [managing, setManaging] = useState<ConnectProvider | null>(null);
 
     return (
         <MotionConfig reducedMotion="user">
@@ -287,7 +295,7 @@ export default function Connect({ state, consumerName, accountName, providers, r
 
                                 <div className="flex w-full flex-col gap-3">
                                     {providers.map((provider) => (
-                                        <ProviderRow key={provider.key} provider={provider} />
+                                        <ProviderRow key={provider.key} provider={provider} onManage={setManaging} />
                                     ))}
                                 </div>
 
@@ -332,6 +340,8 @@ export default function Connect({ state, consumerName, accountName, providers, r
 
                 <SimpleFooter />
             </div>
+
+            <ConnectManageDrawer provider={managing} open={managing !== null} onOpenChange={(open) => !open && setManaging(null)} />
         </MotionConfig>
     );
 }

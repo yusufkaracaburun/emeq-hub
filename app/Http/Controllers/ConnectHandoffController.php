@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Accounting\AccountingTargetRegistry;
 use App\Actions\Connect\ProviderNotConnectableException;
 use App\Actions\Connect\RevokeConnection;
 use App\Actions\Connect\StartProviderConnection;
@@ -40,6 +41,7 @@ class ConnectHandoffController extends Controller
     public function __construct(
         private readonly ProviderConnectStatus $statuses,
         private readonly ConnectLinkFactory $links,
+        private readonly AccountingTargetRegistry $accountingTargets,
     ) {}
 
     public function show(Request $request, Account $account): Response
@@ -54,6 +56,12 @@ class ConnectHandoffController extends Controller
                 'start_url' => $this->links->startUrl($request, $account, $provider['key'], 'connect.start'),
                 'disconnect_url' => $provider['status'] === 'connected'
                     ? $this->links->startUrl($request, $account, $provider['key'], 'connect.disconnect')
+                    : null,
+                // Alleen voor een gekoppelde provider mét een AccountingTarget (nu
+                // Exact): de beheerdrawer heeft niets te tonen voor een provider
+                // zonder boekhoud-referentiedata.
+                'manage_url' => $provider['status'] === 'connected' && $this->accountingTargets->supports($provider['key'])
+                    ? $this->links->manageUrl($request, $account, $provider['key'])
                     : null,
             ])
             ->values()

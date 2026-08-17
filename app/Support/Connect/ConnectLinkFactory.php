@@ -71,6 +71,36 @@ class ConnectLinkFactory
         return URL::temporarySignedRoute($route, $this->inheritedExpiry($request), $parameters);
     }
 
+    /**
+     * De beheerdrawer-payload voor één gekoppelde provider — zelfde getekende
+     * bewijslast als `startUrl()`, alleen naar de drawer-route in plaats van
+     * de connect/disconnect-actie.
+     */
+    public function manageUrl(Request $request, Account $account, string $provider): string
+    {
+        return URL::temporarySignedRoute('connect.manage.show', $this->inheritedExpiry($request), [
+            'account' => $account->getKey(),
+            'provider' => $provider,
+        ]);
+    }
+
+    /**
+     * Overige drawer-acties (mapping opslaan, relatie herkoppelen/ontkoppelen, zoeken):
+     * zelfde `account`/`provider`-paar, plus eventuele route-specifieke parameters
+     * (bv. de `ConnectionAccountingRef`-id). Die laatste tekent mee, dus een geruild
+     * `ref` maakt de handtekening ongeldig.
+     *
+     * @param  array<string, int|string>  $parameters
+     */
+    public function manageActionUrl(Request $request, Account $account, string $provider, string $route, array $parameters = []): string
+    {
+        return URL::temporarySignedRoute($route, $this->inheritedExpiry($request), [
+            'account' => $account->getKey(),
+            'provider' => $provider,
+            ...$parameters,
+        ]);
+    }
+
     public function inheritedExpiry(Request $request): CarbonImmutable
     {
         $expires = $request->query('expires');
