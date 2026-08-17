@@ -60,6 +60,7 @@ return [
             'documents/DocumentAttachments',
             'financialtransaction/BankEntries',
             'financialtransaction/CashEntries',
+            'generaljournalentry/GeneralJournalEntries',
             'webhooks/WebhookSubscriptions',
         ],
     ],

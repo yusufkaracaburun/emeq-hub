@@ -35,6 +35,7 @@ final class ProviderAccess
         'documents/DocumentAttachments' => 'Bestanden die aan een document hangen',
         'financialtransaction/BankEntries' => 'Bankboekingen',
         'financialtransaction/CashEntries' => 'Kasboekingen',
+        'generaljournalentry/GeneralJournalEntries' => 'Memoriaalboekingen',
         'webhooks/WebhookSubscriptions' => 'Webhook-abonnementen van de Hub',
     ];
 
