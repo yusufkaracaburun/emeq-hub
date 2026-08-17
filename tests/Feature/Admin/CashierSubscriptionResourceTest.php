@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Feature\Admin;
 
 use App\Filament\Resources\CashierSubscriptions\Pages\ListCashierSubscriptions;
+use App\Filament\Resources\CashierSubscriptions\Pages\ViewCashierSubscription;
 use App\Models\Consumer;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -60,6 +61,20 @@ class CashierSubscriptionResourceTest extends TestCase
 
         $this->get('/admin/cashier-subscriptions')
             ->assertOk()
+            ->assertSee($consumer->slug);
+    }
+
+    public function test_detail_opens_with_the_status_strip(): void
+    {
+        $this->actingAsStaff();
+
+        $consumer = Consumer::factory()->withActiveSubscription()->create();
+
+        Livewire::test(ViewCashierSubscription::class, ['record' => Subscription::first()->getKey()])
+            ->assertSuccessful()
+            ->assertSee('Status')
+            ->assertSee('Plan')
+            ->assertSee('Cycle eindigt')
             ->assertSee($consumer->slug);
     }
 

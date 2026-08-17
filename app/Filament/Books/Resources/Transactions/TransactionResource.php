@@ -13,8 +13,10 @@ use App\Filament\Books\Resources\Transactions\Pages\ViewTransaction;
 use App\Filament\Books\Resources\Transactions\Schemas\TransactionForm;
 use App\Filament\Books\Resources\Transactions\Schemas\TransactionInfolist;
 use App\Filament\Books\Resources\Transactions\Tables\TransactionsTable;
+use App\Support\Filament\StatusStrip;
 use BackedEnum;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
@@ -60,6 +62,19 @@ class TransactionResource extends Resource
     public static function infolist(Schema $schema): Schema
     {
         return TransactionInfolist::configure($schema);
+    }
+
+    /**
+     * @return list<Section>
+     */
+    public static function statusStripSchema(Transaction $record): array
+    {
+        return StatusStrip::make([
+            StatusStrip::moment('Boekdatum', $record->posted_at),
+            StatusStrip::fact('Bedrag', '€ '.number_format($record->amount / 100, 2, ',', '.')),
+            StatusStrip::badge('Type', $record->type?->value),
+            StatusStrip::fact('Bankrekening', $record->bankAccount?->account?->name),
+        ]);
     }
 
     public static function table(Table $table): Table

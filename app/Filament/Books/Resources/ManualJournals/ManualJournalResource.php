@@ -13,8 +13,10 @@ use App\Filament\Books\Resources\ManualJournals\Pages\ViewManualJournal;
 use App\Filament\Books\Resources\ManualJournals\Schemas\ManualJournalForm;
 use App\Filament\Books\Resources\ManualJournals\Schemas\ManualJournalInfolist;
 use App\Filament\Books\Resources\ManualJournals\Tables\ManualJournalsTable;
+use App\Support\Filament\StatusStrip;
 use BackedEnum;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
@@ -61,6 +63,19 @@ class ManualJournalResource extends Resource
     public static function infolist(Schema $schema): Schema
     {
         return ManualJournalInfolist::configure($schema);
+    }
+
+    /**
+     * @return list<Section>
+     */
+    public static function statusStripSchema(Transaction $record): array
+    {
+        return StatusStrip::make([
+            StatusStrip::moment('Boekdatum', $record->posted_at),
+            StatusStrip::fact('Totaal', '€ '.number_format($record->amount / 100, 2, ',', '.')),
+            StatusStrip::fact('Referentie', $record->reference),
+            StatusStrip::fact('Regels', (string) $record->journalEntries()->count()),
+        ]);
     }
 
     public static function table(Table $table): Table
