@@ -17,8 +17,13 @@ use Symfony\Component\HttpFoundation\Response;
  * er één produceren.
  *
  * Additief: de bestaande `error`-sleutel blijft exact zoals hij was, want consumers
- * lezen die. Erbij komen `category` (de provider-onafhankelijke klasse fout) en
- * `request_id` (zodat een supportvraag met één waarde te herleiden is).
+ * lezen die. Erbij komen `category` (de provider-onafhankelijke klasse fout),
+ * `retryable` (of hetzelfde request opnieuw sturen zin heeft) en `request_id`
+ * (zodat een supportvraag met één waarde te herleiden is).
+ *
+ * `retryable` staat hier omdat het antwoord van Hub moet komen: een consumer die
+ * het zelf afleidt uit een lijst foutcodes, verouderd stilzwijgend zodra Hub er
+ * één toevoegt.
  *
  * Twee gaten die het onderweg dicht:
  * - `abort_unless(..., 403, 'insufficient_ability')` levert Laravel-breed een kale
@@ -54,6 +59,7 @@ class NormalizeApiErrors
             ...$payload,
             'error' => $error,
             'category' => ErrorCode::for($status, $error)->value,
+            'retryable' => ErrorCode::retryableFor($status, $error),
             'request_id' => Context::get('request_id'),
         ];
 

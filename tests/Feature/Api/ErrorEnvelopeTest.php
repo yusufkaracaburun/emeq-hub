@@ -44,7 +44,8 @@ class ErrorEnvelopeTest extends TestCase
             ->assertUnauthorized()
             ->assertJsonPath('error', 'unauthenticated')
             ->assertJsonPath('category', ErrorCode::AuthenticationError->value)
-            ->assertJsonStructure(['error', 'category', 'message', 'request_id']);
+            ->assertJsonPath('retryable', false)
+            ->assertJsonStructure(['error', 'category', 'retryable', 'message', 'request_id']);
     }
 
     /**
@@ -125,7 +126,39 @@ class ErrorEnvelopeTest extends TestCase
             ])
             ->assertStatus(422)
             ->assertJsonPath('error', 'mapping_failed')
-            ->assertJsonPath('category', ErrorCode::ReferenceMappingMissing->value);
+            ->assertJsonPath('category', ErrorCode::ReferenceMappingMissing->value)
+            ->assertJsonPath('retryable', false);
+    }
+
+    /**
+     * `retryable` bestaat zodat een consumer niet zelf een lijst foutcodes hoeft bij
+     * te houden. Een storing bij de partner is het opnieuw proberen waard; dezelfde
+     * boeking nog eens sturen na een inhoudelijke weigering niet.
+     */
+    public function test_a_provider_outage_is_reported_as_retryable(): void
+    {
+        config([
+            'services.exact.client_id' => 'app_test_id',
+            'services.exact.client_secret' => 'app_test_secret',
+            'services.exact.redirect_uri' => 'https://hub.test/v1/oauth/exact/callback',
+            'services.exact.auth_base_url' => 'https://start.exactonline.nl',
+            'services.exact.api_base_url' => 'https://start.exactonline.nl',
+        ]);
+        MockClient::global([
+            RawExactRequest::class => MockResponse::make(['error' => ['message' => ['value' => 'stuk']]], 503),
+        ]);
+
+        $consumer = $this->consumerWithExactConnection();
+        $token = $consumer->createToken('t', [TokenAbilities::EXACT_READ])->plainTextToken;
+
+        $response = $this->withHeader('Authorization', "Bearer {$token}")
+            ->withHeader('X-Account-Id', 'school1')
+            ->getJson('/v1/exact/financial/GLAccounts');
+
+        $this->assertGreaterThanOrEqual(500, $response->status());
+        $this->assertTrue($response->json('retryable'));
+
+        MockClient::destroyGlobal();
     }
 
     public function test_the_request_id_in_the_envelope_matches_the_response_header(): void

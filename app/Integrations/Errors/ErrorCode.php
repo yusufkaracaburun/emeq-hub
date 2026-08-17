@@ -56,6 +56,22 @@ enum ErrorCode: string
     ];
 
     /**
+     * Codes die "wacht en probeer het opnieuw" betekenen terwijl hun categorie het
+     * tegenovergestelde zegt.
+     *
+     * Beide zijn 409's, dus {@see self::Conflict}, en een conflict is normaal
+     * definitief. Deze twee juist niet: Hub bewaakt een boeking twee keer en elke
+     * bewaking heeft haar eigen woord voor "wacht" — de Idempotency-Key-claim, en
+     * de per-connection claim die die eerste overleeft.
+     *
+     * @var list<string>
+     */
+    private const RETRYABLE_CODES = [
+        'idempotency_request_in_progress',
+        'document_sync_in_progress',
+    ];
+
+    /**
      * @var array<int, string>
      */
     private const BY_STATUS = [
@@ -89,8 +105,29 @@ enum ErrorCode: string
     }
 
     /**
-     * Of de consumer het opnieuw mag proberen met exact hetzelfde request.
-     * Een conflict of validatiefout retryen levert alleen dezelfde fout op.
+     * Of de consumer dit antwoord opnieuw mag proberen met exact hetzelfde request.
+     *
+     * Dit is het antwoord dat in de envelope gaat, en daarmee het enige dat een
+     * consumer hoeft te kennen: zonder dit veld moet elke SDK zelf een lijst
+     * foutcodes bijhouden die stilzwijgend veroudert zodra Hub er één toevoegt.
+     * De code wint van de categorie, want alleen de code weet dat een 409 hier
+     * "nog even" betekent in plaats van "nooit".
+     */
+    public static function retryableFor(int $status, ?string $error = null): bool
+    {
+        if ($error !== null && in_array($error, self::RETRYABLE_CODES, true)) {
+            return true;
+        }
+
+        return self::for($status, $error)->isRetryable();
+    }
+
+    /**
+     * Of deze klasse fouten in de regel tijdelijk is. Een conflict of validatiefout
+     * retryen levert alleen dezelfde fout op.
+     *
+     * Beantwoordt de vraag alleen op categorieniveau — gebruik
+     * {@see self::retryableFor()} wanneer de foutcode bekend is.
      */
     public function isRetryable(): bool
     {
