@@ -87,4 +87,53 @@ class ErrorCodeTest extends TestCase
         $this->assertFalse(ErrorCode::UnsupportedCapability->isRetryable());
         $this->assertFalse(ErrorCode::AuthorizationError->isRetryable());
     }
+
+    /**
+     * De twee 409's die "wacht" betekenen. Hun categorie (Conflict) zegt het
+     * tegenovergestelde, dus zonder code-override zou een consumer een boeking als
+     * definitief mislukt wegschrijven terwijl er nog één onderweg is.
+     */
+    #[DataProvider('waitCodes')]
+    public function test_a_wait_code_is_retryable_although_its_category_is_not(int $status, string $error): void
+    {
+        $this->assertFalse(ErrorCode::for($status, $error)->isRetryable());
+        $this->assertTrue(ErrorCode::retryableFor($status, $error));
+    }
+
+    /**
+     * @return array<string, array{0: int, 1: string}>
+     */
+    public static function waitCodes(): array
+    {
+        return [
+            'de Idempotency-Key-claim' => [409, 'idempotency_request_in_progress'],
+            'de per-connection claim' => [409, 'document_sync_in_progress'],
+        ];
+    }
+
+    /**
+     * Zonder code-override blijft de categorie beslissen — inclusief de 409 die wél
+     * definitief is.
+     */
+    public function test_retryability_follows_the_category_when_no_code_overrides_it(): void
+    {
+        $this->assertTrue(ErrorCode::retryableFor(429));
+        $this->assertTrue(ErrorCode::retryableFor(503));
+        $this->assertTrue(ErrorCode::retryableFor(500));
+
+        $this->assertFalse(ErrorCode::retryableFor(422, 'upstream_rejected'));
+        $this->assertFalse(ErrorCode::retryableFor(409, 'idempotency_key_reuse'));
+        $this->assertFalse(ErrorCode::retryableFor(422, 'mapping_failed'));
+        $this->assertFalse(ErrorCode::retryableFor(403, 'insufficient_ability'));
+    }
+
+    /**
+     * Een code die deze release niet kent mag geen uitzondering worden: de status
+     * beslist, en de consumer krijgt een antwoord in plaats van een gok.
+     */
+    public function test_an_unknown_code_still_gets_a_retryability_answer(): void
+    {
+        $this->assertTrue(ErrorCode::retryableFor(503, 'iets_nieuws'));
+        $this->assertFalse(ErrorCode::retryableFor(422, 'iets_nieuws'));
+    }
 }

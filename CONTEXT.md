@@ -35,6 +35,7 @@ Multi-tenant integration-platform: één Laravel-Hub die OAuth-koppelingen, webh
 ## Grenzen / invariants
 
 - **SDK-grens:** Hub-domeinmodellen (`Consumer`/`Account`/`Connection`) bestaan **alleen** in `emeq-hub`. De `emeq/*` SDK's zijn dun (HTTP/auth/DTO) en mogen Hub-modellen niet importeren.
+- **Wie bezit wat (Hub / SDK / consumer):** `docs/architecture-boundaries.md`. Leidende toets: *wie moet er iets doen als dit verandert?* Een Hub-deploy raakt nul consumers, een SDK-release raakt ze allemaal — dus wat meebeweegt met een nieuwe partner hoort in de Hub, foutcopy incluis. Vorm: de bron beslist, de SDK valt terug wanneer de bron niets zegt (`HubWebhookEvent::UNMAPPED`, `retryable === null`).
 - **Multi-tenant:** geen impliciete resolutie via session/query-string; alleen via `X-Account-Id` + Consumer-scoped lookup. Cross-consumer-lek = security-incident.
 - **Encryption-at-rest:** secrets encrypted cast; nooit raw in DB/logs/exceptions; fingerprint-only voor debugging.
 - **Forward-only migrations:** geen `down()` in prod-pad; schema-change = nieuwe migration.
@@ -45,5 +46,6 @@ Multi-tenant integration-platform: één Laravel-Hub die OAuth-koppelingen, webh
 ## Docs-kaart
 
 - Architectuur/lagen: `docs/agents/architecture.md` · domein: `docs/agents/domain.md` · dev: `docs/agents/dev-environment.md` · docker: `docs/agents/docker.md` · workflow: `docs/agents/workflow.md`.
+- Grenzen Hub/SDK/consumer: `docs/architecture-boundaries.md` (lagen *binnen* de Hub staan in `docs/unified-api-architecture.md` § Lagen — andere as).
 - ADRs: `.docs/decisions/` (let op: niet `docs/adr/`). Partner-research: `packages/<sdk>/docs/partners/<provider>/` (in de SDK-repos).
 - Authoritative regels: `.ai/rules/` (auto-loaded).
