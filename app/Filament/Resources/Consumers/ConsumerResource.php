@@ -8,6 +8,7 @@ use App\Filament\Resources\Consumers\Pages\ViewConsumer;
 use App\Filament\Resources\Consumers\Schemas\ConsumerInfolist;
 use App\Models\Consumer;
 use App\Sanctum\TokenAbilities;
+use App\Support\Filament\StatusStrip;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
@@ -19,6 +20,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -220,6 +222,19 @@ class ConsumerResource extends Resource
     public static function infolist(Schema $schema): Schema
     {
         return ConsumerInfolist::configure($schema);
+    }
+
+    /**
+     * @return list<Section>
+     */
+    public static function statusStripSchema(Consumer $record): array
+    {
+        return StatusStrip::make([
+            StatusStrip::fact('Slug', $record->slug, copyable: true),
+            StatusStrip::fact('Accounts', (string) $record->accounts()->count()),
+            StatusStrip::fact('Koppelingen', (string) $record->connections()->count()),
+            StatusStrip::moment('Laatste inbound webhook', $record->inboundWebhookEvents()->max('received_at'), emptyText: 'Nog geen'),
+        ]);
     }
 
     public static function table(Table $table): Table

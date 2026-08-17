@@ -11,10 +11,12 @@ use App\Filament\Resources\Accounts\Pages\ViewAccount;
 use App\Filament\Resources\Accounts\Schemas\AccountInfolist;
 use App\Filament\Resources\Accounts\Tables\AccountsTable;
 use App\Models\Account;
+use App\Support\Filament\StatusStrip;
 use BackedEnum;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
@@ -69,6 +71,22 @@ class AccountResource extends Resource
     public static function infolist(Schema $schema): Schema
     {
         return AccountInfolist::configure($schema);
+    }
+
+    /**
+     * @return list<Section>
+     */
+    public static function statusStripSchema(Account $record): array
+    {
+        $connections = $record->connections()->count();
+        $active = $record->connections()->whereNull('revoked_at')->count();
+
+        return StatusStrip::make([
+            StatusStrip::fact('Consumer', $record->consumer?->slug),
+            StatusStrip::fact('External ID', $record->external_id, copyable: true),
+            StatusStrip::fact('Koppelingen', $connections === 0 ? null : "{$active} actief van {$connections}"),
+            StatusStrip::moment('Aangemaakt', $record->created_at),
+        ]);
     }
 
     public static function table(Table $table): Table

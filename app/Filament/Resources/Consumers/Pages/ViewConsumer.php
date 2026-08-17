@@ -5,18 +5,17 @@ declare(strict_types=1);
 namespace App\Filament\Resources\Consumers\Pages;
 
 use App\Filament\Resources\Consumers\ConsumerResource;
+use App\Filament\Support\HasDetailLayout;
 use App\Filament\Support\InfoModalAction;
+use App\Models\Consumer;
 use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
+use Filament\Schemas\Schema;
 
-/**
- * Plan 08-04 — Filament View-page voor ConsumerResource.
- *
- * Read-only detail-view die ConsumerInfolist rendert (D-07 hint-Section + basis-velden).
- * Edit/Delete blijven beschikbaar via getPages() en de table-row-acties.
- */
 class ViewConsumer extends ViewRecord
 {
+    use HasDetailLayout;
+
     protected static string $resource = ConsumerResource::class;
 
     protected function getHeaderActions(): array
@@ -28,5 +27,13 @@ class ViewConsumer extends ViewRecord
             ),
             EditAction::make(),
         ];
+    }
+
+    public function content(Schema $schema): Schema
+    {
+        /** @var Consumer $record */
+        $record = $this->getRecord();
+
+        return $this->detailSchema($schema, ConsumerResource::statusStripSchema($record));
     }
 }
