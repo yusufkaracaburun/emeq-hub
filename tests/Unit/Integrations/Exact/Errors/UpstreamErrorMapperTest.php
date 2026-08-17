@@ -65,6 +65,21 @@ class UpstreamErrorMapperTest extends TestCase
         $this->assertStringContainsString('controlecijfer', $mapped['body']['provider_message']);
     }
 
+    public function test_500_closed_fiscal_year_is_humanized_with_provider_message(): void
+    {
+        // "Verplicht: Boekjaar" is Exact's melding voor een datum buiten elke
+        // boekperiode. Onvertaald leest het als een leeg verplicht veld, terwijl de
+        // consumer geen boekjaar meestuurt en dat ook niet kan.
+        $body = '{"error":{"message":{"value":"Verplicht: Boekjaar"}}}';
+        $mapped = UpstreamErrorMapper::mapException(ServerException::fromResponse(500, $body));
+
+        $this->assertSame(422, $mapped['status']);
+        $this->assertSame('exact_rejected', $mapped['short_code']);
+        $this->assertStringContainsString('geen boekperiode voor de datum', $mapped['body']['message']);
+        $this->assertStringContainsString('Open het boekjaar', $mapped['body']['message']);
+        $this->assertSame('Verplicht: Boekjaar', $mapped['body']['provider_message']);
+    }
+
     public function test_500_without_odata_message_falls_back(): void
     {
         $mapped = UpstreamErrorMapper::mapException(ServerException::fromResponse(500, 'plain text boom'));

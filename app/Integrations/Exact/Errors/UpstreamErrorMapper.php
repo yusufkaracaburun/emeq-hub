@@ -207,6 +207,20 @@ final class UpstreamErrorMapper implements MapsUpstreamExceptions
     {
         $haystack = mb_strtolower($raw);
 
+        // De datum van het document valt buiten elke boekperiode die de administratie
+        // kent. Exact meldt dat als "Verplicht: Boekjaar" — een lege-veld-melding voor
+        // een veld dat de consumer niet stuurt en niet kán sturen, dus onbruikbaar
+        // zonder deze vertaling. Het boekbare bereik staat er bewust niet in: dat komt
+        // uit een aparte Exact-call, en die hoort niet op een faalpad thuis. De
+        // validate-route levert het wél — zie `exact.period.closed` in
+        // {@see \App\Integrations\Exact\Accounting\ExactReportEnricher}.
+        if (str_contains($haystack, 'boekjaar')) {
+            return 'De administratie kent geen boekperiode voor de datum van dit document, '
+                .'dus de boeking is geweigerd. Open het boekjaar in de administratie, of '
+                .'geef het document een datum binnen een boekjaar dat openstaat. '
+                .'Controleer het document vooraf om te zien welk bereik wél boekbaar is.';
+        }
+
         // Exact keurt het btw-nummer af (ongeldig controlecijfer / verkeerd formaat).
         if (str_contains($haystack, 'btw-nummer') || str_contains($haystack, 'controlecijfer')) {
             return 'Het btw-nummer is ongeldig. Controleer het en probeer opnieuw — '
