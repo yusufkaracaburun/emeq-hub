@@ -5,15 +5,12 @@ declare(strict_types=1);
 namespace App\Filament\Resources\PassThroughCalls\Pages;
 
 use App\Filament\Resources\PassThroughCalls\PassThroughCallResource;
-use App\Filament\Support\HasDetailLayout;
+use App\Filament\Support\DetailViewRecord;
 use App\Models\PassThroughCall;
-use Filament\Resources\Pages\ViewRecord;
 use Filament\Schemas\Schema;
 
-class ViewPassThroughCall extends ViewRecord
+class ViewPassThroughCall extends DetailViewRecord
 {
-    use HasDetailLayout;
-
     protected static string $resource = PassThroughCallResource::class;
 
     protected function getHeaderActions(): array

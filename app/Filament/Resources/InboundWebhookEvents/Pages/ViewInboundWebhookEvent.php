@@ -5,15 +5,12 @@ declare(strict_types=1);
 namespace App\Filament\Resources\InboundWebhookEvents\Pages;
 
 use App\Filament\Resources\InboundWebhookEvents\InboundWebhookEventResource;
-use App\Filament\Support\HasDetailLayout;
+use App\Filament\Support\DetailViewRecord;
 use App\Models\InboundWebhookEvent;
-use Filament\Resources\Pages\ViewRecord;
 use Filament\Schemas\Schema;
 
-class ViewInboundWebhookEvent extends ViewRecord
+class ViewInboundWebhookEvent extends DetailViewRecord
 {
-    use HasDetailLayout;
-
     protected static string $resource = InboundWebhookEventResource::class;
 
     protected function getHeaderActions(): array

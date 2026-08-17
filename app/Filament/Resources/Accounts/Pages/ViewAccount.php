@@ -5,17 +5,14 @@ declare(strict_types=1);
 namespace App\Filament\Resources\Accounts\Pages;
 
 use App\Filament\Resources\Accounts\AccountResource;
-use App\Filament\Support\HasDetailLayout;
+use App\Filament\Support\DetailViewRecord;
 use App\Filament\Support\InfoModalAction;
 use App\Models\Account;
 use Filament\Actions\EditAction;
-use Filament\Resources\Pages\ViewRecord;
 use Filament\Schemas\Schema;
 
-class ViewAccount extends ViewRecord
+class ViewAccount extends DetailViewRecord
 {
-    use HasDetailLayout;
-
     protected static string $resource = AccountResource::class;
 
     protected function getHeaderActions(): array

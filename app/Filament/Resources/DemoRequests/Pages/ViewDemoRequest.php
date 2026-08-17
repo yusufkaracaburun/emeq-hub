@@ -5,16 +5,13 @@ declare(strict_types=1);
 namespace App\Filament\Resources\DemoRequests\Pages;
 
 use App\Filament\Resources\DemoRequests\DemoRequestResource;
-use App\Filament\Support\HasDetailLayout;
+use App\Filament\Support\DetailViewRecord;
 use App\Models\DemoRequest;
 use Filament\Actions\Action;
-use Filament\Resources\Pages\ViewRecord;
 use Filament\Schemas\Schema;
 
-class ViewDemoRequest extends ViewRecord
+class ViewDemoRequest extends DetailViewRecord
 {
-    use HasDetailLayout;
-
     protected static string $resource = DemoRequestResource::class;
 
     protected function getHeaderActions(): array

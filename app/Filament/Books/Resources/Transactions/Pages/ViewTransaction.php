@@ -6,14 +6,11 @@ namespace App\Filament\Books\Resources\Transactions\Pages;
 
 use App\Books\Models\Transaction;
 use App\Filament\Books\Resources\Transactions\TransactionResource;
-use App\Filament\Support\HasDetailLayout;
-use Filament\Resources\Pages\ViewRecord;
+use App\Filament\Support\DetailViewRecord;
 use Filament\Schemas\Schema;
 
-class ViewTransaction extends ViewRecord
+class ViewTransaction extends DetailViewRecord
 {
-    use HasDetailLayout;
-
     protected static string $resource = TransactionResource::class;
 
     public function content(Schema $schema): Schema

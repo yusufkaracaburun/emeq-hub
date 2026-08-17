@@ -115,8 +115,11 @@ class AccountSubscriptionResource extends Resource
      */
     public static function statusStripSchema(AccountSubscription $record): array
     {
+        /** @var SubscriptionStatus|null $status */
+        $status = $record->status;
+
         return StatusStrip::make([
-            StatusStrip::badge('Status', $record->status?->value, fn (?string $state): string => $record->status?->getColor() ?? 'gray'),
+            StatusStrip::badge('Status', $status?->value, $status?->getColor() ?? 'gray'),
             StatusStrip::fact('Bedrag', $record->amount_value.' '.$record->amount_currency),
             StatusStrip::fact('Interval', $record->interval),
             StatusStrip::moment('Laatste webhook', $record->last_webhook_event_at, emptyText: 'Nog geen'),

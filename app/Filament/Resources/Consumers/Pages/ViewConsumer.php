@@ -5,17 +5,14 @@ declare(strict_types=1);
 namespace App\Filament\Resources\Consumers\Pages;
 
 use App\Filament\Resources\Consumers\ConsumerResource;
-use App\Filament\Support\HasDetailLayout;
+use App\Filament\Support\DetailViewRecord;
 use App\Filament\Support\InfoModalAction;
 use App\Models\Consumer;
 use Filament\Actions\EditAction;
-use Filament\Resources\Pages\ViewRecord;
 use Filament\Schemas\Schema;
 
-class ViewConsumer extends ViewRecord
+class ViewConsumer extends DetailViewRecord
 {
-    use HasDetailLayout;
-
     protected static string $resource = ConsumerResource::class;
 
     protected function getHeaderActions(): array

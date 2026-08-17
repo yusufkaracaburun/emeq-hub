@@ -6,6 +6,7 @@ use App\Filament\Resources\CashierSubscriptions\Pages\ListCashierSubscriptions;
 use App\Filament\Resources\CashierSubscriptions\Pages\ViewCashierSubscription;
 use App\Filament\Resources\CashierSubscriptions\Schemas\CashierSubscriptionInfolist;
 use App\Filament\Resources\CashierSubscriptions\Tables\CashierSubscriptionsTable;
+use App\Models\Consumer;
 use App\Support\Filament\BadgeColor;
 use App\Support\Filament\StatusStrip;
 use BackedEnum;
@@ -52,13 +53,16 @@ class CashierSubscriptionResource extends Resource
      */
     public static function statusStripSchema(Subscription $record): array
     {
+        /** @var Consumer|null $owner */
+        $owner = $record->owner;
+
         return StatusStrip::make([
             StatusStrip::badge(
                 'Status',
                 CashierSubscriptionInfolist::deriveStatus($record),
                 fn (?string $state): string => BadgeColor::cashierStatus($state),
             ),
-            StatusStrip::fact('Consumer', $record->owner?->slug),
+            StatusStrip::fact('Consumer', $owner?->slug),
             StatusStrip::fact('Plan', $record->plan),
             StatusStrip::moment('Cycle eindigt', $record->cycle_ends_at),
         ]);

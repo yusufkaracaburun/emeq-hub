@@ -96,7 +96,7 @@ class PassThroughCallResource extends Resource
         return StatusStrip::make([
             StatusStrip::badge('HTTP-status', (string) $record->status, fn (?string $state): string => BadgeColor::httpStatus($state)),
             StatusStrip::fact('Endpoint', $record->method.' '.$record->path, copyable: true),
-            StatusStrip::fact('Duur', $record->duration_ms === null ? null : $record->duration_ms.' ms'),
+            StatusStrip::fact('Duur', $record->duration_ms.' ms'),
             StatusStrip::moment('Aangemaakt', $record->created_at),
         ]);
     }

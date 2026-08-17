@@ -5,18 +5,15 @@ namespace App\Filament\Resources\Connections\Pages;
 use App\Enums\Provider;
 use App\Filament\Actions\StartOAuthFlowAction;
 use App\Filament\Resources\Connections\ConnectionResource;
-use App\Filament\Support\HasDetailLayout;
+use App\Filament\Support\DetailViewRecord;
 use App\Models\Connection;
 use Filament\Actions\ActionGroup;
-use Filament\Resources\Pages\ViewRecord;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 
-class ViewConnection extends ViewRecord
+class ViewConnection extends DetailViewRecord
 {
-    use HasDetailLayout;
-
     protected static string $resource = ConnectionResource::class;
 
     protected function getHeaderActions(): array

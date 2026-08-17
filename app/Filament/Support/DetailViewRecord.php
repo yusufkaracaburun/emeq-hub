@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Support;
 
+use Filament\Resources\Pages\ViewRecord;
 use Filament\Schemas\Components\Livewire;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
@@ -18,7 +19,7 @@ use Filament\Support\Icons\Heroicon;
  * "Overzicht" voorop; heeft het er geen, dan blijft de infolist kaal onder de strip
  * staan — een tabbalk met één tab is ruis.
  */
-trait HasDetailLayout
+abstract class DetailViewRecord extends ViewRecord
 {
     /**
      * @param  list<Section>  $strip

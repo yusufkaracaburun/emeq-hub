@@ -3,15 +3,12 @@
 namespace App\Filament\Resources\CashierSubscriptions\Pages;
 
 use App\Filament\Resources\CashierSubscriptions\CashierSubscriptionResource;
-use App\Filament\Support\HasDetailLayout;
-use Filament\Resources\Pages\ViewRecord;
+use App\Filament\Support\DetailViewRecord;
 use Filament\Schemas\Schema;
 use Laravel\Cashier\Subscription;
 
-class ViewCashierSubscription extends ViewRecord
+class ViewCashierSubscription extends DetailViewRecord
 {
-    use HasDetailLayout;
-
     protected static string $resource = CashierSubscriptionResource::class;
 
     protected function getHeaderActions(): array

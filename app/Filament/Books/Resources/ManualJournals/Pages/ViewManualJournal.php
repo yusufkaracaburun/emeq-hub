@@ -6,14 +6,11 @@ namespace App\Filament\Books\Resources\ManualJournals\Pages;
 
 use App\Books\Models\Transaction;
 use App\Filament\Books\Resources\ManualJournals\ManualJournalResource;
-use App\Filament\Support\HasDetailLayout;
-use Filament\Resources\Pages\ViewRecord;
+use App\Filament\Support\DetailViewRecord;
 use Filament\Schemas\Schema;
 
-class ViewManualJournal extends ViewRecord
+class ViewManualJournal extends DetailViewRecord
 {
-    use HasDetailLayout;
-
     protected static string $resource = ManualJournalResource::class;
 
     public function content(Schema $schema): Schema

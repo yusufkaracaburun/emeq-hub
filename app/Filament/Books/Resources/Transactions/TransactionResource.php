@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Filament\Books\Resources\Transactions;
 
 use App\Books\Enums\TransactionType;
+use App\Books\Models\Account;
+use App\Books\Models\BankAccount;
 use App\Books\Models\Transaction;
 use App\Filament\Books\Concerns\GatedToBoekhouding;
 use App\Filament\Books\Resources\Transactions\Pages\CreateTransaction;
@@ -69,11 +71,17 @@ class TransactionResource extends Resource
      */
     public static function statusStripSchema(Transaction $record): array
     {
+        /** @var BankAccount|null $bankAccount */
+        $bankAccount = $record->bankAccount;
+
+        /** @var Account|null $bankLedgerAccount */
+        $bankLedgerAccount = $bankAccount?->account;
+
         return StatusStrip::make([
             StatusStrip::moment('Boekdatum', $record->posted_at),
             StatusStrip::fact('Bedrag', '€ '.number_format($record->amount / 100, 2, ',', '.')),
-            StatusStrip::badge('Type', $record->type?->value),
-            StatusStrip::fact('Bankrekening', $record->bankAccount?->account?->name),
+            StatusStrip::badge('Type', $record->type->value),
+            StatusStrip::fact('Bankrekening', $bankLedgerAccount?->name),
         ]);
     }
 

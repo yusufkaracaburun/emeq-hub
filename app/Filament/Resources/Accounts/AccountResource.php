@@ -11,6 +11,7 @@ use App\Filament\Resources\Accounts\Pages\ViewAccount;
 use App\Filament\Resources\Accounts\Schemas\AccountInfolist;
 use App\Filament\Resources\Accounts\Tables\AccountsTable;
 use App\Models\Account;
+use App\Models\Consumer;
 use App\Support\Filament\StatusStrip;
 use BackedEnum;
 use Filament\Forms\Components\Select;
@@ -81,8 +82,11 @@ class AccountResource extends Resource
         $connections = $record->connections()->count();
         $active = $record->connections()->whereNull('revoked_at')->count();
 
+        /** @var Consumer|null $consumer */
+        $consumer = $record->consumer;
+
         return StatusStrip::make([
-            StatusStrip::fact('Consumer', $record->consumer?->slug),
+            StatusStrip::fact('Consumer', $consumer?->slug),
             StatusStrip::fact('External ID', $record->external_id, copyable: true),
             StatusStrip::fact('Koppelingen', $connections === 0 ? null : "{$active} actief van {$connections}"),
             StatusStrip::moment('Aangemaakt', $record->created_at),

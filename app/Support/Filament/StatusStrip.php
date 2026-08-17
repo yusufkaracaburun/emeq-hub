@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Support\Filament;
 
 use Closure;
+use DateTimeInterface;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
 use Filament\Support\Enums\FontWeight;
@@ -58,11 +59,15 @@ final class StatusStrip
      */
     public static function moment(
         string $label,
-        Carbon|string|null $moment,
+        DateTimeInterface|string|null $moment,
         ?string $emptyText = null,
         bool $pastIsProblem = false,
     ): TextEntry {
-        $moment = is_string($moment) ? Carbon::parse($moment) : $moment;
+        $moment = match (true) {
+            $moment === null => null,
+            is_string($moment) => Carbon::parse($moment),
+            default => Carbon::instance($moment),
+        };
 
         return self::entry($label, $moment?->diffForHumans(), $emptyText)
             ->weight(FontWeight::SemiBold)
