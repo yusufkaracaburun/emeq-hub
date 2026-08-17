@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace Tests\Feature\Admin;
 
 use App\Filament\Resources\Connections\Pages\ViewConnection;
-use Filament\Actions\Testing\TestAction;
 use App\Models\Account;
 use App\Models\Connection;
 use App\Models\Consumer;
 use App\Models\User;
 use Emeq\ExactApi\Http\Request\RawExactRequest;
+use Filament\Actions\Testing\TestAction;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Saloon\Http\Faking\MockClient;
