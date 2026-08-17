@@ -383,6 +383,94 @@ class ProviderEntityLinkTest extends TestCase
     }
 
     /**
+     * De kruis-koppeling-lezing sluit het venster ná een geslaagde boeking, maar niet
+     * het venster eromheen: twee koppelingen op dezelfde administratie claimen elk hun
+     * eigen rij, zien beide nog niets, en boeken beide. De grendel dekt dat venster.
+     *
+     * Deterministische stand-in voor de race: de grendel staat al in handen van de
+     * andere koppeling, alsof die op dit moment aan het pushen is.
+     */
+    public function test_a_simultaneous_push_from_another_connection_on_one_administration_is_refused(): void
+    {
+        MockClient::global([
+            CreateSalesEntry::class => MockResponse::make(['d' => ['ID' => 'inv-guid-race']], 201),
+        ]);
+        $this->bindFakeReferences();
+
+        [, $accountantConnection] = $this->consumerWithExactConnection('school1');
+        [$entrepreneur] = $this->consumerWithExactConnection('school1');
+
+        $document = FinancialDocument::fromArray($this->salesInvoicePayload());
+        $held = app(ProviderEntityLinkRecorder::class)->administrationLock(
+            $accountantConnection,
+            $document,
+            DocumentFingerprint::for($document),
+        );
+
+        $this->assertNotNull($held);
+        $this->assertTrue($held->get());
+
+        $response = $this->postDocument($entrepreneur, $this->salesInvoicePayload())
+            ->assertStatus(409)
+            ->assertJsonPath('error', 'document_sync_in_progress');
+
+        // Transient, dus met een venster om op te pace'en — geen definitieve weigering.
+        $this->assertSame(
+            (string) IdempotencyKey::retryAfterCeilingSeconds(),
+            $response->headers->get('Retry-After'),
+        );
+
+        // Niet geboekt, en de eigen claim is vrijgegeven zodat de retry mag.
+        MockClient::global()->assertNothingSent();
+        $this->assertDatabaseCount('provider_entity_links', 0);
+    }
+
+    /**
+     * Een grendel die na een mislukte push blijft staan, legt dit document in deze
+     * administratie stil tot de TTL (de lease, 900s) verloopt — een storing van één
+     * seconde wordt dan een kwartier.
+     */
+    public function test_a_failed_push_releases_the_cross_connection_lock(): void
+    {
+        MockClient::global([
+            CreateSalesEntry::class => MockResponse::make(['error' => ['message' => 'boom']], 500),
+        ]);
+        $this->bindFakeReferences();
+
+        [$consumer, $connection] = $this->consumerWithExactConnection('school1');
+
+        $this->postDocument($consumer, $this->salesInvoicePayload())->assertStatus(502);
+
+        $document = FinancialDocument::fromArray($this->salesInvoicePayload());
+        $lock = app(ProviderEntityLinkRecorder::class)->administrationLock(
+            $connection,
+            $document,
+            DocumentFingerprint::for($document),
+        );
+
+        $this->assertNotNull($lock);
+        $this->assertTrue($lock->get(), 'De grendel staat na een mislukte push nog vast.');
+    }
+
+    /**
+     * Zonder administratie-id valt "dezelfde administratie" niet vast te stellen. Eén
+     * grendel over alle lege waarden heen zou losstaande administraties serialiseren.
+     */
+    public function test_a_connection_without_an_administration_id_has_no_cross_connection_lock(): void
+    {
+        [, $connection] = $this->consumerWithExactConnection('school1');
+        $connection->forceFill(['administratie_id' => null])->save();
+
+        $document = FinancialDocument::fromArray($this->salesInvoicePayload());
+
+        $this->assertNull(app(ProviderEntityLinkRecorder::class)->administrationLock(
+            $connection,
+            $document,
+            DocumentFingerprint::for($document),
+        ));
+    }
+
+    /**
      * Een dedupe die niet in de audit landt, leest in ops als "er gebeurde niets".
      */
     public function test_a_deduplicated_call_is_audited(): void

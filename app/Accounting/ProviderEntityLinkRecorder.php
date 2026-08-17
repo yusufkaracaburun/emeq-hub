@@ -4,10 +4,13 @@ declare(strict_types=1);
 
 namespace App\Accounting;
 
+use App\Http\Controllers\Webhooks\ExactWebhookController;
 use App\Models\Connection;
 use App\Models\IdempotencyKey;
 use App\Models\ProviderEntityLink;
+use Illuminate\Contracts\Cache\Lock;
 use Illuminate\Database\UniqueConstraintViolationException;
+use Illuminate\Support\Facades\Cache;
 
 /**
  * Leest en schrijft de canonieke ⇄ partner-identiteit. Losgetrokken van
@@ -63,7 +66,7 @@ final readonly class ProviderEntityLinkRecorder
      *
      * De canonieke unique index sluit per Connection af, maar één administratie mag
      * door meerdere Accounts gekoppeld zijn — de boekhouder via de ene Consumer-app,
-     * de ondernemer via de andere. {@see \App\Http\Controllers\Webhooks\ExactWebhookController}
+     * de ondernemer via de andere. {@see ExactWebhookController}
      * rekent daar expliciet op. Aan de boekkant deelden die twee geen grendel.
      *
      * Gelijke fingerprint is voorwaarde, niet alleen gelijk `external_id`. Twee apps
@@ -98,6 +101,49 @@ final readonly class ProviderEntityLinkRecorder
             ->whereNotNull('provider_entity_id')
             ->where('connection_id', '!=', $connection->getKey())
             ->first();
+    }
+
+    /**
+     * De grendel die {@see findPostedOnSameAdministration()} pas een mutex maakt.
+     *
+     * Die methode is een lezing. Twee Connections op dezelfde administratie claimen
+     * elk hun eigen rij — de unique index sluit per Connection af — zien daarna beide
+     * nog geen boeking, en boeken beide. Deze grendel serialiseert dat venster, op
+     * exact dezelfde sleutel-scope als de lezing: een andere scope zou het verkeerde
+     * afsluiten.
+     *
+     * Null wanneer de provider geen administratie-id levert. Dan valt "dezelfde
+     * administratie" niet vast te stellen en doet de lezing ook niets; een grendel
+     * over alle lege waarden heen zou losstaande administraties serialiseren.
+     *
+     * De TTL is de idempotency-lease: hetzelfde antwoord op "hoe lang kan één boeking
+     * duren?" als de claim gebruikt. Korter is gevaarlijk — een grendel die middenin
+     * de push verloopt laat precies de dubbele boeking door die hij moest tegenhouden.
+     *
+     * `external_id` is consumer-invoer en mag alles bevatten, dus de sleutel wordt
+     * gehasht in plaats van samengeplakt.
+     */
+    public function administrationLock(
+        Connection $connection,
+        FinancialDocument $document,
+        string $fingerprint,
+    ): ?Lock {
+        $administratieId = self::administratieId($connection);
+
+        if ($administratieId === '') {
+            return null;
+        }
+
+        $scope = implode("\0", [
+            $connection->provider->value,
+            $administratieId,
+            ProviderEntityLink::ENTITY_FINANCIAL_DOCUMENT,
+            $document->type->value,
+            $document->externalId,
+            $fingerprint,
+        ]);
+
+        return Cache::lock('accounting:post:'.hash('sha256', $scope), IdempotencyKey::leaseSeconds());
     }
 
     private static function administratieId(Connection $connection): string

@@ -13,6 +13,7 @@ use App\Integrations\PassThrough\PassThroughRecorder;
 use App\Jobs\Accounting\SyncAccountingDocumentJob;
 use App\Models\Account;
 use App\Models\Connection;
+use App\Models\IdempotencyKey;
 use App\Models\ProviderEntityLink;
 use Throwable;
 
@@ -34,9 +35,6 @@ final readonly class AccountingSyncRunner
     {
         $provider = $connection->provider->value;
         $start = microtime(true);
-        $upstreamError = null;
-        $responseBody = [];
-        $status = 0;
         $fingerprint = DocumentFingerprint::for($document);
 
         // Tweede verdedigingslijn naast de idempotency-key: die vervalt, deze niet.
@@ -55,9 +53,49 @@ final readonly class AccountingSyncRunner
             return new AccountingSyncOutcome($status, $responseBody, $headers);
         }
 
-        // De claim is van ons, maar die grendel zit per Connection. Staat dit document
-        // al in dezelfde échte administratie via een andere koppeling, dan levert
-        // boeken een tweede journaalpost in hetzelfde grootboek op.
+        // De claim is van ons, maar die grendel zit per Connection. Twee koppelingen op
+        // dezelfde échte administratie claimen elk hun eigen rij en zouden allebei
+        // boeken. Deze grendel serialiseert dat; wie hem niet krijgt wacht even, en
+        // vindt bij de volgende poging de boeking van de ander via de lezing hieronder.
+        $lock = $this->links->administrationLock($connection, $document, $fingerprint);
+
+        if ($lock !== null && ! $lock->get()) {
+            $this->links->releaseClaim($claim);
+
+            [$status, $upstreamError, $responseBody, $headers] = $this->syncInProgressElsewhere($document, $provider);
+            $this->audit($account, $connection, $consumerId, $provider, $document, $status, $start, $upstreamError, $responseBody);
+
+            return new AccountingSyncOutcome($status, $responseBody, $headers);
+        }
+
+        try {
+            return $this->push($document, $connection, $account, $consumerId, $fingerprint, $claim, $start);
+        } finally {
+            $lock?->release();
+        }
+    }
+
+    /**
+     * De boeking zelf, met de kruis-administratie-grendel al in de hand.
+     * Losgetrokken uit {@see run()} zodat het vrijgeven van die grendel in één
+     * `finally` past in plaats van op elk return-pad.
+     */
+    private function push(
+        FinancialDocument $document,
+        Connection $connection,
+        Account $account,
+        int $consumerId,
+        string $fingerprint,
+        ProviderEntityLink $claim,
+        float $start,
+    ): AccountingSyncOutcome {
+        $provider = $connection->provider->value;
+        $upstreamError = null;
+        $responseBody = [];
+        $status = 0;
+
+        // Staat dit document al in dezelfde échte administratie via een andere
+        // koppeling, dan levert boeken een tweede journaalpost in hetzelfde grootboek op.
         $elsewhere = $this->links->findPostedOnSameAdministration($connection, $document, $fingerprint);
 
         if ($elsewhere !== null) {
@@ -193,8 +231,30 @@ final readonly class AccountingSyncRunner
             'status' => SyncStatus::Rejected->value,
             'external_id' => $document->externalId,
             'error' => 'document_already_posted',
-            'message' => "Dit document staat al in deze administratie, geboekt via een andere koppeling. Boek het niet nogmaals; een correctie is een creditnota met een eigen external_id.",
+            'message' => 'Dit document staat al in deze administratie, geboekt via een andere koppeling. Boek het niet nogmaals; een correctie is een creditnota met een eigen external_id.',
         ], []];
+    }
+
+    /**
+     * Een andere koppeling op dezelfde administratie boekt dit document op dit moment.
+     *
+     * Zelfde foutcode als {@see syncInProgress()} — consumers behandelen die al als
+     * "wachten en opnieuw", en dat is precies wat dit is. Alleen het bericht verschilt,
+     * zodat een mens ziet dat het niet zijn eigen tweede poging was. Er is hier geen
+     * claim-rij om een venster van af te leiden (die staat bij de ander), dus het
+     * plafond dat elders de Retry-After begrenst is meteen de hele waarde.
+     *
+     * @return array{0: int, 1: string, 2: array<string, mixed>, 3: array<string, string>}
+     */
+    private function syncInProgressElsewhere(FinancialDocument $document, string $provider): array
+    {
+        return [409, 'sync_in_progress_other_connection', [
+            'provider' => $provider,
+            'status' => SyncStatus::Pending->value,
+            'external_id' => $document->externalId,
+            'error' => 'document_sync_in_progress',
+            'message' => 'Een andere koppeling op deze administratie boekt dit document op dit moment. Probeer het zo opnieuw.',
+        ], ['Retry-After' => (string) IdempotencyKey::retryAfterCeilingSeconds()]];
     }
 
     /**
