@@ -115,6 +115,10 @@ RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 # config genegeerd en gold de image-default — die doet auto-HTTPS en beantwoordde
 # elke request met een 308 naar https://localhost.
 COPY docker/Caddyfile /etc/frankenphp/Caddyfile
+COPY composer.json composer.lock /app/
+RUN --mount=type=cache,target=/tmp/composer-cache \
+    COMPOSER_CACHE_DIR=/tmp/composer-cache \
+    composer install --no-dev --no-scripts --no-autoloader --no-interaction
 COPY . /app
 COPY --from=assets /app/public/build /app/public/build
 # De SSR-bundel draait in de `ssr`-service, maar Inertia's
@@ -122,4 +126,4 @@ COPY --from=assets /app/public/build /app/public/build
 # daar, dan slaat de app SSR stil over en krijgen crawlers een lege body.
 # bootstrap/ssr staat in .gitignore, dus `COPY . /app` hierboven pakt 'm niet.
 COPY --from=assets /app/bootstrap/ssr /app/bootstrap/ssr
-RUN composer install --no-dev --optimize-autoloader --no-interaction
+RUN composer dump-autoload --no-dev --optimize --no-interaction
