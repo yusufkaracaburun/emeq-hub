@@ -880,6 +880,12 @@ koppelde:
   `X-Account-Id`), niet een Hub-intern nummer.
 - **`occurred_at`** — wanneer de Hub het event uitstuurde. De meeste partners
   leveren geen eigen tijdstempel; doen alsof van wel zou liegen over de bron.
+- **`caused_by_hub`** — staat er alleen als hij `true` is, en betekent: deze
+  wijziging is te herleiden tot een schrijfactie die jij zelf via de Hub hebt
+  aangevraagd. Je boekt een factuur, het boekhoudpakket meldt die wijziging, en
+  die melding komt bij jou terug. **Schrijf hier niet op terug** — dat is een lus.
+  Ontbreekt het veld, dan weten we het niet zeker; ga er dan van uit dat de
+  wijziging van de boekhouder komt.
 - **`data`** — bij een event dat van de partner komt: diens payload, ongewijzigd.
   Handig om te debuggen; bouw er geen routering op, want die vorm verschilt per
   provider. Bij de twee events die de Hub zélf publiceert —
@@ -893,7 +899,11 @@ Huidige `event`-waarden:
 | `accounting.bank_statement.changed` | bankmutatie gewijzigd |
 | `accounting.cash_statement.changed` | kasmutatie gewijzigd |
 | `accounting.relation.changed` | debiteur/crediteur gewijzigd |
-| `accounting.sales_invoice.changed` | verkoopfactuur gewijzigd |
+| `accounting.sales_invoice.changed` | verkoopboeking gewijzigd |
+| `accounting.purchase_invoice.changed` | inkoopboeking gewijzigd |
+| `accounting.journal_entry.changed` | memoriaalboeking gewijzigd |
+| `accounting.document.changed` | document (bijlage-container) gewijzigd |
+| `accounting.ledger_account.changed` | grootboekrekening gewijzigd |
 | `accounting.document.synced` | de Hub heeft jouw document weggeschreven |
 | `billing.payment.changed` | betaling gewijzigd |
 | `billing.subscription.changed` | abonnement gewijzigd |

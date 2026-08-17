@@ -71,17 +71,15 @@ return [
         'auth_base_url' => 'https://start.exactonline.nl',
         'api_base_url' => 'https://start.exactonline.nl',
 
-        // Topics waarop de Hub per Exact-Connection abonneert bij OAuth-connect
-        // (Hub-orchestratie, niet SDK-protocol). Strings live-geverifieerd tegen
-        // de Exact-API (2026-06-18): bank/kas-mutaties = de afletter-events die
-        // op de accounting-sync sluiten ("factuur betaald" terugmelden). NIET de
-        // entry-types (Sales/PurchaseEntries) — die boekt de Hub zelf via
-        // accounting-sync → feedback-loop. Nieuwe topic = regel hier.
-        // Geldige topics o.a.: BankEntries, CashEntries, GeneralJournalEntries,
-        // PurchaseEntries, SalesEntries, GoodsDeliveries.
         'webhook_topics' => [
+            'Accounts',
             'BankEntries',
             'CashEntries',
+            'Documents',
+            'GeneralJournalEntries',
+            'GLAccounts',
+            'PurchaseEntries',
+            'SalesEntries',
         ],
     ],
 

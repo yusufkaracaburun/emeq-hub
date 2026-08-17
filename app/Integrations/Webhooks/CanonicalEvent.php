@@ -24,6 +24,14 @@ final class CanonicalEvent
 
     public const SALES_INVOICE_CHANGED = 'accounting.sales_invoice.changed';
 
+    public const PURCHASE_INVOICE_CHANGED = 'accounting.purchase_invoice.changed';
+
+    public const JOURNAL_ENTRY_CHANGED = 'accounting.journal_entry.changed';
+
+    public const DOCUMENT_CHANGED = 'accounting.document.changed';
+
+    public const LEDGER_ACCOUNT_CHANGED = 'accounting.ledger_account.changed';
+
     /** De Hub heeft een canoniek document weggeschreven — publiceert SyncAccountingDocumentJob. */
     public const DOCUMENT_SYNCED = 'accounting.document.synced';
 

@@ -1,5 +1,21 @@
 # Exact App Center — scopes versus code
 
+## Bronnen — raadpleeg deze vóór je iets aanneemt
+
+| Wat | URL |
+|---|---|
+| Alle REST-resources met scope per endpoint | https://start.exactonline.nl/docs/HlpRestAPIResources.aspx |
+| **Alleen de webhook-capabele resources** (= de topic-catalogus) | https://start.exactonline.nl/docs/HlpRestAPIResources.aspx?webhookfilter=yes |
+| Referentiedocumentatie | https://support.exactonline.com/community/s/knowledge-base#All-All-DNO-Content-restrefdocs |
+| Webhooks — concept | https://support.exactonline.com/community/s/knowledge-base#All-All-DNO-Content-webhooksc |
+| Webhooks — tutorial | https://support.exactonline.com/community/s/knowledge-base#All-All-DNO-Content-webhookstut |
+
+De topic-catalogus bestaat alleen als documentatiepagina, niet als API:
+`GET webhooks/WebhookTopics` geeft **404**, zowel division-relatief als op app-niveau
+(geverifieerd 2026-08-17). Een topic-string komt dus uit de webhookfilter-pagina
+hierboven — niet uit een geheugen, niet uit een OSS-SDK.
+
+
 Momentopname 2026-08-11, tegen de scope-selectie van de live koppeling. Bijgewerkt
 2026-08-12: `organization/administration` toegevoegd nadat de webhook-registratie er
 live op stuk liep — zie punt 3.
