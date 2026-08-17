@@ -32,7 +32,7 @@ final class ManageWebhookSubscriptionsAction
                 $selected = array_keys(array_filter((array) ($data['topics'] ?? [])));
 
                 try {
-                    $result = app(ExactWebhookSubscriptionManager::class)->apply($record, array_values($selected));
+                    $result = app(ExactWebhookSubscriptionManager::class)->apply($record, $selected);
                 } catch (Throwable $e) {
                     Notification::make()
                         ->title('Exact weigerde de wijziging')
@@ -98,7 +98,7 @@ final class ManageWebhookSubscriptionsAction
 
         sort($topics);
 
-        return array_values($topics);
+        return $topics;
     }
 
     /**
