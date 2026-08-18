@@ -5,10 +5,10 @@ use App\Http\Controllers\Api\V1\Accounting\DocumentsController as AccountingDocu
 use App\Http\Controllers\Api\V1\Accounting\MappingController as AccountingMappingController;
 use App\Http\Controllers\Api\V1\Accounting\ReadController as AccountingReadController;
 use App\Http\Controllers\Api\V1\Accounting\ValidateDocumentController as AccountingValidateDocumentController;
-use App\Http\Controllers\Api\V1\AccountSubscriptions\AccountSubscriptionController;
-use App\Http\Controllers\Api\V1\AccountSubscriptions\PauseController;
-use App\Http\Controllers\Api\V1\AccountSubscriptions\ResumeController;
-use App\Http\Controllers\Api\V1\Billing\SubscriptionController;
+use App\Integrations\Mollie\Http\AccountSubscriptions\AccountSubscriptionController;
+use App\Integrations\Mollie\Http\AccountSubscriptions\PauseController;
+use App\Integrations\Mollie\Http\AccountSubscriptions\ResumeController;
+use App\Integrations\Mollie\Http\Billing\SubscriptionController;
 use App\Http\Controllers\Api\V1\ConnectionController;
 use App\Http\Controllers\Api\V1\ConnectSessionController;
 use App\Integrations\Exact\Http\Api\GlAccountsController as ExactGlAccountsController;
@@ -17,19 +17,19 @@ use App\Integrations\Exact\Http\Api\PassThroughController as ExactPassThroughCon
 use App\Integrations\Exact\Http\Api\RelationsController as ExactRelationsController;
 use App\Integrations\Exact\Http\Api\VatCodesController as ExactVatCodesController;
 use App\Http\Controllers\Api\V1\IntegrationController;
-use App\Http\Controllers\Api\V1\Mollie\Connect\ClientLinksController as ConnectClientLinksController;
-use App\Http\Controllers\Api\V1\Mollie\Connect\OnboardingController as ConnectOnboardingController;
-use App\Http\Controllers\Api\V1\Mollie\Connect\OrganizationsController as ConnectOrganizationsController;
-use App\Http\Controllers\Api\V1\Mollie\Connect\PermissionsController as ConnectPermissionsController;
-use App\Http\Controllers\Api\V1\Mollie\Connect\ProfilesController as ConnectProfilesController;
-use App\Http\Controllers\Api\V1\Mollie\CustomersController;
-use App\Http\Controllers\Api\V1\Mollie\MandatesController;
-use App\Http\Controllers\Api\V1\Mollie\PaymentLinksController;
-use App\Http\Controllers\Api\V1\Mollie\PaymentMethodsController;
-use App\Http\Controllers\Api\V1\Mollie\PaymentsController;
-use App\Http\Controllers\Api\V1\Mollie\RefundsController;
-use App\Http\Controllers\Api\V1\Mollie\SubscriptionsController;
-use App\Http\Controllers\Api\V1\OAuth\CallbackController;
+use App\Integrations\Mollie\Http\Connect\ClientLinksController as ConnectClientLinksController;
+use App\Integrations\Mollie\Http\Connect\OnboardingController as ConnectOnboardingController;
+use App\Integrations\Mollie\Http\Connect\OrganizationsController as ConnectOrganizationsController;
+use App\Integrations\Mollie\Http\Connect\PermissionsController as ConnectPermissionsController;
+use App\Integrations\Mollie\Http\Connect\ProfilesController as ConnectProfilesController;
+use App\Integrations\Mollie\Http\Api\CustomersController;
+use App\Integrations\Mollie\Http\Api\MandatesController;
+use App\Integrations\Mollie\Http\Api\PaymentLinksController;
+use App\Integrations\Mollie\Http\Api\PaymentMethodsController;
+use App\Integrations\Mollie\Http\Api\PaymentsController;
+use App\Integrations\Mollie\Http\Api\RefundsController;
+use App\Integrations\Mollie\Http\Api\SubscriptionsController;
+use App\Integrations\Mollie\Http\OAuth\CallbackController;
 use App\Integrations\Exact\Http\OAuth\ExactCallbackController;
 use App\Http\Controllers\Api\V1\OAuth\ProviderInitController;
 use App\Http\Controllers\Api\V1\PingController;
@@ -137,9 +137,9 @@ Route::middleware('auth:sanctum')->group(function (): void {
     Route::prefix('admin/billing')
         ->middleware(['ability:billing:write,*', 'emeq.admin'])
         ->group(function (): void {
-            Route::post('/subscriptions', [App\Http\Controllers\Api\V1\Admin\Billing\SubscriptionController::class, 'store'])
+            Route::post('/subscriptions', [App\Integrations\Mollie\Http\Admin\SubscriptionController::class, 'store'])
                 ->name('api.admin.billing.subscriptions.store');
-            Route::delete('/subscriptions/{id}', [App\Http\Controllers\Api\V1\Admin\Billing\SubscriptionController::class, 'destroy'])
+            Route::delete('/subscriptions/{id}', [App\Integrations\Mollie\Http\Admin\SubscriptionController::class, 'destroy'])
                 ->name('api.admin.billing.subscriptions.destroy');
         });
 

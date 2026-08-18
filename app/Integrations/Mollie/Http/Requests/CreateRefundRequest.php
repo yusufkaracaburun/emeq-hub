@@ -1,0 +1,29 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Integrations\Mollie\Http\Requests;
+
+use Illuminate\Foundation\Http\FormRequest;
+
+class CreateRefundRequest extends FormRequest
+{
+    public function authorize(): bool
+    {
+        return true;
+    }
+
+    /** @return array<string, array<int, mixed>> */
+    public function rules(): array
+    {
+        return [
+            'amount' => ['required', 'array'],
+            'amount.currency' => ['required', 'string', 'size:3'],
+            'amount.value' => ['required', 'string', 'regex:/^\d+\.\d{2,}$/'],
+            'description' => ['nullable', 'string', 'max:255'],
+            'externalReference' => ['nullable', 'array'],
+            'metadata' => ['nullable'],
+            'testmode' => ['nullable', 'boolean'],
+        ];
+    }
+}

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Billing\Account;
 
-use App\Billing\Account\AccountSubscriptionManager;
+use App\Integrations\Mollie\Billing\AccountSubscriptionManager;
 use App\Billing\Account\SubscriptionStatus;
 use App\Models\AccountSubscription;
 use App\Sanctum\TokenAbilities;

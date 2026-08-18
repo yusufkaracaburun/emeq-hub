@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Api\V1\Mollie\Connect;
 
-use App\Http\Controllers\Api\V1\Mollie\Connect\AbstractMollieConnectPassThroughController;
-use App\Http\Controllers\Api\V1\Mollie\Connect\ClientLinksController;
-use App\Http\Controllers\Api\V1\Mollie\Connect\OnboardingController;
-use App\Http\Controllers\Api\V1\Mollie\Connect\OrganizationsController;
-use App\Http\Controllers\Api\V1\Mollie\Connect\PermissionsController;
-use App\Http\Controllers\Api\V1\Mollie\Connect\ProfilesController;
-use App\Http\Requests\Api\V1\Mollie\Connect\CreateClientLinkRequest;
-use App\Http\Requests\Api\V1\Mollie\Connect\CreateProfileRequest;
+use App\Integrations\Mollie\Http\Connect\AbstractMollieConnectPassThroughController;
+use App\Integrations\Mollie\Http\Connect\ClientLinksController;
+use App\Integrations\Mollie\Http\Connect\OnboardingController;
+use App\Integrations\Mollie\Http\Connect\OrganizationsController;
+use App\Integrations\Mollie\Http\Connect\PermissionsController;
+use App\Integrations\Mollie\Http\Connect\ProfilesController;
+use App\Integrations\Mollie\Http\Requests\Connect\CreateClientLinkRequest;
+use App\Integrations\Mollie\Http\Requests\Connect\CreateProfileRequest;
 use ReflectionClass;
 use Tests\TestCase;
 

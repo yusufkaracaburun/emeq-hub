@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Admin;
 
-use App\Billing\Account\AccountSubscriptionManager;
+use App\Integrations\Mollie\Billing\AccountSubscriptionManager;
 use App\Billing\Account\Exceptions\InvalidStateTransitionException;
 use App\Billing\Account\SubscriptionStatus;
 use App\Filament\Resources\AccountSubscriptions\Pages\ListAccountSubscriptions;

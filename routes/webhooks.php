@@ -1,7 +1,7 @@
 <?php
 
 use App\Integrations\Exact\Http\Webhooks\ExactWebhookController;
-use App\Http\Controllers\Webhooks\MollieWebhookController;
+use App\Integrations\Mollie\Http\Webhooks\MollieWebhookController;
 use App\Integrations\Snelstart\Http\Webhooks\SnelstartWebhookController;
 use Illuminate\Support\Facades\Route;
 use Laravel\Cashier\Http\Controllers\AftercareWebhookController;

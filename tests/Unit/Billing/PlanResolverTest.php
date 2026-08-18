@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Billing;
 
-use App\Billing\Exceptions\UnknownPlanException;
-use App\Billing\PlanResolver;
+use App\Integrations\Mollie\Billing\Exceptions\UnknownPlanException;
+use App\Integrations\Mollie\Billing\PlanResolver;
 use Tests\TestCase;
 
 class PlanResolverTest extends TestCase
