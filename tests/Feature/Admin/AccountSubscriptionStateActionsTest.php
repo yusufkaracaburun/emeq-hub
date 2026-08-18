@@ -18,7 +18,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
-use Tests\Concerns\StubsMollieClient;
+use Tests\Feature\Integrations\Mollie\Concerns\StubsMollieClient;
 use Tests\TestCase;
 
 class AccountSubscriptionStateActionsTest extends TestCase

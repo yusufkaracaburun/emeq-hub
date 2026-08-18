@@ -1,0 +1,133 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Tests\Feature\Integrations\Mollie\Http\AccountSubscriptions;
+
+use App\Jobs\Webhooks\ForwardWebhookToConsumerJob;
+use App\Models\AccountSubscription;
+use App\Sanctum\TokenAbilities;
+use Emeq\MollieApi\Webhooks\MollieWebhookSignature;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Bus;
+use Tests\Feature\Integrations\Mollie\Concerns\StubsMollieClient;
+use Tests\TestCase;
+
+class MollieAndAccountSubscriptionsCoexistenceTest extends TestCase
+{
+    use RefreshDatabase;
+    use StubsMollieClient;
+
+    private string $webhookSecret = 'whsec_test_xyz';
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        config(['mollie.webhook.secret' => $this->webhookSecret]);
+    }
+
+    public function test_phase_5a_passthrough_subscription_create_still_works_after_phase_7_refactor(): void
+    {
+        [, $token] = $this->setupMollieConsumer([TokenAbilities::MOLLIE_WRITE]);
+
+        $this->bindMollieStubs([
+            'subscriptions' => fn (string $op, mixed $arg) => $this->makeSubscription([
+                'id' => 'sub_5a',
+                'status' => 'pending',
+                'customerId' => $arg['customer_id'],
+                'amount' => $arg['payload']['amount'] ?? null,
+                'interval' => $arg['payload']['interval'] ?? null,
+                'description' => $arg['payload']['description'] ?? null,
+            ]),
+        ]);
+
+        $payload = [
+            'amount' => ['currency' => 'EUR', 'value' => '25.00'],
+            'interval' => '1 month',
+            'description' => 'Pure pass-through 5a',
+        ];
+
+        $this->callMollie($token, 'POST', '/v1/mollie/customers/cst_abc/subscriptions', $payload)
+            ->assertCreated()
+            ->assertJsonPath('id', 'sub_5a');
+
+        $this->assertSame(0, AccountSubscription::query()->count(), 'Phase 5a-create mag geen Hub AccountSubscription-rij maken.');
+    }
+
+    public function test_phase_7_create_and_phase_5a_create_can_coexist_in_same_request_cycle(): void
+    {
+        [, $token, , $connection] = $this->setupMollieConsumer([TokenAbilities::MOLLIE_WRITE]);
+
+        $this->bindMollieStubs([
+            'subscriptions' => fn (string $op, mixed $arg) => $this->makeSubscription([
+                'id' => 'sub_capt_'.count($this->mollieCaptured['subscription_create_for_id']),
+                'status' => 'active',
+                'customerId' => $arg['customer_id'],
+            ]),
+        ]);
+
+        $phase7Body = [
+            'account_external_id' => 'school-A',
+            'mollie_customer_id' => 'cst_abc',
+            'amount' => ['currency' => 'EUR', 'value' => '10.00'],
+            'interval' => '1 month',
+            'description' => 'Phase 7 — eigen Hub-row',
+        ];
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->postJson('/v1/account-subscriptions', $phase7Body)
+            ->assertCreated();
+
+        $this->assertSame(1, AccountSubscription::query()->count());
+
+        $phase5aBody = [
+            'amount' => ['currency' => 'EUR', 'value' => '7.50'],
+            'interval' => '1 month',
+            'description' => 'Phase 5a — pass-through',
+        ];
+
+        $this->callMollie($token, 'POST', '/v1/mollie/customers/cst_xyz/subscriptions', $phase5aBody)
+            ->assertCreated();
+
+        $this->assertSame(1, AccountSubscription::query()->count(), 'Phase 5a-call mag geen extra Hub-row maken.');
+
+        $this->assertCount(2, $this->mollieCaptured['subscription_create_for_id']);
+        $this->assertSame('cst_abc', $this->mollieCaptured['subscription_create_for_id'][0]['customer_id']);
+        $this->assertSame('cst_xyz', $this->mollieCaptured['subscription_create_for_id'][1]['customer_id']);
+        unset($connection);
+    }
+
+    public function test_phase_5a_webhook_payment_without_subscription_id_still_dispatches_fanout_job(): void
+    {
+        Bus::fake();
+
+        [, , , $connection] = $this->setupMollieConsumer();
+
+        $this->bindMollieStubs([
+            'payments' => fn (string $op, mixed $arg) => $this->makePayment([
+                'id' => 'tr_oneshot',
+                'status' => 'paid',
+                'subscriptionId' => null,
+            ]),
+        ]);
+
+        $payload = json_encode(['id' => 'tr_oneshot'], JSON_THROW_ON_ERROR);
+        $signature = MollieWebhookSignature::sign($payload, $this->webhookSecret);
+
+        $this->call(
+            'POST',
+            "/webhooks/mollie/{$connection->id}",
+            [], [], [],
+            ['HTTP_X_MOLLIE_SIGNATURE' => $signature, 'CONTENT_TYPE' => 'application/json'],
+            $payload,
+        )->assertStatus(202);
+
+        Bus::assertDispatched(
+            ForwardWebhookToConsumerJob::class,
+            fn (ForwardWebhookToConsumerJob $job) => $job->providerConnection->id === $connection->id
+                && ($job->payload['id'] ?? null) === 'tr_oneshot',
+        );
+
+        $this->assertSame(0, AccountSubscription::query()->count(), 'Geen Hub-state-mutatie voor `tr_*` zonder subscriptionId.');
+    }
+}
