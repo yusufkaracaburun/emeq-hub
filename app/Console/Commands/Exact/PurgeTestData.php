@@ -33,12 +33,14 @@ use Throwable;
  * "Belastingdienst Omzetbelasting"); geef de te wissen relatie-GUID's expliciet via
  * --relations. Default is dry-run; --force voert daadwerkelijk uit.
  *
- * LET OP — dit laat `provider_entity_links` achter. Die tabel legt vast wat de Hub in
- * deze administratie heeft zien slagen, en weet niet dat de boekingen buiten de Hub om
- * verdwenen zijn. Biedt een consumer zo'n `external_id` daarna opnieuw aan, dan
- * antwoordt de Hub `200 deduplicated` of `409 document_already_posted` en landt het
- * document nooit in Exact. Ruim ná een purge dus ook de links van die Connection op,
- * anders lopen grootboek en administratie stil uiteen.
+ * LET OP — dit laat de Hub-eigen state staan (`provider_entity_links`, idempotency-claims,
+ * relatie-mirror). Die legt vast wat de Hub in deze administratie heeft zien slagen, en
+ * weet niet dat de boekingen buiten de Hub om verdwenen zijn. Biedt een consumer zo'n
+ * `external_id` daarna opnieuw aan, dan antwoordt de Hub `200 deduplicated` of
+ * `409 document_already_posted` en landt het document nooit in Exact. Draai daarom ná
+ * een purge `hub:reset-connection` op dezelfde Connection; de command noemt dat zelf ook
+ * aan het eind van een run. Bewust twee stappen: Hub-state weggooien is een aparte
+ * beslissing, en de purge draait meestal in meerdere passes.
  *
  * Exact throttelt op ~60 calls/minuut per division en elke entry en elk Document is één
  * DELETE. Een volle administratie vergt daarom meerdere passes met een minuut ertussen;
@@ -118,6 +120,7 @@ final class PurgeTestData extends Command
             if ($relationIds !== []) {
                 $this->line('  '.count($relationIds).' relatie(s) zouden worden verwijderd: '.implode(', ', $relationIds));
             }
+            $this->hubStateReminder($connection);
 
             return self::SUCCESS;
         }
@@ -160,7 +163,21 @@ final class PurgeTestData extends Command
             }
         }
 
+        $this->hubStateReminder($connection);
+
         return $failed > 0 ? self::FAILURE : self::SUCCESS;
+    }
+
+    /**
+     * De Hub-eigen state overleeft deze purge en blokkeert anders elke her-test met
+     * `deduplicated` of `document_already_posted` op documenten die in Exact allang weg
+     * zijn. Weggooien blijft een aparte, expliciete stap.
+     */
+    private function hubStateReminder(Connection $connection): void
+    {
+        $this->newLine();
+        $this->line('<comment>De Hub-kant staat er nog:</comment> entity-links, idempotency-claims en de relatie-mirror.');
+        $this->line("  Ruim die op met:  <info>php artisan hub:reset-connection {$connection->id} --force</info>");
     }
 
     /**

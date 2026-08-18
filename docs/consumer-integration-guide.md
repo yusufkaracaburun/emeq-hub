@@ -751,9 +751,14 @@ Een `person` slaat stap 3 tot 5 over: particulieren hebben geen sterke sleutel, 
 gelijknamige personen zouden een factuur aan de verkeerde klant koppelen.
 
 Wat de Hub in de administratie heeft gedaan lees je terug in `warnings[]` op het
-antwoord: `relation.created`, `relation.matched_by_name`, `relation.name_differs`. Toon
-die aan je gebruiker — het is de enige plek waar zichtbaar wordt dat er iets in zijn
-boekhouding is bijgekomen.
+antwoord: `relation.created`, `relation.matched_by_name`, `relation.name_differs` en
+`relation.relinked`. Toon die aan je gebruiker — het is de enige plek waar zichtbaar
+wordt dat er iets in zijn boekhouding is bijgekomen of veranderd.
+
+`relation.relinked` betekent dat de eerder gekoppelde relatie niet meer in de
+administratie staat (verwijderd of samengevoegd) en de Hub de ladder opnieuw heeft
+afgelopen. `context.previous_relation_id` draagt de relatie die weg is; draagt jouw app
+zelf een relatie-id mee, ververs 'm dan.
 
 Vinden stap 3 of 4 méér dan één relatie, dan volgt `409 relation_ambiguous` met de
 kandidaten in de body. De Hub kiest dan niet: twee relaties met hetzelfde KvK-nummer
