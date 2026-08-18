@@ -31,6 +31,20 @@ class InspectionReportTest extends TestCase
         $this->assertTrue($report->valid());
     }
 
+    /**
+     * `valid` belooft de consumer dat de boeking daarna niet alsnog met een 422 strandt.
+     * Een blokkerende warning (bv. `exact.vat_code.unmapped`) doet dat wél, dus telt die
+     * net zo hard mee als een error.
+     */
+    public function test_invalid_when_a_warning_blocks_the_booking(): void
+    {
+        $report = new InspectionReport([
+            new Finding('exact.vat_code.unmapped', Severity::Warning, blocking: true, path: 'lines.0.tax_rate', message: 'm'),
+        ]);
+
+        $this->assertFalse($report->valid());
+    }
+
     public function test_summary_counts_and_error_first_ordering(): void
     {
         $report = new InspectionReport([

@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace App\Accounting\Validation;
 
 /**
- * Uitkomst van een dry-run validatie. `valid` is false zodra er één error-finding is
- * (= zou een foute/illegale boeking opleveren); warnings/infos blokkeren niet maar
- * vragen aandacht. De findings zijn de payload — het endpoint antwoordt altijd 200.
+ * Uitkomst van een dry-run validatie. `valid` beantwoordt één vraag: gaat de boek-POST
+ * hierna lukken? Daarom telt elke blokkerende finding mee, niet alleen de errors —
+ * `exact.vat_code.unmapped` draagt severity `warning` maar de boeking strandt er wél op.
+ * `severity` blijft zeggen hóe ernstig een bevinding is en kantelt niet mee. De findings
+ * zijn de payload — het endpoint antwoordt altijd 200.
  */
 final readonly class InspectionReport
 {
@@ -18,7 +20,7 @@ final readonly class InspectionReport
 
     public function valid(): bool
     {
-        return $this->count(Severity::Error) === 0;
+        return $this->blocking() === 0;
     }
 
     /**
@@ -46,10 +48,15 @@ final readonly class InspectionReport
                 'errors' => $this->count(Severity::Error),
                 'warnings' => $this->count(Severity::Warning),
                 'infos' => $this->count(Severity::Info),
-                'blocking' => count(array_filter($this->findings, fn (Finding $f): bool => $f->blocking)),
+                'blocking' => $this->blocking(),
             ],
             'findings' => array_map(fn (Finding $f): array => $f->toArray(), $sorted),
         ];
+    }
+
+    private function blocking(): int
+    {
+        return count(array_filter($this->findings, fn (Finding $f): bool => $f->blocking));
     }
 
     private function count(Severity $severity): int

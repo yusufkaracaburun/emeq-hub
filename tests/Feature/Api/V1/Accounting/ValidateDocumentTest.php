@@ -221,8 +221,11 @@ class ValidateDocumentTest extends TestCase
                 'lines' => [['description' => 'Laag tarief', 'amount' => 100, 'tax_rate' => 9]],
             ])
             ->assertStatus(200)
-            ->assertJsonPath('valid', true) // warning blokkeert niet
-            ->assertJsonPath('summary.blocking', 1) // maar blocking wél — Exact weigert een niet-ingericht tarief
+            // Severity blijft `warning` — zo erg is een ontbrekende mapping niet — maar de
+            // boeking strandt er wél op, dus `valid` staat op false.
+            ->assertJsonPath('valid', false)
+            ->assertJsonPath('summary.errors', 0)
+            ->assertJsonPath('summary.blocking', 1)
             ->assertJsonFragment(['code' => 'exact.vat_code.unmapped', 'severity' => 'warning', 'blocking' => true]);
     }
 
