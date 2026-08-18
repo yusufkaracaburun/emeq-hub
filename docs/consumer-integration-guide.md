@@ -619,19 +619,20 @@ X-Account-Id: bob
 }
 ```
 
-`valid` is `false` zodra er één `error` is (zou een foute boeking opleveren);
-`warning`/`info` blokkeren niet. Toon de findings, laat de gebruiker bevestigen, boek
-daarná. Elke finding draagt `current` (aangeleverd) + `suggestion` (voorgestelde
-correctie of `null`) — pas een suggestie alleen toe na bevestiging.
+`valid` is `false` zodra één finding de boeking tegenhoudt. Het veld beantwoordt dus
+precies de vraag die je stelt vóór je boekt: gaat dit lukken? Toon de findings, laat de
+gebruiker bevestigen, boek daarná. Elke finding draagt `current` (aangeleverd) +
+`suggestion` (voorgestelde correctie of `null`) — pas een suggestie alleen toe na
+bevestiging.
 
-**Stuur je "mag dit geboekt worden?"-logica op `blocking`, niet op `severity` of
-`valid`.** Sommige `warning`-findings (bv. `exact.relation.new` zonder auto-create,
-`exact.vat_code.unmapped`) laten `valid` op `true` staan terwijl de daaropvolgende
-boek-POST gegarandeerd een `422` teruggeeft — `severity` zegt hoe ernstig een bevinding
-is, `blocking` zegt of ze de boeking tegenhoudt, en de twee kantelen niet automatisch
-in elkaar. Andere warnings (bv. `arithmetic.total_mismatch`, de drie velden die je
-tijdens het boeken nog aanvult: `external_id`, `issue_date`, `party.role`) zijn puur
-advies en blokkeren niets. `summary.blocking` telt hoeveel findings dat zijn.
+**`severity` en `blocking` beantwoorden verschillende vragen en kantelen niet in elkaar.**
+`severity` zegt hoe ernstig een bevinding is, `blocking` of ze de boeking tegenhoudt. Een
+ontbrekende BTW-mapping (`exact.vat_code.unmapped`) is een `warning` — zo erg is het niet
+— maar hij is wél blocking, want Exact weigert de boeking erop. Andersom is
+`arithmetic.total_mismatch` een warning die niets tegenhoudt, net als de drie velden die
+je tijdens het boeken nog aanvult (`external_id`, `issue_date`, `party.role`). Wil je per
+finding weten of de gebruiker 'm eerst moet oplossen, kijk dan naar `blocking`;
+`summary.blocking` telt er hoeveel dat zijn, en `valid` is de samenvatting daarvan.
 
 Een ongeldig NL-btw-nummer (fout formaat of fout controlecijfer/11-proef,
 `vat_number.malformed` / `vat_number.checksum`) is een **`error`** — Exact weigert
@@ -639,11 +640,12 @@ zo'n boeking hard, dus `validate` houdt 'm tegen vóór je POST. Buitenlandse
 EU-formaten blijven `warning` en zijn niet blocking (het boekpad valideert niet-NL
 alleen generiek).
 
-Let op bij de `exact.*`-warnings: die blokkeren `valid` niet, maar een ontbrekende
-mapping (`vat_code.unmapped`, `relation.new` zonder auto-create, `cost_center.unmapped`,
-`cost_unit.unmapped`) laat de daaropvolgende boek-POST wél met een `422` stranden —
-`blocking` staat op deze findings op `true`. Behandel ze in je UI als "eerst oplossen",
-niet als vrijblijvend advies.
+Let op bij de `exact.*`-findings: een ontbrekende mapping (`vat_code.unmapped`,
+`cost_center.unmapped`, `cost_unit.unmapped`) draagt severity `warning` maar staat op
+`blocking: true`, en zet `valid` dus op `false`. Behandel die in je UI als "eerst
+oplossen", niet als vrijblijvend advies. `relation.new` is het tegenovergestelde: die is
+`info` en niet blocking, want de ladder maakt de relatie zelf aan en meldt dat terug in
+`warnings[]`.
 
 De `message` is bedoeld om ongewijzigd aan de eindgebruiker te tonen — Nederlands,
 zonder Exact-jargon, met de consequentie en de handeling erin. Stuur je logica op

@@ -5763,6 +5763,13 @@
                                     "creditor"
                                 ]
                             },
+                            "kind": {
+                                "type": "string",
+                                "enum": [
+                                    "company",
+                                    "person"
+                                ]
+                            },
                             "name": {
                                 "type": "string",
                                 "maxLength": 255
@@ -5782,14 +5789,15 @@
                                 "maxLength": 64
                             },
                             "external_id": {
+                                "type": "string",
+                                "maxLength": 255
+                            },
+                            "relation_id": {
                                 "type": [
                                     "string",
                                     "null"
                                 ],
                                 "maxLength": 255
-                            },
-                            "create_if_missing": {
-                                "type": "boolean"
                             },
                             "chamber_of_commerce": {
                                 "type": [
@@ -5867,7 +5875,9 @@
                         },
                         "required": [
                             "role",
-                            "name"
+                            "kind",
+                            "name",
+                            "external_id"
                         ]
                     },
                     "lines": {
