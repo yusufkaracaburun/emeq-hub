@@ -57,9 +57,6 @@ class AppServiceProvider extends ServiceProvider
             return $registry;
         });
 
-        // Partner-exceptions → Hub-HTTP, per provider. Provider-neutrale code (de
-        // accounting-runner, de canonieke lees-endpoints) vraagt hier de juiste
-        // mapper op in plaats van er één te importeren.
         $this->app->singleton(UpstreamErrorMapperRegistry::class, function (): UpstreamErrorMapperRegistry {
             $registry = new UpstreamErrorMapperRegistry;
             $registry->register(Provider::Exact->value, ExactUpstreamErrorMapper::class);
@@ -69,8 +66,6 @@ class AppServiceProvider extends ServiceProvider
             return $registry;
         });
 
-        // Partner-payload → canonieke event-naam. De consumer krijgt één envelope
-        // met één vocabulaire, ongeacht welk pakket z'n eindgebruiker koppelde.
         $this->app->singleton(CanonicalEventRegistry::class, function (): CanonicalEventRegistry {
             $registry = new CanonicalEventRegistry;
             $registry->register(Provider::Exact, ExactEventResolver::class);
@@ -87,9 +82,6 @@ class AppServiceProvider extends ServiceProvider
             return $registry;
         });
 
-        // Partner-payload → canonieke entity-id + actie. Zelfde vangnet als
-        // CanonicalEventRegistry hierboven, voor "wélk record wijzigde" in plaats
-        // van "wat voor soort event was dit".
         $this->app->singleton(CanonicalEntityRegistry::class, function (): CanonicalEntityRegistry {
             $registry = new CanonicalEntityRegistry;
             $registry->register(Provider::Exact, ExactEntityResolver::class);
@@ -99,8 +91,6 @@ class AppServiceProvider extends ServiceProvider
             return $registry;
         });
 
-        // Accounting-sync: canonical FinancialDocument → boekhoudpakket per provider.
-        // Alleen accounting-providers worden geregistreerd (Mollie = betalingen, niet hier).
         $this->app->singleton(AccountingTargetRegistry::class, function (Application $app): AccountingTargetRegistry {
             $registry = new AccountingTargetRegistry($app);
             $registry->register(Provider::Exact->value, ExactAccountingTarget::class);
@@ -108,45 +98,26 @@ class AppServiceProvider extends ServiceProvider
             return $registry;
         });
 
-        // Eén resolver, want er is één accounting-provider. Zodra provider #2 landt
-        // wordt dit contextueel: ->when(ExactAccountingTarget::class)->needs(...)->give(...).
-        // Let op bij die stap: contextuele bindings winnen stilzwijgend van deze
-        // bind(), dus de `bind(ReferenceResolver::class, <fake>)`-seams in de
-        // accounting-tests stoppen dan met werken zónder rood te worden. Die moeten
-        // in dezelfde commit mee omgezet worden.
-        $this->app->bind(ReferenceResolver::class, ConnectionMappingExactReferenceResolver::class);
+        $this->app->when(ExactAccountingTarget::class)
+            ->needs(ReferenceResolver::class)
+            ->give(ConnectionMappingExactReferenceResolver::class);
 
         $this->app->bind(MollieCredentialResolver::class, HubMollieCredentialResolver::class);
 
-        // Partner-token via Closure → fresh per resolveFor('partner')-call. Vereist
-        // voor long-running workers (Horizon, octane): env-rotatie van
-        // MOLLIE_PARTNER_ACCESS_TOKEN werkt anders pas door na container-restart
-        // omdat de singleton de string-waarde bij boot capture't.
         $this->app->singleton(MollieAccessTokenResolver::class, fn (Application $app): MollieAccessTokenResolver => new MollieAccessTokenResolver(
             $app->make(MollieConnectionContext::class),
             static fn (): ?string => $app['config']->get('services.mollie.partner_access_token'),
         ));
 
-        // D-10: Cashier's default-routes (webhooks/mollie*) uitzetten zodat wij ze
-        // zelf onder /cashier/webhook* registreren achter RequireCashierWebhookSecret.
-        // Moet in register() staan — CashierServiceProvider::boot() leest deze flag.
         Cashier::ignoreRoutes();
     }
 
     public function boot(): void
     {
-        // opcodesio/log-viewer (/log-viewer) — alleen super-admin. Hier staan de
-        // applicatie-logs (laravel.log), incl. de getAuthorizationUrl-fouten.
         LogViewer::auth(fn (Request $request): bool => $request->user()?->hasRole('super-admin') ?? false);
 
         Gate::define('manage-staff', fn (User $user): bool => $user->hasRole('super-admin'));
 
-        // Eén limiter-naam volstaat: een tweede named limiter zou per HTTP-methode
-        // een andere `throttle:`-alias op de route vergen, maar de Exact/Snelstart
-        // pass-through (`Route::any('/{path}', ...)`) bedient lezen én schrijven op
-        // dezelfde route — daar valt geen route-group-grens te trekken. In plaats
-        // daarvan split de `by()`-sleutel op methode, zodat lezen en schrijven een
-        // los budget per consumer krijgen zonder elkaar te verdringen.
         RateLimiter::for('api', function (Request $request): Limit {
             $consumerId = $request->user()?->getKey();
             $scope = $consumerId ? "consumer:{$consumerId}" : "ip:{$request->ip()}";
@@ -154,8 +125,6 @@ class AppServiceProvider extends ServiceProvider
             $isWrite = ! $request->isMethodSafe();
             $limit = (int) config($isWrite ? 'hub.rate_limits.writes_per_minute' : 'hub.rate_limits.reads_per_minute');
 
-            // Een leeggelaten env-var casat naar 0, en perMinute(0) sluit de hele
-            // API af. Een tikfout in .env mag geen totale storing worden.
             return Limit::perMinute(max(1, $limit))->by($scope.':'.($isWrite ? 'write' : 'read'));
         });
 
