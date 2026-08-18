@@ -31,6 +31,7 @@ Hub-intern — niet in de consumer-app.
 - [Stap 4 — Terugkomst + status](#stap-4--terugkomst--status)
 - [Stap 5 — Loskoppelen](#stap-5--loskoppelen)
 - [Boekhouden — documenten valideren & boeken](#boekhouden--documenten-valideren--boeken)
+  - [Betalingen horen niet in de boeking](#betalingen-horen-niet-in-de-boeking)
   - [Boekhoud-mapping (zelf-service, optioneel)](#boekhoud-mapping-zelf-service-optioneel)
 - [Webhooks ontvangen](#webhooks-ontvangen)
 - [Valkuilen](#valkuilen)
@@ -596,6 +597,41 @@ de provider:
   en stuurt die als Exact-`DueDate` (vervaldatum van de openstaande post).
 - `currency` default `EUR`; `attachments` optioneel, inline base64 (PDF/PNG/JPEG, ≲ 1 MB/stuk).
 
+### Betalingen horen niet in de boeking
+
+Een document gaat **één keer, voor het volledige bedrag** de Hub in. Betalingen — volledig,
+gedeeltelijk, of gesplitst over meerdere rekeningen — stuur je niet mee, en boek je ook niet
+als apart `income`/`expense`-document. Die twee types zijn voor vrijstaande kas- en
+bankposten zónder brondocument, niet voor betalingen op een factuur.
+
+Waarom niet:
+
+- **BTW-periode.** Bij het factuurstelsel is de BTW verschuldigd op factuurdatum. Boek je per
+  ontvangst, dan landt de BTW in de periode van de betaling — over een kwartaalgrens klopt de
+  aangifte niet meer.
+- **Openstaande post.** `income`/`expense` boekt direct af. Het debiteuren-/crediteurensaldo
+  staat dan op nul terwijl er geld openstaat: ouderdomsanalyse en aanmaningen vallen om.
+- **Dubbeltelling.** Boek je de factuur én de betalingen, dan staat de omzet er twee keer in.
+
+De betaling landt in de bankadministratie van het boekhoudpakket: de bankmutaties komen daar
+binnen via de bankkoppeling van de klant en worden afgeletterd tegen de openstaande post van
+deze factuur. Een deelbetaling laat het restant gewoon openstaan; twee betalingen op één
+factuur letteren allebei af tegen dezelfde post. De Hub komt daar niet aan te pas.
+
+**Betaalsplitsingen zoals een G-rekening zijn een betaalinstructie, geen boekhoudfeit.** Een
+factuur met een G-deel en een bankdeel blijft één document met één totaalbedrag en één
+BTW-bedrag; alleen het geld loopt over twee rekeningen. Stuur het G-bedrag dus niet als aparte
+regel of apart document mee. Op de factuur-PDF hoort het wel — die gaat via `attachments` mee
+naar de boekhouding.
+
+**Boek niet pas na betaling.** Boekbaarheid hangt aan "definitief en niet geannuleerd", niet
+aan betaalstatus. Wachten tot een factuur betaald is, zet de boeking in de verkeerde periode.
+
+Praktijkpunt bij deelbetalingen: automatische afletterherkenning matcht op bedrag én
+factuurnummer. Bij een deelbetaling valt het bedrag als aanknopingspunt weg — zorg dus dat het
+factuurnummer in de omschrijving van elke betaling staat, bij een gesplitste betaling op beide
+mutaties.
+
 ### Valideren (Scan & herstel)
 
 Stuur het (eventueel OCR-geëxtraheerde) concept naar `validate` vóór je boekt:
@@ -1016,6 +1052,10 @@ Geef mij daarna de URL die ik als `webhook_callback_url` moet doorgeven.
   desnoods zelf aan (Stap 1).
 - Boeken gebruikt de header `X-Account-Id`, niet de query-param
   `account_external_id` van de connect-laag.
+- Boek een factuur voor het **volledige** bedrag, ook als 'ie maar deels betaald is.
+  Betalingen (en betaalsplitsingen zoals een G-rekening) horen op de bankkant van de
+  boekhouding, niet in een `income`/`expense`-document — zie
+  [Betalingen horen niet in de boeking](#betalingen-horen-niet-in-de-boeking).
 - Snelstart is `connectable: false` (geen OAuth) — toon, maar bied geen
   OAuth-connect aan.
 - Volledige, altijd-actuele API-referentie: **`/docs/api`** (live gegenereerd).
