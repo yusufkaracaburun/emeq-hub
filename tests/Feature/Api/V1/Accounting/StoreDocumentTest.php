@@ -409,8 +409,8 @@ class StoreDocumentTest extends TestCase
 
         // YourRef is de kolom die Exact als factuurnummer toont, dus draagt het
         // documentnummer voorop; de external_id blijft erachter staan zodat de
-        // probe erop kan blijven filteren (max 50 tekens).
-        $expected = mb_substr('2026-001 · INV-2026-001', 0, 50);
+        // probe erop kan blijven filteren — hier past het geheel binnen 30 tekens.
+        $expected = '2026-001 · INV-2026-001';
         MockClient::global()->assertSent(fn ($request): bool => $request instanceof CreateSalesEntry
             && ($request->body()->all()['YourRef'] ?? null) === $expected);
     }
@@ -434,9 +434,37 @@ class StoreDocumentTest extends TestCase
             ->postJson('/v1/accounting/documents', $payload)
             ->assertStatus(201);
 
-        $expected = mb_substr($consumer->name.' · INV-2026-001', 0, 50);
+        $expected = mb_substr($consumer->name.' · INV-2026-001', 0, 30);
         MockClient::global()->assertSent(fn ($request): bool => $request instanceof CreateSalesEntry
             && ($request->body()->all()['YourRef'] ?? null) === $expected);
+    }
+
+    /**
+     * Exact kapt YourRef op 30 tekens af. Een uuid-sleutel past daar nooit naast een
+     * nummer in, en een halve uuid is voor niemand bruikbaar — dan blijft alleen het
+     * nummer staan.
+     */
+    public function test_yourref_drops_the_external_id_when_it_does_not_fit_whole(): void
+    {
+        MockClient::global([
+            CreateSalesEntry::class => MockResponse::make(['d' => ['ID' => 'inv-1']], 201),
+        ]);
+        $this->bindFakeReferences();
+
+        [$consumer] = $this->consumerWithExactConnection();
+        $token = $consumer->createToken('t', [TokenAbilities::EXACT_WRITE])->plainTextToken;
+
+        $payload = $this->salesInvoicePayload();
+        $payload['external_id'] = '877f9972-3969-4d9c-9405-356a18072bed';
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->withHeader('X-Account-Id', 'school1')
+            ->withHeader('Idempotency-Key', (string) Str::uuid())
+            ->postJson('/v1/accounting/documents', $payload)
+            ->assertStatus(201);
+
+        MockClient::global()->assertSent(fn ($request): bool => $request instanceof CreateSalesEntry
+            && ($request->body()->all()['YourRef'] ?? null) === '2026-001');
     }
 
     public function test_description_carries_the_consumers_own_reference(): void

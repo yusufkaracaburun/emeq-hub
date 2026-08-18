@@ -553,6 +553,37 @@ class ProviderEntityLinkTest extends TestCase
     }
 
     /**
+     * Past de external_id niet in `YourRef`, dan draagt dat veld alleen het
+     * documentnummer. Daarop filteren zou een boeking van een andere relatie kunnen
+     * aanwijzen, dus probet de Hub dan niet en blijft de oorspronkelijke fout staan.
+     */
+    public function test_a_uuid_key_is_not_probed_because_yourref_cannot_carry_it(): void
+    {
+        MockClient::global([
+            CreateSalesEntry::class => MockResponse::make([], 504),
+            // Zou een treffer opleveren als er tóch op het nummer alleen werd gefilterd.
+            GetSalesEntries::class => MockResponse::make(['d' => ['results' => [[
+                'EntryID' => 'andere-relatie-guid',
+                'EntryNumber' => 91,
+                'SalesEntryLines' => ['results' => []],
+            ]]]], 200),
+        ]);
+        $this->bindFakeReferences();
+
+        [$consumer] = $this->consumerWithExactConnection();
+
+        $payload = $this->salesInvoicePayload();
+        $payload['external_id'] = '877f9972-3969-4d9c-9405-356a18072bed';
+
+        $response = $this->postDocument($consumer, $payload);
+
+        $this->assertGreaterThanOrEqual(500, $response->status());
+        $response->assertJsonPath('status', 'failed');
+
+        $this->assertDatabaseCount('provider_entity_links', 0);
+    }
+
+    /**
      * Een functionele weigering (422) is een definitief antwoord — daar valt niets na
      * te vragen, en een probe zou alleen een nutteloze partner-call zijn.
      */

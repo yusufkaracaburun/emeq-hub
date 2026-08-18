@@ -70,6 +70,12 @@ use Throwable;
  */
 final class ExactAccountingTarget implements AccountingTarget, EnrichesValidation, ProbesPostedDocuments, ReadsBankStatements, ReadsDocuments, ReadsLedgerAccounts, ReadsRelations, ReadsTaxCodes, SyncsReferenceData, UploadsAttachments
 {
+    // Exact kapt `YourRef` op 30 tekens af. De REST-documentatie noemt geen maxlengte;
+    // dit is live vastgesteld op division 4471372 (2026-08-14). Langer versturen betekent
+    // dat wat Exact bewaart niet meer gelijk is aan wat wij verstuurden, en dan vindt de
+    // `eq`-filter van findPostedDocument() zijn eigen boeking nooit terug.
+    private const YOUR_REF_MAX = 30;
+
     public function __construct(
         private readonly ReferenceResolver $references,
         private readonly ExactReferenceSync $referenceSync,
@@ -168,9 +174,20 @@ final class ExactAccountingTarget implements AccountingTarget, EnrichesValidatio
      * wijkt de provenance af en vindt de probe niets — dan rapporteren we de
      * oorspronkelijke fout in plaats van te doen alsof er niets gebeurd is. Dat is de
      * veilige kant: liever een terechte foutmelding dan een gemiste dubbele boeking.
+     *
+     * Om dezelfde reden probet hij niet wanneer de external_id niet in `YourRef` paste:
+     * er blijft dan alleen het documentnummer over, en dat is uniek per relatie — niet
+     * per administratie. Filteren op het nummer alleen zou een boeking van een ándere
+     * relatie als "toch geland" kunnen aanmerken.
      */
     public function findPostedDocument(FinancialDocument $document, Connection $connection): ?PostedDocument
     {
+        $key = $this->provenanceWithKey($document, $connection);
+
+        if ($key === null) {
+            return null;
+        }
+
         $purchase = in_array($document->type, [DocumentType::PurchaseInvoice, DocumentType::Expense], true);
         $collection = $purchase ? 'PurchaseEntryLines' : 'SalesEntryLines';
         $partyField = $purchase ? 'Supplier' : 'Customer';
@@ -178,7 +195,7 @@ final class ExactAccountingTarget implements AccountingTarget, EnrichesValidatio
         $params = [
             '$select' => "EntryID,EntryNumber,{$partyField},EntryDate,DueDate,Journal,Description,YourRef,Currency",
             '$expand' => $collection,
-            '$filter' => "YourRef eq '".str_replace("'", "''", $this->provenance($document, $connection))."'",
+            '$filter' => "YourRef eq '".str_replace("'", "''", $key)."'",
             '$top' => 1,
         ];
 
@@ -331,8 +348,8 @@ final class ExactAccountingTarget implements AccountingTarget, EnrichesValidatio
     /**
      * De volledige `external_id` per `EntryID`, één query voor de hele pagina.
      *
-     * `provenance()` kapt af op 50 tekens vóór verzending naar `YourRef`; de eigen
-     * ledger draagt de ongekapte waarde onder de Exact-`EntryID` (`provider_entity_id`,
+     * `provenance()` laat de external_id weg zodra hij niet in `YourRef` past; de eigen
+     * ledger draagt de volledige waarde onder de Exact-`EntryID` (`provider_entity_id`,
      * uniek per connectie+entity_type — geen subtype nodig om te matchen). Een document
      * dat de Hub niet zelf boekte heeft geen rij en valt terug op `YourRef`.
      *
@@ -719,22 +736,40 @@ final class ExactAccountingTarget implements AccountingTarget, EnrichesValidatio
     }
 
     /**
-     * Exact `YourRef`: "{nummer} · {external_id}", max 50 tekens.
+     * Exact `YourRef`: "{nummer} · {external_id}", of alleen "{nummer}" wanneer die
+     * twee samen niet binnen {@see self::YOUR_REF_MAX} passen.
      *
      * Exact toont dit veld als factuurnummer, dus staat het nummer van het document
      * voorop — op een inkoopboeking is dat het factuurnummer van de leverancier, wat
      * daar hoort. De consumer-naam stond hier eerder, maar zegt een boekhouder niets.
      *
-     * De external_id blijft erachter staan omdat dit veld ook een sleutel is:
-     * {@see self::findPostedDocument()} filtert erop met een exacte vergelijking en
-     * {@see self::externalIdFromProvenance()} leest 'm er weer uit. Een nummer alleen
-     * kan dat niet dragen — het is uniek per relatie, niet per administratie.
+     * De external_id staat erachter zolang hij héél past, want dan is dit veld ook een
+     * sleutel: {@see self::findPostedDocument()} filtert erop met een exacte
+     * vergelijking en {@see self::externalIdFromProvenance()} leest 'm er weer uit.
+     * Past hij niet — een uuid past nooit — dan blijft hij weg in plaats van half:
+     * een halve sleutel is voor de boekhouder onleesbaar en voor de probe waardeloos.
      */
     private function provenance(FinancialDocument $document, Connection $connection): string
     {
-        $lead = $document->number ?? $connection->account?->consumer?->name ?? 'Emeq Hub';
+        return $this->provenanceWithKey($document, $connection)
+            ?? mb_substr($this->provenanceLead($document, $connection), 0, self::YOUR_REF_MAX);
+    }
 
-        return mb_substr($lead.' · '.$document->externalId, 0, 50);
+    /**
+     * De provenance mét external_id, of null wanneer die niet héél binnen Exacts
+     * veldlengte past. Alleen in het eerste geval draagt `YourRef` een sleutel waarop
+     * exact gefilterd kan worden.
+     */
+    private function provenanceWithKey(FinancialDocument $document, Connection $connection): ?string
+    {
+        $full = $this->provenanceLead($document, $connection).' · '.$document->externalId;
+
+        return mb_strlen($full) <= self::YOUR_REF_MAX ? $full : null;
+    }
+
+    private function provenanceLead(FinancialDocument $document, Connection $connection): string
+    {
+        return $document->number ?? $connection->account?->consumer?->name ?? 'Emeq Hub';
     }
 
     /**
