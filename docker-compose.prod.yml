@@ -23,6 +23,7 @@ services:
     cpus: 3.0
     security_opt:
       - no-new-privileges:true
+    stop_grace_period: 45s
     env_file: .env.prod
     environment:
       # SSR draait als eigen service; de app praat er over het compose-netwerk
@@ -109,11 +110,6 @@ services:
       - no-new-privileges:true
     env_file: .env.prod
     command: php artisan horizon
-    # Horizons master rondt bij SIGTERM de lopende job zelf af (MasterSupervisor::
-    # terminate() wacht tot de langste supervisor-timeout, hier 60s — zie
-    # config/horizon.php). Docker's default stop-grace-period (10s) was korter, dus
-    # SIGKILL greep in vóórdat een Exact-refresh kon afronden: het dode-token-scenario
-    # uit #61. 75s = 60s timeout + marge voor de terminate()-overhead zelf.
     stop_grace_period: 75s
     # De base-image (FrankenPHP) levert een curl-healthcheck op :2019/metrics — die
     # host draait hier geen Caddy, dus vervangen door een echte liveness-probe.
