@@ -31,6 +31,7 @@ Hub-intern — niet in de consumer-app.
 - [Stap 4 — Terugkomst + status](#stap-4--terugkomst--status)
 - [Stap 5 — Loskoppelen](#stap-5--loskoppelen)
 - [Boekhouden — documenten valideren & boeken](#boekhouden--documenten-valideren--boeken)
+  - [Categorie of kostendrager?](#categorie-of-kostendrager)
   - [Betalingen horen niet in de boeking](#betalingen-horen-niet-in-de-boeking)
   - [Boekhoud-mapping (zelf-service, optioneel)](#boekhoud-mapping-zelf-service-optioneel)
 - [Webhooks ontvangen](#webhooks-ontvangen)
@@ -596,6 +597,38 @@ de provider:
 - `due_date` (optioneel) = vervaldatum; weggelaten → de Hub zet standaard `issue_date + 1 maand`
   en stuurt die als Exact-`DueDate` (vervaldatum van de openstaande post).
 - `currency` default `EUR`; `attachments` optioneel, inline base64 (PDF/PNG/JPEG, ≲ 1 MB/stuk).
+
+### Categorie of kostendrager?
+
+`category` is een **grootboek**-hint: het antwoord op "welke omzet- of kostenrekening is dit".
+`cost_center` en `cost_unit` zijn **dimensies** op die rekening: voor wie, voor welk project,
+welke werksoort. Verschillende vragen, verschillende velden — en in de praktijk de plek waar
+de mapping het vaakst uit de rails loopt.
+
+De vuistregel: beschrijft je categorie een *soort geld*, dan is het een `category`. Beschrijft
+'ie *waar het geld aan hing*, dan is het een `cost_unit` of `cost_center`.
+
+- "Omzet hoog tarief", "Omzet verlegd", "Personeelskosten", "Huisvestingskosten" → `category`.
+- "Project Noord", "Werksoort Glasvezel", "Klant X", "Vestiging Amsterdam", "Bus 12" →
+  `cost_unit` / `cost_center`, met één `category` eronder.
+
+Apps waar gebruikers hun eigen categorieënlijst inrichten, zien die lijst vaak uitgroeien tot
+een werksoort- of projectschema van tientallen items. Map die niet één-op-één op
+grootboekrekeningen: dan krijgt de administratie er tientallen omzet- en kostenrekeningen bij
+die de boekhouder niet wil en die elk rapport onleesbaar maken. Eén rekening, de rest als
+dimensie.
+
+Twee categorieën die nooit een `category` mogen zijn: balansposten zoals **debiteuren,
+crediteuren, btw of bank**. Dat zijn tegenrekeningen die de boekhouding zelf al boekt vanuit
+de relatie en het BTW-tarief; stuur je ze als GL-hint mee, dan staat de boeking dubbel op de
+balans en klopt de openstaande post niet meer.
+
+Let op het verschil in faalgedrag. Een `cost_center` of `cost_unit` die niet in de
+administratie bestaat, wordt geweigerd met `422`. Een `category` die niet in de mapping staat
+**faalt niet**: die valt stil terug op de standaard-grootboekrekening van het documenttype.
+Een typefout in een categorienaam levert dus een geslaagde boeking op de verkeerde rekening
+op. Laat gebruikers hun categorieën daarom expliciet mappen in plaats van te vertrouwen op de
+afgeleide default.
 
 ### Betalingen horen niet in de boeking
 
