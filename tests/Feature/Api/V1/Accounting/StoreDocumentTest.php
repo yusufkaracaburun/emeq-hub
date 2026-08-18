@@ -423,6 +423,9 @@ class StoreDocumentTest extends TestCase
         $this->bindFakeReferences();
 
         [$consumer] = $this->consumerWithExactConnection();
+        // Vaste, korte naam: dan past de sleutel er nog naast en toetst deze test de
+        // fallback zelf in plaats van de afkapregel.
+        $consumer->update(['name' => 'Emeq']);
         $token = $consumer->createToken('t', [TokenAbilities::EXACT_WRITE])->plainTextToken;
 
         $payload = $this->salesInvoicePayload();
@@ -434,9 +437,8 @@ class StoreDocumentTest extends TestCase
             ->postJson('/v1/accounting/documents', $payload)
             ->assertStatus(201);
 
-        $expected = mb_substr($consumer->name.' · INV-2026-001', 0, 30);
         MockClient::global()->assertSent(fn ($request): bool => $request instanceof CreateSalesEntry
-            && ($request->body()->all()['YourRef'] ?? null) === $expected);
+            && ($request->body()->all()['YourRef'] ?? null) === 'Emeq · INV-2026-001');
     }
 
     /**
@@ -1354,6 +1356,123 @@ class StoreDocumentTest extends TestCase
 
         $ref = ConnectionAccountingRef::query()->where('connection_id', $connection->getKey())->where('code', 'vat-1')->first();
         $this->assertSame(['matched_on' => 'vat'], $ref->attrs);
+    }
+
+    /**
+     * De boekhouder verwijdert of voegt een relatie samen; de mirror wijst daarna naar een
+     * GUID die niet meer bestaat. Voorheen strandde de boeking op Exacts "Ongeldige
+     * referentie". Nu gooit de Hub de dode koppeling weg en loopt de ladder verder.
+     */
+    public function test_a_deleted_relation_is_relinked_instead_of_failing_the_booking(): void
+    {
+        MockClient::global([
+            GetRelations::class => function (PendingRequest $pendingRequest) {
+                $filter = (string) $pendingRequest->query()->get('$filter');
+
+                // De gekoppelde relatie bestaat niet meer…
+                if (str_contains($filter, 'ID eq')) {
+                    return MockResponse::make(['d' => ['results' => []]], 200);
+                }
+
+                // …maar op KvK staat er wél een (de opvolger na een samenvoeging).
+                return MockResponse::make(['d' => ['results' => [[
+                    'ID' => 'nieuwe-guid', 'Code' => 'N001', 'Name' => 'Acme BV', 'IsSales' => true, 'IsSupplier' => false,
+                    'Status' => 'C', 'ChamberOfCommerce' => '12345678', 'VATNumber' => '',
+                ]]]], 200);
+            },
+            CreateSalesEntry::class => MockResponse::make(['d' => ['ID' => 'inv-1']], 201),
+        ]);
+
+        [$consumer, $connection] = $this->consumerWithExactConnection([
+            'metadata' => ['accounting_mapping' => [
+                'vat_codes' => ['21' => '4'],
+                'gl_accounts' => ['_default' => 'gl-def'],
+                'journals' => ['sales' => '70'],
+            ]],
+        ]);
+
+        ConnectionAccountingRef::query()->create([
+            'connection_id' => $connection->getKey(),
+            'kind' => ConnectionAccountingRef::KIND_GL,
+            'code' => 'gl-def',
+            'native_id' => 'gl-def-guid',
+        ]);
+        ConnectionAccountingRef::query()->create([
+            'connection_id' => $connection->getKey(),
+            'kind' => ConnectionAccountingRef::KIND_RELATION,
+            'code' => 'acme-1',
+            'native_id' => 'verwijderde-guid',
+        ]);
+
+        $token = $consumer->createToken('t', [TokenAbilities::EXACT_WRITE])->plainTextToken;
+
+        $response = $this->withHeader('Authorization', "Bearer {$token}")
+            ->withHeader('X-Account-Id', 'school1')
+            ->withHeader('Idempotency-Key', (string) Str::uuid())
+            ->postJson('/v1/accounting/documents', $this->salesInvoicePayload([
+                'party' => ['role' => 'debtor', 'name' => 'Acme BV', 'kind' => 'company', 'external_id' => 'acme-1', 'chamber_of_commerce' => '12345678'],
+            ]))
+            ->assertStatus(201);
+
+        $this->assertSame('relation.relinked', $response->json('warnings.0.code'));
+        $this->assertSame('verwijderde-guid', $response->json('warnings.0.context.previous_relation_id'));
+
+        MockClient::global()->assertSent(fn ($request): bool => $request instanceof CreateSalesEntry
+            && ($request->body()->all()['Customer'] ?? null) === 'nieuwe-guid');
+
+        $this->assertDatabaseHas('connection_accounting_refs', [
+            'connection_id' => $connection->getKey(),
+            'kind' => ConnectionAccountingRef::KIND_RELATION,
+            'code' => 'acme-1',
+            'native_id' => 'nieuwe-guid',
+        ]);
+    }
+
+    /**
+     * Een leesfout mag nooit als "relatie is weg" gelden: dan zou de Hub een gezonde
+     * koppeling weggooien en bij de volgende boeking een tweede relatie aanmaken.
+     */
+    public function test_an_unreadable_relation_keeps_its_link(): void
+    {
+        MockClient::global([
+            GetRelations::class => MockResponse::make(['error' => 'boom'], 500),
+            CreateSalesEntry::class => MockResponse::make(['d' => ['ID' => 'inv-1']], 201),
+        ]);
+
+        [$consumer, $connection] = $this->consumerWithExactConnection([
+            'metadata' => ['accounting_mapping' => [
+                'vat_codes' => ['21' => '4'],
+                'gl_accounts' => ['_default' => 'gl-def'],
+                'journals' => ['sales' => '70'],
+            ]],
+        ]);
+
+        ConnectionAccountingRef::query()->create([
+            'connection_id' => $connection->getKey(),
+            'kind' => ConnectionAccountingRef::KIND_GL,
+            'code' => 'gl-def',
+            'native_id' => 'gl-def-guid',
+        ]);
+        ConnectionAccountingRef::query()->create([
+            'connection_id' => $connection->getKey(),
+            'kind' => ConnectionAccountingRef::KIND_RELATION,
+            'code' => 'acme-1',
+            'native_id' => 'bestaande-guid',
+        ]);
+
+        $token = $consumer->createToken('t', [TokenAbilities::EXACT_WRITE])->plainTextToken;
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->withHeader('X-Account-Id', 'school1')
+            ->withHeader('Idempotency-Key', (string) Str::uuid())
+            ->postJson('/v1/accounting/documents', $this->salesInvoicePayload([
+                'party' => ['role' => 'debtor', 'name' => 'Acme BV', 'kind' => 'company', 'external_id' => 'acme-1', 'chamber_of_commerce' => '12345678'],
+            ]))
+            ->assertStatus(201);
+
+        MockClient::global()->assertNotSent(CreateAccount::class);
+        MockClient::global()->assertSent(fn ($request): bool => $request instanceof CreateSalesEntry
+            && ($request->body()->all()['Customer'] ?? null) === 'bestaande-guid');
     }
 
     public function test_matches_relation_by_name_and_writes_back_the_missing_chamber_of_commerce(): void

@@ -11,6 +11,7 @@ use App\Accounting\Party;
 use App\Integrations\Exact\ConnectionTokenStore;
 use App\Integrations\Exact\ExactReferenceData;
 use App\Integrations\Exact\HubExactCredentialResolver;
+use App\Integrations\Exact\Webhooks\ExactHubOriginDetector;
 use App\Models\Connection;
 use App\Models\ConnectionAccountingRef;
 use App\Models\ProviderEntityLink;
@@ -55,7 +56,7 @@ final class ExactRelationResolver
             ->where('code', $externalId)
             ->first();
 
-        if ($hit !== null) {
+        if ($hit !== null && ! $this->forgetIfGone($hit, $connection, $party)) {
             $this->ensureRole($hit->native_id, $party->role, $connection, externalId: $externalId);
 
             return $hit->native_id;
@@ -329,6 +330,41 @@ final class ExactRelationResolver
     }
 
     /**
+     * Een relatie verwijderen of samenvoegen is gewoon boekhouderswerk, en de Hub hoort
+     * daar niets van. De mirror wijst dan naar een GUID die niet meer bestaat, waarna de
+     * boeking strandt op Exacts "Ongeldige referentie" — een fout waar de consumer-app
+     * niets mee kan.
+     *
+     * Blijkt de gekoppelde relatie aantoonbaar weg, dan gooit de Hub de koppeling weg en
+     * loopt de rest van de ladder alsnog af (KvK → btw → naam → aanmaken). Alleen bij een
+     * hard "niet gevonden" ({@see ExactReferenceData::relationIsGone()}); bij twijfel
+     * blijft de koppeling staan.
+     */
+    private function forgetIfGone(ConnectionAccountingRef $hit, Connection $connection, Party $party): bool
+    {
+        if (! (new ExactReferenceData($connection))->relationIsGone($hit->native_id)) {
+            return false;
+        }
+
+        $guid = $hit->native_id;
+        $hit->delete();
+
+        ProviderEntityLink::query()
+            ->where('connection_id', $connection->getKey())
+            ->where('entity_type', ProviderEntityLink::ENTITY_RELATION)
+            ->where('provider_entity_id', $guid)
+            ->delete();
+
+        $this->warnings->add(
+            'relation.relinked',
+            "De gekoppelde relatie voor '{$party->name}' bestaat niet meer in de administratie; er is opnieuw gezocht.",
+            ['previous_relation_id' => $guid],
+        );
+
+        return true;
+    }
+
+    /**
      * `$matchedOn` voedt de beheerdrawer en maakt achteraf verklaarbaar waaróm twee
      * dingen aan elkaar hangen: `kvk` | `vat` | `name` | `created` | `pinned`.
      */
@@ -355,7 +391,7 @@ final class ExactRelationResolver
 
     /**
      * Legt vast dat de Hub deze relatie heeft aangeraakt (aanmaken, sleutel-writeback,
-     * rolpromotie) — het enige pad dat {@see \App\Integrations\Exact\Webhooks\ExactHubOriginDetector}
+     * rolpromotie) — het enige pad dat {@see ExactHubOriginDetector}
      * nog leest voor echo-detectie op relaties. `updateOrCreate` op `(connection, entity_type,
      * provider_entity_id)`: die tweede unieke sleutel op de tabel staat maar één rij per
      * relatie toe, dus twee verschillende external_id's die dezelfde relatie raken delen 'm.

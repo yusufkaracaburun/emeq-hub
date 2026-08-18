@@ -656,6 +656,38 @@ final class ExactReferenceData
         ];
     }
 
+    /**
+     * Staat deze relatie aantoonbaar niet meer in de administratie?
+     *
+     * Alleen `true` wanneer Exact antwoordde én de relatie er niet bij zat. Elke andere
+     * uitkomst — een fout, een time-out, een ontbrekende division — is `false`: "niet
+     * vastgesteld". Het verschil is wezenlijk, want de caller gooit op `true` een
+     * mirror-koppeling weg. Een transportfout mag dat nooit veroorzaken; dan zou de
+     * eerstvolgende boeking een tweede relatie aanmaken naast een relatie die prima
+     * bestaat.
+     */
+    public function relationIsGone(string $guid): bool
+    {
+        $guid = trim($guid);
+        $division = (string) $this->connection->administratie_id;
+
+        if ($guid === '' || $division === '') {
+            return false;
+        }
+
+        try {
+            $response = $this->connector($division)->send(new GetRelations([
+                '$select' => 'ID',
+                '$filter' => "ID eq guid'".$this->escapeOData($guid)."'",
+                '$top' => '1',
+            ]));
+
+            return $response->failed() ? false : Envelope::results($response->json()) === [];
+        } catch (Throwable) {
+            return false;
+        }
+    }
+
     private function escapeOData(string $value): string
     {
         return str_replace("'", "''", $value);
