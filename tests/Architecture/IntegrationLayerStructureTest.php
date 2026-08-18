@@ -129,6 +129,35 @@ final class IntegrationLayerStructureTest extends TestCase
         }
     }
 
+    public function test_een_test_die_naar_een_provider_heet_ligt_in_diens_map(): void
+    {
+        $root = realpath(__DIR__.'/../../').'/';
+
+        foreach ($this->phpFilesIn(__DIR__.'/..') as $file) {
+            $path = str_replace($root, '', (string) realpath($file->getPathname()));
+            $name = $file->getBasename('.php');
+
+            foreach (Provider::cases() as $provider) {
+                if (! str_starts_with($name, $provider->name)) {
+                    continue;
+                }
+
+                $this->assertMatchesRegularExpression(
+                    '#^tests/(Feature|Unit)/Integrations/'.$provider->name.'/#',
+                    $path,
+                    sprintf(
+                        '%s heet naar %s maar ligt buiten tests/{Feature,Unit}/Integrations/%s. '
+                        .'De testboom spiegelt app/: wie de koppeling uitbreidt vindt de test op '
+                        .'dezelfde plek als de code.',
+                        $path,
+                        $provider->name,
+                        $provider->name,
+                    ),
+                );
+            }
+        }
+    }
+
     /** @return list<SplFileInfo> */
     private function phpFilesIn(string $directory): array
     {
