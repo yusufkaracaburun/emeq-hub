@@ -370,17 +370,17 @@ class ReadResourcesTest extends TestCase
     }
 
     /**
-     * `YourRef` kapt op 50 tekens af (`provenance()`), dus een uuid komt er verminkt
-     * uit. `provider_entity_links` draagt de volledige waarde, geschreven toen de Hub
-     * dit document zelf boekte — de leeskant moet die raadplegen in plaats van de
-     * afgekapte provenance te geloven.
+     * Boekingen van vóór de 30-tekengrens dragen een half afgekapte uuid in `YourRef`.
+     * `provider_entity_links` draagt de volledige waarde, geschreven toen de Hub dit
+     * document zelf boekte — de leeskant moet die raadplegen in plaats van de afgekapte
+     * provenance te geloven.
      */
     public function test_external_id_is_resolved_from_the_provider_entity_link_when_present(): void
     {
         MockClient::global([
             GetSalesEntries::class => MockResponse::make(['d' => ['results' => [[
                 'EntryID' => 'entry-1',
-                // 'Emeq Hub · ' (11) + 39 tekens van de uuid = 50, afgekapt door provenance().
+                // Oude vorm: 'Emeq Hub · ' + een op 50 tekens afgekapte uuid.
                 'YourRef' => 'Emeq Hub · 91dd0bf3-1d3a-4a3e-86a9-dec359140b',
                 'SalesEntryLines' => ['results' => []],
             ]]]], 200),

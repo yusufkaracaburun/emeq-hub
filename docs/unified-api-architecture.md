@@ -152,9 +152,11 @@ boekstuknummer, en mist de bijlagen en de vrije `category`-hint die alleen bij h
 schrijven bestaan. Eén type voor allebei zou op elk veld een slag om de arm nodig
 hebben.
 
-`external_id` wordt teruggelezen uit de provenance die de Hub bij het boeken in
-`YourRef` meeschreef. Documenten die buiten de Hub om zijn ingevoerd hebben er geen —
-dan is `null` het eerlijke antwoord. Relatienamen komen uit de mirror in één query per
+`external_id` komt uit `provider_entity_links`, de eigen ledger van wat de Hub zelf
+boekte; ontbreekt die rij, dan valt de leeskant terug op de provenance in `YourRef`.
+Dat veld draagt de sleutel alleen wanneer hij héél paste — Exact kapt op 30 tekens af,
+dus een uuid staat er niet in. Documenten die buiten de Hub om zijn ingevoerd hebben
+geen provenance; dan is `null` het eerlijke antwoord. Relatienamen komen uit de mirror in één query per
 pagina, want Exact levert bij een boeking alleen de relatie-GUID.
 
 ## Waarom er geen transformation-pipeline is
@@ -172,7 +174,7 @@ De volledige canoniek→Exact-transformatie is 48 regels: `buildRequest()`, `lin
 | Regelmapping via `ReferenceResolver` | 13 | Zit al achter een seam; een stage voegt alleen indirectie toe |
 | Datumformaat | 2 | Een configwaarde, geen stage |
 | `description = number ?? externalId` | 1 | Ja |
-| Provenance-stempel | 5 | Concept wel, `YourRef` + de limiet van 50 niet |
+| Provenance-stempel | 5 | Concept wel, `YourRef` + de limiet van 30 niet |
 
 Netto zo'n negen deelbare regels, waarvan zes one-liners. Een pipeline zou die negen
 regels in stages verpakken en daarbovenop een hook-mechanisme nodig hebben voor alles
