@@ -7,26 +7,15 @@ namespace App\Integrations\Mollie\Errors;
 use App\Integrations\Contracts\MapsUpstreamExceptions;
 use App\Integrations\Mollie\Exceptions\MissingPartnerTokenException;
 use Emeq\MollieApi\Exceptions\AuthenticationException;
-use Emeq\MollieApi\Exceptions\MollieException;
 use Emeq\MollieApi\Exceptions\NotFoundException;
 use Emeq\MollieApi\Exceptions\RateLimitException;
 use Emeq\MollieApi\Exceptions\ServerException;
 use Emeq\MollieApi\Exceptions\ValidationException;
 use Throwable;
 
-/**
- * Mapt Mollie-SDK-exceptions (Emeq\MollieApi\Exceptions\*) naar
- * een Hub-HTTP-response (status + JSON-body + extra headers + audit-short-code).
- *
- * Policy-bron: 05a-CONTEXT.md §<decisions> D-13 + .docs/decisions/mollie-passthrough-api.md.
- * 401/403 worden bewust naar 502 cloaked om Mollie-auth-state niet te
- * onthullen aan de Consumer (threat T-05a-06).
- */
 final class UpstreamErrorMapper implements MapsUpstreamExceptions
 {
-    /**
-     * @return array{status: int, body: array<string, mixed>, headers: array<string, string>, short_code: ?string}
-     */
+    /** @return array{status: int, body: array<string, mixed>, headers: array<string, string>, short_code: ?string} */
     public static function mapException(Throwable $exception): array
     {
         if ($exception instanceof MissingPartnerTokenException) {
@@ -89,9 +78,6 @@ final class UpstreamErrorMapper implements MapsUpstreamExceptions
         }
 
         if ($exception instanceof RateLimitException) {
-            // Emeq\MollieApi\Exceptions\RateLimitException exposeert (nog) geen
-            // retry-after-getter; we laten de header leeg. Mollie's docs zeggen
-            // dat clients een default-backoff van 60s mogen hanteren.
             return [
                 'status' => 429,
                 'body' => [
@@ -118,7 +104,6 @@ final class UpstreamErrorMapper implements MapsUpstreamExceptions
             ];
         }
 
-        // MollieException (base) + onverwachte \Throwable → catch-all.
         return [
             'status' => 502,
             'body' => [

@@ -7,20 +7,12 @@ namespace App\Integrations\Mollie\PassThrough;
 use App\Integrations\PassThrough\HeaderWhitelist;
 use Illuminate\Http\Request;
 
-/**
- * Whitelist headers die we naar de Mollie-SDK forwarden. Mollie kent geen
- * ETag/If-Match-pad (in tegenstelling tot Snelstart), dus de whitelist is
- * beperkter. Idempotency-Key gaat NIET via deze forwarder — die wordt
- * via SDK-config gepropageerd (zie 05a-CONTEXT.md §<decisions> D-06).
- */
 final class MollieHeaderForwarder
 {
     /** @var list<string> */
     private const ALLOWED = ['Accept', 'Content-Type'];
 
-    /**
-     * @return array<string, string>
-     */
+    /** @return array<string, string> */
     public static function forward(Request $request): array
     {
         return HeaderWhitelist::filter($request, self::ALLOWED);

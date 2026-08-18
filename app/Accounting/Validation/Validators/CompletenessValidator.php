@@ -9,27 +9,6 @@ use App\Accounting\Validation\Contracts\DocumentValidator;
 use App\Accounting\Validation\Finding;
 use App\Accounting\Validation\Severity;
 
-/**
- * Controleert of de draft de velden draagt die het boekpad hoe dan ook eist. De andere
- * validators oordelen over de inhoud (klopt dit btw-nummer, klopt deze optelsom); deze
- * kijkt of er überhaupt iets te boeken valt.
- *
- * Zonder deze stap gaf de dry-run `valid: true` op een leeg document: `/validate` laat
- * per-veldproblemen bewust door de edge-validatie heen omdat het vinden ervan hier hoort,
- * en hier keek niemand. Een consumer die de dry-run als "boekt dit?" leest, kreeg groen
- * voor een payload die het boeken met een 422 weigert.
- *
- * Spiegel van StoreDocumentRequest, maar met het onderscheid dat een draft verdient:
- *
- * - **Error** — een waarde die er staat maar niet kan kloppen (onbekend documentsoort,
- *   onbekende rol, onleesbare regel), of een leegte die het document zinloos maakt (geen
- *   soort, geen tegenpartij, geen regels). Dit boekt nooit.
- * - **Warning** — een veld dat de consumer bij het boeken nog invult en dat een verse OCR-
- *   draft legitiem mist (`external_id`, `issue_date`, de rol van de tegenpartij). Blokkeert
- *   de dry-run niet, maar het boeken weigert erop, net als bij `exact.relation.new`.
- *
- * Alleen aanwezigheid en de twee gesloten waardenlijsten — vorm en inhoud zijn andermans werk.
- */
 final class CompletenessValidator implements DocumentValidator
 {
     private const TYPES = ['sales_invoice', 'purchase_invoice', 'credit_note', 'income', 'expense'];
@@ -40,8 +19,6 @@ final class CompletenessValidator implements DocumentValidator
     {
         return [
             ...$this->typeFindings($payload),
-            // Niet-blocking: de consumer vult external_id/issue_date/party.role nog in
-            // tijdens het boeken, ook al zegt de tekst "de boeking wordt geweigerd".
             ...$this->missing($payload, 'external_id', 'document.external_id.missing',
                 'Het kenmerk waarmee jij deze factuur zelf kent ontbreekt. De boeking wordt hierop geweigerd: de boekhouding heeft het nodig om de boeking terug te vinden, en het voorkomt dat een tweede poging hetzelfde document nog een keer boekt.',
                 blocking: false),
@@ -84,9 +61,6 @@ final class CompletenessValidator implements DocumentValidator
     }
 
     /**
-     * Ontbreekt de tegenpartij helemaal, dan is dat één bevinding — niet drie over
-     * velden binnen iets dat er niet is.
-     *
      * @param  array<string, mixed>  $payload
      * @return list<Finding>
      */
@@ -106,7 +80,6 @@ final class CompletenessValidator implements DocumentValidator
         $role = $party['role'] ?? null;
 
         if ($this->blank($role)) {
-            // Niet-blocking: de rol wordt bij het boeken nog ingevuld, ondanks de tekst.
             $findings[] = $this->finding(
                 'document.party.role.missing',
                 Severity::Warning,
@@ -136,8 +109,6 @@ final class CompletenessValidator implements DocumentValidator
         $kind = $party['kind'] ?? null;
 
         if ($this->blank($kind)) {
-            // Niet-blocking, net als role/external_id hierboven: een OCR-draft kent het
-            // onderscheid bedrijf/particulier nog niet. De ladder eist dit pas bij het boeken.
             $findings[] = $this->finding(
                 'document.party.kind.missing',
                 Severity::Warning,
@@ -238,10 +209,6 @@ final class CompletenessValidator implements DocumentValidator
             : [];
     }
 
-    /**
-     * `0` en `0.0` zijn geldige bedragen en tarieven, dus leeg is hier strikt: null,
-     * lege string, of een array/object waar een waarde hoort.
-     */
     private function blank(mixed $value): bool
     {
         if (is_string($value)) {
@@ -251,18 +218,12 @@ final class CompletenessValidator implements DocumentValidator
         return $value === null || is_array($value);
     }
 
-    /**
-     * @param  list<string>  $values
-     */
+    /** @param  list<string>  $values */
     private function list(array $values): string
     {
         return implode(', ', $values);
     }
 
-    /**
-     * Elke error is per definitie blocking (zie Finding-docblock) — geen aparte
-     * $blocking-parameter nodig aan deze aanroepplekken.
-     */
     private function error(string $code, string $path, string $message, mixed $current = null, mixed $suggestion = null): Finding
     {
         return $this->finding($code, Severity::Error, blocking: true, path: $path, message: $message, current: $current, suggestion: $suggestion);

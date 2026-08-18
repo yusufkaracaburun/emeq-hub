@@ -16,14 +16,6 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Spatie\Permission\Exceptions\RoleDoesNotExist;
 
-/*
- * Plan 09-10: UserResource table.
- *
- * Kolommen: email, roles (Spatie pluck), created_at.
- * Custom record-action `assignRole` synced ÉÉN rol op de User via Spatie
- * `syncRoles([$role])` — per D-05 ontwerp is een User altijd super-admin OF staff,
- * niet beide. `syncRoles` is daarom de juiste semantic (assignRole zou stacken).
- */
 class UsersTable
 {
     public static function configure(Table $table): Table
@@ -47,7 +39,6 @@ class UsersTable
                     ->sortable(),
             ])
             ->filters([
-                //
             ])
             ->recordActions([
                 EditAction::make()->iconButton(),

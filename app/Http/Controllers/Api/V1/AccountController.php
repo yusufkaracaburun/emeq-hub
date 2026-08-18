@@ -41,9 +41,7 @@ class AccountController extends Controller
             ->setStatusCode(Response::HTTP_CREATED);
     }
 
-    /**
-     * @param  list<string>  $allowed
-     */
+    /** @param  list<string>  $allowed */
     private function guardAbility(Request $request, array $allowed): void
     {
         $token = $request->user()?->currentAccessToken();

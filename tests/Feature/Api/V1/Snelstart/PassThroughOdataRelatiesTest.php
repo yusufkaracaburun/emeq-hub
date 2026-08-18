@@ -142,9 +142,7 @@ class PassThroughOdataRelatiesTest extends TestCase
         $this->assertSame('application/atom+xml', $response->headers->get('Content-Type'));
     }
 
-    /**
-     * @return array{0: Consumer, 1: string, 2: Account}
-     */
+    /** @return array{0: Consumer, 1: string, 2: Account} */
     private function setupSnelstartConsumer(): array
     {
         $consumer = Consumer::factory()->create();

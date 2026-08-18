@@ -18,7 +18,6 @@ final class AccountsRelationManager extends RelationManager
 
     protected static ?string $title = 'Accounts';
 
-    // Toon de Create-actie ook op de (read-only) ViewConsumer-pagina, niet alleen op Edit.
     protected static bool $isReadOnly = false;
 
     public function table(Table $table): Table

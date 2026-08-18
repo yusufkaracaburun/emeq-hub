@@ -15,10 +15,6 @@ enum SubscriptionStatus: string implements HasColor
     case Completed = 'completed';
     case Unknown = 'unknown';
 
-    /**
-     * Single source voor de badge-kleur van een subscription-status — gedeeld door
-     * de AccountSubscription-resource en beide AccountSubscription-relation-managers.
-     */
     public function getColor(): string
     {
         return match ($this) {

@@ -8,12 +8,6 @@ use App\Books\Models\Invoice;
 use App\Books\Services\InvoicePoster;
 use Illuminate\Database\Seeder;
 
-/*
- * Demo-verkoopfacturen voor de Books-module: één verzonden-en-geboekte met drie
- * regels (21%/9%/0% BTW, raakt alle omzet- en BTW-rekeningen) + één concept.
- * Idempotent (skipt zodra er facturen zijn). Boeken vereist een geseed grootboek;
- * zonder chart blijft de factuur ongeboekt.
- */
 class BooksInvoiceSeeder extends Seeder
 {
     public function run(): void

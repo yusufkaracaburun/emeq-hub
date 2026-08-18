@@ -18,25 +18,6 @@ use Emeq\ExactApi\OData\Envelope;
 use Illuminate\Contracts\Config\Repository as ConfigRepository;
 use Illuminate\Http\Client\Factory as HttpFactory;
 
-/**
- * Exact Online OAuth2 (authorization_code, Seamless). Gemodelleerd op
- * MollieConnectOAuthFlow, met de empirisch-geverifieerde Exact-afwijkingen:
- *
- *  - Roterend single-use refresh-token: élke refresh geeft een NIEUW refresh_token;
- *    het oude vervalt direct. Biedt een tweede aanvrager het inmiddels-verbruikte
- *    token nogmaals aan, dan trekt Exact de hele chain in (`invalid_grant`) en is
- *    herstel alleen mogelijk via een nieuwe consent. refreshToken() loopt daarom
- *    door dezelfde SDK-authenticator (`Emeq\ExactApi\Auth\OAuthAuthenticator`) als
- *    elke pass-through-call — één lock, één rotatie-implementatie, geen tweede pad
- *    dat een verbruikt token kan aanbieden (#61).
- *  - Refresh PAS ná expiry: Exact weigert een refresh zolang de access_token nog
- *    geldig is (HTTP 400 "Rate limit exceeded: access_token not expired"). Dus géén
- *    proactieve 5-min-marge zoals Mollie; alleen refreshen wanneer écht verlopen.
- *  - Division na exchangeCode ophalen → administratie_id.
- *
- * OAuth-shapes komen uit Exact's officiële Postman-collection (issue #3),
- * empirisch gevalideerd tegen de live test-app.
- */
 final class ExactOAuthFlow implements OAuthFlow
 {
     public function __construct(
@@ -53,7 +34,6 @@ final class ExactOAuthFlow implements OAuthFlow
             'state' => $state,
         ];
 
-        // Exact gebruikt géén scopes; alleen meesturen als de host ze toch opgeeft.
         if ($scopes !== []) {
             $query['scope'] = implode(' ', $scopes);
         }
@@ -73,9 +53,6 @@ final class ExactOAuthFlow implements OAuthFlow
 
         $me = $this->fetchMe((string) $token['access_token']);
 
-        // Seamless-deprovisioning ("Niet meer gebruiken") stuurt alléén een
-        // UserId mee; het UserID uit /Me is de sleutel waarmee /exact/stop de
-        // connection terugvindt. Merge zodat bestaande metadata blijft staan.
         $metadata = $connection->metadata ?? [];
         if ($me['user_id'] !== null) {
             $metadata['exact_user_id'] = ExactUserId::normalize($me['user_id']);
@@ -93,13 +70,8 @@ final class ExactOAuthFlow implements OAuthFlow
             'oauth_state_expires_at' => null,
         ])->save();
 
-        // Division is nu bekend → registreer de webhook-subscriptions async (de
-        // subscribe-handshake mag de OAuth-callback niet blokkeren). No-op als er
-        // geen topics geconfigureerd zijn.
         RegisterExactWebhookSubscriptionsJob::dispatch($connection);
 
-        // Spiegel meteen de boekhoud-referentiedata (grootboek/BTW/dagboeken) zodat de
-        // accounting-sync direct lokaal kan resolven zonder live partner-call.
         SyncExactReferenceJob::dispatch($connection);
 
         return $connection;
@@ -114,8 +86,6 @@ final class ExactOAuthFlow implements OAuthFlow
         /** @var Exact $exact */
         $exact = app(Exact::class);
 
-        // forceRefresh() bewaakt zelf de lock, de expiry-check en de clock-skew-guard
-        // (Exact-400 "not expired" → huidige token blijft bruikbaar, geen fout).
         $exact->authenticator()->forceRefresh();
 
         return $connection->refresh();
@@ -123,20 +93,11 @@ final class ExactOAuthFlow implements OAuthFlow
 
     public function revoke(Connection $connection): void
     {
-        // Exact heeft geen gedocumenteerd token-revoke-endpoint; deprovisioning loopt
-        // via de App-Center "Niet meer gebruiken"-flow (server-contract nog niet
-        // vastgelegd). Lokaal markeren + de webhook-subscriptions opzeggen (best-effort,
-        // de job faalt niet hard als de delete na revoke niet meer kan).
         DeleteExactWebhookSubscriptionsJob::dispatch($connection);
 
         $connection->update(['status' => 'revoked', 'revoked_at' => now()]);
     }
 
-    /**
-     * Vult `metadata.exact_user_id` alsnog voor koppelingen die vóór de
-     * deprovision-flow zijn gelegd — zonder die sleutel vindt /exact/stop de
-     * connection niet terug en blijft "Niet meer gebruiken" zonder effect.
-     */
     public function syncUserId(Connection $connection): bool
     {
         $connection = $this->refreshToken($connection);
@@ -155,13 +116,7 @@ final class ExactOAuthFlow implements OAuthFlow
         return true;
     }
 
-    /**
-     * Eén /Me-call levert zowel de division (pass-through-default) als het
-     * UserID (deprovision-matching) — apart fetchen zou een tweede live call
-     * in de OAuth-callback betekenen.
-     *
-     * @return array{division: ?string, user_id: ?string}
-     */
+    /** @return array{division: ?string, user_id: ?string} */
     private function fetchMe(string $accessToken): array
     {
         $response = $this->http->withToken($accessToken)->acceptJson()

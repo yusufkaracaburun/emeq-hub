@@ -13,21 +13,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 
-/**
- * Exact Online webhook-ingress.
- *
- * Aangeroepen ná `verify.exact.signature` (SDK-side middleware) — de HashCode is
- * hier al gevalideerd. Parse de Content-node, check idempotency, resolve de
- * Connection op de division (`Content.Division`), audit via de provider-agnostische
- * InboundWebhookRecorder en dispatch de async fan-out.
- *
- * Exact-specifiek:
- *  - Bij subscribe POST't Exact direct een **lege-body-validatieping** die de
- *    middleware doorlaat → hier 200, geen audit/fan-out (anders faalt de subscription).
- *  - Exact draagt geen natuurlijke notification-id; de idempotency-sleutel is een
- *    hash van de raw body (identiek op een Exact-retry → dedup).
- *  - Onbekende division → 200 + unknown_tenant-audit (anti-retry-storm).
- */
 final class ExactWebhookController extends Controller
 {
     public function __construct(private readonly InboundWebhookRecorder $recorder) {}
@@ -36,7 +21,6 @@ final class ExactWebhookController extends Controller
     {
         $rawBody = $request->getContent();
 
-        // Validatie-ping: lege body → 200/201, geen audit of fan-out.
         if (mb_trim($rawBody) === '') {
             return response('', 200);
         }
@@ -66,12 +50,6 @@ final class ExactWebhookController extends Controller
             return response('', 200);
         }
 
-        // Eén administratie kan door meerdere Accounts gekoppeld zijn — de boekhouder
-        // via de ene Consumer-app, de ondernemer via de andere. Het schema staat dat
-        // toe: de unique zit op (account, provider), de index op (provider,
-        // administratie_id) is niet uniek. `->first()` leverde er dan één willekeurige,
-        // dus kreeg één partij de webhook en de ander niets — en over Consumer-grenzen
-        // heen is dat een levering aan de verkeerde partij.
         /** @var list<Connection> $connections */
         $connections = Connection::query()
             ->where('provider', Provider::Exact->value)
@@ -87,10 +65,6 @@ final class ExactWebhookController extends Controller
             return response('', 200);
         }
 
-        // `inbound_webhook_events` is uniek op (provider, event_id) — dat is de
-        // dedupe-sleutel voor retries — dus er is één auditrij per inkomende webhook,
-        // niet per ontvanger. Die rij wijst de laagste connectie aan; de volledige
-        // ontvangerslijst gaat naar de log zodat de fan-out traceerbaar blijft.
         $this->recorder->record(
             Provider::Exact->value,
             $request,
@@ -119,10 +93,6 @@ final class ExactWebhookController extends Controller
         return response('', 200);
     }
 
-    /**
-     * Exact draagt geen notification-id; de raw body is stabiel over een retry
-     * (identieke bytes), dus z'n hash is een veilige idempotency-sleutel.
-     */
     private function deriveEventId(string $rawBody): string
     {
         return hash('sha256', $rawBody);

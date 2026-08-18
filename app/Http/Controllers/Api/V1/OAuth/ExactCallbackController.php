@@ -12,14 +12,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\URL;
 use Throwable;
 
-/**
- * Exact Online OAuth-callback. Parallel aan CallbackController (Mollie) — dedup
- * naar een generieke {provider}-controller is een uitgestelde follow-up
- * (issue #3 / audit A2). Publiek: de state-parameter is de auth (D-07).
- *
- * Browser-endpoint: na afhandeling redirecten we (PRG) naar een getekende
- * landingsroute (`oauth.connected` / `oauth.failed`) — zie OAuthLandingController.
- */
 #[Group(name: 'OAuth Connect', description: 'OAuth-broker — init de authorize-flow en handle de callback van de partner.', weight: 40)]
 class ExactCallbackController extends Controller
 {

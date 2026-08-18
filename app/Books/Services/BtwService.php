@@ -8,20 +8,9 @@ use App\Books\Models\Account;
 use App\Books\Support\VatLedgerAccounts;
 use Illuminate\Support\Carbon;
 
-/*
- * Bouwt de Nederlandse BTW-aangifte over een periode bovenop de saldo-primitieven
- * van AccountService — net als ReportService voor W&V/Balans. Grootboek-based: de
- * aangifte spiegelt de geboekte realiteit (alleen geboekte facturen + memoriaal
- * dragen journaalposten), dus concept-facturen lekken niet in de aangifte.
- *
- * Data-subset: alleen wat het grootboek kent. Rubriek 1a/1b/1e (binnenlandse
- * leveringen per tarief) + 5a verschuldigd + 5b voorbelasting + saldo. Rubriek
- * 2/3/4 (verlegd/ICP/EU) vereist een EU-/verlegd-vlag op de regels die er nu niet
- * is — buiten scope, het rapport meldt ze als nul.
- */
 class BtwService
 {
-    private const VOORBELASTING = '1530'; // te vorderen BTW (5b)
+    private const VOORBELASTING = '1530';
 
     public function __construct(private readonly AccountService $accounts) {}
 
@@ -63,10 +52,6 @@ class BtwService
         ];
     }
 
-    /**
-     * Nettobeweging van één grootboekrekening over de periode. Ontbrekende
-     * rekening → 0, zodat een read-rapport nooit breekt op een niet-geseede code.
-     */
     private function movement(string $code, string $from, string $to): int
     {
         $account = Account::query()->where('code', $code)->first();
@@ -74,9 +59,7 @@ class BtwService
         return $account !== null ? $this->accounts->netMovement($account, $from, $to) : 0;
     }
 
-    /**
-     * @return array{0: string, 1: string}
-     */
+    /** @return array{0: string, 1: string} */
     private function range(string $start, string $end): array
     {
         return [

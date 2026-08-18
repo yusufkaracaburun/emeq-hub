@@ -18,11 +18,6 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Pennant\Feature;
 use Tests\TestCase;
 
-/**
- * Capabilities zijn afgeleid van `implements`, niet gedeclareerd in config. Deze
- * tests bewaken die eigenschap — zodra iemand een lijst gaat bijhouden, kunnen
- * declaratie en gedrag uit elkaar lopen.
- */
 class AccountingTargetRegistryCapabilityTest extends TestCase
 {
     use RefreshDatabase;
@@ -63,10 +58,6 @@ class AccountingTargetRegistryCapabilityTest extends TestCase
         $this->assertSame([], $this->registry()->capabilitiesFor($this->connectionFor(Provider::Mollie)));
     }
 
-    /**
-     * De capability-vraag mag geen bijwerkingen hebben — hij wordt beantwoord met
-     * reflectie, niet door de adapter te bouwen.
-     */
     public function test_capabilities_do_not_instantiate_the_target(): void
     {
         $this->registry()->register(Provider::Snelstart->value, ExplodingTarget::class);
@@ -77,10 +68,6 @@ class AccountingTargetRegistryCapabilityTest extends TestCase
         );
     }
 
-    /**
-     * Declaratie en beschikbaarheid zijn twee assen. Een uitgeschakelde provider kan
-     * nog steeds vertellen wat hij zou kunnen.
-     */
     public function test_capabilities_are_declared_even_when_the_provider_is_disabled(): void
     {
         Feature::define('provider-exact-enabled', fn () => false);
@@ -106,10 +93,6 @@ class AccountingTargetRegistryCapabilityTest extends TestCase
         );
     }
 
-    /**
-     * De getters lopen via `for()`, dus de kill-switch blijft gelden — anders zou de
-     * capability-laag een gat om de vlag heen zijn.
-     */
     public function test_the_typed_getter_honours_the_kill_switch(): void
     {
         Feature::define('provider-exact-enabled', fn () => false);
@@ -139,7 +122,6 @@ class AccountingTargetRegistryCapabilityTest extends TestCase
     }
 }
 
-/** Adapter die alleen kan boeken — de vorm die een nieuwe provider op dag 1 heeft. */
 final class PushOnlyTarget implements AccountingTarget
 {
     public function push(FinancialDocument $document, Connection $connection): AccountingResult
@@ -148,7 +130,6 @@ final class PushOnlyTarget implements AccountingTarget
     }
 }
 
-/** Bewijst dat capabilitiesFor() de klasse niet instantieert. */
 final class ExplodingTarget implements AccountingTarget
 {
     public function __construct()

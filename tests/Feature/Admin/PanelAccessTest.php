@@ -9,17 +9,6 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
-/**
- * Plan 09-03 Task 3 — feature-tests voor /admin canAccessPanel-gate.
- *
- * Bewijst (D-05 RBAC-gate):
- *  - Unauthenticated User → redirect naar /admin/login (Filament-default)
- *  - Authenticated User zonder Spatie-rol → 403 (canAccessPanel false)
- *  - Authenticated User met rol `staff` → 200 (canAccessPanel true)
- *
- * Rollen worden direct via Spatie's Role-model geseed (niet via EmeqStaffSeeder)
- * omdat EmeqStaffSeeder env-gated is — directe role-create is deterministischer.
- */
 class PanelAccessTest extends TestCase
 {
     use RefreshDatabase;

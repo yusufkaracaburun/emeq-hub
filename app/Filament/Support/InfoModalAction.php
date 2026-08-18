@@ -8,12 +8,6 @@ use Filament\Actions\Action;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\HtmlString;
 
-/**
- * Herbruikbaar info-icoon naast de paginatitel: een grijze icoon-knop die de
- * toelichting (voorheen losse subtitel of "Wat is een X?"-sectie) in een modal
- * toont. Eén patroon over alle list- en detailpagina's, zodat de titels schoon
- * blijven en de uitleg consistent één klik weg is.
- */
 final class InfoModalAction
 {
     public static function make(string $heading, string $body): Action

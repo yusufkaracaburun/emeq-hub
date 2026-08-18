@@ -12,19 +12,6 @@ use Illuminate\Http\Request;
 use Mollie\Api\Exceptions\ApiException as MollieApiException;
 use Symfony\Component\HttpFoundation\Response;
 
-/**
- * Pass-through controller voor Mollie Subscriptions — altijd nested
- * onder een Customer (v0.2-scope, zie 05a-CONTEXT.md regel 35).
- *
- * Beslissingen 05a-CONTEXT.md: D-01 (per-resource), D-04 (typed SDK-calls),
- * D-13 (Mollie-error-mapping), D-14 (ability-gates).
- *
- * Vendor-discovery: Mollie's SDK exposes `SubscriptionEndpointCollection`
- * onder `MollieApiClient::$subscriptions` — NIET `$customerSubscriptions`
- * zoals plan-skelet suggereerde. Zelfde patroon als Plan 05a-04's
- * `$mandates` (i.p.v. `$customerMandates`). Methode-namen createForId/
- * getForId/pageForId/cancelForId blijven plan-conform.
- */
 #[Group(name: 'Mollie · Subscriptions', description: 'Mollie Subscriptions API (nested onder customer; list/get/create/cancel).', weight: 56)]
 class SubscriptionsController extends AbstractMolliePassThroughController
 {

@@ -7,11 +7,6 @@ namespace Tests\Unit;
 use App\Models\PassThroughCall;
 use PHPUnit\Framework\TestCase;
 
-/**
- * Borgt het gedeelde errors-only-contract dat alle pass-through-writers
- * (Exact/Snelstart/Mollie/Mollie-Connect/Subscriptions) gebruiken om
- * response_body te vullen.
- */
 class PassThroughCallErrorBodyTest extends TestCase
 {
     public function test_returns_null_for_success_status_even_with_body(): void

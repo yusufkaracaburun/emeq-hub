@@ -17,11 +17,6 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 
-/**
- * Inbox voor demo-aanvragen vanaf de publieke /demo-pagina. Read-mostly: staff
- * bekijkt de aanvraag, plant de demo buiten de Hub en markeert 'm afgehandeld.
- * Anders dan bij een koppel-aanvraag volgt hier geen onboarding-wizard.
- */
 class DemoRequestResource extends Resource
 {
     protected static ?string $model = DemoRequest::class;
@@ -78,9 +73,7 @@ class DemoRequestResource extends Resource
         return DemoRequestInfolist::configure($schema);
     }
 
-    /**
-     * @return list<Section>
-     */
+    /** @return list<Section> */
     public static function statusStripSchema(DemoRequest $record): array
     {
         return StatusStrip::make([

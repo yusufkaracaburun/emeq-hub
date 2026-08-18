@@ -6,16 +6,6 @@ namespace App\Support;
 
 use InvalidArgumentException;
 
-/**
- * Value-object met factory + discovery voor provider-credential-metadata.
- *
- * D-04: Connection-fingerprint, Filament-form-sections en revoke-visibility
- *       worden config-driven gemaakt; nieuwe provider toevoegen = nieuwe rij
- *       in config/hub-providers.php zonder Filament-code-wijziging.
- *
- * Bewuste keuze: final class + static factory (zelfde discovery-contract als
- * App\Sanctum\TokenAbilities::all()) en readonly properties (immutable).
- */
 final class ProviderCredentialDescriptor
 {
     /**
@@ -30,9 +20,7 @@ final class ProviderCredentialDescriptor
         public readonly ?string $oauthFlowKey,
     ) {}
 
-    /**
-     * @throws InvalidArgumentException Wanneer de provider niet in config/hub-providers.php staat.
-     */
+    /** @throws InvalidArgumentException Wanneer de provider niet in config/hub-providers.php staat. */
     public static function for(string $provider): self
     {
         /** @var array<string, mixed>|null $cfg */
@@ -59,13 +47,6 @@ final class ProviderCredentialDescriptor
         );
     }
 
-    /**
-     * Expressievere variant van `for()` voor callsites die bij een onbekende
-     * provider gewoon `null` willen ipv een exception (Connection::fingerprint).
-     *
-     * Per D-11 vangt deze helper specifiek `InvalidArgumentException` — geen
-     * `Throwable` — zodat échte bugs in `for()` blijven doorgooien.
-     */
     public static function tryFor(string $provider): ?self
     {
         try {
@@ -75,9 +56,7 @@ final class ProviderCredentialDescriptor
         }
     }
 
-    /**
-     * @return list<self>
-     */
+    /** @return list<self> */
     public static function all(): array
     {
         /** @var array<string, mixed> $providers */

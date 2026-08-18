@@ -250,9 +250,7 @@ class ExactWebhookSubscriptionManagerTest extends TestCase
         $this->assertSame(self::TOPICS, array_keys($connection->metadata['exact_webhooks']));
     }
 
-    /**
-     * @param  array<string, mixed>  $state
-     */
+    /** @param  array<string, mixed>  $state */
     private function exactConnection(array $state = []): Connection
     {
         $consumer = Consumer::factory()->create();

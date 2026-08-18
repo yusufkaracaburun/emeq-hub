@@ -7,24 +7,9 @@ namespace App\Accounting;
 use App\Accounting\Enums\DocumentType;
 use Carbon\CarbonImmutable;
 
-/**
- * Een document zoals het in de boekhouding stáát.
- *
- * Bewust een ander type dan {@see FinancialDocument}: dat is wat je stuurt, dit is wat
- * er ligt. De verschillen zijn echt — een geboekt document heeft een partner-identiteit
- * en een boekstuknummer, en mist de bijlagen en de vrije `category`-hint die alleen bij
- * het schrijven bestaan. Eén type voor allebei zou op elk veld een "geldt alleen bij
- * lezen/schrijven"-slag om de arm nodig hebben.
- *
- * `id` is ondoorzichtig. `externalId` is jóuw sleutel, teruggelezen uit de provenance
- * die de Hub bij het boeken meeschreef — leeg voor documenten die buiten de Hub om zijn
- * ingevoerd.
- */
 final readonly class PostedDocument
 {
-    /**
-     * @param  list<PostedDocumentLine>  $lines
-     */
+    /** @param  list<PostedDocumentLine>  $lines */
     public function __construct(
         public string $id,
         public DocumentType $type,
@@ -40,13 +25,6 @@ final readonly class PostedDocument
         public string $currency = 'EUR',
     ) {}
 
-    /**
-     * Netto totaal uit de regels, niet uit een header-veld van de partner.
-     *
-     * Dat is bewust: het regelbedrag is wat de Hub zelf gestuurd heeft en wat elke
-     * provider levert, terwijl een header-totaal per pakket een andere betekenis heeft
-     * (met/zonder btw, in valuta of in administratie-valuta).
-     */
     public function netTotal(): float
     {
         return round(array_sum(array_map(
@@ -55,9 +33,7 @@ final readonly class PostedDocument
         )), 2);
     }
 
-    /**
-     * @return array<string, mixed>
-     */
+    /** @return array<string, mixed> */
     public function toArray(): array
     {
         return [

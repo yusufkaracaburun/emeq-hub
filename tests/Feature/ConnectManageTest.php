@@ -190,7 +190,6 @@ class ConnectManageTest extends TestCase
         $this->putJson($payload['urls']['mapping_url'], [
             'journals' => ['sales' => '70', 'purchase' => '80'],
             'gl_accounts' => ['sales_default' => 'gl-8000', 'purchase_default' => 'gl-4000'],
-            // Genegeerd: geen bewerkbare sleutel.
             'vat_codes' => ['21' => '3'],
         ])
             ->assertOk()
@@ -269,10 +268,6 @@ class ConnectManageTest extends TestCase
         ]);
     }
 
-    /**
-     * Een handtekening voor koppeling A mag koppeling B (van een ander account) nooit
-     * raken, ook al is de aangevraagde `ref` geldig voor B zelf.
-     */
     public function test_a_relation_action_cannot_reach_another_accounts_connection(): void
     {
         $mine = $this->account();
@@ -357,9 +352,7 @@ class ConnectManageTest extends TestCase
             ->firstWhere('key', $provider)['manage_url'];
     }
 
-    /**
-     * @return array<string, mixed>
-     */
+    /** @return array<string, mixed> */
     private function getPageProps(string $url): array
     {
         return $this->get($url)->assertOk()->viewData('page')['props'];

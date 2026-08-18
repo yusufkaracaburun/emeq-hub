@@ -18,13 +18,6 @@ use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
-/**
- * Inbox voor onboarding-leads vanaf de publieke koppel-formulieren op de
- * partner-pagina's. Read-mostly:
- * staff bekijkt aanvragen en markeert ze afgehandeld; aanmaken/bewerken gebeurt
- * niet hier (de aanvraag komt van de publieke form, onboarden via de
- * OnboardConsumer-wizard).
- */
 class AccessRequestResource extends Resource
 {
     protected static ?string $model = AccessRequest::class;
@@ -86,9 +79,7 @@ class AccessRequestResource extends Resource
         return AccessRequestInfolist::configure($schema);
     }
 
-    /**
-     * @return list<Section>
-     */
+    /** @return list<Section> */
     public static function statusStripSchema(AccessRequest $record): array
     {
         return StatusStrip::make([

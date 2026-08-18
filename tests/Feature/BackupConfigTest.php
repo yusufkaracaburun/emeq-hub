@@ -7,11 +7,6 @@ namespace Tests\Feature;
 use Illuminate\Console\Scheduling\Schedule;
 use Tests\TestCase;
 
-/**
- * Wiring van spatie/laravel-backup: bestemming = de lokale `backups`-disk,
- * encryptie aan, en de backup-commando's zijn ingepland. De echte `backup:run`
- * vereist pg_dump + Postgres en draait daarom niet in de sqlite-testsuite.
- */
 class BackupConfigTest extends TestCase
 {
     public function test_backup_targets_the_backups_disk_with_encryption(): void

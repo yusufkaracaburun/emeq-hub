@@ -20,19 +20,6 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Spatie\WebhookServer\WebhookCall;
 
-/**
- * Async accounting-push: voert de partner-boeking uit en meldt de uitkomst per
- * webhook terug aan de Consumer-callback-URL (anti-correlation: outbound HMAC met
- * `consumers.webhook_callback_secret`, nooit een partner-secret).
- *
- * `$tries = 1`: Exact heeft geen native idempotency-key, dus een retry op de hele
- * job zou de boeking dubbel doen. De `run()` vangt alle fouten af en fire't dan een
- * `failed`-webhook — de job zelf throwt niet, dus tries=1 is genoeg. De webhook-delivery
- * retryt los via spatie/laravel-webhook-server.
- *
- * Consumer zonder `webhook_callback_url` → silent skip (de boeking is geaudit; alleen
- * de terugmelding vervalt). De edge weigert async zonder callback al met 400.
- */
 final class SyncAccountingDocumentJob implements ShouldQueue
 {
     use Dispatchable;

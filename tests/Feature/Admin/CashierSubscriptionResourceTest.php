@@ -15,17 +15,6 @@ use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
-/**
- * Plan 09-09 Task 2 — feature-tests voor CashierSubscriptionResource.
- *
- * Bewijst (HUB-04 deelcriterium):
- *  - List toont Cashier-Subscription-rijen met owner.slug (Consumer)
- *  - Derived-status reflecteert Cashier's accessor-output (Phase 6 D-02: geen status-kolom)
- *  - Sub zonder ends_at → derived_status 'active'
- *  - Sub met ends_at in toekomst → derived_status 'grace' (subset van Cashier's cancelled())
- *
- * Roles worden direct via Spatie's Role-model geseed (PanelAccessTest-pattern, 09-03).
- */
 class CashierSubscriptionResourceTest extends TestCase
 {
     use RefreshDatabase;

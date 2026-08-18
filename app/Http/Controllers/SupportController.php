@@ -9,17 +9,9 @@ use App\Support\Seo\SeoMeta;
 use Inertia\Inertia;
 use Inertia\Response;
 
-/**
- * Publieke support-pagina. De FAQ staat hier en niet in de React-component,
- * zodat de zichtbare tekst en de FAQPage-structured-data dezelfde bron delen —
- * schema.org dat afwijkt van de pagina-inhoud is een handmatige richtlijn-
- * overtreding en levert een manual action op.
- */
 class SupportController extends Controller
 {
-    /**
-     * @var list<array{question:string,answer:string}>
-     */
+    /** @var list<array{question:string,answer:string}> */
     private const FAQ = [
         [
             'question' => 'Hoe krijg ik een API-token?',

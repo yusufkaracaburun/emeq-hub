@@ -10,31 +10,10 @@ use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
-/**
- * Plan 10-03 D-1 — bewijst dat alle 6 niet-User-Filament-resources
- * permission-gated zijn via Spatie's `can()`-check. Sluit CR-02 BLOCKER
- * uit 09-REVIEW.md: staff zonder de gemapte permission ziet de resource
- * niet (canAccess=false) én krijgt 403 op de directe `/admin/<resource>`-URL.
- *
- * Permission-mapping (locked per 10-CONTEXT.md D-1):
- *  - consumers / accounts       → manage-consumers
- *  - connections                → manage-connections
- *  - inbound-webhook-events     → view-webhooks
- *  - account-subscriptions      → view-account-subscriptions
- *  - cashier-subscriptions      → view-billing
- *
- * UserResource (gated via `manage-staff`-Gate, niet permission-can()) wordt
- * door PermissionGatingTest gecoverd — niet hier.
- */
 class ResourceCanAccessTest extends TestCase
 {
     use RefreshDatabase;
 
-    /**
-     * Seed alleen `staff`-rol + de 5 permissions die door D-1 worden gemapt.
-     * Geen `super-admin`-rol — die zou alle permissions overrulen via Spatie's
-     * Gate::before-hook en de gating-bewijslast verstoren.
-     */
     private function seedRolesAndPermissions(): void
     {
         Role::firstOrCreate(['name' => 'staff']);
@@ -61,8 +40,6 @@ class ResourceCanAccessTest extends TestCase
         return $user;
     }
 
-    // ---------------- ConsumerResource (manage-consumers) ----------------
-
     public function test_consumers_returns_403_for_staff_without_permission(): void
     {
         $user = $this->staffUser();
@@ -77,8 +54,6 @@ class ResourceCanAccessTest extends TestCase
 
         $this->actingAs($user)->get('/admin/consumers')->assertOk();
     }
-
-    // ---------------- ConnectionResource (manage-connections) ----------------
 
     public function test_connections_returns_403_for_staff_without_permission(): void
     {
@@ -95,8 +70,6 @@ class ResourceCanAccessTest extends TestCase
         $this->actingAs($user)->get('/admin/connections')->assertOk();
     }
 
-    // ---------------- AccountResource (manage-consumers — D-1) ----------------
-
     public function test_accounts_returns_403_for_staff_without_permission(): void
     {
         $user = $this->staffUser();
@@ -111,8 +84,6 @@ class ResourceCanAccessTest extends TestCase
 
         $this->actingAs($user)->get('/admin/accounts')->assertOk();
     }
-
-    // ---------------- InboundWebhookEventResource (view-webhooks) ----------------
 
     public function test_inbound_webhook_events_returns_403_for_staff_without_permission(): void
     {
@@ -129,8 +100,6 @@ class ResourceCanAccessTest extends TestCase
         $this->actingAs($user)->get('/admin/inbound-webhook-events')->assertOk();
     }
 
-    // ---------------- AccountSubscriptionResource (view-account-subscriptions) ----------------
-
     public function test_account_subscriptions_returns_403_for_staff_without_permission(): void
     {
         $user = $this->staffUser();
@@ -145,8 +114,6 @@ class ResourceCanAccessTest extends TestCase
 
         $this->actingAs($user)->get('/admin/account-subscriptions')->assertOk();
     }
-
-    // ---------------- CashierSubscriptionResource (view-billing) ----------------
 
     public function test_cashier_subscriptions_returns_403_for_staff_without_permission(): void
     {

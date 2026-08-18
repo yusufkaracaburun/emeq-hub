@@ -7,11 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
-/*
- * Eén betaling-allocatie: koppelt een bank-leg (Transaction) aan een open post
- * (Invoice of Bill) met een bedrag in centen. De double-entry zit in de
- * gekoppelde Transaction (LedgerPoster); deze rij legt alleen de toewijzing vast.
- */
 class Payment extends Model
 {
     use BelongsToBooksCompany;

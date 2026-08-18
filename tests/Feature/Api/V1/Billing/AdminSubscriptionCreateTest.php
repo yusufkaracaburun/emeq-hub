@@ -66,11 +66,6 @@ class AdminSubscriptionCreateTest extends TestCase
         $target = Consumer::factory()->create();
         $token = $admin->createToken('admin', [TokenAbilities::BILLING_WRITE])->plainTextToken;
 
-        // Pre-create een actieve subscription voor de target zodat we kunnen
-        // controleren dat Cashier's newSubscription() in deze testomgeving
-        // zonder Mollie test-mode key niet crasht maar een handled status
-        // teruggeeft. De échte happy-path (real Mollie test-mode hit) valt
-        // onder plan 06-07's integration suite.
         DB::table('subscriptions')->insert([
             'name' => 'main',
             'plan' => 'naschool-license',

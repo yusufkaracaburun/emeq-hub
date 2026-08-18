@@ -4,17 +4,6 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-/*
- * Inkoopfacturen van de Books-module: books_bills (header + totalen) +
- * books_bill_lines (regels). Spiegel van books_invoices, met twee verschillen:
- * een bill hangt aan een crediteur (vendor_id) i.p.v. debiteur, en elke regel
- * draagt een eigen kostenrekening (account_id) — inkoop is een echte categorie-
- * keuze (4000/4400/4500), niet uit het BTW-tarief af te leiden zoals omzet. Voor
- * de boeking volgt input-BTW één rekening (1530), dus tax_rate stuurt alleen het
- * bedrag, niet de rekening. Bedragen in integer-centen; per-regel + bill-totalen
- * worden door de BillLineObserver herrekend (subtotaal/BTW/totaal). tax_rate is
- * een BTW-percentage (21/9/0).
- */
 return new class extends Migration
 {
     public function up(): void

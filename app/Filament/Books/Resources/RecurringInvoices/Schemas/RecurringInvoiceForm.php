@@ -13,12 +13,6 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
 
-/*
- * Template-form voor een terugkerende factuur. Bedragen (totalen) staan niet
- * hier — die rekent de gegenereerde Invoice. Stukprijs als euro's → integer-
- * centen per regel (mirror InvoiceForm). next_date wordt bij aanmaak uit
- * start_date afgeleid (model-hook), dus niet in het form.
- */
 class RecurringInvoiceForm
 {
     public static function configure(Schema $schema): Schema

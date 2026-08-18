@@ -9,11 +9,6 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Concerns\StubsMollieClient;
 use Tests\TestCase;
 
-/**
- * Bewijst D-06 forward-pad voor POST /v1/mollie/customers/{id}/subscriptions —
- * gap-closure Plan 05a-06 (verificatie-truth #12 / CR-01). Subscriptions
- * zijn recurring-debit risico bij retry-storm zonder Idempotency-Key forward.
- */
 class SubscriptionsIdempotencyForwardTest extends TestCase
 {
     use RefreshDatabase;

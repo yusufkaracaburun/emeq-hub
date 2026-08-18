@@ -46,9 +46,7 @@ class MappingApiTest extends TestCase
         parent::tearDown();
     }
 
-    /**
-     * @return array{0: Consumer, 1: Connection}
-     */
+    /** @return array{0: Consumer, 1: Connection} */
     private function setupConnection(): array
     {
         $consumer = Consumer::factory()->create();
@@ -128,11 +126,6 @@ class MappingApiTest extends TestCase
             ->assertJsonPath('mapping.gl_accounts.kosten', '4000');
     }
 
-    /**
-     * De 422 hangt aan de capability, niet aan de providernaam. Een adapter die alleen
-     * kan boeken krijgt hem — ook al is dat niet Exact. Zonder deze test zou een
-     * verplaatste `if ($provider !== Exact)` er nog steeds doorheen komen.
-     */
     public function test_sync_returns_422_when_the_provider_cannot_sync_references(): void
     {
         app(AccountingTargetRegistry::class)->register(Provider::Snelstart->value, PushOnlySyncTarget::class);
@@ -150,9 +143,6 @@ class MappingApiTest extends TestCase
             ->assertJsonPath('error', 'sync_unsupported');
     }
 
-    /**
-     * Sync liep vroeger langs de kill-switch heen; via de registry niet meer.
-     */
     public function test_sync_returns_503_when_the_provider_is_switched_off(): void
     {
         Feature::define('provider-exact-enabled', fn () => false);
@@ -167,7 +157,6 @@ class MappingApiTest extends TestCase
     }
 }
 
-/** Boekt wel, spiegelt geen referentiedata — de vorm van een verse provider. */
 final class PushOnlySyncTarget implements AccountingTarget
 {
     public function push(FinancialDocument $document, Connection $connection): AccountingResult

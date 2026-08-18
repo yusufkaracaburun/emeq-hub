@@ -6,9 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 class CreateRedeemedCouponsTable extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('redeemed_coupons', function (Blueprint $table) {
@@ -23,9 +20,6 @@ class CreateRedeemedCouponsTable extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('redeemed_coupons');

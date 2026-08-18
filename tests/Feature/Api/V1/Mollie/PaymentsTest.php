@@ -9,10 +9,6 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Concerns\StubsMollieClient;
 use Tests\TestCase;
 
-/**
- * Bewijst MOLL-03 SC-1 (Mollie-checkout-URL terug) + happy paths
- * (store/show/destroy) via SDK-stub.
- */
 class PaymentsTest extends TestCase
 {
     use RefreshDatabase;

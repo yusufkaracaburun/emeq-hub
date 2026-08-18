@@ -21,12 +21,6 @@ use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
-/**
- * Smoke-tests voor de RelationManagers op Consumer/Account/Connection-detail-pagina's.
- *
- * Filament v4 lazy-rendert tab-content — alleen de eerste/active tab zit in
- * initial HTML. Voor lazy tabs gebruiken we Livewire::test() op de manager-class.
- */
 class RelationManagersRenderTest extends TestCase
 {
     use RefreshDatabase;

@@ -10,15 +10,9 @@ use App\Integrations\Webhooks\CanonicalEntityRegistry;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
-/**
- * Spiegel van {@see CanonicalEventEnvelopeTest}, maar voor "wélk record wijzigde"
- * (`entity_id` + `action`) in plaats van "wat voor soort event was dit".
- */
 class CanonicalEntityEnvelopeTest extends TestCase
 {
-    /**
-     * @return array<string, array{0: Provider, 1: array<string, mixed>, 2: string|null, 3: string|null}>
-     */
+    /** @return array<string, array{0: Provider, 1: array<string, mixed>, 2: string|null, 3: string|null}> */
     public static function payloads(): array
     {
         return [
@@ -37,9 +31,7 @@ class CanonicalEntityEnvelopeTest extends TestCase
         ];
     }
 
-    /**
-     * @param  array<string, mixed>  $payload
-     */
+    /** @param  array<string, mixed>  $payload */
     #[DataProvider('payloads')]
     public function test_partner_payloads_map_to_entity_id_and_action(Provider $provider, array $payload, ?string $expectedEntityId, ?string $expectedAction): void
     {

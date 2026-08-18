@@ -23,11 +23,6 @@ use Saloon\Http\Faking\MockResponse;
 use Tests\Concerns\BindsFakeAccountingReferences;
 use Tests\TestCase;
 
-/**
- * De claim-laag. Vóór deze fase deed de middleware SELECT-dan-INSERT zonder lock:
- * twee gelijktijdige requests met dezelfde key boekten allebei bij Exact en de
- * tweede `create()` gaf een 500. De unique index is nu de mutex.
- */
 class IdempotencyTest extends TestCase
 {
     use BindsFakeAccountingReferences;
@@ -53,13 +48,6 @@ class IdempotencyTest extends TestCase
         parent::tearDown();
     }
 
-    /**
-     * De administratie is expliciet, want de factory deelt één vaste `administratie_id`
-     * uit. Twee consumers kwamen daardoor op dezelfde échte administratie uit — een
-     * topologie die deze tests niet bedoelen en die sinds de kruis-connectie-guard een
-     * 409 geeft in plaats van de 201 waar hun onderwerp om draait. Dat geval hoort in
-     * ProviderEntityLinkTest, niet hier.
-     */
     private function consumerWithExactConnection(string $administratieId = '4471372'): Consumer
     {
         $consumer = Consumer::factory()->create();
@@ -93,9 +81,7 @@ class IdempotencyTest extends TestCase
         ], $overrides);
     }
 
-    /**
-     * @param  array<string, mixed>  $payload
-     */
+    /** @param  array<string, mixed>  $payload */
     private function postDocument(Consumer $consumer, string $key, array $payload): TestResponse
     {
         $token = $consumer->createToken('t', [TokenAbilities::EXACT_WRITE])->plainTextToken;
@@ -128,10 +114,6 @@ class IdempotencyTest extends TestCase
         MockClient::global()->assertSentCount(1);
     }
 
-    /**
-     * Het bewijs dat de claim vóór de handler staat. Deze assertie zou onder de oude
-     * SELECT-dan-INSERT-volgorde falen — er was dan nog geen rij.
-     */
     public function test_the_claim_row_is_in_flight_while_the_handler_runs(): void
     {
         $seen = new ArrayObject;
@@ -178,7 +160,6 @@ class IdempotencyTest extends TestCase
 
         MockClient::global()->assertSentCount(1);
 
-        // De bewaarde respons hoort onaangeroerd te zijn.
         $this->assertSame(201, (int) IdempotencyKey::query()->sole()->response_status);
     }
 
@@ -192,7 +173,6 @@ class IdempotencyTest extends TestCase
         $consumer = $this->consumerWithExactConnection();
         $key = (string) Str::uuid();
 
-        // Deterministische stand-in voor de race: de claim staat er al, lease leeft.
         IdempotencyKey::query()->create([
             'consumer_id' => $consumer->getKey(),
             'account_id' => $consumer->accounts()->where('external_id', 'school1')->value('id'),
@@ -246,10 +226,6 @@ class IdempotencyTest extends TestCase
         $this->assertSame(201, (int) $row->response_status);
     }
 
-    /**
-     * Een mislukte poging mag opnieuw. Zonder vrijgave zou één upstream-storing de
-     * sleutel permanent blokkeren.
-     */
     public function test_a_failed_request_releases_the_claim(): void
     {
         MockClient::global([
@@ -294,9 +270,6 @@ class IdempotencyTest extends TestCase
             ->assertJsonPath('error', 'idempotency_key_required');
     }
 
-    /**
-     * Dezelfde sleutel bij twee consumers is geen conflict — de claim is per consumer.
-     */
     public function test_the_claim_is_scoped_per_consumer(): void
     {
         MockClient::global([
@@ -308,9 +281,6 @@ class IdempotencyTest extends TestCase
 
         $this->postDocument($this->consumerWithExactConnection(), $key, $this->payload())->assertStatus(201);
 
-        // De auth-manager is een singleton binnen één test en memoiseert de opgeloste
-        // user; zonder dit zou het tweede request nog als consumer 1 binnenkomen en
-        // zou deze test zijn eigen onderwerp niet raken.
         $this->app['auth']->forgetGuards();
 
         $this->postDocument($this->consumerWithExactConnection('9990002'), $key, $this->payload())->assertStatus(201);

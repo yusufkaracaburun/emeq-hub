@@ -10,21 +10,9 @@ use App\Accounting\Read\ReadQuery;
 use App\Models\Connection;
 use App\Models\ConnectionAccountingRef;
 
-/**
- * Leest referentiedata uit de provider-neutrale mirror (`connection_accounting_refs`).
- *
- * Gedeeld door alle adapters: het schema is niet Exact-specifiek, dus de leescode ook
- * niet. Een adapter declareert de capability en delegeert hierheen; wat per provider
- * verschilt is hoe de mirror gevúld wordt, niet hoe hij gelezen wordt.
- *
- * Keyset-paginatie op `code`, wat exact de unieke index `(connection_id, kind, code)`
- * volgt. Geen offset: die wordt duur en instabiel zodra er tussentijds gesynct wordt.
- */
 final readonly class MirrorReader
 {
-    /**
-     * @return ReadPage<LedgerAccount>
-     */
+    /** @return ReadPage<LedgerAccount> */
     public function ledgerAccounts(Connection $connection, ReadQuery $query): ReadPage
     {
         return $this->page(
@@ -40,9 +28,7 @@ final readonly class MirrorReader
         );
     }
 
-    /**
-     * @return ReadPage<TaxCode>
-     */
+    /** @return ReadPage<TaxCode> */
     public function taxCodes(Connection $connection, ReadQuery $query): ReadPage
     {
         return $this->page(
@@ -57,7 +43,6 @@ final readonly class MirrorReader
                     id: (string) $ref->native_id,
                     code: (string) $ref->code,
                     name: $ref->label,
-                    // Null blijft null: 0.0 zou "0%" betekenen en dat bestaat echt.
                     rate: $rate === null ? null : (float) $rate,
                     attributes: $attrs,
                 );
@@ -78,8 +63,6 @@ final readonly class MirrorReader
             ->where('kind', $kind)
             ->when($query->cursor !== null, fn ($q) => $q->where('code', '>', $query->cursor->value))
             ->orderBy('code')
-            // Eén extra rij ophalen is goedkoper dan een count-query om te weten of er
-            // nog meer is.
             ->limit($query->limit + 1)
             ->get();
 

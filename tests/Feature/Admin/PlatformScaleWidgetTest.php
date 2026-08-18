@@ -14,17 +14,11 @@ use Livewire\Livewire;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
-/**
- * Dashboard-omvangwidget: totalen per schakel in de keten Consumer → Account → Connection,
- * met "verbonden"-tellers die alleen actieve, niet-ingetrokken koppelingen meenemen.
- */
 class PlatformScaleWidgetTest extends TestCase
 {
     use RefreshDatabase;
 
-    /**
-     * @return array<string, int>
-     */
+    /** @return array<string, int> */
     private function counts(): array
     {
         return (new PlatformScaleWidget)->platformCounts();
@@ -50,7 +44,6 @@ class PlatformScaleWidgetTest extends TestCase
     {
         $consumer = Consumer::factory()->create();
         $accounts = Account::factory()->count(3)->create(['consumer_id' => $consumer->id]);
-        // Eén account mag per provider maar één koppeling hebben (unique account_id + provider).
         Connection::factory()->create(['account_id' => $accounts->first()->id, 'provider' => 'exact']);
         Connection::factory()->create(['account_id' => $accounts->first()->id, 'provider' => 'snelstart']);
 
@@ -72,13 +65,13 @@ class PlatformScaleWidgetTest extends TestCase
         $pendingOnly = Account::factory()->create();
         Connection::factory()->create(['account_id' => $pendingOnly->id, 'status' => 'pending', 'revoked_at' => null]);
 
-        Account::factory()->create(); // helemaal geen koppeling
+        Account::factory()->create();
 
         $counts = $this->counts();
 
         $this->assertSame(4, $counts['accounts']);
         $this->assertSame(1, $counts['connected_accounts']);
-        $this->assertSame(4, $counts['consumers']);        // elke account-factory maakt zijn eigen consumer
+        $this->assertSame(4, $counts['consumers']);
         $this->assertSame(1, $counts['connected_consumers']);
         $this->assertSame(3, $counts['connections']);
         $this->assertSame(1, $counts['active_connections']);

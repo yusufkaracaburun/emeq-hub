@@ -20,10 +20,6 @@ enum RecurringFrequency: string implements HasLabel
         };
     }
 
-    /**
-     * De volgende boekdatum, gerekend vanaf $from. addMonthNoOverflow voorkomt
-     * dat 31 jan → 3 mrt schuift bij maand-cadans.
-     */
     public function nextDate(CarbonInterface $from): CarbonInterface
     {
         return match ($this) {

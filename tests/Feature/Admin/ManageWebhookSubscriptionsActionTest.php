@@ -145,9 +145,7 @@ class ManageWebhookSubscriptionsActionTest extends TestCase
         return $user;
     }
 
-    /**
-     * @param  array<string, mixed>  $state
-     */
+    /** @param  array<string, mixed>  $state */
     private function makeExactConnection(array $state = []): Connection
     {
         $account = Account::factory()->for(Consumer::factory()->create())->create();

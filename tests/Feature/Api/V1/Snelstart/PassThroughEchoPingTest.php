@@ -23,7 +23,6 @@ class PassThroughEchoPingTest extends TestCase
     {
         parent::setUp();
         MockClient::destroyGlobal();
-        // Disable retries voor snellere tests; pad-correctheid is hier de focus.
         config(['snelstart.http.retry.times' => 1, 'snelstart.http.retry.sleep' => 0]);
     }
 

@@ -21,18 +21,6 @@ use Spatie\Permission\Models\Role;
 use Tests\Concerns\StubsMollieClient;
 use Tests\TestCase;
 
-/**
- * Plan 09-08 Task 3 — feature-tests voor state-flip actions van
- * AccountSubscriptionResource (T-07-03-03 invariant — manager-only delegation).
- *
- * Bewijst:
- *  - Pause-action zichtbaar alleen op Active
- *  - Resume-action zichtbaar alleen op Paused
- *  - Cancel-action zichtbaar op Active OF Paused
- *  - Pause-action delegeert via AccountSubscriptionManager (state flipt naar Paused)
- *  - Illegale transition gooit InvalidStateTransitionException + geen DB-mutatie
- *    (T-07-03-03 + StateTransitions D-04 invariant)
- */
 class AccountSubscriptionStateActionsTest extends TestCase
 {
     use RefreshDatabase;
@@ -56,9 +44,7 @@ class AccountSubscriptionStateActionsTest extends TestCase
         return $user;
     }
 
-    /**
-     * @return array{0: Consumer, 1: Account, 2: Connection}
-     */
+    /** @return array{0: Consumer, 1: Account, 2: Connection} */
     private function setupTenancy(string $externalId = 'school-X'): array
     {
         $consumer = Consumer::factory()->create();
@@ -136,11 +122,6 @@ class AccountSubscriptionStateActionsTest extends TestCase
         $component->assertTableActionHidden('cancel', $pending);
     }
 
-    /**
-     * D-10 (IN-02): cancelAction's Throwable-catch toont generieke notification
-     * met sha256-fingerprint i.p.v. raw $e->getMessage(). Bewijst dat
-     * exception-message-leak via Filament Notification dicht is.
-     */
     public function test_cancel_action_shows_generic_notification_with_fingerprint_on_throwable(): void
     {
         $this->actingAsStaff();
@@ -163,9 +144,6 @@ class AccountSubscriptionStateActionsTest extends TestCase
             );
     }
 
-    /**
-     * D-10 (IN-02) — pauseAction symmetrisch met cancelAction.
-     */
     public function test_pause_action_shows_generic_notification_with_fingerprint_on_throwable(): void
     {
         $this->actingAsStaff();
@@ -188,9 +166,6 @@ class AccountSubscriptionStateActionsTest extends TestCase
             );
     }
 
-    /**
-     * D-10 (IN-02) — resumeAction symmetrisch met cancelAction.
-     */
     public function test_resume_action_shows_generic_notification_with_fingerprint_on_throwable(): void
     {
         $this->actingAsStaff();
@@ -213,17 +188,6 @@ class AccountSubscriptionStateActionsTest extends TestCase
             );
     }
 
-    /**
-     * Plan 09-08 success-criterium 5 + HUB-04 success-criterium 8:
-     * Illegale state-transitie → geen DB-mutatie + InvalidStateTransitionException.
-     *
-     * Filament-UI filtert cancel-action al uit op canceled (visibility-test
-     * boven), maar de manager-laag MOET ook hard-faili op illegale transities.
-     * Hier testen we de manager direct met een echt illegale transitie
-     * (pause op canceled — StateTransitions kent geen Canceled→Paused-pair).
-     * Dit bewijst dat T-07-03-03 invariant in stand blijft ook als Filament's
-     * visibility-filter zou worden omzeild.
-     */
     public function test_illegal_transition_throws_without_db_mutation(): void
     {
         $this->actingAsStaff();
@@ -236,8 +200,6 @@ class AccountSubscriptionStateActionsTest extends TestCase
 
         $originalCanceledAt = $canceled->canceled_at;
 
-        // Manager-laag throwt InvalidStateTransitionException op illegale
-        // transition (Canceled → Paused is geen legale pair per StateTransitions).
         try {
             app(AccountSubscriptionManager::class)->pause($canceled, 'forced_illegal_transition');
             $this->fail('Expected InvalidStateTransitionException, geen exception gegooid.');
@@ -246,7 +208,6 @@ class AccountSubscriptionStateActionsTest extends TestCase
             $this->assertSame(SubscriptionStatus::Paused, $e->to);
         }
 
-        // DB-row blijft Canceled — geen mutatie ondanks de pause-poging.
         $fresh = $canceled->fresh();
         $this->assertSame(SubscriptionStatus::Canceled, $fresh->status);
         $this->assertEquals($originalCanceledAt?->timestamp, $fresh->canceled_at?->timestamp);

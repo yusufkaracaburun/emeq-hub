@@ -15,12 +15,6 @@ use App\Sanctum\TokenAbilities;
 use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Http\JsonResponse;
 
-/**
- * Dry-run validatie van een geëxtraheerd draft-document ("Scan & herstel"). Boekt niets:
- * de Hub controleert de bedragen, BTW-behandeling, IBAN/BTW-nummer, geografie en valuta
- * provider-agnostisch en geeft een findings-rapport met concrete suggesties terug. De
- * consumer toont de issues, de gebruiker bevestigt, en pas dán volgt de boek-POST.
- */
 #[Group(name: 'Accounting Validate', description: 'Valideer een geëxtraheerd draft-document vóór het boeken; geeft findings + suggesties terug zonder te boeken.', weight: 51)]
 class ValidateDocumentController extends Controller
 {
@@ -43,10 +37,6 @@ class ValidateDocumentController extends Controller
         $payload = $request->validated();
         $report = $this->inspector->inspect($payload);
 
-        // De kill-switch afvangen in plaats van laten doorslaan: de enrichment doet een
-        // live partner-call, en die hoort niet te gebeuren als de provider uit staat.
-        // Het rapport degradeert dan naar de agnostische findings in plaats van te falen —
-        // een read-only dry-run hoort niet te struikelen over een uitgeschakelde provider.
         try {
             $enricher = $this->registry->enrichesValidation($connection);
         } catch (ProviderDisabledException) {

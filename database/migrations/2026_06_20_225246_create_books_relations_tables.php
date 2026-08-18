@@ -4,17 +4,6 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-/*
- * Relaties van de Books-module: books_clients (debiteuren) + books_vendors
- * (crediteuren). Lean NL-opzet — inline contact/adres i.p.v. polymorfe
- * Contact/Address, BTW-/KvK-nummer, geen Blamable (consistent met de overige
- * books_-tabellen), EUR-only.
- *
- * Een books_client mag optioneel naar een Hub-`Consumer` wijzen (de betalende
- * klant die emeq al kent): reuse zonder de bounded-context-grens te breken. De
- * link is nullOnDelete — een financieel record overleeft het wissen van de
- * operationele Consumer (NL-retentie). Crediteuren bestaan niet in de Hub.
- */
 return new class extends Migration
 {
     public function up(): void

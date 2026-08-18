@@ -68,12 +68,6 @@ class ExactWebhookControllerTest extends TestCase
         );
     }
 
-    /**
-     * Twee Consumers kunnen dezelfde administratie gekoppeld hebben — de boekhouder
-     * via de ene app, de ondernemer via de andere. Het schema staat dat toe. De
-     * lookup pakte er één willekeurige, dus kreeg één partij de webhook en de ander
-     * niets; over Consumer-grenzen heen was dat een levering aan de verkeerde partij.
-     */
     public function test_a_division_connected_by_two_consumers_fans_out_to_both(): void
     {
         Bus::fake([ForwardWebhookToConsumerJob::class]);
@@ -219,9 +213,7 @@ class ExactWebhookControllerTest extends TestCase
         Bus::assertNothingDispatched();
     }
 
-    /**
-     * @return array<string, mixed>
-     */
+    /** @return array<string, mixed> */
     private function connectionForNewConsumer(): Connection
     {
         $consumer = Consumer::factory()->withWebhookCallback()->create();
@@ -246,9 +238,7 @@ class ExactWebhookControllerTest extends TestCase
         ];
     }
 
-    /**
-     * @param  array<string, mixed>  $content
-     */
+    /** @param  array<string, mixed>  $content */
     private function postSignedWebhook(array $content): TestResponse
     {
         $contentJson = json_encode($content, JSON_THROW_ON_ERROR);

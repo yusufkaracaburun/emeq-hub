@@ -14,17 +14,6 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Concerns\StubsMollieClient;
 use Tests\TestCase;
 
-/**
- * Plan 07-06 Task 1 — feature-tests voor DELETE /v1/account-subscriptions/{id}.
- *
- * Bewijst:
- *  - happy: Active sub → Mollie-cancel + Hub-state Canceled + 204
- *  - re-cancel op already-Canceled: self-transition no-op (StateTransitions.D-04),
- *    Mollie cancelForId wél aangeroepen (manager skipt niet op canceled-state),
- *    response blijft 204
- *  - cross-Consumer DELETE → 404 (D-12)
- *  - read-only-token → 403 (route-ability gating)
- */
 class CancelAccountSubscriptionTest extends TestCase
 {
     use RefreshDatabase;
@@ -65,10 +54,6 @@ class CancelAccountSubscriptionTest extends TestCase
 
     public function test_already_canceled_is_idempotent_returns_204(): void
     {
-        // Self-transition Canceled → Canceled is no-op per StateTransitions (D-04
-        // §webhook-replay-safety). Manager roept nog wel Mollie cancelForId aan
-        // (defensive — Mollie kan zelf 422 retourneren bij re-cancel), maar de
-        // Hub-state-flip is geen-op. Resultaat: 204.
         [, $token, , $connection] = $this->setupMollieConsumer([TokenAbilities::MOLLIE_WRITE]);
 
         $sub = AccountSubscription::factory()
@@ -96,7 +81,6 @@ class CancelAccountSubscriptionTest extends TestCase
 
     public function test_cross_consumer_destroy_returns_404(): void
     {
-        // Consumer A's PAT, sub van Consumer B → 404 (D-12 invariant, T-07-04-01).
         [, $tokenA] = $this->setupMollieConsumer([TokenAbilities::MOLLIE_WRITE]);
 
         $consumerB = Consumer::factory()->create();

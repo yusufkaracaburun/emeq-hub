@@ -17,15 +17,6 @@ use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
-/**
- * Plan 09-06 Task 4 — Revoke-action wiring + delegation.
- *
- * Bewijst (Phase 4-contract + D-04):
- *  - Revoke-action zichtbaar op Mollie-Connection (oauthFlowKey='mollie')
- *  - Revoke-action verborgen op Snelstart-Connection (oauthFlowKey=null)
- *  - Revoke-action verborgen op reeds-revoked Mollie-Connection
- *  - Revoke-action delegates naar OAuthFlow::revoke($connection)
- */
 class ConnectionRevokeActionTest extends TestCase
 {
     use RefreshDatabase;
@@ -97,9 +88,6 @@ class ConnectionRevokeActionTest extends TestCase
 
     public function test_revoke_action_calls_oauth_flow_revoke(): void
     {
-        // Swap de Mollie-OAuthFlow voor een spy zodat we delegation kunnen bewijzen
-        // zonder echte Mollie-API te raken. OAuthFlowRegistry::for('mollie') resolved
-        // via container->make($this->providers['mollie']) — een bind volstaat.
         $fake = new FakeOAuthFlow;
         $this->app->instance(MollieConnectOAuthFlow::class, $fake);
 
@@ -112,8 +100,6 @@ class ConnectionRevokeActionTest extends TestCase
 
         $this->assertSame(1, $fake->wasCalled('revoke'));
 
-        // FakeOAuthFlow::revoke() zet status='revoked' + revoked_at — bewijst
-        // dat de Connection daadwerkelijk doorgegeven is.
         $mollie->refresh();
         $this->assertSame('revoked', $mollie->status);
         $this->assertNotNull($mollie->revoked_at);

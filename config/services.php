@@ -2,18 +2,6 @@
 
 return [
 
-    /*
-    |--------------------------------------------------------------------------
-    | Third Party Services
-    |--------------------------------------------------------------------------
-    |
-    | This file is for storing the credentials for third party services such
-    | as Mailgun, Postmark, AWS and more. This file provides the de facto
-    | location for this type of information, allowing packages to have
-    | a conventional file to locate the various service credentials.
-    |
-    */
-
     'postmark' => [
         'key' => env('POSTMARK_API_KEY'),
     ],
@@ -60,10 +48,6 @@ return [
     ],
 
     'exact' => [
-        // Credentials komen uit de DB-settings (ExactSettings) via
-        // SettingsHydrationServiceProvider — niet uit .env. Vul ze in de admin
-        // (Beheer → Integratie-instellingen). Base-URLs houden een statische
-        // default (geen secret, geen env).
         'client_id' => null,
         'client_secret' => null,
         'redirect_uri' => null,

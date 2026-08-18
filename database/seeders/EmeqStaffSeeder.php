@@ -8,26 +8,9 @@ use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
-/*
- * D-05 + D-7 (WR-04): RBAC-bootstrap via Spatie laravel-permission.
- * Env-driven seeder die 2 rollen + 6 permissions + 1 bootstrap super-admin
- * User aanmaakt. Zonder beide env-vars: no-op (production-safe).
- *
- * Bootstrap-only — voor password-resets gebruik `php artisan tinker`.
- * 2× runnen op een gebootstrapt env gooit RuntimeException (D-7 / WR-04 —
- * "bootstrap, niet sync"). Roles + Permissions blijven idempotent via
- * firstOrCreate; alleen de User-creatie is hard-fail.
- *
- * Run: EMEQ_STAFF_SEED_EMAIL=… EMEQ_STAFF_SEED_PASSWORD=… \
- *      php artisan db:seed --class=EmeqStaffSeeder
- */
 class EmeqStaffSeeder extends Seeder
 {
-    /**
-     * Permissions die zowel super-admin als staff krijgen.
-     *
-     * @var list<string>
-     */
+    /** @var list<string> */
     private const SHARED_PERMISSIONS = [
         'manage-consumers',
         'manage-connections',
@@ -37,9 +20,6 @@ class EmeqStaffSeeder extends Seeder
         'view-billing',
     ];
 
-    /**
-     * Permission die alleen super-admin krijgt.
-     */
     private const SUPER_ADMIN_ONLY_PERMISSION = 'manage-staff';
 
     public function run(): void
@@ -54,9 +34,6 @@ class EmeqStaffSeeder extends Seeder
         $superAdmin = Role::firstOrCreate(['name' => 'super-admin']);
         $staff = Role::firstOrCreate(['name' => 'staff']);
 
-        // Boekhoud-rol (eigen bounded context, geen Hub-permissions). Geeft
-        // admin-paneel-toegang maar enkel de Boekhouding-cluster (GatedToBoekhouding),
-        // niet de Hub-resources — die hangen aan de permissions hierboven.
         Role::firstOrCreate(['name' => 'boekhouder']);
 
         foreach (self::SHARED_PERMISSIONS as $perm) {

@@ -20,13 +20,6 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
-/**
- * Read-only viewer voor de immutable `pass_through_calls`-audit (Consumer → Hub →
- * Partner → terug). Geen Create/Edit/Delete: rijen worden alleen door
- * PassThroughController via create() geschreven ($timestamps = false).
- *
- * Voorzien in ADR pass-through-calls-table.md §Consequenties ("5e resource").
- */
 class PassThroughCallResource extends Resource
 {
     protected static ?string $model = PassThroughCall::class;
@@ -88,9 +81,7 @@ class PassThroughCallResource extends Resource
         return PassThroughCallInfolist::configure($schema);
     }
 
-    /**
-     * @return list<Section>
-     */
+    /** @return list<Section> */
     public static function statusStripSchema(PassThroughCall $record): array
     {
         return StatusStrip::make([

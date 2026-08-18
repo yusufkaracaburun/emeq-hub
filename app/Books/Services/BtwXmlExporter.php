@@ -6,18 +6,6 @@ namespace App\Books\Services;
 
 use Spatie\ArrayToXml\ArrayToXml;
 
-/*
- * Exporteert de BTW-aangifte als plat XML-artefact (rubriek-codes + bedragen in
- * centen) voor hand-off/import bij de accountant. Dit is NIET het gecertificeerde
- * SBR/XBRL-Digipoort-formaat — digitaal indienen bij de Belastingdienst vereist
- * PKIoverheid-cert + de OB-taxonomie en is een apart traject.
- *
- * XML-generatie via spatie/array-to-xml: één-richtings array→XML is precies de
- * operatie hier (de declaration is al een array), de lib doet niets meer dan dat,
- * en het past in de Spatie-gebaseerde dependency-stack van de Hub. Geen reader
- * nodig (zoals saloonphp/xml-wrangler biedt) en geen parser (orchestral/parser is
- * juist lees-georiënteerd).
- */
 class BtwXmlExporter
 {
     public function __construct(private readonly BtwService $btw) {}

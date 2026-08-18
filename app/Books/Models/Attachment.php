@@ -9,11 +9,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Facades\Storage;
 
-/*
- * Bijlage bij een Books-document (Invoice/Bill). Polymorf; het bestand staat op
- * een private disk, deze rij draagt enkel metadata + pad. Bij delete wordt het
- * fysieke bestand opgeruimd — Filament doet dat niet zelf.
- */
 class Attachment extends Model
 {
     use BelongsToBooksCompany;
@@ -38,8 +33,6 @@ class Attachment extends Model
 
     protected static function booted(): void
     {
-        // De FileUpload levert enkel path (+ original_name); disk/metadata/uploader
-        // leiden we hier af — onafhankelijk van de Filament-action-API.
         static::creating(static function (Attachment $attachment): void {
             $attachment->disk ??= 'local';
 

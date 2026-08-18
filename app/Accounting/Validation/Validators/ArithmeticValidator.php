@@ -9,13 +9,6 @@ use App\Accounting\Validation\Finding;
 use App\Accounting\Validation\Severity;
 use App\Accounting\Validation\Support\Money;
 
-/**
- * Reconcilieert de geëxtraheerde bedragen. Per regel: niet-numeriek bedrag → flag, en
- * (indien aanwezig) bedrag vs aantal × stukprijs. Op documentniveau: de som van de
- * regels tegen de aangeleverde subtotaal / BTW-totaal / totaal (met korting). De Hub
- * stelt het herberekende bedrag voor maar past het nooit toe. Mismatches zijn warnings —
- * de bookbare payload (regels) blijft welgevormd; het is OCR-extractie die niet sluit.
- */
 final class ArithmeticValidator implements DocumentValidator
 {
     public function validate(array $payload): array
@@ -37,7 +30,6 @@ final class ArithmeticValidator implements DocumentValidator
                 $findings[] = new Finding(
                     code: 'arithmetic.amount_not_numeric',
                     severity: Severity::Warning,
-                    // Het boekpad eist `lines.*.amount` numeriek — dit exacte bedrag faalt daarop.
                     blocking: true,
                     path: "lines.{$index}.amount",
                     message: 'Deze factuurregel heeft geen leesbaar bedrag. Controleer de regel op de factuur.',
@@ -63,8 +55,6 @@ final class ArithmeticValidator implements DocumentValidator
                     $findings[] = new Finding(
                         code: 'arithmetic.line_amount_mismatch',
                         severity: Severity::Warning,
-                        // Het boekpad valideert alleen dat `amount` numeriek is, niet dat
-                        // die uit aantal × stukprijs volgt — puur advies.
                         blocking: false,
                         path: "lines.{$index}.amount",
                         message: 'Het regelbedrag komt niet uit op aantal × stukprijs. Controleer welke van de drie klopt.',
@@ -89,9 +79,6 @@ final class ArithmeticValidator implements DocumentValidator
      */
     private function reconcileTotals(array $payload, float $net, float $tax): array
     {
-        // subtotal/tax_total/total/discount zijn OCR-samenvattingsvelden: het boekpad
-        // kent ze niet (StoreDocumentRequest heeft geen regels voor deze keys), dus een
-        // mismatch hier kan de boek-POST nooit doen weigeren — puur advies.
         $findings = [];
 
         $subtotal = Money::toFloat($payload['subtotal'] ?? null);

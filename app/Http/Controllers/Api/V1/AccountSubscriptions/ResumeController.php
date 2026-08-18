@@ -14,9 +14,6 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-/**
- * Hub-only state-flip: Paused → Active. Geen Mollie-call (D-08).
- */
 #[Group(name: 'Account Subscriptions', description: 'Multi-tenant subscription-state per Account+Connection (use-case B — Accounts factureren hun eigen eindgebruikers via Connect).', weight: 70)]
 class ResumeController extends Controller
 {

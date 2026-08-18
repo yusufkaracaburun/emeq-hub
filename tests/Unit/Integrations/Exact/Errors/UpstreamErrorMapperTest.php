@@ -27,9 +27,7 @@ class UpstreamErrorMapperTest extends TestCase
     {
         $mapped = UpstreamErrorMapper::mapException(AuthenticationException::apiUnauthorized(403, 'forbidden'));
 
-        // Naar de consumer nog steeds 502 (auth-state niet lekken)…
         $this->assertSame(502, $mapped['status']);
-        // …maar operator-actionable onderscheiden in de audit.
         $this->assertSame(403, $mapped['body']['upstream_status']);
         $this->assertSame('forbidden', $mapped['body']['upstream_detail']);
         $this->assertSame('exact_forbidden', $mapped['short_code']);
@@ -37,8 +35,6 @@ class UpstreamErrorMapperTest extends TestCase
 
     public function test_500_with_functional_message_maps_to_422_rejected(): void
     {
-        // Exact geeft 500 voor functionele afwijzingen — permanent, niet retryable. Map naar
-        // 422 zodat de body (en dus de reden) niet achter een Cloudflare-502 verdwijnt.
         $body = '{"error":{"message":{"value":"Can\'t delete: used in journal entry"}}}';
         $mapped = UpstreamErrorMapper::mapException(ServerException::fromResponse(500, $body));
 
@@ -47,7 +43,6 @@ class UpstreamErrorMapperTest extends TestCase
         $this->assertSame(500, $mapped['body']['upstream_status']);
         $this->assertSame('rejected', $mapped['body']['upstream_detail']);
         $this->assertSame('exact_rejected', $mapped['short_code']);
-        // Geen humanisatie → geen duplicaat-veld; `message` is zelf al de bron.
         $this->assertArrayNotHasKey('provider_message', $mapped['body']);
     }
 
@@ -58,18 +53,13 @@ class UpstreamErrorMapperTest extends TestCase
 
         $this->assertSame(422, $mapped['status']);
         $this->assertSame('exact_rejected', $mapped['short_code']);
-        // Schone, partner-neutrale uitleg voor de consument…
         $this->assertStringContainsString('btw-nummer is ongeldig', $mapped['body']['message']);
         $this->assertStringContainsString('NL000099998B57', $mapped['body']['message']);
-        // …met de rauwe Exact-tekst bewaard voor traceability.
         $this->assertStringContainsString('controlecijfer', $mapped['body']['provider_message']);
     }
 
     public function test_500_closed_fiscal_year_is_humanized_with_provider_message(): void
     {
-        // "Verplicht: Boekjaar" is Exact's melding voor een datum buiten elke
-        // boekperiode. Onvertaald leest het als een leeg verplicht veld, terwijl de
-        // consumer geen boekjaar meestuurt en dat ook niet kan.
         $body = '{"error":{"message":{"value":"Verplicht: Boekjaar"}}}';
         $mapped = UpstreamErrorMapper::mapException(ServerException::fromResponse(500, $body));
 

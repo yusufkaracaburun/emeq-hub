@@ -9,16 +9,10 @@ use Illuminate\Routing\RouteCollection;
 use Illuminate\Support\Facades\Route;
 use Tests\TestCase;
 
-/**
- * Regressie-vangnet voor REVIEW.md CR-01 — /admin/quick-login moet STRICT
- * geguard zijn met `app()->environment('local', 'testing')`, niet de bredere
- * `! app()->isProduction()` (die op preview/staging-deploys open zou staan).
- */
 class QuickLoginRouteGuardTest extends TestCase
 {
     public function test_quick_login_route_is_registered_when_environment_is_testing(): void
     {
-        // PHPUnit-runner draait altijd in `testing`-env → route bestaat
         $this->assertSame('testing', $this->app->environment());
         $this->assertNotNull(app('router')->getRoutes()->getByName('admin.quick-login'));
     }
@@ -40,7 +34,6 @@ class QuickLoginRouteGuardTest extends TestCase
         $app['env'] = $env;
         $app->detectEnvironment(fn () => $env);
 
-        // Re-laad routes/web.php tegen deze app instance zonder de testing-cache.
         Route::clearResolvedInstances();
         $router = $app->make('router');
         $router->setRoutes(new RouteCollection);

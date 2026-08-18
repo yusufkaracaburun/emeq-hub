@@ -18,9 +18,6 @@ class CursorTest extends TestCase
         $this->assertSame("guid'abc-123'", Cursor::decode($original->encode())?->value);
     }
 
-    /**
-     * De cursor gaat in een URL, dus geen `+`, `/` of `=`.
-     */
     public function test_the_encoded_form_is_url_safe(): void
     {
         $encoded = Cursor::of("guid'~!@#$%^&*()_+/='")->encode();
@@ -28,10 +25,6 @@ class CursorTest extends TestCase
         $this->assertMatchesRegularExpression('/^[A-Za-z0-9_-]+$/', $encoded);
     }
 
-    /**
-     * Een consumer mag de cursor niet interpreteren, dus mag hij er ook niet op
-     * vastlopen. Onleesbaar betekent "begin opnieuw", geen 400.
-     */
     public function test_an_unreadable_cursor_means_start_over(): void
     {
         $this->assertNull(Cursor::decode(''));
@@ -68,10 +61,6 @@ class CursorTest extends TestCase
         ReadQuery::fromRequest(['limit' => 0]);
     }
 
-    /**
-     * `external_id`, `number`, `from` en `issued_after` werden stil genegeerd —
-     * een consumer die filtert kreeg 200 met de ongefilterde lijst terug.
-     */
     public function test_an_unsupported_query_parameter_is_rejected(): void
     {
         $this->expectException(InvalidArgumentException::class);

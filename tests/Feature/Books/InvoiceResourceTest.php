@@ -90,7 +90,6 @@ class InvoiceResourceTest extends TestCase
 
         $invoice = Invoice::firstOrFail();
 
-        // Stukprijs 100 euro → 10000 centen; 2 × → subtotaal 20000, BTW 4200, totaal 24200.
         $this->assertSame(1, $invoice->lines()->count());
         $this->assertSame(20000, $invoice->subtotal);
         $this->assertSame(4200, $invoice->tax_total);

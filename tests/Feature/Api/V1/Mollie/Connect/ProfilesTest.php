@@ -12,15 +12,6 @@ use Mollie\Api\Resources\ProfileCollection;
 use Tests\Concerns\StubsMollieConnectClient;
 use Tests\TestCase;
 
-/**
- * MOLL-05 SC-1 — Profiles partner-resource pass-through:
- *  - GET /v1/mollie/connect/profiles → 200 met ProfileCollection (wire-shape)
- *  - POST /v1/mollie/connect/profiles → 201 met Profile (Form Request gevalideerd)
- *  - GET /v1/mollie/connect/profiles/{id} → 200 met Profile
- *  - 401 upstream → 502 mollie_auth_failed
- *  - 422 op missing required (Form Request)
- *  - Audit-rij met token_type=partner.
- */
 class ProfilesTest extends TestCase
 {
     use RefreshDatabase;

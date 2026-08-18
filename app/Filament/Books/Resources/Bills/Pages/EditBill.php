@@ -16,7 +16,6 @@ class EditBill extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            // Een geboekte inkoopfactuur kun je niet verwijderen (zou het grootboek wees achterlaten).
             DeleteAction::make()
                 ->hidden(fn (Bill $record): bool => $record->isPosted()),
         ];

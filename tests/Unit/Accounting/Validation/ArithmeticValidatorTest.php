@@ -39,7 +39,7 @@ class ArithmeticValidatorTest extends TestCase
         $finding = array_values(array_filter($findings, fn ($f): bool => $f->code === 'arithmetic.total_mismatch'))[0];
         $this->assertSame(121.0, $finding->suggestion);
         $this->assertSame(120.0, $finding->current);
-        $this->assertFalse($finding->blocking); // `total` bestaat niet op het boekcontract
+        $this->assertFalse($finding->blocking);
     }
 
     public function test_discount_is_factored_into_expected_total(): void
@@ -50,7 +50,6 @@ class ArithmeticValidatorTest extends TestCase
             'lines' => [['description' => 'A', 'amount' => 100, 'tax_rate' => 21]],
         ]);
 
-        // 100 + 21 − 10 = 111 → sluit, geen mismatch.
         $this->assertNotContains('arithmetic.total_mismatch', $this->codes($findings));
     }
 
@@ -61,7 +60,7 @@ class ArithmeticValidatorTest extends TestCase
         ]);
 
         $this->assertSame(['arithmetic.amount_not_numeric'], $this->codes($findings));
-        $this->assertTrue($findings[0]->blocking); // `lines.*.amount` moet numeriek zijn om te boeken
+        $this->assertTrue($findings[0]->blocking);
     }
 
     public function test_line_amount_against_quantity_times_price(): void
@@ -73,6 +72,6 @@ class ArithmeticValidatorTest extends TestCase
         $this->assertContains('arithmetic.line_amount_mismatch', $this->codes($findings));
         $finding = array_values(array_filter($findings, fn ($f): bool => $f->code === 'arithmetic.line_amount_mismatch'))[0];
         $this->assertSame(100.0, $finding->suggestion);
-        $this->assertFalse($finding->blocking); // het boekpad valideert amount ≠ qty × prijs niet
+        $this->assertFalse($finding->blocking);
     }
 }

@@ -12,17 +12,6 @@ use App\Models\Consumer;
 use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Http\Request;
 
-/**
- * Provider-agnostische OAuth-init voor élke huidige en toekomstige OAuth-provider.
- * Resolved de provider uit de route, de scopes uit config en de flow uit de
- * OAuthFlowRegistry — een nieuwe provider is koppelbaar zonder nieuwe route of
- * controller. De named routes `/oauth/{mollie,exact}/init` wijzen hierheen via
- * `->defaults('provider', …)` (behouden per-provider ability + backward-compat);
- * `/oauth/{provider}/init` vangt elke toekomstige provider.
- *
- * De flow-opzet zelf leeft in StartProviderConnection, gedeeld met de
- * handoff-pagina waar de eindgebruiker zelf koppelt.
- */
 #[Group(name: 'OAuth Connect', description: 'OAuth-broker — init de authorize-flow en handle de callback van de partner.', weight: 40)]
 class ProviderInitController extends Controller
 {
@@ -31,9 +20,7 @@ class ProviderInitController extends Controller
         private readonly ReturnUrlResolver $returnUrls,
     ) {}
 
-    /**
-     * @return array{connection_id: string, redirect_url: string}
-     */
+    /** @return array{connection_id: string, redirect_url: string} */
     public function __invoke(Request $request, string $provider): array
     {
         $providerEnum = Provider::tryFrom($provider);
@@ -49,9 +36,6 @@ class ProviderInitController extends Controller
         /** @var Consumer $consumer */
         $consumer = $request->user();
 
-        // Eén-knop-onboarding: de consumer-app start de koppeling zonder het
-        // Account eerst apart aan te maken. external_id is per-Consumer genamespaced
-        // (firstOrCreate is scoped op $consumer->accounts()), dus geen cross-tenant-leak.
         $account = $consumer->accounts()->firstOrCreate(
             ['external_id' => $validated['account_external_id']],
             ['display_name' => $validated['display_name'] ?? null],
@@ -66,7 +50,6 @@ class ProviderInitController extends Controller
         try {
             $result = $this->startConnection->handle($account, $providerEnum, $returnUrl);
         } catch (ProviderNotConnectableException) {
-            // Geen OAuth-flow (bv. Snelstart = clientkey) → niet via deze route te koppelen.
             abort(404, 'provider_not_connectable');
         } catch (ProviderDisabledException) {
             abort(503, 'provider_disabled');

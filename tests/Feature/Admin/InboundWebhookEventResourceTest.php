@@ -15,18 +15,6 @@ use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
-/**
- * Feature-tests voor de read-only InboundWebhookEventResource (Partner → Hub
- * audit-viewer). Mirror van de oude WebhookCallResourceTest na de migratie
- * `webhook_calls` (Spatie) → `inbound_webhook_events` (metadata-only).
- *
- * Bewijst:
- *  - Staff-User ziet audit-rijen die door InboundWebhookRecorder geschreven zijn
- *  - Outcome-filter narrowt de tabel
- *  - View-page op `/admin/inbound-webhook-events/{id}` rendert event-metadata
- *  - Consumer-slug komt via de relatie de tabel/view in
- *  - Permission-gating (view-webhooks): zonder permission 403
- */
 class InboundWebhookEventResourceTest extends TestCase
 {
     use RefreshDatabase;
@@ -131,7 +119,6 @@ class InboundWebhookEventResourceTest extends TestCase
         $this->seedRoles();
         $user = User::factory()->create();
         $user->assignRole('staff');
-        // Bewust GEEN givePermissionTo('view-webhooks').
         $this->actingAs($user);
 
         $this->get('/admin/inbound-webhook-events')->assertForbidden();

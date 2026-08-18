@@ -13,14 +13,10 @@ class ExactDevSettingsSeederTest extends TestCase
 {
     use RefreshDatabase;
 
-    /**
-     * @var array<string, array{env: ?string, server: ?string, getenv: string|false}>
-     */
+    /** @var array<string, array{env: ?string, server: ?string, getenv: string|false}> */
     private array $envBackup = [];
 
-    /**
-     * @param  array<string, string>  $vars
-     */
+    /** @param  array<string, string>  $vars */
     private function withEnv(array $vars): void
     {
         foreach ($vars as $key => $value) {

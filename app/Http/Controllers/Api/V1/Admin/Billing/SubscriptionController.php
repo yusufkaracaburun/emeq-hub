@@ -15,12 +15,6 @@ use Laravel\Cashier\Subscription;
 use Symfony\Component\HttpFoundation\Response;
 use Throwable;
 
-/**
- * D-15: Emeq-admin POSTs subscription-create namens een Consumer.
- * Cashier's `newSubscription()->create()` doet de heavy lifting; deze
- * controller resolved Consumer, valideert plan-slug via PlanResolver,
- * en wrap't de redirect-flow (first_payment) in een JSON-response.
- */
 #[Group(name: 'Admin — Billing', description: 'Emeq-staff endpoints om Consumer-subscriptions te beheren (`admin`-ability vereist).', weight: 90)]
 final class SubscriptionController extends Controller
 {
@@ -34,7 +28,6 @@ final class SubscriptionController extends Controller
         $consumer = Consumer::query()->findOrFail($validated['consumer_id']);
         $subscriptionName = $validated['subscription_name'] ?? (string) config('billing.default_subscription_name', 'main');
 
-        // Plan-shape valideren (defense-in-depth bovenop Form-Request Rule::in).
         $this->planResolver->find($validated['plan_slug']);
 
         try {
@@ -47,7 +40,6 @@ final class SubscriptionController extends Controller
             ], Response::HTTP_BAD_GATEWAY);
         }
 
-        // Cashier kan een Subscription returnen OF een redirect-URL (first_payment-flow).
         if ($result instanceof Subscription) {
             return response()->json([
                 'subscription' => [
@@ -59,7 +51,6 @@ final class SubscriptionController extends Controller
             ], Response::HTTP_CREATED);
         }
 
-        // First-payment-flow → Cashier retourneert RedirectResponse-achtige met getTargetUrl()
         if (is_object($result) && method_exists($result, 'getTargetUrl')) {
             return response()->json([
                 'first_payment_required' => true,
@@ -75,9 +66,6 @@ final class SubscriptionController extends Controller
 
     public function destroy(Request $request, int $id): JsonResponse
     {
-        // Admin-allowlist is omni-tenant (D-15): de cancel mag elke Consumer-
-        // subscription raken, maar nooit een ander morph-type dat per ongeluk
-        // dezelfde id deelt.
         $subscription = Subscription::query()
             ->whereMorphedTo('owner', Consumer::class)
             ->findOrFail($id);

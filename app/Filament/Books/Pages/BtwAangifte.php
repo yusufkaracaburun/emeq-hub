@@ -15,10 +15,6 @@ use Filament\Support\Icons\Heroicon;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use UnitEnum;
 
-/*
- * BTW-aangifte over een periode (NL kwartaalaangifte). De berekening leeft in
- * BtwService (grootboek-based); deze pagina levert de periode-keuze + PDF/XML-export.
- */
 class BtwAangifte extends Page
 {
     use GatedToBoekhouding;
@@ -41,14 +37,11 @@ class BtwAangifte extends Page
 
     public function mount(): void
     {
-        // NL BTW = kwartaalaangifte → default huidig kwartaal.
         $this->startDate = now()->startOfQuarter()->toDateString();
         $this->endDate = now()->endOfQuarter()->toDateString();
     }
 
-    /**
-     * @return array<Action>
-     */
+    /** @return array<Action> */
     protected function getHeaderActions(): array
     {
         return [
@@ -79,9 +72,6 @@ class BtwAangifte extends Page
         ];
     }
 
-    /**
-     * Snelle periode-presets voor de filterbalk.
-     */
     public function setRange(string $preset): void
     {
         $now = now();

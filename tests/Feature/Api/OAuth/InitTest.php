@@ -18,7 +18,6 @@ class InitTest extends TestCase
     {
         parent::setUp();
 
-        // Bind FakeOAuthFlow zodat de Registry de fake serveert i.p.v. echte Mollie-call.
         $this->app->bind(MollieConnectOAuthFlow::class, FakeOAuthFlow::class);
     }
 
@@ -93,8 +92,6 @@ class InitTest extends TestCase
             ->postJson('/v1/oauth/mollie/init', ['account_external_id' => 'b-only'])
             ->assertOk();
 
-        // external_id is per-Consumer genamespaced: A krijgt een eigen 'b-only'-account,
-        // B's gelijknamige account blijft ongemoeid (geen cross-consumer reuse).
         $accountA = $consumerA->accounts()->where('external_id', 'b-only')->sole();
         $this->assertNotSame($accountB->id, $accountA->id);
         $this->assertSame(0, $accountB->connections()->count());

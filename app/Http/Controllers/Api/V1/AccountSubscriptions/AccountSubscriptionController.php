@@ -35,12 +35,6 @@ class AccountSubscriptionController extends Controller
         private readonly AccountSubscriptionManager $manager,
     ) {}
 
-    /**
-     * Maakt een nieuwe AccountSubscription + Mollie-subscription via de
-     * manager. Idempotency-Key header wordt forwarded naar Mollie (D-14).
-     *
-     * @header Idempotency-Key string optional UUID v7 voor retry-safe Mollie-create (forward naar Mollie-SDK setIdempotencyKey)
-     */
     public function store(CreateAccountSubscriptionRequest $request): JsonResponse|AccountSubscriptionResource
     {
         /** @var Consumer $consumer */
@@ -111,11 +105,6 @@ class AccountSubscriptionController extends Controller
             ->setStatusCode(Response::HTTP_CREATED);
     }
 
-    /**
-     * Lijst van AccountSubscriptions voor een Account binnen deze Consumer.
-     * Vereist query-param `account_external_id`. Vreemde-Consumer-account →
-     * lege list (info-disclosure-protectie per T-07-04-01).
-     */
     public function index(Request $request): JsonResponse|JsonResource
     {
         /** @var Consumer $consumer */
@@ -135,8 +124,6 @@ class AccountSubscriptionController extends Controller
             ->first();
 
         if ($account === null) {
-            // Lege list — voorkomt info-disclosure of het account bij een
-            // andere Consumer bestaat.
             return AccountSubscriptionResource::collection(collect());
         }
 

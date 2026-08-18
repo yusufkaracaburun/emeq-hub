@@ -12,13 +12,6 @@ use Mollie\Api\Resources\PermissionCollection;
 use Tests\Concerns\StubsMollieConnectClient;
 use Tests\TestCase;
 
-/**
- * MOLL-05 SC-1 — Permissions partner-resource pass-through:
- *  - GET /v1/mollie/connect/permissions → 200 met PermissionCollection
- *  - GET /v1/mollie/connect/permissions/{id} → 200 met Permission
- *  - 401 upstream → 502 mollie_auth_failed
- *  - Audit-rij met token_type=partner.
- */
 class PermissionsTest extends TestCase
 {
     use RefreshDatabase;

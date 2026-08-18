@@ -71,8 +71,6 @@ class MollieAccessTokenResolverTest extends TestCase
         );
 
         $this->expectException(\InvalidArgumentException::class);
-        // Assert op volledige canonical message — niet alleen de input-substring,
-        // anders zou een typo in het format ('snelstart' is óók de input) onopgemerkt blijven (WR-04).
         $this->expectExceptionMessage('Unknown token type: snelstart');
 
         $resolver->resolveFor('snelstart');
@@ -88,11 +86,6 @@ class MollieAccessTokenResolverTest extends TestCase
         $this->assertSame($a, $b);
     }
 
-    /**
-     * CR-02 regressie: partner-token wordt elke resolveFor()-call vers gelezen
-     * uit de Closure, niet bij construct-time gefixeerd. Long-running workers
-     * (Horizon, octane) zien daardoor env-rotatie zonder container-restart.
-     */
     public function test_partner_token_reflects_config_changes_without_rebind(): void
     {
         config()->set('services.mollie.partner_access_token', 'access_partner_initial');

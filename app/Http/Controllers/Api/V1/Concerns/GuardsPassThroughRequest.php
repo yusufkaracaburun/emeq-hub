@@ -6,18 +6,9 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-/**
- * Gedeelde pass-through request-guards (method-whitelist, token-ability,
- * Content-Type). Gebruikt door de Exact- en Snelstart-pass-through-controllers,
- * die dezelfde `Route::any`-catch-all bewaken maar elk met eigen method-,
- * ability- en body-set. Elke guard geeft een `JsonResponse` terug om vroeg te
- * stoppen, of `null` om door te laten.
- */
 trait GuardsPassThroughRequest
 {
-    /**
-     * @param  list<string>  $allowed
-     */
+    /** @param  list<string>  $allowed */
     private function guardMethodAllowed(string $method, array $allowed): ?JsonResponse
     {
         if (in_array($method, $allowed, true)) {
@@ -30,9 +21,7 @@ trait GuardsPassThroughRequest
         ], Response::HTTP_METHOD_NOT_ALLOWED)->header('Allow', implode(', ', $allowed));
     }
 
-    /**
-     * @param  list<string>  $required
-     */
+    /** @param  list<string>  $required */
     private function guardTokenAbility(Request $request, array $required): ?JsonResponse
     {
         $token = $request->user()?->currentAccessToken();
@@ -48,9 +37,7 @@ trait GuardsPassThroughRequest
         ], Response::HTTP_FORBIDDEN);
     }
 
-    /**
-     * @param  list<string>  $bodyMethods
-     */
+    /** @param  list<string>  $bodyMethods */
     private function guardJsonContentType(Request $request, string $method, array $bodyMethods): ?JsonResponse
     {
         if (! in_array($method, $bodyMethods, true)) {

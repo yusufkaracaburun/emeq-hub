@@ -8,16 +8,12 @@ use App\Models\InboundWebhookEvent;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
-/**
- * @extends Factory<InboundWebhookEvent>
- */
+/** @extends Factory<InboundWebhookEvent> */
 class InboundWebhookEventFactory extends Factory
 {
     protected $model = InboundWebhookEvent::class;
 
-    /**
-     * @return array<string, mixed>
-     */
+    /** @return array<string, mixed> */
     public function definition(): array
     {
         return [

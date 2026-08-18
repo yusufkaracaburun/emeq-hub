@@ -11,10 +11,6 @@ use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
-/**
- * Inbound partner→Hub-webhooks die op deze Connection zijn gerouteerd — read-only
- * relatie op de Connection-detailpagina. Klik door naar de audit-detail.
- */
 final class InboundWebhookEventsRelationManager extends RelationManager
 {
     protected static string $relationship = 'inboundWebhookEvents';

@@ -36,14 +36,6 @@ use App\Http\Controllers\Api\V1\PingController;
 use App\Http\Controllers\Api\V1\Snelstart\PassThroughController;
 use Illuminate\Support\Facades\Route;
 
-/*
-|--------------------------------------------------------------------------
-| API Routes — /v1/*
-|--------------------------------------------------------------------------
-| Prefix `v1` wordt gezet in bootstrap/app.php (apiPrefix). Auth via
-| Sanctum-PAT.
-*/
-
 Route::middleware('auth:sanctum')->group(function (): void {
     Route::get('/ping', PingController::class)->name('api.ping');
 
@@ -53,15 +45,10 @@ Route::middleware('auth:sanctum')->group(function (): void {
     Route::get('/connections/{connection}', [ConnectionController::class, 'show'])->name('api.connections.show');
     Route::delete('/connections/{connection}', [ConnectionController::class, 'destroy'])->name('api.connections.destroy');
 
-    // Discovery + per-account koppel-status van alle providers (voedt de
-    // consumer-connect-kit). Data-driven: nieuwe provider verschijnt vanzelf.
     Route::get('/integrations', IntegrationController::class)
         ->middleware('ability:integrations:manage,consumer:manage-accounts,*')
         ->name('api.integrations.index');
 
-    // Getekende handoff-link waarmee de consumer-app zijn eigen eindgebruiker
-    // naar de Hub stuurt om zelf te koppelen (banner-CTA → deze URL). Kortlevend
-    // en account-gebonden; de pagina zelf leeft op /connect/{account} in web.php.
     Route::post('/connect-sessions', ConnectSessionController::class)
         ->middleware('ability:integrations:manage,consumer:manage-accounts,*')
         ->name('api.connect-sessions.store');
@@ -77,9 +64,6 @@ Route::middleware('auth:sanctum')->group(function (): void {
         ->middleware(['feature.provider:snelstart', 'resolve.snelstart.account'])
         ->name('api.snelstart.passthrough');
 
-    // Exact Online — OAuth-init + division-aware REST pass-through, gegroepeerd
-    // onder de provider-kill-switch (spiegelt het Mollie-blok). Structured
-    // resource-routes landen onder de `exact`-prefix vóór de catch-all.
     Route::middleware('feature.provider:exact')->group(function (): void {
         Route::post('/oauth/exact/init', ProviderInitController::class)
             ->defaults('provider', 'exact')
@@ -87,8 +71,6 @@ Route::middleware('auth:sanctum')->group(function (): void {
             ->name('api.oauth.exact.init');
 
         Route::prefix('exact')->middleware('resolve.exact.account')->group(function (): void {
-            // Named resource-endpoints — vóór de catch-all (route-volgorde). Elk
-            // mapt 1-op-1 op één Exact OData-endpoint, met eigen Scramble-groep.
             Route::get('/gl-accounts', [ExactGlAccountsController::class, 'index'])
                 ->middleware('ability:exact:read,exact:write,*')
                 ->name('api.exact.gl-accounts.index');
@@ -105,44 +87,29 @@ Route::middleware('auth:sanctum')->group(function (): void {
                 ->middleware('ability:exact:read,exact:write,*')
                 ->name('api.exact.journals.index');
 
-            // Generieke escape-hatch voor elk overig Exact-endpoint.
             Route::any('/{path}', ExactPassThroughController::class)
                 ->where('path', '.*')
                 ->name('api.exact.passthrough');
         });
     });
 
-    // Generieke OAuth-init voor élke (toekomstige) OAuth-provider. NA de
-    // specifieke mollie/exact-init-routes (route-precedence) zodat die hun eigen
-    // ability-set houden; de feature-kill-switch zit in de controller via de
-    // OAuthFlowRegistry. Snelstart (geen OAuth-flow) → 404.
     Route::post('/oauth/{provider}/init', ProviderInitController::class)
         ->where('provider', '[a-z][a-z0-9_-]*')
         ->middleware('ability:integrations:manage')
         ->name('api.oauth.init');
 
-    // Dry-run validatie van een geëxtraheerd draft-document ("Scan & herstel"):
-    // read-only, boekt niets, géén idempotency. Geeft findings + suggesties terug.
     Route::post('/accounting/documents/validate', AccountingValidateDocumentController::class)
         ->name('api.accounting.documents.validate');
 
-    // Provider-agnostische accounting-sync: canonical doc → gekoppeld boekhoudpakket.
-    // Account + Connection + provider-gate worden in de controller geresolved
-    // (de provider is niet route-vast — kan Exact/Snelstart/… zijn).
     Route::post('/accounting/documents', [AccountingDocumentsController::class, 'store'])
         ->middleware('idempotent:required')
         ->name('api.accounting.documents.store');
 
-    // Consumer-beheer van de boekhoud-koppeling: (her)sync de referentie-mirror + de
-    // optionele mapping-override. Account + Connection in de controller geresolved.
     Route::get('/accounting/capabilities', [AccountingMappingController::class, 'capabilities'])
         ->name('api.accounting.capabilities');
 
-    // Provider-onafhankelijk lezen. Grootboek en btw uit de mirror, documenten en
-    // relaties live.
     Route::get('/accounting/documents', [AccountingReadController::class, 'documents'])
         ->name('api.accounting.documents.index');
-    // Cursor-paginatie: `?limit=&cursor=`, cursor ondoorzichtig.
     Route::get('/accounting/bank-statements', [AccountingReadController::class, 'bankStatements'])
         ->name('api.accounting.bank-statements');
     Route::get('/accounting/ledger-accounts', [AccountingReadController::class, 'ledgerAccounts'])
@@ -205,10 +172,6 @@ Route::middleware('auth:sanctum')->group(function (): void {
         Route::get('/payment-links/{id}', [PaymentLinksController::class, 'show'])->name('api.mollie.payment-links.show');
     });
 
-    // Mollie Connect partner-resources — zie .docs/decisions/mollie-connect-partner-resources.md.
-    // Géén resolve.mollie.account (D-07): partner-access-token via
-    // MollieAccessTokenResolver in de Connect-controllers; geen
-    // Account/Connection-context op deze routes.
     Route::prefix('mollie/connect')
         ->middleware(['feature.provider:mollie'])
         ->name('api.mollie.connect.')
@@ -252,7 +215,6 @@ Route::middleware('auth:sanctum')->group(function (): void {
     });
 });
 
-// Publiek — state-parameter is de auth (D-07).
 Route::get('/oauth/mollie/callback', CallbackController::class)
     ->name('api.oauth.mollie.callback');
 

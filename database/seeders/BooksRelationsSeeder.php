@@ -7,10 +7,6 @@ use App\Books\Models\Vendor;
 use App\Models\Consumer;
 use Illuminate\Database\Seeder;
 
-/*
- * Demo-relaties voor de Books-module: een paar debiteuren (waarvan één gekoppeld
- * aan een Hub-Consumer) + crediteuren. Idempotent per soort.
- */
 class BooksRelationsSeeder extends Seeder
 {
     public function run(): void

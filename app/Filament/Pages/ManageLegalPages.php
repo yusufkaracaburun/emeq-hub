@@ -15,10 +15,6 @@ use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Carbon;
 use UnitEnum;
 
-/**
- * Beheer de publieke juridische teksten (privacyverklaring) als markdown.
- * De /privacy-pagina rendert het resultaat server-side. super-admin-only.
- */
 class ManageLegalPages extends Page
 {
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDocumentText;

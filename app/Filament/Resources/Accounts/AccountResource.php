@@ -22,12 +22,6 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 
-/**
- * Filament Resource voor Account-beheer. Accounts worden primair via de Hub
- * `/v1/accounts`-API gemuteerd; de admin-CRUD is een handmatige beheer-escape.
- * `consumer_id` + `external_id` vormen samen de identiteit en zijn daarom op edit
- * immutable — alleen `display_name` is bij te werken.
- */
 class AccountResource extends Resource
 {
     protected static string|\UnitEnum|null $navigationGroup = 'Koppelingen';
@@ -74,9 +68,7 @@ class AccountResource extends Resource
         return AccountInfolist::configure($schema);
     }
 
-    /**
-     * @return list<Section>
-     */
+    /** @return list<Section> */
     public static function statusStripSchema(Account $record): array
     {
         $connections = $record->connections()->count();

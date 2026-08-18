@@ -10,16 +10,6 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Laravel\Sanctum\PersonalAccessToken;
 
-/**
- * Uitgegeven PATs per Consumer, met een revoke-actie.
- *
- * Zonder deze lijst kon een token wél worden uitgegeven maar nooit worden
- * teruggenomen: een nieuwe PAT maken laat de oude gewoon geldig. Een gelekt token
- * blijft dan tot in lengte van dagen bruikbaar.
- *
- * Uitgeven gebeurt niet hier maar via de Issue-PAT-actie op de Consumers-lijst —
- * die flasht de plain-text waarde eenmalig.
- */
 final class TokensRelationManager extends RelationManager
 {
     protected static string $relationship = 'tokens';
@@ -56,9 +46,6 @@ final class TokensRelationManager extends RelationManager
             ->recordActions([
                 DeleteAction::make()
                     ->label('Intrekken')
-                    // PersonalAccessToken is een Sanctum-model zonder policy; zonder deze
-                    // regel verbergt Filament de actie. Gaten op dezelfde permissie als de
-                    // Consumer-resource waar dit onder hangt.
                     ->authorize(fn (): bool => auth()->user()?->can('manage-consumers') ?? false)
                     ->modalHeading('Token intrekken')
                     ->modalDescription(fn (PersonalAccessToken $record): string => "Token '{$record->name}' wordt direct ongeldig. Apps die het gebruiken krijgen 401 tot ze een nieuw token hebben."),

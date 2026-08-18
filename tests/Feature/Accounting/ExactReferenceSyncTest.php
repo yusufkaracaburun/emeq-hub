@@ -108,7 +108,6 @@ class ExactReferenceSyncTest extends TestCase
             ->firstOrFail();
         $this->assertSame(20, $journal->attrs['type']);
 
-        // Kostenplaats/-drager: native_id = Code (Exact boekt op Code, niet GUID).
         $costCenter = ConnectionAccountingRef::query()
             ->where('connection_id', $connection->getKey())
             ->where('kind', ConnectionAccountingRef::KIND_COST_CENTER)
@@ -129,7 +128,6 @@ class ExactReferenceSyncTest extends TestCase
     {
         $connection = $this->makeExactConnection();
 
-        // Een verouderde GL-Code die in de volgende sync verdwijnt + een lazy relatie die blijft.
         ConnectionAccountingRef::query()->create([
             'connection_id' => $connection->getKey(),
             'kind' => ConnectionAccountingRef::KIND_GL,
@@ -148,7 +146,6 @@ class ExactReferenceSyncTest extends TestCase
         $this->mockReferenceData();
         app(ExactReferenceSync::class)->sync($connection);
 
-        // Verdwenen GL-Code gepruned, relatie ongemoeid, geen duplicaten.
         $this->assertDatabaseMissing('connection_accounting_refs', [
             'connection_id' => $connection->getKey(),
             'kind' => ConnectionAccountingRef::KIND_GL,

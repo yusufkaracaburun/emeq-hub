@@ -8,11 +8,6 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Barryvdh\DomPDF\PDF as DomPdf;
 use Illuminate\Support\Carbon;
 
-/*
- * Rendert de financiële overzichten (W&V + Balans) over een periode naar een PDF.
- * Dun: leest ReportService, geeft een plain-HTML Blade aan dompdf. Afzender uit
- * config('books.issuer'), net als InvoicePdfRenderer.
- */
 class ReportPdfRenderer
 {
     public function __construct(private readonly ReportService $reports) {}

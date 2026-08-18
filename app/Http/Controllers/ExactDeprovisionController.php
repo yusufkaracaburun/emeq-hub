@@ -19,16 +19,6 @@ use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
 
-/**
- * Exact App Center Seamless-deprovisioning ("Niet meer gebruiken"). Exact
- * redirect de gebruiker naar /exact/stop?Country=&Language=&UserId=; we
- * matchen op het bij connect opgeslagen Exact-UserID (metadata, uit /Me).
- *
- * De te revoken connection reist via de sessie — niet via een POST-param —
- * zodat de CSRF-beschermde confirm-POST geen tamperbare connection-verwijzing
- * accepteert. Geen match (of al beëindigd) toont de zachte variant; de query-
- * params verschijnen nergens in de UI.
- */
 class ExactDeprovisionController extends Controller
 {
     private const SESSION_KEY = 'exact_stop.connection_id';
@@ -44,9 +34,6 @@ class ExactDeprovisionController extends Controller
         $connection = $this->matchConnection($exactUserId);
 
         if ($connection === null) {
-            // Alleen auditen als Exact daadwerkelijk een UserId meestuurde:
-            // dan is dit een deprovision-poging die we niet konden matchen
-            // (triage-waardig), geen kale crawler-hit.
             if ($exactUserId !== null) {
                 $this->recorder->record(
                     Provider::Exact->value,
@@ -80,20 +67,12 @@ class ExactDeprovisionController extends Controller
                 ->first()
             : null;
 
-        // Sessie verlopen of connection intussen al ingetrokken → terug naar
-        // de GET, die zonder UserId de zachte variant toont.
         if ($connection === null) {
             return redirect()->route('exact.stop');
         }
 
-        // Bewust niet via de OAuthFlowRegistry: die gooit bij een actieve
-        // kill-switch (Pennant) een ProviderDisabledException, en ontkoppelen
-        // moet juist ook dan blijven werken.
         $this->oauthFlow->revoke($connection);
 
-        // Nette afhandeling: consumer-app notificeren (die stuurt de
-        // eindgebruiker-bevestiging — de Hub kent bewust geen PII), interne
-        // ops-melding, en een audit-rij met de fanout-uitkomst.
         $eventId = (string) Str::uuid();
         $hasCallback = filled($connection->account?->consumer?->webhook_callback_url);
 
@@ -120,9 +99,7 @@ class ExactDeprovisionController extends Controller
         return $this->page('done');
     }
 
-    /**
-     * @param  string|null  $normalized  al door ExactUserId::normalize() gehaald
-     */
+    /** @param  string|null  $normalized  al door ExactUserId::normalize() gehaald */
     private function matchConnection(?string $normalized): ?Connection
     {
         if ($normalized === null) {

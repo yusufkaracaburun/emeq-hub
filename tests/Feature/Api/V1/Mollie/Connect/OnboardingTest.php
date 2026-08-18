@@ -11,13 +11,6 @@ use Mollie\Api\Resources\Onboarding;
 use Tests\Concerns\StubsMollieConnectClient;
 use Tests\TestCase;
 
-/**
- * MOLL-05 SC-1 — Onboarding partner-resource pass-through:
- *  - GET /v1/mollie/connect/onboarding/me → 200 met onboarding-resource
- *  - 401 upstream → 502 mollie_auth_failed (Hub-cloaked)
- *  - Audit-rij met token_type=partner, geen account_id/connection_id,
- *    partner_token_fingerprint = substr(sha256(token), 0, 12).
- */
 class OnboardingTest extends TestCase
 {
     use RefreshDatabase;

@@ -11,18 +11,6 @@ use Mollie\Api\MollieApiClient;
 use PHPUnit\Framework\Attributes\Group;
 use Tests\Integration\IntegrationTestCase;
 
-/**
- * D-18 SC-3: admin POST → echte Mollie test-mode Subscription resource.
- *
- * Test 1 (create-flow): target heeft GEEN mandate → Cashier's
- * newSubscription()->create() triggert de first_payment-flow → response is
- * 202 + mandate_redirect_url naar Mollie's checkout-pagina.
- *
- * Test 2 (cancel-flow): we pre-creëeren een echte Mollie test-mode customer +
- * valid directdebit-mandate + subscription, persisten de Cashier-side state in
- * de subscriptions-tabel, en cancellen via de admin-API. Mollie-side status
- * moet `canceled` worden.
- */
 #[Group('integration')]
 class CashierMollieSubscriptionFlowTest extends IntegrationTestCase
 {
@@ -52,8 +40,6 @@ class CashierMollieSubscriptionFlowTest extends IntegrationTestCase
                 'plan_slug' => 'naschool-license',
             ]);
 
-        // Target heeft GEEN mandate → Cashier triggert first_payment-flow.
-        // Response: 202 + mandate_redirect_url naar Mollie test-mode checkout.
         $response->assertStatus(202);
         $response->assertJsonStructure(['first_payment_required', 'mandate_redirect_url']);
         $this->assertStringStartsWith('https://www.mollie.com/', $response->json('mandate_redirect_url'));
@@ -61,8 +47,6 @@ class CashierMollieSubscriptionFlowTest extends IntegrationTestCase
 
     public function test_admin_can_cancel_existing_subscription_via_api(): void
     {
-        // Stap 1: maak EERST een echte Mollie test-mode customer + valid mandate
-        // (test-IBAN levert direct geldige directdebit-mandate in test-mode).
         $mollieClient = new MollieApiClient;
         $mollieClient->setApiKey(env('CASHIER_MOLLIE_KEY'));
 
@@ -79,7 +63,6 @@ class CashierMollieSubscriptionFlowTest extends IntegrationTestCase
 
         $this->assertSame('valid', $mollieMandate->status, 'Mollie test-mode mandate must be valid for cancel-test.');
 
-        // Stap 2: maak een echte Mollie subscription op die customer.
         $mollieSubscription = $mollieClient->subscriptions->createForId($mollieCustomer->id, [
             'amount' => ['value' => '49.00', 'currency' => 'EUR'],
             'interval' => '1 month',
@@ -87,13 +70,6 @@ class CashierMollieSubscriptionFlowTest extends IntegrationTestCase
             'mandateId' => $mollieMandate->id,
         ]);
 
-        // Stap 3: persist de Cashier-side state. Het `subscriptions`-schema
-        // (zie database/migrations/2026_05_15_074719_create_subscriptions_table.php)
-        // heeft GEEN mollie_subscription_id/mollie_mandate_id-kolommen — Cashier
-        // ^2.x persist die op het Billable-model OF resolved ze on-demand via
-        // de Mollie-API. Voor cancel-via-API is alleen de Eloquent-row nodig;
-        // de Mollie-side cancel hangt aan Cashier's Subscription::cancel()
-        // die intern de Mollie-subscription-id resolved.
         $admin = Consumer::factory()->create();
         config(['billing.admin_allowlist' => [$admin->id]]);
         $target = Consumer::factory()->create();
@@ -112,9 +88,6 @@ class CashierMollieSubscriptionFlowTest extends IntegrationTestCase
 
         $token = $admin->createToken('admin', [TokenAbilities::BILLING_WRITE])->plainTextToken;
 
-        // Stap 4: cancel via API. Cashier's Subscription::cancel() doet de
-        // Mollie-API-call; bij success keren we 204 No Content terug
-        // (zie SubscriptionController::destroy).
         $response = $this->withHeader('Authorization', "Bearer {$token}")
             ->deleteJson("/v1/admin/billing/subscriptions/{$subscriptionId}");
 
@@ -125,10 +98,6 @@ class CashierMollieSubscriptionFlowTest extends IntegrationTestCase
             $response->content(),
         ));
 
-        // Stap 5: assert Mollie-side state. Onafhankelijk van of Cashier de
-        // remote cancel triggerde (204 path) verifieren we dat de Mollie
-        // subscription via een directe API-call cancelbaar is — bewijst de
-        // happy-path-omgeving werkt.
         $mollieClient->subscriptions->cancelForId($mollieCustomer->id, $mollieSubscription->id);
         $refreshed = $mollieClient->subscriptions->getForId($mollieCustomer->id, $mollieSubscription->id);
         $this->assertSame('canceled', $refreshed->status);

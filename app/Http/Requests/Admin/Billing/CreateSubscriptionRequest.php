@@ -12,12 +12,10 @@ final class CreateSubscriptionRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true; // Ability + admin-allowlist worden via middleware geguard.
+        return true;
     }
 
-    /**
-     * @return array<string, list<mixed>>
-     */
+    /** @return array<string, list<mixed>> */
     public function rules(): array
     {
         return [
@@ -27,9 +25,7 @@ final class CreateSubscriptionRequest extends FormRequest
         ];
     }
 
-    /**
-     * @return array<string, string>
-     */
+    /** @return array<string, string> */
     public function messages(): array
     {
         return [
@@ -38,9 +34,7 @@ final class CreateSubscriptionRequest extends FormRequest
         ];
     }
 
-    /**
-     * @return array<string, mixed>
-     */
+    /** @return array<string, mixed> */
     private function plansAllowed(): array
     {
         return app(PlanResolver::class)->all();

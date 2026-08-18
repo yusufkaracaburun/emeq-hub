@@ -92,10 +92,6 @@ class HubConsumerCreateTest extends TestCase
 
     public function test_handle_resolves_consumer_onboarding_from_container(): void
     {
-        // ConsumerOnboarding is `final readonly` (PLAN-acceptance), dus geen
-        // Mockery-stub mogelijk. We bewijzen DI via reflection van de
-        // handle()-signature plus een end-to-end-run die het stubable
-        // pre-resolved object via $this->app->instance() in de container zet.
         $resolved = $this->app->make(ConsumerOnboarding::class);
         $this->assertInstanceOf(ConsumerOnboarding::class, $resolved);
 
@@ -108,7 +104,6 @@ class HubConsumerCreateTest extends TestCase
             'handle() ontvangt ConsumerOnboarding via container-DI'
         );
 
-        // End-to-end smoke: command roept onboard() via DI aan en print plain token.
         $this->artisan('hub:consumer:create', [
             '--slug' => 'di-test',
             '--name' => 'DI Test',

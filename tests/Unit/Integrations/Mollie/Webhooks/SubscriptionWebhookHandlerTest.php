@@ -49,8 +49,6 @@ class SubscriptionWebhookHandlerTest extends TestCase
 
     public function test_handle_with_unknown_subscription_id_returns_skip_without_mollie_call(): void
     {
-        // Geen AccountSubscription-rij voor 'sub_unknown' → handler moet skip
-        // retourneren zonder ooit syncFromMollie aan te roepen (quota-burn).
         $this->manager->shouldNotReceive('syncFromMollie');
 
         $result = $this->handler->handle('sub_unknown', [], $this->connection);

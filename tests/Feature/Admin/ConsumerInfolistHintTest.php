@@ -13,11 +13,6 @@ use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
-/**
- * Bewijst dat ConsumerResource een View-page heeft met de 'Wat is een Consumer?'-
- * toelichting (canonical D-07 / UI-SPEC §S4 copy) achter het info-icoon-modal in de
- * paginaheader, niet inline op de pagina.
- */
 class ConsumerInfolistHintTest extends TestCase
 {
     use RefreshDatabase;
@@ -58,7 +53,6 @@ class ConsumerInfolistHintTest extends TestCase
         $response = $this->get("/admin/consumers/{$consumer->id}");
 
         $response->assertOk();
-        // De toelichting staat niet inline op de pagina maar achter het info-icoon.
         $response->assertDontSeeText('Eén SaaS-app die de Hub gebruikt (Naschool, Planny, externe app).');
     }
 
@@ -91,7 +85,6 @@ class ConsumerInfolistHintTest extends TestCase
     {
         $this->seedRolesAndPermissions();
         $user = User::factory()->create();
-        // assign staff-rol maar GEEN manage-consumers-permission
         $user->assignRole('staff');
         $this->actingAs($user);
 

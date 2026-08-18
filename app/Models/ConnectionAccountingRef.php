@@ -10,17 +10,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
 
 /**
- * Eén rij gemirrorde boekhoud-referentiedata per Connection: een stabiele `code`
- * (GL-/dagboek-/BTW-Code of party.external_id) → de provider-native `native_id` (GUID).
- *
- * De boeking resolvet code→native_id lokaal tegen deze mirror (geen live partner-call);
- * de mirror wordt ververst door de reference-sync. `kind` ∈
- * gl|vat|journal|relation|cost_center|cost_unit.
- */
-/**
- * Statische analyse leest `casts()` niet en valt terug op het kolomtype uit de
- * migratie; `attrs` las daardoor als string. Zie ook {@see Connection}.
- *
  * @property array<string, mixed>|null $attrs
  * @property Carbon|null $synced_at
  */
@@ -47,9 +36,7 @@ class ConnectionAccountingRef extends Model
 
     public const KIND_COST_UNIT = 'cost_unit';
 
-    /**
-     * @return array<string, string>
-     */
+    /** @return array<string, string> */
     protected function casts(): array
     {
         return [

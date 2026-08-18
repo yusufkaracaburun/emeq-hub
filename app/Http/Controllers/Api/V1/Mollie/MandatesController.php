@@ -11,18 +11,6 @@ use Illuminate\Http\Request;
 use Mollie\Api\Exceptions\ApiException as MollieApiException;
 use Symfony\Component\HttpFoundation\Response;
 
-/**
- * Pass-through controller voor Mollie Mandates (list-per-customer +
- * get + revoke).
- *
- * Geen create-route: mandates worden door Mollie zelf aangemaakt na
- * een first-payment in een SEPA-flow. v0.2-scope = read + revoke.
- *
- * Vendor-discovery: Mollie's SDK exposes het MandateEndpointCollection
- * als `MollieApiClient::$mandates` (NIET `$customerMandates` zoals plan
- * suggereerde). Methodes pageForId / getForId / revokeForId blijven
- * hetzelfde.
- */
 #[Group(name: 'Mollie · Mandates', description: 'Mollie Mandates API (list per customer + get + revoke).', weight: 51)]
 class MandatesController extends AbstractMolliePassThroughController
 {

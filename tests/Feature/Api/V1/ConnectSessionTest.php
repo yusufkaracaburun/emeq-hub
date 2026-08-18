@@ -60,7 +60,6 @@ class ConnectSessionTest extends TestCase
             ->json('url');
 
         $this->assertStringNotContainsString('evil.test', urldecode($url));
-        // Handoff: geen bare app_url als stille fallback (anders → marketingdomein).
         $this->assertStringNotContainsString('return_url=', $url);
     }
 
@@ -107,9 +106,7 @@ class ConnectSessionTest extends TestCase
             ->assertStatus(422);
     }
 
-    /**
-     * @return array{0: Consumer, 1: string}
-     */
+    /** @return array{0: Consumer, 1: string} */
     private function consumerWithToken(array $abilities): array
     {
         $consumer = Consumer::factory()->create();

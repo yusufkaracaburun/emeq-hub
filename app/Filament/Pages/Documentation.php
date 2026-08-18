@@ -11,11 +11,6 @@ use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Str;
 use UnitEnum;
 
-/**
- * Rendert de consumer-integratiehandleiding (docs/consumer-integration-guide.md)
- * in het paneel zodat staff/boekhouders 'm naast de interactieve API-reference
- * (/docs/api) kunnen lezen zonder het losse markdown-bestand op te zoeken.
- */
 class Documentation extends Page
 {
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBookOpen;
@@ -32,9 +27,7 @@ class Documentation extends Page
 
     private const GUIDE_PATH = 'docs/consumer-integration-guide.md';
 
-    /**
-     * @return array<Action>
-     */
+    /** @return array<Action> */
     protected function getHeaderActions(): array
     {
         return [

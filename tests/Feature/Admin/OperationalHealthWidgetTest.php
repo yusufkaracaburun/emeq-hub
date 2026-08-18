@@ -13,11 +13,6 @@ use App\Models\PassThroughCall;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
-/**
- * Dashboard "needs attention"-widget: telt mislukte pass-throughs, niet-verwerkte
- * webhooks, bijna-verlopen koppelingen en open OAuth-handshakes binnen het
- * triage-venster (24u / 7d). Stuurt ook de sidebar nav-badges op de audit-resources.
- */
 class OperationalHealthWidgetTest extends TestCase
 {
     use RefreshDatabase;
@@ -44,8 +39,8 @@ class OperationalHealthWidgetTest extends TestCase
     {
         PassThroughCall::factory()->create(['status' => 500, 'created_at' => now()]);
         PassThroughCall::factory()->create(['status' => 404, 'created_at' => now()->subHours(3)]);
-        PassThroughCall::factory()->create(['status' => 200, 'created_at' => now()]);            // ok → niet tellen
-        PassThroughCall::factory()->create(['status' => 500, 'created_at' => now()->subDays(2)]); // te oud → niet tellen
+        PassThroughCall::factory()->create(['status' => 200, 'created_at' => now()]);
+        PassThroughCall::factory()->create(['status' => 500, 'created_at' => now()->subDays(2)]);
 
         $this->assertSame(2, $this->counts()['failed_pass_throughs']);
     }
@@ -54,9 +49,9 @@ class OperationalHealthWidgetTest extends TestCase
     {
         InboundWebhookEvent::factory()->create(['outcome' => 'malformed', 'received_at' => now()]);
         InboundWebhookEvent::factory()->create(['outcome' => 'invalid_signature', 'received_at' => now()->subHours(2)]);
-        InboundWebhookEvent::factory()->create(['outcome' => 'processed', 'received_at' => now()]);    // ok → niet tellen
-        InboundWebhookEvent::factory()->create(['outcome' => 'duplicate', 'received_at' => now()]);    // benign → niet tellen
-        InboundWebhookEvent::factory()->create(['outcome' => 'malformed', 'received_at' => now()->subDays(2)]); // te oud
+        InboundWebhookEvent::factory()->create(['outcome' => 'processed', 'received_at' => now()]);
+        InboundWebhookEvent::factory()->create(['outcome' => 'duplicate', 'received_at' => now()]);
+        InboundWebhookEvent::factory()->create(['outcome' => 'malformed', 'received_at' => now()->subDays(2)]);
 
         $this->assertSame(2, $this->counts()['webhook_problems']);
     }
@@ -64,9 +59,9 @@ class OperationalHealthWidgetTest extends TestCase
     public function test_counts_connections_expiring_within_seven_days(): void
     {
         Connection::factory()->create(['expires_at' => now()->addDays(3), 'revoked_at' => null]);
-        Connection::factory()->create(['expires_at' => now()->addDays(30), 'revoked_at' => null]);          // ver weg → niet tellen
-        Connection::factory()->create(['expires_at' => now()->addDays(2), 'revoked_at' => now()]);          // revoked → niet tellen
-        Connection::factory()->create(['expires_at' => null, 'revoked_at' => null]);                        // geen expiry → niet tellen
+        Connection::factory()->create(['expires_at' => now()->addDays(30), 'revoked_at' => null]);
+        Connection::factory()->create(['expires_at' => now()->addDays(2), 'revoked_at' => now()]);
+        Connection::factory()->create(['expires_at' => null, 'revoked_at' => null]);
 
         $this->assertSame(1, $this->counts()['expiring_connections']);
     }

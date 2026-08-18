@@ -10,15 +10,6 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Laravel\Cashier\Subscription;
 
-/**
- * D-15: Consumer leest eigen subscription-state via Bearer-PAT
- * (`billing:read`-ability). Geen cross-Consumer-leakage — token resolved
- * de Consumer; alle subscriptions zijn polymorf gebonden via owner_id.
- *
- * NB: Cashier-Mollie's `subscriptions`-tabel heeft GEEN `status`-kolom.
- * Status wordt afgeleid uit de Subscription-state-methodes
- * (`active()` / `cancelled()` / `ended()` / `onTrial()` / `onGracePeriod()`).
- */
 #[Group(name: 'Billing (Cashier)', description: 'Consumer-billing via Cashier-Mollie (use-case A — Emeq factureert Consumers via Emeq\'s eigen Mollie-account).', weight: 80)]
 final class SubscriptionController extends Controller
 {

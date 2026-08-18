@@ -6,11 +6,6 @@ namespace App\Settings;
 
 use Spatie\LaravelSettings\Settings;
 
-/**
- * Exact Online app-level credentials, beheerd via de admin i.p.v. .env.
- * Secrets (client_secret, webhook_secret) worden encrypted opgeslagen.
- * SettingsHydrationServiceProvider hydrateert hiermee config('services.exact.*').
- */
 class ExactSettings extends Settings
 {
     public string $client_id;
@@ -30,9 +25,7 @@ class ExactSettings extends Settings
         return 'exact';
     }
 
-    /**
-     * @return list<string>
-     */
+    /** @return list<string> */
     public static function encrypted(): array
     {
         return ['client_secret', 'webhook_secret'];

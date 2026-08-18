@@ -6,22 +6,13 @@ use App\Books\Enums\AccountCategory;
 use App\Books\Models\Account;
 use Illuminate\Support\Carbon;
 
-/*
- * Bouwt de financiële overzichten (Winst & Verlies + Balans) bovenop de
- * saldo-primitieven van AccountService. W&V = nominale rekeningen (omzet/kosten)
- * over een periode; Balans = reële rekeningen cumulatief tot een datum, met het
- * cumulatieve resultaat onder het eigen vermogen — zodat Activa = Passiva per
- * constructie sluit (dubbel-boekhouden: elke boeking is in balans).
- */
 class ReportService
 {
     private const INCEPTION = '2000-01-01 00:00:00';
 
     public function __construct(private readonly AccountService $accounts) {}
 
-    /**
-     * @return array{revenue: list<array{code: string, name: string, amount: int}>, expense: list<array{code: string, name: string, amount: int}>, total_revenue: int, total_expense: int, result: int}
-     */
+    /** @return array{revenue: list<array{code: string, name: string, amount: int}>, expense: list<array{code: string, name: string, amount: int}>, total_revenue: int, total_expense: int, result: int} */
     public function profitAndLoss(string $start, string $end): array
     {
         [$start, $end] = $this->range($start, $end);
@@ -41,9 +32,7 @@ class ReportService
         ];
     }
 
-    /**
-     * @return array{assets: list<array{code: string, name: string, amount: int}>, liabilities: list<array{code: string, name: string, amount: int}>, equity: list<array{code: string, name: string, amount: int}>, result: int, total_assets: int, total_liabilities_and_equity: int, balances: bool}
-     */
+    /** @return array{assets: list<array{code: string, name: string, amount: int}>, liabilities: list<array{code: string, name: string, amount: int}>, equity: list<array{code: string, name: string, amount: int}>, result: int, total_assets: int, total_liabilities_and_equity: int, balances: bool} */
     public function balanceSheet(string $asOf): array
     {
         $end = Carbon::parse($asOf)->endOfDay()->toDateTimeString();
@@ -69,9 +58,7 @@ class ReportService
         ];
     }
 
-    /**
-     * @return array{0: string, 1: string}
-     */
+    /** @return array{0: string, 1: string} */
     private function range(string $start, string $end): array
     {
         return [
@@ -80,9 +67,7 @@ class ReportService
         ];
     }
 
-    /**
-     * @return list<array{code: string, name: string, amount: int}>
-     */
+    /** @return list<array{code: string, name: string, amount: int}> */
     private function lines(AccountCategory $category, string $start, string $end): array
     {
         return Account::query()
@@ -104,9 +89,7 @@ class ReportService
         return $this->sum($this->lines($category, $start, $end));
     }
 
-    /**
-     * @param  list<array{amount: int}>  $lines
-     */
+    /** @param  list<array{amount: int}>  $lines */
     private function sum(array $lines): int
     {
         return (int) array_sum(array_column($lines, 'amount'));

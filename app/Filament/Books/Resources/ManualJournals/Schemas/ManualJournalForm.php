@@ -15,12 +15,6 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
 
-/*
- * Memoriaal-form. De regels staan als losse Repeater-state (niet relationship-
- * bound) zodat CreateManualJournal volledige controle houdt over de euro→centen-
- * conversie én de balans. De Repeater-rule blokkeert een ongebalanceerde boeking
- * al bij submit; ManualJournalPoster bewaakt dezelfde invariant in het domein.
- */
 class ManualJournalForm
 {
     public static function configure(Schema $schema): Schema
@@ -86,8 +80,6 @@ class ManualJournalForm
                     ->defaultItems(2)
                     ->minItems(2)
                     ->addActionLabel('Regel toevoegen')
-                    // Filament evalueert de buitenste closure (utility-injection) en
-                    // gebruikt de teruggegeven closure als Laravel-validatieregel.
                     ->rule(static fn (): Closure => static function (string $attribute, mixed $value, Closure $fail): void {
                         $lines = collect(is_array($value) ? $value : [])
                             ->map(static fn (array $line): array => [

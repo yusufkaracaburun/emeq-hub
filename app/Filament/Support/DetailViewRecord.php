@@ -12,13 +12,6 @@ use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 
-/**
- * Gedeelde opbouw van een detailpagina: kopstrip bovenaan, daaronder de inhoud.
- *
- * Heeft het record kinderen of eigen deelschermen, dan komt de inhoud in tabs met
- * "Overzicht" voorop; heeft het er geen, dan blijft de infolist kaal onder de strip
- * staan — een tabbalk met één tab is ruis.
- */
 abstract class DetailViewRecord extends ViewRecord
 {
     /**
@@ -52,9 +45,7 @@ abstract class DetailViewRecord extends ViewRecord
         ]);
     }
 
-    /**
-     * @return list<Tab>
-     */
+    /** @return list<Tab> */
     protected function relationManagerTabs(): array
     {
         $record = $this->getRecord();

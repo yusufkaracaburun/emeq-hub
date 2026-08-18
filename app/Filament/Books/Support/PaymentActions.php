@@ -17,11 +17,6 @@ use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Support\Icons\Heroicon;
 
-/*
- * Gedeelde doc-driven betaal-acties voor de Invoice- en Bill-tabel: registreren
- * (genereert de bank-boeking via PaymentService) en de laatste betaling
- * terugdraaien. Werkt op zowel Invoice als Bill via de HasPayments-API.
- */
 class PaymentActions
 {
     public static function register(): Action
@@ -86,11 +81,6 @@ class PaymentActions
             });
     }
 
-    /**
-     * Bank-driven: letter een bestaande bank-Transaction (geboekt op 1300/1600,
-     * nog niet volledig toegewezen) af tegen een open post. Hoort op de
-     * Transactions-tabel.
-     */
     public static function reconcile(): Action
     {
         return Action::make('afletteren')
@@ -138,9 +128,7 @@ class PaymentActions
             && $transaction->unallocatedAmount() > 0;
     }
 
-    /**
-     * @return array<int, string>
-     */
+    /** @return array<int, string> */
     private static function openDocumentOptions(Transaction $transaction): array
     {
         $documents = $transaction->type === TransactionType::Deposit
@@ -171,9 +159,7 @@ class PaymentActions
         return $number.' — openstaand € '.number_format($document->amountDue() / 100, 2, ',', '.');
     }
 
-    /**
-     * @return array<int, string>
-     */
+    /** @return array<int, string> */
     private static function bankOptions(): array
     {
         return BankAccount::query()

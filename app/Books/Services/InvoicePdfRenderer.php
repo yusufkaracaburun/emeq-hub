@@ -8,10 +8,6 @@ use App\Books\Models\Invoice;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Barryvdh\DomPDF\PDF as DomPdf;
 
-/*
- * Rendert een verkoopfactuur naar een PDF. Dun: laadt regels + debiteur, geeft
- * de Blade-view aan dompdf. De afzender-gegevens komen uit config('books.issuer').
- */
 class InvoicePdfRenderer
 {
     public function render(Invoice $invoice): DomPdf

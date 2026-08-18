@@ -206,10 +206,8 @@ class ConsumerOnboardingTest extends TestCase
             ]);
             $this->fail('Duplicate slug had QueryException moeten gooien');
         } catch (QueryException $e) {
-            // verwacht
         }
 
-        // Eerste consumer is nog steeds aanwezig; tweede call heeft niets toegevoegd
         $this->assertSame(1, Consumer::count());
         $this->assertSame(0, Account::count(), 'Tweede call: Account mag niet half-aangemaakt zijn');
         $this->assertSame($tokenCountBefore, PersonalAccessToken::count(), 'Tweede call: PAT mag niet half-aangemaakt zijn');

@@ -6,9 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('access_requests', function (Blueprint $table) {
@@ -21,16 +18,13 @@ return new class extends Migration
             $table->json('providers');
             $table->text('message')->nullable();
             $table->timestamp('privacy_accepted_at')->nullable();
-            $table->string('status')->default('new'); // new | handled | declined
+            $table->string('status')->default('new');
             $table->timestamps();
 
             $table->index('status');
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('access_requests');

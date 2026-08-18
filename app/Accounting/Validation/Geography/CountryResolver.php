@@ -4,22 +4,11 @@ declare(strict_types=1);
 
 namespace App\Accounting\Validation\Geography;
 
-/**
- * Leidt het land af uit de landprefix van een BTW-nummer of IBAN (eerste twee letters,
- * ISO 3166-1 alpha-2) en classificeert het als binnenland (NL) / intra-EU / niet-EU.
- * Pure statische helper — gedeeld door de GeographyClassifier en VatTreatmentValidator.
- */
 final class CountryResolver
 {
-    /** Thuisland van de Hub. */
     public const HOME = 'NL';
 
-    /**
-     * EU-lidstaten (ISO 3166-1 alpha-2). `EL` is de BTW-prefix die Griekenland gebruikt
-     * i.p.v. `GR` — beide opgenomen zodat een BTW-prefix correct matcht.
-     *
-     * @var list<string>
-     */
+    /** @var list<string> */
     private const EU = [
         'AT', 'BE', 'BG', 'HR', 'CY', 'CZ', 'DK', 'EE', 'FI', 'FR', 'DE', 'EL', 'GR',
         'HU', 'IE', 'IT', 'LV', 'LT', 'LU', 'MT', 'NL', 'PL', 'PT', 'RO', 'SK', 'SI',
@@ -51,9 +40,6 @@ final class CountryResolver
         return in_array($country, self::EU, true) ? Region::Eu : Region::NonEu;
     }
 
-    /**
-     * Eerste twee letters van een genormaliseerde code, of null als die er niet zijn.
-     */
     private static function prefix(?string $value): ?string
     {
         if ($value === null) {
@@ -66,7 +52,6 @@ final class CountryResolver
             return null;
         }
 
-        // `EL` (Griekse BTW-prefix) → `GR` als ISO-landcode.
         return $m[0] === 'EL' ? 'GR' : $m[0];
     }
 }

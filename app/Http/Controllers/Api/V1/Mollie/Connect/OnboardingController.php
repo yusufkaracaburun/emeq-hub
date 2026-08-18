@@ -14,7 +14,6 @@ class OnboardingController extends AbstractMollieConnectPassThroughController
     public function me(Request $request): Response
     {
         return $this->handle($request, '/v2/onboarding/me', function (Request $r) {
-            // Vendor-method-name: $client->onboarding->status() (geen ::get() in mollie/mollie-api-php).
             $onboarding = $this->dispatchMollieCall(
                 fn () => $this->client($r)->onboarding->status(),
             );

@@ -52,9 +52,7 @@ final class ManageWebhookSubscriptionsAction
             });
     }
 
-    /**
-     * @return list<Section>
-     */
+    /** @return list<Section> */
     private static function schemaFor(Connection $record): array
     {
         [$plan, $error] = self::plan($record);
@@ -101,9 +99,7 @@ final class ManageWebhookSubscriptionsAction
         return $topics;
     }
 
-    /**
-     * @param  array<string, mixed>  $plan
-     */
+    /** @param  array<string, mixed>  $plan */
     private static function helperFor(string $topic, array $plan): ?string
     {
         $id = $plan['remote'][$topic] ?? null;
@@ -119,9 +115,7 @@ final class ManageWebhookSubscriptionsAction
             : null;
     }
 
-    /**
-     * @return array<string, bool>
-     */
+    /** @return array<string, bool> */
     private static function currentState(Connection $record): array
     {
         [$plan] = self::plan($record);
@@ -135,9 +129,7 @@ final class ManageWebhookSubscriptionsAction
         return $state;
     }
 
-    /**
-     * @return array{0: array<string, mixed>, 1: string|null}
-     */
+    /** @return array{0: array<string, mixed>, 1: string|null} */
     private static function plan(Connection $record): array
     {
         $manager = app(ExactWebhookSubscriptionManager::class);
@@ -156,9 +148,7 @@ final class ManageWebhookSubscriptionsAction
         }
     }
 
-    /**
-     * @param  array{added: list<string>, removed: list<string>}  $result
-     */
+    /** @param  array{added: list<string>, removed: list<string>}  $result */
     private static function summarise(array $result): string
     {
         $parts = [];

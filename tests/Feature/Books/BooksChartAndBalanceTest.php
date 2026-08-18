@@ -39,7 +39,6 @@ class BooksChartAndBalanceTest extends TestCase
         $this->assertSame(AccountCategory::Revenue, Account::where('code', '8000')->firstOrFail()->category);
         $this->assertSame(AccountCategory::Liability, Account::where('code', '1620')->firstOrFail()->category);
 
-        // Tweede run mag niets dupliceren.
         $this->seed(BooksChartSeeder::class);
         $this->assertSame(14, Account::count());
     }
@@ -54,33 +53,28 @@ class BooksChartAndBalanceTest extends TestCase
         $omzet = Account::where('code', '8000')->firstOrFail();
         [$start, $end] = ['2026-01-01', '2026-12-31'];
 
-        // Bank = Asset (normaal debet): net = debet - credit.
         $this->assertSame(10000, $svc->debitBalance($bank, $start, $end));
         $this->assertSame(10000, $svc->netMovement($bank, $start, $end));
         $this->assertSame(10000, $svc->endingBalance($bank, $start, $end));
 
-        // Omzet = Revenue (normaal credit): net = credit - debet.
         $this->assertSame(10000, $svc->creditBalance($omzet, $start, $end));
         $this->assertSame(10000, $svc->netMovement($omzet, $start, $end));
-        // Nominale rekening → ending == net (geen doorlopend saldo).
         $this->assertSame(10000, $svc->endingBalance($omzet, $start, $end));
     }
 
     public function test_starting_balance_accumulates_prior_periods_for_real_accounts(): void
     {
         $this->seed(BooksChartSeeder::class);
-        $this->deposit(5000, '2025-06-01');  // vorig jaar
-        $this->deposit(10000, '2026-03-01');  // dit jaar
+        $this->deposit(5000, '2025-06-01');
+        $this->deposit(10000, '2026-03-01');
 
         $svc = app(AccountService::class);
         $bank = Account::where('code', '1100')->firstOrFail();
         $omzet = Account::where('code', '8000')->firstOrFail();
 
-        // Bank (reëel): beginsaldo 2026 = vorig jaar (5000), eindsaldo = 5000 + 10000.
         $this->assertSame(5000, $svc->startingBalance($bank, '2026-01-01'));
         $this->assertSame(15000, $svc->endingBalance($bank, '2026-01-01', '2026-12-31'));
 
-        // Omzet (nominaal): geen doorlopend beginsaldo; net 2026 = 10000.
         $this->assertSame(0, $svc->startingBalance($omzet, '2026-01-01'));
         $this->assertSame(10000, $svc->netMovement($omzet, '2026-01-01', '2026-12-31'));
     }

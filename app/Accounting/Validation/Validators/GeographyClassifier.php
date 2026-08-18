@@ -9,12 +9,6 @@ use App\Accounting\Validation\Finding;
 use App\Accounting\Validation\Geography\CountryResolver;
 use App\Accounting\Validation\Severity;
 
-/**
- * Vergelijkt het land afgeleid uit het BTW-nummer met dat uit het IBAN. Een mismatch
- * (bijv. Duits BTW-nummer op een Nederlands IBAN) wijst op een extractiefout of een
- * onverwachte constructie en wordt geflagd. De daadwerkelijke NL/EU/niet-EU-classificatie
- * voedt de VatTreatmentValidator.
- */
 final class GeographyClassifier implements DocumentValidator
 {
     public function validate(array $payload): array
@@ -28,7 +22,7 @@ final class GeographyClassifier implements DocumentValidator
             return [new Finding(
                 code: 'geography.country_mismatch',
                 severity: Severity::Warning,
-                blocking: false, // advies; het boekpad kent geen kruischeck btw-land/iban-land
+                blocking: false,
                 path: 'party',
                 message: "Het btw-nummer hoort bij {$vatCountry}, het rekeningnummer bij {$ibanCountry}. Controleer of beide van dezelfde partij zijn.",
                 current: ['vat_country' => $vatCountry, 'iban_country' => $ibanCountry],

@@ -10,21 +10,9 @@ use App\Models\ConnectionAccountingRef;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
-/**
- * Spiegelt de stabiele Exact-referentiedata (grootboek, BTW-codes, dagboeken,
- * kostenplaatsen, kostendragers) van één Connection naar `connection_accounting_refs`. De
- * boeking resolvet daarna code→native_id lokaal tegen deze mirror — geen live partner-call
- * op het schrijfpad.
- *
- * Idempotent: upsert op `(connection, kind, code)` + prune van weggevallen
- * gl/vat/journal/cost_center/cost_unit-rijen (Code verdwenen in Exact → uit de mirror).
- * Relaties (kind=relation) worden lazy bijgevuld door de resolver en hier níét aangeraakt.
- */
 final class ExactReferenceSync
 {
-    /**
-     * @return int aantal gesynct rijen
-     */
+    /** @return int aantal gesynct rijen */
     public function sync(Connection $connection): int
     {
         $rows = (new ExactReferenceData($connection))->mirrorRows();
@@ -47,7 +35,6 @@ final class ExactReferenceSync
                 );
             }
 
-            // Prune: gl/vat/journal-Codes die in Exact zijn verdwenen (niet in deze run gezien).
             ConnectionAccountingRef::query()
                 ->where('connection_id', $connection->getKey())
                 ->whereIn('kind', [

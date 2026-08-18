@@ -43,10 +43,6 @@ class RequestIdTest extends TestCase
         $this->assertSame('trace-abc_123', $response->headers->get('X-Request-Id'));
     }
 
-    /**
-     * De waarde wordt teruggekaatst naar de client; zonder strikte validatie is dat
-     * een header-injectie- en log-vervuilingspad.
-     */
     #[DataProvider('malformedIds')]
     public function test_rejects_a_malformed_inbound_request_id(string $malformed): void
     {
@@ -62,9 +58,7 @@ class RequestIdTest extends TestCase
         $this->assertMatchesRegularExpression('/^[0-9A-HJKMNP-TV-Z]{26}$/', (string) $echoed);
     }
 
-    /**
-     * @return array<string, array{0: string}>
-     */
+    /** @return array<string, array{0: string}> */
     public static function malformedIds(): array
     {
         return [
@@ -76,10 +70,6 @@ class RequestIdTest extends TestCase
         ];
     }
 
-    /**
-     * De middleware staat vóór auth en throttle, dus ook een geweigerd request is
-     * te correleren. Dit is precies het request dat je tijdens een incident zoekt.
-     */
     public function test_request_id_is_present_on_an_unauthenticated_response(): void
     {
         $response = $this->getJson('/v1/ping');

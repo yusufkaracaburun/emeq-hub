@@ -8,12 +8,6 @@ use App\Books\Models\Vendor;
 use App\Books\Services\BillPoster;
 use Illuminate\Database\Seeder;
 
-/*
- * Demo-inkoopfacturen voor de Books-module: één ontvangen-en-geboekte met twee
- * regels op verschillende kostenrekeningen (21%/9% BTW) + één concept. Idempotent
- * (skipt zodra er bills zijn). Boeken vereist een geseed grootboek; zonder chart
- * blijft de bill ongeboekt. Spiegel van BooksInvoiceSeeder.
- */
 class BooksBillSeeder extends Seeder
 {
     public function run(): void

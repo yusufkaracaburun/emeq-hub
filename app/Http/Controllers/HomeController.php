@@ -9,10 +9,6 @@ use App\Support\Seo\SeoMeta;
 use Inertia\Inertia;
 use Inertia\Response;
 
-/**
- * Publieke marketing-homepage. Toont de waardepropositie van de Hub en de
- * beschikbare integraties — géén tenant-data. Indexeerbaar (zie SetNoIndexHeaders).
- */
 class HomeController extends Controller
 {
     public function __construct(private readonly ProviderShowcase $showcase) {}

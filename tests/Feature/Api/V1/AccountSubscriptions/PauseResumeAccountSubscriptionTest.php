@@ -13,21 +13,6 @@ use App\Sanctum\TokenAbilities;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
-/**
- * Plan 07-06 Task 1 — feature-tests voor Hub-only state-flips (D-08):
- *  - POST /v1/account-subscriptions/{id}/pause
- *  - POST /v1/account-subscriptions/{id}/resume
- *
- * Bewijst:
- *  - happy: active → paused (200), paused → active (200)
- *  - pause op already-paused: self-transition no-op (D-04 StateTransitions),
- *    response 200, paused_at-veld update't
- *  - resume op canceled: illegal transition → 409
- *  - cross-Consumer pause → 404 (D-12)
- *  - **SC-3 mutate-isolation expliciet:** same-Consumer-other-Account pause → 200
- *    (per-Consumer scope, optie B, gekozen 2026-05-15 — zie 07-08 ADR)
- *  - read-only-token → 403 op pause
- */
 class PauseResumeAccountSubscriptionTest extends TestCase
 {
     use RefreshDatabase;
@@ -54,8 +39,6 @@ class PauseResumeAccountSubscriptionTest extends TestCase
 
     public function test_pause_on_already_paused_is_idempotent_returns_200(): void
     {
-        // Self-transition Paused → Paused is no-op per StateTransitions; manager
-        // update't wel paused_at zodat audit-trail klopt.
         [, $token, , $connection] = $this->setup_consumer_with_token([TokenAbilities::MOLLIE_WRITE]);
 
         $sub = AccountSubscription::factory()
@@ -93,7 +76,6 @@ class PauseResumeAccountSubscriptionTest extends TestCase
 
     public function test_resume_on_canceled_returns_409_invalid_state_transition(): void
     {
-        // Canceled is terminal (D-04); transition naar Active is illegaal → 409.
         [, $token, , $connection] = $this->setup_consumer_with_token([TokenAbilities::MOLLIE_WRITE]);
 
         $sub = AccountSubscription::factory()
@@ -111,7 +93,6 @@ class PauseResumeAccountSubscriptionTest extends TestCase
 
     public function test_cross_consumer_pause_returns_404(): void
     {
-        // Consumer A's PAT + sub van Consumer B → 404 (D-12 + T-07-04-01).
         [, $tokenA] = $this->setup_consumer_with_token([TokenAbilities::MOLLIE_WRITE]);
 
         $consumerB = Consumer::factory()->create();
@@ -132,8 +113,6 @@ class PauseResumeAccountSubscriptionTest extends TestCase
 
     public function test_pause_on_subscription_of_other_account_same_consumer_returns_200(): void
     {
-        // Bewijst per-Consumer scope (optie B, gekozen 2026-05-15 — zie 07-08
-        // ADR). Mutate op vreemde-Consumer sub blijft 404 (zie cross_consumer_pause).
         $consumer = Consumer::factory()->create();
         $accountA = Account::factory()->for($consumer)->create(['external_id' => 'school-a']);
         $accountB = Account::factory()->for($consumer)->create(['external_id' => 'school-b']);
@@ -175,9 +154,6 @@ class PauseResumeAccountSubscriptionTest extends TestCase
     }
 
     /**
-     * Minimale Consumer + Account + actieve Mollie-Connection. Geen Mollie-stub
-     * — pause/resume zijn Hub-only state-flips (D-08, geen Mollie-call).
-     *
      * @param  list<string>  $abilities
      * @return array{0: Consumer, 1: string, 2: Account, 3: Connection}
      */

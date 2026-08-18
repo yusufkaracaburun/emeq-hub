@@ -8,21 +8,6 @@ use App\Integrations\Errors\UpstreamErrorMapperRegistry;
 use Symfony\Component\HttpFoundation\Response;
 use Throwable;
 
-/**
- * Het frame om elke pass-through-call: klok starten, de partner aanroepen, een
- * exception naar het Hub-foutcontract vertalen, de auditrij schrijven en de
- * response renderen.
- *
- * Dat frame stond vier keer los in de codebase — Exact, Snelstart, Mollie en Mollie
- * Connect — met per kopie dezelfde volgorde en dezelfde randgevallen. Vier kopieën
- * betekent dat een fix aan de audit- of foutafhandeling er drie mist, en dat elke
- * nieuwe provider een vijfde bijschrijft.
- *
- * Wat per provider verschilt zit in de aanroeper: welk SDK-request eruit gaat, en
- * hoe het antwoord tot een {@see UpstreamResult} komt. De foutmapper wordt hier via
- * de registry gekozen, niet op importniveau — anders kiest elke aanroeper er weer
- * zelf een.
- */
 final class PassThroughPipeline
 {
     public function __construct(

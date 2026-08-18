@@ -14,11 +14,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Context;
 use Tests\TestCase;
 
-/**
- * Unit-ish feature-test voor de single write-path achter alle inbound
- * partner→Hub-webhook-audit. Bewijst kolom-mapping, tenant-afleiding via
- * `$connection->account`, event_id-NULL-op-duplicate en de fingerprint.
- */
 class InboundWebhookRecorderTest extends TestCase
 {
     use RefreshDatabase;
@@ -159,14 +154,9 @@ class InboundWebhookRecorderTest extends TestCase
         );
 
         $this->assertTrue($this->recorder->isDuplicate('snelstart', 'evt-9'));
-        // Andere provider met dezelfde event_id is geen duplicaat.
         $this->assertFalse($this->recorder->isDuplicate('exact', 'evt-9'));
     }
 
-    /**
-     * De recorder kent het correlatie-id niet; de model-hook haalt 'm uit de
-     * request-context. Deze test bewaakt dat die hook blijft vuren.
-     */
     public function test_records_the_request_id_from_the_context(): void
     {
         Context::add('request_id', '01HRECORDER00000000000000');

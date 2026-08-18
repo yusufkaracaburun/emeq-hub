@@ -270,9 +270,7 @@ class ExactWebhooksCommandTest extends TestCase
             ->assertSuccessful();
     }
 
-    /**
-     * @param  list<array<string, string>>  $results
-     */
+    /** @param  list<array<string, string>>  $results */
     private function mockRemote(array $results): void
     {
         MockClient::global([
@@ -280,9 +278,7 @@ class ExactWebhooksCommandTest extends TestCase
         ]);
     }
 
-    /**
-     * @param  array<string, mixed>  $state
-     */
+    /** @param  array<string, mixed>  $state */
     private function exactConnection(array $state = []): Connection
     {
         $consumer = Consumer::factory()->create();

@@ -11,16 +11,6 @@ use App\Books\Models\Transaction;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 
-/*
- * Boekt een inkoopfactuur naar het grootboek via een memoriaal-Transaction
- * (type=journal) als carrier — hetzelfde JournalEntry→Transaction-spoor als de
- * verkoopkant, géén schema-uitbreiding. Spiegel van InvoicePoster met debet/credit
- * omgedraaid:
- *   debet 4xxx Kosten         = subtotaal per kostenrekening (regel-account)
- *   debet 1530 Te vorderen BTW = totale input-BTW (één rekening, geen tarief-split)
- *   credit 1600 Crediteuren    = bill-totaal (incl. BTW)
- * Σ debet = Σ subtotalen + Σ BTW = totaal = credit.
- */
 class BillPoster
 {
     private const PAYABLE = '1600';

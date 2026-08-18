@@ -9,19 +9,6 @@ use App\Models\Connection;
 use App\Models\ConnectionAccountingRef;
 use Illuminate\Support\Collection;
 
-/**
- * Leidt een verstandige default-mapping af uit de gesynchroniseerde mirror, zodat een
- * consumer direct kan boeken zonder iets te configureren:
- *  - BTW (standard): tarief → VATCode-Code waar `percentage == tarief` (voorkeur: exclusief).
- *  - BTW (verlegd): reverse_charge:tarief → VATCode-Code waar `percentage == tarief` én label "verlegd".
- *  - Dagboek: verkoop → eerste Type-20-dagboek, inkoop → eerste Type-22-dagboek.
- *  - Grootboek: omzet/sales_default → eerste 8xxx-rekening, kosten/purchase_default/
- *    _default → eerste 4xxx-rekening. Vindt de mirror geen 8xxx- of 4xxx-rekening, dan
- *    blijft de bijbehorende default leeg — geraden in plaats van afgeleid is een bug.
- *
- * Vult alléén ontbrekende keys aan (`merge` zonder overschrijven) — een handmatige
- * override via de mapping-API of admin-UI blijft staan.
- */
 final class ExactMappingDeriver
 {
     public function deriveAndStore(Connection $connection): void
@@ -40,8 +27,6 @@ final class ExactMappingDeriver
         $existing = $metadata['accounting_mapping'] ?? [];
 
         foreach ($derived as $section => $map) {
-            // '+' behoudt numerieke string-keys (array_merge hernummert 21/9/0 → 0/1/2);
-            // bestaande (override-)waarden winnen, de derive vult alleen ontbrekende keys.
             $existing[$section] = ($existing[$section] ?? []) + $map;
         }
 
@@ -66,13 +51,11 @@ final class ExactMappingDeriver
                 continue;
             }
 
-            // Voorkeur: exclusief, niet-verlegd/inclusief.
             $preferred = $matches->first(fn (ConnectionAccountingRef $r) => $this->isPlainExclusive((string) $r->label)) ?? $matches->first();
 
             $out[$rate] = $preferred->code;
         }
 
-        // Verlegd (reverse charge) — apart gemerkte VATCode per tarief (label bevat "verlegd").
         foreach (['21', '9'] as $rate) {
             $verlegd = $vat->first(fn (ConnectionAccountingRef $r) => (float) ($r->attrs['percentage'] ?? -1) === (float) $rate
                 && str_contains(mb_strtolower((string) $r->label), 'verlegd'));

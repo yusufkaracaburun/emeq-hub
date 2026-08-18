@@ -34,7 +34,6 @@ class BtwAangiftePageTest extends TestCase
         $boekhouder->assignRole('boekhouder');
         $this->actingAs($boekhouder);
 
-        // Verkoop 21% binnen het huidige kwartaal (= default-periode van de page).
         $client = Client::create(['name' => 'Acme BV']);
         $invoice = Invoice::create(['client_id' => $client->id, 'invoice_number' => '2026-001', 'status' => 'sent', 'date' => now()]);
         $invoice->lines()->create(['description' => 'Werk', 'quantity' => 1, 'unit_price' => 10000, 'tax_rate' => 21]);
@@ -47,7 +46,7 @@ class BtwAangiftePageTest extends TestCase
             ->assertOk()
             ->assertSee('Prestaties binnenland')
             ->assertSee('Te betalen')
-            ->assertSee('€ 21,00'); // verschuldigde BTW 21% over grondslag €100 (10000 cent)
+            ->assertSee('€ 21,00');
     }
 
     public function test_quarter_default_period(): void

@@ -9,19 +9,6 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-/**
- * Gedeelde pass-through-context-resolutie voor de provider-middleware:
- *
- * 1. Leest X-Account-Id; ontbreekt → 400.
- * 2. Scoped Account-lookup op de geauthenticeerde Consumer; fail → 404.
- * 3. Actieve Connection-lookup voor deze provider; fail → 404.
- * 4. Bindt de provider-SDK per-request (bindSdk — het enige dat per provider verschilt).
- * 5. Zet account + connection op request->attributes onder "{provider}_account" /
- *    "{provider}_connection" voor controller en audit.
- *
- * Per provider verschilt alleen: de Provider-enum, het label in de
- * connection_not_found-melding, en de SDK-binding.
- */
 abstract class ResolveProviderAccount
 {
     abstract protected function provider(): Provider;

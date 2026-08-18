@@ -16,12 +16,6 @@ class CreateManualJournal extends CreateRecord
 {
     protected static string $resource = ManualJournalResource::class;
 
-    /*
-     * `lines` is losse Repeater-state (bedragen al naar centen gedehydrateerd):
-     * we bouwen de gebalanceerde Transaction(type=journal) + JournalEntries via
-     * ManualJournalPoster, niet via Filament's relationship-save. De balans is
-     * al door de form-rule afgedwongen; de service-throw is een backstop.
-     */
     protected function handleRecordCreation(array $data): Model
     {
         $lines = collect($data['lines'] ?? [])

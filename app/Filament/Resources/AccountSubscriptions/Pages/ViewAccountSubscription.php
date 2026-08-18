@@ -15,7 +15,6 @@ class ViewAccountSubscription extends DetailViewRecord
 
     protected function getHeaderActions(): array
     {
-        // Read-only Resource — geen Edit-action.
         return [];
     }
 

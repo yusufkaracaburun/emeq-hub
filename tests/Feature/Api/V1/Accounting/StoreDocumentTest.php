@@ -2,7 +2,6 @@
 
 namespace Tests\Feature\Api\V1\Accounting;
 
-use App\Accounting\Enums\DocumentType;
 use App\Models\Connection;
 use App\Models\ConnectionAccountingRef;
 use App\Models\Consumer;
@@ -117,9 +116,6 @@ class StoreDocumentTest extends TestCase
 
     public function test_invalid_nl_vat_checksum_is_rejected_at_edge_before_exact(): void
     {
-        // NL123456789B01 is formaat-geldig maar controlecijfer-ongeldig. De edge-guard
-        // (ValidVatNumber op StoreDocumentRequest) weigert 'm met 422 — geen Exact-call,
-        // geen half-aangemaakte relatie. Geen MockClient nodig: validatie faalt vóór de adapter.
         [$consumer] = $this->consumerWithExactConnection();
         $token = $consumer->createToken('t', [TokenAbilities::EXACT_WRITE])->plainTextToken;
 
@@ -137,8 +133,6 @@ class StoreDocumentTest extends TestCase
 
     public function test_response_echoes_exact_entry_number_when_present(): void
     {
-        // Exact geeft het mensleesbare boekstuknummer (EntryNumber) terug naast de GUID;
-        // de Hub echoot dat als external_number zodat de consumer-app niet enkel een UUID toont.
         MockClient::global([
             CreateSalesEntry::class => MockResponse::make(['d' => ['ID' => 'inv-guid-1', 'EntryNumber' => 60001]], 201),
         ]);
@@ -176,9 +170,6 @@ class StoreDocumentTest extends TestCase
 
     public function test_exact_functional_rejection_returns_422_with_clear_message(): void
     {
-        // Exact weigert functioneel (bv. ongeldig btw-controlecijfer) met een 500 + OData-melding.
-        // De Hub mapt dat naar 422 — permanent, niet retryable — zodat de melding niet achter een
-        // Cloudflare-502 verdwijnt, en herschrijft 'm naar een partner-neutrale uitleg.
         MockClient::global([
             CreateSalesEntry::class => MockResponse::make(
                 ['error' => ['message' => ['value' => 'Ongeldig controlecijfer voor btw-nummer.']]],
@@ -291,7 +282,6 @@ class StoreDocumentTest extends TestCase
         [$consumer] = $this->consumerWithExactConnection();
         $token = $consumer->createToken('t', [TokenAbilities::EXACT_WRITE])->plainTextToken;
 
-        // salesInvoicePayload heeft issue_date 2026-06-16 en géén due_date.
         $this->withHeader('Authorization', "Bearer {$token}")
             ->withHeader('X-Account-Id', 'school1')
             ->withHeader('Idempotency-Key', (string) Str::uuid())
@@ -407,9 +397,6 @@ class StoreDocumentTest extends TestCase
             ->postJson('/v1/accounting/documents', $this->salesInvoicePayload())
             ->assertStatus(201);
 
-        // YourRef is de kolom die Exact als factuurnummer toont, dus draagt het
-        // documentnummer voorop; de external_id blijft erachter staan zodat de
-        // probe erop kan blijven filteren — hier past het geheel binnen 30 tekens.
         $expected = '2026-001 · INV-2026-001';
         MockClient::global()->assertSent(fn ($request): bool => $request instanceof CreateSalesEntry
             && ($request->body()->all()['YourRef'] ?? null) === $expected);
@@ -423,8 +410,6 @@ class StoreDocumentTest extends TestCase
         $this->bindFakeReferences();
 
         [$consumer] = $this->consumerWithExactConnection();
-        // Vaste, korte naam: dan past de sleutel er nog naast en toetst deze test de
-        // fallback zelf in plaats van de afkapregel.
         $consumer->update(['name' => 'Emeq']);
         $token = $consumer->createToken('t', [TokenAbilities::EXACT_WRITE])->plainTextToken;
 
@@ -441,11 +426,6 @@ class StoreDocumentTest extends TestCase
             && ($request->body()->all()['YourRef'] ?? null) === 'Emeq · INV-2026-001');
     }
 
-    /**
-     * Exact kapt YourRef op 30 tekens af. Een uuid-sleutel past daar nooit naast een
-     * nummer in, en een halve uuid is voor niemand bruikbaar — dan blijft alleen het
-     * nummer staan.
-     */
     public function test_yourref_drops_the_external_id_when_it_does_not_fit_whole(): void
     {
         MockClient::global([
@@ -511,8 +491,6 @@ class StoreDocumentTest extends TestCase
 
     public function test_uses_connection_metadata_mapping(): void
     {
-        // Geen fake → de echte ConnectionMappingExactReferenceResolver. Mapping draagt enkel
-        // stabiele Codes; GL-Code + relatie resolven lokaal naar native-ID via de mirror.
         MockClient::global([
             CreateSalesEntry::class => MockResponse::make(['d' => ['ID' => 'inv-1']], 201),
         ]);
@@ -525,7 +503,6 @@ class StoreDocumentTest extends TestCase
             ]],
         ]);
 
-        // Mirror: GL-Code → native GUID, en de lazy-geleerde relatie external_id → GUID.
         ConnectionAccountingRef::query()->create([
             'connection_id' => $connection->getKey(),
             'kind' => ConnectionAccountingRef::KIND_GL,
@@ -561,9 +538,6 @@ class StoreDocumentTest extends TestCase
 
     public function test_sales_invoice_line_without_category_uses_sales_default_not_purchase_default(): void
     {
-        // Regressie voor emeq-hub#60: een regel zonder categorie mag niet stil op de
-        // gedeelde `_default` (hier bewust de kostenrekening) belanden — de verkoop
-        // hoort op `sales_default`.
         MockClient::global([
             CreateSalesEntry::class => MockResponse::make(['d' => ['ID' => 'inv-1']], 201),
         ]);
@@ -651,8 +625,6 @@ class StoreDocumentTest extends TestCase
 
     public function test_auto_created_relation_carries_the_whole_relation_card(): void
     {
-        // Wat de consumer weet van de relatie, hoort in de administratie te staan —
-        // een boekhouder heeft aan een losse naam niets.
         MockClient::global([
             GetRelations::class => MockResponse::make(['d' => ['results' => []]], 200),
             CreateAccount::class => MockResponse::make(['d' => ['ID' => 'new-rel-guid']], 201),
@@ -726,10 +698,6 @@ class StoreDocumentTest extends TestCase
 
     public function test_person_party_without_a_strong_key_is_created_when_the_mirror_has_no_hit(): void
     {
-        // Geen fake → de echte resolver. `person` slaat KvK/btw/naam-matching over (geen
-        // sterke sleutel, en naam-matching op een natuurlijk persoon zou een factuur aan
-        // de verkeerde persoon kunnen koppelen) — geen mirror-hit betekent dus meteen
-        // aanmaken, zonder een crm/Accounts-lookup vooraf.
         MockClient::global([
             CreateAccount::class => MockResponse::make(['d' => ['ID' => 'new-rel-guid']], 201),
             CreateSalesEntry::class => MockResponse::make(['d' => ['ID' => 'inv-1']], 201),
@@ -764,9 +732,6 @@ class StoreDocumentTest extends TestCase
         $this->assertSame('relation.created', $response->json('warnings.0.code'));
         $this->assertSame('new-rel-guid', $response->json('warnings.0.context.relation_id'));
 
-        // De auditrij moet het ook dragen: `response_body` blijft leeg bij een geslaagde
-        // boeking, dus zonder deze kolom is achteraf niet te zien dat de Hub een relatie
-        // in de administratie heeft gezet.
         $this->assertSame(
             'relation.created',
             PassThroughCall::query()
@@ -860,9 +825,6 @@ class StoreDocumentTest extends TestCase
 
     public function test_company_party_without_chamber_of_commerce_or_vat_number_is_rejected_at_edge(): void
     {
-        // De edge-guard (StoreDocumentRequest::withValidator) weigert dit met 422 —
-        // geen Exact-call: een zakelijke party zonder sterke sleutel kan de ladder
-        // alleen op naam matchen, en een naam-miss zou een duplicaat aanmaken.
         [$consumer] = $this->consumerWithExactConnection();
         $token = $consumer->createToken('t', [TokenAbilities::EXACT_WRITE])->plainTextToken;
 
@@ -897,9 +859,6 @@ class StoreDocumentTest extends TestCase
 
     public function test_booking_same_party_twice_creates_one_relation_via_the_mirror(): void
     {
-        // Eerste boeking: geen mirror-hit → aanmaken. Tweede boeking, zelfde external_id:
-        // mirror-hit → geen tweede CreateAccount, wel een rol-check (relationRoles) op de
-        // GUID die de eerste boeking terugkreeg.
         MockClient::global([
             CreateAccount::class => MockResponse::make(['d' => ['ID' => 'new-dup-guid']], 201),
             CreateSalesEntry::class => MockResponse::make(['d' => ['ID' => 'inv-1']], 201),
@@ -946,7 +905,7 @@ class StoreDocumentTest extends TestCase
 
         MockClient::global()->assertSentCount(1, CreateAccount::class);
 
-        $this->assertDatabaseCount('connection_accounting_refs', 2); // 1× GL (seed) + 1× relatie
+        $this->assertDatabaseCount('connection_accounting_refs', 2);
 
         MockClient::global()->assertSent(fn ($request): bool => $request instanceof CreateSalesEntry && $request->body()->all()['Customer'] === 'new-dup-guid');
     }
@@ -1016,11 +975,6 @@ class StoreDocumentTest extends TestCase
         ]);
     }
 
-    /**
-     * income = ontvangst met relatie als debiteur → SalesEntry (geen memoriaal): elke
-     * income/expense draagt altijd een relatie + categorie + (eventueel) BTW, dus het
-     * is een gewone verkoop-/inkoopboeking, niet een relatieloze GL-mutatie. Zie #12.
-     */
     public function test_pushes_income_to_salesentry(): void
     {
         MockClient::global([
@@ -1078,7 +1032,6 @@ class StoreDocumentTest extends TestCase
             ->assertJsonPath('status', 'posted')
             ->assertJsonPath('external_ref', 'exp-1');
 
-        // expense = declaratie/kosten met relatie als crediteur → PurchaseEntry.
         MockClient::global()->assertSent(function (CreatePurchaseEntry $request): bool {
             $body = $request->body()->all();
 
@@ -1091,10 +1044,6 @@ class StoreDocumentTest extends TestCase
 
     public function test_promotes_existing_customer_relation_to_supplier_for_expense(): void
     {
-        // Dezelfde firma is al klant (IsSales) maar nog geen leverancier. Een expense
-        // (crediteur) hergebruikt die relatie → de resolver promoveert 'm met
-        // IsSupplier=true vóór de PurchaseEntry. Zonder promotie weigert Exact met
-        // "Ongeldig: Leverancier (Type)".
         MockClient::global([
             GetRelations::class => MockResponse::make(['d' => ['results' => [[
                 'ID' => 'cust-guid',
@@ -1138,7 +1087,6 @@ class StoreDocumentTest extends TestCase
             ->assertStatus(201)
             ->assertJsonPath('external_ref', 'exp-1');
 
-        // Promotie: PUT crm/Accounts(guid) met enkel IsSupplier=true (Status/IsSales onaangeroerd).
         MockClient::global()->assertSent(function ($request): bool {
             if (! $request instanceof UpdateAccount) {
                 return false;
@@ -1151,7 +1099,6 @@ class StoreDocumentTest extends TestCase
                 && ! array_key_exists('IsSales', $body);
         });
 
-        // Boeking op de (nu) leverancier-GUID.
         MockClient::global()->assertSent(fn ($request): bool => $request instanceof CreatePurchaseEntry
             && $request->body()->all()['Supplier'] === 'cust-guid');
 
@@ -1165,9 +1112,6 @@ class StoreDocumentTest extends TestCase
 
     public function test_promotes_relation_from_mirror_when_supplier_flag_missing(): void
     {
-        // Polluted-state: de relatie staat al in de mirror (geleerd bij een eerdere
-        // mislukte poging) maar is nog geen leverancier. Mirror-hit → ensureRole leest
-        // de rol-vlaggen op GUID en promoveert alsnog vóór de boeking.
         MockClient::global([
             GetRelations::class => MockResponse::make(['d' => ['results' => [[
                 'ID' => 'cust-guid',
@@ -1193,7 +1137,6 @@ class StoreDocumentTest extends TestCase
             'code' => 'gl-kosten',
             'native_id' => 'gl-kosten-guid',
         ]);
-        // Al geleerd onder 's1' maar niet gepromote (de mislukte poging leerde 'm wél).
         ConnectionAccountingRef::query()->create([
             'connection_id' => $connection->getKey(),
             'kind' => ConnectionAccountingRef::KIND_RELATION,
@@ -1222,7 +1165,6 @@ class StoreDocumentTest extends TestCase
 
     public function test_does_not_promote_when_relation_already_supplier(): void
     {
-        // Relatie is al leverancier → geen overbodige PUT.
         MockClient::global([
             GetRelations::class => MockResponse::make(['d' => ['results' => [[
                 'ID' => 'supp-guid',
@@ -1358,23 +1300,16 @@ class StoreDocumentTest extends TestCase
         $this->assertSame(['matched_on' => 'vat'], $ref->attrs);
     }
 
-    /**
-     * De boekhouder verwijdert of voegt een relatie samen; de mirror wijst daarna naar een
-     * GUID die niet meer bestaat. Voorheen strandde de boeking op Exacts "Ongeldige
-     * referentie". Nu gooit de Hub de dode koppeling weg en loopt de ladder verder.
-     */
     public function test_a_deleted_relation_is_relinked_instead_of_failing_the_booking(): void
     {
         MockClient::global([
             GetRelations::class => function (PendingRequest $pendingRequest) {
                 $filter = (string) $pendingRequest->query()->get('$filter');
 
-                // De gekoppelde relatie bestaat niet meer…
                 if (str_contains($filter, 'ID eq')) {
                     return MockResponse::make(['d' => ['results' => []]], 200);
                 }
 
-                // …maar op KvK staat er wél een (de opvolger na een samenvoeging).
                 return MockResponse::make(['d' => ['results' => [[
                     'ID' => 'nieuwe-guid', 'Code' => 'N001', 'Name' => 'Acme BV', 'IsSales' => true, 'IsSupplier' => false,
                     'Status' => 'C', 'ChamberOfCommerce' => '12345678', 'VATNumber' => '',
@@ -1428,10 +1363,6 @@ class StoreDocumentTest extends TestCase
         ]);
     }
 
-    /**
-     * Een leesfout mag nooit als "relatie is weg" gelden: dan zou de Hub een gezonde
-     * koppeling weggooien en bij de volgende boeking een tweede relatie aanmaken.
-     */
     public function test_an_unreadable_relation_keeps_its_link(): void
     {
         MockClient::global([
@@ -1477,8 +1408,6 @@ class StoreDocumentTest extends TestCase
 
     public function test_matches_relation_by_name_and_writes_back_the_missing_chamber_of_commerce(): void
     {
-        // KvK-stap mist bewust (Exact draagt 'm nog niet) → valt door naar naam; de match
-        // vult het lege KvK-veld terug, nooit een reeds gevuld veld.
         MockClient::global([
             GetRelations::class => function (PendingRequest $pendingRequest) {
                 $filter = (string) $pendingRequest->query()->get('$filter');
@@ -1582,13 +1511,11 @@ class StoreDocumentTest extends TestCase
         MockClient::global()->assertNotSent(CreateAccount::class);
         MockClient::global()->assertNotSent(CreateSalesEntry::class);
 
-        $this->assertDatabaseCount('connection_accounting_refs', 1); // alleen de geseede GL-ref, geen relatie geleerd
+        $this->assertDatabaseCount('connection_accounting_refs', 1);
     }
 
     public function test_relation_id_pins_and_skips_the_ladder(): void
     {
-        // person: de ladder-stappen 2-4 (KvK/btw/naam) zouden hoe dan ook overgeslagen
-        // worden, maar relation_id slaat ook de mirror-lookup (stap 1) over.
         MockClient::global([
             CreateSalesEntry::class => MockResponse::make(['d' => ['ID' => 'inv-1']], 201),
             GetRelations::class => MockResponse::make(['d' => ['results' => [[
@@ -1624,7 +1551,6 @@ class StoreDocumentTest extends TestCase
         MockClient::global()->assertNotSent(CreateAccount::class);
         MockClient::global()->assertSent(fn ($request): bool => $request instanceof CreateSalesEntry && $request->body()->all()['Customer'] === 'pinned-guid');
 
-        // Pin permanent: de mirror onthoudt de keuze voor het volgende document.
         $ref = ConnectionAccountingRef::query()
             ->where('connection_id', $connection->getKey())
             ->where('kind', ConnectionAccountingRef::KIND_RELATION)
@@ -1674,7 +1600,6 @@ class StoreDocumentTest extends TestCase
                 ->assertJsonPath('external_ref', 'inv-1');
         }
 
-        // Twee POSTs met dezelfde key → één boeking bij Exact, tweede is een replay.
         MockClient::global()->assertSentCount(1);
     }
 
@@ -1717,10 +1642,6 @@ class StoreDocumentTest extends TestCase
             ->assertJson(['error' => 'insufficient_ability']);
     }
 
-    /**
-     * Het punt van de canonieke ability: dit token noemt geen enkele provider en
-     * blijft daarom geldig als de eindgebruiker naar een ander boekhoudpakket gaat.
-     */
     public function test_canonical_accounting_write_ability_is_accepted(): void
     {
         MockClient::global([
@@ -1754,9 +1675,6 @@ class StoreDocumentTest extends TestCase
 
     public function test_unconfigured_reference_mapping_returns_422(): void
     {
-        // Geen fake gebonden → de echte ConnectionMappingExactReferenceResolver. De relatie
-        // matcht/creëert prima (geen mapping nodig voor de ladder), maar journal()/vatCode()
-        // vinden geen accounting_mapping → mapping_failed.
         MockClient::global([
             CreateAccount::class => MockResponse::make(['d' => ['ID' => 'auto-guid']], 201),
             CreateSalesEntry::class => MockResponse::make(['d' => ['ID' => 'x']], 201),
@@ -1811,15 +1729,11 @@ class StoreDocumentTest extends TestCase
             ->assertJsonPath('attachments.0.status', 'uploaded')
             ->assertJsonPath('attachments.0.document_ref', 'doc-guid-1');
 
-        // Document gekoppeld aan de boeking (FinancialTransactionEntryID = SalesEntry-ID)
-        // en aan de relatie (Account), met de gegronde DocumentType 10 (Sales invoice).
         MockClient::global()->assertSent(fn ($request): bool => $request instanceof CreateDocument
             && $request->resolveEndpoint() === '/documents/Documents'
             && $request->body()->all()['Type'] === 10
             && $request->body()->all()['Account'] === 'cust-guid'
             && $request->body()->all()['FinancialTransactionEntryID'] === 'inv-guid-1'
-            // Zonder datum stempelt Exact de dag van uploaden en staat een factuur uit
-            // juni in het documentenoverzicht onder vandaag.
             && $request->body()->all()['DocumentDate'] === '2026-06-16');
 
         MockClient::global()->assertSent(fn ($request): bool => $request instanceof CreateDocumentAttachment
@@ -1830,8 +1744,6 @@ class StoreDocumentTest extends TestCase
 
     public function test_purchase_attachment_reuses_exacts_auto_document(): void
     {
-        // PurchaseEntry-respons draagt Exact's auto-Document (d.Document); de bijlage hangt
-        // daaraan — géén tweede CreateDocument (anders dubbel document op de inkoopfactuur).
         MockClient::global([
             CreatePurchaseEntry::class => MockResponse::make(['d' => ['ID' => 'pe-1', 'Document' => 'auto-doc-1']], 201),
             CreateDocumentAttachment::class => MockResponse::make(['d' => ['ID' => 'att-1']], 201),

@@ -72,11 +72,6 @@ class AccountSubscriptionManagerSyncTest extends TestCase
         $this->assertNotNull($fresh->canceled_at);
     }
 
-    /**
-     * Mollie's NotFoundException constructor verwacht een Mollie\Api\Http\Response;
-     * voor unit-tests bouwen we een minimale RuntimeException-subclass die de
-     * type-check passeert zonder de echte response-bagage.
-     */
     private function fakeMollieNotFoundException(): MollieNotFoundException
     {
         $reflection = new \ReflectionClass(MollieNotFoundException::class);
@@ -96,7 +91,6 @@ class AccountSubscriptionManagerSyncTest extends TestCase
             try {
                 $responseProp->setValue($ex, $this->buildMinimalMollieResponse());
             } catch (\Throwable) {
-                // Niet-kritiek; de manager raakt deze prop niet aan.
             }
         }
 

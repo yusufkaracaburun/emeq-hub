@@ -4,14 +4,6 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-/*
- * Terugkerende verkoopfacturen van de Books-module: books_recurring_invoices
- * (template + cadans) + books_recurring_invoice_lines (template-regels). De
- * RecurringInvoiceGenerator maakt op de cadans een gewone (concept-)Invoice +
- * InvoiceLines; bedragen/totalen leven daar, niet op de template. Cadans is
- * lean (weekly/monthly/yearly + einddatum of max-aantal), géén custom intervals.
- * unit_price in integer-centen, tax_rate is een BTW-percentage (21/9/0).
- */
 return new class extends Migration
 {
     public function up(): void

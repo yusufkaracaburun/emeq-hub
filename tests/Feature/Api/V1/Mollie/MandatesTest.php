@@ -9,14 +9,6 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Concerns\StubsMollieClient;
 use Tests\TestCase;
 
-/**
- * MOLL-03 Mandates — list per Customer + get + revoke via Mollie SDK.
- *
- * Vendor-discovery: Mollie's SDK heeft `MandateEndpointCollection`
- * onder `MollieApiClient::$mandates` (NIET `$customerMandates` zoals
- * plan suggereerde). Methodes pageForId/getForId/revokeForId blijven
- * hetzelfde — alleen de property-naam wijkt af.
- */
 class MandatesTest extends TestCase
 {
     use RefreshDatabase;

@@ -14,11 +14,6 @@ use Filament\Support\Icons\Heroicon;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use UnitEnum;
 
-/*
- * Ouderdomsanalyse (debiteuren/crediteuren) op een peildatum. De berekening leeft in
- * AgingService (open posten + bucketing); deze pagina levert de peildatum + AR/AP-keuze
- * + PDF-export.
- */
 class AgingReport extends Page
 {
     use GatedToBoekhouding;
@@ -37,7 +32,6 @@ class AgingReport extends Page
 
     public string $asOfDate = '';
 
-    /** receivable = debiteuren, payable = crediteuren */
     public string $kind = 'receivable';
 
     public function mount(): void
@@ -45,9 +39,7 @@ class AgingReport extends Page
         $this->asOfDate = now()->toDateString();
     }
 
-    /**
-     * @return array<Action>
-     */
+    /** @return array<Action> */
     protected function getHeaderActions(): array
     {
         return [
@@ -71,9 +63,6 @@ class AgingReport extends Page
         $this->kind = $kind === 'payable' ? 'payable' : 'receivable';
     }
 
-    /**
-     * Snelle peildatum-presets voor de filterbalk.
-     */
     public function setAsOf(string $preset): void
     {
         $now = now();

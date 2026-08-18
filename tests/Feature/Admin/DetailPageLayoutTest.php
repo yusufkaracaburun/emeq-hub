@@ -27,11 +27,6 @@ use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
-/**
- * Elke detailpagina opent met dezelfde kopstrip. Deze test rendert ze allemaal en
- * controleert de labels van die strip — de opbouw is gedeeld, dus één kapotte
- * relatie of kolomnaam legt hier direct een pagina om.
- */
 class DetailPageLayoutTest extends TestCase
 {
     use RefreshDatabase;

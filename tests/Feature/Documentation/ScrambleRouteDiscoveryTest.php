@@ -4,13 +4,6 @@ namespace Tests\Feature\Documentation;
 
 use Tests\TestCase;
 
-/**
- * Bewijst HUB-05 SC-8: Scramble's OpenAPI-spec bevat alle nieuwe /v1-routes
- * die in Phase 5b zijn geland (3 provisioning + 1 catch-all + ping).
- *
- * De docs zijn publiek — geen token, geen gate. Het endpoint-overzicht is geen
- * geheim; de authenticatie (Sanctum-PAT) is dat wel.
- */
 class ScrambleRouteDiscoveryTest extends TestCase
 {
     public function test_docs_zijn_publiek_bereikbaar_zonder_token(): void
@@ -49,10 +42,6 @@ class ScrambleRouteDiscoveryTest extends TestCase
         $spec = $this->fetchSpec();
         $paths = $spec['paths'] ?? [];
 
-        // Scramble's path-template-resolver kan de `Route::any('/snelstart/{path}')`
-        // catch-all op verschillende manieren renderen — als één `{path}`-template
-        // óf als afzonderlijke entries per HTTP-method. Geef beide vormen een kans;
-        // als geen van beide bestaat, markeer skipped met ADR-pointer.
         $candidates = ['/snelstart/{path}', '/snelstart'];
         $matched = null;
 
@@ -111,10 +100,6 @@ class ScrambleRouteDiscoveryTest extends TestCase
 
     public function test_openapi_spec_contains_mollie_refunds_routes(): void
     {
-        // Scramble gebruikt controller-argument-namen voor path-variables
-        // i.p.v. de route-placeholder-naam. RefundsController's nested
-        // routes nemen `$payment_id` als argument, dus Scramble rendert
-        // `{payment_id}` (NIET `{id}` zoals de route-definitie).
         $spec = $this->fetchSpec();
         $paths = $spec['paths'] ?? [];
 
@@ -127,8 +112,6 @@ class ScrambleRouteDiscoveryTest extends TestCase
 
     public function test_openapi_spec_contains_mollie_mandates_routes(): void
     {
-        // Scramble rendert `{customer_id}` (uit controller-argument), niet
-        // `{id}` (uit route-placeholder). Zie test_openapi_spec_contains_mollie_refunds_routes.
         $spec = $this->fetchSpec();
         $paths = $spec['paths'] ?? [];
 
@@ -164,10 +147,6 @@ class ScrambleRouteDiscoveryTest extends TestCase
         $this->assertArrayHasKey('get', $paths['/mollie/payment-links/{id}']);
     }
 
-    /**
-     * MOLL-05 SC-3 — alle 9 Mollie-Connect-routes (Phase 13 Plan 02) staan in
-     * de OpenAPI-spec onder de juiste paths + HTTP-methods.
-     */
     public function test_openapi_spec_contains_all_nine_mollie_connect_routes(): void
     {
         $spec = $this->fetchSpec();
@@ -199,11 +178,6 @@ class ScrambleRouteDiscoveryTest extends TestCase
         $this->assertArrayHasKey('post', $paths['/mollie/connect/client-links']);
     }
 
-    /**
-     * MOLL-05 SC-3 — Connect-routes worden gegroepeerd onder de gedeelde
-     * Scramble Group 'Mollie · Connect' (D-12). Test minimaal 3 paths om
-     * bewijs te leveren zonder alle 9 te dupliceren.
-     */
     public function test_openapi_spec_groups_connect_routes_under_mollie_connect_tag(): void
     {
         $spec = $this->fetchSpec();
@@ -228,12 +202,6 @@ class ScrambleRouteDiscoveryTest extends TestCase
         }
     }
 
-    /**
-     * Regressie-vangst: bestaande Mollie-merchant-tags blijven onveranderd
-     * (geen onbedoelde #[Group]-attribuut-edits). Zonder deze test zou een
-     * accidentele wijziging in `Mollie · Payments` of `Mollie · Customers`
-     * tag-keten ongezien blijven.
-     */
     public function test_openapi_spec_preserves_existing_mollie_merchant_tags(): void
     {
         $spec = $this->fetchSpec();
@@ -254,9 +222,7 @@ class ScrambleRouteDiscoveryTest extends TestCase
         }
     }
 
-    /**
-     * @return array<string, mixed>
-     */
+    /** @return array<string, mixed> */
     private function fetchSpec(): array
     {
         $response = $this->getJson('/docs/api.json');

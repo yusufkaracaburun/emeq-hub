@@ -14,15 +14,6 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 
-/**
- * Spiegelt de referentiedata (grootboek/btw/dagboeken) van een Connection naar
- * `connection_accounting_refs` en leidt de default-mapping af. Async ná OAuth-connect
- * zodat de callback niet blokkeert op de reference-fetches; ook handmatig herbruikbaar
- * via POST /v1/accounting/sync.
- *
- * Loopt via de capability in plaats van rechtstreeks langs de Exact-klassen, zodat de
- * volgorde spiegelen-dan-afleiden op één plek staat.
- */
 final class SyncExactReferenceJob implements ShouldQueue
 {
     use Dispatchable;
@@ -37,9 +28,6 @@ final class SyncExactReferenceJob implements ShouldQueue
         try {
             $registry->syncsReferenceData($this->exactConnection)?->syncReferences($this->exactConnection);
         } catch (ProviderDisabledException) {
-            // De provider is uitgezet tussen connect en uitvoering. Dat is precies wat de
-            // kill-switch hoort te doen — geen exception die de job laat retryen en in
-            // failed_jobs eindigt.
             Log::info('accounting.reference_sync_skipped', [
                 'connection_id' => $this->exactConnection->id,
                 'provider' => $this->exactConnection->provider->value,

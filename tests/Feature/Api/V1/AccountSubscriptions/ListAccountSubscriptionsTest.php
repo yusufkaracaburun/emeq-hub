@@ -12,18 +12,6 @@ use App\Sanctum\TokenAbilities;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
-/**
- * Plan 07-06 Task 1 — feature-tests voor GET /v1/account-subscriptions.
- *
- * Bewijst:
- *  - filter op account_external_id retourneert alleen rijen van die Account
- *  - missing account_external_id → 422 met `error_code: account_external_id_required`
- *  - cross-Consumer account_external_id → 200 + lege list (info-disclosure-protectie, D-25)
- *  - sortering: laatst-aangemaakte sub eerst (latest())
- *  - read-only-token kan listen
- *  - **LOW #6**: write-only-token kan read-routes aanroepen (Sanctum CheckForAnyAbility
- *    OR-logic op `ability:mollie:read,mollie:write,*`-alias, D-10)
- */
 class ListAccountSubscriptionsTest extends TestCase
 {
     use RefreshDatabase;
@@ -47,7 +35,6 @@ class ListAccountSubscriptionsTest extends TestCase
         $response->assertOk()->assertJsonCount(1, 'data');
         $this->assertSame($accountA->id, $response->json('data.0.id'))
             ?: $this->assertNotNull($response->json('data.0.id'));
-        // Verifieer dat de eerste data-rij bij accountA hoort, niet bij accountB.
         $returnedSub = AccountSubscription::query()->where('account_id', $accountA->id)->firstOrFail();
         $this->assertSame($returnedSub->id, $response->json('data.0.id'));
     }
@@ -82,9 +69,6 @@ class ListAccountSubscriptionsTest extends TestCase
 
     public function test_list_with_other_consumer_account_external_id_returns_empty_list(): void
     {
-        // Info-disclosure-protectie: 200 + lege list i.p.v. 404 zodat aanwezigheid
-        // van het account bij een andere Consumer niet via status-code lekt
-        // (D-25 + 07-04-SUMMARY decision §"Index lege list voor unknown external_id").
         $consumerA = Consumer::factory()->create();
         $consumerB = Consumer::factory()->create();
         $accountB = Account::factory()->for($consumerB)->create(['external_id' => 'school-secret']);
@@ -142,9 +126,6 @@ class ListAccountSubscriptionsTest extends TestCase
 
     public function test_write_token_can_access_read_routes_returns_200_when_ability_includes_mollie_write(): void
     {
-        // LOW #6 — pin Sanctum CheckForAnyAbility OR-gedrag op read-routes.
-        // PAT met ABLE `mollie:write` (zonder `mollie:read`) → 200, bewijst
-        // dat de `ability:mollie:read,mollie:write,*`-alias OR-matched.
         $consumer = Consumer::factory()->create();
         $account = Account::factory()->for($consumer)->create(['external_id' => 'school-a']);
         Connection::factory()->forMollie()->active()->for($account)->create();

@@ -4,26 +4,8 @@ declare(strict_types=1);
 
 namespace App\Integrations\Mollie\Webhooks;
 
-/**
- * Value-object dat het uitkomst-contract tussen `WebhookPayloadRouter` /
- * Mollie-handlers en `MollieWebhookController` stolt (07-CONTEXT.md D-15/D-18).
- *
- * Drie statussen:
- *  - `ok`               — handler verwerkt, audit + fan-out vinden plaats
- *  - `skip`             — handler heeft niets te doen (bv. onbekende
- *                         `sub_*`-id of `mdt_*`-placeholder); audit-rij wel
- *                         schrijven voor diagnose; fan-out blijft staan
- *  - `anti_spoof_failed` — Mollie-resource-fetch faalde (404/auth-error);
- *                         audit-rij schrijven, géén fan-out (D-31 invariant
- *                         + bestaand Phase-5a-gedrag uit
- *                         `MollieWebhookAntiSpoofingTest`).
- */
 final readonly class WebhookHandlerResult
 {
-    /**
-     * Private-constructor-style: roep de static factories aan vanaf de
-     * handlers in plaats van `new WebhookHandlerResult(...)`.
-     */
     public function __construct(
         public string $status,
         public ?string $reason = null,

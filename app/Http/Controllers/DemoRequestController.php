@@ -15,12 +15,6 @@ use Illuminate\Support\Facades\Mail;
 use Inertia\Inertia;
 use Inertia\Response;
 
-/**
- * Publieke demo-aanvraag. De lead landt in demo_requests en is zichtbaar in de
- * admin; de melding per e-mail komt daar bovenop. Eerder was het mail-only, en
- * met de log-mailer verdween zo'n aanvraag spoorloos.
- * Géén auth — wel honeypot + throttle.
- */
 class DemoRequestController extends Controller
 {
     public function create(): Response
@@ -40,16 +34,11 @@ class DemoRequestController extends Controller
 
     public function store(StoreDemoRequestRequest $request): RedirectResponse
     {
-        // Honeypot: gevuld = bot. Stille no-op zodat we 'm niet tippen.
         if (! $request->filled('website')) {
-            // `privacy_accepted` is gevalideerd op `accepted` maar niet fillable;
-            // we leggen het akkoord vast als tijdstip.
             $demoRequest = DemoRequest::create($request->safe()->except('privacy_accepted') + [
                 'privacy_accepted_at' => now(),
             ]);
 
-            // De lead staat nu in de database; de melding is een gemak. Faalt
-            // die, dan is er niets verloren — vandaar best-effort.
             try {
                 Mail::to(config('mail.notify_address'))->send(new DemoRequestSubmitted($demoRequest));
             } catch (\Throwable $e) {

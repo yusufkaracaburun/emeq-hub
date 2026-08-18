@@ -14,10 +14,6 @@ use Saloon\Http\Faking\MockResponse;
 use Tests\Concerns\PrimesSnelstartTokenCache;
 use Tests\TestCase;
 
-/**
- * Bewijst HUB-05 SC-7: raw credentials en request-body verschijnen nergens
- * in een pass_through_calls-rij. Fingerprint-only.
- */
 class PassThroughAuditNoSecretsTest extends TestCase
 {
     use PrimesSnelstartTokenCache;
@@ -111,7 +107,6 @@ class PassThroughAuditNoSecretsTest extends TestCase
             }
         }
 
-        // fingerprint is wel gezet (12-char sha256-prefix), niet de body.
         $this->assertNotNull($row['request_fingerprint']);
         $this->assertMatchesRegularExpression('/^[a-f0-9]{12}$/', (string) $row['request_fingerprint']);
     }

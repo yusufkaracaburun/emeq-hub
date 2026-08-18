@@ -7,11 +7,6 @@ use App\Models\Consumer;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-/*
- * Debiteur in emeq's eigen boekhouding. Mag optioneel naar een Hub-`Consumer`
- * wijzen (de betalende klant die emeq al kent) — eenrichtings-link, nullOnDelete,
- * zodat dit financiële record het wissen van de operationele Consumer overleeft.
- */
 class Client extends Model
 {
     use BelongsToBooksCompany;

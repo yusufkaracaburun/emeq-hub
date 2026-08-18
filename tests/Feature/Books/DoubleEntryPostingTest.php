@@ -68,11 +68,9 @@ class DoubleEntryPostingTest extends TestCase
         $debit = $entries->firstWhere('type', JournalEntryType::Debit);
         $credit = $entries->firstWhere('type', JournalEntryType::Credit);
 
-        // Deposit: bank (Asset) debet, omzet credit.
         $this->assertSame($bank->account_id, $debit->account_id);
         $this->assertSame($revenue->id, $credit->account_id);
 
-        // Double-entry invariant: som debet == som credit.
         $this->assertSame(
             (int) $entries->where('type', JournalEntryType::Debit)->sum('amount'),
             (int) $entries->where('type', JournalEntryType::Credit)->sum('amount'),
@@ -87,8 +85,6 @@ class DoubleEntryPostingTest extends TestCase
 
         $this->expectException(RuntimeException::class);
 
-        // Deposit zonder grootboek-tegenrekening (account_id) → onbalanceerbaar.
-        // Niet stilletjes overslaan: hard falen i.p.v. een transactie zonder boeking.
         Transaction::create([
             'bank_account_id' => $bank->id,
             'type' => TransactionType::Deposit,
@@ -118,7 +114,6 @@ class DoubleEntryPostingTest extends TestCase
         $debit = $entries->firstWhere('type', JournalEntryType::Debit);
         $credit = $entries->firstWhere('type', JournalEntryType::Credit);
 
-        // Withdrawal: kosten (chart) debet, bank credit.
         $this->assertSame($expense->id, $debit->account_id);
         $this->assertSame($bank->account_id, $credit->account_id);
         $this->assertSame($debit->amount, $credit->amount);
@@ -138,7 +133,6 @@ class DoubleEntryPostingTest extends TestCase
             'description' => 'Handmatige memoriaalboeking',
         ]);
 
-        // type=journal → LedgerPoster post niet automatisch (handmatige entries volgen later).
         $this->assertSame(0, $txn->journalEntries()->count());
     }
 

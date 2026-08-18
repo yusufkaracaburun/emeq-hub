@@ -90,14 +90,6 @@ class MollieWebhookAntiSpoofingTest extends TestCase
         return Connection::factory()->forMollie()->active()->for($account)->create();
     }
 
-    /**
-     * Bind een Mollie-mock waarbij client()->payments->get($id) altijd $throwable gooit.
-     * Gebruikt een endpoint-stub die op het payments-property leeft van een echte
-     * MollieApiClient niet werkt (magic __get bouwt een nieuwe EndpointCollection elke call).
-     *
-     * In plaats daarvan mocken we direct het Mollie-wrapper-object zodat client() een
-     * stub-MollieApiClient-subclass returnt waar payments een vooraf-bepaalde stub is.
-     */
     private function bindMollieClientThatThrows(Throwable $throwable): void
     {
         $payments = new class($throwable)

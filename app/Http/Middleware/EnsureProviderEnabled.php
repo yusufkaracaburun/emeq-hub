@@ -9,15 +9,6 @@ use Illuminate\Http\Request;
 use Laravel\Pennant\Feature;
 use Symfony\Component\HttpFoundation\Response;
 
-/**
- * Kill-switch-middleware per partner-provider. Geeft 503 zonder upstream-call
- * als `provider-<provider>-enabled` op false staat.
- *
- * Gebruik via route alias: `->middleware('feature.provider:mollie')`.
- *
- * 503 ipv 4xx omdat een uitgeschakelde provider geen Consumer-fout is — het is
- * een tijdelijk Hub-side besluit (kill-switch bij partner-outage of rollout-gate).
- */
 final class EnsureProviderEnabled
 {
     public function handle(Request $request, Closure $next, string $provider): Response

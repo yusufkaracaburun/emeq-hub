@@ -16,28 +16,9 @@ use DateTimeImmutable;
 use DateTimeZone;
 use Throwable;
 
-/**
- * Exact-specifieke verrijking van het validate-rapport. Draait ná de provider-agnostische
- * DocumentInspector (gated op een Exact-connection) en voegt findings toe die de consumer
- * vóór de boek-POST laten zien of de boeking gaat slagen: is het BTW-tarief ingericht, staat
- * de relatie al in de administratie, en bestaan de opgegeven kostenplaats/-drager.
- *
- * Findings zijn geschreven voor de eindgebruiker die de factuur goedkeurt, niet voor de
- * integrator: geen VATCode/GUID/mirror-jargon in de tekst, wél de consequentie ("de boeking
- * wordt geweigerd") en de handeling die dat oplost. De machine-leesbare kant zit in `code`,
- * `current` en `suggestion`.
- *
- * Findings krijgen het prefix `exact.` om provider-specifieke enrichment te onderscheiden van
- * de agnostische validators. Muteert niets — een dry-run hoort read-only te zijn.
- */
 final class ExactReportEnricher
 {
-    /**
-     * Per regel-veld de mirror-soort + het label voor de finding-tekst. De veldnaam is
-     * tevens het finding-code-segment (`exact.cost_center.*`, `exact.cost_unit.*`).
-     *
-     * @var array<string, array{kind: string, label: string}>
-     */
+    /** @var array<string, array{kind: string, label: string}> */
     private const COST_DIMENSIONS = [
         'cost_center' => ['kind' => ConnectionAccountingRef::KIND_COST_CENTER, 'label' => 'Kostenplaats'],
         'cost_unit' => ['kind' => ConnectionAccountingRef::KIND_COST_UNIT, 'label' => 'Kostendrager'],
@@ -62,14 +43,6 @@ final class ExactReportEnricher
     }
 
     /**
-     * Een datum buiten elke boekperiode van de administratie levert bij het boeken
-     * `Verplicht: Boekjaar` op. Dat oordeel valt volledig aan Exact-kant, dus zonder deze
-     * finding meldt validate `valid: true` voor een document dat gegarandeerd geweigerd wordt.
-     *
-     * Zwijgt zodra de periodelijst onbekend is — een lege lijst betekent hier "niet kunnen
-     * kijken", niet "niets is boekbaar", en een blokkerende finding op een mislukte
-     * Exact-call zou elk document tegenhouden.
-     *
      * @param  array<string, mixed>  $payload
      * @return list<Finding>
      */
@@ -144,20 +117,18 @@ final class ExactReportEnricher
             $rate = Money::toFloat($line['tax_rate'] ?? null);
 
             if ($rate === null) {
-                continue; // ongeldige tax_rate flaggen de agnostische validators al
+                continue;
             }
 
             $treatment = TaxTreatment::tryFrom((string) ($line['tax_treatment'] ?? '')) ?? TaxTreatment::Standard;
             $key = $treatment->value.'|'.number_format($rate, 2, '.', '');
 
             if (isset($seen[$key])) {
-                continue; // één finding per distinct (behandeling, tarief)
+                continue;
             }
 
             $seen[$key] = true;
 
-            // Een gekoppeld tarief is goed nieuws zonder actie — de interne Exact-VATCode zegt
-            // de consument niets, dus geen finding. Alleen een ontbrekende koppeling is actionable.
             if ($this->resolver->vatCodeOrNull($rate, $treatment, $connection) !== null) {
                 continue;
             }
@@ -167,7 +138,7 @@ final class ExactReportEnricher
             $findings[] = new Finding(
                 code: 'exact.vat_code.unmapped',
                 severity: Severity::Warning,
-                blocking: true, // Exact weigert de boeking op een niet-ingericht tarief
+                blocking: true,
                 path: "lines.{$index}.tax_rate",
                 message: "BTW-tarief {$label} is nog niet ingericht voor deze administratie — de boeking wordt hierop geweigerd. Richt het tarief in of gebruik een tarief dat de administratie al kent.",
                 current: $line['tax_rate'] ?? null,
@@ -179,13 +150,6 @@ final class ExactReportEnricher
     }
 
     /**
-     * Spiegelt de relatie-resolutie-ladder van het schrijfpad (ExactRelationResolver) zodat
-     * de dry-run hetzelfde oordeelt als de boeking: pin → mirror op `external_id` → (company:
-     * KvK → btw → naam) → aanmaken. `person` slaat KvK/btw/naam over, net als de resolver.
-     *
-     * Read-only: deze methode schrijft nooit terug naar Exact — geen sleutel-writeback, geen
-     * rolpromotie, geen aanmaken. Een dry-run hoort geen bijwerking te hebben.
-     *
      * @param  array<string, mixed>  $payload
      * @return list<Finding>
      */
@@ -253,7 +217,6 @@ final class ExactReportEnricher
                 return [$this->relationMatched($label, $nameMatches[0]['name'], $nameMatches[0]['id'], $name)];
             }
         } catch (Throwable) {
-            // Een dry-run mag nooit breken op een live Exact-call → geen finding.
             return [];
         }
 
@@ -275,14 +238,7 @@ final class ExactReportEnricher
         );
     }
 
-    /**
-     * Meer dan één treffer op KvK of btw-nummer — dezelfde grens als de resolver, die
-     * daar hard op stopt (409 `relation.ambiguous`). De dry-run spiegelt dat als
-     * blocking, met de kandidaatnamen in de tekst zodat de consument meteen ziet
-     * waartussen te kiezen.
-     *
-     * @param  list<array{id: string, name: string}>  $matches
-     */
+    /** @param  list<array{id: string, name: string}>  $matches */
     private function relationAmbiguous(string $label, string $on, array $matches): Finding
     {
         $names = implode(', ', array_map(fn (array $match): string => $match['name'], $matches));
@@ -298,10 +254,6 @@ final class ExactReportEnricher
         );
     }
 
-    /**
-     * De relatie ontbreekt — de Hub maakt 'm bij het boeken zelf aan. Info, niet
-     * blocking: dat is de ladder z'n laatste stap, geen weigering.
-     */
     private function relationNew(string $label, ?string $name): Finding
     {
         return new Finding(
@@ -316,11 +268,6 @@ final class ExactReportEnricher
     }
 
     /**
-     * Kostenplaats/-drager-Codes (cost_center/cost_unit) dragen direct op de boeking en worden
-     * tegen de Exact-mirror gevalideerd. Dry-run-spiegel van de boeking: een onbekende Code →
-     * `unmapped`-Warning (de boeking zou er met een 422 op weigeren), een bekende → `matched`-Info.
-     * Eén finding per distinct (veld, Code).
-     *
      * @param  array<string, mixed>  $payload
      * @return list<Finding>
      */
@@ -345,7 +292,7 @@ final class ExactReportEnricher
                 $key = $field.'|'.$code;
 
                 if (isset($seen[$key])) {
-                    continue; // één finding per distinct (veld, Code)
+                    continue;
                 }
 
                 $seen[$key] = true;
@@ -366,7 +313,7 @@ final class ExactReportEnricher
                     : new Finding(
                         code: "exact.{$field}.unmapped",
                         severity: Severity::Warning,
-                        blocking: true, // Exact weigert de boeking op een onbekende Code
+                        blocking: true,
                         path: $path,
                         message: "{$dimension['label']} '{$code}' bestaat niet in de administratie — de boeking wordt hierop geweigerd. Corrigeer de {$this->lowerLabel($dimension['label'])} of voeg 'm toe in de administratie; is die net aangemaakt, ververs dan eerst de gegevens.",
                         current: $code,
@@ -378,10 +325,6 @@ final class ExactReportEnricher
         return $findings;
     }
 
-    /**
-     * Afnemer (debtor) of leverancier (creditor) — de canonical party-rol bepaalt het
-     * woord; onbekende/ontbrekende rol valt terug op het neutrale "Relatie".
-     */
     private function partyLabel(?string $role): string
     {
         return match ($role) {
@@ -406,9 +349,6 @@ final class ExactReportEnricher
         return $value === null || trim($value) === '';
     }
 
-    /**
-     * Een scalar (string/int) regel-veld naar een getrimde non-lege string, anders null.
-     */
     private function scalarString(mixed $value): ?string
     {
         if (! is_string($value) && ! is_int($value)) {

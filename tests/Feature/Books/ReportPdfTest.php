@@ -36,7 +36,6 @@ class ReportPdfTest extends TestCase
         $boekhouder->assignRole('boekhouder');
         $this->actingAs($boekhouder);
 
-        // Eén geboekte verkoopfactuur → beweging in W&V + Balans.
         $client = Client::create(['name' => 'Acme BV']);
         $invoice = Invoice::create(['client_id' => $client->id, 'invoice_number' => '2026-001', 'status' => 'sent', 'date' => now()]);
         $invoice->lines()->create(['description' => 'Werk', 'quantity' => 1, 'unit_price' => 10000, 'tax_rate' => 21]);

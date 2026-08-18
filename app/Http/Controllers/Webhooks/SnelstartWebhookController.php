@@ -13,18 +13,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 
-/**
- * Snelstart webhook-ingress (HUB-06).
- *
- * Aangeroepen ná `verify.snelstart.signature` (SDK-side middleware) — de signature
- * is hier al gevalideerd. Parse de payload, check idempotency, resolve de Connection
- * op `administratieId`, audit via de provider-agnostische InboundWebhookRecorder en
- * dispatch de async fan-out.
- *
- *  - Onbekende `administratieId` → 200 + unknown_tenant-audit (anti-retry-storm).
- *  - Audit: `inbound_webhook_events` (metadata-only), niet `pass_through_calls`.
- *  - Fan-out async (Spatie webhook-server) zodat we <500ms ack'en.
- */
 final class SnelstartWebhookController extends Controller
 {
     public function __construct(private readonly InboundWebhookRecorder $recorder) {}
@@ -51,9 +39,6 @@ final class SnelstartWebhookController extends Controller
             return response('', 200);
         }
 
-        // Zelfde reden als bij Exact: één administratie kan door meerdere Accounts
-        // gekoppeld zijn, en `->first()` koos er dan willekeurig één — over
-        // Consumer-grenzen heen een levering aan de verkeerde partij.
         /** @var list<Connection> $connections */
         $connections = Connection::query()
             ->where('provider', Provider::Snelstart->value)

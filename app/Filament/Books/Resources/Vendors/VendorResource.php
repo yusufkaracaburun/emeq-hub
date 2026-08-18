@@ -17,9 +17,6 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 
-/*
- * Leveranciers (crediteuren) van emeq's eigen boekhouding. Géén Hub-equivalent.
- */
 class VendorResource extends Resource
 {
     use GatedToBoekhouding;

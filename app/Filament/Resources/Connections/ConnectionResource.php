@@ -64,8 +64,6 @@ class ConnectionResource extends Resource
 
     public static function form(Schema $schema): Schema
     {
-        // Read-only resource: form() bestaat om Filament's contract te honoreren
-        // maar exposeert niets — alle weergave loopt via infolist().
         return $schema->components([]);
     }
 
@@ -140,12 +138,7 @@ class ConnectionResource extends Resource
         ]);
     }
 
-    /**
-     * Kopstrip op de detailpagina: de vier feiten waarop je een koppeling beoordeelt,
-     * zonder een tab te hoeven openen.
-     *
-     * @return list<Section>
-     */
+    /** @return list<Section> */
     public static function statusStripSchema(Connection $record): array
     {
         return StatusStrip::make([
@@ -168,9 +161,7 @@ class ConnectionResource extends Resource
         ]);
     }
 
-    /**
-     * @return list<Section>
-     */
+    /** @return list<Section> */
     public static function accessSchema(Connection $record): array
     {
         $resources = ProviderAccess::describeResources($record->provider);
@@ -200,9 +191,7 @@ class ConnectionResource extends Resource
         ];
     }
 
-    /**
-     * @return list<Section>
-     */
+    /** @return list<Section> */
     public static function accountingMappingSchema(Connection $record): array
     {
         $mapping = $record->metadata['accounting_mapping'] ?? [];
@@ -242,12 +231,7 @@ class ConnectionResource extends Resource
         ];
     }
 
-    /**
-     * Webhook-tab. Toont de stand zoals de Hub die kent — geen live-call bij het
-     * openen van de pagina; het beheer-modal haalt de stand bij Exact op.
-     *
-     * @return list<Section>
-     */
+    /** @return list<Section> */
     public static function webhookSubscriptionsSchema(Connection $record): array
     {
         $stored = (array) (($record->metadata ?? [])['exact_webhooks'] ?? []);
@@ -342,11 +326,6 @@ class ConnectionResource extends Resource
             ->toolbarActions([]);
     }
 
-    /**
-     * Revoke-actie — gedeeld door de lijst-rij (icoon) en de Connection-detail-header.
-     * Roept de upstream OAuth-revoke aan en zet revoked_at lokaal; alleen zichtbaar
-     * voor een nog-actieve OAuth-connection.
-     */
     public static function revokeAction(): Action
     {
         return Action::make('revoke')

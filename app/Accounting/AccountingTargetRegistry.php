@@ -14,12 +14,6 @@ use Illuminate\Contracts\Container\Container;
 use InvalidArgumentException;
 use Laravel\Pennant\Feature;
 
-/**
- * Resolved de juiste AccountingTarget-adapter per provider. Spiegel van
- * OAuthFlowRegistry: register + dezelfde Pennant-kill-switch (`provider-{p}-enabled`).
- * Alleen boekhoud-providers worden geregistreerd — `supports()` onderscheidt zo
- * een accounting-Connection van bv. een Mollie-betaal-Connection.
- */
 final class AccountingTargetRegistry
 {
     /** @var array<string, class-string<AccountingTarget>> */
@@ -27,9 +21,7 @@ final class AccountingTargetRegistry
 
     public function __construct(private readonly Container $container) {}
 
-    /**
-     * @param  class-string<AccountingTarget>  $implementation
-     */
+    /** @param  class-string<AccountingTarget>  $implementation */
     public function register(string $provider, string $implementation): void
     {
         $this->targets[$provider] = $implementation;
@@ -61,24 +53,12 @@ final class AccountingTargetRegistry
         return array_keys($this->targets);
     }
 
-    /**
-     * De kill-switch als vraag in plaats van als exception — `for()` gebruikt 'm ook,
-     * zodat er één plek is waar de vlagnaam staat.
-     */
     public function enabled(string $provider): bool
     {
         return Feature::active("provider-{$provider}-enabled");
     }
 
-    /**
-     * Wat de adapter van deze Connection kan.
-     *
-     * Reflectie over de geregistreerde class-string: geen instantiatie, geen
-     * container, geen kill-switch. Een uitgeschakelde provider *declareert* nog
-     * steeds wat hij kan — beschikbaarheid is de aparte as die `enabled()` beantwoordt.
-     *
-     * @return list<Capability>
-     */
+    /** @return list<Capability> */
     public function capabilitiesFor(Connection $connection): array
     {
         $implementation = $this->targets[$connection->provider->value] ?? null;
@@ -93,12 +73,7 @@ final class AccountingTargetRegistry
         ));
     }
 
-    /**
-     * `null` betekent "deze provider kan dit niet" — de aanroeper beslist wat dat
-     * oplevert. Loopt via `for()`, dus de kill-switch geldt gewoon.
-     *
-     * @throws ProviderDisabledException
-     */
+    /** @throws ProviderDisabledException */
     public function syncsReferenceData(Connection $connection): ?SyncsReferenceData
     {
         $target = $this->targetFor($connection);
@@ -106,9 +81,7 @@ final class AccountingTargetRegistry
         return $target instanceof SyncsReferenceData ? $target : null;
     }
 
-    /**
-     * @throws ProviderDisabledException
-     */
+    /** @throws ProviderDisabledException */
     public function enrichesValidation(Connection $connection): ?EnrichesValidation
     {
         $target = $this->targetFor($connection);

@@ -165,9 +165,7 @@ class PassThroughErrorMappingTest extends TestCase
         $this->assertSame(504, $row->status);
     }
 
-    /**
-     * @return array{0: Consumer, 1: string, 2: Account}
-     */
+    /** @return array{0: Consumer, 1: string, 2: Account} */
     private function setupSnelstartConsumer(): array
     {
         $consumer = Consumer::factory()->create();

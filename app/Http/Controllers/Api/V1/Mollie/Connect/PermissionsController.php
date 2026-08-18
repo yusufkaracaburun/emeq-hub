@@ -14,7 +14,6 @@ class PermissionsController extends AbstractMollieConnectPassThroughController
     public function index(Request $request): Response
     {
         return $this->handle($request, '/v2/permissions', function (Request $r) {
-            // Vendor-method-name: $client->permissions->list() (geen ::all() in mollie/mollie-api-php).
             $collection = $this->dispatchMollieCall(
                 fn () => $this->client($r)->permissions->list(),
             );

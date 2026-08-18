@@ -6,17 +6,12 @@ use App\Models\Account;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-/**
- * @mixin Account
- */
+/** @mixin Account */
 class AccountResource extends JsonResource
 {
-    /** Geen `data`-envelope — zie {@see ConnectionResource::$wrap}. */
     public static $wrap = null;
 
-    /**
-     * @return array<string, mixed>
-     */
+    /** @return array<string, mixed> */
     public function toArray(Request $request): array
     {
         return [

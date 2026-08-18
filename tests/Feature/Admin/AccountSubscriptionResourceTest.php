@@ -17,14 +17,6 @@ use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
-/**
- * Plan 09-08 Task 3 — feature-tests voor AccountSubscriptionResource (read-only).
- *
- * Bewijst:
- *  - List-page toont subscriptions in verschillende statuses voor een staff-User
- *  - Status-filter narrowt correct naar één rij
- *  - View-page toont Mollie-IDs (D-02: opaque refs, geen secrets)
- */
 class AccountSubscriptionResourceTest extends TestCase
 {
     use RefreshDatabase;

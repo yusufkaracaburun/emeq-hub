@@ -17,12 +17,6 @@ use Filament\Tables\Table;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
-/*
- * Bijlagen op Invoice/Bill. Gedeeld door beide resources. Bestanden op een
- * private disk (financiële documenten, AVG); download streamt met auth (het
- * paneel is al gate'd op boekhouder/super-admin). Size/mime/uploader vult het
- * Attachment-model zelf in.
- */
 class AttachmentsRelationManager extends RelationManager
 {
     protected static string $relationship = 'attachments';

@@ -121,9 +121,6 @@ class BooksAttachmentTest extends TestCase
             ])
             ->assertHasNoActionErrors();
 
-        // De RelationManager-create-actie koppelt een bijlage-rij aan de factuur.
-        // De metadata-afleiding (size/mime/uploader) is met een echt bestand getest
-        // in test_attachment_persists_and_derives_metadata.
         $this->assertSame(1, $invoice->attachments()->count());
         $attachment = $invoice->attachments()->first();
         $this->assertSame(Invoice::class, $attachment->attachable_type);

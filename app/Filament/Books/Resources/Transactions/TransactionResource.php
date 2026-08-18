@@ -24,13 +24,6 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
-/*
- * Kas/bank-boekingen (deposit/withdrawal/transfer) van de Books-module. Een
- * Transaction post bij create via de observer een gebalanceerde grootboek-boeking
- * → daarom immutable: alleen aanmaken + bekijken, géén edit/delete (corrigeren =
- * tegenboeking). Journaalposten (type=journal) horen in het memoriaal-dagboek
- * (ManualJournalResource) en worden hier uitgescoped.
- */
 class TransactionResource extends Resource
 {
     use GatedToBoekhouding;
@@ -66,9 +59,7 @@ class TransactionResource extends Resource
         return TransactionInfolist::configure($schema);
     }
 
-    /**
-     * @return list<Section>
-     */
+    /** @return list<Section> */
     public static function statusStripSchema(Transaction $record): array
     {
         /** @var BankAccount|null $bankAccount */

@@ -14,11 +14,6 @@ use Saloon\Http\PendingRequest;
 use Tests\Concerns\PrimesSnelstartTokenCache;
 use Tests\TestCase;
 
-/**
- * Bewijst T-05b-09 mitigation: alleen de whitelist (Accept, Content-Type,
- * If-Match, If-None-Match) gaat door naar Snelstart. Authorization,
- * X-Account-Id, Cookie en User-Agent worden gestript.
- */
 class HeaderForwardingTest extends TestCase
 {
     use PrimesSnelstartTokenCache;
@@ -52,9 +47,6 @@ class HeaderForwardingTest extends TestCase
 
         $forwarded = $this->lowercasedForwardedHeaders();
 
-        // De SDK voegt zijn eigen Bearer toe (Snelstart-token uit cache); die
-        // mag in headers staan. De Hub's Consumer-PAT echter NIET — die zou
-        // Snelstart's auth-laag laten falen.
         $this->assertNotEquals("bearer {$token}", $forwarded['authorization'] ?? null);
     }
 
@@ -85,8 +77,6 @@ class HeaderForwardingTest extends TestCase
         $forwarded = $this->lowercasedForwardedHeaders();
         $this->assertArrayNotHasKey('cookie', $forwarded);
 
-        // Saloon zet zelf een User-Agent (Guzzle default); wij eisen alleen
-        // dat de consumer-string er niet doorheen sneakt.
         $ua = $forwarded['user-agent'] ?? '';
         $this->assertStringNotContainsString('consumer/app 1.0', is_array($ua) ? implode(',', $ua) : (string) $ua);
     }
@@ -109,9 +99,7 @@ class HeaderForwardingTest extends TestCase
         return $consumer->createToken('test', [TokenAbilities::SNELSTART_READ])->plainTextToken;
     }
 
-    /**
-     * @return array<string, mixed>
-     */
+    /** @return array<string, mixed> */
     private function lowercasedForwardedHeaders(): array
     {
         $out = [];

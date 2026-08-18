@@ -7,14 +7,10 @@ use App\Models\AccountSubscription;
 use App\Models\Connection;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-/**
- * @extends Factory<AccountSubscription>
- */
+/** @extends Factory<AccountSubscription> */
 class AccountSubscriptionFactory extends Factory
 {
-    /**
-     * @return array<string, mixed>
-     */
+    /** @return array<string, mixed> */
     public function definition(): array
     {
         $account = Account::factory();

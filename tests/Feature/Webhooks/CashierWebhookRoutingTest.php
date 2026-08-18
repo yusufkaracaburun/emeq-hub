@@ -26,8 +26,6 @@ class CashierWebhookRoutingTest extends TestCase
 
         $response = $this->postJson("/webhooks/mollie/{$connection->id}", ['id' => 'tr_test']);
 
-        // Phase 5a's MollieWebhookController hard-fail't op empty mollie-secret.
-        // De cashier-secret die WEL gezet is mag GEEN invloed hebben.
         $response->assertStatus(500);
         $response->assertJsonPath('error', 'webhook_misconfigured');
     }

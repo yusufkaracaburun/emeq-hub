@@ -17,11 +17,6 @@ use Spatie\WebhookServer\CallWebhookJob;
 use Tests\Concerns\BindsFakeAccountingReferences;
 use Tests\TestCase;
 
-/**
- * Het correlatie-id moet de hele keten overleven: consumer-request → audit-rij →
- * partner-call → resultaat-webhook. Zonder deze dekking valt de keten stil op de
- * eerste plek waar iemand vergeet 'm door te geven.
- */
 class RequestIdCorrelationTest extends TestCase
 {
     use BindsFakeAccountingReferences;
@@ -73,9 +68,7 @@ class RequestIdCorrelationTest extends TestCase
         return [$consumer, $connection];
     }
 
-    /**
-     * @return array<string, mixed>
-     */
+    /** @return array<string, mixed> */
     private function salesInvoicePayload(): array
     {
         return [
@@ -114,10 +107,6 @@ class RequestIdCorrelationTest extends TestCase
         ]);
     }
 
-    /**
-     * De audit-writer weet niets van correlatie — de model-hook vult 'm. Deze test
-     * bewijst dat de hook vuurt in plaats van dat één writer het toevallig doet.
-     */
     public function test_request_id_is_generated_when_the_consumer_sends_none(): void
     {
         MockClient::global([

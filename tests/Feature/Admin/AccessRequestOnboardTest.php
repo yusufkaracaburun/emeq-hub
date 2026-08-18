@@ -14,10 +14,6 @@ use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
-/**
- * De loop van koppel-aanvraag → OnboardConsumer: prefill via ?from_request,
- * en bij submit de aanvraag koppelen aan de nieuwe Consumer + op 'handled' zetten.
- */
 class AccessRequestOnboardTest extends TestCase
 {
     use RefreshDatabase;
@@ -35,9 +31,7 @@ class AccessRequestOnboardTest extends TestCase
         return $user;
     }
 
-    /**
-     * @return array<string, mixed>
-     */
+    /** @return array<string, mixed> */
     private function snelstartConnection(string $idSuffix): array
     {
         return [

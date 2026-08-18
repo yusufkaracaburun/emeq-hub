@@ -13,11 +13,6 @@ use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
-/**
- * De afwijs-tak van de koppel-intake: een lead die we niet onboarden krijgt
- * status 'declined' in plaats van 'handled', zodat de inbox-filter klopt en
- * de onboard-actie er niet meer op kan.
- */
 class AccessRequestDeclineActionTest extends TestCase
 {
     use RefreshDatabase;

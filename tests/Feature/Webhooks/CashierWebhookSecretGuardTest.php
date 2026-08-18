@@ -44,17 +44,10 @@ class CashierWebhookSecretGuardTest extends TestCase
 
     public function test_set_secret_passes_guard_and_does_not_write_misconfigured_audit(): void
     {
-        // De guard schrijft alleen een audit-rij bij hard-fail (empty/null secret).
-        // Bij gezette secret moet de request DE GUARD PASSEREN. Wat Cashier's eigen
-        // WebhookController daarna doet (Mollie API call → kan 500'en zonder echte
-        // test-mode key) is voor plan 06-07 (integration tests met echte key).
-        // Wat WIJ hier asserteren: guard heeft geen audit-rij geschreven en de
-        // request bereikte de downstream-handler (= URL was niet 404).
         config(['services.cashier.webhook_secret' => 'whsec_cashier_test_abc']);
 
         $this->postJson('/cashier/webhook', ['id' => 'tr_test_xyz']);
 
-        // Audit-rij voor misconfigured mag NIET bestaan.
         $misconfigured = InboundWebhookEvent::query()
             ->where('provider', 'cashier')
             ->where('outcome', 'misconfigured')

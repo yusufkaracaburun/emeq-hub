@@ -10,17 +10,6 @@ use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
-/**
- * Plan 09-10: D-05 RBAC-gate-enforcement op UserResource.
- *
- * Bewijst:
- *  - staff-User (zonder super-admin-rol) → 403 op /admin/users (Filament canAccess fail)
- *  - super-admin-User → 200 op /admin/users
- *  - staff-User op /admin → response bevat geen UserResource-nav-link
- *
- * Rollen direct via Role::firstOrCreate (niet via EmeqStaffSeeder) — koppelt gate-test
- * los van seeder-test (zelfde pattern als PanelAccessTest).
- */
 class PermissionGatingTest extends TestCase
 {
     use RefreshDatabase;

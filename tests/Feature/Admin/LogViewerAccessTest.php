@@ -9,10 +9,6 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
-/**
- * opcodesio/log-viewer op /log-viewer — gated via LogViewer::auth()
- * (AppServiceProvider::boot) op de super-admin-rol.
- */
 class LogViewerAccessTest extends TestCase
 {
     use RefreshDatabase;

@@ -4,15 +4,8 @@ declare(strict_types=1);
 
 namespace App\Accounting\Validation\Support;
 
-/**
- * Numerieke helpers voor de validators. Leest waarden defensief uit ongesaneerde
- * draft-input en vergelijkt met een centtolerantie (OCR levert floats).
- */
 final class Money
 {
-    /**
-     * Coerce naar float, of null als de waarde niet numeriek is (OCR-rotzooi).
-     */
     public static function toFloat(mixed $value): ?float
     {
         if (is_int($value) || is_float($value)) {

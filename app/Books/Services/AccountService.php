@@ -7,12 +7,6 @@ use App\Books\Enums\JournalEntryType;
 use App\Books\Models\Account;
 use App\Books\Models\JournalEntry;
 
-/*
- * Saldo-berekening over de journaalposten. De kern-regel
- * (calculateNetMovementByCategory) volgt het dubbel-boekhouden-teken per
- * AccountCategory; bedragen zijn integer-centen (geen Money-VO) en de query loopt
- * over de books_-tabellen.
- */
 class AccountService
 {
     public function debitBalance(Account $account, string $startDate, string $endDate): int
@@ -34,10 +28,6 @@ class AccountService
         );
     }
 
-    /**
-     * Cumulatief saldo vóór $startDate. Alleen zinvol voor reële rekeningen;
-     * nominale rekeningen (revenue/expense) starten elke periode op nul.
-     */
     public function startingBalance(Account $account, string $startDate): int
     {
         if ($account->category->isNominal()) {

@@ -17,7 +17,7 @@ class GeographyClassifierTest extends TestCase
 
         $this->assertCount(1, $findings);
         $this->assertSame('geography.country_mismatch', $findings[0]->code);
-        $this->assertFalse($findings[0]->blocking); // advies; geen kruischeck op het boekpad
+        $this->assertFalse($findings[0]->blocking);
     }
 
     public function test_matching_countries_produce_no_finding(): void

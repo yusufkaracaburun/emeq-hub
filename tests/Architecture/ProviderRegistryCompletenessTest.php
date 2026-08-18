@@ -12,39 +12,19 @@ use App\Integrations\Webhooks\CanonicalEntityRegistry;
 use App\Integrations\Webhooks\CanonicalEventRegistry;
 use Tests\TestCase;
 
-/**
- * De registries vallen bewust zacht terug wanneer een provider ontbreekt — een
- * vergeten registratie mag geen webhook of partner-fout laten sneuvelen. De prijs
- * daarvan is dat het gat stil blijft. Deze tests zijn waar het luid wordt.
- *
- * Een nieuwe Provider-enum-case breekt de bouw tot iemand per registry beslist:
- * registreren, of hier vastleggen waarom niet.
- */
 final class ProviderRegistryCompletenessTest extends TestCase
 {
-    /**
-     * Providers zonder OAuth-redirect-flow, met reden.
-     *
-     * @var array<string, string>
-     */
+    /** @var array<string, string> */
     private const OAUTH_EXCEPTIONS = [
         'Snelstart' => 'authenticeert met grant_type=clientkey, zonder redirect-flow',
     ];
 
-    /**
-     * Providers die geen boekhoudkoppeling zijn, met reden.
-     *
-     * @var array<string, string>
-     */
+    /** @var array<string, string> */
     private const ACCOUNTING_EXCEPTIONS = [
         'Mollie' => 'betaalprovider — boekt niets',
         'Snelstart' => 'boekhoudkoppeling nog niet gebouwd',
     ];
 
-    /**
-     * Elke provider praat HTTP en kan dus falen. Zonder mapper landt een
-     * inhoudelijke afwijzing als generieke 502 bij de consumer.
-     */
     public function test_elke_provider_heeft_een_foutmapper(): void
     {
         $registry = $this->app->make(UpstreamErrorMapperRegistry::class);
@@ -58,10 +38,6 @@ final class ProviderRegistryCompletenessTest extends TestCase
         }
     }
 
-    /**
-     * Zonder resolver krijgt de consumer `unmapped` in de envelope: de webhook
-     * komt aan, maar zegt niets.
-     */
     public function test_elke_provider_vertaalt_zijn_webhooks(): void
     {
         $registry = $this->app->make(CanonicalEventRegistry::class);
@@ -75,11 +51,6 @@ final class ProviderRegistryCompletenessTest extends TestCase
         }
     }
 
-    /**
-     * Zonder resolver levert elke webhook van deze partner `entity_id` en `action`
-     * als `null` — geen crash, maar wel een consumer die weer zelf moet gaan
-     * gissen naar wélk record wijzigde.
-     */
     public function test_elke_provider_beschrijft_zijn_gewijzigde_entity(): void
     {
         $registry = $this->app->make(CanonicalEntityRegistry::class);
@@ -145,10 +116,6 @@ final class ProviderRegistryCompletenessTest extends TestCase
         }
     }
 
-    /**
-     * De kill-switch komt uit config/hub-providers.php; een enum-case zonder
-     * config-key levert een feature-flag die nooit aan kan staan.
-     */
     public function test_elke_provider_staat_in_de_provider_config(): void
     {
         $configured = array_keys(config('hub-providers'));

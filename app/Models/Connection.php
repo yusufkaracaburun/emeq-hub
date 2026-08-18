@@ -15,10 +15,6 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 
 /**
- * Statische analyse leest de casts uit {@see Connection::casts()} niet en valt terug
- * op het kolomtype uit de migratie — daardoor las `provider` als string en `metadata`
- * als string|null. Deze declaraties zetten dat recht.
- *
  * @property Provider $provider
  * @property array<string, mixed>|null $metadata
  * @property array<int, string>|null $scopes
@@ -51,11 +47,6 @@ class Connection extends Model
     /** @use HasFactory<ConnectionFactory> */
     use HasFactory;
 
-    /**
-     * Het voorvoegsel maakt in een log of een support-gesprek meteen duidelijk
-     * waar een id bij hoort, en voorkomt dat een consumer 'm verwart met de
-     * `X-Account-Id` die hij zelf aanlevert.
-     */
     public const PUBLIC_ID_PREFIX = 'con_';
 
     protected static function booted(): void
@@ -90,15 +81,6 @@ class Connection extends Model
         return $this->hasMany(ConnectionAccountingRef::class);
     }
 
-    /**
-     * Reuse-or-create de (account, provider)-connection voor een OAuth-init.
-     * Eén rij per (account, provider): voorkomt gestapelde pending-rijen bij
-     * herhaalde connect-pogingen. Een al-active connection wordt op dezelfde
-     * rij her-gekoppeld (status terug naar 'pending'); de bestaande tokens
-     * blijven staan tot de callback nieuwe levert, zodat een afgebroken
-     * re-link een werkende connectie niet weggooit (Prune skipt rijen mét
-     * access_token).
-     */
     public static function startOAuthFlow(
         Account $account,
         Provider $provider,
@@ -115,9 +97,6 @@ class Connection extends Model
             'oauth_state' => $state,
             'oauth_state_expires_at' => now()->addMinutes(30),
             'oauth_return_url' => $returnUrl,
-            // Hergebruik van een eerder losgekoppelde row: de revoke-markering
-            // wissen, anders blijft de connection na reconnect 'active' mét
-            // revoked_at en faalt een volgende DELETE op de revoked-guard (404).
             'revoked_at' => null,
         ])->save();
 
@@ -143,9 +122,7 @@ class Connection extends Model
         return $secret ? substr(hash('sha256', (string) $secret), 0, 12) : null;
     }
 
-    /**
-     * @return array<string, string>
-     */
+    /** @return array<string, string> */
     protected function casts(): array
     {
         return [

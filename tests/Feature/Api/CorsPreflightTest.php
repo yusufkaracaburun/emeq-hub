@@ -17,20 +17,15 @@ class CorsPreflightTest extends TestCase
         $this->assertStringContainsString('POST', (string) $response->headers->get('Access-Control-Allow-Methods'));
     }
 
-    /**
-     * @return array<string, array{0: string, 1: bool}>
-     */
+    /** @return array<string, array{0: string, 1: bool}> */
     public static function originProvider(): array
     {
         return [
-            // Elke https-origin mag — multi-tenant consumers (emeq.nl, planny.nl,
-            // …) werken zonder per-consumer config. De PAT is de security-grens.
             'tenant-subdomein emeq' => ['https://bob.emeq.nl', true],
             'consumer-admin emeq' => ['https://admin.emeq.nl', true],
             'andere consumer planny' => ['https://admin.planny.nl', true],
             'tenant van andere consumer' => ['https://klant.planny.nl', true],
             'willekeurige https-origin' => ['https://app.willekeurig.example', true],
-            // Plain-http (anders dan de expliciete dev-host) wordt geweigerd.
             'non-tls geweigerd' => ['http://bob.emeq.nl', false],
         ];
     }

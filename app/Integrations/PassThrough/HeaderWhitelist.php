@@ -6,17 +6,6 @@ namespace App\Integrations\PassThrough;
 
 use Illuminate\Http\Request;
 
-/**
- * Kopieert alleen de expliciet toegestane headers uit het consumer-request.
- *
- * Whitelist boven blacklist: een nieuwe Hub-header lekt zo niet vanzelf naar een
- * partner. Auth-headers zet elke SDK zelf via de credential-resolver — die mogen
- * nooit uit het inkomende request komen.
- *
- * Wat een provider toestaat verschilt (Snelstart en Exact kennen ETag-conditionals,
- * Mollie niet); de filterlus was drie keer dezelfde. Die staat nu hier, zodat per
- * provider alleen de lijst overblijft — het enige wat er te beslissen valt.
- */
 final class HeaderWhitelist
 {
     /**

@@ -16,7 +16,6 @@ class EditInvoice extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            // Een geboekte factuur kun je niet verwijderen (zou het grootboek wees achterlaten).
             DeleteAction::make()
                 ->hidden(fn (Invoice $record): bool => $record->isPosted()),
         ];

@@ -167,11 +167,6 @@ class StoreConnectionTest extends TestCase
             ->assertCreated();
     }
 
-    /**
-     * De key-based shape kent geen OAuth-callback die de administratie ophaalt, dus de
-     * consumer levert 'm mee. Zonder deze waarde resolveert SnelstartWebhookController
-     * de Connection niet en valt elke inkomende webhook als unknown_tenant weg.
-     */
     public function test_administratie_id_is_persisted_so_snelstart_webhooks_resolve(): void
     {
         [$consumer, $token] = $this->consumerWithToken([TokenAbilities::SNELSTART_WRITE]);

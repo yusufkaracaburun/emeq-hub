@@ -81,7 +81,6 @@ class ManualJournalResourceTest extends TestCase
         $txn = Transaction::firstOrFail();
 
         $this->assertSame(TransactionType::Journal, $txn->type);
-        // Euro-invoer → integer-centen; carrier-bedrag = Σ debet.
         $this->assertSame(10000, $txn->amount);
         $this->assertSame(2, $txn->journalEntries()->count());
         $this->assertSame(

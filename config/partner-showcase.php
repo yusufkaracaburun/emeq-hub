@@ -2,37 +2,6 @@
 
 declare(strict_types=1);
 
-/*
- * Publieke /partners-showcase: marketing-copy per provider, gescheiden van de
- * credential-metadata in config/hub-providers.php. Een provider verschijnt op
- * de showcase als hij in BEIDE configs staat (bestaat én heeft copy).
- *
- * Capabilities/connect-stappen/cURL moeten exact kloppen met de echte
- * Hub-endpoints (.ai/rules/global.md: geen verzonnen partner-features). Géén
- * tenant-data hier — puur statische productbeschrijving.
- *
- * Vorm per provider:
- *   label         human-readable provider-naam
- *   tagline       één regel onder de titel
- *   summary       korte alinea
- *   category      'Boekhouden' | 'Betalingen' | …
- *   logo          ?string  pad naar officieel SVG-logo (bv. '/img/partners/exact.svg').
- *                 null = de UI toont een merk-veilige monogram-tegel tot het echte
- *                 logo in public/img/partners/ staat.
- *   brand         ?string  hex-accent uit de huisstijl (bv. '#E2001A'). null = amber-fallback.
- *   live          ?bool    true = productie-klaar; alleen deze partners staan in de
- *                 "Nu live met"-strip op de homepage. Ontbreekt = false.
- *   capabilities  list<array{title,description}>
- *   endpoints     ?list<array{method,path,target,description}>  Hub→partner endpoint-kaart (optioneel)
- *   connect_steps list<string>
- *   example_curl  ?string  (null = geen snippet)
- *   docs_url      ?string  officiële API-/developer-documentatie van de partner
- *   meta_description ?string  ~155 tekens voor de zoekresultaat-snippet.
- *                 Ontbreekt = summary afgekapt, wat midden in een woord kan
- *                 eindigen. Voor live providers dus invullen.
- *   website_url   ?string  officiële partner-website
- *   support_url   ?string  officieel support-portaal van de partner
- */
 return [
     'exact' => [
         'label' => 'Exact Online',
@@ -172,8 +141,6 @@ return [
               -H "X-Account-Id: klant-2841" \
               -H "Accept: application/json"
             CURL,
-        // De REST-API-resourcelijst, niet de algemene kennisbank — dit veld is de
-        // developer-doc-link; support_url dekt de kennisbank al.
         'docs_url' => 'https://start.exactonline.nl/docs/HlpRestAPIResources.aspx',
         'website_url' => 'https://www.exact.com/nl',
         'support_url' => 'https://support.exactonline.com',
@@ -224,11 +191,7 @@ return [
             CURL,
         'docs_url' => 'https://docs.mollie.com',
         'website_url' => 'https://www.mollie.com/nl',
-        // help.mollie.com blokkeert geautomatiseerde requests (403) — niet als
-        // publieke link opnemen zolang we 'm niet kunnen verifiëren.
         'support_url' => null,
     ],
 
-    // SnelStart bewust niet in de showcase: de integratie is niet gebouwd en er
-    // is geen partnercontract — de publieke surface toont alleen Exact en Mollie.
 ];

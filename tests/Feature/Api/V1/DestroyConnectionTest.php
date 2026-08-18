@@ -32,8 +32,6 @@ class DestroyConnectionTest extends TestCase
 
     public function test_public_id_from_the_connect_flow_revokes(): void
     {
-        // Zie ShowConnectionTest: de gedocumenteerde loskoppel-flow geeft de
-        // public_id door, en die typefout gaf hier dezelfde 500.
         [$consumer, $token] = $this->consumerWithToken([TokenAbilities::CONSUMER_MANAGE_ACCOUNTS]);
         $account = Account::factory()->for($consumer)->create();
         $connection = Connection::factory()->forSnelstart()->for($account)->create();
@@ -108,9 +106,6 @@ class DestroyConnectionTest extends TestCase
             ->deleteJson("/v1/connections/{$connection->id}")
             ->assertNoContent();
 
-        // Loskoppelen via de consumer-API moet de Exact-OAuthFlow draaien: de
-        // webhook-subscriptions opzeggen én status op 'revoked' zetten — niet
-        // alleen revoked_at (anders dangling subscriptions bij Exact).
         Queue::assertPushed(DeleteExactWebhookSubscriptionsJob::class);
 
         $fresh = $connection->fresh();
@@ -131,8 +126,6 @@ class DestroyConnectionTest extends TestCase
             ->deleteJson("/v1/connections/{$connection->id}")
             ->assertNoContent();
 
-        // Kill-switch mag deprovisioning niet blokkeren: lokaal revoken, geen
-        // provider-teardown.
         Queue::assertNotPushed(DeleteExactWebhookSubscriptionsJob::class);
 
         $fresh = $connection->fresh();

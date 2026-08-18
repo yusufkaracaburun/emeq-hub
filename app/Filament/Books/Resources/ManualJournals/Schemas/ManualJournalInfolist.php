@@ -11,12 +11,6 @@ use Filament\Infolists\Components\RepeatableEntry\TableColumn;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Schema;
 
-/*
- * Read-only weergave van een memoriaalboeking + haar grootboekregels. `amount`
- * is integer-centen → teruggeformatteerd naar EUR. Hier verschijnen ook de
- * auto-geposte factuur-/inkoop-carriers (memoriaalboekingen) — correct vanuit
- * dagboek-oogpunt, immutable.
- */
 class ManualJournalInfolist
 {
     public static function configure(Schema $schema): Schema

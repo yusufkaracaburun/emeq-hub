@@ -11,12 +11,6 @@ use App\Accounting\Validation\Geography\Region;
 use App\Accounting\Validation\Severity;
 use App\Accounting\Validation\Support\Money;
 
-/**
- * De kern-boekhoudregel: de juiste BTW-behandeling volgt uit geografie + BTW-identiteit.
- * Intra-EU B2B met een EU-BTW-nummer hoort verlegd te zijn (0% + "BTW verlegd"); een
- * niet-EU leverancier die een binnenlands tarief rekent is fout (import-BTW loopt via de
- * douane, niet op de factuur). Binnenland en onbepaald → geen oordeel.
- */
 final class VatTreatmentValidator implements DocumentValidator
 {
     public function validate(array $payload): array
@@ -47,7 +41,7 @@ final class VatTreatmentValidator implements DocumentValidator
                 $findings[] = new Finding(
                     code: 'vat_treatment.reverse_charge_expected',
                     severity: Severity::Warning,
-                    blocking: false, // advies; het boekpad valideert tax_rate niet tegen de regio
+                    blocking: false,
                     path: "lines.{$index}.tax_rate",
                     message: 'Leverancier binnen de EU met een eigen btw-nummer: hier hoort BTW verlegd (0%) op de factuur, geen BTW-tarief.',
                     current: $rate,

@@ -6,9 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 class CreateSubscriptionsTable extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('subscriptions', function (Blueprint $table) {
@@ -29,9 +26,6 @@ class CreateSubscriptionsTable extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('subscriptions');

@@ -10,14 +10,6 @@ use App\Models\Connection;
 use Illuminate\Console\Command;
 use Throwable;
 
-/**
- * Koppelingen van vóór de Seamless-deprovisioning-flow missen
- * `metadata.exact_user_id`. /exact/stop matcht daarop, dus zonder backfill
- * ziet zo'n gebruiker "Geen actieve koppeling gevonden" en blijft de
- * koppeling actief terwijl hij om beëindiging vroeg.
- *
- * Eén /Me-call per koppeling. Default is dry-run; --force schrijft weg.
- */
 final class BackfillUserIds extends Command
 {
     protected $signature = 'exact:backfill-user-ids

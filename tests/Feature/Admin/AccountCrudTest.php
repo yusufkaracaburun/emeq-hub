@@ -16,11 +16,6 @@ use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
-/**
- * Admin-CRUD voor Account (tenant-resource met volledige CRUD). `external_id` +
- * `consumer_id` vormen samen de identiteit en zijn op edit immutable — alleen
- * `display_name` is bij te werken.
- */
 class AccountCrudTest extends TestCase
 {
     use RefreshDatabase;

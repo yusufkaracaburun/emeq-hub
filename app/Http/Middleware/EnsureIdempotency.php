@@ -12,28 +12,12 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Throwable;
 
-/**
- * Hub-brede idempotentie voor write-requests, consumer-scoped.
- *
- * De unique index op `(consumer_id, key)` is de mutex: de rij wordt met één INSERT
- * geclaimd vóórdat de handler draait. Verliest die INSERT, dan loopt er al een request
- * met dezelfde key, of is er al een afgeronde respons om te herhalen. Zonder die
- * claim-eerst-volgorde konden twee gelijktijdige requests allebei bij de partner boeken.
- *
- * Bewust géén transactie om de handler heen: die zou een database-connectie vasthouden
- * voor de duur van een HTTP-round-trip naar de partner.
- *
- * Modus `required` → ontbrekende key geeft 400. Alleen 2xx wordt bewaard; een mislukte
- * poging geeft de claim vrij zodat hij opnieuw mag.
- */
 class EnsureIdempotency
 {
     public const HEADER = 'Idempotency-Key';
 
-    /** Zichtbaar op een herhaalde respons, zodat een consumer replay van uitvoering kan onderscheiden. */
     public const REPLAY_HEADER = 'Idempotent-Replayed';
 
-    /** Printbare ASCII, 1–255 tekens. Weert CR/LF en onbegrensde sleutels. */
     private const KEY_SHAPE = '/^[\x21-\x7E]{1,255}$/';
 
     public function handle(Request $request, Closure $next, string $mode = 'optional'): Response
@@ -53,10 +37,6 @@ class EnsureIdempotency
             return $this->error('idempotency_key_invalid', 'Idempotency-Key moet 1–255 printbare ASCII-tekens zijn.', 400);
         }
 
-        // De claim is per consumer; zonder consumer valt er niets te claimen. Op een
-        // `required`-route is dat geen geldige situatie maar een verkeerde
-        // middleware-volgorde — dan liever hard falen dan stilzwijgend zonder
-        // bescherming doorlopen.
         if ($consumerId === null) {
             if ($mode === 'required') {
                 return $this->error(
@@ -78,7 +58,6 @@ class EnsureIdempotency
             $claim = $this->resolveConflict((int) $consumerId, $accountId, $key, $fingerprint);
         }
 
-        // Een terminale respons: replay, hergebruik-conflict of "er loopt er al een".
         if ($claim instanceof Response) {
             return $claim;
         }
@@ -86,9 +65,6 @@ class EnsureIdempotency
         return $this->execute($request, $next, $claim);
     }
 
-    /**
-     * Eén INSERT, geen SELECT ervoor. Slaagt hij, dan is de claim van ons.
-     */
     private function accountId(Request $request, int $consumerId): ?int
     {
         $header = $request->header('X-Account-Id');
@@ -124,11 +100,6 @@ class EnsureIdempotency
         }
     }
 
-    /**
-     * De INSERT verloor. Bestaande rij ophalen en bepalen wat dat betekent: een
-     * `Response` is terminaal, een `IdempotencyKey` betekent "claim is nu van ons,
-     * draai de handler".
-     */
     private function resolveConflict(int $consumerId, ?int $accountId, string $key, string $fingerprint): Response|IdempotencyKey
     {
         $existing = IdempotencyKey::query()
@@ -141,8 +112,6 @@ class EnsureIdempotency
             )
             ->first();
 
-        // De rij is tussen onze INSERT en deze SELECT verdwenen: de winnaar faalde en
-        // gaf zijn claim vrij. De consumer mag het gewoon opnieuw proberen.
         if ($existing === null) {
             return $this->error(
                 'idempotency_request_in_progress',
@@ -152,9 +121,6 @@ class EnsureIdempotency
             );
         }
 
-        // Een bekende fingerprint die niet matcht betekent: dezelfde sleutel, ander
-        // document. Stil de oude respons herhalen zou de tweede boeking laten
-        // verdwijnen zonder dat iemand het merkt.
         if ($existing->request_fingerprint !== null && $existing->request_fingerprint !== $fingerprint) {
             return $this->error(
                 'idempotency_key_reuse',
@@ -179,10 +145,6 @@ class EnsureIdempotency
         return $this->takeOver($existing, $fingerprint);
     }
 
-    /**
-     * De lease is verlopen; het vorige request is kennelijk gestorven. Conditioneel
-     * overnemen, zodat twee retries die tegelijk aankomen niet allebei denken te winnen.
-     */
     private function takeOver(IdempotencyKey $existing, string $fingerprint): Response|IdempotencyKey
     {
         $claimed = IdempotencyKey::query()
@@ -191,7 +153,6 @@ class EnsureIdempotency
             ->where('locked_at', '<=', now()->subSeconds(IdempotencyKey::leaseSeconds()))
             ->update(['locked_at' => now(), 'request_fingerprint' => $fingerprint]);
 
-        // Nul rijen geraakt: een andere retry was net eerder met dezelfde overname.
         if ($claimed === 0) {
             return $this->error(
                 'idempotency_request_in_progress',
@@ -217,8 +178,6 @@ class EnsureIdempotency
         $status = $response->getStatusCode();
 
         if ($status < 200 || $status >= 300) {
-            // Mislukt mag opnieuw — dat was het contract vóór de claim-laag en het
-            // blijft het contract erna.
             $claim->delete();
 
             return $response;
@@ -243,9 +202,7 @@ class EnsureIdempotency
             ->header(self::REPLAY_HEADER, 'true');
     }
 
-    /**
-     * @param  array<string, string>  $headers
-     */
+    /** @param  array<string, string>  $headers */
     private function error(string $code, string $message, int $status, array $headers = []): Response
     {
         return response()->json(['error' => $code, 'message' => $message], $status, $headers);

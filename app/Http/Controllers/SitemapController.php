@@ -7,11 +7,6 @@ namespace App\Http\Controllers;
 use App\Support\PublicPages;
 use Illuminate\Http\Response;
 
-/**
- * XML-sitemap over de publieke surface. Route in plaats van statisch bestand,
- * zodat nieuwe providers uit config/partner-showcase.php automatisch
- * meegroeien en de lijst niet uit sync loopt met PublicPages.
- */
 class SitemapController extends Controller
 {
     public function __construct(private readonly PublicPages $pages) {}

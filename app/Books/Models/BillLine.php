@@ -8,12 +8,6 @@ use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-/*
- * Eén inkoopregel. quantity × unit_price (centen) → subtotal; tax_rate is een
- * BTW-percentage. account_id is de kostenrekening waarop de regel geboekt wordt
- * (de echte categorie-keuze die inkoop van verkoop onderscheidt).
- * subtotal/tax_amount/total worden door de BillLineObserver gezet, niet handmatig.
- */
 #[ObservedBy(BillLineObserver::class)]
 class BillLine extends Model
 {

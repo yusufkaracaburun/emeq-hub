@@ -13,28 +13,18 @@ use App\Accounting\Validation\Validators\IbanValidator;
 use App\Accounting\Validation\Validators\VatNumberValidator;
 use App\Accounting\Validation\Validators\VatTreatmentValidator;
 
-/**
- * Draait alle provider-agnostische validators over een geëxtraheerd draft-document en
- * verzamelt hun findings. Pure orchestratie — geen Connection of provider-call — zodat de
- * laag los van Exact/Snelstart te testen is. De default-set is dependency-vrij; geef een
- * eigen lijst mee om te isoleren in tests.
- */
 final class DocumentInspector
 {
     /** @var list<DocumentValidator> */
     private array $validators;
 
-    /**
-     * @param  list<DocumentValidator>|null  $validators
-     */
+    /** @param  list<DocumentValidator>|null  $validators */
     public function __construct(?array $validators = null)
     {
         $this->validators = $validators ?? self::defaults();
     }
 
-    /**
-     * @param  array<string, mixed>  $payload
-     */
+    /** @param  array<string, mixed>  $payload */
     public function inspect(array $payload): InspectionReport
     {
         $findings = [];
@@ -46,13 +36,10 @@ final class DocumentInspector
         return new InspectionReport(array_values($findings));
     }
 
-    /**
-     * @return list<DocumentValidator>
-     */
+    /** @return list<DocumentValidator> */
     private static function defaults(): array
     {
         return [
-            // Eerst: valt er iets te boeken? De rest oordeelt over de inhoud.
             new CompletenessValidator,
             new ArithmeticValidator,
             new IbanValidator,

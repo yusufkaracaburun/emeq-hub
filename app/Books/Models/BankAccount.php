@@ -7,11 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-/*
- * Bankrekening — de "cash"-kant van een boeking. Gekoppeld aan een grootboek-
- * rekening (Account, meestal een Asset). Plaid/ConnectedBankAccount is bewust
- * weggelaten in v1 (zie ADR out-of-scope).
- */
 class BankAccount extends Model
 {
     use BelongsToBooksCompany;

@@ -4,13 +4,6 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-/*
- * Books-module kern-domein (Fase 2). `books_`-prefix (D2 — `accounts` zou botsen
- * met Hub's bestaande `accounts`-tabel) en een vaste single-company FK naar
- * books_companies (D1). Bankfeed/institutions + created_by/updated_by-audit +
- * currencies-tabel zijn bewust weggelaten in v1.
- * Zie .docs/decisions/books-module.md.
- */
 return new class extends Migration
 {
     public function up(): void
@@ -63,7 +56,7 @@ return new class extends Migration
             $table->foreignId('company_id')->constrained('books_companies')->cascadeOnDelete();
             $table->foreignId('account_id')->nullable()->constrained('books_accounts')->nullOnDelete();
             $table->foreignId('bank_account_id')->nullable()->constrained('books_bank_accounts')->nullOnDelete();
-            $table->string('type'); // deposit, withdrawal, journal, transfer
+            $table->string('type');
             $table->string('payment_channel')->nullable();
             $table->string('payment_method')->nullable();
             $table->boolean('is_payment')->default(false);
@@ -86,7 +79,7 @@ return new class extends Migration
             $table->foreignId('company_id')->constrained('books_companies')->cascadeOnDelete();
             $table->foreignId('account_id')->constrained('books_accounts')->cascadeOnDelete();
             $table->foreignId('transaction_id')->constrained('books_transactions')->cascadeOnDelete();
-            $table->string('type'); // debit, credit
+            $table->string('type');
             $table->bigInteger('amount')->default(0);
             $table->text('description')->nullable();
             $table->timestamps();

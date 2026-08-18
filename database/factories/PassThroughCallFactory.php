@@ -8,14 +8,10 @@ use App\Models\Consumer;
 use App\Models\PassThroughCall;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-/**
- * @extends Factory<PassThroughCall>
- */
+/** @extends Factory<PassThroughCall> */
 class PassThroughCallFactory extends Factory
 {
-    /**
-     * @return array<string, mixed>
-     */
+    /** @return array<string, mixed> */
     public function definition(): array
     {
         $consumer = Consumer::factory();

@@ -5,15 +5,6 @@ declare(strict_types=1);
 use App\Support\LegalDefaults;
 use Spatie\LaravelSettings\Migrations\SettingsMigration;
 
-/**
- * De drie juridische teksten die de Hub publiceert: privacyverklaring,
- * algemene voorwaarden en verwerkersovereenkomst.
- *
- * De teksten zelf leven in {@see LegalDefaults}; deze migratie zet alleen de
- * eerste waarde. Wijzigt een tekst, dan is dat een wijziging in LegalDefaults —
- * bestaande omgevingen halen 'm op via het admin-paneel, een verse omgeving
- * krijgt hem hier.
- */
 return new class extends SettingsMigration
 {
     public function up(): void

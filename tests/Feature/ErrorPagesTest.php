@@ -7,15 +7,9 @@ namespace Tests\Feature;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
-/**
- * Branded error-pages renderen (standalone Blade, géén Inertia — overleeft een
- * stukke JS-bundle bij een 500).
- */
 class ErrorPagesTest extends TestCase
 {
-    /**
-     * @return array<string, array{0:string, 1:string, 2:string}>
-     */
+    /** @return array<string, array{0:string, 1:string, 2:string}> */
     public static function errorPages(): array
     {
         return [

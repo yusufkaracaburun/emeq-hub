@@ -12,11 +12,6 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
-/**
- * Registreert de Exact-webhook-subscriptions van een Connection ná OAuth-connect.
- * Async zodat de OAuth-callback niet blokkeert op Exact's subscribe-handshake
- * (Exact POST't tijdens de create direct een validatie-ping naar onze CallbackURL).
- */
 final class RegisterExactWebhookSubscriptionsJob implements ShouldQueue
 {
     use Dispatchable;

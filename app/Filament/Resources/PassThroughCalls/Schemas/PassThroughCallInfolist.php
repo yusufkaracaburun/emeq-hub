@@ -38,8 +38,6 @@ class PassThroughCallInfolist
                     TextEntry::make('account.external_id')->label('Account')->placeholder('—'),
                     TextEntry::make('connection.provider')->label('Connection')->badge()->placeholder('—'),
                     TextEntry::make('event_id')->label('Event ID')->placeholder('—'),
-                    // Correlatie-id: plakken in de logzoeker levert de hele keten
-                    // rond dit request.
                     TextEntry::make('request_id')->label('Request ID')->copyable()->placeholder('—'),
                 ]),
 

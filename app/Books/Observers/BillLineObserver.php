@@ -4,11 +4,6 @@ namespace App\Books\Observers;
 
 use App\Books\Models\BillLine;
 
-/*
- * Houdt de afgeleide bedragen consistent: per regel subtotal/tax/total uit
- * quantity × unit_price × tax_rate, en daarna de bill-totalen. UI-agnostisch —
- * werkt voor Filament, tinker en tests gelijk. Spiegel van InvoiceLineObserver.
- */
 class BillLineObserver
 {
     public function saving(BillLine $line): void

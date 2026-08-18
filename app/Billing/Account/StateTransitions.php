@@ -8,13 +8,7 @@ use App\Billing\Account\Exceptions\InvalidStateTransitionException;
 
 final class StateTransitions
 {
-    /**
-     * Legal transitions per D-04 (07-CONTEXT.md). Self-transitions zijn niet
-     * opgenomen — die zijn idempotent en worden in assertTransition expliciet
-     * toegestaan (webhook-replay-safety).
-     *
-     * @return array<int, array{0: SubscriptionStatus, 1: SubscriptionStatus}>
-     */
+    /** @return array<int, array{0: SubscriptionStatus, 1: SubscriptionStatus}> */
     private static function legalPairs(): array
     {
         return [

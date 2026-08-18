@@ -12,15 +12,6 @@ use Illuminate\Http\Request;
 use Mollie\Api\Exceptions\ApiException as MollieApiException;
 use Symfony\Component\HttpFoundation\Response;
 
-/**
- * Pass-through controller voor Mollie Payment Links (create + get + list).
- *
- * Beslissingen 05a-CONTEXT.md: D-01 (per-resource), D-04 (typed SDK-calls),
- * D-13 (Mollie-error-mapping), D-14 (ability-gates).
- *
- * Vendor: `MollieApiClient::$paymentLinks` exposes
- * `PaymentLinkEndpointCollection` met create/get/page-methods.
- */
 #[Group(name: 'Mollie · Payment Links', description: 'Mollie Payment Links API (list/get/create).', weight: 53)]
 class PaymentLinksController extends AbstractMolliePassThroughController
 {

@@ -65,9 +65,7 @@ class RecurringInvoiceResourceTest extends TestCase
 
         $template = RecurringInvoice::firstOrFail();
         $this->assertSame(1, $template->lines()->count());
-        // next_date is bij aanmaak uit start_date afgeleid.
         $this->assertTrue($template->next_date->isSameDay(Carbon::today()));
-        // €100 → 10000 centen op de template-regel.
         $this->assertSame(10000, $template->lines()->first()->unit_price);
     }
 

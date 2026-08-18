@@ -11,24 +11,11 @@ use Emeq\ExactApi\Http\Request\Read\GetVatCodes;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-/**
- * Named Exact-resource: BTW-codes. Mapt op de Exact OData-endpoint
- * `GET vat/VATCodes` (read-only) — de referentiedata voor de tarief→VATCode-mapping
- * van de accounting-sync. Eigen Scramble-groep + dezelfde PassThroughCall-audit
- * als de generieke pass-through.
- */
 #[Group(name: 'Exact · VAT Codes', description: 'BTW-codes van de gekoppelde administratie. Mapt op de Exact OData-endpoint `GET vat/VATCodes` (read-only).', weight: 62)]
 class VatCodesController extends Controller
 {
     public function __construct(private readonly ExactForwarder $forwarder) {}
 
-    /**
-     * List VAT codes.
-     *
-     * Forward naar Exact `GET /vat/VATCodes` met de OAuth-tokens van de gekoppelde
-     * Account. OData-query (`$select`, `$filter`, `$top`, …) wordt ongewijzigd
-     * doorgegeven; het antwoord is Exact's payload zoals ontvangen.
-     */
     public function index(Request $request): Response
     {
         /** @var Account $account */

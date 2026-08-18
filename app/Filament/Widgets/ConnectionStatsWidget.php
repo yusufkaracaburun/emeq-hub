@@ -9,12 +9,6 @@ use App\Support\ProviderCredentialDescriptor;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 
-/**
- * Dashboard-widget: per-provider connection-counts opgesplitst naar actief / revoked.
- *
- * Provider-set komt uit `config/hub-providers.php` via ProviderCredentialDescriptor::all(),
- * dus een nieuwe provider verschijnt automatisch zonder widget-wijziging (D-04 invariant).
- */
 class ConnectionStatsWidget extends StatsOverviewWidget
 {
     protected ?string $heading = 'Koppelingen per SDK';
@@ -23,7 +17,6 @@ class ConnectionStatsWidget extends StatsOverviewWidget
 
     protected static ?int $sort = 2;
 
-    // Hub-koppelingen — niet voor boekhouder (die ziet enkel de Boekhouding-cluster).
     public static function canView(): bool
     {
         return auth()->user()?->hasAnyRole(['super-admin', 'staff']) ?? false;

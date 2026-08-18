@@ -7,10 +7,6 @@ namespace App\Filament\Books\Resources\Transactions\Schemas;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Schema;
 
-/*
- * Read-only weergave van een geboekte transactie. `amount` is integer-centen op
- * het model → hier teruggeformatteerd naar een EUR-bedrag (1.000,00).
- */
 class TransactionInfolist
 {
     public static function configure(Schema $schema): Schema

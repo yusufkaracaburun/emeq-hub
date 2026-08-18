@@ -18,9 +18,6 @@ class SecurityHeaders
         $headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');
         $headers->set('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), interest-cohort=()');
 
-        // HSTS alleen over https. Achter Cloudflare ziet de origin http, maar
-        // trustProxies + X-Forwarded-Proto maken secure() true in prod; lokaal
-        // (http) blijft de header weg. Geen `preload` — dat vergt de apex-domein.
         if ($request->secure()) {
             $headers->set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
         }

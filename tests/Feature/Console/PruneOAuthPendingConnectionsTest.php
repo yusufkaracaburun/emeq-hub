@@ -25,8 +25,6 @@ class PruneOAuthPendingConnectionsTest extends TestCase
 
     public function test_does_not_prune_expired_pending_with_tokens(): void
     {
-        // Van-active her-gekoppelde rij: pending + verlopen state, maar nog tokens.
-        // Mag niet gewist worden — afgebroken re-link verliest anders een werkende connectie.
         $relinking = Connection::factory()->forMollie()->expired()->create([
             'status' => 'pending',
         ]);

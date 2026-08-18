@@ -11,23 +11,12 @@ use App\Books\Models\Transaction;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 
-/*
- * Betalingen/afletteren. De double-entry van de bank-leg leeft NIET hier maar in
- * LedgerPoster: een betaling is een Deposit (klant betaalt → debet 1100 Bank,
- * credit 1300 Debiteuren) of Withdrawal (wij betalen → debet 1600 Crediteuren,
- * credit 1100 Bank). Deze service maakt die Transaction + legt de allocatie vast
- * (Payment) en houdt de doc-status in lijn. Bedragen in centen.
- */
 class PaymentService
 {
     private const RECEIVABLE = '1300';
 
     private const PAYABLE = '1600';
 
-    /**
-     * Doc-driven: registreer een betaling op een open post en genereer de
-     * bijbehorende bank-boeking.
-     */
     public function register(Invoice|Bill $document, int $bankAccountId, int $amount, string $date): Payment
     {
         if (! $document->isPosted()) {
@@ -67,11 +56,6 @@ class PaymentService
         });
     }
 
-    /**
-     * Bank-driven: letter een bestaande bank-Transaction af tegen een open post.
-     * De double-entry staat al (de Transaction is eerder geboekt op 1300/1600) —
-     * dit legt alleen vast wélke post 'm settelt, na de match-validaties.
-     */
     public function reconcile(Transaction $transaction, Invoice|Bill $document, int $amount): Payment
     {
         $isInvoice = $document instanceof Invoice;
@@ -101,10 +85,6 @@ class PaymentService
         return DB::transaction(fn (): Payment => $this->allocate($transaction, $document, $amount));
     }
 
-    /**
-     * Koppel (een deel van) een bestaande bank-Transaction aan een open post.
-     * Gedeeld door doc-driven (nieuwe Transaction) en bank-driven afletteren.
-     */
     public function allocate(Transaction $transaction, Invoice|Bill $document, int $amount): Payment
     {
         $payment = $document->payments()->create([
@@ -117,9 +97,6 @@ class PaymentService
         return $payment;
     }
 
-    /**
-     * Doc-driven undo: verwijder de allocatie én de bank-boeking die er bij hoort.
-     */
     public function remove(Payment $payment): void
     {
         $document = $payment->payable;

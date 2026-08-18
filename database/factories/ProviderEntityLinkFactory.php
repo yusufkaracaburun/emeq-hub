@@ -10,14 +10,10 @@ use App\Models\Consumer;
 use App\Models\ProviderEntityLink;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-/**
- * @extends Factory<ProviderEntityLink>
- */
+/** @extends Factory<ProviderEntityLink> */
 class ProviderEntityLinkFactory extends Factory
 {
-    /**
-     * @return array<string, mixed>
-     */
+    /** @return array<string, mixed> */
     public function definition(): array
     {
         $account = Account::factory()->for(Consumer::factory());

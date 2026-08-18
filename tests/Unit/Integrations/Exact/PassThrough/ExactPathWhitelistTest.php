@@ -48,7 +48,6 @@ class ExactPathWhitelistTest extends TestCase
 
     public function test_blocks_prefix_trap(): void
     {
-        // financial/GLAccountsGroups must NOT match the financial/GLAccounts prefix.
         $this->assertFalse($this->whitelist()->allows('financial/GLAccountsGroups'));
     }
 
@@ -60,7 +59,6 @@ class ExactPathWhitelistTest extends TestCase
 
     public function test_empty_config_disables_whitelist(): void
     {
-        // Kill-switch: empty list = whitelist off, everything allowed.
         $this->assertTrue($this->whitelist([])->allows('anything/AtAll'));
     }
 }

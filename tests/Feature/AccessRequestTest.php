@@ -13,17 +13,11 @@ use Illuminate\Support\Facades\Mail;
 use Inertia\Testing\AssertableInertia;
 use Tests\TestCase;
 
-/**
- * Publieke koppel-intake: POST /koppelen — opslag, validatie, honeypot,
- * redirect-terug naar de partner-pagina.
- */
 class AccessRequestTest extends TestCase
 {
     use RefreshDatabase;
 
-    /**
-     * @return array<string, mixed>
-     */
+    /** @return array<string, mixed> */
     private function validPayload(array $overrides = []): array
     {
         return array_merge([
@@ -109,9 +103,6 @@ class AccessRequestTest extends TestCase
 
     public function test_robots_txt_does_not_block_partners(): void
     {
-        // robots.txt is een route (RobotsController), geen statisch bestand
-        // meer. Buiten productie is alles dicht; het productie-contract is
-        // "alles wat niet in DISALLOWED_PATHS staat is toegestaan".
         $this->get('/robots.txt')
             ->assertOk()
             ->assertSee('Disallow: /');

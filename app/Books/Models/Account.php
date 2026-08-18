@@ -10,10 +10,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
-/*
- * Grootboekrekening (chart of accounts). Bedragen leven niet op dit model maar op
- * JournalEntry; saldo wordt afgeleid via AccountService.
- */
 class Account extends Model
 {
     use BelongsToBooksCompany;

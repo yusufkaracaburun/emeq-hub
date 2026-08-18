@@ -6,17 +6,6 @@ namespace App\Http\Requests\Api\V1\Mollie;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-/**
- * Edge-validatie voor POST /v1/mollie/payment-links — vangt grove
- * payload-fouten af vóór Mollie-roundtrip.
- *
- * Required-fields per Mollie's Create Payment Link API:
- *   description (max 255 chars)
- *
- * Mollie zelf handhaaft mutual-exclusion tussen `amount` en
- * `minimumAmount` — Hub valideert alleen dat per-shape correct is
- * wanneer aanwezig.
- */
 class CreatePaymentLinkRequest extends FormRequest
 {
     public function authorize(): bool
@@ -24,9 +13,7 @@ class CreatePaymentLinkRequest extends FormRequest
         return true;
     }
 
-    /**
-     * @return array<string, array<int, mixed>>
-     */
+    /** @return array<string, array<int, mixed>> */
     public function rules(): array
     {
         return [

@@ -4,23 +4,13 @@ declare(strict_types=1);
 
 namespace App\Support\Seo;
 
-/**
- * schema.org-nodes voor de publieke pagina's. Gebruikt @id-referenties zodat de
- * losse nodes in één @graph aan elkaar hangen — dat is wat zoekmachines en
- * LLM's nodig hebben om "emeq" als entiteit te herkennen in plaats van als los
- * woord.
- *
- * Alleen verifieerbare feiten: geen verzonnen KvK, adres of certificering.
- */
 final class Schema
 {
     public const ORGANIZATION_ID = '#organization';
 
     public const WEBSITE_ID = '#website';
 
-    /**
-     * @return array<string, mixed>
-     */
+    /** @return array<string, mixed> */
     public static function organization(): array
     {
         return [
@@ -33,7 +23,6 @@ final class Schema
                 .'aanbiedt als één API, inclusief OAuth, tokenbeheer en webhooks.',
             'email' => 'info@emeq.nl',
             'areaServed' => 'NL',
-            // Eigen properties — maakt de relatie tussen de domeinen machineleesbaar.
             'sameAs' => [
                 'https://emeq.nl',
                 'https://planny.nl',
@@ -47,9 +36,7 @@ final class Schema
         ];
     }
 
-    /**
-     * @return array<string, mixed>
-     */
+    /** @return array<string, mixed> */
     public static function website(): array
     {
         return [
@@ -84,9 +71,6 @@ final class Schema
     }
 
     /**
-     * Eén provider-koppeling als product. `applicationCategory` +
-     * `featureList` zijn de velden waar een LLM een concreet antwoord uit haalt.
-     *
      * @param  list<string>  $features
      * @return array<string, mixed>
      */
@@ -130,9 +114,7 @@ final class Schema
         ];
     }
 
-    /**
-     * @return array<string, mixed>
-     */
+    /** @return array<string, mixed> */
     public static function legalPage(string $name, string $url, ?string $dateModified): array
     {
         return array_filter([

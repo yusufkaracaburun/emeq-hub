@@ -32,7 +32,6 @@ class AgingServiceTest extends TestCase
 
     private function invoice(int $clientId, string $dueDate, int $total, string $status = 'sent', ?string $date = '2026-01-01'): Invoice
     {
-        // Total wordt direct gezet (geen regels) — de line-observer herrekent enkel bij regels.
         return Invoice::create([
             'client_id' => $clientId,
             'invoice_number' => 'INV-'.$dueDate.'-'.$total,
@@ -48,20 +47,18 @@ class AgingServiceTest extends TestCase
         $acme = Client::create(['name' => 'Acme BV'])->id;
         $beta = Client::create(['name' => 'Beta BV'])->id;
 
-        // Eén factuur per bucket voor Acme, elk €100.
-        $this->invoice($acme, '2026-07-10', 10000); // niet vervallen (toekomst)
-        $this->invoice($acme, '2026-06-20', 10000); // 10 dagen → 1-30
-        $this->invoice($acme, '2026-05-20', 10000); // 41 dagen → 31-60
-        $this->invoice($acme, '2026-04-20', 10000); // 71 dagen → 61-90
-        $this->invoice($acme, '2026-02-01', 10000); // 149 dagen → >90
-        $this->invoice($beta, '2026-07-10', 20000); // niet vervallen, €200
+        $this->invoice($acme, '2026-07-10', 10000);
+        $this->invoice($acme, '2026-06-20', 10000);
+        $this->invoice($acme, '2026-05-20', 10000);
+        $this->invoice($acme, '2026-04-20', 10000);
+        $this->invoice($acme, '2026-02-01', 10000);
+        $this->invoice($beta, '2026-07-10', 20000);
 
         $report = $this->service()->receivables(self::AS_OF);
 
         $this->assertSame('receivable', $report['kind']);
         $this->assertSame('2026-06-30', $report['as_of']);
 
-        // Gesorteerd op grootste openstaand → Acme (€500) vóór Beta (€200).
         $this->assertSame('Acme BV', $report['rows'][0]['relation']);
         $this->assertSame('Beta BV', $report['rows'][1]['relation']);
 
@@ -73,7 +70,7 @@ class AgingServiceTest extends TestCase
         $this->assertSame(10000, $acmeBuckets['d90_plus']);
         $this->assertSame(50000, $report['rows'][0]['total']);
 
-        $this->assertSame(30000, $report['totals']['current']); // 10000 Acme + 20000 Beta
+        $this->assertSame(30000, $report['totals']['current']);
         $this->assertSame(70000, $report['totals']['total']);
     }
 
@@ -81,10 +78,10 @@ class AgingServiceTest extends TestCase
     {
         $acme = Client::create(['name' => 'Acme BV'])->id;
 
-        $this->invoice($acme, '2026-05-01', 10000);              // telt mee
-        $this->invoice($acme, '2026-05-01', 9999, 'draft');     // concept → uit
-        $this->invoice($acme, '2026-05-01', 0);                 // amountDue 0 → uit
-        $this->invoice($acme, '2026-05-01', 5000, 'sent', '2026-12-01'); // gefactureerd ná peildatum → uit
+        $this->invoice($acme, '2026-05-01', 10000);
+        $this->invoice($acme, '2026-05-01', 9999, 'draft');
+        $this->invoice($acme, '2026-05-01', 0);
+        $this->invoice($acme, '2026-05-01', 5000, 'sent', '2026-12-01');
 
         $report = $this->service()->receivables(self::AS_OF);
 
@@ -96,10 +93,8 @@ class AgingServiceTest extends TestCase
     {
         $acme = Client::create(['name' => 'Acme BV'])->id;
 
-        // Mét vervaldatum: 40 dagen vóór peildatum → 31-60.
         $this->invoice($acme, '2026-05-21', 10000, date: '2026-05-21');
 
-        // Zónder vervaldatum: valt terug op de documentdatum (ook 2026-05-21) → 31-60.
         Invoice::create([
             'client_id' => $acme,
             'invoice_number' => 'INV-NULLDUE',
@@ -124,7 +119,7 @@ class AgingServiceTest extends TestCase
             'bill_number' => 'INK-1',
             'status' => 'received',
             'date' => '2026-01-01',
-            'due_date' => '2026-03-01', // >90 dagen
+            'due_date' => '2026-03-01',
             'total' => 12100,
         ]);
         Bill::create([

@@ -48,9 +48,7 @@ class CashierSubscriptionResource extends Resource
         return CashierSubscriptionInfolist::configure($schema);
     }
 
-    /**
-     * @return list<Section>
-     */
+    /** @return list<Section> */
     public static function statusStripSchema(Subscription $record): array
     {
         /** @var Consumer|null $owner */

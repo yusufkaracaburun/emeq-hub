@@ -12,8 +12,6 @@ class ListConnections extends ListRecords
 
     protected function getHeaderActions(): array
     {
-        // Connections worden aangemaakt via OAuth-flow (Phase 4) of
-        // hub:consumer:create-CLI — niet via admin-UI.
         return [
             InfoModalAction::make(
                 'Wat is een Connection?',

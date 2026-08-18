@@ -13,10 +13,6 @@ use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
-/**
- * Spiegelt AccessRequestDeclineActionTest: ook een demo-aanvraag die we niet
- * oppakken moet 'declined' kunnen worden in plaats van 'handled'.
- */
 class DemoRequestDeclineActionTest extends TestCase
 {
     use RefreshDatabase;

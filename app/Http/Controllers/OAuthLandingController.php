@@ -10,12 +10,6 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-/**
- * Branded HTML-landing na een partner-OAuth-callback (PRG). De callbacks in
- * api.php draaien onder de stateless `api`-middleware (geen sessie), dus de
- * redirect hierheen gebeurt met een tijdelijk-getekende URL (`signed`) — dat is
- * tamper-proof en voorkomt enumeratie van Connection-ids.
- */
 class OAuthLandingController extends Controller
 {
     public function connected(Connection $connection): View

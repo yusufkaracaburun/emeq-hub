@@ -43,12 +43,10 @@ class PassThroughResolutionTest extends TestCase
 
     public function test_other_consumers_account_id_returns_404_not_403(): void
     {
-        // Consumer A heeft een Account met external_id 'school-A'.
         $consumerA = Consumer::factory()->create();
         $accountA = Account::factory()->for($consumerA)->create(['external_id' => 'school-A']);
         Connection::factory()->forSnelstart()->for($accountA)->create();
 
-        // Consumer B probeert via header school-A te bereiken.
         [, $tokenB] = $this->consumerWithToken([TokenAbilities::SNELSTART_READ]);
 
         $this->withHeader('Authorization', "Bearer {$tokenB}")

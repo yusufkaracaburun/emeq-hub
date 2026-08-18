@@ -19,12 +19,6 @@ use Inertia\Testing\AssertableInertia;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
-/**
- * Exact App Center Seamless-deprovisioning: GET /exact/stop matcht op het bij
- * connect opgeslagen Exact-UserID (confirm/soft), POST voert de echte revoke
- * uit via de sessie (nooit via een tamperbare POST-param) en redirect naar de
- * done-pagina (PRG).
- */
 class ExactDeprovisionTest extends TestCase
 {
     use RefreshDatabase;
@@ -66,9 +60,7 @@ class ExactDeprovisionTest extends TestCase
             ->assertSessionMissing('exact_stop.connection_id');
     }
 
-    /**
-     * @return array<string, array{0: string}>
-     */
+    /** @return array<string, array{0: string}> */
     public static function guidSpellings(): array
     {
         return [
@@ -90,12 +82,7 @@ class ExactDeprovisionTest extends TestCase
             ->assertSessionHas('exact_stop.connection_id', $connection->id);
     }
 
-    /**
-     * Spiegelbeeld: een rij die vóór de normalisatie met accolades of in
-     * hoofdletters is opgeslagen moet nog steeds gevonden worden.
-     *
-     * @return array<string, array{0: string}>
-     */
+    /** @return array<string, array{0: string}> */
     public static function storedSpellings(): array
     {
         return [

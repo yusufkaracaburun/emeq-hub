@@ -63,8 +63,6 @@ class ReturnUrlResolverTest extends TestCase
 
     public function test_accepts_tenant_subdomain_of_same_base_domain(): void
     {
-        // Consumer-app op admin.emeq.nl, tenant-SPA op bob.emeq.nl → toegestaan,
-        // anders landt de tenant na connect op het verkeerde subdomein.
         $consumer = new Consumer(['app_url' => 'https://admin.emeq.nl']);
 
         $this->assertSame(
@@ -91,7 +89,6 @@ class ReturnUrlResolverTest extends TestCase
     {
         $consumer = new Consumer(['app_url' => 'https://admin.emeq.nl']);
 
-        // emeq.nl.evil.com en xemeq.nl mogen niet matchen op het basisdomein.
         $this->assertSame(
             'https://admin.emeq.nl',
             $this->resolver->resolve($consumer, 'https://emeq.nl.evil.com/steal'),
@@ -104,8 +101,6 @@ class ReturnUrlResolverTest extends TestCase
 
     public function test_rejects_sibling_on_multi_part_public_suffix(): void
     {
-        // acme.co.uk en evil.co.uk delen enkel het public-suffix co.uk — geen
-        // basisdomein-match, dus terugval op app_url.
         $consumer = new Consumer(['app_url' => 'https://acme.co.uk']);
 
         $this->assertSame(
@@ -126,8 +121,6 @@ class ReturnUrlResolverTest extends TestCase
 
     public function test_uses_browser_origin_when_no_return_url_and_origin_matches_domain(): void
     {
-        // Consumer stuurt niets mee; de browser-Origin (bob.emeq.nl) drijft de
-        // terugkeer — zo werkt het zonder code-wijziging bij de consumer.
         $consumer = new Consumer(['app_url' => 'https://admin.emeq.nl']);
 
         $this->assertSame(

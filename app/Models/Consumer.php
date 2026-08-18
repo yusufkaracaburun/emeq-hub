@@ -17,9 +17,7 @@ class Consumer extends Authenticatable
     /** @use HasFactory<ConsumerFactory> */
     use Billable, HasApiTokens, HasFactory;
 
-    /**
-     * @return array<string, string>
-     */
+    /** @return array<string, string> */
     protected function casts(): array
     {
         return [

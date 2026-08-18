@@ -97,7 +97,6 @@ class BillResourceTest extends TestCase
 
         $bill = Bill::firstOrFail();
 
-        // Stukprijs 100 euro → 10000 centen; 2 × → subtotaal 20000, BTW 4200, totaal 24200.
         $this->assertSame(1, $bill->lines()->count());
         $this->assertSame(20000, $bill->subtotal);
         $this->assertSame(4200, $bill->tax_total);

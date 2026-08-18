@@ -6,12 +6,6 @@ use App\Books\Models\Payment;
 use BackedEnum;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 
-/*
- * Betaal-allocatie-logica voor een open post (Invoice/Bill). "Betaald" is
- * afgeleid uit Σ allocaties vs het doc-totaal — niet een losse vlag. De
- * gebruikende class levert de eigen status-enumwaarden (paid/unpaid), zodat het
- * status-vocabulaire bij het model blijft.
- */
 trait HasPayments
 {
     public function payments(): MorphMany
@@ -41,12 +35,6 @@ trait HasPayments
         return $paid > 0 && $paid < $this->total;
     }
 
-    /**
-     * Houdt de workflow-status in lijn met de betaal-stand: volledig afgeletterd
-     * → betaald; een eerder-betaalde doc die weer openstaat → terug naar de
-     * open-status. Partiële betalingen laten de status ongemoeid (openstaand-
-     * saldo is daar de drager).
-     */
     public function syncPaymentStatus(): void
     {
         if ($this->isPaid()) {

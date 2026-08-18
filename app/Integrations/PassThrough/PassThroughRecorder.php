@@ -7,19 +7,6 @@ namespace App\Integrations\PassThrough;
 use App\Enums\Provider;
 use App\Models\PassThroughCall;
 
-/**
- * Schrijft de auditrij van één Consumer→Hub→Partner-call.
- *
- * `pass_through_calls` is het enige spoor van wat een Consumer via de Hub bij een
- * partner gedaan heeft. Die rij werd op zeven plekken met de hand samengesteld,
- * waarvan vijf byte-voor-byte gelijk op de providerwaarde na. Zeven kopieën van
- * een auditcontract betekent dat provider #4 er een achtste bijschrijft en dat
- * niemand merkt als daar een veld in ontbreekt.
- *
- * De privacy-eisen zitten hier, niet bij de aanroeper: `path` draagt het
- * endpoint-template zonder query-string of concrete id, `query_keys` alleen de
- * sleutels, en de request-body wordt gereduceerd tot een fingerprint.
- */
 final class PassThroughRecorder
 {
     /**
@@ -67,14 +54,10 @@ final class PassThroughRecorder
             $attributes['direction'] = $direction;
         }
 
-        // `extra` eerst: wat deze klasse berekent (status, duur, fingerprint, tenant)
-        // is de reden dat ze bestaat en mag een aanroeper niet stilletjes vervangen.
         PassThroughCall::create([...$extra, ...$attributes]);
     }
 
-    /**
-     * @param  array<string, mixed>|null  $body
-     */
+    /** @param  array<string, mixed>|null  $body */
     private static function fingerprint(?array $body): ?string
     {
         if ($body === null || $body === []) {

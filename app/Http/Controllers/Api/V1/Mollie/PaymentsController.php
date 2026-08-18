@@ -15,19 +15,6 @@ use Mollie\Api\Resources\Payment;
 use Symfony\Component\HttpFoundation\Response;
 use Throwable;
 
-/**
- * Pass-through controller voor Mollie Payments (create + get + cancel).
- *
- * Beslissingen 05a-CONTEXT.md: D-01 (per-resource), D-02 (Mollie/-folder),
- * D-04 (typed SDK-calls), D-06 (Idempotency-Key forward),
- * D-13 (Mollie-error-mapping), D-14 (mollie:read/write ability-gates).
- *
- * WebhookUrl-injectie (D-08): als Consumer geen webhookUrl in payload zet,
- * vult de Hub automatisch url('/webhooks/mollie/{connection_id}') in zodat
- * Mollie naar onze ingress-controller post (Plan 05a-02).
- *
- * Idempotency-Key forward via AbstractMolliePassThroughController::buildClient (D-06).
- */
 #[Group(name: 'Mollie · Payments', description: 'Mollie Payments API (create/get/cancel).', weight: 52)]
 class PaymentsController extends AbstractMolliePassThroughController
 {
@@ -80,13 +67,7 @@ class PaymentsController extends AbstractMolliePassThroughController
         });
     }
 
-    /**
-     * Mollie's typed resource heeft géén toArray()-method op de base; we
-     * serializeren via response-body om de wire-shape (inclusief _links,
-     * _embedded) verbatim te bewaren.
-     *
-     * @return array<string, mixed>
-     */
+    /** @return array<string, mixed> */
     private function paymentToArray(Payment $payment): array
     {
         $response = $payment->getResponse();
@@ -98,11 +79,9 @@ class PaymentsController extends AbstractMolliePassThroughController
                     return $decoded;
                 }
             } catch (Throwable) {
-                // fallthrough naar object-cast
             }
         }
 
-        // Fallback wanneer test-stub geen origin-Response heeft.
         return json_decode((string) json_encode($payment), true) ?: [];
     }
 }

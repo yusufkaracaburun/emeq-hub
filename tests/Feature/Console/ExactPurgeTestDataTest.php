@@ -41,9 +41,7 @@ class ExactPurgeTestDataTest extends TestCase
         return Connection::factory()->forExact()->for($account)->create();
     }
 
-    /**
-     * @return list<MockResponse>
-     */
+    /** @return list<MockResponse> */
     private function inventoryResponses(): array
     {
         return [
@@ -81,9 +79,9 @@ class ExactPurgeTestDataTest extends TestCase
     {
         $mock = MockClient::global([
             ...$this->inventoryResponses(),
-            MockResponse::make([], 204), // delete sales se-1
-            MockResponse::make([], 204), // delete document doc-1
-            MockResponse::make([], 204), // delete relation acc-1
+            MockResponse::make([], 204),
+            MockResponse::make([], 204),
+            MockResponse::make([], 204),
         ]);
         $connection = $this->exactConnection();
 
@@ -96,11 +94,9 @@ class ExactPurgeTestDataTest extends TestCase
         $mock->assertSent(DeleteSalesEntry::class);
         $mock->assertSent(DeleteDocument::class);
         $mock->assertSent(DeleteAccount::class);
-        $mock->assertNotSent(DeletePurchaseEntry::class); // 0 purchase entries
-        // Belastingdienst (tax-1) niet opgegeven → niet verwijderd
+        $mock->assertNotSent(DeletePurchaseEntry::class);
         $mock->assertSent(fn ($request): bool => ! str_contains($request->resolveEndpoint(), 'tax-1'));
 
-        // Documents blokkeren relaties bij Exact → moeten vóór de relatie-delete weg.
         $responses = $mock->getRecordedResponses();
         $documentIndex = null;
         $relationIndex = null;
@@ -122,10 +118,10 @@ class ExactPurgeTestDataTest extends TestCase
     {
         $mock = MockClient::global([
             ...$this->inventoryResponses(),
-            MockResponse::make([], 204), // delete sales se-1
+            MockResponse::make([], 204),
             MockResponse::make([
                 'error' => ['code' => ['value' => 'AR13'], 'message' => ['lang' => 'en-US', 'value' => 'Kan niet verwijderen: Document - Gebruikt in: Bijlage (1)']],
-            ], 500), // delete document doc-1 faalt
+            ], 500),
         ]);
         $connection = $this->exactConnection();
 

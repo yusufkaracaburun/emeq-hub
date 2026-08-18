@@ -12,9 +12,7 @@ use PHPUnit\Framework\TestCase;
 
 class StateTransitionsTest extends TestCase
 {
-    /**
-     * @return array<string, array{0: SubscriptionStatus, 1: SubscriptionStatus}>
-     */
+    /** @return array<string, array{0: SubscriptionStatus, 1: SubscriptionStatus}> */
     public static function legalPairs(): array
     {
         return [
@@ -30,9 +28,7 @@ class StateTransitionsTest extends TestCase
         ];
     }
 
-    /**
-     * @return array<string, array{0: SubscriptionStatus, 1: SubscriptionStatus}>
-     */
+    /** @return array<string, array{0: SubscriptionStatus, 1: SubscriptionStatus}> */
     public static function illegalPairs(): array
     {
         return [
@@ -58,9 +54,7 @@ class StateTransitionsTest extends TestCase
         ];
     }
 
-    /**
-     * @return array<string, array{0: SubscriptionStatus}>
-     */
+    /** @return array<string, array{0: SubscriptionStatus}> */
     public static function allStates(): array
     {
         return [
@@ -109,11 +103,6 @@ class StateTransitionsTest extends TestCase
         $this->assertTrue(StateTransitions::isLegal($state, $state));
     }
 
-    /**
-     * Terminal states (canceled, completed, unknown) accepteren GEEN outbound
-     * transitions naar een andere state — alleen self-transition is toegestaan
-     * (idempotency). Dit dekt D-04's "terminal" annotatie + threat T-07-02-02.
-     */
     public function test_terminal_states_block_all_outbound_transitions(): void
     {
         $terminals = [
@@ -129,7 +118,6 @@ class StateTransitionsTest extends TestCase
         ];
 
         foreach ($terminals as $terminal) {
-            // Naar elke non-terminal: moet falen
             foreach ($nonTerminals as $target) {
                 $this->assertFalse(
                     StateTransitions::isLegal($terminal, $target),
@@ -137,7 +125,6 @@ class StateTransitionsTest extends TestCase
                 );
             }
 
-            // Tussen terminals (behalve self): ook falen
             foreach ($terminals as $otherTerminal) {
                 if ($terminal === $otherTerminal) {
                     continue;
@@ -167,7 +154,6 @@ class StateTransitionsTest extends TestCase
 
     public function test_paused_to_active_is_bidirectional_with_active_to_paused(): void
     {
-        // D-04: `paused → active` is bidirectioneel met `active → paused`.
         $this->assertTrue(StateTransitions::isLegal(SubscriptionStatus::Active, SubscriptionStatus::Paused));
         $this->assertTrue(StateTransitions::isLegal(SubscriptionStatus::Paused, SubscriptionStatus::Active));
     }

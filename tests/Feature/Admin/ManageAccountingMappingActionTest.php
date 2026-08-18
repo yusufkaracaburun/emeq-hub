@@ -19,11 +19,6 @@ use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
-/**
- * Slice 3b + increment 1b — UI om de per-Connection boekhoud-mapping
- * (metadata.accounting_mapping) te beheren, met keuzelijsten gevuld uit live
- * Exact-referentiedata. Getest via de echte Filament-table-action.
- */
 class ManageAccountingMappingActionTest extends TestCase
 {
     use RefreshDatabase;
@@ -48,12 +43,7 @@ class ManageAccountingMappingActionTest extends TestCase
         parent::tearDown();
     }
 
-    /**
-     * Onderschept de Exact-referentie-fetches die de form-schema doet, zodat tests
-     * geen echte HTTP-calls maken. Lege results => keuzevelden vallen terug op tekst.
-     *
-     * @param  list<array<string, mixed>>  $results
-     */
+    /** @param  list<array<string, mixed>>  $results */
     private function mockExactReference(array $results = []): void
     {
         MockClient::global([
@@ -163,7 +153,6 @@ class ManageAccountingMappingActionTest extends TestCase
 
         $connection->refresh();
 
-        // Verlegd boekt op eigen VATCodes (6/7), náást de gewone code — niet eroverheen.
         $this->assertSame(
             ['21' => '3', 'reverse_charge:21' => '6', 'reverse_charge:9' => '7'],
             $connection->metadata['accounting_mapping']['vat_codes'],
@@ -197,8 +186,6 @@ class ManageAccountingMappingActionTest extends TestCase
         ]);
         $connection = $this->makeExactConnection();
 
-        // Met live VATCodes is vat_* een Select; een gekozen Code rondt correct af
-        // naar de opslag-vorm die de resolver leest.
         Livewire::test(ViewConnection::class, ['record' => $connection->getRouteKey()])
             ->callAction(TestAction::make('accountingMapping')->schemaComponent('accountingMapping', 'content'), data: [
                 'vat_21' => '4',

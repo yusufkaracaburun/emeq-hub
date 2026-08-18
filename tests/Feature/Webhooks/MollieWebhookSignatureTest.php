@@ -188,7 +188,6 @@ class MollieWebhookSignatureTest extends TestCase
 
         $connection = $this->makeMollieConnection();
         $payload = json_encode(['id' => 'tr_test123']);
-        // Signature is irrelevant — guard moet faillen vóór verify
         $signature = MollieWebhookSignature::sign($payload, 'any-value');
 
         $response = $this->call(
@@ -244,12 +243,6 @@ class MollieWebhookSignatureTest extends TestCase
         return Connection::factory()->forMollie()->active()->for($account)->create();
     }
 
-    /**
-     * Bind een MollieApiClient::fake()-instance op de container via een Mollie-mock,
-     * zodat controller's anti-spoofing-fetch (Mollie::client()->payments->get($id))
-     * een MockResponse retourneert zonder echte HTTP-call. Optionele $throwable wordt
-     * gegooid in plaats van een succes-response.
-     */
     private function fakeMolliePaymentGet(string $id, ?Throwable $throwable = null): MollieApiClient
     {
         $response = $throwable !== null

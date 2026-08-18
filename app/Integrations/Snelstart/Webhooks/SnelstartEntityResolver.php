@@ -7,17 +7,6 @@ namespace App\Integrations\Snelstart\Webhooks;
 use App\Integrations\Contracts\ResolvesCanonicalEntity;
 use App\Integrations\Webhooks\CanonicalAction;
 
-/**
- * Snelstart's `type` draagt `Entity.Action` ('Verkoopfactuur.Updated') — zie
- * {@see SnelstartEventResolver} voor het entity-deel. Dit levert het actie-deel.
- *
- * Geen `entityId()`: buiten `administratieId`, `eventId` en `type` is Snelstart's
- * webhook-payload niet geverifieerd (zie `.docs/decisions/snelstart-webhook-ingress.md`
- * — vijf ❓-aannames, defensief gebouwd, partner-antwoord op de payload-vorm zelf
- * staat nog open). Een entity-id-veldnaam verzinnen zou de invariant "geen
- * verzonnen partner-features" doorbreken; `null` is hier het eerlijke antwoord
- * totdat `partner@snelstart.nl` de vorm bevestigt.
- */
 final class SnelstartEntityResolver implements ResolvesCanonicalEntity
 {
     public function entityId(array $payload): ?string

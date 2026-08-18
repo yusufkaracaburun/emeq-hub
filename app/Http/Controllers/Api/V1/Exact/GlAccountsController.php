@@ -11,24 +11,11 @@ use Emeq\ExactApi\Http\Request\Read\GetGlAccounts;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-/**
- * Named Exact-resource: grootboekrekeningen. Eerste tracer voor het pattern —
- * een Hub-endpoint dat 1-op-1 op één gedocumenteerde Exact OData-endpoint mapt,
- * met eigen Scramble-groep (docs-traceability) en dezelfde PassThroughCall-audit
- * als de generieke pass-through (runtime-traceability).
- */
 #[Group(name: 'Exact · GL Accounts', description: 'Grootboekrekeningen van de gekoppelde administratie. Mapt op de Exact OData-endpoint `GET financial/GLAccounts` (read-only).', weight: 61)]
 class GlAccountsController extends Controller
 {
     public function __construct(private readonly ExactForwarder $forwarder) {}
 
-    /**
-     * List GL accounts.
-     *
-     * Forward naar Exact `GET /financial/GLAccounts` met de OAuth-tokens van de
-     * gekoppelde Account. OData-query (`$select`, `$filter`, `$top`, …) wordt
-     * ongewijzigd doorgegeven; het antwoord is Exact's payload zoals ontvangen.
-     */
     public function index(Request $request): Response
     {
         /** @var Account $account */

@@ -71,8 +71,6 @@ class HeaderForwarderTest extends TestCase
     public function test_omits_empty_content_type(): void
     {
         $request = Request::create('/v1/snelstart/relaties', 'GET');
-        // GET-request zonder body: Content-Type wordt door Symfony niet gezet,
-        // of komt als lege string binnen. In beide gevallen mag de forwarder 'm niet doorzetten.
         $request->headers->remove('Content-Type');
 
         $forwarded = HeaderForwarder::forward($request);

@@ -78,7 +78,6 @@ class MollieWebhookFanOutTest extends TestCase
         $job = new ForwardWebhookToConsumerJob(Provider::Mollie, $connection, ['id' => 'tr_handle_1']);
         $job->handle(app(CanonicalEventRegistry::class), app(HubOriginRegistry::class), app(CanonicalEntityRegistry::class));
 
-        // Spatie's webhook-server dispatcht intern een CallWebhookJob.
         Queue::assertPushed(CallWebhookJob::class, function (CallWebhookJob $pushed) {
             return $pushed->webhookUrl === 'https://consumer.test/hooks'
                 && is_array($pushed->payload)
@@ -98,7 +97,6 @@ class MollieWebhookFanOutTest extends TestCase
                 && $context['provider'] === 'mollie'
                 && $context['reason'] === 'callback_url_not_configured');
 
-        // Consumer zonder webhook_callback_url (default state).
         $consumer = Consumer::factory()->create();
         $account = Account::factory()->for($consumer)->create();
         $connection = Connection::factory()->forMollie()->active()->for($account)->create();

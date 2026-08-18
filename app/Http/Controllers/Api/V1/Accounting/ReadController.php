@@ -31,16 +31,6 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use InvalidArgumentException;
 
-/**
- * Provider-onafhankelijk lezen van de gekoppelde administratie.
- *
- * De controller kent geen providernaam: hij vraagt de registry om het leescontract
- * en krijgt `null` als de gekoppelde provider het niet kan. Grootboek en btw-codes
- * komen uit de mirror (geen partner-call), relaties live.
- *
- * `/customers` en `/suppliers` zijn twee ingangen op één bron — beide partners die
- * we kennen hebben één relatie-entiteit met rolvlaggen.
- */
 #[Group(name: 'Accounting Read', description: 'Lees grootboek, btw-codes en relaties van de gekoppelde boekhouding in canonieke vorm.', weight: 52)]
 class ReadController extends Controller
 {
@@ -52,18 +42,6 @@ class ReadController extends Controller
         private readonly UpstreamErrorMapperRegistry $errors,
     ) {}
 
-    /**
-     * Geboekte documenten uit de gekoppelde administratie.
-     *
-     * De leeskant van `POST /v1/accounting/documents` — zelfde pad, zelfde canonieke
-     * begrip.
-     *
-     * `?type=` is verplicht. Zonder filter kwamen hier verkoopboekingen terug: een
-     * stille keuze, want de consumer vroeg om documenten en kreeg er één soort van.
-     * Boekhoudpakketten houden verkoop en inkoop in gescheiden collecties met een
-     * eigen cursor, dus "alles" is niet in één pagina te leveren zonder te liegen
-     * over de volgorde.
-     */
     #[Response(200, type: 'array{data: list<array{id: string, type: string, number: string|null, external_id: string|null, issue_date: string|null, due_date: string|null, reference: string|null, party: array{id: string|null, name: string|null}, journal: string|null, currency: string, net_total: float, lines: list<array{description: string|null, amount: float, tax_code: string|null, ledger_account_id: string|null, cost_center: string|null, cost_unit: string|null}>}>, next_cursor: string|null, has_more: bool}')]
     public function documents(Request $request): JsonResponse
     {
@@ -96,12 +74,6 @@ class ReadController extends Controller
         );
     }
 
-    /**
-     * Bank- of kasafschriften met hun mutaties.
-     *
-     * Filter met `?kind=bank|cash`; standaard bank. Dit is de resource waarover de
-     * bank-webhooks notificeren — zonder dit endpoint is zo'n melding onbruikbaar.
-     */
     #[Response(200, type: 'array{data: list<array{id: string, kind: string, number: string|null, journal: string|null, financial_year: int|null, financial_period: int|null, opening_balance: float|null, closing_balance: float|null, currency: string, lines: list<array{id: string, date: string|null, amount: float, description: string|null, relation: array{id: string|null, name: string|null}, ledger_account_id: string|null, ledger_account_code: string|null, tax_code: string|null, document_number: string|null}>}>, next_cursor: string|null, has_more: bool}')]
     public function bankStatements(Request $request): JsonResponse
     {
@@ -125,9 +97,6 @@ class ReadController extends Controller
         );
     }
 
-    /**
-     * Grootboekrekeningen van de gekoppelde administratie.
-     */
     #[Response(200, type: 'array{data: list<array{id: string, code: string, name: string|null, attributes: mixed}>, next_cursor: string|null, has_more: bool}')]
     public function ledgerAccounts(Request $request): JsonResponse
     {
@@ -141,9 +110,6 @@ class ReadController extends Controller
         );
     }
 
-    /**
-     * Btw-codes van de gekoppelde administratie.
-     */
     #[Response(200, type: 'array{data: list<array{id: string, code: string, name: string|null, rate: float|null, attributes: mixed}>, next_cursor: string|null, has_more: bool}')]
     public function taxCodes(Request $request): JsonResponse
     {
@@ -157,18 +123,12 @@ class ReadController extends Controller
         );
     }
 
-    /**
-     * Debiteuren (klanten) van de gekoppelde administratie.
-     */
     #[Response(200, type: 'array{data: list<array{id: string, name: string, roles: list<string>, code: string|null, vat_number: string|null, email: string|null, attributes: mixed}>, next_cursor: string|null, has_more: bool}')]
     public function customers(Request $request): JsonResponse
     {
         return $this->relations($request, Relation::ROLE_DEBTOR);
     }
 
-    /**
-     * Crediteuren (leveranciers) van de gekoppelde administratie.
-     */
     #[Response(200, type: 'array{data: list<array{id: string, name: string, roles: list<string>, code: string|null, vat_number: string|null, email: string|null, attributes: mixed}>, next_cursor: string|null, has_more: bool}')]
     public function suppliers(Request $request): JsonResponse
     {
@@ -188,17 +148,11 @@ class ReadController extends Controller
     }
 
     /**
-     * Eén vorm voor alle lees-endpoints: connectie resolven, ability checken,
-     * capability opvragen, pagineren, partner-fouten normaliseren.
-     *
      * @param  list<string>  $allowedExtraQuery  endpoint-eigen parameters die naast
      *                                           `limit`/`cursor` toegestaan zijn
      */
     private function read(Request $request, Capability $capability, callable $fetch, callable $transform, array $allowedExtraQuery = []): JsonResponse
     {
-        // Ability vóór resolutie: nu de canonieke abilities niet meer van de
-        // gekoppelde provider afhangen, hoeft een token zonder recht niet eerst te
-        // horen wélke koppelingen dit Account heeft.
         $this->guardAbility($request, TokenAbilities::accounting(write: false));
 
         [, $connection] = $this->resolveAccountingConnection($request, $this->registry->providers());
@@ -223,9 +177,6 @@ class ReadController extends Controller
         } catch (ProviderDisabledException $e) {
             return response()->json(['error' => 'provider_disabled', 'message' => $e->getMessage()], 503);
         } catch (Exception $e) {
-            // Bewust `Exception` en niet `Throwable`: een PHP-`Error` is onze bug en
-            // hoort als 500 met stacktrace naar boven te komen, niet vermomd als
-            // "partner onbereikbaar" — dat stuurt de zoektocht de verkeerde kant op.
             $mapped = $this->errors->map($provider, $e);
 
             return response()->json($mapped['body'], $mapped['status'], $mapped['headers']);

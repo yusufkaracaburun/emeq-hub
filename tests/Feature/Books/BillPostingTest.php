@@ -42,7 +42,7 @@ class BillPostingTest extends TestCase
         ]);
         $this->bill->lines()->create(['account_id' => $algemeneKosten, 'description' => 'Hosting', 'quantity' => 1, 'unit_price' => 10000, 'tax_rate' => 21]);
         $this->bill->lines()->create(['account_id' => $autokosten, 'description' => 'Brandstof', 'quantity' => 1, 'unit_price' => 20000, 'tax_rate' => 9]);
-        $this->bill->refresh(); // subtotal 30000, tax 3900, total 33900
+        $this->bill->refresh();
     }
 
     private function sumByCode(string $code): int
@@ -81,17 +81,16 @@ class BillPostingTest extends TestCase
 
         $entries = $transaction->journalEntries()->get();
 
-        // 3 debet (4400 / 4500 / 1530) + 1 credit (1600).
         $this->assertCount(4, $entries);
         $this->assertSame(
             (int) $entries->where('type', JournalEntryType::Debit)->sum('amount'),
             (int) $entries->where('type', JournalEntryType::Credit)->sum('amount'),
         );
 
-        $this->assertSame(10000, $this->sumByCode('4400')); // Algemene kosten (debet)
-        $this->assertSame(20000, $this->sumByCode('4500')); // Autokosten (debet)
-        $this->assertSame(3900, $this->sumByCode('1530'));  // Te vorderen BTW (debet)
-        $this->assertSame(33900, $this->sumByCode('1600')); // Crediteuren (credit)
+        $this->assertSame(10000, $this->sumByCode('4400'));
+        $this->assertSame(20000, $this->sumByCode('4500'));
+        $this->assertSame(3900, $this->sumByCode('1530'));
+        $this->assertSame(33900, $this->sumByCode('1600'));
     }
 
     public function test_posting_groups_lines_on_the_same_cost_account(): void
@@ -102,7 +101,6 @@ class BillPostingTest extends TestCase
 
         $transaction = app(BillPoster::class)->post($this->bill);
 
-        // 4400 verschijnt één keer, opgeteld (10000 + 5000), niet als twee regels.
         $this->assertSame(1, $transaction->journalEntries()->whereHas('account', fn ($q) => $q->where('code', '4400'))->count());
         $this->assertSame(15000, $this->sumByCode('4400'));
     }
@@ -147,7 +145,6 @@ class BillPostingTest extends TestCase
 
         $crediteuren = Account::where('code', '1600')->firstOrFail();
 
-        // Crediteuren is een schuld (normaal creditsaldo) → nettobeweging = credit − debet.
         $this->assertSame(33900, app(AccountService::class)->netMovement(
             $crediteuren,
             now()->startOfDay()->toDateTimeString(),

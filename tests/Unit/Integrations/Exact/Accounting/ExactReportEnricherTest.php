@@ -17,13 +17,7 @@ class ExactReportEnricherTest extends TestCase
         return new ExactReportEnricher(new ConnectionMappingExactReferenceResolver(new ExactRelationResolver(new BookingWarnings)));
     }
 
-    /**
-     * Connection zonder administratie_id → ExactReferenceData::fetch() levert [] (geen live
-     * call), zodat deze unit-tests de pure VATCode-logica isoleren. De relatie-lookup tegen
-     * een echte Exact-response loopt via ValidateDocumentTest (MockClient).
-     *
-     * @param  array<string, string>  $vatCodes
-     */
+    /** @param  array<string, string>  $vatCodes */
     private function connection(array $vatCodes): Connection
     {
         $connection = new Connection;
@@ -34,7 +28,6 @@ class ExactReportEnricherTest extends TestCase
 
     public function test_mapped_vat_rate_produces_no_finding(): void
     {
-        // Een gekoppeld tarief is geen actiepunt — de interne VATCode zegt de consument niets.
         $findings = $this->enricher()->enrich(
             ['lines' => [['description' => 'A', 'amount' => 100, 'tax_rate' => 21]]],
             $this->connection(['21' => '4']),
@@ -58,7 +51,6 @@ class ExactReportEnricherTest extends TestCase
 
     public function test_dedupes_vat_findings_per_distinct_rate(): void
     {
-        // Geen mapping → elk distinct ongekoppeld tarief levert één unmapped-finding (21 + 9, niet 3).
         $findings = $this->enricher()->enrich(
             ['lines' => [
                 ['description' => 'A', 'amount' => 100, 'tax_rate' => 21],
@@ -74,7 +66,6 @@ class ExactReportEnricherTest extends TestCase
 
     public function test_reverse_charge_and_standard_are_keyed_separately(): void
     {
-        // Alleen verlegd 21 is gemapt; standaard 21 niet → de behandelingen delen geen sleutel.
         $findings = $this->enricher()->enrich(
             ['lines' => [
                 ['description' => 'Gewoon', 'amount' => 100, 'tax_rate' => 21],
@@ -83,7 +74,6 @@ class ExactReportEnricherTest extends TestCase
             $this->connection(['reverse_charge:21' => '6']),
         );
 
-        // Standaard 21 is ongekoppeld → warning; verlegd 21 matcht → geen finding.
         $this->assertCount(1, $findings);
         $this->assertSame('exact.vat_code.unmapped', $findings[0]->code);
         $this->assertSame('lines.0.tax_rate', $findings[0]->path);
@@ -94,7 +84,7 @@ class ExactReportEnricherTest extends TestCase
     {
         $findings = $this->enricher()->enrich(
             ['lines' => [['description' => 'Verlegd', 'amount' => 100, 'tax_rate' => 21, 'tax_treatment' => 'reverse_charge']]],
-            $this->connection(['21' => '3']), // alleen standaard gemapt
+            $this->connection(['21' => '3']),
         );
 
         $this->assertCount(1, $findings);
@@ -139,8 +129,6 @@ class ExactReportEnricherTest extends TestCase
 
     public function test_unknown_relation_is_info_and_gets_auto_created(): void
     {
-        // De ladder maakt de relatie zelf aan wanneer niets matcht — geen 422 meer op
-        // "onbekende relatie", dus de dry-run meldt dat als Info, niet blocking.
         $findings = $this->enricher()->enrich(
             ['party' => ['role' => 'creditor', 'name' => 'Acme BV'], 'lines' => []],
             $this->connection(['21' => '4']),

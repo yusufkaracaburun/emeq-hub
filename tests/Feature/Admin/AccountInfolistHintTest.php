@@ -14,11 +14,6 @@ use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
-/**
- * Bewijst dat AccountResource de 'Wat is een Account?'-toelichting (canonical
- * D-07 / UI-SPEC §S4 copy) achter het info-icoon-modal toont, EN dat de Tenants-
- * navgroup een tooltip (title-attribuut) heeft met de canonical uitleg.
- */
 class AccountInfolistHintTest extends TestCase
 {
     use RefreshDatabase;
@@ -61,7 +56,6 @@ class AccountInfolistHintTest extends TestCase
         $response = $this->get("/admin/accounts/{$account->id}");
 
         $response->assertOk();
-        // De toelichting staat niet inline op de pagina maar achter het info-icoon.
         $response->assertDontSeeText('Een klant van een Consumer (bv. school A bij Naschool). Niet de individuele eindgebruiker/ouder.');
     }
 
@@ -90,9 +84,6 @@ class AccountInfolistHintTest extends TestCase
         $response = $this->get('/admin');
 
         $response->assertOk();
-        // Sidebar-`<li>` voor groep "Koppelingen" heeft data-group-label="Koppelingen" + title-attribuut
-        // (extraSidebarAttributes(['title' => ...]) op NavigationGroup). Volgorde-assertie
-        // voorkomt false-positive match in body-content.
         $response->assertSeeInOrder([
             'data-group-label="Koppelingen"',
             'SaaS-apps (Consumer) → Accounts → partner-Connections + audit',

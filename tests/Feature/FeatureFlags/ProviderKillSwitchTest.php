@@ -79,8 +79,6 @@ class ProviderKillSwitchTest extends TestCase
 
         [, $token] = $this->consumerWithToken([TokenAbilities::SNELSTART_READ]);
 
-        // Snelstart-call hoort niet door de Mollie-kill-switch te worden geblokkeerd.
-        // We krijgen 400 (missing_account_header) ipv 503 (provider_disabled).
         $this->withHeader('Authorization', "Bearer {$token}")
             ->getJson('/v1/snelstart/echo/ping')
             ->assertStatus(400)
@@ -89,9 +87,6 @@ class ProviderKillSwitchTest extends TestCase
 
     public function test_enabled_provider_does_not_return_503(): void
     {
-        // Default-state: beide providers actief. Mollie-pass-through faalt op
-        // missing-account-header met 400, niet 503. Bewijst dat middleware
-        // alleen blokkeert wanneer feature inactive is.
         [, $token] = $this->consumerWithToken([TokenAbilities::MOLLIE_WRITE]);
 
         $this->withHeader('Authorization', "Bearer {$token}")

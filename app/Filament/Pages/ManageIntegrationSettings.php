@@ -17,11 +17,6 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use UnitEnum;
 
-/**
- * Beheer Exact-integratie-credentials in de DB i.p.v. .env. Secrets worden
- * encrypted opgeslagen (zie ExactSettings::encrypted()).
- * SettingsHydrationServiceProvider hydrateert config('services.exact.*') hiermee.
- */
 class ManageIntegrationSettings extends Page
 {
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedKey;
@@ -60,8 +55,6 @@ class ManageIntegrationSettings extends Page
 
     public function form(Schema $schema): Schema
     {
-        // Eén tab per partner-integratie — nieuwe provider = nieuwe Tab met zijn
-        // eigen *Settings-velden, zonder de bestaande integraties te raken.
         return $schema
             ->components([
                 Tabs::make('Integraties')
@@ -72,13 +65,7 @@ class ManageIntegrationSettings extends Page
             ->statePath('data');
     }
 
-    /**
-     * Exact heeft een echte settings-tab; de overige providers tonen we vast als
-     * "binnenkort" zodat de roadmap zichtbaar is. Nieuwe Provider-enum-case
-     * verschijnt automatisch als binnenkort-tab tot hij eigen settings krijgt.
-     *
-     * @return list<Tab>
-     */
+    /** @return list<Tab> */
     private function providerTabs(): array
     {
         $tabs = [$this->exactTab()];

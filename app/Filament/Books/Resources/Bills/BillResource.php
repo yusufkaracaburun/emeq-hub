@@ -18,10 +18,6 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 
-/*
- * Inkoopfacturen (crediteuren). Concept-CRUD met regels + auto-totalen; boeken
- * naar het grootboek via BillPoster. Spiegel van InvoiceResource.
- */
 class BillResource extends Resource
 {
     use GatedToBoekhouding;

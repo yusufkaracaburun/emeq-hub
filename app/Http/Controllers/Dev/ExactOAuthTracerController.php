@@ -14,33 +14,12 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Psr\Log\LoggerInterface;
 
-/**
- * Dev-only Exact Online OAuth2 + Seamless-connection tracer.
- *
- * Doel: een ECHTE OAuth-round-trip draaien met de test-app-creds én vastleggen
- * wát Exact precies naar de Seamless-lifecycle-URIs ("Starten" / "Niet meer
- * gebruiken") stuurt — method, query, body, headers. Die contracten staan niet
- * in publieke docs, dus we observeren ze i.p.v. ze te verzinnen.
- *
- * De OAuth-request-shapes (authorize-URL, token-exchange) zijn 1:1 overgenomen
- * uit Exact's eigen Postman-collection (packages/exact-api/OAUTH.postman_collection.json) —
- * de autoritatieve bron.
- *
- * Wegwerp-harnas: leeft alleen in local/testing (route-guard) en op de
- * `/dev/exact/*`-paden, los van de echte `/v1/oauth/exact/*`-endpoints die in de
- * Hub-wiring-slice landen. Captures gaan naar storage/logs/exact-tracer.log
- * (gitignored). Secrets worden ge-fingerprint, nooit raw gelogd.
- */
 final class ExactOAuthTracerController
 {
     private const AUTHORIZE_PATH = '/api/oauth2/auth';
 
     private const TOKEN_PATH = '/api/oauth2/token';
 
-    /**
-     * Seamless "Starten" + OAuth-init. Logt eerst wat Exact bij de launch
-     * meestuurt, bouwt dan de authorize-URL en redirect naar Exact.
-     */
     public function start(Request $request): RedirectResponse|Response
     {
         $this->capture('start (Seamless "Starten" / OAuth-init)', $request);
@@ -59,8 +38,6 @@ final class ExactOAuthTracerController
         $state = Str::random(40);
         $request->session()->put('exact_tracer_state', $state);
 
-        // Shape exact per Postman-collection request #1 (client_id, redirect_uri,
-        // response_type=code). state toegevoegd als standaard-OAuth2 CSRF-guard.
         $authorizeUrl = rtrim((string) config('services.exact.auth_base_url'), '/').self::AUTHORIZE_PATH.'?'.http_build_query([
             'client_id' => $clientId,
             'redirect_uri' => $redirectUri,
@@ -77,11 +54,6 @@ final class ExactOAuthTracerController
         return redirect()->away($authorizeUrl);
     }
 
-    /**
-     * Redirect-URI / OAuth-callback. Vangt ALLES op wat Exact terugstuurt,
-     * verifieert state, wisselt code in voor tokens en logt de token-respons
-     * (ge-fingerprint).
-     */
     public function callback(Request $request): Response
     {
         $this->capture('callback (redirect URI)', $request);
@@ -100,7 +72,6 @@ final class ExactOAuthTracerController
         }
 
         $response = Http::asForm()->post($this->tokenUrl(), [
-            // Body verbatim uit Postman request #2 (First Token Request).
             'grant_type' => 'authorization_code',
             'client_id' => (string) config('services.exact.client_id'),
             'client_secret' => (string) config('services.exact.client_secret'),
@@ -116,10 +87,6 @@ final class ExactOAuthTracerController
 
         $body = (array) $response->json();
 
-        // Stash de raw bundle (dev-only cache) zodat /dev/exact/refresh 'm ná
-        // expiry kan refreshen. Exact weigert refresh zolang de access_token nog
-        // geldig is ("Rate limit exceeded: access_token not expired"), dus rotatie
-        // is alleen ~10 min later te bevestigen.
         Cache::put('exact_tracer:last_token', [
             'access_token' => $body['access_token'] ?? null,
             'refresh_token' => $body['refresh_token'] ?? null,
@@ -148,11 +115,6 @@ final class ExactOAuthTracerController
         return response(implode("\n", $lines), 200)->header('Content-Type', 'text/plain; charset=utf-8');
     }
 
-    /**
-     * Delayed refresh — bevestigt rotatie ná expiry. Leest het gestalde token,
-     * roept de refresh aan en vergelijkt oud vs nieuw refresh_token. Re-stalt de
-     * nieuwe bundle zodat je 'm na een volgende expiry opnieuw kunt proberen.
-     */
     public function refresh(Request $request): Response
     {
         $this->capture('refresh (delayed rotatie-check)', $request);
@@ -206,9 +168,7 @@ final class ExactOAuthTracerController
         ]), 200)->header('Content-Type', 'text/plain; charset=utf-8');
     }
 
-    /**
-     * @return array{0: int, 1: int|string|null} [http-status, CurrentDivision]
-     */
+    /** @return array{0: int, 1: int|string|null} [http-status, CurrentDivision] */
     private function fetchDivision(string $accessToken): array
     {
         if ($accessToken === '') {
@@ -238,10 +198,6 @@ final class ExactOAuthTracerController
         return rtrim((string) config('services.exact.auth_base_url'), '/').'/api/v1/current/Me';
     }
 
-    /**
-     * Seamless "Niet meer gebruiken" (deprovision). Puur logger — legt vast wat
-     * Exact stuurt zodat de echte revoke-handler in de Hub-slice op feiten bouwt.
-     */
     public function stop(Request $request): Response
     {
         $this->capture('stop (Seamless "Niet meer gebruiken")', $request);
@@ -250,9 +206,6 @@ final class ExactOAuthTracerController
             ->header('Content-Type', 'text/plain; charset=utf-8');
     }
 
-    /**
-     * "Meer informatie" / "Probeer nu" landing. Logger + minimale pagina.
-     */
     public function info(Request $request): Response
     {
         $this->capture('info ("Meer informatie" / "Probeer nu")', $request);
@@ -261,10 +214,6 @@ final class ExactOAuthTracerController
             ->header('Content-Type', 'text/plain; charset=utf-8');
     }
 
-    /**
-     * Legt method, path, query, body en relevante headers van een inkomend
-     * verzoek vast. Secrets/cookies worden geredigeerd.
-     */
     private function capture(string $label, Request $request): void
     {
         $this->logger()->info("[exact-tracer] {$label}", [
@@ -279,9 +228,7 @@ final class ExactOAuthTracerController
         ]);
     }
 
-    /**
-     * @param  array<string, mixed>  $body
-     */
+    /** @param  array<string, mixed>  $body */
     private function logTokenResponse(string $label, int $status, array $body): void
     {
         $this->logger()->info("[exact-tracer] {$label}", [
@@ -309,10 +256,6 @@ final class ExactOAuthTracerController
         return $data;
     }
 
-    /**
-     * sha256-prefix + lengte — genoeg om rotatie te herkennen zonder het secret
-     * te lekken.
-     */
     private function fingerprint(string $value): string
     {
         return 'fp:'.mb_substr(hash('sha256', $value), 0, 12).' (len '.mb_strlen($value).')';

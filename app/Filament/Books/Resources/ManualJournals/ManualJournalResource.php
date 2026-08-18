@@ -22,12 +22,6 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
-/*
- * Memoriaal — handmatige debet/credit-journaalposten. Eigen view op het
- * Transaction-model, gescoped op type=journal. Immutable net als
- * TransactionResource: aanmaken + bekijken, géén edit/delete (corrigeren =
- * tegenboeking). Toont ook de auto-geposte factuur-/inkoop-carriers (read-only).
- */
 class ManualJournalResource extends Resource
 {
     use GatedToBoekhouding;
@@ -65,9 +59,7 @@ class ManualJournalResource extends Resource
         return ManualJournalInfolist::configure($schema);
     }
 
-    /**
-     * @return list<Section>
-     */
+    /** @return list<Section> */
     public static function statusStripSchema(Transaction $record): array
     {
         return StatusStrip::make([

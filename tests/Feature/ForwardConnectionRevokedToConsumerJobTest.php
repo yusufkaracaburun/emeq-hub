@@ -36,8 +36,6 @@ class ForwardConnectionRevokedToConsumerJobTest extends TestCase
             return $job->webhookUrl === 'https://consumer.test/hooks'
                 && $job->payload['event'] === CanonicalEvent::CONNECTION_REVOKED
                 && $job->payload['provider'] === 'exact'
-                // Dezelfde envelope als elke andere consumer-webhook: de tenant-sleutel
-                // heet overal `account_id`, de eventspecifieke velden staan in `data`.
                 && $job->payload['account_id'] === $account->external_id
                 && is_string($job->payload['occurred_at'])
                 && $job->payload['data']['connection_id'] === $connection->public_id

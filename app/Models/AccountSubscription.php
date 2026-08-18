@@ -45,9 +45,7 @@ class AccountSubscription extends Model
         return $this->belongsTo(Connection::class);
     }
 
-    /**
-     * @return array<string, string>
-     */
+    /** @return array<string, string> */
     protected function casts(): array
     {
         return [

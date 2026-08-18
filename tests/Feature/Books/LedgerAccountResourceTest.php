@@ -36,8 +36,6 @@ class LedgerAccountResourceTest extends TestCase
     {
         $this->seed(BooksChartSeeder::class);
 
-        // Default-sort op code; eerste pagina (10/14). Assert een paar bekende
-        // page-1-rekeningen i.p.v. alle 14 (pagineren verbergt de rest).
         Livewire::test(ListLedgerAccounts::class)
             ->assertOk()
             ->assertCanSeeTableRecords(Account::whereIn('code', ['0500', '1000', '1100'])->get());

@@ -150,7 +150,6 @@ class ExactReferenceDataTest extends TestCase
 
     public function test_chamber_of_commerce_matches_the_digits_only_variant(): void
     {
-        // Exact draagt de KvK soms met spaties — de tweede probe strip alles behalve cijfers.
         MockClient::global([
             GetRelations::class => $this->fakeRelationsBackend([
                 ['ID' => 'guid-1', 'Code' => '1', 'Name' => 'Klant BV', 'ChamberOfCommerce' => '12345678', 'IsSales' => true, 'IsSupplier' => false, 'Status' => 'C'],
@@ -165,8 +164,6 @@ class ExactReferenceDataTest extends TestCase
 
     public function test_chamber_of_commerce_never_falls_back_to_a_full_scan(): void
     {
-        // Twee kandidaten die alléén op naam zouden matchen — de KvK-stap mag ze niet
-        // vinden zonder een server-side treffer op ChamberOfCommerce.
         MockClient::global([
             GetRelations::class => $this->fakeRelationsBackend([
                 ['ID' => 'guid-1', 'Code' => '1', 'Name' => 'Andere Klant BV', 'ChamberOfCommerce' => '', 'IsSales' => true, 'IsSupplier' => false, 'Status' => 'C'],
@@ -209,8 +206,6 @@ class ExactReferenceDataTest extends TestCase
 
     public function test_vat_number_matches_dotted_input_via_the_normalized_probe(): void
     {
-        // De normalized-probe-variant (input zonder punten) matcht de rauwe waarde
-        // rechtstreeks — geen vangnet-scan nodig.
         MockClient::global([
             GetRelations::class => $this->fakeRelationsBackend([
                 ['ID' => 'guid-1', 'Code' => '1', 'Name' => 'Klant BV', 'VATNumber' => 'NL803725802B01', 'IsSales' => true, 'IsSupplier' => false, 'Status' => 'C'],
@@ -225,9 +220,6 @@ class ExactReferenceDataTest extends TestCase
 
     public function test_vat_number_matches_normalized_input_against_dotted_stored_value_via_the_fallback_scan(): void
     {
-        // Hier missen beide server-side probes (rauw én genormaliseerd input, geen van
-        // beide is de gestippelde opgeslagen waarde): pas het vangnet — volledige scan
-        // + lokale normalisatie aan beide kanten — vindt de treffer.
         MockClient::global([
             GetRelations::class => $this->fakeRelationsBackend([
                 ['ID' => 'guid-1', 'Code' => '1', 'Name' => 'Klant BV', 'VATNumber' => 'NL8037.25.802.B01', 'IsSales' => true, 'IsSupplier' => false, 'Status' => 'C'],
@@ -242,8 +234,6 @@ class ExactReferenceDataTest extends TestCase
 
     public function test_vat_number_returns_every_candidate_when_ambiguous(): void
     {
-        // Twee relaties dragen letterlijk hetzelfde btw-nummer — de server-side probe
-        // vindt ze allebei, dus dit hoeft het vangnet niet in.
         MockClient::global([
             GetRelations::class => $this->fakeRelationsBackend([
                 ['ID' => 'guid-1', 'Code' => '1', 'Name' => 'Klant BV', 'VATNumber' => 'NL803725802B01', 'IsSales' => true, 'IsSupplier' => false, 'Status' => 'C'],
@@ -257,11 +247,6 @@ class ExactReferenceDataTest extends TestCase
         $this->assertEqualsCanonicalizing(['guid-1', 'guid-2'], array_column($matches, 'id'));
     }
 
-    /**
-     * De vangnet-scan (getriggerd omdat de probes op de rauwe/genormaliseerde input
-     * niets vinden) hertoetst wél lokaal genormaliseerd, en kan zo tóch twee
-     * verschillend gestileerde opslagvormen van hetzelfde nummer allebei terugvinden.
-     */
     public function test_vat_number_fallback_scan_also_returns_every_candidate_when_ambiguous(): void
     {
         MockClient::global([
@@ -294,8 +279,6 @@ class ExactReferenceDataTest extends TestCase
 
     public function test_vat_number_fallback_returns_no_candidates_when_the_skiptoken_repeats(): void
     {
-        // Zonder een geldige server-side treffer valt de VAT-stap terug op de volledige
-        // scan (fetchAllPages) — die moet zich ook aan de skiptoken/MAX_PAGES-grenzen houden.
         $mockClient = MockClient::global([
             GetRelations::class => $this->fakeRelationsBackend([
                 ['ID' => 'guid-1', 'Code' => '1', 'Name' => 'Klant BV', 'VATNumber' => 'NL803725802B01', 'IsSales' => true, 'IsSupplier' => false, 'Status' => 'C'],
@@ -354,8 +337,6 @@ class ExactReferenceDataTest extends TestCase
 
     public function test_name_returns_no_candidates_when_the_next_page_stream_never_converges(): void
     {
-        // Zonder de MAX_PAGES-grens zou dit request voor eeuwig `__next` blijven volgen —
-        // ook al staat de treffer al op pagina 1.
         MockClient::global([
             GetRelations::class => $this->fakeRelationsBackend([
                 ['ID' => 'guid-1', 'Code' => '1', 'Name' => 'Klant BV', 'IsSales' => true, 'IsSupplier' => false, 'Status' => 'C'],
@@ -367,13 +348,7 @@ class ExactReferenceDataTest extends TestCase
         $this->assertSame([], $matches);
     }
 
-    /**
-     * Serveert een vaste set rijen in vensters van `$pageSize`, met een `d.__next`-envelope
-     * zolang er nog rijen resten. Geen `$filter`-simulatie — voor de mirror-reads, die
-     * filterloos de hele set ophalen.
-     *
-     * @param  list<array<string, mixed>>  $rows
-     */
+    /** @param  list<array<string, mixed>>  $rows */
     private function fakePagedBackend(array $rows, int $pageSize): \Closure
     {
         return function (PendingRequest $pendingRequest) use ($rows, $pageSize) {
@@ -389,23 +364,7 @@ class ExactReferenceDataTest extends TestCase
         };
     }
 
-    /**
-     * Simuleert Exact's OData `$filter`-gedrag (letterlijke, hoofdlettergevoelige
-     * string-equality — géén normalisatie) tegen een vaste set relaties, zodat de mock
-     * hetzelfde onderscheid maakt als de echte API tussen een `eq`-filter op de rauwe
-     * input en een filterloze `relationsByName`-full-scan.
-     *
-     * Met `$pageSize` simuleert de mock ook paginatie: de rauwe lijst wordt in vensters
-     * van `$pageSize` opgeknipt en pas per venster gefilterd, met een `d.__next`-envelope
-     * zolang er nog rauwe rijen resten. Zo kan een venster nul treffers opleveren terwijl
-     * er verderop nog wél een match ligt.
-     *
-     * `$neverConverges` blijft `__next` sturen voorbij het einde van `$relations` (een
-     * server die nooit "klaar" meldt); `$repeatsSkipToken` stuurt telkens hetzelfde token
-     * terug (een vastgelopen continuation).
-     *
-     * @param  list<array<string, mixed>>  $relations
-     */
+    /** @param  list<array<string, mixed>>  $relations */
     private function fakeRelationsBackend(
         array $relations,
         ?int $pageSize = null,

@@ -14,12 +14,6 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Symfony\Component\Console\Exception\RuntimeException;
 use Tests\TestCase;
 
-/**
- * `hub:reset-connection` ruimt de Hub-eigen state op die `exact:purge-test-data`
- * (Exact-only) laat staan: idempotency-claims, entity-links en de relatie-mirror.
- * Zonder deze opruiming gaf herboeken na een Exact-purge nog steeds
- * `422 idempotency_key_reuse`.
- */
 class HubResetConnectionTest extends TestCase
 {
     use RefreshDatabase;
@@ -58,8 +52,6 @@ class HubResetConnectionTest extends TestCase
 
     public function test_requires_a_connection_argument(): void
     {
-        // Geen default op het argument → Artisan weigert het commando zelf te starten
-        // ("geen connection meegegeven = falen, geen 'alles'").
         $this->expectException(RuntimeException::class);
 
         $this->artisan('hub:reset-connection');
@@ -114,10 +106,6 @@ class HubResetConnectionTest extends TestCase
         $this->assertSame(0, ConnectionAccountingRef::count());
     }
 
-    /**
-     * De kernafbakening: gl/vat/journal/cost_center/cost_unit zijn echte Exact-
-     * referentiedata, geen test-vervuiling — die moeten na een reset blijven staan.
-     */
     public function test_only_relation_kind_refs_are_deleted_the_rest_survives(): void
     {
         $connection = $this->connectionWithConsumer();
@@ -160,12 +148,6 @@ class HubResetConnectionTest extends TestCase
         $this->assertSame(1, ProviderEntityLink::query()->where('connection_id', $other->id)->count());
     }
 
-    /**
-     * `idempotency_keys` is consumer-scoped, niet connection-scoped (het schema kent
-     * geen connection-kolom). Voor een consumer met precies één connection is dat
-     * effectief hetzelfde; met meerdere connections raakt de reset ze allemaal — de
-     * dry-run moet dat expliciet melden vóórdat --force iets verwijdert.
-     */
     public function test_idempotency_keys_are_consumer_scoped_and_the_ambiguity_is_disclosed(): void
     {
         $consumer = Consumer::factory()->create();
@@ -185,7 +167,7 @@ class HubResetConnectionTest extends TestCase
         $connection = $this->connectionWithConsumer();
         $unrelated = $this->connectionWithConsumer();
         $this->idempotencyKeyFor($connection, 'key-1');
-        $this->idempotencyKeyFor($unrelated, 'key-1'); // zelfde key, andere consumer — geen botsing
+        $this->idempotencyKeyFor($unrelated, 'key-1');
 
         $this->artisan('hub:reset-connection', [
             'connection' => $connection->id,

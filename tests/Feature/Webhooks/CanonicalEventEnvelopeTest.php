@@ -19,19 +19,11 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use Spatie\WebhookServer\CallWebhookJob;
 use Tests\TestCase;
 
-/**
- * De Hub stuurde partner-payloads ongewijzigd door: een consumer moest Exact's
- * `Topic`/`Action` leren én straks Moneybird's vorm ernaast. Terwijl het
- * async-boekpad (SyncAccountingDocumentJob) al wél canoniek publiceerde — twee
- * eventmodellen in één platform.
- */
 class CanonicalEventEnvelopeTest extends TestCase
 {
     use RefreshDatabase;
 
-    /**
-     * @return array<string, array{0: Provider, 1: array<string, mixed>, 2: string}>
-     */
+    /** @return array<string, array{0: Provider, 1: array<string, mixed>, 2: string}> */
     public static function payloads(): array
     {
         return [
@@ -47,19 +39,13 @@ class CanonicalEventEnvelopeTest extends TestCase
         ];
     }
 
-    /**
-     * @param  array<string, mixed>  $payload
-     */
+    /** @param  array<string, mixed>  $payload */
     #[DataProvider('payloads')]
     public function test_partner_payloads_map_to_canonical_events(Provider $provider, array $payload, string $expected): void
     {
         $this->assertSame($expected, app(CanonicalEventRegistry::class)->eventFor($provider, $payload));
     }
 
-    /**
-     * Een provider zonder resolver mag de webhook niet laten sneuvelen — de
-     * consumer krijgt de envelope, met een naam die zegt dat we het niet weten.
-     */
     public function test_an_unresolvable_payload_still_produces_an_envelope(): void
     {
         $this->assertSame(
@@ -84,7 +70,6 @@ class CanonicalEventEnvelopeTest extends TestCase
         Bus::assertDispatched(CallWebhookJob::class, function (CallWebhookJob $job) use ($payload): bool {
             return $job->payload['event'] === CanonicalEvent::BANK_STATEMENT_CHANGED
                 && $job->payload['provider'] === 'exact'
-                // Het id dat de consumer zelf aanleverde, niet onze primary key.
                 && $job->payload['account_id'] === 'school1'
                 && is_string($job->payload['occurred_at'])
                 && $job->payload['data'] === $payload
@@ -93,11 +78,6 @@ class CanonicalEventEnvelopeTest extends TestCase
         });
     }
 
-    /**
-     * De handleiding draagt consumers op om op `X-Emeq-Event-Id` te deduperen.
-     * Mollie levert zelf geen event-id en vuurt meerdere webhooks voor dezelfde
-     * resource — juist daar mag de header niet ontbreken.
-     */
     public function test_de_dedupe_header_gaat_altijd_mee_ook_zonder_partner_event_id(): void
     {
         Bus::fake([CallWebhookJob::class]);

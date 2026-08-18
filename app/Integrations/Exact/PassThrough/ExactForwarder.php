@@ -17,14 +17,6 @@ use Saloon\Contracts\Body\HasBody;
 use Saloon\Http\Request as SdkRequest;
 use Symfony\Component\HttpFoundation\Response;
 
-/**
- * Stuurt één division-scoped Exact-SDK-request door en logt 'm in pass_through_calls.
- *
- * Eén audit-/trace-pad voor zowel de generieke pass-through (RawExactRequest) als de
- * named resource-endpoints (GetGlAccounts/…): method + geraakte Exact-endpoint komen
- * uit het SDK-request zelf (`resolveEndpoint()`), zodat de Hub het pad niet dupliceert.
- * De endpoint-/payload-kennis leeft in de SDK; de Hub regelt division-scope + audit.
- */
 final class ExactForwarder
 {
     public function __construct(
@@ -74,8 +66,6 @@ final class ExactForwarder
 
                 $sdkResponse = $exact->connector($division)->send($sdkRequest);
 
-                // De SDK throwt niet automatisch op failed-status — geef de Exact-mapped
-                // exception een kans om door de foutmapper te worden gemapt.
                 if ($sdkResponse->failed()) {
                     $sdkResponse->throw();
                 }
@@ -87,17 +77,10 @@ final class ExactForwarder
                     headers: HeaderForwarder::forwardResponse($sdkResponse),
                 );
             },
-            // Tel tegen het error-budget wat Exact zélf teruggaf: de mapper maskeert
-            // 401/403 naar 502 voor de consumer, de breaker spiegelt Exact's limiet.
             fn (int $upstreamStatus) => $this->errorBudget->record($connection, $endpoint, $upstreamStatus),
         );
     }
 
-    /**
-     * Breaker open: blokkeer Hub-side met 429 i.p.v. door te tikken naar Exact.
-     * Wordt als pass_through_call gelogd (status 429, upstream_error=circuit_open)
-     * zodat de blokkade zichtbaar is in de audit-/admin-laag.
-     */
     private function blocked(
         Request $request,
         Account $account,

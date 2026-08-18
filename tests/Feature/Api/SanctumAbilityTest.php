@@ -25,10 +25,6 @@ class SanctumAbilityTest extends TestCase
 
     public function test_token_with_specific_ability_can_reach_ping(): void
     {
-        // /v1/ping zelf eist geen specifieke ability — auth:sanctum is genoeg.
-        // Deze test bewijst dat een token met `snelstart:read` (uit TokenAbilities)
-        // wordt geaccepteerd door de sanctum-guard, zonder dat we vandaag al een
-        // ability-middleware-check hebben.
         $consumer = Consumer::factory()->create();
         $token = $consumer
             ->createToken('snel-read', [TokenAbilities::SNELSTART_READ])
@@ -42,8 +38,6 @@ class SanctumAbilityTest extends TestCase
 
     public function test_token_without_required_ability_is_rejected(): void
     {
-        // /v1/snelstart/{path} eist `snelstart:read` (of write/*) op GET — een
-        // token met alleen `mollie:read` moet 403 insufficient_ability krijgen.
         $consumer = Consumer::factory()->create();
         $account = Account::factory()->for($consumer)->create(['external_id' => 'school-A']);
         Connection::factory()->forSnelstart()->for($account)->create();
@@ -61,8 +55,6 @@ class SanctumAbilityTest extends TestCase
 
     public function test_token_with_only_snelstart_read_ability_is_rejected_on_mollie_get(): void
     {
-        // Mollie-equivalent van Phase 3's placeholder (zie 05a-05-PLAN.md Task 2):
-        // een PAT met snelstart:read moet géén toegang krijgen tot /v1/mollie/* GET-routes.
         $consumer = Consumer::factory()->create();
         $account = Account::factory()->for($consumer)->create(['external_id' => 'school-A']);
         Connection::factory()->forMollie()->active()->for($account)->create();
@@ -80,7 +72,6 @@ class SanctumAbilityTest extends TestCase
 
     public function test_token_with_only_mollie_read_ability_is_rejected_on_mollie_post(): void
     {
-        // mollie:read mag GET maar niet POST — write-routes eisen mollie:write of *.
         $consumer = Consumer::factory()->create();
         $account = Account::factory()->for($consumer)->create(['external_id' => 'school-A']);
         Connection::factory()->forMollie()->active()->for($account)->create();

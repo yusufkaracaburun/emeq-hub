@@ -14,13 +14,6 @@ use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
-/**
- * Read-only viewer voor de immutable `pass_through_calls`-audit.
- *
- * Spiegelt WebhookCallResourceTest. Permission-gating volgt dezelfde v0.2-keuze
- * (D-3): staff zonder `view-pass-through-calls` krijgt 403; staff mét de permission
- * ziet ALLE consumer-calls (cross-Consumer-binding is v1.0+ scope).
- */
 class PassThroughCallResourceTest extends TestCase
 {
     use RefreshDatabase;
@@ -59,8 +52,8 @@ class PassThroughCallResourceTest extends TestCase
     {
         $this->actAsStaff();
 
-        PassThroughCall::factory()->create();               // outbound (default)
-        PassThroughCall::factory()->inbound()->create();    // inbound
+        PassThroughCall::factory()->create();
+        PassThroughCall::factory()->inbound()->create();
 
         Livewire::test(ListPassThroughCalls::class)
             ->filterTable('direction', 'inbound')
@@ -117,7 +110,6 @@ class PassThroughCallResourceTest extends TestCase
         $this->seedRoles();
         $user = User::factory()->create();
         $user->assignRole('staff');
-        // Bewust GEEN givePermissionTo('view-pass-through-calls').
         $this->actingAs($user);
 
         $this->get('/admin/pass-through-calls')->assertForbidden();

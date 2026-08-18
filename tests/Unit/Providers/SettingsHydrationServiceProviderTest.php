@@ -12,13 +12,6 @@ use Tests\TestCase;
 
 class SettingsHydrationServiceProviderTest extends TestCase
 {
-    /**
-     * Zonder bereikbare database moet boot() stil overslaan, niet gooien.
-     *
-     * Dit is geen theoretisch geval: `composer install` draait
-     * `artisan package:discover` in de Docker-build, waar geen database bestaat.
-     * Een gooiende provider laat de hele image-build klappen.
-     */
     public function test_boot_slaat_over_als_de_database_onbereikbaar_is(): void
     {
         Schema::shouldReceive('hasTable')

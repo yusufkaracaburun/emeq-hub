@@ -8,18 +8,6 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Group;
 use Tests\TestCase;
 
-/**
- * D-12: alle integration-tests die echte Mollie test-mode API hitten erven
- * van deze base-class. Skipt automatisch als de Mollie test-key niet (of niet
- * met `test_`-prefix) gezet is — voorkomt CI-failures op feature-branches
- * zonder secrets.
- *
- * Het #[Group('integration')]-attribute zorgt dat:
- *  - phpunit.xml's <groups><exclude>-block deze tests OVERSLAAT in de
- *    standaard `php artisan test`-suite.
- *  - phpunit.integration.xml's <groups><include>-block deze tests EXCLUSIEF
- *    runt via `composer test:integration`.
- */
 #[Group('integration')]
 abstract class IntegrationTestCase extends TestCase
 {

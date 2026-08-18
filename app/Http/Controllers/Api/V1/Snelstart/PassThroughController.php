@@ -84,10 +84,6 @@ class PassThroughController extends Controller
                     headers: $headers,
                 ));
 
-                // De SDK throwt niet automatisch op failed-status — geef de
-                // Snelstart-mapped exception (Authentication/Validation/Server/
-                // NotFound/RateLimit) een kans om door de foutmapper te worden
-                // gemapt naar de juiste Hub-response.
                 if ($sdkResponse->failed()) {
                     $sdkResponse->throw();
                 }

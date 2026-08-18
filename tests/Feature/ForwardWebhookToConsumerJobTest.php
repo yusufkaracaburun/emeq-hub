@@ -88,7 +88,6 @@ class ForwardWebhookToConsumerJobTest extends TestCase
 
         Bus::assertDispatched(CallWebhookJob::class, function (CallWebhookJob $job) use ($payload): bool {
             $signatureHeader = config('webhook-server.signature_header_name', 'Signature');
-            // De HMAC gaat over wat er daadwerkelijk de deur uit gaat: de envelope.
             $expectedSignature = hash_hmac('sha256', json_encode($job->payload), 'consumer-secret-abc');
 
             return $job->webhookUrl === 'https://consumer.test/snelstart'

@@ -54,8 +54,6 @@ class ProviderDescriptorTest extends TestCase
 
     public function test_adding_theoretical_provider_appears_in_all(): void
     {
-        // D-04 success-criterium 10: een nieuwe provider toevoegen vereist
-        // alleen een rij in config/hub-providers.php — geen Filament-code-wijziging.
         config(['hub-providers.moneybird' => [
             'encrypted_fields' => ['access_token', 'refresh_token'],
             'primary_label' => 'OAuth token',

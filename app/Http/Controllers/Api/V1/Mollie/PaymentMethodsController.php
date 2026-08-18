@@ -11,14 +11,6 @@ use Illuminate\Http\Request;
 use Mollie\Api\Exceptions\ApiException as MollieApiException;
 use Symfony\Component\HttpFoundation\Response;
 
-/**
- * Pass-through controller voor Mollie PaymentMethods (list-only).
- *
- * Single-action `__invoke` — er is alleen GET /v2/methods. Mollie's
- * `methods->all($query)` accepteert optioneel filters zoals amount,
- * locale, sequenceType. We geven de hele query-string door zodat de
- * Hub geen Mollie-filter-shape hoeft te dupliceren.
- */
 #[Group(name: 'Mollie · Payment Methods', description: 'Mollie PaymentMethods API (list).', weight: 54)]
 class PaymentMethodsController extends AbstractMolliePassThroughController
 {

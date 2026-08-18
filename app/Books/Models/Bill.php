@@ -12,12 +12,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-/*
- * Inkoopfactuur (crediteur). Spiegel van Invoice: header + regels;
- * subtotal/tax_total/total zijn afgeleid van de regels en worden door de
- * BillLineObserver herrekend — niet handmatig gezet. Boeken naar het grootboek
- * loopt via BillPoster.
- */
 class Bill extends Model
 {
     use BelongsToBooksCompany;
@@ -49,12 +43,6 @@ class Bill extends Model
         'total' => 'integer',
     ];
 
-    /**
-     * Onwijzigbaarheid van een geboekte inkoopfactuur: zodra ze aan een Transaction hangt,
-     * blokkeer je een (niet-quiet) update of delete — anders divergeert de bill van het
-     * grootboek. De boeking zelf (transaction_id van null → gezet) blijft toegestaan;
-     * payment-status- en totaal-herrekeningen lopen via saveQuietly en omzeilen deze guard.
-     */
     protected static function booted(): void
     {
         static::updating(function (self $bill): void {
@@ -85,9 +73,6 @@ class Bill extends Model
         return $this->hasMany(BillLine::class, 'bill_id');
     }
 
-    /**
-     * Een inkoopfactuur is geboekt zodra ze aan een memoriaal-Transaction hangt.
-     */
     public function isPosted(): bool
     {
         return $this->transaction_id !== null;
@@ -103,10 +88,6 @@ class Bill extends Model
         return BillStatus::Received;
     }
 
-    /**
-     * Tel de regel-bedragen op tot de bill-totalen. Quiet — voorkomt een
-     * observer-lus en raakt geen timestamps.
-     */
     public function recalculateTotals(): void
     {
         $lines = $this->lines()->get();

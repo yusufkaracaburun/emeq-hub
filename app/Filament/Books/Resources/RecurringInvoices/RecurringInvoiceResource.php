@@ -17,11 +17,6 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 
-/*
- * Terugkerende verkoopfacturen (templates + cadans). Editable — een template is
- * geen geboekte rij. De RecurringInvoiceGenerator post er periodiek concept-
- * facturen uit; die verschijnen in de gewone Facturen-lijst.
- */
 class RecurringInvoiceResource extends Resource
 {
     use GatedToBoekhouding;

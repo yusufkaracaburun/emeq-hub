@@ -7,22 +7,8 @@ namespace App\Integrations\Exact\PassThrough;
 use App\Models\Connection;
 use Illuminate\Contracts\Cache\Repository as Cache;
 
-/**
- * Per-(connection, endpoint) error-budget-circuit-breaker voor de Exact-pass-through.
- *
- * Exact blokkeert een API-key tijdelijk bij >10 fouten (400/401/403/404) per
- * key/user/company/endpoint/uur. Die key is Hub-breed gedeeld, dus één stoeiende
- * consumer kan álle connections meeslepen. Deze breaker telt de tellende statussen
- * per (connection, endpoint) in een uur-venster en trip ruim vóór Exact's limiet,
- * zodat de Hub een eigen 429 teruggeeft i.p.v. door te tikken naar Exact.
- *
- * Teller leeft in de cache (Redis): `add(0, ttl)` zaait het venster met TTL, daarna
- * houdt `increment` (Redis INCR) de bestaande TTL aan — een rollend uur-venster vanaf
- * de eerste fout. Per-connection key isoleert de boosdoener van de rest.
- */
 final class ExactErrorBudget
 {
-    /** Statussen die meetellen tegen Exact's error-limiet. 429/5xx tellen niet. */
     private const COUNTING_STATUSES = [400, 401, 403, 404];
 
     public function __construct(private readonly Cache $cache) {}

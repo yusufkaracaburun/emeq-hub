@@ -52,8 +52,6 @@ class ConnectHandoffTest extends TestCase
             ->assertInertia(function (AssertableInertia $page): void {
                 $keys = collect($page->toArray()['props']['providers'])->pluck('key');
 
-                // Snelstart heeft geen OAuth-flow (clientkey) en mag hier geen
-                // knop krijgen die gegarandeerd faalt.
                 $this->assertEqualsCanonicalizing(['exact', 'mollie'], $keys->all());
             });
     }
@@ -64,7 +62,6 @@ class ConnectHandoffTest extends TestCase
         Connection::factory()->forExact()->active()->for($account)->create();
         Connection::factory()->forMollie()->active()->for($account)->create();
 
-        // Geen aparte "alles gekoppeld"-variant: de status staat per rij.
         $this->get($this->linkFor($account))
             ->assertOk()
             ->assertInertia(fn (AssertableInertia $page) => $page->where('state', 'manage'));
@@ -108,8 +105,6 @@ class ConnectHandoffTest extends TestCase
             $this->linkFor($mine),
         );
 
-        // Cross-tenant-poging: de handtekening dekt het account-id, dus dit
-        // mag nooit de pagina van een ander tenant openen.
         $this->get($tampered)->assertStatus(410);
     }
 
@@ -172,8 +167,6 @@ class ConnectHandoffTest extends TestCase
 
         $tampered = str_replace('/exact', '/snelstart', $this->startUrlFor($account, 'exact'));
 
-        // De handtekening dekt óók de provider: je kunt een knop voor provider A
-        // niet ombouwen tot een koppeling met provider B.
         $this->post($tampered)->assertStatus(410);
         $this->assertDatabaseCount('connections', 0);
     }
@@ -182,8 +175,6 @@ class ConnectHandoffTest extends TestCase
     {
         $account = $this->account();
 
-        // Snelstart bestaat wél als provider maar koppelt via clientkey; een
-        // correct getekende link mag daar alsnog niet op landen.
         $url = URL::temporarySignedRoute('connect.start', now()->addMinutes(15), [
             'account' => $account->getKey(),
             'provider' => 'snelstart',
@@ -207,8 +198,6 @@ class ConnectHandoffTest extends TestCase
 
         $this->assertNotNull($account->connections()->where('provider', 'exact')->sole()->revoked_at);
 
-        // De consumer-app heeft dit niet zelf gestart en moet het horen, anders
-        // blijft er een dode koppeling in zijn UI staan.
         Queue::assertPushed(ForwardConnectionRevokedToConsumerJob::class);
     }
 
@@ -225,14 +214,10 @@ class ConnectHandoffTest extends TestCase
         $disconnectUrl = collect($this->getPageProps($link)['providers'])
             ->firstWhere('key', 'exact')['disconnect_url'];
 
-        // Zonder tijdsprong zou een verse mint in dezelfde seconde dezelfde
-        // vervaltijd opleveren en zou deze test niets bewijzen.
         $this->travel(5)->minutes();
 
         $redirect = $this->delete($disconnectUrl)->assertRedirect()->headers->get('Location');
 
-        // De TTL begrenst de schade van een gelekte link. Wie de link heeft mag
-        // ontkoppelen, maar niet z'n eigen venster oprekken.
         $this->assertSame($originalExpiry, $this->expiryOf($redirect));
     }
 
@@ -336,9 +321,7 @@ class ConnectHandoffTest extends TestCase
         return (int) ($query['expires'] ?? 0);
     }
 
-    /**
-     * @return array<string, mixed>
-     */
+    /** @return array<string, mixed> */
     private function getPageProps(string $url): array
     {
         return $this->get($url)->assertOk()->viewData('page')['props'];

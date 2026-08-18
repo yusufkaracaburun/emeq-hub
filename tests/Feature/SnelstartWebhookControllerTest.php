@@ -237,9 +237,7 @@ class SnelstartWebhookControllerTest extends TestCase
         );
     }
 
-    /**
-     * @param  array<string, mixed>  $payload
-     */
+    /** @param  array<string, mixed>  $payload */
     private function postSignedWebhook(array $payload): TestResponse
     {
         $rawBody = json_encode($payload, JSON_THROW_ON_ERROR);

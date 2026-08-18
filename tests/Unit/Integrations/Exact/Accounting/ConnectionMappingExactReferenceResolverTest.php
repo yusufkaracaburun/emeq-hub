@@ -25,9 +25,7 @@ class ConnectionMappingExactReferenceResolverTest extends TestCase
         return new ConnectionMappingExactReferenceResolver(new ExactRelationResolver(new BookingWarnings));
     }
 
-    /**
-     * @param  array<string, mixed>|null  $mapping
-     */
+    /** @param  array<string, mixed>|null  $mapping */
     private function connection(?array $mapping): Connection
     {
         $account = Account::factory()->for(Consumer::factory()->create())->create();
@@ -39,7 +37,6 @@ class ConnectionMappingExactReferenceResolverTest extends TestCase
 
     private function fullMapping(): Connection
     {
-        // Mapping draagt enkel Codes; GL-Code + relatie resolven via de mirror.
         return $this->connection([
             'vat_codes' => ['21' => '4', '9' => '2', '0' => '1'],
             'gl_accounts' => ['_default' => 'gl-def', 'omzet' => 'gl-omzet'],
@@ -108,7 +105,6 @@ class ConnectionMappingExactReferenceResolverTest extends TestCase
     {
         $resolver = $this->resolver();
 
-        // Mapping verwijst naar een Code die niet (meer) in de mirror staat → drift-melding.
         $this->expectException(AccountingMappingException::class);
         $resolver->glAccountRef('omzet', DocumentType::SalesInvoice, $this->fullMapping());
     }
@@ -142,8 +138,6 @@ class ConnectionMappingExactReferenceResolverTest extends TestCase
 
     public function test_gl_code_falls_back_to_shared_default_when_no_document_type_default_is_mapped(): void
     {
-        // Regressie: een bestaande mapping die alleen `_default` kent (geen sales_default/
-        // purchase_default) moet exact blijven werken zoals vóór deze doctype-terugval.
         $resolver = $this->resolver();
         $connection = $this->connection(['gl_accounts' => ['_default' => 'gl-def']]);
         $this->seedRef($connection, ConnectionAccountingRef::KIND_GL, 'gl-def', 'gl-def-id');
@@ -169,12 +163,10 @@ class ConnectionMappingExactReferenceResolverTest extends TestCase
         $resolver = $this->resolver();
         $connection = $this->connection(['vat_codes' => ['21' => '3', '9' => '1', 'reverse_charge:21' => '6', 'reverse_charge:9' => '7']]);
 
-        // Verlegd leest de behandeling-key, niet de platte tarief-key.
         $this->assertSame('6', $resolver->vatCode(21, TaxTreatment::ReverseCharge, $connection));
         $this->assertSame('7', $resolver->vatCode(9, TaxTreatment::ReverseCharge, $connection));
         $this->assertSame('3', $resolver->vatCode(21, TaxTreatment::Standard, $connection));
 
-        // Geen fallback: een ongemapt verlegd-tarief blijft null i.p.v. de standaard-code.
         $this->assertNull($resolver->vatCodeOrNull(21, TaxTreatment::ReverseCharge, $this->connection(['vat_codes' => ['21' => '3']])));
     }
 

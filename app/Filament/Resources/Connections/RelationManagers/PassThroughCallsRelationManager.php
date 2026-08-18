@@ -11,10 +11,6 @@ use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
-/**
- * Pass-through-calls die via deze Connection liepen — read-only relatie op de
- * Connection-detailpagina. Klik door naar de audit-detail.
- */
 final class PassThroughCallsRelationManager extends RelationManager
 {
     protected static string $relationship = 'passThroughCalls';

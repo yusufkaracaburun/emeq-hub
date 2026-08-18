@@ -18,10 +18,6 @@ use Saloon\Http\Faking\MockClient;
 use Saloon\Http\Faking\MockResponse;
 use Tests\TestCase;
 
-/**
- * Een datum buiten elke boekperiode wordt door Exact geweigerd met "Verplicht: Boekjaar".
- * Zonder deze finding meldde validate `valid: true` voor zo'n document. Vereist DB.
- */
 class ExactReportEnricherPeriodTest extends TestCase
 {
     use RefreshDatabase;
@@ -159,11 +155,6 @@ class ExactReportEnricherPeriodTest extends TestCase
         $this->assertSame([], $findings);
     }
 
-    /**
-     * De cache serialiseert wat erin gaat. Een `DateTimeImmutable` kwam op productie als
-     * incomplete object terug en liet elke tweede validate met een 500 stranden; de
-     * array-store in tests serialiseert niet en verborg dat. Vandaar de eis op de inhoud.
-     */
     public function test_the_cached_period_list_holds_only_scalars(): void
     {
         $this->mockOpenYear2026();

@@ -14,14 +14,6 @@ use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
-/**
- * Plan 09-07 Task 3 — feature-tests voor AccountResource read-only Filament-page.
- *
- * Bewijst:
- *  - Staff-User ziet alle Accounts (geen tenant-filtering — admin sees all)
- *  - Consumer-filter narrowt naar één Consumer
- *  - View-page op `/admin/accounts/{id}` returns 200
- */
 class AccountResourceTest extends TestCase
 {
     use RefreshDatabase;

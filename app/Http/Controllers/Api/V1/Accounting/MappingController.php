@@ -18,12 +18,6 @@ use Dedoc\Scramble\Attributes\Response;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
-/**
- * Consumer-facing beheer van de boekhoud-koppeling: sync de referentie-mirror,
- * lees de beschikbare codes (`/meta`-analoog), en lees/overschrijf de optionele
- * mapping-override. Standaard hoeft de consumer hier niets te doen — de Hub synct
- * bij connect en auto-mapt; deze endpoints zijn voor expliciete (her)sync + verfijning.
- */
 #[Group(name: 'Accounting Sync', description: 'Beheer de boekhoud-referentie-mirror en de optionele mapping-override van een Account-koppeling.', weight: 51)]
 class MappingController extends Controller
 {
@@ -31,9 +25,6 @@ class MappingController extends Controller
 
     public function __construct(private readonly AccountingTargetRegistry $registry) {}
 
-    /**
-     * (Her)synchroniseer de referentiedata (grootboek/BTW/dagboeken) naar de mirror.
-     */
     #[Response(200, type: 'array{provider: string, synced: int}')]
     public function sync(Request $request): JsonResponse
     {
@@ -61,14 +52,6 @@ class MappingController extends Controller
         ]);
     }
 
-    /**
-     * Wat de gekoppelde boekhoudprovider ondersteunt.
-     *
-     * `capabilities` is een platte lijst, geen object van booleans: een capability
-     * toevoegen is dan additief voor consumers, terwijl `capabilities.foo === undefined`
-     * versus `false` een bugfabriek is. `enabled` is de losse as — een uitgeschakelde
-     * provider declareert nog steeds wat hij kan.
-     */
     public function capabilities(Request $request): JsonResponse
     {
         $resolved = $this->resolve($request, write: false);
@@ -89,9 +72,6 @@ class MappingController extends Controller
         ]);
     }
 
-    /**
-     * De beschikbare referentie-codes uit de mirror — waaruit een override gekozen kan worden.
-     */
     #[Response(200, type: 'array{gl: list<array{code: string, label: string|null, attrs: mixed}>, vat: list<array{code: string, label: string|null, attrs: mixed}>, journal: list<array{code: string, label: string|null, attrs: mixed}>}')]
     public function referenceData(Request $request): JsonResponse
     {
@@ -122,9 +102,6 @@ class MappingController extends Controller
         ]);
     }
 
-    /**
-     * De huidige (auto-derived of overschreven) mapping van de koppeling.
-     */
     #[Response(200, type: 'array{mapping: array{vat_codes?: array<string, string>, gl_accounts?: array<string, string>, journals?: array<string, string>}}')]
     public function show(Request $request): JsonResponse
     {
@@ -139,9 +116,6 @@ class MappingController extends Controller
         return response()->json(['mapping' => $connection->metadata['accounting_mapping'] ?? new \stdClass]);
     }
 
-    /**
-     * Overschrijf (merge) de mapping — voor wie de auto-default wil verfijnen.
-     */
     #[Response(200, type: 'array{mapping: array{vat_codes?: array<string, string>, gl_accounts?: array<string, string>, journals?: array<string, string>}}')]
     public function update(Request $request): JsonResponse
     {
@@ -178,12 +152,7 @@ class MappingController extends Controller
         return response()->json(['mapping' => $mapping]);
     }
 
-    /**
-     * Bearer-PAT → Consumer → Account (X-Account-Id) → actieve boekhoud-Connection.
-     * Spiegelt DocumentsController; write-ops eisen `{provider}:write`, reads `:read`/`:write`.
-     *
-     * @return array{0: Account, 1: Connection}|JsonResponse
-     */
+    /** @return array{0: Account, 1: Connection}|JsonResponse */
     private function resolve(Request $request, bool $write): array|JsonResponse
     {
         $allowed = false;

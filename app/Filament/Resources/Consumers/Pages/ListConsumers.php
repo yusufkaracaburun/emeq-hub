@@ -23,11 +23,6 @@ class ListConsumers extends ListRecords
                 'Een Consumer is een app die de Hub gebruikt — één van Emeq\'s eigen SaaS-apps (Naschool, …) of een betalende derde. '
                 .'Maak één Consumer per app. Per Consumer geef je via Issue PAT een Bearer-token uit waarmee die app `/v1/*`-endpoints kan aanroepen.',
             ),
-            // Plan 08-02: launch-pad voor de Filament OnboardConsumer-wizard. Visible-gate
-            // hergebruikt OnboardConsumer::canAccess() (manage-consumers) — staff zonder
-            // permission ziet de actie niet en kan de Page-route niet bereiken (D-04 RBAC).
-            // Geen kale CreateAction: die levert een Consumer zonder PAT en zonder
-            // app_url, en dus een die niets kan koppelen. Onboarden is de enige weg in.
             Action::make('onboard')
                 ->label('Onboarden')
                 ->icon(Heroicon::OutlinedSparkles)

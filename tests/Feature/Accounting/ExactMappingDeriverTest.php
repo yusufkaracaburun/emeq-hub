@@ -49,15 +49,11 @@ class ExactMappingDeriverTest extends TestCase
 
         $mapping = $connection->fresh()->metadata['accounting_mapping'];
 
-        // BTW op percentage, voorkeur exclusief (code 3, niet de inclusief 4); verlegd
-        // apart afgeleid uit het label naar reverse_charge:tarief (6/7).
         $this->assertSame(
             ['21' => '3', '9' => '1', '0' => '0', 'reverse_charge:21' => '6', 'reverse_charge:9' => '7'],
             $mapping['vat_codes'],
         );
-        // Dagboek op Type: 20 → verkoop, 22 → inkoop.
         $this->assertSame(['sales' => '80', 'purchase' => '70'], $mapping['journals']);
-        // GL-default: 8xxx omzet/sales_default, 4xxx kosten/purchase_default/_default.
         $this->assertSame(
             ['omzet' => '8000', 'sales_default' => '8000', 'kosten' => '4000', 'purchase_default' => '4000', '_default' => '4000'],
             $mapping['gl_accounts'],
@@ -77,7 +73,6 @@ class ExactMappingDeriverTest extends TestCase
 
         $mapping = $connection->fresh()->metadata['accounting_mapping'];
 
-        // Override blijft; alleen ontbrekende keys aangevuld.
         $this->assertSame('handmatig-gekozen', $mapping['gl_accounts']['omzet']);
         $this->assertSame('4000', $mapping['gl_accounts']['kosten']);
         $this->assertSame('4', $mapping['vat_codes']['21']);
@@ -86,8 +81,6 @@ class ExactMappingDeriverTest extends TestCase
 
     public function test_leaves_missing_default_empty_instead_of_guessing(): void
     {
-        // Mirror kent alleen een 8xxx-rekening (geen 4xxx) → purchase_default mag niet
-        // geraden worden op de omzetrekening; een fout grootboek is precies de bug (#60).
         $account = Account::factory()->for(Consumer::factory()->create())->create();
         $connection = Connection::factory()->forExact()->for($account)->create();
 

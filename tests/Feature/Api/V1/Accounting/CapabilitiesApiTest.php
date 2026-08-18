@@ -13,10 +13,6 @@ use Illuminate\Testing\TestResponse;
 use Laravel\Pennant\Feature;
 use Tests\TestCase;
 
-/**
- * Het discovery-endpoint: een consumer die één keer integreert wil kunnen vragen wat
- * de gekoppelde administratie ondersteunt, zonder te weten wélke provider dat is.
- */
 class CapabilitiesApiTest extends TestCase
 {
     use RefreshDatabase;
@@ -35,9 +31,7 @@ class CapabilitiesApiTest extends TestCase
         return $consumer;
     }
 
-    /**
-     * @param  list<string>  $abilities
-     */
+    /** @param  list<string>  $abilities */
     private function fetchCapabilities(Consumer $consumer, array $abilities = [TokenAbilities::EXACT_READ], ?string $accountId = 'school1'): TestResponse
     {
         $token = $consumer->createToken('t', $abilities)->plainTextToken;
@@ -61,10 +55,6 @@ class CapabilitiesApiTest extends TestCase
             ->assertJsonFragment(['capabilities' => Capability::values()]);
     }
 
-    /**
-     * Beschikbaarheid en kunnen zijn twee dingen: een uitgezette provider meldt nog
-     * steeds wat hij ondersteunt, met `enabled: false` erbij.
-     */
     public function test_reports_enabled_false_when_the_provider_is_switched_off(): void
     {
         Feature::define('provider-exact-enabled', fn () => false);
@@ -95,9 +85,6 @@ class CapabilitiesApiTest extends TestCase
             ->assertStatus(403);
     }
 
-    /**
-     * Een Account zonder boekhoud-koppeling heeft niets te melden.
-     */
     public function test_returns_404_without_an_accounting_connection(): void
     {
         $consumer = Consumer::factory()->create();

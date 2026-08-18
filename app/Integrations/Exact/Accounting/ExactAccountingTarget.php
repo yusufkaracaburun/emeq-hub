@@ -34,7 +34,6 @@ use App\Accounting\Relation;
 use App\Accounting\TaxCode;
 use App\Accounting\Validation\Finding;
 use App\Integrations\Exact\ConnectionTokenStore;
-use App\Integrations\Exact\ExactReferenceData;
 use App\Integrations\Exact\HubExactCredentialResolver;
 use App\Models\Connection;
 use App\Models\ConnectionAccountingRef;
@@ -58,22 +57,8 @@ use Emeq\ExactApi\OData\Envelope;
 use Saloon\Http\Request as SdkRequest;
 use Throwable;
 
-/**
- * Exact Online accounting-adapter. Mapt een canonical FinancialDocument op de juiste
- * emeq/exact-api write-request en schrijft die weg op de division van de Connection.
- * Bindt de Exact-SDK per-request (mirror ResolveExactAccount) zodat de reactieve
- * token-refresh tegen déze Connection loopt. Referentie-data (relatie/VATCode/
- * GLAccount/journaal) komt uit de ReferenceResolver-seam.
- *
- * De Exact-wire (endpoints, veldnamen, AmountFC/AmountDC, response-envelope) leeft in
- * de SDK; deze adapter levert alleen geresolvede waarden in een neutrale regel-vorm.
- */
 final class ExactAccountingTarget implements AccountingTarget, EnrichesValidation, ProbesPostedDocuments, ReadsBankStatements, ReadsDocuments, ReadsLedgerAccounts, ReadsRelations, ReadsTaxCodes, SyncsReferenceData, UploadsAttachments
 {
-    // Exact kapt `YourRef` op 30 tekens af. De REST-documentatie noemt geen maxlengte;
-    // dit is live vastgesteld op division 4471372 (2026-08-14). Langer versturen betekent
-    // dat wat Exact bewaart niet meer gelijk is aan wat wij verstuurden, en dan vindt de
-    // `eq`-filter van findPostedDocument() zijn eigen boeking nooit terug.
     private const YOUR_REF_MAX = 30;
 
     public function __construct(
@@ -84,36 +69,19 @@ final class ExactAccountingTarget implements AccountingTarget, EnrichesValidatio
         private readonly MirrorReader $mirror,
     ) {}
 
-    /**
-     * Capability `accounting.ledger_accounts.read` — uit de mirror, geen partner-call.
-     *
-     * @return ReadPage<LedgerAccount>
-     */
+    /** @return ReadPage<LedgerAccount> */
     public function readLedgerAccounts(Connection $connection, ReadQuery $query): ReadPage
     {
         return $this->mirror->ledgerAccounts($connection, $query);
     }
 
-    /**
-     * Capability `accounting.tax_codes.read` — uit de mirror, geen partner-call.
-     *
-     * @return ReadPage<TaxCode>
-     */
+    /** @return ReadPage<TaxCode> */
     public function readTaxCodes(Connection $connection, ReadQuery $query): ReadPage
     {
         return $this->mirror->taxCodes($connection, $query);
     }
 
-    /**
-     * Capability `accounting.relations.read` — wél live: relaties bewegen, en de mirror
-     * vult zich alleen lui met wat er geboekt is.
-     *
-     * Faalt hard, in tegenstelling tot {@see ExactReferenceData} die
-     * fail-soft naar `[]` gaat: een lege lijst teruggeven terwijl Exact plat ligt is een
-     * leugen tegen de consumer. De exception loopt door naar UpstreamErrorMapper.
-     *
-     * @return ReadPage<Relation>
-     */
+    /** @return ReadPage<Relation> */
     public function readRelations(Connection $connection, ReadQuery $query, ?string $role = null): ReadPage
     {
         $params = ['$select' => 'ID,Code,Name,VATNumber,Email,IsSales,IsSupplier'];
@@ -131,18 +99,7 @@ final class ExactAccountingTarget implements AccountingTarget, EnrichesValidatio
         );
     }
 
-    /**
-     * Capability `accounting.documents.read`. Leest terug uit dezelfde resources waar
-     * `push()` naartoe schrijft, dus wat je stuurde krijg je terug.
-     *
-     * Alleen velden die aantoonbaar bestaan worden opgevraagd: die uit de write-body
-     * plus `EntryID`/`EntryNumber` (die leest de SDK al uit de create-respons). Een
-     * header-totaal wordt niet opgehaald maar uit de regels berekend — per pakket
-     * betekent zo'n veld iets anders (met of zonder btw, in valuta of administratie-
-     * valuta) en dat verschil hoort niet in een canoniek antwoord.
-     *
-     * @return ReadPage<PostedDocument>
-     */
+    /** @return ReadPage<PostedDocument> */
     public function readDocuments(Connection $connection, ReadQuery $query, DocumentType $type): ReadPage
     {
         $purchase = in_array($type, [DocumentType::PurchaseInvoice, DocumentType::Expense], true);
@@ -162,24 +119,6 @@ final class ExactAccountingTarget implements AccountingTarget, EnrichesValidatio
         );
     }
 
-    /**
-     * Capability `accounting.documents.probe`.
-     *
-     * Zoekt op `YourRef`, de herkomst die {@see self::provenance()} bij het boeken
-     * meeschrijft. Bewust een exacte `eq`-vergelijking op die volledige string en geen
-     * `substringof`: de gelijkheidsvergelijking is gegarandeerd door elke OData-provider
-     * ondersteund, een string-functie niet.
-     *
-     * Faalt bewust dicht. Is de consumer hernoemd tussen de boeking en de probe, dan
-     * wijkt de provenance af en vindt de probe niets — dan rapporteren we de
-     * oorspronkelijke fout in plaats van te doen alsof er niets gebeurd is. Dat is de
-     * veilige kant: liever een terechte foutmelding dan een gemiste dubbele boeking.
-     *
-     * Om dezelfde reden probet hij niet wanneer de external_id niet in `YourRef` paste:
-     * er blijft dan alleen het documentnummer over, en dat is uniek per relatie — niet
-     * per administratie. Filteren op het nummer alleen zou een boeking van een ándere
-     * relatie als "toch geland" kunnen aanmerken.
-     */
     public function findPostedDocument(FinancialDocument $document, Connection $connection): ?PostedDocument
     {
         $key = $this->provenanceWithKey($document, $connection);
@@ -215,15 +154,7 @@ final class ExactAccountingTarget implements AccountingTarget, EnrichesValidatio
         return $this->toPostedDocuments($rows, $connection, $purchase, $collection, $partyField)[0] ?? null;
     }
 
-    /**
-     * Capability `accounting.bank_statements.read`.
-     *
-     * De resource waarover de webhook-topics `BankEntries`/`CashEntries` notificeren.
-     * Zonder deze read draagt zo'n notificatie alleen een Key en kan de ontvanger er
-     * niets mee.
-     *
-     * @return ReadPage<BankStatement>
-     */
+    /** @return ReadPage<BankStatement> */
     public function readBankStatements(Connection $connection, ReadQuery $query, string $kind = BankStatement::KIND_BANK): ReadPage
     {
         $cash = $kind === BankStatement::KIND_CASH;
@@ -244,9 +175,7 @@ final class ExactAccountingTarget implements AccountingTarget, EnrichesValidatio
         );
     }
 
-    /**
-     * @param  array<string, mixed>  $row
-     */
+    /** @param  array<string, mixed>  $row */
     private static function toBankStatement(array $row, string $kind, string $collection): BankStatement
     {
         return new BankStatement(
@@ -263,9 +192,7 @@ final class ExactAccountingTarget implements AccountingTarget, EnrichesValidatio
         );
     }
 
-    /**
-     * @return list<BankStatementLine>
-     */
+    /** @return list<BankStatementLine> */
     private static function toBankStatementLines(mixed $raw): array
     {
         $rows = Envelope::results(is_array($raw) ? ['d' => $raw] : null);
@@ -275,7 +202,6 @@ final class ExactAccountingTarget implements AccountingTarget, EnrichesValidatio
             amount: (float) ($line['AmountFC'] ?? 0),
             date: self::toDate($line['Date'] ?? null),
             description: self::nullableString($line['Description'] ?? null),
-            // Anders dan bij een boeking levert Exact hier de naam op de regel zelf.
             relationId: self::nullableString($line['Account'] ?? null),
             relationName: self::nullableString($line['AccountName'] ?? null),
             ledgerAccountId: self::nullableString($line['GLAccount'] ?? null),
@@ -324,9 +250,6 @@ final class ExactAccountingTarget implements AccountingTarget, EnrichesValidatio
     }
 
     /**
-     * Relatienamen uit de mirror in één query — Exact levert bij de boekingsregels
-     * alleen de relatie-GUID, en per document een lookup doen zou een N+1 zijn.
-     *
      * @param  list<string>  $ids
      * @return array<string, string>
      */
@@ -346,13 +269,6 @@ final class ExactAccountingTarget implements AccountingTarget, EnrichesValidatio
     }
 
     /**
-     * De volledige `external_id` per `EntryID`, één query voor de hele pagina.
-     *
-     * `provenance()` laat de external_id weg zodra hij niet in `YourRef` past; de eigen
-     * ledger draagt de volledige waarde onder de Exact-`EntryID` (`provider_entity_id`,
-     * uniek per connectie+entity_type — geen subtype nodig om te matchen). Een document
-     * dat de Hub niet zelf boekte heeft geen rij en valt terug op `YourRef`.
-     *
      * @param  list<string>  $entryIds
      * @return array<string, string>
      */
@@ -370,9 +286,7 @@ final class ExactAccountingTarget implements AccountingTarget, EnrichesValidatio
             ->all();
     }
 
-    /**
-     * @return list<PostedDocumentLine>
-     */
+    /** @return list<PostedDocumentLine> */
     private static function toPostedLines(mixed $raw): array
     {
         $rows = Envelope::results(is_array($raw) ? ['d' => $raw] : null);
@@ -387,11 +301,6 @@ final class ExactAccountingTarget implements AccountingTarget, EnrichesValidatio
         ), $rows);
     }
 
-    /**
-     * `YourRef` draagt "{consumer} · {external_id}" (zie {@see self::provenance()}).
-     * Alleen het deel ná de scheider is van de consumer; ontbreekt die, dan is het
-     * document buiten de Hub om ingevoerd en hebben we geen external_id.
-     */
     private static function externalIdFromProvenance(?string $yourRef): ?string
     {
         if ($yourRef === null || ! str_contains($yourRef, ' · ')) {
@@ -416,12 +325,9 @@ final class ExactAccountingTarget implements AccountingTarget, EnrichesValidatio
         }
     }
 
-    /**
-     * @param  array<string, mixed>  $row
-     */
+    /** @param  array<string, mixed>  $row */
     private static function toRelation(array $row): Relation
     {
-        // Exact vult Code op met spaties tot een vaste breedte.
         $code = trim((string) ($row['Code'] ?? ''));
 
         return new Relation(
@@ -445,9 +351,6 @@ final class ExactAccountingTarget implements AccountingTarget, EnrichesValidatio
     }
 
     /**
-     * Bindt de Exact-SDK aan déze Connection (spiegel van ResolveExactAccount) zodat de
-     * reactieve token-refresh tegen de juiste koppeling loopt, en geeft de division terug.
-     *
      * @return string de division van de Connection
      *
      * @throws AccountingMappingException wanneer de Connection geen division heeft
@@ -470,12 +373,6 @@ final class ExactAccountingTarget implements AccountingTarget, EnrichesValidatio
     }
 
     /**
-     * De gedeelde vorm van elke gepagineerde OData-lees: cursor erin, versturen, falen
-     * omhoog laten gaan, envelope pellen, `__next` naar een cursor, pagina terug.
-     *
-     * Eén plek, zodat het paginatie-contract voor alle lees-endpoints gelijk ís in
-     * plaats van dat het per methode toevallig hetzelfde geschreven is.
-     *
      * @template T
      *
      * @param  array<string, scalar|null>  $params
@@ -521,10 +418,6 @@ final class ExactAccountingTarget implements AccountingTarget, EnrichesValidatio
         return $exact->connector($division);
     }
 
-    /**
-     * Capability `references.sync`. Spiegelen en afleiden horen bij elkaar; deze
-     * methode is de enige plek waar die volgorde nog staat.
-     */
     public function syncReferences(Connection $connection): int
     {
         $mirrored = $this->referenceSync->sync($connection);
@@ -534,8 +427,6 @@ final class ExactAccountingTarget implements AccountingTarget, EnrichesValidatio
     }
 
     /**
-     * Capability `validation.enrich`.
-     *
      * @param  array<string, mixed>  $payload
      * @return list<Finding>
      */
@@ -546,8 +437,6 @@ final class ExactAccountingTarget implements AccountingTarget, EnrichesValidatio
 
     public function push(FinancialDocument $document, Connection $connection): AccountingResult
     {
-        // Binden vóór ensureMapping: die synct zo nodig referentiedata en heeft de SDK
-        // dus al nodig. De connector pas daarná ophalen, want ensureMapping herbindt.
         $division = $this->bindSdkFor($connection);
 
         $this->ensureMapping($connection);
@@ -573,13 +462,7 @@ final class ExactAccountingTarget implements AccountingTarget, EnrichesValidatio
         );
     }
 
-    /**
-     * Uploadt elke bijlage in 2 stappen (Document → DocumentAttachment) ná de boeking.
-     * Best-effort: de boeking is leidend en al persistent; een mislukte bijlage gooit
-     * niet (anders herboekt een idempotency-retry) maar wordt per stuk gerapporteerd.
-     *
-     * @return list<array{filename: string, status: string, document_ref: ?string, error: ?string}>
-     */
+    /** @return list<array{filename: string, status: string, document_ref: ?string, error: ?string}> */
     private function uploadAttachments(
         FinancialDocument $document,
         Connection $connection,
@@ -609,9 +492,7 @@ final class ExactAccountingTarget implements AccountingTarget, EnrichesValidatio
         );
     }
 
-    /**
-     * @return array{filename: string, status: string, document_ref: ?string, error: ?string}
-     */
+    /** @return array{filename: string, status: string, document_ref: ?string, error: ?string} */
     private function uploadAttachment(
         Attachment $attachment,
         Connection $connection,
@@ -623,9 +504,6 @@ final class ExactAccountingTarget implements AccountingTarget, EnrichesValidatio
         ?string $autoDocRef,
     ): array {
         try {
-            // Inkoop: Exact koppelt al automatisch een Document aan de boeking (`d.Document`)
-            // → de bijlage dáár aan hangen, anders krijg je een dubbel document. Verkoop
-            // heeft geen auto-Document → er zelf één aanmaken en koppelen.
             $documentRef = $autoDocRef;
 
             if ($documentRef === null) {
@@ -634,9 +512,6 @@ final class ExactAccountingTarget implements AccountingTarget, EnrichesValidatio
                     type: $type,
                     account: $this->references->relationRef($document->party, $connection),
                     financialTransactionEntryId: $entryId,
-                    // Inkoop erft de datum van het Document dat Exact zelf aanmaakt;
-                    // verkoop heeft er geen, dus zonder dit staat het stuk in het
-                    // documentenoverzicht onder de dag van boeken.
                     documentDate: $document->issueDate->format('Y-m-d'),
                 ));
 
@@ -684,11 +559,6 @@ final class ExactAccountingTarget implements AccountingTarget, EnrichesValidatio
         };
     }
 
-    /**
-     * Zelf-initialiserend: heeft de Connection nog geen mapping (bv. eerste document vóór een
-     * sync), spiegel dan de referentiedata en derive de default-mapping. No-op zodra er een
-     * mapping staat — de reguliere weg vult 'm al bij connect (SyncExactReferenceJob).
-     */
     private function ensureMapping(Connection $connection): void
     {
         if (! empty($connection->metadata['accounting_mapping'])) {
@@ -703,16 +573,9 @@ final class ExactAccountingTarget implements AccountingTarget, EnrichesValidatio
     {
         $entryDate = $document->issueDate->format('Y-m-d');
         $dueDate = $document->dueDate?->format('Y-m-d');
-        // `reference` is het nummer waaronder de consumer het document zelf kent en dat
-        // hij op zijn betalingen zet; daarop wordt een bankregel afgeletterd. Het nummer
-        // van de tegenpartij staat al in YourRef, dus die twee botsen niet.
         $description = $document->reference ?? $document->number ?? $document->externalId;
         $yourRef = $this->provenance($document, $connection);
 
-        // income = ontvangst met relatie-debiteur → SalesEntry; expense = declaratie/
-        // kosten met relatie-crediteur → PurchaseEntry. Beide dragen altijd relatie +
-        // BTW + categorie-GL, dus geen memoriaal (zie #12). De openstaande post wordt
-        // later via Exact-bankreconciliatie afgeletterd.
         return match ($document->type) {
             DocumentType::SalesInvoice, DocumentType::CreditNote, DocumentType::Income => new CreateSalesEntry(
                 customer: $this->references->relationRef($document->party, $connection),
@@ -735,31 +598,12 @@ final class ExactAccountingTarget implements AccountingTarget, EnrichesValidatio
         };
     }
 
-    /**
-     * Exact `YourRef`: "{nummer} · {external_id}", of alleen "{nummer}" wanneer die
-     * twee samen niet binnen {@see self::YOUR_REF_MAX} passen.
-     *
-     * Exact toont dit veld als factuurnummer, dus staat het nummer van het document
-     * voorop — op een inkoopboeking is dat het factuurnummer van de leverancier, wat
-     * daar hoort. De consumer-naam stond hier eerder, maar zegt een boekhouder niets.
-     *
-     * De external_id staat erachter zolang hij héél past, want dan is dit veld ook een
-     * sleutel: {@see self::findPostedDocument()} filtert erop met een exacte
-     * vergelijking en {@see self::externalIdFromProvenance()} leest 'm er weer uit.
-     * Past hij niet — een uuid past nooit — dan blijft hij weg in plaats van half:
-     * een halve sleutel is voor de boekhouder onleesbaar en voor de probe waardeloos.
-     */
     private function provenance(FinancialDocument $document, Connection $connection): string
     {
         return $this->provenanceWithKey($document, $connection)
             ?? mb_substr($this->provenanceLead($document, $connection), 0, self::YOUR_REF_MAX);
     }
 
-    /**
-     * De provenance mét external_id, of null wanneer die niet héél binnen Exacts
-     * veldlengte past. Alleen in het eerste geval draagt `YourRef` een sleutel waarop
-     * exact gefilterd kan worden.
-     */
     private function provenanceWithKey(FinancialDocument $document, Connection $connection): ?string
     {
         $full = $this->provenanceLead($document, $connection).' · '.$document->externalId;
@@ -772,12 +616,7 @@ final class ExactAccountingTarget implements AccountingTarget, EnrichesValidatio
         return $document->number ?? $connection->account?->consumer?->name ?? 'Emeq Hub';
     }
 
-    /**
-     * Geresolvede regels in de neutrale vorm die de SDK-write-requests verwachten.
-     * costCenter/costUnit zijn gevalideerde Codes (of null) — de SDK laat null-velden vallen.
-     *
-     * @return list<array{description: ?string, amount: float, vatCode: ?string, glAccount: ?string, costCenter: ?string, costUnit: ?string}>
-     */
+    /** @return list<array{description: ?string, amount: float, vatCode: ?string, glAccount: ?string, costCenter: ?string, costUnit: ?string}> */
     private function lines(FinancialDocument $document, Connection $connection): array
     {
         return array_map(

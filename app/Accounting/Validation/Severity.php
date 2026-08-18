@@ -10,9 +10,6 @@ enum Severity: string
     case Warning = 'warning';
     case Info = 'info';
 
-    /**
-     * Hoger = ernstiger; gebruikt om findings te ordenen in de respons.
-     */
     public function weight(): int
     {
         return match ($this) {

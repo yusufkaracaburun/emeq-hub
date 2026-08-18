@@ -9,9 +9,6 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Concerns\StubsMollieClient;
 use Tests\TestCase;
 
-/**
- * MOLL-03 Customers — list, get, create via Mollie SDK pass-through.
- */
 class CustomersTest extends TestCase
 {
     use RefreshDatabase;

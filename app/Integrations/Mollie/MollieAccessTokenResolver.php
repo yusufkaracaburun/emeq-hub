@@ -9,9 +9,7 @@ use InvalidArgumentException;
 
 final class MollieAccessTokenResolver
 {
-    /**
-     * @var Closure(): ?string
-     */
+    /** @var Closure(): ?string */
     private readonly Closure $partnerTokenResolver;
 
     /**

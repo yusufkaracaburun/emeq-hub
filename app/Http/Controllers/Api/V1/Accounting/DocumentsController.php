@@ -19,15 +19,6 @@ use Dedoc\Scramble\Attributes\Group;
 use Dedoc\Scramble\Attributes\Response;
 use Illuminate\Http\JsonResponse;
 
-/**
- * Provider-agnostische accounting-sync. Een consumer POST een canonical
- * FinancialDocument; de Hub resolvet de gekoppelde boekhoud-Connection van de
- * Account, dispatcht naar de juiste AccountingTarget-adapter en audit het als
- * uitgaande PassThroughCall. Welk pakket (Exact/Snelstart/…) is transparant.
- *
- * Default synchroon (201 + `status:posted`). Met `Prefer: respond-async` draait de
- * partner-push in een queue-job die het resultaat per webhook terugmeldt (202 + pending).
- */
 #[Group(name: 'Accounting Sync', description: 'Push canonical financiële documenten naar het gekoppelde boekhoudpakket van de Account.', weight: 50)]
 class DocumentsController extends Controller
 {
@@ -38,11 +29,6 @@ class DocumentsController extends Controller
         private readonly AccountingSyncRunner $runner,
     ) {}
 
-    /**
-     * `AccountingSyncRunner::run()` levert bij succes (posted, deduplicated of
-     * recovered-after-timeout) altijd deze vorm; `external_number`/`attachments`/
-     * `deduplicated`/`recovered` komen er alleen bij als die van toepassing zijn.
-     */
     #[Response(200, type: 'array{provider: string, status: string, external_id: string, external_ref: string|null, external_number?: int, attachments?: list<array{filename: string, status: string, document_ref: string|null, error: string|null}>, deduplicated?: bool, recovered?: bool}')]
     public function store(StoreDocumentRequest $request): JsonResponse
     {
@@ -77,8 +63,6 @@ class DocumentsController extends Controller
         Account $account,
         int $consumerId,
     ): JsonResponse {
-        // Async zonder terugmeld-kanaal is een zwart gat — weiger fail-fast i.p.v. de
-        // uitkomst alleen in de audit te laten verdwijnen.
         if (! $request->user()?->webhook_callback_url) {
             return response()->json([
                 'status' => SyncStatus::Rejected->value,
@@ -96,9 +80,6 @@ class DocumentsController extends Controller
         ], 202);
     }
 
-    /**
-     * RFC 7240 `Prefer: respond-async` — de consumer vraagt de async-variant aan.
-     */
     private function wantsAsync(StoreDocumentRequest $request): bool
     {
         return str_contains(strtolower((string) $request->header('Prefer', '')), 'respond-async');

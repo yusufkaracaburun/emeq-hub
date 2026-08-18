@@ -4,19 +4,6 @@ declare(strict_types=1);
 
 namespace App\Accounting;
 
-/**
- * Debiteur (afnemer) of crediteur (leverancier) op een FinancialDocument. Het
- * canonical model draagt geen provider-GUID's — de adapter resolvet die, behalve
- * wanneer de consumer er zelf één pint via {@see self::$relationId}.
- *
- * Naast de sleutelvelden draagt de party een optionele relatiekaart (KvK, adres,
- * contactgegevens). Die is alleen van belang wanneer de Hub de relatie aanmaakt:
- * bestaat 'ie al, dan is de administratie leidend en raakt de Hub 'm niet aan.
- *
- * `kind` zegt wélke sleutels bestaan, niet wat de Hub mag doen: een `company`
- * draagt KvK of btw-nummer, een `person` heeft geen van beide en leunt volledig
- * op de mirror. Zie `.docs/decisions/relation-resolution-ladder.md`.
- */
 final readonly class Party
 {
     public const KIND_COMPANY = 'company';
@@ -48,9 +35,7 @@ final readonly class Party
         return $this->kind !== self::KIND_PERSON;
     }
 
-    /**
-     * @param  array<string, mixed>  $data
-     */
+    /** @param  array<string, mixed>  $data */
     public static function fromArray(array $data): self
     {
         $text = static fn (string $key): ?string => isset($data[$key]) && trim((string) $data[$key]) !== ''

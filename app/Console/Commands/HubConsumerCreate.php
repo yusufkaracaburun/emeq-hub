@@ -63,9 +63,7 @@ class HubConsumerCreate extends Command
         return self::SUCCESS;
     }
 
-    /**
-     * @return list<string>
-     */
+    /** @return list<string> */
     private function resolveAbilities(): array
     {
         /** @var list<string> $raw */

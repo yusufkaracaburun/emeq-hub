@@ -6,14 +6,6 @@ namespace App\Integrations\PassThrough;
 
 use App\Enums\Provider;
 
-/**
- * Wie deze call doet en waarheen — alles wat de auditrij nodig heeft, los van wat
- * de partner terugstuurt.
- *
- * Bestaat zodat {@see PassThroughPipeline} één signatuur heeft voor vier stromen die
- * in hun tenant-vorm verschillen: de meeste dragen Account én Connection, Mollie
- * Connect draait op het partner-token en heeft geen van beide.
- */
 final class PassThroughContext
 {
     /**

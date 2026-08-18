@@ -14,11 +14,6 @@ use App\Models\Consumer;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
-/**
- * De relatie-finding moet hetzelfde oordelen als het schrijfpad. ExactRelationResolver kijkt
- * eerst naar de geleerde koppeling op `external_id` in de mirror; deed de dry-run dat niet,
- * dan meldde die "nieuw" voor een relatie die de boeking wél terugvindt. Vereist DB.
- */
 class ExactReportEnricherRelationTest extends TestCase
 {
     use RefreshDatabase;
@@ -79,7 +74,6 @@ class ExactReportEnricherRelationTest extends TestCase
 
         $this->assertCount(1, $findings);
         $this->assertSame('exact.relation.new', $findings[0]->code);
-        // De ladder maakt de relatie zelf aan wanneer niets matcht — Info, niet blocking.
         $this->assertSame(Severity::Info, $findings[0]->severity);
         $this->assertFalse($findings[0]->blocking);
     }

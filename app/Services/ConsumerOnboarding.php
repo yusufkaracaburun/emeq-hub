@@ -10,19 +10,6 @@ use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 use RuntimeException;
 
-/**
- * Atomic onboarding-service: maakt Consumer + (optioneel) Account + (optioneel)
- * Connection + PAT in één DB::transaction aan. Failure op willekeurige stap →
- * volledige rollback (geen wees-Consumer of orphan-Account).
- *
- * Eén bron-van-waarheid voor onboarding-logica die zowel de CLI
- * (`hub:consumer:create`) als de Filament-wizard (PLAN 08-02) consumeren.
- *
- * Plain `plain_token` + `plain_webhook_callback_secret` worden alleen via de
- * return-array beschikbaar gesteld — bedoeld voor eenmalige Cache-flash. Nooit
- * loggen, nooit persistent dumpen. Encrypted-cast op Consumer + Connection
- * garandeert at-rest-encryption (regel `protected function casts()`).
- */
 final readonly class ConsumerOnboarding
 {
     /**
@@ -66,8 +53,6 @@ final readonly class ConsumerOnboarding
 
             $token = $consumer->createToken($data['token_name'], $data['abilities']);
 
-            // Test-only failure marker — bewijst rollback in feature-test zonder
-            // model-event-listener of FK-violation te hoeven simuleren.
             if (! empty($data['__force_failure'])) {
                 throw new RuntimeException('forced failure inside DB::transaction');
             }
@@ -82,9 +67,7 @@ final readonly class ConsumerOnboarding
         });
     }
 
-    /**
-     * @param  array<int, string>  $abilities
-     */
+    /** @param  array<int, string>  $abilities */
     private function assertAbilitiesWhitelisted(array $abilities): void
     {
         $invalid = array_values(array_diff($abilities, TokenAbilities::all()));

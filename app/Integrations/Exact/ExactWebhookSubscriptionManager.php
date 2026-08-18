@@ -16,22 +16,11 @@ use Emeq\ExactApi\OData\Envelope;
 use Illuminate\Contracts\Config\Repository as ConfigRepository;
 use Throwable;
 
-/**
- * Beheert de Exact-webhook-subscriptions van één Connection (register bij connect,
- * unsubscribe bij revoke). Bindt de SDK per-connection zoals ExactAccountingTarget,
- * zodat de reactieve token-refresh tegen déze Connection loopt.
- *
- * De Exact-wire (endpoints, OData-envelope) leeft in de SDK; deze service orkestreert
- * alleen: welke topics, welke CallbackURL, en waar de subscription-IDs landen
- * (`connection.metadata['exact_webhooks']`, topic → subscription-ID).
- */
 final class ExactWebhookSubscriptionManager
 {
     public function __construct(private readonly ConfigRepository $config) {}
 
-    /**
-     * @return array{callback_url: string, configured: list<string>, remote: array<string, string>, stored: array<string, string>, missing: list<string>, orphans: array<string, string>, stale: list<string>}
-     */
+    /** @return array{callback_url: string, configured: list<string>, remote: array<string, string>, stored: array<string, string>, missing: list<string>, orphans: array<string, string>, stale: list<string>} */
     public function plan(Connection $connection): array
     {
         $division = (string) $connection->administratie_id;
@@ -59,9 +48,7 @@ final class ExactWebhookSubscriptionManager
         ];
     }
 
-    /**
-     * @param  array{callback_url: string, configured: list<string>, remote: array<string, string>, stored: array<string, string>, missing: list<string>, orphans: array<string, string>, stale: list<string>}|null  $plan
-     */
+    /** @param  array{callback_url: string, configured: list<string>, remote: array<string, string>, stored: array<string, string>, missing: list<string>, orphans: array<string, string>, stale: list<string>}|null  $plan */
     public function register(Connection $connection, ?array $plan = null): void
     {
         $division = (string) $connection->administratie_id;
@@ -148,10 +135,6 @@ final class ExactWebhookSubscriptionManager
         return ['added' => $added, 'removed' => $removed];
     }
 
-    /**
-     * Best-effort: na een OAuth-revoke kan de delete falen (token weg) — Exact ruimt
-     * verweesde subscriptions 's nachts zelf op, dus we falen niet hard.
-     */
     public function unsubscribe(Connection $connection): void
     {
         $division = (string) $connection->administratie_id;
@@ -190,14 +173,7 @@ final class ExactWebhookSubscriptionManager
 
     private function createSubscription(ExactConnector $connector, string $topic, string $callbackUrl): ?string
     {
-        // De connector heeft retries aan → een niet-retrybare 500 wordt door Saloon
-        // gegooid i.p.v. teruggegeven. Beide paden afvangen: een duplicate ("Data
-        // already exists" — een andere user van dezelfde klant abonneerde al) is
-        // idempotent, geen fout. We krijgen dan geen ID; een volgende register()
-        // pakt 'm via de list-stap.
         try {
-            // IsInstant NIET meesturen: Exact accepteert die parameter alléén voor
-            // het topic 'GoodsDeliveries' (anders HTTP 500). Default = batched.
             $response = $connector->send(new CreateWebhookSubscription(
                 topic: $topic,
                 callbackUrl: $callbackUrl,
@@ -226,9 +202,7 @@ final class ExactWebhookSubscriptionManager
         return str_contains($message, 'Data already exists');
     }
 
-    /**
-     * @return array<string, string> topic → subscription-ID
-     */
+    /** @return array<string, string> topic → subscription-ID */
     private function existingSubscriptions(ExactConnector $connector): array
     {
         $response = $connector->send(new ListWebhookSubscriptions);
@@ -248,9 +222,7 @@ final class ExactWebhookSubscriptionManager
         return $map;
     }
 
-    /**
-     * @return array<string, string> topic → subscription-ID
-     */
+    /** @return array<string, string> topic → subscription-ID */
     private function storedSubscriptions(Connection $connection): array
     {
         $subscriptions = ($connection->metadata ?? [])['exact_webhooks'] ?? [];
@@ -258,9 +230,7 @@ final class ExactWebhookSubscriptionManager
         return is_array($subscriptions) ? $subscriptions : [];
     }
 
-    /**
-     * @param  array<string, string>  $subscriptions
-     */
+    /** @param  array<string, string>  $subscriptions */
     private function persist(Connection $connection, array $subscriptions): void
     {
         $metadata = $connection->metadata ?? [];
@@ -274,9 +244,7 @@ final class ExactWebhookSubscriptionManager
         $connection->update(['metadata' => $metadata]);
     }
 
-    /**
-     * @return list<string>
-     */
+    /** @return list<string> */
     private function topics(): array
     {
         return array_values(array_filter(
@@ -285,13 +253,6 @@ final class ExactWebhookSubscriptionManager
         ));
     }
 
-    /**
-     * Exact eist dat de CallbackURL hetzelfde scheme+domein heeft als de
-     * geregistreerde RedirectURI (en HTTPS). Daarom leiden we de origin af van
-     * `services.exact.redirect_uri` — niet van APP_URL, dat in dev de lokale
-     * (niet-publieke, http) host is. Zo kan de CallbackURL nooit van de
-     * Exact-constraint afdrijven. Geen redirect_uri (standalone/tests) → route().
-     */
     public function callbackUrl(): string
     {
         $redirectUri = (string) $this->config->get('services.exact.redirect_uri');

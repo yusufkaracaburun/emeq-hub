@@ -20,31 +20,9 @@ use Illuminate\Support\Str;
 use InvalidArgumentException;
 use Laravel\Pennant\Feature;
 
-/**
- * Plan 08-03 — Shared Filament Action voor OAuth-init.
- *
- * D-05 + UI-SPEC S2: één Action-class met twee static factories:
- *  - forAccount(): primary CTA op AccountResource ("Koppel met provider…")
- *  - forConnection(): secondary CTA op ConnectionResource ("Start OAuth-koppeling")
- *
- * Beide hergebruiken Phase-4 OAuthFlowRegistry + InitController-logica via
- * de gedeelde dispatch()-method; geen duplicate OAuth-flow-implementatie.
- *
- * Descriptor-driven via ProviderCredentialDescriptor::all() — alleen providers
- * met oauthFlowKey !== null verschijnen in de provider-dropdown.
- */
 class StartOAuthFlowAction
 {
-    /**
-     * Whitelist providers met OAuth-flow (descriptor-driven).
-     *
-     * Filtert tevens uit op Pennant feature-flag — een provider die via de
-     * documented kill-switch (CLAUDE.md "Feature-flags / kill-switch") is
-     * uitgeschakeld verschijnt niet in de dropdown, zodat staff zich niet
-     * door een 503-notification heen worstelt (CR-03).
-     *
-     * @return array<string, string> key => label
-     */
+    /** @return array<string, string> key => label */
     public static function oauthCapableProviders(): array
     {
         $providers = [];
@@ -62,9 +40,6 @@ class StartOAuthFlowAction
         return $providers;
     }
 
-    /**
-     * Primary CTA op AccountResource — modal met provider-keuze.
-     */
     public static function forAccount(): Action
     {
         return Action::make('startOAuthFlow')
@@ -84,9 +59,6 @@ class StartOAuthFlowAction
             ->action(fn (Account $record, array $data): RedirectResponse|Redirector => self::dispatch($record, $data['provider']));
     }
 
-    /**
-     * Secondary CTA op ConnectionResource — alleen voor pending Mollie zonder access_token.
-     */
     public static function forConnection(): Action
     {
         return Action::make('startOAuthFlow')
@@ -100,15 +72,6 @@ class StartOAuthFlowAction
             ->action(fn (Connection $record): RedirectResponse|Redirector => self::dispatch($record->account, $record->provider->value, $record));
     }
 
-    /**
-     * Single source-of-truth voor OAuth-init — copy van InitController-pattern.
-     *
-     * Hergebruikt bestaande Connection als $existing meegegeven (forConnection-pad);
-     * anders maakt een nieuwe pending Connection aan op het Account.
-     *
-     * Public static voor directe testability — anders moet je via Livewire-mount-stack
-     * gaan, wat een onnodige indirectie is voor unit-coverage van de init-flow.
-     */
     public static function dispatch(Account $account, string $provider, ?Connection $existing = null): RedirectResponse|Redirector
     {
         try {
@@ -122,10 +85,6 @@ class StartOAuthFlowAction
 
             return back();
         } catch (ProviderDisabledException $e) {
-            // CR-03: Pennant kill-switch — provider tijdelijk uitgeschakeld.
-            // `oauthCapableProviders()` filtert hierop, dus de dropdown zou de
-            // optie niet moeten tonen; deze catch dekt de race tussen flag-toggle
-            // en form-submit (én de forConnection()-CTA die de dropdown overslaat).
             Notification::make()
                 ->title("Provider {$provider} is tijdelijk uitgeschakeld")
                 ->body($e->getMessage())
@@ -136,14 +95,8 @@ class StartOAuthFlowAction
         }
 
         $state = Str::random(48);
-        // (array)-cast: niet elke provider heeft een connect.scopes-config (Exact
-        // gebruikt geen scopes → null). getAuthorizationUrl() verwacht een array;
-        // null zou een TypeError geven. No-op voor Mollie's array.
         $scopes = (array) config("services.{$provider}.connect.scopes");
 
-        // CR-04-equivalent: bouw de authorize-URL VÓÓR we de pending Connection
-        // wegschrijven. Een runtime-fout in getAuthorizationUrl() (network, config
-        // missing, etc.) liet voorheen een orphan pending-row achter op elke retry.
         try {
             $url = $flow->getAuthorizationUrl($account, $scopes, $state);
         } catch (\Throwable $e) {
@@ -158,10 +111,6 @@ class StartOAuthFlowAction
             return back();
         }
 
-        // Idempotent: hergebruik een bestaande niet-revoked Connection (orphan
-        // pending van een eerdere poging, of een active connection die her-koppelt).
-        // De partial unique-index (account_id, provider) WHERE revoked_at IS NULL
-        // staat geen tweede non-revoked rij toe → anders UniqueConstraintViolation.
         $existing ??= $account->connections()
             ->where('provider', $provider)
             ->whereNull('revoked_at')
@@ -169,7 +118,6 @@ class StartOAuthFlowAction
 
         if ($existing !== null) {
             $existing->update([
-                // Reset naar pending: de callback zoekt op status='pending' + oauth_state.
                 'status' => 'pending',
                 'oauth_state' => $state,
                 'oauth_state_expires_at' => now()->addMinutes(30),

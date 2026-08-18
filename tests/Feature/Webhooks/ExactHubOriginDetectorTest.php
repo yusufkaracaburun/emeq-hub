@@ -56,12 +56,6 @@ class ExactHubOriginDetectorTest extends TestCase
         $this->assertFalse($this->detect($theirs, 'guid-hub'));
     }
 
-    /**
-     * Elke Hub-write op een relatie (aanmaken, sleutel-writeback, rolpromotie) legt een
-     * `ProviderEntityLink` met `origin=hub` vast — zie `ExactRelationResolver::recordOrigin()`.
-     * Dat is het enige pad dat de detector nog leest; het losse `created_by_hub`-attribuut
-     * op `ConnectionAccountingRef` is geen tweede bron meer.
-     */
     public function test_it_recognises_a_relation_the_hub_created(): void
     {
         $connection = $this->exactConnection();

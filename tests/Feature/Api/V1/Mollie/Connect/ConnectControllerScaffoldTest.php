@@ -15,12 +15,6 @@ use App\Http\Requests\Api\V1\Mollie\Connect\CreateProfileRequest;
 use ReflectionClass;
 use Tests\TestCase;
 
-/**
- * Smoke-bewijs voor Plan 13-02 Task 1 — alle 8 nieuwe classes laden,
- * de base implementeert de spec'd helpers (client / dispatchMollieCall /
- * handle / resourceToArray / collectionToArray), en de container-resolve-
- * + Mollie-exception-mapper-affordances zitten erin.
- */
 class ConnectControllerScaffoldTest extends TestCase
 {
     public function test_all_eight_connect_classes_autoload(): void

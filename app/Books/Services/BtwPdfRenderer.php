@@ -7,11 +7,6 @@ namespace App\Books\Services;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Barryvdh\DomPDF\PDF as DomPdf;
 
-/*
- * Rendert de BTW-aangifte over een periode naar een PDF. Dun: leest BtwService,
- * geeft een plain-HTML Blade aan dompdf. Afzender uit config('books.issuer'),
- * net als ReportPdfRenderer.
- */
 class BtwPdfRenderer
 {
     public function __construct(private readonly BtwService $btw) {}

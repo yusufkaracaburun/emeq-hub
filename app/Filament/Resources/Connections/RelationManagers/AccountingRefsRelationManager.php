@@ -12,12 +12,6 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
 
-/**
- * Read-only spiegel van Exact's referentiedata zoals de Hub die kent
- * (connection_accounting_refs): grootboek, BTW, dagboeken én lazy geleerde
- * relaties met hun stabiele code → provider-native GUID. Hiermee kan een
- * boekhouder een GUID uit een boeking-respons terugzoeken naar een naam.
- */
 final class AccountingRefsRelationManager extends RelationManager
 {
     protected static string $relationship = 'accountingRefs';
@@ -30,9 +24,7 @@ final class AccountingRefsRelationManager extends RelationManager
             && $ownerRecord->accountingRefs()->exists();
     }
 
-    /**
-     * @var array<string, string>
-     */
+    /** @var array<string, string> */
     private const KIND_LABELS = [
         ConnectionAccountingRef::KIND_GL => 'Grootboek',
         ConnectionAccountingRef::KIND_VAT => 'BTW',
@@ -42,9 +34,7 @@ final class AccountingRefsRelationManager extends RelationManager
         ConnectionAccountingRef::KIND_COST_UNIT => 'Kostendrager',
     ];
 
-    /**
-     * @var array<string, string>
-     */
+    /** @var array<string, string> */
     private const KIND_COLORS = [
         ConnectionAccountingRef::KIND_GL => 'info',
         ConnectionAccountingRef::KIND_VAT => 'warning',

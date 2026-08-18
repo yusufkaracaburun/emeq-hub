@@ -13,13 +13,6 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
-/*
- * Boekhouding leeft top-level in het admin-paneel onder de collapsed groep
- * Boekhouding (géén aparte cluster meer). Eén paneel, functiescheiding blijft:
- * super-admin/boekhouder zien de boekhoud-resources, staff niet; boekhouder ziet
- * géén Hub-resources. Toegang per resource via GatedToBoekhouding (rol) resp. de
- * bestaande Hub-permissions.
- */
 class BooksPanelAccessTest extends TestCase
 {
     use RefreshDatabase;

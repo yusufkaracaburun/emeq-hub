@@ -9,12 +9,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-/**
- * Onboarding-lead vanaf de publieke koppel-intake (formulier op de
- * partner-pagina's). Bewust losgekoppeld van
- * het Connection-model: dit is een aanvraag om gekoppeld te worden, geen
- * OAuth-koppeling.
- */
 class AccessRequest extends Model
 {
     /** @use HasFactory<AccessRequestFactory> */
@@ -32,9 +26,7 @@ class AccessRequest extends Model
         'consumer_id',
     ];
 
-    /**
-     * @return array<string, string>
-     */
+    /** @return array<string, string> */
     protected function casts(): array
     {
         return [
@@ -43,11 +35,7 @@ class AccessRequest extends Model
         ];
     }
 
-    /**
-     * De Consumer die uit deze aanvraag is ge-onboard (null = nog niet afgehandeld).
-     *
-     * @return BelongsTo<Consumer, $this>
-     */
+    /** @return BelongsTo<Consumer, $this> */
     public function consumer(): BelongsTo
     {
         return $this->belongsTo(Consumer::class);

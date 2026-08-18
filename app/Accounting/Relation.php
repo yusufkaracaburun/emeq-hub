@@ -4,17 +4,6 @@ declare(strict_types=1);
 
 namespace App\Accounting;
 
-/**
- * Canonieke relatie: een debiteur (klant) of crediteur (leverancier).
- *
- * Eén type met een `role`, geen twee klassen. Zowel Exact als Moneybird kennen
- * één relatie-entiteit met rolvlaggen, en het canonieke {@see Party} op de
- * schrijfzijde doet het al net zo. `/customers` en `/suppliers` zijn twee
- * ingangen op dezelfde vorm.
- *
- * Een relatie kan beide rollen hebben; `roles` draagt dat, `role` is de rol
- * waarop gefilterd werd.
- */
 final readonly class Relation
 {
     public const ROLE_DEBTOR = 'debtor';
@@ -40,9 +29,7 @@ final readonly class Relation
         return in_array($role, $this->roles, true);
     }
 
-    /**
-     * @return array<string, mixed>
-     */
+    /** @return array<string, mixed> */
     public function toArray(): array
     {
         return [

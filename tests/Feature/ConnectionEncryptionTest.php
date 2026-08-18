@@ -108,11 +108,6 @@ class ConnectionEncryptionTest extends TestCase
 
     public function test_unknown_provider_value_is_rejected_by_the_enum_cast(): void
     {
-        // Sinds audit A1 is Connection::provider gecast naar App\Enums\Provider.
-        // De cast is nu de guard tegen onbekende providers: een waarde buiten de
-        // enum wordt al bij assignment geweigerd, vóór fingerprint() ooit draait.
-        // Het oude "fingerprint() geeft null voor unknown provider"-pad is daarmee
-        // structureel onbereikbaar geworden.
         $this->expectException(\ValueError::class);
 
         Connection::factory()->create([

@@ -43,7 +43,7 @@ class RecurringInvoiceGeneratorTest extends TestCase
         $template->lines()->create([
             'description' => 'Maandelijkse dienst',
             'quantity' => 1,
-            'unit_price' => 10000, // €100,00
+            'unit_price' => 10000,
             'tax_rate' => 21,
             'sort' => 0,
         ]);
@@ -62,7 +62,6 @@ class RecurringInvoiceGeneratorTest extends TestCase
         $invoice = Invoice::firstOrFail();
         $this->assertSame(InvoiceStatus::Draft, $invoice->status);
         $this->assertSame(1, $invoice->lines()->count());
-        // €100 + 21% BTW = €121,00 → 12100 centen (observer-berekend).
         $this->assertSame(12100, $invoice->total);
         $this->assertTrue($invoice->due_date->isSameDay(Carbon::today()->addDays(14)));
 
@@ -82,7 +81,6 @@ class RecurringInvoiceGeneratorTest extends TestCase
         $this->assertSame(RecurringStatus::Ended, $template->status);
         $this->assertSame(1, Invoice::query()->count());
 
-        // Tweede run levert niets meer.
         app(RecurringInvoiceGenerator::class)->generateDue();
         $this->assertSame(1, Invoice::query()->count());
     }
@@ -94,7 +92,6 @@ class RecurringInvoiceGeneratorTest extends TestCase
         app(RecurringInvoiceGenerator::class)->generateDue();
 
         $template->refresh();
-        // Eén factuur (vandaag <= einddatum), daarna next_date voorbij einddatum → Ended.
         $this->assertSame(1, Invoice::query()->count());
         $this->assertSame(RecurringStatus::Ended, $template->status);
     }
@@ -111,7 +108,6 @@ class RecurringInvoiceGeneratorTest extends TestCase
 
     public function test_catchup_is_capped(): void
     {
-        // Start 3 jaar terug, maandelijks → zonder cap 36; cap = 24.
         $this->template(['start_date' => Carbon::today()->subYears(3)]);
 
         $count = app(RecurringInvoiceGenerator::class)->generateDue();

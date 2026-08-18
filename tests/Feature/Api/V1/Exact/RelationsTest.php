@@ -35,9 +35,7 @@ class RelationsTest extends TestCase
         parent::tearDown();
     }
 
-    /**
-     * @return array{0: Consumer, 1: Connection}
-     */
+    /** @return array{0: Consumer, 1: Connection} */
     private function consumerWithExactConnection(): array
     {
         $consumer = Consumer::factory()->create();

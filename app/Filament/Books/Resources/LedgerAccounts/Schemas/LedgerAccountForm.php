@@ -11,11 +11,6 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Schema;
 
-/*
- * Grootboekrekening-form. `category` staat NIET in het form — die wordt afgeleid
- * uit `type` (AccountType::getCategory) in de Create/Edit-pages, zodat type en
- * categorie nooit uit de pas lopen.
- */
 class LedgerAccountForm
 {
     public static function configure(Schema $schema): Schema

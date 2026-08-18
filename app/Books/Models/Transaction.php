@@ -10,11 +10,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-/*
- * Boeking — koppelt een grootboekrekening (account_id) aan de cash-kant
- * (bank_account_id). De TransactionObserver post bij create de gebalanceerde
- * debet/credit-journaalpost via LedgerPoster. Bedrag in integer-centen.
- */
 #[ObservedBy(TransactionObserver::class)]
 class Transaction extends Model
 {
@@ -70,9 +65,6 @@ class Transaction extends Model
         return (int) $this->payments()->sum('amount');
     }
 
-    /**
-     * Nog niet aan een open post toegewezen deel van deze bank-boeking.
-     */
     public function unallocatedAmount(): int
     {
         return max(0, $this->amount - $this->allocatedAmount());

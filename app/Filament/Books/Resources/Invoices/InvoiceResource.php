@@ -18,10 +18,6 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 
-/*
- * Verkoopfacturen (debiteuren). Concept-CRUD met regels + auto-totalen; posten
- * naar het grootboek volgt in een eigen slice.
- */
 class InvoiceResource extends Resource
 {
     use GatedToBoekhouding;

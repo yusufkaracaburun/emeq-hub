@@ -13,13 +13,7 @@ final class ExactHubOriginDetector implements DetectsHubOrigin
 {
     public function __construct(private readonly ExactEntityResolver $entities) {}
 
-    /**
-     * Eén pad voor elke entity-soort: een `ProviderEntityLink` met `origin=hub` op
-     * deze `provider_entity_id`. Voor relaties is dat elke Hub-write (aanmaken,
-     * sleutel-writeback, rolpromotie) — zie `ExactRelationResolver::recordOrigin()`.
-     *
-     * @param  array<string, mixed>  $payload
-     */
+    /** @param  array<string, mixed>  $payload */
     public function hubAuthored(Connection $connection, array $payload): bool
     {
         $key = $this->entities->entityId($payload);
@@ -27,9 +21,7 @@ final class ExactHubOriginDetector implements DetectsHubOrigin
         return $key !== null && $this->hasHubAuthoredLink($connection, $key);
     }
 
-    /**
-     * @param  array<string, mixed>  $payload
-     */
+    /** @param  array<string, mixed>  $payload */
     public function hubLastWroteAt(Connection $connection, array $payload): ?CarbonInterface
     {
         $key = $this->entities->entityId($payload);

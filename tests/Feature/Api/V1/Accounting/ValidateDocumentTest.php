@@ -28,7 +28,6 @@ class ValidateDocumentTest extends TestCase
             'services.exact.api_base_url' => 'https://start.exactonline.nl',
         ]);
 
-        // De Exact-enrichment doet een live crm/Accounts-lookup; default: één match.
         $this->mockRelations([['ID' => 'rel-guid-1', 'Code' => 'C001', 'Name' => 'NL Leverancier BV']]);
     }
 
@@ -39,9 +38,7 @@ class ValidateDocumentTest extends TestCase
         parent::tearDown();
     }
 
-    /**
-     * @param  list<array<string, string>>  $rows
-     */
+    /** @param  list<array<string, string>>  $rows */
     private function mockRelations(array $rows): void
     {
         MockClient::destroyGlobal();
@@ -90,18 +87,11 @@ class ValidateDocumentTest extends TestCase
             ->assertStatus(200)
             ->assertJsonPath('valid', true)
             ->assertJsonPath('summary.errors', 0)
-            ->assertJsonMissing(['code' => 'vat_number.checksum']) // geldig controlecijfer = geen finding
-            ->assertJsonMissing(['code' => 'exact.vat_code.matched']) // gekoppeld tarief = geen ruis-finding
+            ->assertJsonMissing(['code' => 'vat_number.checksum'])
+            ->assertJsonMissing(['code' => 'exact.vat_code.matched'])
             ->assertJsonFragment(['code' => 'exact.relation.matched', 'suggestion' => 'rel-guid-1']);
     }
 
-    /**
-     * Een lege body kwam terug als `valid: true` met nul findings. `/validate` laat
-     * per-veldproblemen bewust door de edge-validatie, omdat het vinden ervan de taak van
-     * de inspector is — en die keek niet of er überhaupt iets te boeken viel. Een consumer
-     * die de dry-run leest als "boekt dit?" kreeg groen voor een payload waar het boeken
-     * met een 422 op weigert.
-     */
     public function test_an_empty_body_is_not_reported_as_bookable(): void
     {
         [$consumer] = $this->consumerWithExactConnection();
@@ -117,11 +107,6 @@ class ValidateDocumentTest extends TestCase
             ->assertJsonFragment(['code' => 'document.lines.missing', 'severity' => 'error']);
     }
 
-    /**
-     * Een veld zonder regel in ValidateDocumentRequest overleeft `validated()` niet, dus
-     * zag de inspector `issue_date` nooit en meldde het als ontbrekend terwijl het in de
-     * body stond. Ontdekt op prod, niet in de unit-test — die voedt de validator direct.
-     */
     public function test_a_field_present_in_the_body_is_not_reported_as_missing(): void
     {
         [$consumer] = $this->consumerWithExactConnection();
@@ -167,9 +152,6 @@ class ValidateDocumentTest extends TestCase
         [$consumer] = $this->consumerWithExactConnection();
         $token = $consumer->createToken('t', [TokenAbilities::EXACT_READ])->plainTextToken;
 
-        // NL001234567B01 heeft het juiste formaat maar faalt de 11-proef — Exact weigert dit
-        // hard (HTTP 500). De dry-run spiegelt dat als error → valid=false, zodat de consument
-        // niet alsnog gaat boeken en op een 422 stuk loopt.
         $this->withHeader('Authorization', "Bearer {$token}")
             ->withHeader('X-Account-Id', 'school1')
             ->postJson('/v1/accounting/documents/validate', [
@@ -180,7 +162,7 @@ class ValidateDocumentTest extends TestCase
                 'lines' => [['description' => 'Dienst', 'amount' => 100, 'tax_rate' => 21]],
             ])
             ->assertStatus(200)
-            ->assertJsonPath('valid', false) // error blokkeert
+            ->assertJsonPath('valid', false)
             ->assertJsonFragment(['code' => 'vat_number.checksum', 'severity' => 'error']);
     }
 
@@ -193,15 +175,12 @@ class ValidateDocumentTest extends TestCase
             ->withHeader('X-Account-Id', 'school1')
             ->postJson('/v1/accounting/documents/validate', [
                 'type' => 'purchase_invoice',
-                'total' => 120, // 100 + 21 = 121 → mismatch, suggestie 121
+                'total' => 120,
                 'party' => ['role' => 'creditor', 'name' => 'Swiss AG', 'vat_number' => 'CHE123456789', 'iban' => 'NL00BANK0123456789'],
                 'lines' => [['description' => 'Import', 'amount' => 100, 'tax_rate' => 21]],
             ])
             ->assertStatus(200)
             ->assertJsonPath('valid', false)
-            // Gemengd geval: 2 errors (altijd blocking) + 1 advisory warning
-            // (arithmetic.total_mismatch, niet blocking — `total` bestaat niet op het
-            // boekcontract) → blocking telt de 2 errors, niet de warning erbij.
             ->assertJsonPath('summary.blocking', 2)
             ->assertJsonFragment(['code' => 'iban.checksum_invalid', 'blocking' => true])
             ->assertJsonFragment(['code' => 'vat_treatment.domestic_rate_on_non_eu', 'blocking' => true])
@@ -221,8 +200,6 @@ class ValidateDocumentTest extends TestCase
                 'lines' => [['description' => 'Laag tarief', 'amount' => 100, 'tax_rate' => 9]],
             ])
             ->assertStatus(200)
-            // Severity blijft `warning` — zo erg is een ontbrekende mapping niet — maar de
-            // boeking strandt er wél op, dus `valid` staat op false.
             ->assertJsonPath('valid', false)
             ->assertJsonPath('summary.errors', 0)
             ->assertJsonPath('summary.blocking', 1)
@@ -231,11 +208,9 @@ class ValidateDocumentTest extends TestCase
 
     public function test_new_supplier_is_reported_as_info_since_the_hub_creates_it(): void
     {
-        // De ladder maakt de relatie zelf aan wanneer niets matcht — geen 422 meer op
-        // "onbekende relatie", dus de dry-run meldt dat als Info, niet blocking.
         [$consumer] = $this->consumerWithExactConnection();
         $token = $consumer->createToken('t', [TokenAbilities::EXACT_READ])->plainTextToken;
-        $this->mockRelations([]); // geen treffer
+        $this->mockRelations([]);
 
         $this->withHeader('Authorization', "Bearer {$token}")
             ->withHeader('X-Account-Id', 'school1')
@@ -276,11 +251,6 @@ class ValidateDocumentTest extends TestCase
             ->assertJson(['error' => 'missing_account_header']);
     }
 
-    /**
-     * De enrichment doet een live Exact-call (relatie-lookup). Die liep vroeger óók
-     * met de kill-switch uit. Nu degradeert het rapport naar de agnostische findings
-     * in plaats van de partner te bellen — een dry-run hoort read-only én stil te zijn.
-     */
     public function test_enrichment_is_skipped_and_no_partner_call_is_made_when_the_provider_is_off(): void
     {
         Feature::define('provider-exact-enabled', fn () => false);

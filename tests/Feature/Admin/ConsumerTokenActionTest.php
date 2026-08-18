@@ -72,10 +72,6 @@ class ConsumerTokenActionTest extends TestCase
         $this->assertSame('Custom PAT', $token->name);
     }
 
-    /**
-     * D-9 (WR-06): plain token mag NIET in Livewire's wire:snapshot meer staan.
-     * Token-flash gaat via server-side Cache::pull() one-shot.
-     */
     public function test_plain_token_not_in_livewire_snapshot(): void
     {
         $this->seedRoles();
@@ -96,20 +92,12 @@ class ConsumerTokenActionTest extends TestCase
         $token = $consumer->fresh()->tokens()->first();
         $this->assertNotNull($token);
 
-        // ListConsumers Livewire-component mag GEEN $lastIssuedPat-state meer hebben
-        // (en dus geen plain token in wire:snapshot). De property bestaat niet meer.
         $this->assertFalse(
             property_exists($component->instance(), 'lastIssuedPat'),
             'ListConsumers should not expose $lastIssuedPat — plain token leaks into wire:snapshot.'
         );
     }
 
-    /**
-     * D-9 (WR-06): action-callback flasht plain token via Cache::put() naar
-     * `pat-flash:{livewire-id}` key (60s TTL). De blade-view pull't 'm one-shot
-     * tijdens de Livewire-render, dus we sniffen op een Cache::spy() i.p.v.
-     * achteraf naar de key te kijken (die is dan al gepull'd).
-     */
     public function test_issue_pat_action_writes_plain_token_to_cache_flash(): void
     {
         $this->seedRoles();
@@ -132,7 +120,6 @@ class ConsumerTokenActionTest extends TestCase
         $token = $consumer->fresh()->tokens()->first();
         $this->assertNotNull($token);
 
-        // Verifieer dat de action twee Cache::put-calls deed met de pat-flash-keys.
         Cache::shouldHaveReceived('put')
             ->withArgs(fn (string $key, mixed $value): bool => str_starts_with($key, 'pat-flash:') && is_string($value) && $value !== '')
             ->once();
@@ -141,11 +128,6 @@ class ConsumerTokenActionTest extends TestCase
             ->once();
     }
 
-    /**
-     * De Kopieer-knop moet werken op http://hub.emeq.test (geen secure context →
-     * navigator.clipboard is undefined). De blade-view moet daarom een
-     * execCommand-fallback renderen, anders doet de knop daar stilletjes niets.
-     */
     public function test_pat_flash_copy_button_renders_clipboard_fallback(): void
     {
         $this->seedRoles();

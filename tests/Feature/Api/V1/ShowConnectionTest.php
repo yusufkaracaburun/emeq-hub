@@ -32,11 +32,6 @@ class ShowConnectionTest extends TestCase
 
     public function test_public_id_from_the_connect_flow_resolves(): void
     {
-        // Regressie: elke connection-id die de Hub uitdeelt is de public_id —
-        // /v1/integrations, de OAuth-init-respons en de connection_revoked-webhook
-        // sturen alle drie die. Dit endpoint typte z'n parameter als int, dus de
-        // gedocumenteerde flow ("bewaar connection_id, poll dan
-        // GET /v1/connections/{id}") gaf een TypeError → 500.
         [$consumer, $token] = $this->consumerWithToken([TokenAbilities::INTEGRATIONS_MANAGE]);
         $account = Account::factory()->for($consumer)->create();
         $connection = Connection::factory()->forExact()->for($account)->create();

@@ -169,8 +169,6 @@ class PassThroughTest extends TestCase
 
     public function test_pass_through_maps_functional_5xx_to_422_rejection(): void
     {
-        // Exact geeft 500 met een functionele melding voor permanente afwijzingen — niet
-        // retryable. Map naar 422 zodat de reden niet achter een Cloudflare-502 verdwijnt.
         MockClient::global([
             RawExactRequest::class => MockResponse::make(
                 '{"error":{"message":{"value":"Invalid combination of GLAccount and Journal"}}}',
@@ -198,8 +196,6 @@ class PassThroughTest extends TestCase
 
     public function test_pass_through_blocks_delete_method_with_405(): void
     {
-        // De Hub verwijdert geen data bij Exact via de pass-through — least-privilege
-        // (D&S vraag 2). DELETE wordt geweigerd vóór de forward; niks bereikt Exact.
         [$consumer] = $this->consumerWithExactConnection();
         $token = $consumer->createToken('t', [TokenAbilities::EXACT_WRITE])->plainTextToken;
 
@@ -247,7 +243,6 @@ class PassThroughTest extends TestCase
         [$consumer] = $this->consumerWithExactConnection();
         $token = $consumer->createToken('t', [TokenAbilities::EXACT_READ])->plainTextToken;
 
-        // 6 fouten reiken Exact (403 → gemaskeerd naar 502); de 7e wordt Hub-side geblokkeerd.
         for ($i = 0; $i < 6; $i++) {
             $this->withHeader('Authorization', "Bearer {$token}")
                 ->withHeader('X-Account-Id', 'school1')
@@ -292,7 +287,6 @@ class PassThroughTest extends TestCase
                 ->getJson('/v1/exact/crm/Accounts');
         }
 
-        // A is geblokkeerd, B niet (krijgt nog de upstream-mapped 502).
         $this->withHeader('Authorization', "Bearer {$token}")
             ->withHeader('X-Account-Id', 'a')
             ->getJson('/v1/exact/crm/Accounts')

@@ -23,8 +23,6 @@ class IntegrationsIndexTest extends TestCase
             ->assertOk()
             ->json());
 
-        // Alleen providers die in beide configs staan; Snelstart zit wél in
-        // hub-providers maar wordt (nog) niet publiek aangeboden.
         $this->assertEqualsCanonicalizing(['exact', 'mollie'], $items->pluck('key')->all());
         $this->assertTrue($items->every(fn (array $i): bool => $i['status'] === 'disconnected'));
         $this->assertTrue($items->firstWhere('key', 'exact')['connectable']);
@@ -36,7 +34,6 @@ class IntegrationsIndexTest extends TestCase
         [$consumer, $token] = $this->consumerWithToken([TokenAbilities::INTEGRATIONS_MANAGE]);
         $account = Account::factory()->for($consumer)->create(['external_id' => 'school1']);
         Connection::factory()->forMollie()->active()->for($account)->create();
-        // pending() hardcodet provider=mollie, dus expliciet status zetten op de exact-rij.
         Connection::factory()->forExact()->for($account)->create(['status' => 'pending']);
 
         $items = collect($this->withHeader('Authorization', "Bearer {$token}")
@@ -124,7 +121,6 @@ class IntegrationsIndexTest extends TestCase
             ->assertOk()
             ->json())->firstWhere('key', 'mollie');
 
-        // Consumer A mag de gekoppelde status van consumer B's account niet zien.
         $this->assertSame('disconnected', $mollie['status']);
         $this->assertNull($mollie['connection_id']);
     }

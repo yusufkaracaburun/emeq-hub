@@ -9,13 +9,8 @@ use App\Accounting\Read\ReadPage;
 use App\Accounting\Read\ReadQuery;
 use App\Models\Connection;
 
-/**
- * Capability `ledger_accounts.read`.
- */
 interface ReadsLedgerAccounts
 {
-    /**
-     * @return ReadPage<LedgerAccount>
-     */
+    /** @return ReadPage<LedgerAccount> */
     public function readLedgerAccounts(Connection $connection, ReadQuery $query): ReadPage;
 }

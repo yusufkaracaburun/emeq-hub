@@ -2,15 +2,6 @@
 
 namespace App\Integrations\Exact\PassThrough;
 
-/**
- * Guard voor de generieke Exact pass-through: laat alleen de Exact OData-resources
- * door die de Hub daadwerkelijk ondersteunt. De lijst leeft in
- * `config('hub-providers.exact.allowed_paths')` en spiegelt de App-Center-scope-
- * matrix (docs/exact/data-security-answers.md). Lege lijst = whitelist uit.
- *
- * Matcht op resource-pad (`category/Resource`), niet op verb — verb-controle
- * blijft bij de token-abilities en Exact zelf.
- */
 final class ExactPathWhitelist
 {
     public function allows(string $path): bool
@@ -38,9 +29,7 @@ final class ExactPathWhitelist
         return false;
     }
 
-    /**
-     * @return list<string>
-     */
+    /** @return list<string> */
     public function allowedPaths(): array
     {
         return array_values(array_filter(
@@ -49,11 +38,6 @@ final class ExactPathWhitelist
         ));
     }
 
-    /**
-     * Strip leading slash, query-string en OData key-predicate (`(guid'…')`),
-     * lowercase — zodat `crm/Accounts`, `/crm/Accounts(guid'x')?$select=Name` en
-     * `CRM/accounts` allemaal op dezelfde resource-sleutel uitkomen.
-     */
     private function normalize(string $path): string
     {
         $path = ltrim($path, '/');

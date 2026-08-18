@@ -32,9 +32,7 @@ class ConnectionDetailTabsTest extends TestCase
         return $user;
     }
 
-    /**
-     * @param  array<string, mixed>  $attributes
-     */
+    /** @param  array<string, mixed>  $attributes */
     private function makeConnection(string $state, array $attributes = []): Connection
     {
         $consumer = Consumer::factory()->create();

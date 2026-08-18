@@ -13,11 +13,6 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
 
-/*
- * Factuur-form. Regel-bedragen (subtotaal/BTW/totaal) staan NIET in het form —
- * die rekent de InvoiceLineObserver. Stukprijs wordt als euro's ingevoerd en
- * per regel omgezet naar integer-centen.
- */
 class InvoiceForm
 {
     public static function configure(Schema $schema): Schema
@@ -93,7 +88,6 @@ class InvoiceForm
                     ->maxLength(1000)
                     ->columnSpanFull(),
             ])
-            // Geboekte factuur is onwijzigbaar (zie Invoice::booted()) → form read-only.
             ->disabled(fn (?Invoice $record): bool => (bool) $record?->isPosted());
     }
 }

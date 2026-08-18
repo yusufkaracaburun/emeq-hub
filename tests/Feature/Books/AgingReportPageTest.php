@@ -66,7 +66,7 @@ class AgingReportPageTest extends TestCase
             ->call('setKind', 'payable')
             ->assertSet('kind', 'payable')
             ->assertSee('Crediteuren')
-            ->assertDontSee('Acme BV'); // verkoopfacturen horen niet in de crediteuren-weergave
+            ->assertDontSee('Acme BV');
     }
 
     public function test_pdf_action_streams_download(): void

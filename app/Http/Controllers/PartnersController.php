@@ -11,11 +11,6 @@ use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
 
-/**
- * Publieke integraties-showcase. Toont de providers die de Hub ondersteunt en
- * wat ze leveren — géén tenant-data. De content komt uit ProviderShowcase
- * (config/hub-providers.php ∩ config/partner-showcase.php).
- */
 class PartnersController extends Controller
 {
     public function __construct(private readonly ProviderShowcase $showcase) {}
@@ -48,23 +43,17 @@ class PartnersController extends Controller
 
         return Inertia::render('partners/show', [
             'provider' => $detail,
-            // Alle showcase-providers voor de integratie-keuze in het koppel-formulier.
             'providers' => $this->showcase->summaries(),
             'seo' => $this->detailSeo($detail),
         ]);
     }
 
-    /**
-     * @param  array<string, mixed>  $detail
-     */
+    /** @param  array<string, mixed>  $detail */
     private function detailSeo(array $detail): SeoMeta
     {
         $label = $detail['label'];
         $url = route('partners.show', $detail['key']);
 
-        // featureList voedt de GEO-kant: concrete, citeerbare mogelijkheden in
-        // plaats van marketing-taal. Capabilities eerst, endpoints als fallback
-        // voor providers die nog geen use-case-copy hebben.
         $features = array_column($detail['capabilities'] ?? [], 'title');
 
         foreach ($detail['endpoints'] ?? [] as $endpoint) {
@@ -73,7 +62,6 @@ class PartnersController extends Controller
 
         return SeoMeta::make(
             $label.'-koppeling via één API',
-            // Afkappen knipt midden in een woord; geschreven copy gaat voor.
             $detail['meta_description'] ?? Str::limit($detail['summary'], 155),
             $url,
         )->schema(

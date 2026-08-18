@@ -11,14 +11,6 @@ use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Illuminate\Support\Carbon;
 
-/**
- * Dashboard "needs attention"-widget: één blik op wat operationeel mis is.
- *
- * Vier triage-tellers binnen hun eigen venster — mislukte pass-throughs (24u),
- * niet-verwerkte inbound-webhooks (24u), koppelingen die binnen 7 dagen verlopen,
- * en open OAuth-handshakes. Staat bovenaan het dashboard (sort 1), boven de
- * per-provider-tellingen van {@see ConnectionStatsWidget}.
- */
 class OperationalHealthWidget extends StatsOverviewWidget
 {
     protected ?string $heading = 'Operationele status';
@@ -27,18 +19,12 @@ class OperationalHealthWidget extends StatsOverviewWidget
 
     protected static ?int $sort = 1;
 
-    // Hub-operationele health — niet voor boekhouder (die ziet enkel de Boekhouding-cluster).
     public static function canView(): bool
     {
         return auth()->user()?->hasAnyRole(['super-admin', 'staff']) ?? false;
     }
 
-    /**
-     * Rauwe triage-tellers — los van de presentatie zodat ze deterministisch
-     * getest kunnen worden en de nav-badges op de audit-resources ze hergebruiken.
-     *
-     * @return array{failed_pass_throughs: int, webhook_problems: int, expiring_connections: int, pending_oauth: int}
-     */
+    /** @return array{failed_pass_throughs: int, webhook_problems: int, expiring_connections: int, pending_oauth: int} */
     public function attentionCounts(): array
     {
         return [
@@ -49,10 +35,6 @@ class OperationalHealthWidget extends StatsOverviewWidget
         ];
     }
 
-    /**
-     * Pass-throughs met HTTP ≥ 400 in de laatste 24 uur. Gedeeld met de
-     * PassThroughCall-nav-badge.
-     */
     public static function failedPassThroughCount(): int
     {
         return PassThroughCall::query()
@@ -61,10 +43,6 @@ class OperationalHealthWidget extends StatsOverviewWidget
             ->count();
     }
 
-    /**
-     * Inbound-webhooks die niet verwerkt zijn (outcome buiten processed/duplicate)
-     * in de laatste 24 uur. Gedeeld met de InboundWebhookEvent-nav-badge.
-     */
     public static function webhookProblemCount(): int
     {
         return InboundWebhookEvent::query()
@@ -73,10 +51,6 @@ class OperationalHealthWidget extends StatsOverviewWidget
             ->count();
     }
 
-    /**
-     * Actieve koppelingen waarvan het OAuth-token binnen 7 dagen verloopt. Gedeeld
-     * met de Connection-nav-badge.
-     */
     public static function expiringConnectionCount(): int
     {
         return Connection::query()
@@ -114,13 +88,7 @@ class OperationalHealthWidget extends StatsOverviewWidget
         ];
     }
 
-    /**
-     * Dag-counts van mislukte pass-throughs over de laatste 7 dagen (oud → nieuw)
-     * voor de sparkline onder de eerste stat. Bewust collection-grouping i.p.v.
-     * een DB-specifieke DATE()-functie, zodat het op sqlite (tests) én postgres werkt.
-     *
-     * @return list<int>
-     */
+    /** @return list<int> */
     private function failedPassThroughTrend(): array
     {
         $perDay = PassThroughCall::query()

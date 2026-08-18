@@ -10,9 +10,7 @@ use Illuminate\Http\Request;
 #[Group(name: 'System', description: 'Smoke- en auth-check endpoints.', weight: 5)]
 class PingController extends Controller
 {
-    /**
-     * @return array<string, mixed>
-     */
+    /** @return array<string, mixed> */
     public function __invoke(Request $request): array
     {
         /** @var Consumer $consumer */

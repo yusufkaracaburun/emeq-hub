@@ -16,15 +16,6 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Testing\TestResponse;
 use Tests\TestCase;
 
-/**
- * Wie mag er bij `/v1/accounting/*`.
- *
- * De canonieke endpoints horen bij `accounting:*`. Daarnáást is er precies één
- * overgangspad: tokens met `exact:*`, uitgegeven toen dit deel van de API nog
- * Exact-only was. Dat pad hing eerst aan de gekoppelde provider in plaats van aan
- * Exact — waardoor elke nieuwe provider een legacy-recht zou erven dat bij hem nooit
- * heeft bestaan.
- */
 class CanonicalAbilitiesTest extends TestCase
 {
     use RefreshDatabase;
@@ -34,20 +25,11 @@ class CanonicalAbilitiesTest extends TestCase
         $this->capabilitiesWith(TokenAbilities::ACCOUNTING_READ)->assertOk();
     }
 
-    /**
-     * Het overgangspad. **Weghalen zodra de bestaande consumers een
-     * `accounting:*`-token hebben** — dan hoort dit een 403 te worden.
-     */
     public function test_a_legacy_exact_token_still_opens_the_canonical_endpoint(): void
     {
         $this->capabilitiesWith(TokenAbilities::EXACT_READ)->assertOk();
     }
 
-    /**
-     * Een provider-ability van een ándere provider is géén overgangspad: die tokens
-     * hebben nooit toegang gehad tot de canonieke endpoints en krijgen die ook niet
-     * cadeau zodra hun provider een boekhoudadapter krijgt.
-     */
     public function test_another_providers_ability_does_not_open_the_canonical_endpoint(): void
     {
         app(AccountingTargetRegistry::class)->register(Provider::Snelstart->value, StubTarget::class);
@@ -57,10 +39,6 @@ class CanonicalAbilitiesTest extends TestCase
             ->assertJsonPath('error', 'insufficient_ability');
     }
 
-    /**
-     * De ability wordt gecheckt vóór de koppeling wordt opgezocht: een token zonder
-     * recht hoort niet te horen wélke koppelingen dit Account heeft.
-     */
     public function test_a_token_without_the_ability_learns_nothing_about_the_connections(): void
     {
         $this->capabilitiesWith(TokenAbilities::MOLLIE_READ)
@@ -85,9 +63,6 @@ class CanonicalAbilitiesTest extends TestCase
     }
 }
 
-/**
- * Minimale adapter — deze test gaat over abilities, niet over boeken.
- */
 final class StubTarget implements AccountingTarget
 {
     public function push(FinancialDocument $document, Connection $connection): AccountingResult

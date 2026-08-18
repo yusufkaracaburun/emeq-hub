@@ -16,25 +16,6 @@ use Tests\Concerns\StubsMollieConnectClient;
 use Tests\Feature\Api\V1\Mollie\StubMollieClient;
 use Tests\TestCase;
 
-/**
- * MOLL-06 SC-2 bewijs: beide token-paden expliciet in één test-file.
- *
- *  - Merchant-route (/v1/mollie/payments) gebruikt Connection.access_token via
- *    HubMollieCredentialResolver → Mollie::client()->setAccessToken(...) op de
- *    StubMollieClient (Phase-5a) — captured in $lastUsedAccessToken.
- *  - Connect-route (/v1/mollie/connect/permissions) gebruikt de partner-env-var
- *    via MollieAccessTokenResolver::resolveFor('partner') →
- *    AbstractMollieConnectPassThroughController::client()->setAccessToken(...)
- *    op StubMollieConnectClient — captured in $lastUsedAccessToken.
- *  - Missing partner-token → 503 partner_token_missing (via
- *    UpstreamErrorMapper-branch uit Plan 13-01).
- *
- * De Phase-5a `Mollie::client()`-call gaat normaal door HubMollieCredentialResolver
- * dat een `new MollieApiClient()` opbouwt + `setAccessToken()` aanroept. In de
- * test-pipeline mocken we de Mollie-wrapper zelf, dus moeten we die
- * `setAccessToken` mimic'en op de stub om de symmetrische assertie mogelijk te
- * maken. Zie de inline mock in test_merchant_route_uses_connection_access_token().
- */
 class TokenResolverIntegrationTest extends TestCase
 {
     use RefreshDatabase;
@@ -47,9 +28,6 @@ class TokenResolverIntegrationTest extends TestCase
         $expectedToken = $connection->access_token;
         $this->assertIsString($expectedToken);
 
-        // Bouw een StubMollieClient + zelfgebouwde Mollie-wrapper-mock die de
-        // productie-keten emuleert: voor élke client()-call wordt
-        // setAccessToken($connection->access_token) op de stub aangeroepen.
         $paymentsStub = new class
         {
             public function create(array $payload): Payment
@@ -143,11 +121,6 @@ class TokenResolverIntegrationTest extends TestCase
 
         [, $token] = $this->setupMollieConnectConsumer([TokenAbilities::MOLLIE_READ]);
 
-        // Geen Connect-stub nodig — de resolver gooit MissingPartnerTokenException
-        // vóór de SDK-call. Maar bind toch een lege stub-client zodat
-        // AbstractMollieConnectPassThroughController::client() consistent een
-        // MollieApiClient van de container krijgt (geen mid-pipeline-failures
-        // door autowire-resolution).
         $this->bindMollieConnectStubs([
             'permissions' => fn () => null,
         ]);

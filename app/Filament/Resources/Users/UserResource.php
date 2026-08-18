@@ -17,14 +17,6 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Gate;
 
-/*
- * Plan 09-10: UserResource — super-admin only staff-onboarding.
- *
- * D-05 gate: `manage-staff`-gate (geregistreerd in AppServiceProvider::boot)
- * checkt $user->hasRole('super-admin'). Beide canAccess() én
- * shouldRegisterNavigation() lezen Gate::allows() — sidebar-link verdwijnt
- * voor staff, directe URL geeft 403.
- */
 class UserResource extends Resource
 {
     protected static ?string $model = User::class;
@@ -60,7 +52,6 @@ class UserResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
         ];
     }
 

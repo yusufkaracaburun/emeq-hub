@@ -6,14 +6,6 @@ namespace App\Accounting;
 
 use Carbon\CarbonImmutable;
 
-/**
- * Eén mutatie op een {@see BankStatement} — dit is wat een consumer afletterend
- * tegenkomt.
- *
- * `relationId`/`relationName` zijn de tegenpartij zoals het pakket die kent; die komen
- * hier wél direct mee, want de partner levert ze op de regel zelf (anders dan bij een
- * boeking, waar alleen een GUID meekomt).
- */
 final readonly class BankStatementLine
 {
     public function __construct(
@@ -29,9 +21,7 @@ final readonly class BankStatementLine
         public ?string $documentNumber = null,
     ) {}
 
-    /**
-     * @return array<string, mixed>
-     */
+    /** @return array<string, mixed> */
     public function toArray(): array
     {
         return [

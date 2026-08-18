@@ -11,14 +11,6 @@ use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
-/**
- * Plan 09-03 Task 3 — feature-tests voor EmeqStaffSeeder.
- *
- * Bewijst:
- *  - Zonder beide env-vars: no-op (geen rollen, geen users)
- *  - Met beide env-vars: 2 rollen + 6 permissions + bootstrap super-admin User
- *  - 2× draaien met zelfde env: throws RuntimeException (D-7 / WR-04 — bootstrap, niet sync)
- */
 class EmeqStaffSeederTest extends TestCase
 {
     use RefreshDatabase;
@@ -64,10 +56,6 @@ class EmeqStaffSeederTest extends TestCase
         $this->assertFalse($staff->hasPermissionTo('manage-staff'));
     }
 
-    /**
-     * D-7 (WR-04): seeder is bootstrap-only — 2× draaien op een gebootstrapt
-     * env gooit RuntimeException. Operator moet password-resets via tinker doen.
-     */
     public function test_seeder_throws_runtime_exception_when_user_already_exists(): void
     {
         putenv('EMEQ_STAFF_SEED_EMAIL=admin@emeq.test');

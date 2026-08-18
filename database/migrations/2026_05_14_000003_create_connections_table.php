@@ -11,33 +11,26 @@ return new class extends Migration
     {
         Schema::create('connections', function (Blueprint $table): void {
             $table->id();
-            // Publieke, stabiele sleutel waarmee een consumer één koppeling aanwijst.
-            // De primary key is intern en opsombaar en hoort niet in een API-contract.
             $table->string('public_id', 40)->unique();
             $table->foreignId('account_id')->constrained('accounts')->cascadeOnDelete();
             $table->string('provider');
             $table->string('status')->default('active');
 
-            // OAuth-shape (Mollie, future Exact/Ibanity)
             $table->text('access_token')->nullable();
             $table->text('refresh_token')->nullable();
             $table->timestamp('expires_at')->nullable();
             $table->json('scopes')->nullable();
             $table->string('oauth_state', 64)->nullable();
             $table->timestamp('oauth_state_expires_at')->nullable();
-            // Per-request gevalideerde terugkeer-URL (gezet bij init, gelezen door de landing).
             $table->string('oauth_return_url')->nullable();
 
-            // Key-based-shape (Snelstart) — subscription_id + administratie_id zijn geen secrets (tenant-UUIDs)
             $table->text('client_key')->nullable();
             $table->text('subscription_key')->nullable();
             $table->string('subscription_id')->nullable();
             $table->string('administratie_id')->nullable();
 
-            // Provider-specifieke overflow
             $table->json('metadata')->nullable();
 
-            // Audit
             $table->timestamp('revoked_at')->nullable();
             $table->timestamps();
 
@@ -47,7 +40,6 @@ return new class extends Migration
             $table->index(['provider', 'administratie_id']);
         });
 
-        // Partial unique: één actieve Connection per (account, provider). Revoked rijen vrij.
         DB::statement(
             'CREATE UNIQUE INDEX connections_account_id_provider_active_unique '
             .'ON connections (account_id, provider) WHERE revoked_at IS NULL'

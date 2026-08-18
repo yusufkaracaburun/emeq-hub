@@ -17,24 +17,11 @@ use Illuminate\Support\Facades\Log;
 use Saloon\Enums\Method;
 use Symfony\Component\HttpFoundation\Response;
 
-/**
- * Exact Online pass-through. Forward een consumer-request naar de Exact REST-API
- * met de tokens van de gekoppelde Account (division uit `administratie_id`).
- * Gemodelleerd op de Snelstart-pass-through. De SDK-OAuthAuthenticator refresht
- * reactief mét rotatie via de Connection-backed TokenStore.
- *
- * Forward + audit-logging leeft in ExactForwarder, gedeeld met de named
- * resource-endpoints (bv. GL Accounts) zodat elke Exact-call op één plek wordt
- * vastgelegd.
- */
 #[Group(name: 'Exact', description: 'Generieke Exact Online REST-pass-through (`/exact/{path}`) met de OAuth-tokens van de gekoppelde Account; division in het pad. Named resource-endpoints staan onder hun eigen `Exact · …`-groep.', weight: 60)]
 class PassThroughController extends Controller
 {
     use GuardsPassThroughRequest;
 
-    // Geen DELETE: de Hub verwijdert geen data bij Exact via de pass-through
-    // (least-privilege / D&S vraag 2). Test-opruiming loopt via de connector
-    // rechtstreeks (PurgeTestData), niet via deze route.
     private const ALLOWED_METHODS = ['GET', 'POST', 'PUT', 'PATCH'];
 
     private const BODY_METHODS = ['POST', 'PUT', 'PATCH'];

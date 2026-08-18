@@ -8,16 +8,6 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
-/**
- * Plan 09-02 Task 2 — smoke-test voor Filament v4 + Spatie permission install.
- *
- * Bewijst:
- *  - GET /admin/login rendert (Filament asset-pipeline + route-registratie werkt)
- *  - Spatie's 5 permission-tabellen bestaan na publish + migrate
- *  - GET /admin (unauthenticated) redirect naar /admin/login (Filament auth-gate)
- *
- * Geen User-trait of role-seeding — die landen pas in plan 09-03.
- */
 class FilamentInstallSmokeTest extends TestCase
 {
     use RefreshDatabase;

@@ -14,30 +14,11 @@ use Mollie\Api\Resources\BaseResource;
 use Tests\Feature\Api\V1\Mollie\Connect\StubMollieConnectClient;
 use Throwable;
 
-/**
- * Test-helper voor Mollie-Connect-pass-through-tests. Binds een
- * StubMollieConnectClient direct via $this->app->instance() (geen
- * Mollie-facade-wrapper — Connect-base resolved de client via
- * app(MollieApiClient::class)), capture't access-token per call zodat
- * TokenResolverIntegrationTest beide token-paden symmetrisch kan asserten,
- * en levert een makeMollieResourceWithBody-helper die een echte Mollie
- * Response op de resource zet zodat AbstractMolliePassThroughController::
- * resourceToArray() de geneste velden (_links / _embedded) behoudt via
- * $response->body() i.p.v. de json_encode-fallback.
- *
- * D-07: Connect-routes hebben geen X-Account-Id-header — callMollieConnect()
- * volgt callMollie() (StubsMollieClient) shape maar laat die header weg.
- */
 trait StubsMollieConnectClient
 {
     protected ?StubMollieConnectClient $mollieConnectClient = null;
 
-    /**
-     * Per-resource captured ops + args zodat tests kunnen asserten welke
-     * payload naar de stub ging.
-     *
-     * @var array<string, array<int, mixed>>
-     */
+    /** @var array<string, array<int, mixed>> */
     protected array $mollieConnectCaptured = [
         'client_link_create' => [],
         'onboarding_status' => [],
@@ -50,9 +31,6 @@ trait StubsMollieConnectClient
     ];
 
     /**
-     * Setup een Consumer + PAT voor Connect-tests. Geen Account/Connection —
-     * D-07: Connect-routes hebben geen Account-context.
-     *
      * @param  list<string>  $abilities
      * @return array{0:Consumer, 1:string}
      */
@@ -64,31 +42,12 @@ trait StubsMollieConnectClient
         return [$consumer, $token];
     }
 
-    /**
-     * Zet de partner-access-token in config. De resolver leest config()
-     * elke resolveFor('partner')-aanroep via een Closure (CR-02-fix), dus
-     * forgetInstance is niet meer nodig.
-     */
     protected function setPartnerToken(string $token = 'access_partner_xyz'): void
     {
         config(['services.mollie.partner_access_token' => $token]);
     }
 
-    /**
-     * Bouwt anonymous-class-stubs per Connect-resource, bindt een
-     * StubMollieConnectClient via $this->app->instance(MollieApiClient::class, ...)
-     * zodat de Connect-controllers (Plan 13-02 — app(MollieApiClient::class))
-     * exact deze instance terugkrijgen.
-     *
-     * Resolver-signature per resource:
-     *  - 'clientLinks'    : callable(string $op, mixed $arg): BaseResource|Throwable    ($op = 'create')
-     *  - 'onboarding'     : callable(string $op, mixed $arg): BaseResource|Throwable    ($op = 'status')
-     *  - 'organizations'  : callable(string $op, mixed $arg): BaseResource|Throwable    ($op = 'get'; $arg = id-string)
-     *  - 'profiles'       : callable(string $op, mixed $arg): mixed|Throwable           ($op = 'page'|'create'|'get')
-     *  - 'permissions'    : callable(string $op, mixed $arg): mixed|Throwable           ($op = 'list'|'get')
-     *
-     * @param  array<string, callable>  $resolvers
-     */
+    /** @param  array<string, callable>  $resolvers */
     protected function bindMollieConnectStubs(array $resolvers): StubMollieConnectClient
     {
         $captured = &$this->mollieConnectCaptured;
@@ -117,8 +76,6 @@ trait StubsMollieConnectClient
     }
 
     /**
-     * Roep een Connect-route aan zonder X-Account-Id-header (D-07).
-     *
      * @param  array<string, mixed>  $payload
      * @param  array<string, string>  $extraHeaders
      */
@@ -133,12 +90,6 @@ trait StubsMollieConnectClient
     }
 
     /**
-     * Bouwt een Mollie-resource-instance met een echte Response zodat
-     * $resource->getResponse()->body() de exacte JSON (incl. _links / _embedded)
-     * teruggeeft. Voorkomt dat AbstractMolliePassThroughController::
-     * resourceToArray() terugvalt op json_encode($resource) waar geneste velden
-     * verdwijnen (BLOCKER-5-fix).
-     *
      * @template T of BaseResource
      *
      * @param  class-string<T>  $resourceClass
@@ -163,10 +114,6 @@ trait StubsMollieConnectClient
     }
 
     /**
-     * Bouwt een collectie-instance (PermissionCollection / ProfileCollection /
-     * …) met een echte Response zodat collectionToArray() de wire-shape (incl.
-     * _embedded / _links / count) verbatim terugkrijgt.
-     *
      * @template T of \Mollie\Api\Resources\BaseCollection
      *
      * @param  class-string<T>  $collectionClass
@@ -182,23 +129,13 @@ trait StubsMollieConnectClient
         return $collection;
     }
 
-    /**
-     * Bouwt een anonymous subclass van Mollie\Api\Http\Response met een no-op
-     * constructor (geen PSR-request/response/pending-request nodig) en
-     * geoverridete body() die de gewenste JSON teruggeeft. Implementeert het
-     * ResourceOrigin-contract via parent-extends.
-     *
-     * @param  array<string, mixed>  $bodyJson
-     */
+    /** @param  array<string, mixed>  $bodyJson */
     private function fakeMollieResponse(array $bodyJson): MollieResponse
     {
         return new class($bodyJson) extends MollieResponse
         {
             /** @param array<string, mixed> $body */
-            public function __construct(private readonly array $body)
-            {
-                // Bewust geen parent::__construct() — we vullen alleen body()/status().
-            }
+            public function __construct(private readonly array $body) {}
 
             public function body(): string
             {

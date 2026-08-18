@@ -92,9 +92,7 @@ final class ManageWebhooks extends Command
         return $plan['missing'] === [] ? self::SUCCESS : self::FAILURE;
     }
 
-    /**
-     * @param  array{remote: array<string, string>, stored: array<string, string>, orphans: array<string, string>, stale: list<string>, ...}  $plan
-     */
+    /** @param  array{remote: array<string, string>, stored: array<string, string>, orphans: array<string, string>, stale: list<string>, ...}  $plan */
     private function reportDrift(array $plan): void
     {
         if ($plan['orphans'] !== []) {

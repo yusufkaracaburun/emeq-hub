@@ -7,10 +7,6 @@ use App\Books\Enums\JournalEntryType;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-/*
- * Één zijde (debet of credit) van een boeking. Bedrag in integer-centen.
- * Een Transaction draagt altijd een gebalanceerd paar (debet == credit).
- */
 class JournalEntry extends Model
 {
     use BelongsToBooksCompany;

@@ -98,12 +98,6 @@ class AccountSubscriptionManagerCreateTest extends TestCase
         $this->assertNull($row->mollie_subscription_id);
     }
 
-    /**
-     * Mollie's ApiException-constructor verwacht een Response-object. Voor
-     * unit-test maken we een instance zonder constructor + zetten message
-     * via reflection — daardoor blijft de subscriptions-stub instanceof-check
-     * geldig en kan de manager de exception bubble'n laten.
-     */
     private function fakeMollieValidationException(): MollieApiException
     {
         $reflection = new \ReflectionClass(MollieApiException::class);

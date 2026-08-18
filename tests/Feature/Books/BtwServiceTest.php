@@ -27,14 +27,10 @@ class BtwServiceTest extends TestCase
 
         $client = Client::create(['name' => 'Acme BV']);
 
-        // Verkoop 21% → omzet 8000 = 10000, af te dragen BTW 1620 = 2100.
         $this->postInvoice($client->id, '2026-001', 10000, 21);
-        // Verkoop 9% → omzet 8010 = 20000, af te dragen BTW 1621 = 1800.
         $this->postInvoice($client->id, '2026-002', 20000, 9);
-        // Verkoop 0% → omzet 8020 = 5000, geen BTW.
         $this->postInvoice($client->id, '2026-003', 5000, 0);
 
-        // Inkoop 21% op 4400 → voorbelasting 1530 = 2100.
         $vendor = Vendor::create(['name' => 'Hosting BV']);
         $bill = Bill::create(['vendor_id' => $vendor->id, 'bill_number' => 'INK-1', 'status' => 'received', 'date' => now()]);
         $bill->lines()->create(['account_id' => Account::where('code', '4400')->value('id'), 'description' => 'Hosting', 'quantity' => 1, 'unit_price' => 10000, 'tax_rate' => 21]);
@@ -76,9 +72,9 @@ class BtwServiceTest extends TestCase
     {
         $d = $this->declaration();
 
-        $this->assertSame(3900, $d['verschuldigd']);   // 5a = 2100 + 1800
-        $this->assertSame(2100, $d['voorbelasting']);  // 5b = 1530
-        $this->assertSame(1800, $d['saldo']);          // te betalen = 3900 - 2100
+        $this->assertSame(3900, $d['verschuldigd']);
+        $this->assertSame(2100, $d['voorbelasting']);
+        $this->assertSame(1800, $d['saldo']);
     }
 
     public function test_empty_period_yields_zeros(): void
@@ -93,7 +89,6 @@ class BtwServiceTest extends TestCase
 
     public function test_unposted_invoice_is_excluded(): void
     {
-        // Concept-factuur (niet geboekt) → geen journaalposten → telt niet mee.
         $client = Client::create(['name' => 'Draft BV']);
         $invoice = Invoice::create(['client_id' => $client->id, 'invoice_number' => '2026-099', 'status' => 'draft', 'date' => now()]);
         $invoice->lines()->create(['description' => 'Concept', 'quantity' => 1, 'unit_price' => 99999, 'tax_rate' => 21]);

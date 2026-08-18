@@ -4,15 +4,6 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-/*
- * Betalingen/afletteringen van de Books-module. Eén rij = één allocatie: ze
- * koppelt een bank-leg (transaction_id, een Deposit/Withdrawal die LedgerPoster
- * al boekt op 1100 ↔ 1300/1600) aan een open post (payable = factuur of bill)
- * met een bedrag in centen. Polymorf + per-allocatie-bedrag → ondersteunt zowel
- * deelbetalingen (meerdere rijen per doc) als bank-driven afletteren (één
- * banktransactie over meerdere docs). "Betaald" wordt afgeleid uit Σ allocaties
- * vs doc-totaal — geen status-kolom op de doc-tabellen.
- */
 return new class extends Migration
 {
     public function up(): void

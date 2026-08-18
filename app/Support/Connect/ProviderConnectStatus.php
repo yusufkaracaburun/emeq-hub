@@ -11,22 +11,11 @@ use App\Support\ProviderShowcase;
 use Illuminate\Support\Collection;
 use Laravel\Pennant\Feature;
 
-/**
- * Per-account koppelstatus van alle providers, data-driven uit ProviderShowcase
- * (config) + de live connection-rijen. Gedeeld door de consumer-API
- * (`GET /v1/integrations`) en de handoff-pagina waar de eindgebruiker zelf
- * koppelt — beide moeten exact dezelfde waarheid tonen.
- *
- * Een nieuwe provider verschijnt automatisch zodra zijn config-rijen + OAuthFlow
- * bestaan; geen code-wijziging hier of bij de consumer.
- */
 class ProviderConnectStatus
 {
     public function __construct(private readonly ProviderShowcase $showcase) {}
 
-    /**
-     * @return list<array{key:string,label:string,tagline:string,category:string,logo:?string,brand:?string,connectable:bool,status:string,connection_id:?string}>
-     */
+    /** @return list<array{key:string,label:string,tagline:string,category:string,logo:?string,brand:?string,connectable:bool,status:string,connection_id:?string}> */
     public function for(?Account $account): array
     {
         $statusByProvider = $this->connectionStatuses($account);
@@ -54,8 +43,6 @@ class ProviderConnectStatus
                         $connection->status === 'pending' => 'pending',
                         default => 'disconnected',
                     },
-                    // De publieke sleutel, niet de primary key: dit is precies de waarde
-                    // die als `X-Connection-Id` terugkomt op de accounting-endpoints.
                     'connection_id' => $live ? (string) $connection->public_id : null,
                 ];
             })
@@ -63,12 +50,7 @@ class ProviderConnectStatus
             ->all();
     }
 
-    /**
-     * Connection-rijen van het (optionele) account, geïndexeerd op provider-key.
-     * Geen account → lege collectie (alles 'disconnected').
-     *
-     * @return Collection<string, Connection>
-     */
+    /** @return Collection<string, Connection> */
     private function connectionStatuses(?Account $account): Collection
     {
         if ($account === null) {

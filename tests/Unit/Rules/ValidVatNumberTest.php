@@ -22,20 +22,16 @@ class ValidVatNumberTest extends TestCase
 
     public function test_rejects_format_valid_but_checksum_invalid_nl(): void
     {
-        // De gemelde bug: NL123456789B01 is formaat-geldig maar controlecijfer-ongeldig.
-        // Exact weigert 'm; de Hub hoort dat aan de rand al te doen.
         $this->assertNotEmpty($this->failures('NL123456789B01'));
     }
 
     public function test_accepts_legacy_elfproef_number(): void
     {
-        // NL123456782B01 doorstaat de legacy elfproef (gewichten 9..2,−1).
         $this->assertSame([], $this->failures('NL123456782B01'));
     }
 
     public function test_accepts_modern_mod97_number(): void
     {
-        // NL000099998B57 (kanoniek voorbeeld, business.gov.nl) doorstaat de moderne mod-97.
         $this->assertSame([], $this->failures('NL000099998B57'));
     }
 
@@ -51,7 +47,6 @@ class ValidVatNumberTest extends TestCase
 
     public function test_non_nl_eu_is_format_only(): void
     {
-        // Niet-NL EU wordt niet op controlecijfer gecheckt, alleen formaat.
         $this->assertSame([], $this->failures('BE0123456789'));
     }
 

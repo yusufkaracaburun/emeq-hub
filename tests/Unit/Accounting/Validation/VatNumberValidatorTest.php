@@ -12,7 +12,6 @@ class VatNumberValidatorTest extends TestCase
 {
     public function test_valid_nl_vat_number_produces_no_finding(): void
     {
-        // NL000099998B57 doorstaat de moderne mod-97-controle (kanoniek voorbeeld).
         $findings = (new VatNumberValidator)->validate([
             'party' => ['vat_number' => 'NL000099998B57'],
         ]);
@@ -22,7 +21,6 @@ class VatNumberValidatorTest extends TestCase
 
     public function test_malformed_nl_vat_number_is_error(): void
     {
-        // NL valideert Exact strikt op formaat → harde fout (blokkeert de boeking).
         $findings = (new VatNumberValidator)->validate([
             'party' => ['vat_number' => 'NL123B01'],
         ]);
@@ -35,8 +33,6 @@ class VatNumberValidatorTest extends TestCase
 
     public function test_malformed_non_nl_vat_number_is_warning_and_not_blocking(): void
     {
-        // Het boekpad (ValidVatNumber-rule) checkt niet-NL alleen op het generieke
-        // EU-formaat — een misvormd DE-nummer zoals dit passeert daar alsnog.
         $findings = (new VatNumberValidator)->validate([
             'party' => ['vat_number' => 'DE12'],
         ]);
@@ -49,8 +45,6 @@ class VatNumberValidatorTest extends TestCase
 
     public function test_invalid_nl_checksum_is_error(): void
     {
-        // NL001234567B01: juist formaat, maar faalt de 11-proef (som 84) — Exact weigert dit
-        // hard (HTTP 500). De dry-run spiegelt dat als Error zodat valid=false.
         $findings = (new VatNumberValidator)->validate([
             'party' => ['name' => 'Bouwbedrijf Noord', 'vat_number' => 'NL001234567B01'],
         ]);

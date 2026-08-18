@@ -38,7 +38,7 @@ class InvoicePostingTest extends TestCase
         ]);
         $this->invoice->lines()->create(['description' => 'Werk', 'quantity' => 1, 'unit_price' => 10000, 'tax_rate' => 21]);
         $this->invoice->lines()->create(['description' => 'Dienst', 'quantity' => 1, 'unit_price' => 20000, 'tax_rate' => 9]);
-        $this->invoice->refresh(); // subtotal 30000, tax 3900, total 33900
+        $this->invoice->refresh();
     }
 
     private function sumByCode(string $code): int
@@ -57,18 +57,17 @@ class InvoicePostingTest extends TestCase
 
         $entries = $transaction->journalEntries()->get();
 
-        // 1 debet (1300) + 4 credit (8000/1620 voor 21%, 8010/1621 voor 9%).
         $this->assertCount(5, $entries);
         $this->assertSame(
             (int) $entries->where('type', JournalEntryType::Debit)->sum('amount'),
             (int) $entries->where('type', JournalEntryType::Credit)->sum('amount'),
         );
 
-        $this->assertSame(33900, $this->sumByCode('1300')); // Debiteuren (debet)
-        $this->assertSame(10000, $this->sumByCode('8000')); // Omzet 21%
-        $this->assertSame(2100, $this->sumByCode('1620'));  // Af te dragen BTW 21%
-        $this->assertSame(20000, $this->sumByCode('8010')); // Omzet 9%
-        $this->assertSame(1800, $this->sumByCode('1621'));  // Af te dragen BTW 9%
+        $this->assertSame(33900, $this->sumByCode('1300'));
+        $this->assertSame(10000, $this->sumByCode('8000'));
+        $this->assertSame(2100, $this->sumByCode('1620'));
+        $this->assertSame(20000, $this->sumByCode('8010'));
+        $this->assertSame(1800, $this->sumByCode('1621'));
     }
 
     public function test_posting_is_idempotent(): void
@@ -127,7 +126,6 @@ class InvoicePostingTest extends TestCase
 
         $debiteuren = Account::where('code', '1300')->firstOrFail();
 
-        // Debiteuren is een actief (normaal debetsaldo) → nettobeweging = debet − credit.
         $this->assertSame(33900, app(AccountService::class)->netMovement(
             $debiteuren,
             now()->startOfDay()->toDateTimeString(),

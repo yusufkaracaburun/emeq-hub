@@ -23,19 +23,6 @@ use Inertia\Inertia;
 use Inertia\Response;
 use Symfony\Component\HttpFoundation\Response as HttpResponse;
 
-/**
- * Handoff-pagina: de eindgebruiker van een consumer-app kiest hier zelf welk
- * systeem hij koppelt. De consumer-app hoeft alleen te linken (zie
- * `POST /v1/connect-sessions`); zijn klant doet de rest.
- *
- * Niet publiek: beide routes draaien onder `signed`, de handtekening legt vast
- * om welk Account het gaat. De Consumer wordt daaruit afgeleid via de relatie,
- * nooit uit de URL — de keten `Consumer → Account → Connection` blijft zo
- * intact zonder eindgebruiker-auth in de Hub.
- *
- * De pagina staat bewust niet in PublicPages: geen sitemap, geen index
- * (SetNoIndexHeaders zet noindex op alles buiten de marketing-surface).
- */
 class ConnectHandoffController extends Controller
 {
     public function __construct(
@@ -46,9 +33,6 @@ class ConnectHandoffController extends Controller
 
     public function show(Request $request, Account $account): Response
     {
-        // Alleen providers die daadwerkelijk via een authorize-redirect te
-        // koppelen zijn. Snelstart (clientkey) en providers met een actieve
-        // kill-switch vallen af — een knop tonen die zeker faalt is misleidend.
         $providers = collect($this->statuses->for($account))
             ->filter(fn (array $provider): bool => $provider['connectable'])
             ->map(fn (array $provider): array => [
@@ -57,9 +41,6 @@ class ConnectHandoffController extends Controller
                 'disconnect_url' => $provider['status'] === 'connected'
                     ? $this->links->startUrl($request, $account, $provider['key'], 'connect.disconnect')
                     : null,
-                // Alleen voor een gekoppelde provider mét een AccountingTarget (nu
-                // Exact): de beheerdrawer heeft niets te tonen voor een provider
-                // zonder boekhoud-referentiedata.
                 'manage_url' => $provider['status'] === 'connected' && $this->accountingTargets->supports($provider['key'])
                     ? $this->links->manageUrl($request, $account, $provider['key'])
                     : null,
@@ -67,9 +48,6 @@ class ConnectHandoffController extends Controller
             ->values()
             ->all();
 
-        // Eén beheerscherm voor alle gevallen: de status staat per rij, dus een
-        // aparte "alles gekoppeld"-variant voegt niets toe. Het geslaagd-moment
-        // na een koppeling leeft bovendien al op /oauth/connected/{connection}.
         return Inertia::render('connect/index', [
             'state' => 'manage',
             'consumerName' => $account->consumer?->name,
@@ -102,20 +80,9 @@ class ConnectHandoffController extends Controller
             abort(503);
         }
 
-        // Weg van de eigen site naar de partner-authorize-URL: Inertia moet dit
-        // als volledige browser-navigatie doen, niet als XHR-visit.
         return Inertia::location($result['redirect_url']);
     }
 
-    /**
-     * De eindgebruiker trekt zijn eigen koppeling in. De getekende link bewijst
-     * om welk Account het gaat — dezelfde bewijslast als voor koppelen, dus
-     * geen apart autorisatiemodel.
-     *
-     * Anders dan bij `DELETE /v1/connections/{id}` moet de consumer-app hier
-     * wél actief genotificeerd worden: die heeft de actie niet zelf gestart en
-     * zou anders met een dode koppeling in zijn UI blijven staan.
-     */
     public function disconnect(
         Request $request,
         Account $account,
@@ -131,8 +98,6 @@ class ConnectHandoffController extends Controller
             ->whereNull('revoked_at')
             ->first();
 
-        // Al ingetrokken (of nooit gekoppeld): geen fout tonen, gewoon terug
-        // naar de pagina — die laat dan vanzelf de losgekoppelde staat zien.
         if ($connection instanceof Connection) {
             $revokeConnection->handle($connection);
 
@@ -143,8 +108,6 @@ class ConnectHandoffController extends Controller
             );
         }
 
-        // Vervaltijd overnemen, niet opnieuw zetten: ontkoppelen is idempotent,
-        // dus een verse TTL zou een gelekte link onbeperkt verlengbaar maken.
         return redirect()->to($this->links->mint(
             $account,
             $this->returnUrl($request),
@@ -152,11 +115,6 @@ class ConnectHandoffController extends Controller
         )['url']);
     }
 
-    /**
-     * De return-URL reist mee in de getekende query en is bij het minten al
-     * door ReturnUrlResolver tegen `Consumer.app_url` gevalideerd; de
-     * handtekening maakt hem hier tamper-proof.
-     */
     private function returnUrl(Request $request): ?string
     {
         $returnUrl = $request->query('return_url');

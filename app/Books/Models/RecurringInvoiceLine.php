@@ -6,11 +6,6 @@ use App\Books\Concerns\BelongsToBooksCompany;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-/*
- * Eén template-regel van een terugkerende factuur. Géén observer/totalen — de
- * RecurringInvoiceGenerator kopieert deze naar een echte InvoiceLine, die haar
- * subtotaal/BTW/totaal zelf rekent. unit_price in integer-centen.
- */
 class RecurringInvoiceLine extends Model
 {
     use BelongsToBooksCompany;

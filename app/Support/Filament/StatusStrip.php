@@ -12,14 +12,6 @@ use Filament\Support\Enums\FontWeight;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 
-/**
- * Kopstrip op een detailpagina: de handvol feiten waarop je een record beoordeelt,
- * zichtbaar zonder een tab of sectie te openen.
- *
- * De resource levert alleen de feiten; vormgeving (sectie, kolomindeling,
- * typografie, lege-waarde-tekst) ligt hier vast zodat alle detailpagina's er
- * hetzelfde uitzien.
- */
 final class StatusStrip
 {
     /**
@@ -53,10 +45,6 @@ final class StatusStrip
         return $copyable ? $entry->copyable() : $entry;
     }
 
-    /**
-     * Tijdstip als "3 uur geleden", met het absolute moment in de tooltip. Geef
-     * `danger` mee zodra een verstreken moment een probleem is (token-expiry).
-     */
     public static function moment(
         string $label,
         DateTimeInterface|string|null $moment,

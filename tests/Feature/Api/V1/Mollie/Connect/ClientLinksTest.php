@@ -11,14 +11,6 @@ use Mollie\Api\Resources\ClientLink;
 use Tests\Concerns\StubsMollieConnectClient;
 use Tests\TestCase;
 
-/**
- * MOLL-05 SC-1 — ClientLinks partner-resource pass-through:
- *  - POST /v1/mollie/connect/client-links → 201 met _links.clientLink.href
- *  - Idempotency-Key auto-forward naar Mollie SDK
- *  - 401 upstream → 502 mollie_auth_failed (Hub-cloaked)
- *  - Form Request blokkeert invalid payloads vóór SDK-call (422)
- *  - Audit-rij met token_type=partner.
- */
 class ClientLinksTest extends TestCase
 {
     use RefreshDatabase;
@@ -134,7 +126,6 @@ class ClientLinksTest extends TestCase
     {
         [, $token] = $this->setupMollieConnectConsumer([TokenAbilities::MOLLIE_WRITE]);
 
-        // Form Request blokkeert vóór SDK-call → geen partner-token of stub nodig.
         $response = $this->callMollieConnect($token, 'POST', '/v1/mollie/connect/client-links', []);
 
         $response->assertStatus(422)

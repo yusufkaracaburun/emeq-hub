@@ -6,16 +6,6 @@ namespace App\Billing;
 
 use App\Billing\Exceptions\UnknownPlanException;
 
-/**
- * Config-driven plan-resolver voor Cashier-Mollie subscriptions.
- *
- * D-05: plans worden in config/billing-plans.php gedefinieerd (niet in
- *       Cashier's eigen vendor-config-tree).
- * D-06: simpele find()/all() public API zonder Eloquent Plan-model.
- *
- * Retourneert plan-arrays in Cashier-Mollie ^2.20's verwachte shape
- * zodat plan 06-05 ze 1:1 aan SubscriptionBuilder kan voeren.
- */
 final class PlanResolver
 {
     /**
@@ -36,9 +26,7 @@ final class PlanResolver
         return $plan;
     }
 
-    /**
-     * @return array<string, array{amount: array{value: string, currency: string}, interval: string, description: string}>
-     */
+    /** @return array<string, array{amount: array{value: string, currency: string}, interval: string, description: string}> */
     public function all(): array
     {
         /** @var array<string, array{amount: array{value: string, currency: string}, interval: string, description: string}> $plans */

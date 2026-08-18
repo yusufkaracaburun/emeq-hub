@@ -23,10 +23,6 @@ use Spatie\WebhookServer\CallWebhookJob;
 use Tests\Concerns\BindsFakeAccountingReferences;
 use Tests\TestCase;
 
-/**
- * Async-variant van de accounting-sync: `Prefer: respond-async` → 202 + pending,
- * de Exact-push draait in een queue-job die het resultaat per webhook terugmeldt.
- */
 class AsyncStoreDocumentTest extends TestCase
 {
     use BindsFakeAccountingReferences;
@@ -114,7 +110,6 @@ class AsyncStoreDocumentTest extends TestCase
             ->assertJsonPath('status', 'pending')
             ->assertJsonPath('external_id', 'INV-2026-001');
 
-        // Push is uitgesteld naar de job — synchroon ging er niks naar Exact.
         MockClient::global()->assertNothingSent();
 
         Bus::assertDispatched(
@@ -128,7 +123,7 @@ class AsyncStoreDocumentTest extends TestCase
     {
         Bus::fake([SyncAccountingDocumentJob::class]);
 
-        [$consumer] = $this->consumerWithExactConnection(); // geen webhook_callback_url
+        [$consumer] = $this->consumerWithExactConnection();
         $token = $consumer->createToken('t', [TokenAbilities::EXACT_WRITE])->plainTextToken;
 
         $this->withHeader('Authorization', "Bearer {$token}")
@@ -183,7 +178,6 @@ class AsyncStoreDocumentTest extends TestCase
             app(AccountingSyncRunner::class)
         );
 
-        // Push is daadwerkelijk gedaan vanuit de job.
         MockClient::global()->assertSent(CreateSalesEntry::class);
 
         Bus::assertDispatched(CallWebhookJob::class, function (CallWebhookJob $job) use ($account): bool {
@@ -193,8 +187,6 @@ class AsyncStoreDocumentTest extends TestCase
             return $job->webhookUrl === 'https://consumer.test/accounting'
                 && $job->payload['event'] === CanonicalEvent::DOCUMENT_SYNCED
                 && $job->payload['provider'] === 'exact'
-                // Het resultaat draagt dezelfde envelope als elke andere consumer-webhook:
-                // de consumer routeert op `event` en leest zijn eigen `account_id`.
                 && $job->payload['account_id'] === $account->external_id
                 && is_string($job->payload['occurred_at'])
                 && $job->payload['data']['status'] === 'posted'
@@ -244,14 +236,9 @@ class AsyncStoreDocumentTest extends TestCase
 
         $job = new SyncAccountingDocumentJob($document, $connection, $account, 1);
 
-        // Exact heeft geen idempotency-key → de push mag nooit herhaald worden.
         $this->assertSame(1, $job->tries);
     }
 
-    /**
-     * De dedupe-laag zit in AccountingSyncRunner en niet in de controller, juist zodat
-     * het async-pad hem óók krijgt. Deze test bewaakt die keuze.
-     */
     public function test_async_job_records_the_provider_entity_link(): void
     {
         Bus::fake([CallWebhookJob::class]);
@@ -278,10 +265,6 @@ class AsyncStoreDocumentTest extends TestCase
         ]);
     }
 
-    /**
-     * Een tweede async-boeking van hetzelfde document mag de partner niet nog eens
-     * raken; de terugmelding blijft `posted` met een dedupe-markering.
-     */
     public function test_async_job_deduplicates_a_repeat_of_the_same_document(): void
     {
         Bus::fake([CallWebhookJob::class]);

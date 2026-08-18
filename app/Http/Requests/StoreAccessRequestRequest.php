@@ -14,9 +14,7 @@ class StoreAccessRequestRequest extends FormRequest
         return true;
     }
 
-    /**
-     * @return array<string, mixed>
-     */
+    /** @return array<string, mixed> */
     public function rules(): array
     {
         $providers = array_keys(config('hub-providers', []));
@@ -30,14 +28,10 @@ class StoreAccessRequestRequest extends FormRequest
             'providers.*' => ['string', Rule::in($providers)],
             'message' => ['nullable', 'string', 'max:2000'],
             'privacy_accepted' => ['accepted'],
-            // 'website' is een honeypot — niet hier valideren (zou bots tippen),
-            // de controller behandelt een gevuld honeypot-veld als stille no-op.
         ];
     }
 
-    /**
-     * @return array<string, string>
-     */
+    /** @return array<string, string> */
     public function messages(): array
     {
         return [

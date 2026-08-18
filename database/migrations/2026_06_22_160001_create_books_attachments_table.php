@@ -4,12 +4,6 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-/*
- * Bijlagen (bonnetjes/scans) van de Books-module. Polymorf (attachable →
- * Invoice/Bill), mirror de books_payments-aanpak. Bestanden staan op een
- * private disk (financiële documenten, AVG) — deze rij draagt enkel metadata +
- * het pad. company-scoped + cascadeOnDelete dekt recht-op-vergeten.
- */
 return new class extends Migration
 {
     public function up(): void

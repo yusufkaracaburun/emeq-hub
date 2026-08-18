@@ -8,13 +8,6 @@ use App\Models\Connection;
 use Emeq\ExactApi\Contracts\ExactCredentialResolver;
 use Emeq\ExactApi\Data\ExactCredentials;
 
-/**
- * Per-Connection Exact credential-resolver. Gebonden aan
- * Emeq\ExactApi\Contracts\ExactCredentialResolver via de container in
- * ResolveExactAccount-middleware. clientId/secret/redirectUri komen uit de
- * gedeelde app-config; de connectionRef (= Connection-id) maakt de fingerprint
- * per-connection (clientId is gedeeld over alle tenants).
- */
 final readonly class HubExactCredentialResolver implements ExactCredentialResolver
 {
     public function __construct(

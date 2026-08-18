@@ -11,13 +11,6 @@ use Mollie\Api\Resources\Organization;
 use Tests\Concerns\StubsMollieConnectClient;
 use Tests\TestCase;
 
-/**
- * MOLL-05 SC-1 — Organizations partner-resource pass-through:
- *  - GET /v1/mollie/connect/organizations/me → 200 met organisatie
- *  - GET /v1/mollie/connect/organizations/{id} → 200 met organisatie
- *  - 401 upstream → 502 mollie_auth_failed
- *  - Audit-rij met token_type=partner.
- */
 class OrganizationsTest extends TestCase
 {
     use RefreshDatabase;

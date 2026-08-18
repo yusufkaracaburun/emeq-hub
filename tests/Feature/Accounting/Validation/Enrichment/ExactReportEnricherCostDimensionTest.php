@@ -15,10 +15,6 @@ use App\Models\Consumer;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
-/**
- * Dry-run-spiegel van de boeking: kostenplaats/-drager-Codes (cost_center/cost_unit) op een
- * regel worden tegen de Exact-mirror gevalideerd. Vereist DB (mirror-rijen), vandaar Feature.
- */
 class ExactReportEnricherCostDimensionTest extends TestCase
 {
     use RefreshDatabase;
@@ -45,9 +41,7 @@ class ExactReportEnricherCostDimensionTest extends TestCase
         ]);
     }
 
-    /**
-     * @return list<Finding>
-     */
+    /** @return list<Finding> */
     private function costFindings(array $findings): array
     {
         return array_values(array_filter(
@@ -88,7 +82,7 @@ class ExactReportEnricherCostDimensionTest extends TestCase
         $this->assertSame('exact.cost_center.unmapped', $findings[0]->code);
         $this->assertSame(Severity::Warning, $findings[0]->severity);
         $this->assertNull($findings[0]->suggestion);
-        $this->assertTrue($findings[0]->blocking); // Exact weigert de boeking op een onbekende Code
+        $this->assertTrue($findings[0]->blocking);
     }
 
     public function test_dedupes_per_distinct_field_and_code(): void
@@ -104,7 +98,7 @@ class ExactReportEnricherCostDimensionTest extends TestCase
             $connection,
         ));
 
-        $this->assertCount(1, $findings); // één finding voor de herhaalde Code
+        $this->assertCount(1, $findings);
         $this->assertSame('exact.cost_center.matched', $findings[0]->code);
     }
 

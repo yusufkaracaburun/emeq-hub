@@ -13,11 +13,6 @@ use Tests\TestCase;
 
 class UpstreamErrorMapperRegistryTest extends TestCase
 {
-    /**
-     * De regressie waar deze registry voor bestaat: provider-neutrale code
-     * importeerde Exact's mapper, dus een niet-Exact-exception viel door naar
-     * "onbekende fout" in plaats van naar de mapping van zijn eigen provider.
-     */
     public function test_each_provider_is_mapped_by_its_own_mapper(): void
     {
         $registry = $this->registry();
@@ -30,11 +25,6 @@ class UpstreamErrorMapperRegistryTest extends TestCase
         $this->assertSame('mollie_auth_failed', $mollie['body']['error']);
     }
 
-    /**
-     * Elke provider die de Hub kent moet een mapper hebben. Zonder deze test valt
-     * een nieuwe provider stilletjes terug op de neutrale vorm: geen fout, wel
-     * verkeerde statuscodes en een onbruikbare `upstream_error` in de audit.
-     */
     public function test_every_known_provider_has_a_mapper(): void
     {
         $registry = $this->registry();
@@ -47,9 +37,6 @@ class UpstreamErrorMapperRegistryTest extends TestCase
         }
     }
 
-    /**
-     * Een ontbrekende registratie mag een partner-fout niet in een 500 veranderen.
-     */
     public function test_an_unregistered_provider_falls_back_instead_of_throwing(): void
     {
         $mapped = $this->registry()->map('moneybird', new RuntimeException('boom'));

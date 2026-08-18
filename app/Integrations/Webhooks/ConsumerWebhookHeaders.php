@@ -6,24 +6,12 @@ namespace App\Integrations\Webhooks;
 
 use Illuminate\Support\Facades\Context;
 
-/**
- * Correlatie-headers op elke outbound consumer-webhook. Eén bron, zodat een
- * nieuwe fan-out-job niet stilletjes zonder correlatie de deur uit gaat.
- *
- * Bewust niet via `config('webhook-server.headers')`: dat is procesbreed en
- * statisch, dus een per-request-waarde daarin lekt onder Octane naar het
- * volgende request.
- */
 final class ConsumerWebhookHeaders
 {
-    /**
-     * @return array<string, string>
-     */
+    /** @return array<string, string> */
     public static function make(?string $eventId = null): array
     {
         return array_filter([
-            // Houdt een falende consumer op 4xx/5xx in plaats van een 3xx die als
-            // geleverd telt. Zie `.docs/decisions/webhook-fanout-retry-policy.md`.
             'Accept' => 'application/json',
             'X-Emeq-Event-Id' => $eventId,
             'X-Emeq-Request-Id' => Context::get('request_id'),

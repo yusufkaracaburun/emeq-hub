@@ -7,16 +7,10 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
-/**
- * @extends Factory<Consumer>
- */
+/** @extends Factory<Consumer> */
 class ConsumerFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
+    /** @return array<string, mixed> */
     public function definition(): array
     {
         $name = fake()->company();
@@ -42,13 +36,6 @@ class ConsumerFactory extends Factory
         ]);
     }
 
-    /**
-     * Maak een Consumer aan met een actieve subscription-rij voor de gegeven
-     * plan-slug. Vereist dat plan 06-02's subscriptions-tabel is gemigreerd.
-     * Cashier-Mollie's eigen factory-helpers zijn niet stabiel in v2.x; deze
-     * state schrijft een minimale rij die de `subscribed('main')`-assert groen
-     * maakt. Geen Mollie-API-hit — alleen DB-state.
-     */
     public function withActiveSubscription(string $planSlug = 'naschool-license', string $subscriptionName = 'main'): static
     {
         return $this->afterCreating(function (Consumer $consumer) use ($planSlug, $subscriptionName): void {

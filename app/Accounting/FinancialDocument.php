@@ -7,11 +7,6 @@ namespace App\Accounting;
 use App\Accounting\Enums\DocumentType;
 use Carbon\CarbonImmutable;
 
-/**
- * Hub-owned canonical financieel document. Consumers leveren dit aan op
- * /v1/accounting/documents; AccountingTarget-adapters mappen het naar het
- * gekoppelde boekhoudpakket. Apps buigen naar dit contract — de Hub niet naar de apps.
- */
 final readonly class FinancialDocument
 {
     /**
@@ -32,9 +27,7 @@ final readonly class FinancialDocument
         public array $attachments = [],
     ) {}
 
-    /**
-     * @param  array<string, mixed>  $data
-     */
+    /** @param  array<string, mixed>  $data */
     public static function fromArray(array $data): self
     {
         $issueDate = CarbonImmutable::parse((string) $data['issue_date']);
@@ -48,8 +41,6 @@ final readonly class FinancialDocument
                 $data['lines'],
             )),
             issueDate: $issueDate,
-            // Geen vervaldatum aangeleverd → standaard issue_date + 1 maand (Hub-conventie),
-            // zodat de openstaande post in het boekhoudpakket altijd een vervaldatum krijgt.
             dueDate: isset($data['due_date']) ? CarbonImmutable::parse((string) $data['due_date']) : $issueDate->addMonth(),
             number: isset($data['number']) ? (string) $data['number'] : null,
             reference: isset($data['reference']) ? (string) $data['reference'] : null,

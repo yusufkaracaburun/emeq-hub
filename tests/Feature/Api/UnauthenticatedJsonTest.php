@@ -5,12 +5,6 @@ namespace Tests\Feature\Api;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
-/**
- * /v1/* is een pure JSON-API. Een consumer-app praat via een eigen-origin proxy
- * die niet altijd een `Accept: application/json`-header meestuurt. Zonder de
- * expliciete JSON-render zou een ontbrekende/ongeldige PAT een redirect naar de
- * niet-bestaande `login`-route worden → `RouteNotFoundException` (500).
- */
 class UnauthenticatedJsonTest extends TestCase
 {
     use RefreshDatabase;

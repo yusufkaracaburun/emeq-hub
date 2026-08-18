@@ -15,12 +15,6 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
 
-/*
- * Inkoopfactuur-form. Regel-bedragen (subtotaal/BTW/totaal) staan NIET in het
- * form — die rekent de BillLineObserver. Stukprijs wordt als euro's ingevoerd en
- * per regel omgezet naar integer-centen. Elke regel kiest een kostenrekening
- * (de echte categorie-keuze die inkoop van verkoop onderscheidt).
- */
 class BillForm
 {
     public static function configure(Schema $schema): Schema
@@ -106,13 +100,10 @@ class BillForm
                     ->maxLength(1000)
                     ->columnSpanFull(),
             ])
-            // Geboekte inkoopfactuur is onwijzigbaar (zie Bill::booted()) → form read-only.
             ->disabled(fn (?Bill $record): bool => (bool) $record?->isPosted());
     }
 
-    /**
-     * @return array<int, string>
-     */
+    /** @return array<int, string> */
     private static function expenseAccountOptions(): array
     {
         return Account::query()

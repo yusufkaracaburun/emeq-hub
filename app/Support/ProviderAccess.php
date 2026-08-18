@@ -54,9 +54,7 @@ final class ProviderAccess
         return $described;
     }
 
-    /**
-     * @return array<string, string>
-     */
+    /** @return array<string, string> */
     public static function describeResources(Provider $provider): array
     {
         /** @var list<string> $paths */

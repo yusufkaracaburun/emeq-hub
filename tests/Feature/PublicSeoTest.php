@@ -11,12 +11,6 @@ use Inertia\Testing\AssertableInertia;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
-/**
- * Bewaakt de publieke crawler-surface: robots.txt, sitemap, llms.txt en de
- * server-side SEO-payload per pagina. De regressie die dit voorkomt is drift —
- * eerder stond de indexeerbare-lijst in drie bestanden en blokkeerde robots.txt
- * pagina's die de middleware wél indexeerbaar verklaarde.
- */
 class PublicSeoTest extends TestCase
 {
     use RefreshDatabase;
@@ -25,7 +19,6 @@ class PublicSeoTest extends TestCase
     {
         parent::setUp();
 
-        // De legal-pagina's lezen hun tekst uit de settings-tabel.
         LegalSettings::fake([
             'privacy_statement' => '## Privacy',
             'privacy_updated_at' => '2026-07-18',
@@ -36,9 +29,7 @@ class PublicSeoTest extends TestCase
         ]);
     }
 
-    /**
-     * @return list<array{0:string}>
-     */
+    /** @return list<array{0:string}> */
     public static function publicPages(): array
     {
         return [
@@ -102,7 +93,6 @@ class PublicSeoTest extends TestCase
 
         $application = $graph[array_search('SoftwareApplication', $types, true)];
 
-        // featureList is wat een LLM citeert; leeg = de pagina levert geen feiten.
         $this->assertNotEmpty($application['featureList']);
         $this->assertContains('POST /v1/accounting/documents', $application['featureList']);
     }
@@ -157,8 +147,6 @@ class PublicSeoTest extends TestCase
 
     public function test_snelstart_stays_off_the_public_surface(): void
     {
-        // Bewuste productkeuze: de SnelStart-integratie is niet gebouwd en er is
-        // geen partnercontract — de showcase toont alleen Exact en Mollie.
         $keys = array_column(app(ProviderShowcase::class)->summaries(), 'key');
 
         $this->assertNotContains('snelstart', $keys);
@@ -175,17 +163,13 @@ class PublicSeoTest extends TestCase
         $this->assertStringContainsString('Disallow: /admin', $body);
         $this->assertStringContainsString('Disallow: /v1/', $body);
 
-        // De legal-pagina's waren hiervóór geblokkeerd terwijl de middleware ze
-        // indexeerbaar verklaarde — precies de drift die dit bestand bewaakt.
         $this->assertStringNotContainsString(
             "\nDisallow: /\n",
             substr($body, 0, (int) strpos($body, 'User-agent: GPTBot')),
         );
 
-        // Rechtsvoorbehoud voor tekst- en datamining (EU 2019/790 art. 4).
         $this->assertStringContainsString('Content-Signal: search=yes,ai-train=no,use=reference', $body);
 
-        // Crawlers die naar de bron linken: zelfde surface als iedereen.
         foreach (['OAI-SearchBot', 'PerplexityBot', 'Claude-SearchBot'] as $agent) {
             $this->assertStringContainsString('User-agent: '.$agent, $body);
         }
@@ -201,8 +185,6 @@ class PublicSeoTest extends TestCase
             $this->assertStringContainsString('User-agent: '.$agent, $body);
         }
 
-        // De trainings-groep sluit af met een kale Disallow: / — die regel mag
-        // alleen dáár staan, niet in de groep voor iedereen.
         $training = substr($body, (int) strpos($body, 'User-agent: GPTBot'));
         $this->assertStringContainsString("\nDisallow: /\n", $training);
         $this->assertStringNotContainsString(
@@ -254,12 +236,7 @@ class PublicSeoTest extends TestCase
             ->assertHeader('X-Robots-Tag', 'noindex, nofollow, noarchive, nosnippet');
     }
 
-    /**
-     * De props reizen als objecten tot ze ge-json-encode worden; via een
-     * round-trip lezen we exact wat de browser en de crawler te zien krijgen.
-     *
-     * @return list<array<string, mixed>>
-     */
+    /** @return list<array<string, mixed>> */
     private function graph(mixed $seo): array
     {
         return json_decode(json_encode($seo), true)['jsonLd']['@graph'];

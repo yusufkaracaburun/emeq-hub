@@ -39,10 +39,6 @@ class ModelPruningTest extends TestCase
         $this->assertNotNull(InboundWebhookEvent::find($recent->id));
     }
 
-    /**
-     * Idempotency-keys werden nooit geprund en groeiden onbegrensd. Het verval staat
-     * nu op de rij zelf, gezet bij het claimen.
-     */
     public function test_prunes_expired_idempotency_keys(): void
     {
         $consumer = Consumer::factory()->create();

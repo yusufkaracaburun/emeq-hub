@@ -12,23 +12,6 @@ use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 
-/**
- * Ruimt de Hub-eigen boekhoud-state voor één Connection op — het vervolg op
- * `exact:purge-test-data`, dat alleen de Exact-kant opruimt. Zonder deze stap
- * blijft de Hub het document als geboekt kennen (`idempotency_keys`,
- * `provider_entity_links`) en geeft herboeken `422 idempotency_key_reuse`, ook
- * ná een volledige Exact-purge.
- *
- * Provider-agnostisch: `provider_entity_links` en `connection_accounting_refs` zijn
- * `connection_id`-gescoped. `idempotency_keys` kent geen connection-kolom en is
- * `consumer_id`-gescoped — bij meer dan één connection per consumer raakt dat dus
- * ook andere connections; `handle()` meldt dat expliciet vóór een `--force`-run.
- *
- * `connection_accounting_refs` is de enige tabel met een deel-afbakening: alleen
- * `kind = relation` is test-vervuiling (geleerde koppelingen op een consumer-
- * gegenereerd `external_id`). `gl`/`vat`/`journal`/`cost_center`/`cost_unit` zijn de
- * gemirrorde Exact-referentiedata — die overleven een reset.
- */
 final class HubResetConnection extends Command
 {
     protected $signature = 'hub:reset-connection

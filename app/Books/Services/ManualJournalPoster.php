@@ -9,15 +9,6 @@ use App\Books\Models\Transaction;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 
-/*
- * Boekt een handmatige memoriaalboeking (vrije debet/credit-regels) naar het
- * grootboek via een Transaction(type=journal) als carrier — hetzelfde
- * JournalEntry→Transaction-spoor als InvoicePoster/BillPoster, maar generiek
- * i.p.v. document-afgeleid. De balans-invariant is hier niet per constructie
- * gegarandeerd (de gebruiker tikt zelf), dus de service bewaakt 'm expliciet.
- *
- * Bedragen in integer-centen. company_id wordt door BelongsToBooksCompany gezet.
- */
 class ManualJournalPoster
 {
     /**
@@ -60,9 +51,6 @@ class ManualJournalPoster
     }
 
     /**
-     * Canonieke balans-check, gedeeld door de Filament-form-rule (UX-edge) en
-     * post() (domein-invariant). Werkt op genormaliseerde regels (centen + enum).
-     *
      * @param  list<array{type: ?JournalEntryType, amount: int|float}>  $lines
      * @return string|null Nederlandse foutmelding, of null als de boeking klopt.
      */

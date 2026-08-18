@@ -31,7 +31,7 @@ class VatTreatmentValidatorTest extends TestCase
         $this->assertSame('vat_treatment.reverse_charge_expected', $findings[0]->code);
         $this->assertSame('reverse_charge', $findings[0]->suggestion);
         $this->assertSame(Severity::Warning, $findings[0]->severity);
-        $this->assertFalse($findings[0]->blocking); // advies; het boekpad valideert tax_rate niet tegen de regio
+        $this->assertFalse($findings[0]->blocking);
     }
 
     public function test_non_eu_supplier_with_domestic_rate_is_error(): void

@@ -7,27 +7,14 @@ namespace App\Http\Requests\Api\V1\AccountSubscriptions;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-/**
- * Edge-validatie voor POST /v1/account-subscriptions — vangt grove payload-fouten af
- * vóór Mollie-roundtrip (lager Mollie-quota-burn). 07-CONTEXT.md D-09 body-shape.
- *
- * Belangrijk:
- *  - `Rule::exists('accounts', 'external_id')->where('consumer_id', ...)` zorgt voor
- *    cross-Consumer-scoping (T-07-04-03): vreemde-Consumer-account → 422, geen 404.
- *  - amount.value-regex pin't exact 2 decimals (T-07-04-06 — quota-burn-protection).
- *  - currency-rule pin't EUR-only (D-09 + Phase 7 strict-EUR-stance).
- */
 class CreateAccountSubscriptionRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        // Auth gebeurt op middleware-niveau (auth:sanctum + ability:mollie:write,*).
         return true;
     }
 
-    /**
-     * @return array<string, array<int, mixed>>
-     */
+    /** @return array<string, array<int, mixed>> */
     public function rules(): array
     {
         $consumerId = (int) $this->user()?->getKey();
@@ -51,13 +38,7 @@ class CreateAccountSubscriptionRequest extends FormRequest
         ];
     }
 
-    /**
-     * NL-foutmessages op de meest gebruikersgerichte rules. De
-     * `account_external_id.exists`-message verbergt of het account bestond bij
-     * een andere Consumer (info-disclosure-risk per T-07-04-03).
-     *
-     * @return array<string, string>
-     */
+    /** @return array<string, string> */
     public function messages(): array
     {
         return [

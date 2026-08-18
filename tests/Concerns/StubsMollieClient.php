@@ -26,47 +26,28 @@ use Mollie\Api\Resources\SubscriptionCollection;
 use Tests\Feature\Api\V1\Mollie\StubMollieClient;
 use Throwable;
 
-/**
- * Test-helper voor Mollie-pass-through-tests. Binds een Mollie-wrapper-mock
- * waarvan `client()` een test-only MollieApiClient-subclass retourneert met
- * een stub `payments`-endpoint. De stub capture't payloads en
- * Idempotency-Key-runtime-state vlak vóór elke call zodat tests precies
- * kunnen asserten wat naar Mollie zou zijn gegaan.
- *
- * Patroon overgenomen van Plan 05a-02's ThrowingMollieApiClient, uitgebreid
- * met success-pad (Payment-resource-return) + key-capture.
- */
 trait StubsMollieClient
 {
-    /**
-     * @var array<string, array<int, mixed>>
-     */
+    /** @var array<string, array<int, mixed>> */
     protected array $mollieCaptured = [
-        // Payments (Plan 05a-03)
         'create' => [],
         'get' => [],
         'cancel' => [],
         'idempotency_keys' => [],
-        // Customers (Plan 05a-04 Task 1)
         'customer_create' => [],
         'customer_get' => [],
         'customer_page' => [],
-        // Methods (Plan 05a-04 Task 1)
         'method_all' => [],
-        // PaymentRefunds + Refunds (Plan 05a-04 Task 2)
         'refund_create_for_id' => [],
         'refund_page_for_id' => [],
         'refund_get_for_id' => [],
-        // CustomerMandates (Plan 05a-04 Task 3)
         'mandate_page_for_id' => [],
         'mandate_get_for_id' => [],
         'mandate_revoke_for_id' => [],
-        // Subscriptions (Plan 05a-05 Task 1) — nested onder Customer
         'subscription_create_for_id' => [],
         'subscription_get_for_id' => [],
         'subscription_page_for_id' => [],
         'subscription_cancel_for_id' => [],
-        // PaymentLinks (Plan 05a-05 Task 1) — top-level
         'payment_link_create' => [],
         'payment_link_get' => [],
         'payment_link_page' => [],
@@ -86,29 +67,7 @@ trait StubsMollieClient
         return $this->bindMollieStubs(['payments' => $resolver]);
     }
 
-    /**
-     * Binds een StubMollieClient met meerdere endpoint-stubs in één keer.
-     * Per resource een aparte resolver-callable die de stub voor die
-     * property bouwt. De resolver-signature verschilt per resource:
-     *
-     *  - 'payments'         : callable(string $op, mixed $arg): Payment|Throwable
-     *                         (compat met Plan 05a-03 — $op = create|get|cancel)
-     *  - 'customers'        : callable(string $op, mixed $arg): Customer|Throwable
-     *                         ($op = create | get | page; $arg = payload-array of id-string of [$from, $limit])
-     *  - 'methods'          : callable(array $query): MethodCollection|Throwable
-     *  - 'paymentRefunds'   : callable(string $op, mixed $arg): Refund|RefundCollection|Throwable
-     *                         ($op = createForId | pageForId | getForId)
-     *  - 'mandates'         : callable(string $op, mixed $arg): Mandate|MandateCollection|null|Throwable
-     *                         ($op = pageForId | getForId | revokeForId)
-     *                         (Mollie SDK exposes het op `MollieApiClient::$mandates`, niet `$customerMandates`)
-     *  - 'subscriptions'    : callable(string $op, mixed $arg): Subscription|SubscriptionCollection|Throwable
-     *                         ($op = createForId | getForId | pageForId | cancelForId)
-     *                         (Vendor: `MollieApiClient::$subscriptions` — NIET `$customerSubscriptions`)
-     *  - 'paymentLinks'     : callable(string $op, mixed $arg): PaymentLink|PaymentLinkCollection|Throwable
-     *                         ($op = create | get | page)
-     *
-     * @param  array<string, callable>  $resolvers
-     */
+    /** @param  array<string, callable>  $resolvers */
     protected function bindMollieStubs(array $resolvers): StubMollieClient
     {
         $captured = &$this->mollieCaptured;
@@ -117,11 +76,7 @@ trait StubsMollieClient
         $paymentsResolver = $resolvers['payments'] ?? null;
         $paymentsStub = $paymentsResolver !== null
             ? $this->makePaymentsStub($paymentsResolver, $captured, $clientRef)
-            : new class
-            {
-                // Lege placeholder zodat StubMollieClient een 'payments'-property heeft
-                // (vereist door MollieApiClient::$payments magic-getter elders).
-            };
+            : new class {};
 
         $extras = [];
         if (isset($resolvers['customers'])) {
@@ -487,11 +442,7 @@ trait StubsMollieClient
         };
     }
 
-    /**
-     * Helper voor een Subscription-resource met dynamic-properties gevuld.
-     *
-     * @param  array<string, mixed>  $attributes
-     */
+    /** @param  array<string, mixed>  $attributes */
     protected function makeSubscription(array $attributes): Subscription
     {
         $subscription = new Subscription(new MollieApiClient);
@@ -502,9 +453,7 @@ trait StubsMollieClient
         return $subscription;
     }
 
-    /**
-     * @param  array<int, array<string, mixed>>  $items
-     */
+    /** @param  array<int, array<string, mixed>>  $items */
     protected function makeSubscriptionCollection(array $items): SubscriptionCollection
     {
         $client = new MollieApiClient;
@@ -520,11 +469,7 @@ trait StubsMollieClient
         return new SubscriptionCollection($client, $subscriptions, null);
     }
 
-    /**
-     * Helper voor een PaymentLink-resource met dynamic-properties gevuld.
-     *
-     * @param  array<string, mixed>  $attributes
-     */
+    /** @param  array<string, mixed>  $attributes */
     protected function makePaymentLink(array $attributes): PaymentLink
     {
         $link = new PaymentLink(new MollieApiClient);
@@ -535,9 +480,7 @@ trait StubsMollieClient
         return $link;
     }
 
-    /**
-     * @param  array<int, array<string, mixed>>  $items
-     */
+    /** @param  array<int, array<string, mixed>>  $items */
     protected function makePaymentLinkCollection(array $items): PaymentLinkCollection
     {
         $client = new MollieApiClient;
@@ -553,11 +496,7 @@ trait StubsMollieClient
         return new PaymentLinkCollection($client, $links, null);
     }
 
-    /**
-     * Helper voor een Customer-resource met dynamic-properties gevuld.
-     *
-     * @param  array<string, mixed>  $attributes
-     */
+    /** @param  array<string, mixed>  $attributes */
     protected function makeCustomer(array $attributes): Customer
     {
         $customer = new Customer(new MollieApiClient);
@@ -568,9 +507,7 @@ trait StubsMollieClient
         return $customer;
     }
 
-    /**
-     * @param  array<int, array<string, mixed>>  $items
-     */
+    /** @param  array<int, array<string, mixed>>  $items */
     protected function makeMethodCollection(array $items): MethodCollection
     {
         $client = new MollieApiClient;
@@ -586,11 +523,7 @@ trait StubsMollieClient
         return new MethodCollection($client, $methods, null);
     }
 
-    /**
-     * Helper voor een Refund-resource met dynamic-properties gevuld.
-     *
-     * @param  array<string, mixed>  $attributes
-     */
+    /** @param  array<string, mixed>  $attributes */
     protected function makeRefund(array $attributes): Refund
     {
         $refund = new Refund(new MollieApiClient);
@@ -601,9 +534,7 @@ trait StubsMollieClient
         return $refund;
     }
 
-    /**
-     * @param  array<int, array<string, mixed>>  $items
-     */
+    /** @param  array<int, array<string, mixed>>  $items */
     protected function makeRefundCollection(array $items): RefundCollection
     {
         $client = new MollieApiClient;
@@ -619,11 +550,7 @@ trait StubsMollieClient
         return new RefundCollection($client, $refunds, null);
     }
 
-    /**
-     * Helper voor een Mandate-resource met dynamic-properties gevuld.
-     *
-     * @param  array<string, mixed>  $attributes
-     */
+    /** @param  array<string, mixed>  $attributes */
     protected function makeMandate(array $attributes): Mandate
     {
         $mandate = new Mandate(new MollieApiClient);
@@ -634,9 +561,7 @@ trait StubsMollieClient
         return $mandate;
     }
 
-    /**
-     * @param  array<int, array<string, mixed>>  $items
-     */
+    /** @param  array<int, array<string, mixed>>  $items */
     protected function makeMandateCollection(array $items): MandateCollection
     {
         $client = new MollieApiClient;
@@ -652,11 +577,7 @@ trait StubsMollieClient
         return new MandateCollection($client, $mandates, null);
     }
 
-    /**
-     * Helper voor een Payment-resource met dynamic-properties gevuld.
-     *
-     * @param  array<string, mixed>  $attributes
-     */
+    /** @param  array<string, mixed>  $attributes */
     protected function makePayment(array $attributes): Payment
     {
         $payment = new Payment(new MollieApiClient);
@@ -668,8 +589,6 @@ trait StubsMollieClient
     }
 
     /**
-     * Setup een Consumer + PAT + Account + actieve Mollie-Connection.
-     *
      * @param  list<string>  $abilities
      * @return array{0:Consumer, 1:string, 2:Account, 3:Connection}
      */

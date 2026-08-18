@@ -26,14 +26,6 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Throwable;
 
-/**
- * Plan 09-08 — Read-only Filament-Resource voor AccountSubscription met
- * 3 state-flip-actions (Pause/Resume/Cancel) die uitsluitend via
- * AccountSubscriptionManager (Phase 7-03) lopen.
- *
- * Geen Create/Edit-pages: subscription-create gebeurt via
- * POST /v1/account-subscriptions (Phase 7-04).
- */
 class AccountSubscriptionResource extends Resource
 {
     protected static ?string $model = AccountSubscription::class;
@@ -58,7 +50,6 @@ class AccountSubscriptionResource extends Resource
 
     public static function form(Schema $schema): Schema
     {
-        // Read-only Resource — geen Create/Edit pages. Schema blijft leeg.
         return $schema->components([]);
     }
 
@@ -110,9 +101,7 @@ class AccountSubscriptionResource extends Resource
         ]);
     }
 
-    /**
-     * @return list<Section>
-     */
+    /** @return list<Section> */
     public static function statusStripSchema(AccountSubscription $record): array
     {
         /** @var SubscriptionStatus|null $status */
@@ -185,11 +174,6 @@ class AccountSubscriptionResource extends Resource
             ->toolbarActions([]);
     }
 
-    /**
-     * Pause-action — alleen zichtbaar op Active. Delegates naar
-     * AccountSubscriptionManager::pause (Phase 7-03 single-entry-point).
-     * NOOIT direct $sub->update(['status' => ...]) (T-07-03-03 invariant).
-     */
     private static function pauseAction(): Action
     {
         return Action::make('pause')
@@ -224,10 +208,6 @@ class AccountSubscriptionResource extends Resource
             });
     }
 
-    /**
-     * Resume-action — alleen zichtbaar op Paused. Delegates naar
-     * AccountSubscriptionManager::resume.
-     */
     private static function resumeAction(): Action
     {
         return Action::make('resume')
@@ -261,11 +241,6 @@ class AccountSubscriptionResource extends Resource
             });
     }
 
-    /**
-     * Cancel-action — zichtbaar op Active OF Paused. Delegates naar
-     * AccountSubscriptionManager::cancel (roept ook Mollie SDK aan als
-     * mollie_subscription_id niet null is).
-     */
     private static function cancelAction(): Action
     {
         return Action::make('cancel')

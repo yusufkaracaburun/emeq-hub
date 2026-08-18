@@ -8,13 +8,6 @@ use App\Models\Connection;
 use App\Models\InboundWebhookEvent;
 use Illuminate\Http\Request;
 
-/**
- * Eén write-path voor alle inbound partner→Hub-webhook-audit (Snelstart/Exact/
- * Mollie/Cashier). Vervangt de per-provider hand-rolled `create([...])`-blokken.
- *
- * Metadata-only: bewaart géén payload/headers (AVG). De `request_fingerprint`
- * (sha256-prefix van de raw body) is genoeg voor correlatie zonder de inhoud.
- */
 final class InboundWebhookRecorder
 {
     public const OUTCOME_PROCESSED = 'processed';
@@ -50,8 +43,6 @@ final class InboundWebhookRecorder
 
         return InboundWebhookEvent::create([
             'provider' => $provider,
-            // Duplicate-rij: event_id bewust NULL zodat de (provider,event_id)
-            // unique-index niet triggert; outcome houdt de forensics.
             'event_id' => $outcome === self::OUTCOME_DUPLICATE ? null : $eventId,
             'topic' => $topic,
             'action' => $action,

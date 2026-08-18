@@ -15,14 +15,6 @@ use Illuminate\Support\Facades\Bus;
 use Illuminate\Testing\TestResponse;
 use Tests\TestCase;
 
-/**
- * HUB-06 acceptance-gate. Bewijst alle 5 Success Criteria uit
- * ROADMAP §Phase 5c end-to-end via de volle stack (route → SDK-middleware →
- * controller → forward-job). Per-scenario coverage zit in plan 03 + 04;
- * deze suite bewijst dat de combinatie werkt zonder middleware-mocks.
- *
- * Mapping: test_sc_{1..5}_* ↔ ROADMAP SC-1..SC-5.
- */
 final class SnelstartWebhookEndToEndTest extends TestCase
 {
     use RefreshDatabase;
@@ -220,9 +212,7 @@ final class SnelstartWebhookEndToEndTest extends TestCase
         );
     }
 
-    /**
-     * @param  array<string, mixed>  $payload
-     */
+    /** @param  array<string, mixed>  $payload */
     private function postSignedWebhook(array $payload): TestResponse
     {
         $rawBody = json_encode($payload, JSON_THROW_ON_ERROR);

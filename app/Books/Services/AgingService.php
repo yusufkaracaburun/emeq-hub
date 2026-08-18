@@ -13,14 +13,6 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 
-/*
- * Ouderdomsanalyse (AR/AP aging) van de open posten op een peildatum. Bouwt op de
- * bestaande open-post-primitieven: een document staat open zolang amountDue() > 0
- * (HasPayments). Concepten tellen niet mee (geen vordering/verplichting), volledig
- * afgeletterde posten vallen vanzelf weg (amountDue 0). Het verschil tussen peildatum
- * en vervaldatum bepaalt de ouderdomsbucket — net als BtwService/ReportService een
- * dun read-rapport bovenop de modellen, geen eigen state.
- */
 class AgingService
 {
     /** @var array<string, string> bucket-key => label */
@@ -32,11 +24,7 @@ class AgingService
         'd90_plus' => '> 90 dagen',
     ];
 
-    /**
-     * Debiteuren: open verkoopfacturen per klant, gebucket op ouderdom.
-     *
-     * @return array{as_of: string, kind: string, rows: list<array{relation: string, buckets: array<string, int>, total: int}>, totals: array<string, int>}
-     */
+    /** @return array{as_of: string, kind: string, rows: list<array{relation: string, buckets: array<string, int>, total: int}>, totals: array<string, int>} */
     public function receivables(string $asOf): array
     {
         $invoices = Invoice::query()
@@ -48,11 +36,7 @@ class AgingService
         return $this->build($invoices, $asOf, 'receivable', fn (Invoice $invoice): string => $invoice->client?->name ?? '— onbekend —');
     }
 
-    /**
-     * Crediteuren: open inkoopfacturen per leverancier, gebucket op ouderdom.
-     *
-     * @return array{as_of: string, kind: string, rows: list<array{relation: string, buckets: array<string, int>, total: int}>, totals: array<string, int>}
-     */
+    /** @return array{as_of: string, kind: string, rows: list<array{relation: string, buckets: array<string, int>, total: int}>, totals: array<string, int>} */
     public function payables(string $asOf): array
     {
         $bills = Bill::query()
@@ -80,7 +64,7 @@ class AgingService
             $amountDue = $document->amountDue();
 
             if ($amountDue <= 0) {
-                continue; // afgeletterd → geen open post
+                continue;
             }
 
             $name = $relationName($document);
@@ -92,7 +76,7 @@ class AgingService
         }
 
         $rows = array_values($byRelation);
-        usort($rows, fn (array $a, array $b): int => $b['total'] <=> $a['total']); // grootste openstaand bovenaan
+        usort($rows, fn (array $a, array $b): int => $b['total'] <=> $a['total']);
 
         $totals = $emptyBuckets;
         $grand = 0;
@@ -113,10 +97,6 @@ class AgingService
         ];
     }
 
-    /**
-     * Ouderdomsbucket uit het verschil peildatum − vervaldatum. Ontbreekt de
-     * vervaldatum, dan valt 'ie terug op de documentdatum.
-     */
     private function bucketKey(Carbon $asOf, Model $document): string
     {
         $due = Carbon::parse($document->due_date ?? $document->date)->startOfDay();

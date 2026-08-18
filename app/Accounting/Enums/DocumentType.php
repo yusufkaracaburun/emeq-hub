@@ -4,10 +4,6 @@ declare(strict_types=1);
 
 namespace App\Accounting\Enums;
 
-/**
- * Canonical document-soort die consumers naar de Hub sturen. Provider-onafhankelijk;
- * elke AccountingTarget-adapter mapt deze naar zijn eigen endpoints.
- */
 enum DocumentType: string
 {
     case SalesInvoice = 'sales_invoice';

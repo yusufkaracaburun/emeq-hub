@@ -12,17 +12,11 @@ use Illuminate\Support\Facades\Mail;
 use Inertia\Testing\AssertableInertia;
 use Tests\TestCase;
 
-/**
- * Publieke demo-aanvraag: GET /demo + POST /demo — persistentie, melding,
- * validatie, honeypot, redirect-terug met success-flash.
- */
 class DemoRequestTest extends TestCase
 {
     use RefreshDatabase;
 
-    /**
-     * @return array<string, mixed>
-     */
+    /** @return array<string, mixed> */
     private function validPayload(array $overrides = []): array
     {
         return array_merge([
@@ -54,8 +48,6 @@ class DemoRequestTest extends TestCase
             ->assertRedirect(route('demo'))
             ->assertSessionHas('submitted', true);
 
-        // De lead hoort in de database te staan, niet alleen in een mail: met de
-        // log-mailer verdween een aanvraag anders spoorloos.
         $demoRequest = DemoRequest::sole();
         $this->assertSame('Naschool BV', $demoRequest->company);
         $this->assertSame('Deze week', $demoRequest->preferred_slot);
@@ -72,8 +64,6 @@ class DemoRequestTest extends TestCase
 
     public function test_lead_survives_a_failing_notification(): void
     {
-        // De melding is een gemak, geen schakel: een mailstoring mag de aanvraag
-        // niet laten verdwijnen en de bezoeker geen foutpagina geven.
         Mail::shouldReceive('to->send')->andThrow(new \RuntimeException('mailer down'));
 
         $this->from(route('demo'))

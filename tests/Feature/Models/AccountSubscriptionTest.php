@@ -3,7 +3,6 @@
 namespace Tests\Feature\Models;
 
 use App\Billing\Account\SubscriptionStatus;
-use App\Models\Account;
 use App\Models\AccountSubscription;
 use App\Models\Connection;
 use Illuminate\Database\Eloquent\Collection;
@@ -85,29 +84,18 @@ class AccountSubscriptionTest extends TestCase
 
     public function test_account_id_fk_is_wired_as_cascade_on_delete(): void
     {
-        // D-03 schreef voor: account_id FK cascadet, connection_id FK restrict.
-        // Onder Postgres aborteert een directe Account::delete() omdat de
-        // restrict-FK op connection_id de geneste cascade blokkeert. De
-        // admin-flow (T-07-01-03) ruimt daarom eerst subs + connections op,
-        // pas dan account — dit test bewijst dat die volgorde clean afsluit
-        // én dat een sub die nog op een al-opgeschoonde connection-chain hangt
-        // door de cascade op account_id verdwijnt.
         $connection = Connection::factory()->forMollie()->create();
         $account = $connection->account;
 
         AccountSubscription::factory()->forConnection($connection)->pending()->create();
         $this->assertSame(1, AccountSubscription::count());
 
-        // Admin-volgorde: eerst subs, dan connections, dan account.
         AccountSubscription::where('connection_id', $connection->id)->delete();
         $connection->delete();
         $account->delete();
 
         $this->assertSame(0, AccountSubscription::count());
 
-        // Postgres-only assertion: bewijst dat de account_id FK met
-        // CASCADE-disposition is gedefinieerd (confdeltype 'c' = CASCADE).
-        // Onder SQLite skipt deze pg_constraint-query niet beschikbaar is.
         if (DB::connection()->getDriverName() === 'pgsql') {
             $row = DB::selectOne(
                 'SELECT confdeltype FROM pg_constraint WHERE conname = ?',

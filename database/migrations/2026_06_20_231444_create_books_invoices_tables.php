@@ -4,14 +4,6 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-/*
- * Verkoopfacturen van de Books-module: books_invoices (header + totalen) +
- * books_invoice_lines (regels). Lean NL-opzet —
- * géén logo/header/footer/discount/offerings/estimate. Bedragen in
- * integer-centen; per-regel + factuur-totalen worden door de InvoiceLineObserver
- * herrekend (subtotaal/BTW/totaal). Posten naar het grootboek volgt in een eigen
- * slice. tax_rate is een BTW-percentage (21/9/0).
- */
 return new class extends Migration
 {
     public function up(): void

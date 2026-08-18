@@ -8,10 +8,6 @@ use App\Accounting\Validation\Contracts\DocumentValidator;
 use App\Accounting\Validation\Finding;
 use App\Accounting\Validation\Severity;
 
-/**
- * Valideert het IBAN van de party via mod-97 (ISO 13616) + lengte-per-land. Stelt het
- * genormaliseerde IBAN voor (spaties weg, uppercase); bij een gefaalde checksum geen gok.
- */
 final class IbanValidator implements DocumentValidator
 {
     /** @var array<string, int> IBAN-lengte per land (gangbare EU + UK/CH). */
@@ -48,7 +44,7 @@ final class IbanValidator implements DocumentValidator
             return [new Finding(
                 code: 'iban.normalize',
                 severity: Severity::Info,
-                blocking: false, // het boekpad valideert `party.iban` niet op vorm
+                blocking: false,
                 path: 'party.iban',
                 message: 'Het rekeningnummer klopt, maar staat met spaties of kleine letters. Wij stellen de nette schrijfwijze voor.',
                 current: $raw,
@@ -74,10 +70,6 @@ final class IbanValidator implements DocumentValidator
         return $this->mod97($iban) === 1;
     }
 
-    /**
-     * ISO 7064 mod-97-10: verplaats de eerste 4 tekens naar achteren, letters → cijfers
-     * (A=10..Z=35), en reken modulo 97 in stukken (geen bigint nodig).
-     */
     private function mod97(string $iban): int
     {
         $rearranged = substr($iban, 4).substr($iban, 0, 4);

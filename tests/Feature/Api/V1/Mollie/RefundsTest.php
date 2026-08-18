@@ -9,17 +9,6 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Concerns\StubsMollieClient;
 use Tests\TestCase;
 
-/**
- * MOLL-03 Refunds — create + list (nested onder payments) + get
- * (standalone via ?paymentId-query).
- *
- * Plan-deviatie (Rule 1): Mollie's SDK heeft géén
- * `refunds->get($id)`-method op RefundEndpointCollection; alleen
- * `paymentRefunds->getForId($paymentId, $refundId)`. De
- * standalone-route /v1/mollie/refunds/{id} vereist daarom een
- * `?paymentId=tr_xxx` query-parameter. Audit-path blijft
- * `/v2/refunds/{id}`.
- */
 class RefundsTest extends TestCase
 {
     use RefreshDatabase;

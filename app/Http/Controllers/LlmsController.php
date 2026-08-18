@@ -7,12 +7,6 @@ namespace App\Http\Controllers;
 use App\Support\ProviderShowcase;
 use Illuminate\Http\Response;
 
-/**
- * /llms.txt — markdown-index van de publieke surface volgens de llmstxt.org-
- * conventie. Een taalmodel dat de Hub tegenkomt krijgt hier in platte tekst
- * wat het product doet en welke koppelingen bestaan, zonder de JS-bundle te
- * hoeven renderen.
- */
 class LlmsController extends Controller
 {
     public function __construct(private readonly ProviderShowcase $showcase) {}

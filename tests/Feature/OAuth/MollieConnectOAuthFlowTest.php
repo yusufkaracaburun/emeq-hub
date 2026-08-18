@@ -69,8 +69,6 @@ class MollieConnectOAuthFlowTest extends TestCase
 
     public function test_refresh_token_is_locked_per_connection(): void
     {
-        // Lock-pattern uit D-05: tweede aanroep moet wachten op de eerste.
-        // Test scope: één call doet HTTP; verify dat Cache::lock is gebruikt.
         $this->markTestIncomplete('Concurrent-refresh-race wordt getest in een aparte testcase met parallel-process simulatie.');
     }
 

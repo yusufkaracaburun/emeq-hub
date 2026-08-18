@@ -16,10 +16,6 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use RuntimeException;
 use Tests\TestCase;
 
-/**
- * Het frame dat elke pass-through deelt. Deze test dekt wat vóór de consolidatie in
- * vier kopieën stond en dus vier keer stuk kon gaan.
- */
 final class PassThroughPipelineTest extends TestCase
 {
     use RefreshDatabase;
@@ -77,10 +73,6 @@ final class PassThroughPipelineTest extends TestCase
         $this->assertNotNull($call->upstream_error);
     }
 
-    /**
-     * De consumer ziet een gemaskeerde status; wie de partner-limiet spiegelt moet
-     * de échte status zien. Exact's error-budget hangt hieraan.
-     */
     public function test_meldt_de_status_die_de_partner_zelf_gaf_ook_als_die_gemaskeerd_wordt(): void
     {
         $observed = [];
@@ -103,10 +95,6 @@ final class PassThroughPipelineTest extends TestCase
         $this->assertSame(1, PassThroughCall::count());
     }
 
-    /**
-     * Mollie Connect draait op het partner-token: geen Account, geen Connection, wél
-     * een token-fingerprint. Die vorm moet door hetzelfde frame passen.
-     */
     public function test_ondersteunt_een_call_zonder_account_of_connection(): void
     {
         $fingerprint = substr(hash('sha256', 'connect-test'), 0, 12);

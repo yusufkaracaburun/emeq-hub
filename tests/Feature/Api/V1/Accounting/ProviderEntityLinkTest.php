@@ -23,11 +23,6 @@ use Saloon\Http\Faking\MockResponse;
 use Tests\Concerns\BindsFakeAccountingReferences;
 use Tests\TestCase;
 
-/**
- * De tweede verdedigingslijn tegen dubbele boekingen. De idempotency-key dekt de
- * retry binnen zijn levensduur; deze tabel dekt de retry daarna — en de retry die
- * met een nieuwe key binnenkomt.
- */
 class ProviderEntityLinkTest extends TestCase
 {
     use BindsFakeAccountingReferences;
@@ -53,9 +48,7 @@ class ProviderEntityLinkTest extends TestCase
         parent::tearDown();
     }
 
-    /**
-     * @return array{0: Consumer, 1: Connection}
-     */
+    /** @return array{0: Consumer, 1: Connection} */
     private function consumerWithExactConnection(string $accountExternalId = 'school1'): array
     {
         $consumer = Consumer::factory()->create();
@@ -91,17 +84,11 @@ class ProviderEntityLinkTest extends TestCase
         ], $overrides);
     }
 
-    /**
-     * @param  array<string, mixed>  $payload
-     */
+    /** @param  array<string, mixed>  $payload */
     private function postDocument(Consumer $consumer, array $payload, ?string $idempotencyKey = null, string $accountExternalId = 'school1'): TestResponse
     {
         $token = $consumer->createToken('t', [TokenAbilities::EXACT_WRITE])->plainTextToken;
 
-        // De auth-manager is een singleton binnen één test en memoiseert de opgeloste
-        // user. Zonder dit komt een tweede request met een ánder token nog steeds als
-        // de eerste consumer binnen — waarmee elke test over twee tenants stilletjes
-        // over één tenant gaat. Zelfde reden als in IdempotencyTest.
         $this->app['auth']->forgetGuards();
 
         return $this->withHeader('Authorization', "Bearer {$token}")
@@ -110,13 +97,6 @@ class ProviderEntityLinkTest extends TestCase
             ->postJson('/v1/accounting/documents', $payload);
     }
 
-    /**
-     * Verkoop- en inkoopnummering lopen bij een consumer los van elkaar, dus
-     * external_id "INV-2026-001" kan allebei voorkomen. Zolang het documenttype
-     * niet in de identiteitssleutel zat, maakte de eerste boeking de tweede
-     * permanent onmogelijk: de claim botste, de fingerprint week af, en het
-     * antwoord was 409 "gebruik een nieuw external_id".
-     */
     public function test_a_sales_and_a_purchase_invoice_may_share_an_external_id(): void
     {
         MockClient::global([
@@ -186,10 +166,6 @@ class ProviderEntityLinkTest extends TestCase
         $this->assertDatabaseCount('provider_entity_links', 0);
     }
 
-    /**
-     * Dit is de kern van de fase. Zonder deze tabel boekt de tweede POST opnieuw
-     * omdat de idempotency-key hem niet meer kent.
-     */
     public function test_repost_after_key_loss_is_deduplicated_not_rebooked(): void
     {
         MockClient::global([
@@ -201,7 +177,6 @@ class ProviderEntityLinkTest extends TestCase
 
         $this->postDocument($consumer, $this->salesInvoicePayload())->assertStatus(201);
 
-        // Simuleer verval/opruiming van de idempotency-key.
         IdempotencyKey::query()->delete();
 
         $second = $this->postDocument($consumer, $this->salesInvoicePayload());
@@ -241,16 +216,6 @@ class ProviderEntityLinkTest extends TestCase
         MockClient::global()->assertSentCount(1);
     }
 
-    /**
-     * Twee administraties mogen hetzelfde factuurnummer voeren. De dedupe-sleutel
-     * bevat de connectie, dus dit is geen duplicaat.
-     *
-     * De tweede connectie krijgt expliciet een eigen `administratie_id`. De factory
-     * deelt er standaard één uit, waardoor deze opzet twee koppelingen naar dezelfde
-     * échte administratie maakte — precies het tegenovergestelde van wat de naam
-     * belooft, en sinds de kruis-connectie-guard ook een 409. Dat geval staat in
-     * {@see self::test_a_second_tenant_cannot_rebook_one_document_into_one_administration()}.
-     */
     public function test_dedupe_is_scoped_per_connection(): void
     {
         MockClient::global([
@@ -274,12 +239,6 @@ class ProviderEntityLinkTest extends TestCase
         $this->assertDatabaseCount('provider_entity_links', 2);
     }
 
-    /**
-     * Eén administratie mag door meerdere Consumers gekoppeld zijn — de boekhouder via
-     * de ene app, de ondernemer via de andere. De canonieke unique index sluit alleen
-     * per Connection af, dus zonder kruis-connectie-guard boeken die twee hetzelfde
-     * document tweemaal in hetzelfde grootboek.
-     */
     public function test_a_second_tenant_cannot_rebook_one_document_into_one_administration(): void
     {
         MockClient::global([
@@ -296,24 +255,15 @@ class ProviderEntityLinkTest extends TestCase
             ->assertStatus(409)
             ->assertJsonPath('error', 'document_already_posted');
 
-        // De partner is niet nog eens aangesproken: één push, niet twee.
         MockClient::global()->assertSentCount(1);
         $this->assertDatabaseCount('provider_entity_links', 1);
 
-        // Niets van de andere tenant lekt mee. De referentie is door een andere
-        // Consumer aangemaakt; wie hem nodig heeft leest hem in de administratie.
         $body = $response->json();
         $this->assertArrayNotHasKey('external_ref', $body);
         $this->assertArrayNotHasKey('external_number', $body);
         $this->assertStringNotContainsString('inv-guid-shared', $response->getContent());
     }
 
-    /**
-     * De keerzijde, en de reden dat de guard op de fingerprint beslist en niet op
-     * `external_id` alleen: twee apps met een eigen nummerreeks gebruiken allebei
-     * "INV-2026-001" voor een ánder document. Dat weigeren zou een echte boeking
-     * tegenhouden — een fout die erger is dan die hij voorkomt.
-     */
     public function test_a_different_document_sharing_a_number_still_books(): void
     {
         MockClient::global([
@@ -338,15 +288,6 @@ class ProviderEntityLinkTest extends TestCase
         $this->assertDatabaseCount('provider_entity_links', 2);
     }
 
-    /**
-     * Zonder administratie-id valt "dezelfde administratie" niet vast te stellen. Alle
-     * lege waarden op één hoop gooien zou losstaande administraties als één behandelen
-     * en echte boekingen weigeren — de guard hoort dan uit te staan, niet aan.
-     *
-     * Rechtstreeks op de recorder: Exact weigert een boeking zonder division, dus via
-     * de API is dit pad niet te bereiken. Een volgende provider die géén administratie-
-     * id levert komt er wél langs, en dan moet dit kloppen.
-     */
     public function test_an_empty_administration_id_disables_the_cross_connection_guard(): void
     {
         [, $first] = $this->consumerWithExactConnection('school1');
@@ -375,21 +316,12 @@ class ProviderEntityLinkTest extends TestCase
 
         $this->assertNull($recorder->findPostedOnSameAdministration($second, $document, $fingerprint));
 
-        // Controle dat de opzet verder klopt: mét een administratie-id vindt hij hem wél.
         $second->forceFill(['administratie_id' => '4471372'])->save();
         ProviderEntityLink::query()->where('connection_id', $first->getKey())->update(['administratie_id' => '4471372']);
 
         $this->assertNotNull($recorder->findPostedOnSameAdministration($second, $document, $fingerprint));
     }
 
-    /**
-     * De kruis-koppeling-lezing sluit het venster ná een geslaagde boeking, maar niet
-     * het venster eromheen: twee koppelingen op dezelfde administratie claimen elk hun
-     * eigen rij, zien beide nog niets, en boeken beide. De grendel dekt dat venster.
-     *
-     * Deterministische stand-in voor de race: de grendel staat al in handen van de
-     * andere koppeling, alsof die op dit moment aan het pushen is.
-     */
     public function test_a_simultaneous_push_from_another_connection_on_one_administration_is_refused(): void
     {
         MockClient::global([
@@ -414,22 +346,15 @@ class ProviderEntityLinkTest extends TestCase
             ->assertStatus(409)
             ->assertJsonPath('error', 'document_sync_in_progress');
 
-        // Transient, dus met een venster om op te pace'en — geen definitieve weigering.
         $this->assertSame(
             (string) IdempotencyKey::retryAfterCeilingSeconds(),
             $response->headers->get('Retry-After'),
         );
 
-        // Niet geboekt, en de eigen claim is vrijgegeven zodat de retry mag.
         MockClient::global()->assertNothingSent();
         $this->assertDatabaseCount('provider_entity_links', 0);
     }
 
-    /**
-     * Een grendel die na een mislukte push blijft staan, legt dit document in deze
-     * administratie stil tot de TTL (de lease, 900s) verloopt — een storing van één
-     * seconde wordt dan een kwartier.
-     */
     public function test_a_failed_push_releases_the_cross_connection_lock(): void
     {
         MockClient::global([
@@ -452,10 +377,6 @@ class ProviderEntityLinkTest extends TestCase
         $this->assertTrue($lock->get(), 'De grendel staat na een mislukte push nog vast.');
     }
 
-    /**
-     * Zonder administratie-id valt "dezelfde administratie" niet vast te stellen. Eén
-     * grendel over alle lege waarden heen zou losstaande administraties serialiseren.
-     */
     public function test_a_connection_without_an_administration_id_has_no_cross_connection_lock(): void
     {
         [, $connection] = $this->consumerWithExactConnection('school1');
@@ -470,9 +391,6 @@ class ProviderEntityLinkTest extends TestCase
         ));
     }
 
-    /**
-     * Een dedupe die niet in de audit landt, leest in ops als "er gebeurde niets".
-     */
     public function test_a_deduplicated_call_is_audited(): void
     {
         MockClient::global([
@@ -493,16 +411,10 @@ class ProviderEntityLinkTest extends TestCase
         ]);
     }
 
-    /**
-     * Het laatste herboek-venster: de partner commit, maar de respons bereikt ons niet.
-     * De Hub weet dan van niets en zou bij een retry opnieuw boeken. De probe vraagt na.
-     */
     public function test_a_booking_that_landed_despite_a_timeout_is_recovered(): void
     {
         MockClient::global([
-            // De boeking zelf krijgt geen antwoord…
             CreateSalesEntry::class => MockResponse::make([], 504),
-            // …maar bij navraag staat hij er wél.
             GetSalesEntries::class => MockResponse::make(['d' => ['results' => [[
                 'EntryID' => 'recovered-guid',
                 'EntryNumber' => 91,
@@ -519,7 +431,6 @@ class ProviderEntityLinkTest extends TestCase
             ->assertJsonPath('recovered', true)
             ->assertJsonPath('external_ref', 'recovered-guid');
 
-        // De link is alsnog vastgelegd, dus een volgende poging dedupliceert.
         $this->assertDatabaseHas('provider_entity_links', [
             'external_id' => 'INV-2026-001',
             'provider_entity_id' => 'recovered-guid',
@@ -528,10 +439,6 @@ class ProviderEntityLinkTest extends TestCase
         $this->assertDatabaseHas('pass_through_calls', ['upstream_error' => 'recovered_after_timeout']);
     }
 
-    /**
-     * Vindt de probe niets, dan blijft de fout staan. Doen alsof het goed ging zou
-     * erger zijn dan een terechte foutmelding.
-     */
     public function test_a_timeout_without_a_landed_booking_still_reports_the_failure(): void
     {
         MockClient::global([
@@ -544,24 +451,16 @@ class ProviderEntityLinkTest extends TestCase
 
         $response = $this->postDocument($consumer, $this->salesInvoicePayload());
 
-        // Welke 5xx precies hangt af van hoe de partner faalt; wat telt is dat de fout
-        // blijft staan en er niets is vastgelegd.
         $this->assertGreaterThanOrEqual(500, $response->status());
         $response->assertJsonPath('status', 'failed');
 
         $this->assertDatabaseCount('provider_entity_links', 0);
     }
 
-    /**
-     * Past de external_id niet in `YourRef`, dan draagt dat veld alleen het
-     * documentnummer. Daarop filteren zou een boeking van een andere relatie kunnen
-     * aanwijzen, dus probet de Hub dan niet en blijft de oorspronkelijke fout staan.
-     */
     public function test_a_uuid_key_is_not_probed_because_yourref_cannot_carry_it(): void
     {
         MockClient::global([
             CreateSalesEntry::class => MockResponse::make([], 504),
-            // Zou een treffer opleveren als er tóch op het nummer alleen werd gefilterd.
             GetSalesEntries::class => MockResponse::make(['d' => ['results' => [[
                 'EntryID' => 'andere-relatie-guid',
                 'EntryNumber' => 91,
@@ -583,10 +482,6 @@ class ProviderEntityLinkTest extends TestCase
         $this->assertDatabaseCount('provider_entity_links', 0);
     }
 
-    /**
-     * Een functionele weigering (422) is een definitief antwoord — daar valt niets na
-     * te vragen, en een probe zou alleen een nutteloze partner-call zijn.
-     */
     public function test_a_functional_rejection_is_not_probed(): void
     {
         MockClient::global([
@@ -601,11 +496,6 @@ class ProviderEntityLinkTest extends TestCase
         MockClient::global()->assertNotSent(GetSalesEntries::class);
     }
 
-    /**
-     * De idempotency-key beschermt alleen tegen retries mét dezelfde sleutel. Een client
-     * die per poging een verse UUID genereert omzeilt die volledig — dan is de claim op
-     * `external_id` het enige dat een dubbele boeking tegenhoudt.
-     */
     public function test_a_concurrent_attempt_with_a_different_key_is_refused(): void
     {
         MockClient::global([
@@ -615,8 +505,6 @@ class ProviderEntityLinkTest extends TestCase
 
         [$consumer, $connection] = $this->consumerWithExactConnection();
 
-        // Deterministische stand-in voor de race: de claim van de eerste poging staat er
-        // al, nog zonder partner-referentie.
         ProviderEntityLink::query()->create([
             'connection_id' => $connection->getKey(),
             'entity_type' => ProviderEntityLink::ENTITY_FINANCIAL_DOCUMENT,
@@ -635,11 +523,6 @@ class ProviderEntityLinkTest extends TestCase
         MockClient::global()->assertNothingSent();
     }
 
-    /**
-     * Dezelfde instructie als de idempotency-laag bij "er loopt al iets" (409):
-     * een consumer die op Retry-After pace't mag ook op déze 409 kunnen wachten
-     * in plaats van te pollen.
-     */
     public function test_a_concurrent_attempt_carries_a_retry_after_header(): void
     {
         MockClient::global([
@@ -665,11 +548,6 @@ class ProviderEntityLinkTest extends TestCase
             ->assertStatus(409)
             ->assertJsonPath('error', 'document_sync_in_progress');
 
-        // Niet het resterende lease-venster (hier 800s): dat beantwoordt "wanneer
-        // verklaren we de andere poging dood?", niet "wanneer mag je terugkomen?".
-        // Een normale boeking is in seconden klaar, dus het lease-venster als
-        // Retry-After legt dit document een kwartier stil bij een consumer die de
-        // header honoreert — en sinds hub-sdk 0.16.0 doet die dat.
         $this->assertSame(
             (string) IdempotencyKey::retryAfterCeilingSeconds(),
             $response->headers->get('Retry-After'),
@@ -678,11 +556,6 @@ class ProviderEntityLinkTest extends TestCase
         MockClient::global()->assertNothingSent();
     }
 
-    /**
-     * Vlak voor het einde van de lease is het resterende venster kleiner dan het
-     * plafond, en dan wint het venster: verder vooruit wijzen dan de claim zelf
-     * bestaat heeft geen zin.
-     */
     public function test_retry_after_never_points_past_the_end_of_the_claim(): void
     {
         MockClient::global([
@@ -710,9 +583,6 @@ class ProviderEntityLinkTest extends TestCase
         $this->assertSame('3', $response->headers->get('Retry-After'));
     }
 
-    /**
-     * Een claim van een gecrashte worker mag dit document niet voorgoed blokkeren.
-     */
     public function test_a_stale_claim_is_taken_over(): void
     {
         MockClient::global([
@@ -738,10 +608,6 @@ class ProviderEntityLinkTest extends TestCase
         $this->assertSame('inv-takeover', ProviderEntityLink::query()->sole()->provider_entity_id);
     }
 
-    /**
-     * Eén storing mag dit external_id niet permanent blokkeren — geldt voor élke
-     * faalgrond, ook een mapping-fout die niet eens bij de partner aankomt.
-     */
     public function test_a_failed_attempt_releases_the_claim(): void
     {
         MockClient::global([
@@ -754,7 +620,6 @@ class ProviderEntityLinkTest extends TestCase
         $this->postDocument($consumer, $this->salesInvoicePayload())->assertStatus(422);
         $this->assertDatabaseCount('provider_entity_links', 0);
 
-        // En dus mag een volgende poging gewoon boeken.
         MockClient::destroyGlobal();
         MockClient::global([
             CreateSalesEntry::class => MockResponse::make(['d' => ['ID' => 'inv-retry']], 201),
@@ -763,9 +628,6 @@ class ProviderEntityLinkTest extends TestCase
         $this->postDocument($consumer, $this->salesInvoicePayload())->assertStatus(201);
     }
 
-    /**
-     * Een mapping-fout raakt de partner niet eens, maar liet de claim eerder wél staan.
-     */
     public function test_a_mapping_failure_also_releases_the_claim(): void
     {
         $this->bindFakeReferences();

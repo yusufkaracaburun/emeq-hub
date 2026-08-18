@@ -10,9 +10,7 @@ use PHPUnit\Framework\TestCase;
 
 class CompletenessValidatorTest extends TestCase
 {
-    /**
-     * @return array<string, mixed>
-     */
+    /** @return array<string, mixed> */
     private function document(): array
     {
         return [
@@ -37,8 +35,6 @@ class CompletenessValidatorTest extends TestCase
 
     public function test_an_empty_draft_is_not_silently_bookable(): void
     {
-        // The dry-run answered `valid: true` with zero findings for `{}` — the
-        // one shape that certainly does not book.
         $findings = (new CompletenessValidator)->validate([]);
 
         $bySeverity = [];
@@ -47,21 +43,16 @@ class CompletenessValidatorTest extends TestCase
             $bySeverity[$finding->severity->value][] = $finding->code;
         }
 
-        // Nothing to book at all: an error, so `valid` turns false.
         $this->assertSame(
             ['document.type.missing', 'document.party.missing', 'document.lines.missing'],
             $bySeverity['error'] ?? [],
         );
 
-        // Fields a consumer still supplies at booking time — the booking is
-        // refused without them, which is a warning, not a broken draft.
         $this->assertSame(
             ['document.external_id.missing', 'document.issue_date.missing'],
             $bySeverity['warning'] ?? [],
         );
 
-        // Not blocking: the consumer fills these in during the booking review step,
-        // regardless of what the message text implies.
         foreach ($findings as $finding) {
             if ($finding->severity === Severity::Warning) {
                 $this->assertFalse($finding->blocking, "{$finding->code} should not be blocking");
@@ -73,9 +64,6 @@ class CompletenessValidatorTest extends TestCase
 
     public function test_a_draft_without_the_fields_added_at_booking_time_stays_valid(): void
     {
-        // The OCR flow validates before external_id and issue_date exist. Those
-        // may not fail the draft, or "Scan & herstel" reports a broken document
-        // on every first pass.
         $document = $this->document();
         unset($document['external_id'], $document['issue_date']);
 
@@ -142,7 +130,6 @@ class CompletenessValidatorTest extends TestCase
 
     public function test_a_missing_party_role_is_a_warning_and_not_blocking(): void
     {
-        // The role is still supplied at booking time, like external_id/issue_date.
         $document = $this->document();
         unset($document['party']['role']);
 
@@ -173,7 +160,6 @@ class CompletenessValidatorTest extends TestCase
 
     public function test_a_missing_party_kind_is_a_warning_and_not_blocking(): void
     {
-        // The kind is still supplied at booking time, like role/external_id.
         $document = $this->document();
         unset($document['party']['kind']);
 
@@ -200,8 +186,6 @@ class CompletenessValidatorTest extends TestCase
 
     public function test_a_company_party_without_chamber_of_commerce_or_vat_number_is_a_warning(): void
     {
-        // The resolver can only match a company on a strong key; without one, the
-        // booking is refused — but a draft may legitimately not have it yet.
         $document = $this->document();
         unset($document['party']['chamber_of_commerce']);
 
@@ -226,7 +210,6 @@ class CompletenessValidatorTest extends TestCase
 
     public function test_a_person_party_without_chamber_of_commerce_or_vat_number_produces_no_identifier_finding(): void
     {
-        // person has no strong key by design (see the ADR) — nothing to warn about.
         $document = $this->document();
         unset($document['party']['chamber_of_commerce']);
         $document['party']['kind'] = 'person';
@@ -238,9 +221,6 @@ class CompletenessValidatorTest extends TestCase
 
     public function test_an_ocr_draft_summary_is_not_mistaken_for_a_document(): void
     {
-        // The dry-run also accepts an OCR summary (subtotal/tax_total/total).
-        // Those carry no lines yet, and the report has to say so rather than
-        // pass the draft as bookable.
         $findings = (new CompletenessValidator)->validate([
             'subtotal' => 100.0,
             'tax_total' => 21.0,

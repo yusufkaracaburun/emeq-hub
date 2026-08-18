@@ -15,18 +15,6 @@ use Mollie\Api\Exceptions\ApiException as MollieApiException;
 use Mollie\Api\Exceptions\NotFoundException as MollieNotFoundException;
 use Mollie\Api\Resources\Subscription as MollieSubscription;
 
-/**
- * Single-entry-point voor alle Mollie Subscription-flows + Hub-state-machine
- * transitions (07-CONTEXT.md D-13).
- *
- * Invariants:
- *  - Vóór elke Mollie-call: $this->context->set($connection) (D-13).
- *  - Elke state-flip via $this->transitionTo() (D-04 + D-22 logging).
- *  - State-machine bypass (direct $sub->status = '...') is verboden — manager
- *    is single-entry-point (T-07-03-03).
- *  - syncFromMollie() vangt NotFoundException → state Unknown (D-17).
- *  - recordPaymentEvent() met mandate_invalid → Active → Paused (D-16, SC-2).
- */
 class AccountSubscriptionManager
 {
     public function __construct(
@@ -34,9 +22,6 @@ class AccountSubscriptionManager
     ) {}
 
     /**
-     * Persist een pending Hub-row → roep Mollie aan → transitioneer naar
-     * Active + vul mollie_subscription_id.
-     *
      * @param  string|null  $idempotencyKey  Forward't via MollieApiClient::setIdempotencyKey()
      *                                       (D-14, T-07-03-01).
      *
@@ -89,10 +74,6 @@ class AccountSubscriptionManager
         return $sub->fresh();
     }
 
-    /**
-     * Cancel Mollie-side (alleen als mollie_subscription_id niet null) +
-     * transitioneer naar Canceled + zet canceled_at.
-     */
     public function cancel(AccountSubscription $sub): void
     {
         if ($sub->mollie_subscription_id !== null) {
@@ -107,30 +88,18 @@ class AccountSubscriptionManager
         $this->transitionTo($sub, SubscriptionStatus::Canceled, ['reason' => 'manual_cancel']);
     }
 
-    /**
-     * Hub-only: Active → Paused (geen Mollie-call). Plan 07-CONTEXT.md D-04
-     * + D-16 — gebruikt wanneer Consumer weet dat het mandaat ongeldig is.
-     */
     public function pause(AccountSubscription $sub, string $reason): void
     {
         $sub->paused_at = now();
         $this->transitionTo($sub, SubscriptionStatus::Paused, ['reason' => $reason]);
     }
 
-    /**
-     * Hub-only: Paused → Active (geen Mollie-call). Reset paused_at.
-     */
     public function resume(AccountSubscription $sub): void
     {
         $sub->paused_at = null;
         $this->transitionTo($sub, SubscriptionStatus::Active, ['reason' => 'manual_resume']);
     }
 
-    /**
-     * GET subscription via Mollie SDK; map remote status naar Hub-state. Bij
-     * NotFoundException → Unknown (D-17). Onbekende remote-status logt en
-     * behoudt huidige state.
-     */
     public function syncFromMollie(AccountSubscription $sub): void
     {
         if ($sub->mollie_subscription_id === null) {
@@ -181,17 +150,7 @@ class AccountSubscriptionManager
         $this->transitionTo($sub, $mapped, ['reason' => 'mollie_resync']);
     }
 
-    /**
-     * Webhook-handler-entry: inspecteer Mollie Payment-payload + flip state.
-     *
-     * - status='failed' + details.failureReason='mandate_invalid' → Active →
-     *   Paused (D-16, SC-2). last_payment_status = 'failed_mandate_invalid'.
-     * - status='failed' (andere reason) → bewaar reason in last_payment_status;
-     *   geen state-flip.
-     * - status='paid' → last_payment_status='paid' + last_webhook_event_at.
-     *
-     * @param  array<string, mixed>  $payment
-     */
+    /** @param  array<string, mixed>  $payment */
     public function recordPaymentEvent(AccountSubscription $sub, array $payment): void
     {
         $status = is_string($payment['status'] ?? null) ? $payment['status'] : null;
@@ -231,9 +190,7 @@ class AccountSubscriptionManager
         $sub->save();
     }
 
-    /**
-     * @param  array<string, mixed>  $context
-     */
+    /** @param  array<string, mixed>  $context */
     private function transitionTo(
         AccountSubscription $sub,
         SubscriptionStatus $to,
@@ -255,9 +212,7 @@ class AccountSubscriptionManager
         ], $context));
     }
 
-    /**
-     * @return array<string, mixed>
-     */
+    /** @return array<string, mixed> */
     private function buildMollieCreateBody(CreateAccountSubscriptionDto $dto): array
     {
         $body = [

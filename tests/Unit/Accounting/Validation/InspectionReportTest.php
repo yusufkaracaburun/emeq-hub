@@ -31,11 +31,6 @@ class InspectionReportTest extends TestCase
         $this->assertTrue($report->valid());
     }
 
-    /**
-     * `valid` belooft de consumer dat de boeking daarna niet alsnog met een 422 strandt.
-     * Een blokkerende warning (bv. `exact.vat_code.unmapped`) doet dat wél, dus telt die
-     * net zo hard mee als een error.
-     */
     public function test_invalid_when_a_warning_blocks_the_booking(): void
     {
         $report = new InspectionReport([
@@ -62,8 +57,6 @@ class InspectionReportTest extends TestCase
 
     public function test_blocking_count_is_independent_of_severity(): void
     {
-        // Een niet-blokkerende warning naast een blokkerende: `blocking` telt op basis van
-        // het veld, niet van severity.
         $report = new InspectionReport([
             new Finding('x.warn.blocking', Severity::Warning, blocking: true, path: 'a', message: 'm'),
             new Finding('x.warn.advisory', Severity::Warning, blocking: false, path: 'b', message: 'm'),

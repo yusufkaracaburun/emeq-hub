@@ -36,22 +36,7 @@ class ConsumerResource extends Resource
 
     public const ISSUE_PAT_ACTION = 'issuePat';
 
-    /**
-     * Preset-shape per D-03: slug-keyed map met group + label + abilities.
-     * Unie van alle preset-abilities + PAT_CUSTOM_ONLY MOET TokenAbilities::all() afdekken
-     * (regressie-vangnet via PatAbilityPresetsTest).
-     *
-     * `koppelen + read/write` bestaat omdat dát de normale consumer-token is: eerst de
-     * OAuth-flow starten (integrations:manage), daarna calls doen. Zonder die preset moest
-     * je voor het meest voorkomende geval naar Custom.
-     *
-     * Voor boekhouding staat de provider-onafhankelijke groep bovenaan: die tokens
-     * noemen geen provider en blijven daarom geldig als een eindgebruiker van Exact
-     * naar een ander pakket verhuist. De `exact-*`/`snelstart-*`-presets blijven voor
-     * de ruwe pass-through, die wél providerspecifiek is.
-     *
-     * @var array<string, array{group: string, label: string, abilities: list<string>}>
-     */
+    /** @var array<string, array{group: string, label: string, abilities: list<string>}> */
     public const PAT_PRESETS = [
         'accounting-read' => [
             'group' => 'Boekhouding (provider-onafhankelijk)',
@@ -164,11 +149,7 @@ class ConsumerResource extends Resource
         ],
     ];
 
-    /**
-     * Abilities die NIET in een preset zitten en alleen via custom-mode uitgereikt worden.
-     *
-     * @var list<string>
-     */
+    /** @var list<string> */
     public const PAT_CUSTOM_ONLY = [
         TokenAbilities::BILLING_READ,
         TokenAbilities::BILLING_WRITE,
@@ -224,9 +205,7 @@ class ConsumerResource extends Resource
         return ConsumerInfolist::configure($schema);
     }
 
-    /**
-     * @return list<Section>
-     */
+    /** @return list<Section> */
     public static function statusStripSchema(Consumer $record): array
     {
         return StatusStrip::make([
@@ -255,7 +234,6 @@ class ConsumerResource extends Resource
                     ->sortable(),
             ])
             ->filters([
-                //
             ])
             ->recordUrl(fn (Consumer $record): string => self::getUrl('view', ['record' => $record]))
             ->recordActions([
@@ -281,19 +259,12 @@ class ConsumerResource extends Resource
     public static function getPages(): array
     {
         return [
-            // Geen 'create': een Consumer ontstaat alleen via de onboard-wizard, die
-            // ook de PAT en app_url zet. Een kale create-route leverde een Consumer op
-            // die niets kon koppelen.
             'index' => ListConsumers::route('/'),
             'view' => ViewConsumer::route('/{record}'),
             'edit' => EditConsumer::route('/{record}/edit'),
         ];
     }
 
-    /**
-     * Issue-PAT table-action (D-03): modal met preset-radio + custom-mode-CheckboxList.
-     * Submit → $consumer->createToken() + chain naar viewPatToken-action voor copy-paste UX.
-     */
     private static function issuePatAction(): Action
     {
         return Action::make(self::ISSUE_PAT_ACTION)
@@ -325,9 +296,6 @@ class ConsumerResource extends Resource
 
                 $result = $record->createToken($data['name'], $abilities);
 
-                // D-9 (WR-06): plain token gaat via server-side Cache flash naar de blade-view.
-                // De blade Cache::pull't beide keys one-shot bij de eerstvolgende render —
-                // het token verschijnt nooit in Livewire's wire:snapshot of in Alpine x-data.
                 $livewireId = $livewire->getId();
                 Cache::put("pat-flash:{$livewireId}", $result->plainTextToken, now()->addSeconds(60));
                 Cache::put("pat-flash-name:{$livewireId}", $data['name'], now()->addSeconds(60));
@@ -339,12 +307,7 @@ class ConsumerResource extends Resource
             });
     }
 
-    /**
-     * Gegroepeerd per provider — de vlakke lijst liet je zoeken tussen negen opties
-     * die per ability geordend waren in plaats van per taak.
-     *
-     * @return array<string, array<string, string>>
-     */
+    /** @return array<string, array<string, string>> */
     public static function presetOptions(): array
     {
         $options = [];
@@ -356,9 +319,7 @@ class ConsumerResource extends Resource
         return $options;
     }
 
-    /**
-     * @return array<string, string>
-     */
+    /** @return array<string, string> */
     private static function customAbilitiesOptions(): array
     {
         $options = [];

@@ -15,14 +15,6 @@ use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
-/**
- * Plan 09-06 Task 3 — no-secret-leak feature-test.
- *
- * Bewijst (T-09-06-01): GEEN plain-text waarde van
- *  access_token / refresh_token / client_key / subscription_key
- * verschijnt in Filament-render — HTTP-response én Livewire-HTML, voor
- * zowel List- als View-pagina.
- */
 class ConnectionFingerprintTest extends TestCase
 {
     use RefreshDatabase;
@@ -52,9 +44,7 @@ class ConnectionFingerprintTest extends TestCase
         return $user;
     }
 
-    /**
-     * @return array{0: Connection, 1: Connection}
-     */
+    /** @return array{0: Connection, 1: Connection} */
     private function seedTwoConnections(): array
     {
         $consumer = Consumer::factory()->create();

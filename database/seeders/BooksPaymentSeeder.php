@@ -9,12 +9,6 @@ use App\Books\Models\Payment;
 use App\Books\Services\PaymentService;
 use Illuminate\Database\Seeder;
 
-/*
- * Demo-betalingen: een deelbetaling op een geboekte verkoopfactuur (toont
- * openstaand-saldo) + een volledige betaling op een geboekte inkoopfactuur
- * (status → betaald). Idempotent (skipt zodra er betalingen zijn). Vereist een
- * bankrekening + geboekte documenten; zonder die blijft dit een no-op.
- */
 class BooksPaymentSeeder extends Seeder
 {
     public function run(): void

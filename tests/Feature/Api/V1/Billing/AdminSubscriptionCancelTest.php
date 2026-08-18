@@ -45,8 +45,6 @@ class AdminSubscriptionCancelTest extends TestCase
         config(['billing.admin_allowlist' => [$admin->id]]);
         $token = $admin->createToken('admin', [TokenAbilities::BILLING_WRITE])->plainTextToken;
 
-        // Een subscription van een ander morph-type dat dezelfde numerieke id deelt
-        // mag niet via de Consumer-admin-endpoint te annuleren zijn.
         $id = DB::table('subscriptions')->insertGetId([
             'name' => 'main',
             'plan' => 'pro',

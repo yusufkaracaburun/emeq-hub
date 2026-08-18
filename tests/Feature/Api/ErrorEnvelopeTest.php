@@ -16,10 +16,6 @@ use Saloon\Http\Faking\MockClient;
 use Saloon\Http\Faking\MockResponse;
 use Tests\TestCase;
 
-/**
- * Elke `/v1/*`-fout draagt dezelfde envelope, ongeacht welke van de ~50 plekken hem
- * produceerde — inclusief de framework-fouten die er nooit één hadden.
- */
 class ErrorEnvelopeTest extends TestCase
 {
     use RefreshDatabase;
@@ -48,10 +44,6 @@ class ErrorEnvelopeTest extends TestCase
             ->assertJsonStructure(['error', 'category', 'retryable', 'message', 'request_id']);
     }
 
-    /**
-     * De 401 droeg historisch `code` in plaats van `error`. Die sleutel blijft staan
-     * voor wie erop leest, maar `error` staat er nu ook.
-     */
     public function test_the_legacy_code_key_is_preserved_next_to_error(): void
     {
         $this->getJson('/v1/ping')
@@ -60,10 +52,6 @@ class ErrorEnvelopeTest extends TestCase
             ->assertJsonPath('error', 'unauthenticated');
     }
 
-    /**
-     * `abort_unless(..., 403, 'insufficient_ability')` leverde een kale `{message}`.
-     * Een consumer die op `error` leest kreeg daar niets.
-     */
     public function test_an_abort_based_403_now_carries_an_error_key(): void
     {
         $consumer = $this->consumerWithExactConnection();
@@ -84,9 +72,6 @@ class ErrorEnvelopeTest extends TestCase
             ->assertJsonPath('category', ErrorCode::AuthorizationError->value);
     }
 
-    /**
-     * Framework-validatie had helemaal geen `error`-sleutel.
-     */
     public function test_a_validation_failure_carries_the_envelope(): void
     {
         $consumer = $this->consumerWithExactConnection();
@@ -102,16 +87,11 @@ class ErrorEnvelopeTest extends TestCase
             ->assertJsonStructure(['error', 'category', 'request_id', 'errors']);
     }
 
-    /**
-     * De categorie volgt de betekenis van de code, niet alleen de status: dit is een
-     * 422 die eigenlijk "koppeling ontbreekt" betekent.
-     */
     public function test_a_mapping_failure_is_categorised_as_a_missing_reference(): void
     {
         $consumer = $this->consumerWithExactConnection();
         $token = $consumer->createToken('t', [TokenAbilities::EXACT_WRITE])->plainTextToken;
 
-        // Geen division op de Connection → AccountingMappingException → 422 mapping_failed.
         Connection::query()->update(['administratie_id' => null]);
 
         $this->withHeader('Authorization', "Bearer {$token}")
@@ -130,11 +110,6 @@ class ErrorEnvelopeTest extends TestCase
             ->assertJsonPath('retryable', false);
     }
 
-    /**
-     * `retryable` bestaat zodat een consumer niet zelf een lijst foutcodes hoeft bij
-     * te houden. Een storing bij de partner is het opnieuw proberen waard; dezelfde
-     * boeking nog eens sturen na een inhoudelijke weigering niet.
-     */
     public function test_a_provider_outage_is_reported_as_retryable(): void
     {
         config([
@@ -170,9 +145,6 @@ class ErrorEnvelopeTest extends TestCase
         $this->assertSame('envelope-test-0001', $response->headers->get('X-Request-Id'));
     }
 
-    /**
-     * Alleen fouten worden aangeraakt; een geslaagde respons blijft precies wat hij was.
-     */
     public function test_a_successful_response_is_left_alone(): void
     {
         $consumer = Consumer::factory()->create();
@@ -185,10 +157,6 @@ class ErrorEnvelopeTest extends TestCase
         $this->assertArrayNotHasKey('error', $response->json());
     }
 
-    /**
-     * De envelope wordt over foutresponses heen gelegd; dat mag nooit een pad worden
-     * waarlangs het bearer-token of een partner-secret naar buiten komt.
-     */
     public function test_the_envelope_never_echoes_credentials(): void
     {
         $consumer = $this->consumerWithExactConnection();
@@ -212,11 +180,6 @@ class ErrorEnvelopeTest extends TestCase
         $this->assertStringNotContainsString('Authorization', $body);
     }
 
-    /**
-     * De pass-through-controllers geven `response($body, $status)` terug — een gewone
-     * Response met een JSON-content-type, geen JsonResponse. Dat is het merendeel van
-     * het foutverkeer; die overslaan zou de envelope grotendeels leeg laten lopen.
-     */
     public function test_a_pass_through_error_carries_the_envelope_too(): void
     {
         config([
@@ -245,10 +208,6 @@ class ErrorEnvelopeTest extends TestCase
         MockClient::destroyGlobal();
     }
 
-    /**
-     * Een JSON-lijst zou door de spread in een object veranderen (`{"0":…}`). Dat is
-     * geen envelope maar een vormwijziging, dus die body blijft ongemoeid.
-     */
     public function test_a_list_body_is_left_untouched(): void
     {
         Route::middleware('api')->get('/v1/__test_list_error', fn () => response()->json(['a', 'b'], 422));
@@ -259,9 +218,6 @@ class ErrorEnvelopeTest extends TestCase
         $this->assertSame(['a', 'b'], $response->json());
     }
 
-    /**
-     * De envelope hoort alleen bij de consumer-API, niet bij de publieke webpagina's.
-     */
     public function test_non_v1_routes_are_untouched(): void
     {
         $this->getJson('/webhooks/exact')->assertStatus(405);

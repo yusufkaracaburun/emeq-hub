@@ -17,10 +17,6 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 
-/*
- * Klanten (debiteuren) van emeq's eigen boekhouding. Een klant mag optioneel naar
- * een Hub-Consumer wijzen — zie Client::consumer().
- */
 class ClientResource extends Resource
 {
     use GatedToBoekhouding;

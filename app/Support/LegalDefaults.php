@@ -4,11 +4,6 @@ declare(strict_types=1);
 
 namespace App\Support;
 
-/**
- * Default-teksten voor de publieke juridische pagina's (privacy + voorwaarden).
- * Gedeelde bron zodat zowel de settings-migraties (seed + refresh) als een reset
- * dezelfde markdown gebruiken. De live tekst is daarna beheerbaar via de admin.
- */
 final class LegalDefaults
 {
     public const UPDATED_AT = '2026-07-20';

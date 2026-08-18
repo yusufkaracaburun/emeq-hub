@@ -11,13 +11,6 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Concerns\StubsMollieClient;
 use Tests\TestCase;
 
-/**
- * Bewijst D-05 audit-row-shape + geen secrets in audit. Vangt de drie
- * 5b-REVIEW-blockers af op de Mollie-pad:
- *   - path = template ZONDER query-string
- *   - query_keys-kolom bevat alleen keys, geen values
- *   - request_fingerprint = NULL bij empty body
- */
 class MolliePassThroughAuditTest extends TestCase
 {
     use RefreshDatabase;
@@ -57,7 +50,6 @@ class MolliePassThroughAuditTest extends TestCase
         $this->assertNotNull($row);
         $this->assertSame('/v2/payments/{id}', $row->path);
         $this->assertNotNull($row->query_keys);
-        // Comma-separated keys; geen waardes.
         $keys = explode(',', $row->query_keys);
         $this->assertEqualsCanonicalizing(['include', 'embed'], $keys);
         $this->assertStringNotContainsString('details', $row->query_keys);
@@ -68,17 +60,8 @@ class MolliePassThroughAuditTest extends TestCase
     {
         [, $token] = $this->setupMollieConsumer([TokenAbilities::MOLLIE_WRITE]);
 
-        // Stub gooit ValidationException (Mollie zou ook 422 op empty payload geven).
         $this->bindMollieStub(fn () => new ValidationException(message: 'description is required', field: 'description'));
 
-        // Edge-validatie van CreatePaymentRequest faalt op required-velden,
-        // wat een 422 oplevert ZONDER controller-call. Om in de
-        // AbstractMolliePassThroughController-audit-pad te landen passeren
-        // we de Form Request via een ander minimaal-aanvaardbaar-shape:
-        // we sturen een payload met description en amount maar zorgen dat
-        // de Mollie-stub faalt. Body is dus NIET leeg — fingerprint moet
-        // hash zijn. Voor de NULL-fingerprint-case is `GET` zonder body
-        // de juiste reproductie.
         $this->bindMollieStub(fn (string $op, mixed $arg) => $this->makePayment([
             'id' => $arg,
             'status' => 'paid',
@@ -109,7 +92,6 @@ class MolliePassThroughAuditTest extends TestCase
         $row = PassThroughCall::query()->latest('id')->first();
         $this->assertNotNull($row);
 
-        // Scan alle string-attributes — geen kolom mag de raw access-token bevatten.
         foreach ($row->getAttributes() as $col => $value) {
             if (! is_string($value)) {
                 continue;

@@ -17,12 +17,6 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 
-/*
- * Grootboek (chart of accounts) van de Books-module. Onderdeel van de
- * Boekhouding-cluster (/admin/boekhouding); toegang via GatedToBoekhouding.
- * Model = App\Books\Models\Account (de grootboekrekening), niet te verwarren
- * met de Hub's consumer-Account.
- */
 class LedgerAccountResource extends Resource
 {
     use GatedToBoekhouding;

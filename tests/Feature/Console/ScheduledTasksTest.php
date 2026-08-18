@@ -8,9 +8,7 @@ use Tests\TestCase;
 
 class ScheduledTasksTest extends TestCase
 {
-    /**
-     * @return list<string>
-     */
+    /** @return list<string> */
     private function scheduledCommands(): array
     {
         return collect(app(Schedule::class)->events())

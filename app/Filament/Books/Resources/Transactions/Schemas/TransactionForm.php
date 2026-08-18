@@ -13,11 +13,6 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
 
-/*
- * Boekings-form. Alleen de standaard cash-types (deposit/withdrawal) — die post
- * de LedgerPoster automatisch. `amount` staat hier in euro's; CreateTransaction
- * zet het om naar integer-centen (de opslag-eenheid op het model).
- */
 class TransactionForm
 {
     public static function configure(Schema $schema): Schema

@@ -8,10 +8,6 @@ use App\Accounting\Validation\Contracts\DocumentValidator;
 use App\Accounting\Validation\Finding;
 use App\Accounting\Validation\Severity;
 
-/**
- * Detecteert vreemde valuta: alles anders dan de basisvaluta (EUR) wordt als info
- * geflagd zodat de consumer een koers/valuta-keuze kan tonen vóór het boeken.
- */
 final class CurrencyValidator implements DocumentValidator
 {
     private const BASE = 'EUR';
@@ -33,7 +29,7 @@ final class CurrencyValidator implements DocumentValidator
         return [new Finding(
             code: 'currency.foreign',
             severity: Severity::Info,
-            blocking: false, // elke 3-letter code passeert `currency` bij het boeken
+            blocking: false,
             path: 'currency',
             message: "Deze factuur staat in {$normalized}, niet in euro's. Controleer de valuta en de gehanteerde koers vóór het boeken.",
             current: $currency,

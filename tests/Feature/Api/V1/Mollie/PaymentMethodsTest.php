@@ -9,9 +9,6 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Concerns\StubsMollieClient;
 use Tests\TestCase;
 
-/**
- * MOLL-03 PaymentMethods — list-only via Mollie SDK pass-through.
- */
 class PaymentMethodsTest extends TestCase
 {
     use RefreshDatabase;

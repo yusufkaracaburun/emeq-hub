@@ -9,11 +9,6 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
-/**
- * Regressie: dev-seeder moet super-admin én staff de `view-pass-through-calls`
- * permission geven, zodat de PassThroughCallResource zichtbaar is na een kale
- * `migrate:fresh --seed`. Dreef eerder weg van EmeqStaffSeeder::SHARED_PERMISSIONS.
- */
 class DatabaseSeederTest extends TestCase
 {
     use RefreshDatabase;

@@ -16,14 +16,6 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Testing\TestResponse;
 use Tests\TestCase;
 
-/**
- * Het scenario van provider #2: één Account met twee boekhoudkoppelingen.
- *
- * De resolutie deed `->first()` zonder `orderBy`, dus met twee kandidaten koos de
- * rij-volgorde van Postgres welk pakket de boeking kreeg — niet zichtbaar voor de
- * consumer en niet stabiel tussen requests. Met één geregistreerde accounting-
- * provider viel dat niet op; op de dag dat de tweede zich registreert wel.
- */
 class MultipleAccountingConnectionsTest extends TestCase
 {
     use RefreshDatabase;
@@ -32,7 +24,6 @@ class MultipleAccountingConnectionsTest extends TestCase
     {
         parent::setUp();
 
-        // Tweede accounting-provider, zodat `registry->providers()` er twee kent.
         app(AccountingTargetRegistry::class)->register(
             Provider::Snelstart->value,
             SecondAccountingTarget::class,
@@ -47,8 +38,6 @@ class MultipleAccountingConnectionsTest extends TestCase
             ->assertStatus(409)
             ->assertJsonPath('error', 'multiple_accounting_connections');
 
-        // De consumer krijgt genoeg terug om een keuze te tonen: de sleutel om mee te
-        // sturen, plus waar die koppeling naartoe wijst.
         $this->assertSame(
             ['exact', 'snelstart'],
             array_column($response->json('connections'), 'provider'),
@@ -58,10 +47,6 @@ class MultipleAccountingConnectionsTest extends TestCase
         }
     }
 
-    /**
-     * De sleutel is de koppeling zelf, niet het pakket eronder. Een consumer van de
-     * Unified API hoeft niet te weten dat er "exact" of "moneybird" achter zit.
-     */
     public function test_the_connection_header_selects_the_connection(): void
     {
         $consumer = $this->consumerWithTwoConnections();
@@ -85,10 +70,6 @@ class MultipleAccountingConnectionsTest extends TestCase
             ->assertJsonPath('error', 'connection_not_found');
     }
 
-    /**
-     * De keten blijft strikt: een geldig connection_id van een ánder Account is voor
-     * deze Consumer even onvindbaar als een verzonnen id.
-     */
     public function test_a_connection_id_of_another_consumer_is_not_reachable(): void
     {
         $consumer = $this->consumerWithTwoConnections();
@@ -102,9 +83,6 @@ class MultipleAccountingConnectionsTest extends TestCase
             ->assertJsonPath('error', 'connection_not_found');
     }
 
-    /**
-     * Het normale geval mag niet duurder worden: één koppeling blijft impliciet.
-     */
     public function test_a_single_connection_still_resolves_without_the_header(): void
     {
         $consumer = Consumer::factory()->create();
@@ -145,9 +123,6 @@ class MultipleAccountingConnectionsTest extends TestCase
     }
 }
 
-/**
- * Minimale tweede adapter — deze test gaat over connectie-keuze, niet over boeken.
- */
 final class SecondAccountingTarget implements AccountingTarget
 {
     public function push(FinancialDocument $document, Connection $connection): AccountingResult

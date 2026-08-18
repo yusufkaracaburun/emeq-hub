@@ -9,12 +9,6 @@ use App\Accounting\Read\ReadPage;
 use App\Accounting\Read\ReadQuery;
 use App\Models\Connection;
 
-/**
- * Capability `accounting.bank_statements.read`.
- *
- * Bestaat omdat de Hub op bank- en kas-webhooks abonneert: zonder lees-pad is zo'n
- * notificatie een seintje waar de ontvanger niets mee kan.
- */
 interface ReadsBankStatements
 {
     /**

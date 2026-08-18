@@ -12,15 +12,6 @@ use App\Books\Support\VatLedgerAccounts;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 
-/*
- * Boekt een verkoopfactuur naar het grootboek via een memoriaal-Transaction
- * (type=journal) als carrier — het bestaande JournalEntry→Transaction-spoor,
- * géén schema-uitbreiding. De boeking is per constructie in balans:
- *   debet 1300 Debiteuren            = factuur-totaal (incl. BTW)
- *   credit 8000/8010/8020 Omzet      = subtotaal per BTW-tarief
- *   credit 1620/1621 Af te dragen BTW = BTW per tarief
- * Σ credits = Σ subtotalen + Σ BTW = totaal = debet.
- */
 class InvoicePoster
 {
     private const RECEIVABLE = '1300';

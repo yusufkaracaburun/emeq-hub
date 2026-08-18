@@ -10,14 +10,10 @@ class CreateRefundRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        // Auth gebeurt op middleware-niveau (auth:sanctum + resolve.mollie.account
-        // + ability-guard in AbstractMolliePassThroughController).
         return true;
     }
 
-    /**
-     * @return array<string, array<int, mixed>>
-     */
+    /** @return array<string, array<int, mixed>> */
     public function rules(): array
     {
         return [

@@ -6,9 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 class CreateRefundsTable extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('refunds', function (Blueprint $table) {
@@ -25,9 +22,6 @@ class CreateRefundsTable extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('refunds');

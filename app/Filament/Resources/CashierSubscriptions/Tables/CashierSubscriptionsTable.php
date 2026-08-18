@@ -60,10 +60,6 @@ class CashierSubscriptionsTable
             ->recordUrl(fn (Subscription $record): string => CashierSubscriptionResource::getUrl('view', ['record' => $record]));
     }
 
-    /**
-     * Mirror van Cashier's eigen accessor-methods op de Subscription-model:
-     * onGracePeriod() > onTrial() > ended() > active() — exclusieve mapping.
-     */
     private static function deriveStatus(Subscription $record): string
     {
         if ($record->onTrial()) {
@@ -85,11 +81,6 @@ class CashierSubscriptionsTable
         return 'unknown';
     }
 
-    /**
-     * Query-equivalent van Cashier's accessors voor SelectFilter.
-     * Cashier-Mollie v2 heeft geen `status`-kolom — afgeleid via where-clauses op
-     * `ends_at` + `trial_ends_at` (Phase 6 D-02).
-     */
     private static function applyStatusFilter(Builder $query, ?string $value): Builder
     {
         return match ($value) {

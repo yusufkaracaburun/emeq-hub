@@ -8,11 +8,6 @@ use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-/*
- * Eén factuurregel. quantity × unit_price (centen) → subtotal; tax_rate is een
- * BTW-percentage. subtotal/tax_amount/total worden door de InvoiceLineObserver
- * gezet, niet handmatig.
- */
 #[ObservedBy(InvoiceLineObserver::class)]
 class InvoiceLine extends Model
 {

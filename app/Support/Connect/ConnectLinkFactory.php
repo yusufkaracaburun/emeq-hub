@@ -9,20 +9,6 @@ use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\URL;
 
-/**
- * Mint de getekende handoff-links waarmee een consumer-app zijn eigen
- * eindgebruiker naar de Hub stuurt om zelf te koppelen.
- *
- * Waarom getekend en niet publiek: de Hub kent geen eindgebruiker-auth. De
- * consumer-app bewijst in zijn eigen sessie wie er inlogt en mint dan — met
- * zijn PAT — een link die het Account vastlegt. De handtekening maakt die link
- * tamper-proof, zodat niemand een ander `account` kan invullen en zo een
- * koppeling aan andermans administratie kan hangen (cross-tenant-leak).
- *
- * De link is kortlevend maar binnen dat venster herbruikbaar: de eindgebruiker
- * moet na een afgebroken of geweigerde autorisatie opnieuw kunnen klikken
- * zonder dat de consumer-app een nieuwe link hoeft te minten.
- */
 class ConnectLinkFactory
 {
     public const TTL_MINUTES = 15;
@@ -48,13 +34,6 @@ class ConnectLinkFactory
         ];
     }
 
-    /**
-     * Per-provider start-URL voor de knoppen op de handoff-pagina.
-     *
-     * De vervaltijd wordt overgenomen van de binnenkomende link in plaats van
-     * opnieuw op nu+TTL gezet: anders zou elke paginaweergave het venster
-     * verlengen en was de TTL in de praktijk oneindig oprekbaar.
-     */
     public function startUrl(Request $request, Account $account, string $provider, string $route = 'connect.start'): string
     {
         $parameters = [
@@ -71,11 +50,6 @@ class ConnectLinkFactory
         return URL::temporarySignedRoute($route, $this->inheritedExpiry($request), $parameters);
     }
 
-    /**
-     * De beheerdrawer-payload voor één gekoppelde provider — zelfde getekende
-     * bewijslast als `startUrl()`, alleen naar de drawer-route in plaats van
-     * de connect/disconnect-actie.
-     */
     public function manageUrl(Request $request, Account $account, string $provider): string
     {
         return URL::temporarySignedRoute('connect.manage.show', $this->inheritedExpiry($request), [
@@ -84,14 +58,7 @@ class ConnectLinkFactory
         ]);
     }
 
-    /**
-     * Overige drawer-acties (mapping opslaan, relatie herkoppelen/ontkoppelen, zoeken):
-     * zelfde `account`/`provider`-paar, plus eventuele route-specifieke parameters
-     * (bv. de `ConnectionAccountingRef`-id). Die laatste tekent mee, dus een geruild
-     * `ref` maakt de handtekening ongeldig.
-     *
-     * @param  array<string, int|string>  $parameters
-     */
+    /** @param  array<string, int|string>  $parameters */
     public function manageActionUrl(Request $request, Account $account, string $provider, string $route, array $parameters = []): string
     {
         return URL::temporarySignedRoute($route, $this->inheritedExpiry($request), [

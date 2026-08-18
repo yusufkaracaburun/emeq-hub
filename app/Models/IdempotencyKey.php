@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Http\Middleware\EnsureIdempotency;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\MassPrunable;
 use Illuminate\Database\Eloquent\Model;
@@ -12,14 +11,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
 
 /**
- * Claim per (Consumer, Account, Idempotency-Key). De unique index op die drie kolommen
- * is de mutex: {@see EnsureIdempotency} claimt de rij vóór de handler
- * draait en rondt hem daarna af met de respons.
- *
- * Twee staten. `in_flight` betekent dat er nú een request loopt; `completed` dat de
- * bewaarde respons herhaald mag worden. Een mislukte poging verwijdert de rij, zodat
- * hij opnieuw mag — dat was ook het gedrag vóór de claim-laag.
- *
  * @property Carbon|null $locked_at
  * @property Carbon|null $completed_at
  * @property Carbon|null $expires_at
@@ -29,10 +20,8 @@ class IdempotencyKey extends Model
 {
     use MassPrunable;
 
-    /** Er loopt een request voor deze key; `locked_at` draagt de lease. */
     public const STATE_IN_FLIGHT = 'in_flight';
 
-    /** De respons is bewaard en wordt herhaald bij een retry. */
     public const STATE_COMPLETED = 'completed';
 
     public $timestamps = false;
@@ -61,20 +50,11 @@ class IdempotencyKey extends Model
         'expires_at' => 'datetime',
     ];
 
-    /**
-     * Het verval staat op de rij zelf, gezet bij het claimen. Geen `0 = uit`-ontsnapping
-     * zoals bij de audit-tabellen: een key die eeuwig blijft staan is geen archief maar
-     * een lek.
-     */
     public function prunable(): Builder
     {
         return static::query()->where('expires_at', '<=', now());
     }
 
-    /**
-     * Een claim waarvan de lease verlopen is, hoorde bij een request dat kennelijk
-     * gestorven is. Zie de invariant bij `hub.idempotency.lease_seconds`.
-     */
     public function leaseHasExpired(): bool
     {
         if ($this->state !== self::STATE_IN_FLIGHT || $this->locked_at === null) {
@@ -84,25 +64,8 @@ class IdempotencyKey extends Model
         return $this->locked_at->addSeconds(self::leaseSeconds())->isPast();
     }
 
-    /**
-     * Bovengrens voor `Retry-After` bij "er loopt er al een".
-     *
-     * De lease is het worst case (~730s met tien bijlagen) en beantwoordt "wanneer
-     * verklaren we het vorige request dood?" — een heel andere vraag dan "wanneer
-     * mag je terugkomen?". Een normale boeking is in seconden klaar, dus de lease
-     * als Retry-After zou een document een kwartier laten stilstaan voor een
-     * boeking die na twee seconden af is. Te vroeg terugkomen kost één goedkope
-     * 409 met een verse Retry-After; te laat laat het document staan.
-     *
-     * Werd pas schadelijk toen consumers de header gingen honoreren: de SDK doet
-     * dat sinds 0.16.0.
-     */
     private const RETRY_AFTER_CEILING_SECONDS = 10;
 
-    /**
-     * Seconden tot de lease verloopt, minimaal 1 en afgetopt op
-     * {@see self::RETRY_AFTER_CEILING_SECONDS} — bruikbaar als `Retry-After`.
-     */
     public function secondsUntilLeaseExpires(): int
     {
         if ($this->locked_at === null) {

@@ -28,9 +28,6 @@ class AdminPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
-        // IN-03: ->default() markeert dit paneel als Filament's default-panel. Side-effect:
-        // Filament::auth() (zonder panel-id) pakt deze guard. Voor toekomstige consumer-portal-
-        // panels (v1.0+) moet ->default() expliciet naar het nieuwe paneel verhuizen.
         $panel = $panel
             ->default()
             ->id('admin')
@@ -43,22 +40,14 @@ class AdminPanelProvider extends PanelProvider
                 'primary' => Color::Amber,
             ])
             ->viteTheme('resources/css/filament/admin/theme.css')
-            // Desktop-sidebar inklapbaar naar een icon-rail; met group-icons (zie navigationGroups)
-            // wordt dat een minimal rail met fly-out dropdowns per groep.
             ->sidebarCollapsibleOnDesktop()
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
-            // Books-resources/pages leven top-level onder de collapsed Boekhouding-
-            // navgroup; toegang per-resource via GatedToBoekhouding.
             ->discoverResources(in: app_path('Filament/Books/Resources'), for: 'App\Filament\Books\Resources')
             ->discoverPages(in: app_path('Filament/Books/Pages'), for: 'App\Filament\Books\Pages')
             ->pages([
                 Dashboard::class,
             ])
-            // Vier navgroups, expliciet gedeclareerd zodat Filament hun volgorde respecteert.
-            // Koppelingen = de hub-chain (Consumer → Account → Connection) + audit; Boekhouding
-            // en Beheer staan collapsed (secundair). Tooltip via extraSidebarAttributes — pinned
-            // op de NavigationGroup-API (geen native ->description()-slot in v4.11).
             ->navigationGroups([
                 NavigationGroup::make('Koppelingen')
                     ->icon('heroicon-o-link')
@@ -74,8 +63,6 @@ class AdminPanelProvider extends PanelProvider
                     ->icon('heroicon-o-cog-6-tooth')
                     ->collapsed(),
             ])
-            // Externe beheer-tools onder "Beheer" — alleen super-admin. Openen in
-            // nieuw tabblad (eigen UI's buiten het Filament-paneel).
             ->navigationItems([
                 NavigationItem::make('Logs')
                     ->url('/log-viewer')

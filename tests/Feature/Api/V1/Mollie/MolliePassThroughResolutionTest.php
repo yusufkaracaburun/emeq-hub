@@ -57,12 +57,11 @@ class MolliePassThroughResolutionTest extends TestCase
         $consumerB = Consumer::factory()->create();
         Account::factory()->for($consumerB)->create(['external_id' => 'school-B']);
 
-        // Consumer A's PAT met Consumer B's account-external-id
         $this->withHeader('Authorization', "Bearer {$tokenA}")
             ->withHeader('X-Account-Id', 'school-B')
             ->getJson('/v1/__test__/mollie-resolution')
             ->assertStatus(404)
-            ->assertJsonPath('error', 'account_not_found'); // NIET 403 — info-disclosure-policy
+            ->assertJsonPath('error', 'account_not_found');
     }
 
     public function test_account_without_active_mollie_connection_returns_404_connection_not_found(): void

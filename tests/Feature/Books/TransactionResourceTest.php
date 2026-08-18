@@ -82,7 +82,7 @@ class TransactionResourceTest extends TestCase
                 'type' => TransactionType::Deposit->value,
                 'bank_account_id' => $this->bank->id,
                 'account_id' => $this->revenue->id,
-                'amount' => 100, // euro's
+                'amount' => 100,
                 'posted_at' => now()->toDateTimeString(),
                 'description' => 'Verkoop',
             ])
@@ -91,10 +91,8 @@ class TransactionResourceTest extends TestCase
 
         $txn = Transaction::firstOrFail();
 
-        // Euro-invoer is opgeslagen als integer-centen.
         $this->assertSame(10000, $txn->amount);
 
-        // Observer heeft een gebalanceerde debet/credit-boeking gepost.
         $this->assertSame(2, $txn->journalEntries()->count());
         $this->assertSame(
             (int) $txn->journalEntries()->where('type', JournalEntryType::Debit)->sum('amount'),

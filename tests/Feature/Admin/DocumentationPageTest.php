@@ -37,7 +37,6 @@ class DocumentationPageTest extends TestCase
     {
         $html = (new Documentation)->guideHtml();
 
-        // GFM-tabel + heading uit de guide bewijzen dat markdown → HTML rendert.
         $this->assertStringContainsString('<table>', $html);
         $this->assertStringContainsString('<h2>Concepten</h2>', $html);
     }

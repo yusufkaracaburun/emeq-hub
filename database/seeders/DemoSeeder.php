@@ -13,18 +13,6 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
-/*
- * Demo-data voor lokale admin-UI validatie (/admin).
- *
- * Idempotent: re-run convergeert naar dezelfde state via firstOrCreate op
- * Consumer.slug + Account.external_id; child-collections worden ge-wiped en
- * opnieuw aangemaakt voor demo-Consumers zodat counts stabiel blijven.
- *
- * Production-guard: hard-skip op `app()->isProduction()`. Geen Mollie/Snelstart
- * API-calls — alleen DB-rows.
- *
- * Run: php artisan db:seed --class=DemoSeeder
- */
 class DemoSeeder extends Seeder
 {
     use WithoutModelEvents;
@@ -201,8 +189,6 @@ class DemoSeeder extends Seeder
     /** @param array<int, Consumer> $consumers */
     private function seedInboundWebhookEvents(array $consumers): void
     {
-        // Metadata-only (AVG): geen payload/headers. Mix van providers + outcomes
-        // voor de incident-triage-UI.
         $rows = [
             ['provider' => 'exact', 'topic' => 'GeneralJournalEntries', 'action' => 'Update', 'status' => 200, 'outcome' => 'processed', 'fanout_status' => 'dispatched'],
             ['provider' => 'mollie', 'topic' => null, 'action' => null, 'status' => 202, 'outcome' => 'processed', 'fanout_status' => 'dispatched'],

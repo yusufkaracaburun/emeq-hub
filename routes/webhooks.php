@@ -8,53 +8,20 @@ use Laravel\Cashier\Http\Controllers\AftercareWebhookController;
 use Laravel\Cashier\Http\Controllers\FirstPaymentWebhookController;
 use Laravel\Cashier\Http\Controllers\WebhookController as CashierWebhookController;
 
-/*
-|--------------------------------------------------------------------------
-| Webhook Routes — /webhooks/{provider}/{...}
-|--------------------------------------------------------------------------
-| Publiek; signature is de auth. NIET geprefixed met /v1/. Geregistreerd
-| in bootstrap/app.php's withRouting()->then()-callback.
-*/
-
 Route::post('/webhooks/mollie/{connection_id}', MollieWebhookController::class)
     ->where('connection_id', '[0-9]+')
     ->name('webhooks.mollie');
 
-/*
- * Snelstart webhook-ingress (HUB-06). Eén publieke URL voor alle administraties.
- * Per-Connection routing gebeurt in de controller op payload `administratieId`.
- * Signature-middleware (SDK-side, auto-aliased) is de enige gatekeeper.
- *
- * `throttle:api` (geprepend door bootstrap/app.php's api-group) wordt expliciet
- * gestript — Snelstart kan bursten en throttling betekent gemiste events.
- * Mollie- en Cashier-routes blijven onaangetast.
- */
 Route::post('/webhooks/snelstart', SnelstartWebhookController::class)
     ->middleware(['verify.snelstart.signature'])
     ->withoutMiddleware(['throttle:api'])
     ->name('webhooks.snelstart');
 
-/*
- * Exact Online webhook-ingress (#10). Eén publieke URL voor alle divisions;
- * per-Connection routing in de controller op `Content.Division`. HashCode-
- * signature (SDK-side, app-brede secret, auto-aliased) is de enige gatekeeper.
- *
- * `throttle:api` gestript — Exact hertried een non-2xx tot 10× over ~34u, dus
- * throttling zou events verliezen. De lege-body-validatieping bij subscribe
- * passeert de middleware en krijgt 200 van de controller.
- */
 Route::post('/webhooks/exact', ExactWebhookController::class)
     ->middleware(['verify.exact.signature'])
     ->withoutMiddleware(['throttle:api'])
     ->name('webhooks.exact');
 
-/*
- * Cashier-Mollie webhook-ingress (D-10/D-11). Separaat van Phase 5a's
- * /webhooks/mollie/{connection_id} Connect-route. Hard-fail guard via
- * cashier.webhook.secret-middleware. Geen fan-out — Cashier handle't
- * subscription-state-machine intern. Cashier's eigen default-routes zijn
- * uitgezet via Cashier::ignoreRoutes() in AppServiceProvider::register().
- */
 Route::middleware('cashier.webhook.secret')->group(function (): void {
     Route::post('/cashier/webhook', [CashierWebhookController::class, 'handleWebhook'])
         ->name('webhooks.cashier.default');

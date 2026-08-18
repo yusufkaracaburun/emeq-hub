@@ -4,11 +4,6 @@ namespace Tests\Feature\Webhooks;
 
 use Mollie\Api\MollieApiClient;
 
-/**
- * Test-only stub: MollieApiClient subclass die magic __get('payments') overschrijft
- * en een vooraf-gegeven stub returnt. Gebruikt door MollieWebhookAntiSpoofingTest om
- * een payments->get() te laten gooien zonder de echte EndpointCollection te raken.
- */
 class ThrowingMollieApiClient extends MollieApiClient
 {
     public function __construct(private object $paymentsStub)

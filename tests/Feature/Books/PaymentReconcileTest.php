@@ -37,12 +37,11 @@ class PaymentReconcileTest extends TestCase
         $client = Client::create(['name' => 'Acme BV']);
         $this->invoice = Invoice::create(['client_id' => $client->id, 'invoice_number' => '2026-001', 'status' => 'sent', 'date' => now()]);
         $this->invoice->lines()->create(['description' => 'Werk', 'quantity' => 1, 'unit_price' => 10000, 'tax_rate' => 21]);
-        app(InvoicePoster::class)->post($this->invoice->refresh()); // total 12100
+        app(InvoicePoster::class)->post($this->invoice->refresh());
     }
 
     private function depositToDebiteuren(int $amount): Transaction
     {
-        // Een binnenkomende bankbetaling op debiteuren (LedgerPoster boekt 1100 ↔ 1300).
         return Transaction::create([
             'type' => TransactionType::Deposit,
             'account_id' => $this->debiteurenId,
@@ -65,7 +64,6 @@ class PaymentReconcileTest extends TestCase
         $this->assertSame(InvoiceStatus::Paid, $this->invoice->status);
         $this->assertSame($transaction->id, $payment->transaction_id);
         $this->assertSame(0, $transaction->refresh()->unallocatedAmount());
-        // Geen nieuwe boeking: de bank-leg stond al, afletteren legt alleen de match vast.
         $this->assertSame($journalCountBefore, $transaction->journalEntries()->count());
     }
 
@@ -90,7 +88,6 @@ class PaymentReconcileTest extends TestCase
 
     public function test_reconcile_rejects_wrong_counter_account(): void
     {
-        // Bijschrijving op een omzetrekening i.p.v. debiteuren → past niet bij een factuur.
         $transaction = Transaction::create([
             'type' => TransactionType::Deposit,
             'account_id' => Account::where('code', '8000')->value('id'),

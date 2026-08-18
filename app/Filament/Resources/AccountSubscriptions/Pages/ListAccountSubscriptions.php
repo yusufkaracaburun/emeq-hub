@@ -14,8 +14,6 @@ class ListAccountSubscriptions extends ListRecords
 
     protected function getHeaderActions(): array
     {
-        // Read-only Resource — geen Create-action. Subscription-create gebeurt
-        // via POST /v1/account-subscriptions (Phase 7-04).
         return [
             InfoModalAction::make(
                 'Over account-subscriptions',

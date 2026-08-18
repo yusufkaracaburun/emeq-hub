@@ -11,22 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
 
-/**
- * Welke canonieke entity hoort bij welke entity aan partnerzijde, per Connection.
- *
- * Provider-neutraal: `provider_entity_id` draagt een Exact-GUID, een Moneybird-id of
- * wat de volgende partner ook teruggeeft. Het canonieke domein blijft daar vrij van.
- *
- * Bewust géén `MassPrunable`: dit is geen audit-spoor maar de identiteitstabel die
- * dubbele boekingen tegenhoudt. Een rij prunen opent precies het gat dat de tabel
- * dicht. Rijen verdwijnen alleen met hun Connection (cascade).
- */
-/**
- * Statische analyse leest `casts()` niet en valt terug op het kolomtype uit de
- * migratie. Zie ook {@see Connection}.
- *
- * @property Carbon|null $last_synced_at
- */
+/** @property Carbon|null $last_synced_at */
 #[Fillable([
     'connection_id',
     'provider',
@@ -47,13 +32,10 @@ class ProviderEntityLink extends Model
 
     public const ENTITY_FINANCIAL_DOCUMENT = 'financial_document';
 
-    /** Een relatie (debiteur/crediteur) waarop de Hub geschreven heeft — aanmaken, sleutel-writeback of rolpromotie. */
     public const ENTITY_RELATION = 'relation';
 
-    /** De Hub schreef deze entity naar de partner. */
     public const ORIGIN_HUB = 'hub';
 
-    /** De Hub trof deze entity aan de partnerzijde aan. */
     public const ORIGIN_PROVIDER = 'provider';
 
     public function connection(): BelongsTo
@@ -61,9 +43,7 @@ class ProviderEntityLink extends Model
         return $this->belongsTo(Connection::class);
     }
 
-    /**
-     * @return array<string, string>
-     */
+    /** @return array<string, string> */
     protected function casts(): array
     {
         return [

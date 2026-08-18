@@ -40,7 +40,7 @@ class PaymentServiceTest extends TestCase
         $client = Client::create(['name' => 'Acme BV']);
         $this->invoice = Invoice::create(['client_id' => $client->id, 'invoice_number' => '2026-001', 'status' => 'sent', 'date' => now()]);
         $this->invoice->lines()->create(['description' => 'Werk', 'quantity' => 1, 'unit_price' => 10000, 'tax_rate' => 21]);
-        $this->invoice->refresh(); // total 12100
+        $this->invoice->refresh();
         app(InvoicePoster::class)->post($this->invoice->refresh());
     }
 
@@ -66,7 +66,6 @@ class PaymentServiceTest extends TestCase
         $this->assertSame(0, $this->invoice->amountDue());
         $this->assertSame(InvoiceStatus::Paid, $this->invoice->status);
 
-        // Klant betaalt → Deposit: debet 1100 Bank, credit 1300 Debiteuren.
         $transaction = $payment->transaction;
         $this->assertSame(TransactionType::Deposit, $transaction->type);
         $this->assertSame(12100, $this->entryByCode($transaction, '1100', JournalEntryType::Debit));
@@ -81,7 +80,7 @@ class PaymentServiceTest extends TestCase
         $this->assertFalse($this->invoice->isPaid());
         $this->assertTrue($this->invoice->isPartiallyPaid());
         $this->assertSame(7100, $this->invoice->amountDue());
-        $this->assertSame(InvoiceStatus::Sent, $this->invoice->status); // ongemoeid bij partial
+        $this->assertSame(InvoiceStatus::Sent, $this->invoice->status);
     }
 
     public function test_multiple_partial_payments_settle_in_full(): void
@@ -133,7 +132,7 @@ class PaymentServiceTest extends TestCase
         $vendor = Vendor::create(['name' => 'Hosting BV']);
         $bill = Bill::create(['vendor_id' => $vendor->id, 'bill_number' => 'INK-1', 'status' => 'received', 'date' => now()]);
         $bill->lines()->create(['account_id' => Account::where('code', '4400')->value('id'), 'description' => 'Hosting', 'quantity' => 1, 'unit_price' => 10000, 'tax_rate' => 21]);
-        $bill->refresh(); // total 12100
+        $bill->refresh();
         app(BillPoster::class)->post($bill->refresh());
 
         $payment = $this->service()->register($bill->refresh(), $this->bankAccountId, 12100, now()->toDateString());
@@ -142,7 +141,6 @@ class PaymentServiceTest extends TestCase
         $this->assertTrue($bill->isPaid());
         $this->assertSame(BillStatus::Paid, $bill->status);
 
-        // Wij betalen → Withdrawal: debet 1600 Crediteuren, credit 1100 Bank.
         $transaction = $payment->transaction;
         $this->assertSame(TransactionType::Withdrawal, $transaction->type);
         $this->assertSame(12100, $this->entryByCode($transaction, '1600', JournalEntryType::Debit));

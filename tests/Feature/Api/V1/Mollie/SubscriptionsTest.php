@@ -9,20 +9,6 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Concerns\StubsMollieClient;
 use Tests\TestCase;
 
-/**
- * MOLL-03 Subscriptions — nested onder Customer.
- *
- * Vendor-discovery: Mollie's SDK exposes `SubscriptionEndpointCollection`
- * onder `MollieApiClient::$subscriptions` — NIET `$customerSubscriptions`
- * zoals plan suggereerde. Methode-namen createForId/getForId/pageForId/
- * cancelForId blijven hetzelfde.
- *
- * Routes:
- *   GET    /v1/mollie/customers/{id}/subscriptions
- *   POST   /v1/mollie/customers/{id}/subscriptions
- *   GET    /v1/mollie/customers/{id}/subscriptions/{sub_id}
- *   DELETE /v1/mollie/customers/{id}/subscriptions/{sub_id}
- */
 class SubscriptionsTest extends TestCase
 {
     use RefreshDatabase;

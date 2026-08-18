@@ -15,9 +15,7 @@ final class OAuthFlowRegistry
 
     public function __construct(private readonly Container $container) {}
 
-    /**
-     * @param  class-string<OAuthFlow>  $implementation
-     */
+    /** @param  class-string<OAuthFlow>  $implementation */
     public function register(string $provider, string $implementation): void
     {
         $this->providers[$provider] = $implementation;

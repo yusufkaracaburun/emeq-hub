@@ -9,12 +9,7 @@ use Illuminate\Validation\Rule;
 
 class StoreDemoRequestRequest extends FormRequest
 {
-    /**
-     * Voorkeursmomenten voor de demo — single source; de /demo-pagina krijgt
-     * deze lijst als prop.
-     *
-     * @var list<string>
-     */
+    /** @var list<string> */
     public const SLOTS = [
         'Deze week',
         'Volgende week',
@@ -27,9 +22,7 @@ class StoreDemoRequestRequest extends FormRequest
         return true;
     }
 
-    /**
-     * @return array<string, mixed>
-     */
+    /** @return array<string, mixed> */
     public function rules(): array
     {
         return [
@@ -39,14 +32,10 @@ class StoreDemoRequestRequest extends FormRequest
             'preferred_slot' => ['required', 'string', Rule::in(self::SLOTS)],
             'message' => ['nullable', 'string', 'max:2000'],
             'privacy_accepted' => ['accepted'],
-            // 'website' is een honeypot — niet hier valideren (zou bots tippen),
-            // de controller behandelt een gevuld honeypot-veld als stille no-op.
         ];
     }
 
-    /**
-     * @return array<string, string>
-     */
+    /** @return array<string, string> */
     public function messages(): array
     {
         return [

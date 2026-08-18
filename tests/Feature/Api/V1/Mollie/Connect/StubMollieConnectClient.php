@@ -7,15 +7,6 @@ namespace Tests\Feature\Api\V1\Mollie\Connect;
 use Mollie\Api\MollieApiClient;
 
 /**
- * Test-only MollieApiClient-subclass voor Connect-pass-through-tests.
- * Vervangt endpoint-properties (clientLinks/onboarding/organizations/profiles/
- * permissions) door vooraf-gegeven endpoint-stubs en capture't de access-token
- * + Idempotency-Key die de Connect-base op deze client zet — zodat
- * TokenResolverIntegrationTest (MOLL-06 SC-2) en de per-resource tests
- * symmetrisch kunnen asserten welke partner-token er door de pipeline ging.
- *
- * Sibling van Tests\Feature\Api\V1\Mollie\StubMollieClient (Phase 5a).
- *
  * @property mixed $clientLinks
  * @property mixed $onboarding
  * @property mixed $organizations
@@ -31,9 +22,7 @@ class StubMollieConnectClient extends MollieApiClient
     /** @var array<string, object> */
     private array $stubs;
 
-    /**
-     * @param  array<string, object>  $stubs  Map van endpoint-property → stub-object.
-     */
+    /** @param  array<string, object>  $stubs  Map van endpoint-property → stub-object. */
     public function __construct(array $stubs = [])
     {
         parent::__construct();

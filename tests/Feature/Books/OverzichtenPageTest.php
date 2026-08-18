@@ -46,8 +46,8 @@ class OverzichtenPageTest extends TestCase
             ->assertOk()
             ->assertSee('Winst & Verlies')
             ->assertSee('Balans')
-            ->assertSee('Omzet hoog (21%)')   // revenue line uit het grootboek
-            ->assertSee('Debiteuren');         // activa-regel
+            ->assertSee('Omzet hoog (21%)')
+            ->assertSee('Debiteuren');
     }
 
     public function test_period_filter_recomputes(): void

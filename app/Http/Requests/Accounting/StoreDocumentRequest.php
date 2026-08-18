@@ -12,10 +12,6 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
 
-/**
- * Edge-validatie van het canonical FinancialDocument (Hub-conventie: dunne SDK's,
- * validatie aan de Hub-rand). De provider-specifieke mapping gebeurt daarná in de adapter.
- */
 class StoreDocumentRequest extends FormRequest
 {
     public function authorize(): bool
@@ -23,9 +19,7 @@ class StoreDocumentRequest extends FormRequest
         return true;
     }
 
-    /**
-     * @return array<string, mixed>
-     */
+    /** @return array<string, mixed> */
     public function rules(): array
     {
         return [
@@ -47,8 +41,6 @@ class StoreDocumentRequest extends FormRequest
             'party.external_id' => ['required', 'string', 'max:255'],
             'party.relation_id' => ['nullable', 'string', 'max:255'],
 
-            // Relatiekaart — optioneel, en alleen van belang wanneer de Hub de
-            // relatie aanmaakt. Lengtes volgen de Exact-velden.
             'party.chamber_of_commerce' => ['nullable', 'string', 'max:20'],
             'party.address_line_1' => ['nullable', 'string', 'max:255'],
             'party.address_line_2' => ['nullable', 'string', 'max:255'],
@@ -71,10 +63,6 @@ class StoreDocumentRequest extends FormRequest
             'lines.*.cost_center' => ['nullable', 'string', 'max:255'],
             'lines.*.cost_unit' => ['nullable', 'string', 'max:255'],
 
-            // Bijlagen: inline base64. max ~1,4M chars base64 ≈ 1MB binair (ADR < 1MB).
-            // Begrensd omdat elke bijlage twee partner-calls van 30s kost: zonder
-            // plafond is de request-duur onbegrensd en is de idempotency-lease
-            // (config `hub.idempotency.lease_seconds`) niet te onderbouwen.
             'attachments' => ['nullable', 'array', 'max:10'],
             'attachments.*.filename' => ['required', 'string', 'max:255'],
             'attachments.*.mime_type' => ['required', 'string', Rule::in(['application/pdf', 'image/png', 'image/jpeg'])],
@@ -85,15 +73,10 @@ class StoreDocumentRequest extends FormRequest
     public function withValidator(Validator $validator): void
     {
         $validator->after(function (Validator $validator): void {
-            // Een zakelijke partij zonder KvK én zonder btw-nummer kan de resolver alleen op
-            // naam herkennen, en een naam-miss maakt een duplicaat aan in de administratie van
-            // de klant. Liever hier weigeren dan daar opruimen.
             if ($this->input('party.kind') !== Party::KIND_COMPANY) {
                 return;
             }
 
-            // Met een gepinde relatie doet de ladder geen enkele zoekstap meer, dus valt de
-            // reden voor de sleutel-eis weg.
             if (trim((string) $this->input('party.relation_id')) !== '') {
                 return;
             }

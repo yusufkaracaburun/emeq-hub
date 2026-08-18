@@ -75,7 +75,6 @@ class ExactOAuthFlowTest extends TestCase
         $this->assertSame('acc_xyz', $connection->access_token);
         $this->assertSame('ref_xyz', $connection->refresh_token);
         $this->assertSame('4471372', $connection->administratie_id);
-        // Deprovision-sleutel: /exact/stop matcht op dit UserID (Seamless).
         $this->assertSame('d3b3f9a1-9c2e-4b7a-8f7e-2f4a1b6c9d0e', $connection->metadata['exact_user_id'] ?? null);
         $this->assertNull($connection->oauth_state);
 
@@ -96,7 +95,6 @@ class ExactOAuthFlowTest extends TestCase
                 'expires_in' => '600',
                 'refresh_token' => 'ref_xyz',
             ]),
-            // .NET-formatter "B": accolades + hoofdletters.
             'start.exactonline.nl/api/v1/current/Me' => Http::response([
                 'd' => ['results' => [[
                     'CurrentDivision' => 4471372,
@@ -175,7 +173,6 @@ class ExactOAuthFlowTest extends TestCase
 
         $this->app->make(ExactOAuthFlow::class)->refreshToken($connection);
 
-        // Exact weigert refresh op een geldige token — dus we mogen niet refreshen.
         $mock->assertNothingSent();
     }
 

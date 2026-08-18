@@ -10,13 +10,6 @@ use Illuminate\Support\Facades\DB;
 use Laravel\Cashier\Billable;
 use Tests\TestCase;
 
-/**
- * SUB-01 / D-03: bewijst dat de Cashier-Mollie `Billable`-trait correct op
- * `App\Models\Consumer` is geland en zonder errors door Cashier's
- * subscription-API kan worden bevraagd voor een Consumer zonder billing-state.
- *
- * NIET op `Account` (D-04 — uitsluiting) — daarvoor géén tests in dit plan.
- */
 class ConsumerBillableTest extends TestCase
 {
     use RefreshDatabase;
@@ -66,16 +59,6 @@ class ConsumerBillableTest extends TestCase
         $this->assertSame('naschool-license', $consumer->subscriptions->first()->plan);
     }
 
-    /**
-     * `mollieMandateId()` is een pure accessor op de `mollie_mandate_id`-kolom
-     * — geen Mollie-API-call. Voor een verse Consumer zonder die kolom is de
-     * waarde `null`. Bewijst dat de Billable-trait accessor-only methodes
-     * niet crashen op een Consumer zonder billing-state.
-     *
-     * NB: `mollieCustomerId()` is bewust NIET getest hier omdat die method bij
-     * een lege kolom direct `createAsMollieCustomer()` aanroept (live Mollie-
-     * API-hit). Dat gedrag wordt getest in plan 06-05 met een stub-binding.
-     */
     public function test_consumer_mollie_mandate_id_returns_null_when_no_mandate(): void
     {
         $consumer = Consumer::factory()->create();

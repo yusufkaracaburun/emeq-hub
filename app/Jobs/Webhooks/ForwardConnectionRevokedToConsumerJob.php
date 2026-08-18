@@ -16,14 +16,6 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 use Spatie\WebhookServer\WebhookCall;
 
-/**
- * Fan-out van een Hub-eigen `connection.revoked`-event naar de Consumer-
- * callback-URL. Zonder dit signaal weet de consumer-app niet dat de koppeling
- * weg is en loopt die stuk op de revoked-guard bij de volgende pass-through.
- *
- * Provider-agnostisch: elke revoke-bron (App Center-deprovision, admin-actie,
- * toekomstige partner-flows) kan dezelfde job dispatchen met een eigen `source`.
- */
 final class ForwardConnectionRevokedToConsumerJob implements ShouldQueue
 {
     use Dispatchable;

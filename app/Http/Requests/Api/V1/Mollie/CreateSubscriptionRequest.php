@@ -6,33 +6,14 @@ namespace App\Http\Requests\Api\V1\Mollie;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-/**
- * Edge-validatie voor POST /v1/mollie/customers/{id}/subscriptions —
- * vangt grove payload-fouten af vóór Mollie-roundtrip (lager
- * Mollie-quota-burn).
- *
- * Required-fields per Mollie's Create Subscription API:
- *   amount.currency  (ISO 4217 3-letter)
- *   amount.value     (decimal-string met >=2 cijfers achter de komma)
- *   interval         ("N day(s)" | "N week(s)" | "N month(s)")
- *   description      (max 255 chars)
- *
- * Optionele velden: startDate, method, metadata, mandateId, webhookUrl,
- * times. Niet-genoemde Mollie-velden worden niet gevalideerd; Mollie
- * zelf valideert ze als ze in de payload zitten.
- */
 class CreateSubscriptionRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        // Auth gebeurt op middleware-niveau (auth:sanctum + resolve.mollie.account
-        // + ability-guard in AbstractMolliePassThroughController).
         return true;
     }
 
-    /**
-     * @return array<string, array<int, mixed>>
-     */
+    /** @return array<string, array<int, mixed>> */
     public function rules(): array
     {
         return [

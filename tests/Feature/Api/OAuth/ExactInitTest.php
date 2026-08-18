@@ -84,7 +84,7 @@ class ExactInitTest extends TestCase
 
         $fresh = $active->fresh();
         $this->assertSame('pending', $fresh->status);
-        $this->assertNotNull($fresh->access_token); // oude tokens behouden tot callback
+        $this->assertNotNull($fresh->access_token);
     }
 
     public function test_relink_of_revoked_connection_reuses_row_and_clears_revoked_at(): void
@@ -105,9 +105,6 @@ class ExactInitTest extends TestCase
             ->postJson('/v1/oauth/exact/init', ['account_external_id' => 'school1'])
             ->assertOk()->json('connection_id');
 
-        // Reconnect herbruikt dezelfde row en wist de revoke-markering, anders
-        // blijft de connection na reconnect 'active' mét revoked_at en faalt een
-        // volgende DELETE op de revoked-guard (404).
         $this->assertSame((string) $revoked->public_id, $reused);
         $fresh = $revoked->fresh();
         $this->assertNull($fresh->revoked_at);
@@ -124,8 +121,6 @@ class ExactInitTest extends TestCase
         ]);
         $token = $consumer->createToken('t', [TokenAbilities::EXACT_WRITE])->plainTextToken;
 
-        // Geen return_url in de body; de browser-Origin (tenant-subdomein) drijft
-        // de terugkeer — consumer hoeft niets aan te passen.
         $this->withHeaders(['Authorization' => "Bearer {$token}", 'Origin' => 'https://school1.emeq.nl'])
             ->postJson('/v1/oauth/exact/init', ['account_external_id' => 'school1'])
             ->assertOk();
@@ -165,8 +160,6 @@ class ExactInitTest extends TestCase
 
     public function test_init_auto_provisions_missing_account(): void
     {
-        // Eén-knop-onboarding: de consumer-app start de koppeling zonder het
-        // Account eerst apart te POSTen — init maakt het aan.
         $consumer = Consumer::factory()->create();
         $token = $consumer->createToken('t', [TokenAbilities::EXACT_WRITE])->plainTextToken;
 
@@ -200,8 +193,6 @@ class ExactInitTest extends TestCase
             ->postJson('/v1/oauth/exact/init', ['account_external_id' => 'acme'])
             ->assertOk();
 
-        // external_id is per-Consumer genamespaced (unique consumer_id+external_id):
-        // A krijgt een eigen 'acme'-account, B's gelijknamige account blijft ongemoeid.
         $accountA = $consumerA->accounts()->where('external_id', 'acme')->sole();
         $this->assertNotSame($accountB->id, $accountA->id);
         $this->assertSame(0, $accountB->connections()->count());

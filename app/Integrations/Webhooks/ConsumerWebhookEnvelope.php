@@ -7,15 +7,6 @@ namespace App\Integrations\Webhooks;
 use App\Enums\Provider;
 use Carbon\CarbonInterface;
 
-/**
- * De body van elke webhook die de Hub naar een consumer stuurt.
- *
- * De vorm staat als belofte in de integratiehandleiding — "elke webhook heeft
- * dezelfde vorm" — dus mag geen enkele emitter er zijn eigen platte payload naast
- * zetten. Dat gebeurde wel: de partner-fan-out stuurde de envelope, terwijl het
- * boekingsresultaat en de ingetrokken koppeling nog hun eigen velden hadden. Een
- * consumer die op `account_id` routeert kreeg daar `undefined`.
- */
 final class ConsumerWebhookEnvelope
 {
     /**
@@ -46,8 +37,6 @@ final class ConsumerWebhookEnvelope
             'account_id' => $accountId,
             'entity_id' => $entityId,
             'action' => $action,
-            // Wanneer de Hub het event uitstuurde. De partner levert zelden een eigen
-            // tijdstempel; doen alsof van wel zou liegen over de bron.
             'occurred_at' => now()->toIso8601String(),
             'hub_authored' => $hubAuthored ?: null,
             'hub_last_wrote_at' => $hubLastWroteAt?->toIso8601String(),

@@ -14,11 +14,6 @@ use Filament\Support\Icons\Heroicon;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use UnitEnum;
 
-/*
- * Financiële overzichten: Winst & Verlies (periode) + Balans (per einddatum).
- * De berekening leeft in ReportService; deze pagina levert alleen de periode-
- * keuze (live Livewire-props) en de view-data.
- */
 class Overzichten extends Page
 {
     use GatedToBoekhouding;
@@ -45,9 +40,7 @@ class Overzichten extends Page
         $this->endDate = now()->toDateString();
     }
 
-    /**
-     * @return array<Action>
-     */
+    /** @return array<Action> */
     protected function getHeaderActions(): array
     {
         return [
@@ -66,9 +59,6 @@ class Overzichten extends Page
         ];
     }
 
-    /**
-     * Snelle periode-presets voor de filterbalk.
-     */
     public function setRange(string $preset): void
     {
         $now = now();

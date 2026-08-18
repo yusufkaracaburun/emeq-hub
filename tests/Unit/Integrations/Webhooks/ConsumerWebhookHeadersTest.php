@@ -21,10 +21,6 @@ class ConsumerWebhookHeadersTest extends TestCase
         ], ConsumerWebhookHeaders::make('evt-1'));
     }
 
-    /**
-     * Mollie's fan-out heeft geen event-id; die header hoort dan te ontbreken in
-     * plaats van leeg mee te gaan.
-     */
     public function test_omits_the_event_id_when_none_is_given(): void
     {
         Context::add('request_id', '01HTESTREQ0000000000000000');
@@ -35,10 +31,6 @@ class ConsumerWebhookHeadersTest extends TestCase
         );
     }
 
-    /**
-     * Een fan-out vanuit een scheduled command heeft geen request-context. Dan
-     * gaat er geen lege header mee.
-     */
     public function test_omits_the_request_id_outside_a_request_context(): void
     {
         $this->assertSame(
@@ -47,11 +39,6 @@ class ConsumerWebhookHeadersTest extends TestCase
         );
     }
 
-    /**
-     * Zonder deze header rendert een consumer die een ValidationException gooit
-     * een 302-redirect, en spatie/laravel-webhook-server telt een 3xx als
-     * geleverd — een infra-fout wordt dan een stille, permanente drop.
-     */
     public function test_always_asks_for_json(): void
     {
         $this->assertSame('application/json', ConsumerWebhookHeaders::make()['Accept']);

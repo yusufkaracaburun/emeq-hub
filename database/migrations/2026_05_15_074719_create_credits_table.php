@@ -6,9 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 class CreateCreditsTable extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('credits', function (Blueprint $table) {
@@ -21,9 +18,6 @@ class CreateCreditsTable extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('credits');

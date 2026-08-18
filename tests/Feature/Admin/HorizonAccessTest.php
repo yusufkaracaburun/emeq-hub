@@ -9,11 +9,6 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
-/**
- * Horizon-dashboard op /horizon — gated via de viewHorizon-gate
- * (HorizonServiceProvider) op de super-admin-rol. De gate geldt in non-local
- * envs (testing telt), dus hier afdwingbaar.
- */
 class HorizonAccessTest extends TestCase
 {
     use RefreshDatabase;

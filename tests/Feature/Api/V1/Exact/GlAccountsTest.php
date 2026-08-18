@@ -35,9 +35,7 @@ class GlAccountsTest extends TestCase
         parent::tearDown();
     }
 
-    /**
-     * @return array{0: Consumer, 1: Connection}
-     */
+    /** @return array{0: Consumer, 1: Connection} */
     private function consumerWithExactConnection(): array
     {
         $consumer = Consumer::factory()->create();
@@ -72,7 +70,6 @@ class GlAccountsTest extends TestCase
             ->assertOk()
             ->assertJsonPath('d.results.0.Code', '8000');
 
-        // Traceability: de geraakte Exact-endpoint is per-call vastgelegd.
         $this->assertDatabaseHas('pass_through_calls', [
             'provider' => 'exact',
             'method' => 'GET',

@@ -46,10 +46,6 @@ class ConsumerTokensRelationManagerTest extends TestCase
         ])->assertSee('naschool-prod');
     }
 
-    /**
-     * Een nieuw token uitgeven trekt een oud token NIET in — Sanctum-tokens zijn
-     * losse rijen. Dit is de enige plek waar een gelekt token weg kan.
-     */
     public function test_token_kan_worden_ingetrokken(): void
     {
         $this->actAsStaff();

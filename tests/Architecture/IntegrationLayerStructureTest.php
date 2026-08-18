@@ -10,25 +10,11 @@ use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use SplFileInfo;
 
-/**
- * Bewaakt de indeling van app/Integrations. De regel is kort genoeg om te
- * onthouden en te automatiseren: heet een map zoals een Provider-enum-case, dan
- * is de inhoud van die provider; anders is het gedeeld en mag er geen enkele
- * provider in voorkomen.
- *
- * Zonder deze tests zakt die scheiding terug — een gedeelde klasse die "even"
- * Exact importeert is precies hoe de vorige indeling ontstond.
- */
 final class IntegrationLayerStructureTest extends TestCase
 {
     private const INTEGRATIONS = __DIR__.'/../../app/Integrations';
 
-    /**
-     * Gedeelde mappen. Elke andere map direct onder app/Integrations moet een
-     * Provider-case zijn — een nieuwe naam dwingt een bewuste keuze af.
-     *
-     * @var list<string>
-     */
+    /** @var list<string> */
     private const SHARED = ['Contracts', 'Errors', 'Exceptions', 'OAuth', 'PassThrough', 'Webhooks'];
 
     public function test_elke_map_is_gedeeld_of_een_provider(): void
@@ -99,10 +85,6 @@ final class IntegrationLayerStructureTest extends TestCase
         }
     }
 
-    /**
-     * De afhankelijkheid wijst één kant op: de HTTP- en admin-laag mogen een
-     * integratie aanroepen, een integratie kent ze niet.
-     */
     public function test_integraties_kennen_de_http_en_admin_laag_niet(): void
     {
         $forbidden = ['App\\Http\\Controllers\\', 'App\\Filament\\'];
@@ -120,10 +102,6 @@ final class IntegrationLayerStructureTest extends TestCase
         }
     }
 
-    /**
-     * Het canonieke boekhouddomein beschrijft wat de Hub belooft. Zodra het een
-     * specifieke partner noemt is die belofte niet langer canoniek.
-     */
     public function test_het_canonieke_domein_noemt_geen_partner(): void
     {
         foreach ($this->phpFilesIn(__DIR__.'/../../app/Accounting') as $file) {
@@ -163,10 +141,6 @@ final class IntegrationLayerStructureTest extends TestCase
         return $files;
     }
 
-    /**
-     * Commentaar telt niet mee: een klasse mag uitleggen hoe Exact zich gedraagt
-     * zonder ervan af te hangen.
-     */
     private function codeWithoutComments(SplFileInfo $file): string
     {
         $code = '';

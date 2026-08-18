@@ -52,12 +52,6 @@ class ConnectionController extends Controller
                 'client_key' => $request->input('credentials.client_key'),
                 'subscription_key' => $request->input('credentials.subscription_key'),
                 'subscription_id' => $request->input('credentials.subscription_id'),
-                // De key-based shape kent geen OAuth-callback die de administratie
-                // ophaalt zoals ExactOAuthFlow dat doet, dus de consumer levert 'm mee.
-                // Zonder deze waarde vindt SnelstartWebhookController de Connection niet
-                // (die resolveert op `administratie_id`) en valt élke inkomende webhook
-                // als unknown_tenant weg; de kruis-koppeling-guard in
-                // ProviderEntityLinkRecorder staat dan ook uit.
                 'administratie_id' => $request->input('administratie_id'),
                 'metadata' => null,
             ]);
@@ -115,17 +109,6 @@ class ConnectionController extends Controller
         return response()->noContent();
     }
 
-    /**
-     * Scoped op de Consumer achter de PAT, niet op Account — een consumer beheert
-     * zijn eigen koppelingen over al zijn accounts heen. De account-check hoort
-     * bij de consumer (zie de integratiehandleiding, stap "Loskoppelen").
-     *
-     * Accepteert beide sleutels: elke connection-id die de Hub een consumer
-     * teruggeeft is de `public_id` (`con_…`) — de integrations-lijst, de
-     * OAuth-init-respons en de connection_revoked-webhook sturen alle drie die.
-     * De numerieke primary key blijft werken omdat ConnectionResource 'm altijd
-     * als `id` heeft teruggegeven.
-     */
     private function findOwnedConnection(Request $request, string $connectionId): ?Connection
     {
         $consumerId = (int) $request->user()->getKey();

@@ -21,31 +21,6 @@ use Saloon\Enums\Method;
 use Saloon\Http\Response;
 use Throwable;
 
-/**
- * Ruimt test-boekingen, hun Documents en (expliciet opgegeven) test-relaties op in een
- * Exact-division zodat de boekhoud-koppeling opnieuw end-to-end getest kan worden.
- *
- * Boekingen (sales/purchase) en Documents worden áltijd verwijderd — beide zet de Hub
- * (of Exact zelf, bij elke PurchaseEntry) zelf neer. Documents gaan vóór de relaties weg:
- * Exact weigert een relatie te verwijderen zolang er nog een gekoppeld Document bestaat
- * ("Kan niet verwijderen: Relatie - Gebruikt in: Documenten"). Relaties worden NOOIT
- * automatisch verwijderd (een division draagt Exact-default-relaties zoals
- * "Belastingdienst Omzetbelasting"); geef de te wissen relatie-GUID's expliciet via
- * --relations. Default is dry-run; --force voert daadwerkelijk uit.
- *
- * LET OP — dit laat de Hub-eigen state staan (`provider_entity_links`, idempotency-claims,
- * relatie-mirror). Die legt vast wat de Hub in deze administratie heeft zien slagen, en
- * weet niet dat de boekingen buiten de Hub om verdwenen zijn. Biedt een consumer zo'n
- * `external_id` daarna opnieuw aan, dan antwoordt de Hub `200 deduplicated` of
- * `409 document_already_posted` en landt het document nooit in Exact. Draai daarom ná
- * een purge `hub:reset-connection` op dezelfde Connection; de command noemt dat zelf ook
- * aan het eind van een run. Bewust twee stappen: Hub-state weggooien is een aparte
- * beslissing, en de purge draait meestal in meerdere passes.
- *
- * Exact throttelt op ~60 calls/minuut per division en elke entry en elk Document is één
- * DELETE. Een volle administratie vergt daarom meerdere passes met een minuut ertussen;
- * de command is herhaalbaar en pakt bij elke run op wat er nog staat.
- */
 final class PurgeTestData extends Command
 {
     protected $signature = 'exact:purge-test-data
@@ -168,11 +143,6 @@ final class PurgeTestData extends Command
         return $failed > 0 ? self::FAILURE : self::SUCCESS;
     }
 
-    /**
-     * De Hub-eigen state overleeft deze purge en blokkeert anders elke her-test met
-     * `deduplicated` of `document_already_posted` op documenten die in Exact allang weg
-     * zijn. Weggooien blijft een aparte, expliciete stap.
-     */
     private function hubStateReminder(Connection $connection): void
     {
         $this->newLine();
@@ -181,14 +151,8 @@ final class PurgeTestData extends Command
     }
 
     /**
-     * Voert één delete uit, telt 'm mee in $tally onder $category en bewaart de
-     * Exact-foutmelding in $failures bij een mislukking — zonder de rest van de purge
-     * te stoppen.
-     *
      * @param  array<string, array{ok: int, failed: int}>  $tally
      * @param  list<string>  $failures
-     *
-     * @param-out array<string, array{ok: int, failed: int}>  $tally
      */
     private function recordResult(array &$tally, array &$failures, string $category, string $label, object $connector, object $request): void
     {
@@ -206,9 +170,7 @@ final class PurgeTestData extends Command
         $failures[] = "{$label} — {$result['message']}";
     }
 
-    /**
-     * @return array{ok: bool, message: ?string}
-     */
+    /** @return array{ok: bool, message: ?string} */
     private function delete(object $connector, object $request, string $label): array
     {
         try {
@@ -231,11 +193,6 @@ final class PurgeTestData extends Command
         }
     }
 
-    /**
-     * Exact's functionele OData-foutmelding (`error.message.value`) — dezelfde tekst die
-     * de boekhouder in de Exact-UI ziet. Valt terug op de HTTP-status wanneer de body geen
-     * bruikbare melding bevat (bijv. een Akamai-blockpagina in plaats van JSON).
-     */
     private function exactErrorMessage(Response $response): string
     {
         try {

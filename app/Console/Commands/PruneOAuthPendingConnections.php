@@ -14,8 +14,6 @@ class PruneOAuthPendingConnections extends Command
 
     public function handle(): int
     {
-        // whereNull(access_token): een van-active her-gekoppelde rij houdt z'n
-        // oude tokens en mag niet worden gewist als de re-link wordt afgebroken.
         $query = Connection::query()
             ->where('status', 'pending')
             ->whereNull('access_token')

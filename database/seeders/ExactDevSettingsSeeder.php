@@ -5,18 +5,9 @@ namespace Database\Seeders;
 use App\Settings\ExactSettings;
 use Illuminate\Database\Seeder;
 
-/**
- * Dev-only: spiegelt de Exact-app-credentials uit .env naar ExactSettings
- * wanneer een veld leeg is. `migrate:fresh` wist de DB-settings (prod blijft
- * DB-only, geen env-fallback) — deze seeder herstelt een werkende dev-koppeling
- * zonder de creds opnieuw in de admin te tikken. Alleen lege velden, zodat
- * admin-ingevoerde waarden niet worden overschreven.
- */
 class ExactDevSettingsSeeder extends Seeder
 {
-    /**
-     * @var array<string, string>
-     */
+    /** @var array<string, string> */
     private const ENV_MAP = [
         'client_id' => 'EXACT_CLIENT_ID',
         'client_secret' => 'EXACT_CLIENT_SECRET',

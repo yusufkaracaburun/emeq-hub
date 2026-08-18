@@ -17,9 +17,6 @@ enum AccountCategory: string implements HasLabel
         return $this->name;
     }
 
-    /**
-     * Assets en expenses hebben normaal een debetsaldo (debet verhoogt, credit verlaagt).
-     */
     public function isNormalDebitBalance(): bool
     {
         return in_array($this, [self::Asset, self::Expense], true);
@@ -30,10 +27,6 @@ enum AccountCategory: string implements HasLabel
         return ! $this->isNormalDebitBalance();
     }
 
-    /**
-     * Nominale rekeningen (revenue/expense) worden per periode afgesloten naar het
-     * eigen vermogen; reële rekeningen (asset/liability/equity) dragen hun saldo door.
-     */
     public function isNominal(): bool
     {
         return in_array($this, [self::Revenue, self::Expense], true);
@@ -44,9 +37,7 @@ enum AccountCategory: string implements HasLabel
         return ! $this->isNominal();
     }
 
-    /**
-     * @return list<self>
-     */
+    /** @return list<self> */
     public static function getOrderedCategories(): array
     {
         return [

@@ -9,12 +9,6 @@ use App\Books\Models\BankAccount;
 use App\Books\Models\BooksCompany;
 use Illuminate\Database\Seeder;
 
-/*
- * Zet het NL-grootboek (config/books-chart.php) klaar voor de ene Books-company.
- * Idempotent (firstOrCreate op code/subtype-naam), dus veilig herhaalbaar.
- *
- * Run: php artisan db:seed --class=BooksChartSeeder
- */
 class BooksChartSeeder extends Seeder
 {
     public function run(): void

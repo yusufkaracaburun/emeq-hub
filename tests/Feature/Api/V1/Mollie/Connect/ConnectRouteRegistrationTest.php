@@ -8,16 +8,9 @@ use Illuminate\Routing\Route;
 use Illuminate\Support\Facades\Route as RouteFacade;
 use Tests\TestCase;
 
-/**
- * Route-registration-smoke voor Plan 13-02 Task 2 — bewijst dat de 9 Connect-
- * routes onder /v1/mollie/connect/* met de juiste middleware-keten + naming-
- * conventie geregistreerd zijn. Echte happy-path-tests komen in Plan 13-03.
- */
 class ConnectRouteRegistrationTest extends TestCase
 {
-    /**
-     * @return list<array{method: string, uri: string}>
-     */
+    /** @return list<array{method: string, uri: string}> */
     private function expectedRoutes(): array
     {
         return [
@@ -33,9 +26,7 @@ class ConnectRouteRegistrationTest extends TestCase
         ];
     }
 
-    /**
-     * @return list<Route>
-     */
+    /** @return list<Route> */
     private function connectRoutes(): array
     {
         $routes = [];
@@ -62,10 +53,6 @@ class ConnectRouteRegistrationTest extends TestCase
             }
         }
 
-        // Set-based assertion — count(...)-equality blijkt brittle tegen auto-
-        // toegevoegde HEAD-verbs en Route::match-additions (WR-06). De per-tuple
-        // assertContains-loop hieronder bewaakt het echte contract: alle 9
-        // verwachte (method, uri)-paren staan in de actual-set.
         foreach ($expected as $tuple) {
             $this->assertContains(
                 $tuple,

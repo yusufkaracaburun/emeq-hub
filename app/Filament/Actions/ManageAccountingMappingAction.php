@@ -18,17 +18,6 @@ use Filament\Schemas\Components\Section;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\HtmlString;
 
-/**
- * Override-pad voor de per-Connection boekhoud-mapping (`metadata.accounting_mapping`):
- * tarief→VATCode-Code, categorie→GL-Code, doc-type→dagboek-Code. Normaal hoeft niemand
- * hier iets te doen — de Hub synct + auto-derivet bij connect; dit verfijnt enkel. Alleen
- * zichtbaar voor providers met een AccountingTarget (nu Exact).
- *
- * De mapping draagt enkel stabiele Codes; GL-Code → native GUID resolved de sync lokaal
- * tegen de mirror. Relaties staan níét in de mapping — ze worden lazy resolve-or-learned
- * uit de party-data. GL-keuzes komen uit de mirror; VAT/dagboek uit live ExactReferenceData,
- * met terugval op vrije tekst-invoer.
- */
 final class ManageAccountingMappingAction
 {
     public static function make(): Action
@@ -56,9 +45,7 @@ final class ManageAccountingMappingAction
             });
     }
 
-    /**
-     * @return list<Section>
-     */
+    /** @return list<Section> */
     private static function schemaFor(Connection $record): array
     {
         $reference = new ExactReferenceData($record);
@@ -76,9 +63,6 @@ final class ManageAccountingMappingAction
                     self::optionField('vat_9', '9%', $vatCodes),
                     self::optionField('vat_0', '0%', $vatCodes),
                 ]),
-            // Verlegde BTW (reverse charge) krijgt eigen VATCodes (6/7) — een verlegd-tarief
-            // mag niet stilletjes op de gewone code boeken. Leeg = de boeking weigert tot het
-            // verlegd-tarief gemapt is. De keuzelijst bevat de "verlegd"-gelabelde Exact-codes.
             Section::make('BTW verlegd (verleggingsregeling)')
                 ->columns(2)
                 ->schema([
@@ -110,9 +94,6 @@ final class ManageAccountingMappingAction
                 ]),
         ];
 
-        // Kostenplaats/-drager is Code-passthrough (geen mapping-laag) — toon enkel de
-        // gesynchroniseerde Codes als inzicht: dit zijn de waarden die een consumer in
-        // cost_center / cost_unit op een boekingsregel mag meesturen.
         if ($costCenters !== [] || $costUnits !== []) {
             $sections[] = Section::make('Kostenplaatsen & kostendragers')
                 ->description('Read-only inzicht — Code-passthrough, hier valt niets te mappen. Dit zijn de geldige cost_center / cost_unit-Codes voor een boekingsregel.')
@@ -130,22 +111,13 @@ final class ManageAccountingMappingAction
         return $sections;
     }
 
-    /**
-     * GL-keuzelijst uit de gesynchroniseerde mirror ([Code => label]); leeg (nog niet
-     * gesynct) valt terug op vrije invoer. De mapping slaat de Code op, niet de GUID.
-     *
-     * @return array<string, string>
-     */
+    /** @return array<string, string> */
     private static function glOptionsFromMirror(Connection $record): array
     {
         return self::refOptionsFromMirror($record, ConnectionAccountingRef::KIND_GL);
     }
 
-    /**
-     * Mirror-keuzelijst per soort ([Code => label]); lege label valt terug op de kale Code.
-     *
-     * @return array<string, string>
-     */
+    /** @return array<string, string> */
     private static function refOptionsFromMirror(Connection $record, string $kind): array
     {
         return ConnectionAccountingRef::query()
@@ -159,11 +131,7 @@ final class ManageAccountingMappingAction
             ->all();
     }
 
-    /**
-     * Read-only lijst-weergave voor een mirror-keuzelijst in een Placeholder.
-     *
-     * @param  array<string, string>  $options
-     */
+    /** @param  array<string, string>  $options */
     private static function refListContent(array $options): HtmlString
     {
         if ($options === []) {
@@ -177,11 +145,7 @@ final class ManageAccountingMappingAction
         return new HtmlString('<div class="text-sm">'.$items.'</div>');
     }
 
-    /**
-     * Keuzelijst gevuld met live Exact-data; lege referentiedata valt terug op vrije invoer.
-     *
-     * @param  array<string, string>  $options
-     */
+    /** @param  array<string, string>  $options */
     private static function optionField(string $name, string $label, array $options): Select|TextInput
     {
         if ($options === []) {
@@ -195,9 +159,7 @@ final class ManageAccountingMappingAction
             ->native(false);
     }
 
-    /**
-     * @return array<string, mixed>
-     */
+    /** @return array<string, mixed> */
     private static function toFormState(Connection $record): array
     {
         $mapping = $record->metadata['accounting_mapping'] ?? [];
@@ -243,10 +205,6 @@ final class ManageAccountingMappingAction
     }
 
     /**
-     * Vaste-sleutel mapping met string-waarden; lege waarden vallen weg. Select-velden
-     * leveren hun (numerieke) optie-key als int — cast naar string zodat de opslag-vorm
-     * gelijk is aan handinvoer en Exact een string-code ontvangt.
-     *
      * @param  array<string, mixed>  $values
      * @return array<string, string>
      */
@@ -266,8 +224,6 @@ final class ManageAccountingMappingAction
     }
 
     /**
-     * Assoc-mapping ([key => value]) → Repeater-rijen ([{keyName, value}]).
-     *
      * @param  array<string, mixed>  $assoc
      * @return list<array<string, mixed>>
      */
@@ -283,8 +239,6 @@ final class ManageAccountingMappingAction
     }
 
     /**
-     * Repeater-rijen → assoc-mapping; lege key/value-rijen vallen weg.
-     *
      * @param  array<int|string, mixed>  $rows
      * @return array<string, mixed>
      */

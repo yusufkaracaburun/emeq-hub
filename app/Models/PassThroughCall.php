@@ -47,10 +47,6 @@ class PassThroughCall extends Model
 
     public $timestamps = false;
 
-    /**
-     * Er zijn zeven plekken die een audit-rij schrijven. Het correlatie-id hier
-     * ophalen in plaats van bij elke writer voorkomt dat de achtste hem vergeet.
-     */
     protected static function booted(): void
     {
         static::creating(function (self $call): void {
@@ -58,10 +54,6 @@ class PassThroughCall extends Model
         });
     }
 
-    /**
-     * Rijen ouder dan het retentie-venster (config `hub.retention.pass_through_days`).
-     * 0 = pruning uit → match niets.
-     */
     public function prunable(): Builder
     {
         $days = (int) config('hub.retention.pass_through_days', 90);
@@ -83,11 +75,6 @@ class PassThroughCall extends Model
         return $query->where('direction', 'outbound');
     }
 
-    /**
-     * Response-body voor de audit-detail: alleen bij fouten (status >= 400),
-     * afgekapt op 8 KB. Rauwe tokens zitten in request-headers (niet de response);
-     * de cap beperkt PII/grootte at rest. Eén bron voor alle pass-through-writers.
-     */
     public static function errorBody(int $status, ?string $body): ?string
     {
         if ($status < 400 || $body === null || $body === '') {
@@ -114,9 +101,7 @@ class PassThroughCall extends Model
         return $this->belongsTo(Connection::class);
     }
 
-    /**
-     * @return array<string, string>
-     */
+    /** @return array<string, string> */
     protected function casts(): array
     {
         return [

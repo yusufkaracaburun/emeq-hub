@@ -13,14 +13,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Context;
 
-/**
- * Inbound partner→Hub webhook-event-audit (provider-agnostisch). Eigen concern,
- * los van `PassThroughCall` (= Consumer→Hub→Partner pass-through + accounting).
- *
- * **Metadata-only — géén payload/headers** (AVG). Genoeg getypte velden voor
- * incident-triage (provider/topic/action/outcome/status/fanout), niet de inhoud.
- * Geschreven via `App\Integrations\Webhooks\InboundWebhookRecorder` (één write-path).
- */
 #[Fillable([
     'provider',
     'event_id',
@@ -45,11 +37,6 @@ class InboundWebhookEvent extends Model
 
     public $timestamps = false;
 
-    /**
-     * Correlatie-id uit de request-context, zodat de recorder er niets van hoeft
-     * te weten. Werkt ook binnen een queued job: het framework hydrateert
-     * `Context` daar terug uit de job-payload.
-     */
     protected static function booted(): void
     {
         static::creating(function (self $event): void {
@@ -57,10 +44,6 @@ class InboundWebhookEvent extends Model
         });
     }
 
-    /**
-     * Rijen ouder dan het retentie-venster (config `hub.retention.webhook_days`).
-     * 0 = pruning uit → match niets.
-     */
     public function prunable(): Builder
     {
         $days = (int) config('hub.retention.webhook_days', 90);

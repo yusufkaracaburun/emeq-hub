@@ -23,12 +23,10 @@ class RateLimitTest extends TestCase
             ->postJson('/v1/accounts', ['external_id' => 'a1', 'display_name' => 'A1'])
             ->assertCreated();
 
-        // Schrijfbudget is nu op; een tweede POST wordt gethrottled.
         $this->withToken($token)
             ->postJson('/v1/accounts', ['external_id' => 'a2', 'display_name' => 'A2'])
             ->assertStatus(429);
 
-        // Het leesbudget is een aparte teller: dezelfde consumer kan nog lezen.
         $this->withToken($token)
             ->getJson('/v1/ping')
             ->assertOk();
@@ -49,11 +47,8 @@ class RateLimitTest extends TestCase
             ->postJson('/v1/accounts', ['external_id' => 'a2', 'display_name' => 'A2'])
             ->assertStatus(429);
 
-        // De auth-manager memoiseert de opgeloste user binnen één test; zonder dit
-        // komt het volgende request nog als consumer A binnen (zie IdempotencyTest).
         $this->app['auth']->forgetGuards();
 
-        // Consumer B heeft een eigen budget; het verbruik van A telt niet mee.
         $this->withToken($tokenB)
             ->postJson('/v1/accounts', ['external_id' => 'b1', 'display_name' => 'B1'])
             ->assertCreated();

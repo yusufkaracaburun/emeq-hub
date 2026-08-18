@@ -4,21 +4,8 @@ declare(strict_types=1);
 
 namespace App\Support\Filament;
 
-use App\Integrations\Webhooks\InboundWebhookRecorder;
-
-/**
- * Eén bron voor Filament-badge-kleuren van de raw (niet-enum) audit-velden, zodat
- * lijst-tabellen en detail-infolists exact dezelfde kleur tonen voor dezelfde staat.
- *
- * Enum-gedragen velden (provider, subscription-status) dragen hun eigen getColor()
- * via de Filament HasColor-contracten — die horen niet hier maar op de enum.
- */
 final class BadgeColor
 {
-    /**
-     * HTTP-statuscode → kleur per klasse (2xx ok, 3xx neutraal, 4xx client-fout,
-     * 5xx server-fout).
-     */
     public static function httpStatus(int|string|null $status): string
     {
         return match (intdiv((int) $status, 100)) {
@@ -30,10 +17,6 @@ final class BadgeColor
         };
     }
 
-    /**
-     * Inbound-webhook-outcome → kleur. processed = ok, duplicate = benign,
-     * unknown_tenant = aandacht, de overige = fout.
-     */
     public static function webhookOutcome(?string $outcome): string
     {
         return match ($outcome) {
@@ -45,10 +28,6 @@ final class BadgeColor
         };
     }
 
-    /**
-     * Fan-out-status (Hub → consumer-callback) → kleur. Waardenset uit
-     * {@see InboundWebhookRecorder}.
-     */
     public static function fanoutStatus(?string $status): string
     {
         return match ($status) {
@@ -59,9 +38,6 @@ final class BadgeColor
         };
     }
 
-    /**
-     * Pass-through-richting → kleur.
-     */
     public static function passThroughDirection(?string $direction): string
     {
         return match ($direction) {
@@ -71,14 +47,6 @@ final class BadgeColor
         };
     }
 
-    /**
-     * Connection-status → kleur. 'revoked' wordt door de table afgeleid uit
-     * revoked_at; active/pending komen rechtstreeks uit de status-kolom.
-     */
-    /**
-     * Status van een binnengekomen aanvraag (toegang, demo): afgehandeld = klaar,
-     * afgewezen = neutraal, al het andere wacht nog op actie.
-     */
     public static function requestStatus(?string $status): string
     {
         return match ($status) {
@@ -98,10 +66,6 @@ final class BadgeColor
         };
     }
 
-    /**
-     * Cashier (Stripe/Mollie) afgeleide subscription-status → kleur. De afleiding
-     * zelf (onTrial/onGracePeriod/ended/active) leeft in de Cashier-resource.
-     */
     public static function cashierStatus(?string $status): string
     {
         return match ($status) {

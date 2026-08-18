@@ -14,23 +14,10 @@ use Emeq\ExactApi\Exceptions\ValidationException;
 use Saloon\Exceptions\Request\FatalRequestException;
 use Throwable;
 
-/**
- * Mapt Exact-SDK-/Saloon-exceptions uit een pass-through-call naar een Hub-HTTP-
- * response. Spiegelt App\Integrations\Snelstart\Errors\UpstreamErrorMapper (dedup naar een
- * gedeelde mapper = uitgestelde A2).
- *
- * Mask-besluit (#9): 401 én 403 blijven naar 502 gemaskeerd zodat de upstream
- * auth-state niet naar de consumer lekt. Het operator-actionable onderscheid
- * (403 = scope/division/rechten-fix vs 401 = token vervangen) landt in
- * `pass_through_calls.upstream_error` via een eigen short_code.
- *
- * @phpstan-type MappedError array{status: int, body: array<string, mixed>, headers: array<string, string>, short_code: ?string}
- */
+/** @phpstan-type MappedError array{status: int, body: array<string, mixed>, headers: array<string, string>, short_code: ?string} */
 final class UpstreamErrorMapper implements MapsUpstreamExceptions
 {
-    /**
-     * @return array{status: int, body: array<string, mixed>, headers: array<string, string>, short_code: ?string}
-     */
+    /** @return array{status: int, body: array<string, mixed>, headers: array<string, string>, short_code: ?string} */
     public static function mapException(Throwable $exception): array
     {
         if ($exception instanceof AuthenticationException) {
@@ -63,8 +50,6 @@ final class UpstreamErrorMapper implements MapsUpstreamExceptions
         }
 
         if ($exception instanceof ServerException) {
-            // 503 = Exact-onderhoud (04:00–04:30 CET) of Akamai-block: geef 503 + Retry-After
-            // door zodat de consumer gericht wacht i.p.v. een blinde 502 te zien.
             if ($exception->status === 503) {
                 $headers = [];
                 if ($exception->retryAfterSeconds !== null) {
@@ -83,10 +68,6 @@ final class UpstreamErrorMapper implements MapsUpstreamExceptions
                 ];
             }
 
-            // Een 5xx mét functionele OData-melding (`error.message.value`, dezelfde melding
-            // die de boekhouder in de Exact-UI ziet) is een permanente afwijzing — niet
-            // retryable. Geef 422: een 4xx laat Cloudflare de body ongemoeid, dus de consument
-            // ziet de échte reden i.p.v. een generieke gateway-pagina.
             $rawMessage = self::extractODataMessage($exception->rawBody);
 
             if ($rawMessage !== null) {
@@ -99,8 +80,6 @@ final class UpstreamErrorMapper implements MapsUpstreamExceptions
                     'upstream_detail' => 'rejected',
                 ];
 
-                // Bewaar de rauwe Exact-tekst voor developer-traceability zodra we 'm
-                // hebben her-formuleerd (anders is `message` zelf al de bron).
                 if ($humanized !== $rawMessage) {
                     $body['provider_message'] = $rawMessage;
                 }
@@ -113,7 +92,6 @@ final class UpstreamErrorMapper implements MapsUpstreamExceptions
                 ];
             }
 
-            // Geen functionele melding → infra-/gateway-5xx: echt transient, retryable.
             return [
                 'status' => 502,
                 'body' => [
@@ -197,23 +175,10 @@ final class UpstreamErrorMapper implements MapsUpstreamExceptions
         ];
     }
 
-    /**
-     * Vertaalt een bekende functionele Exact-melding naar een consument-vriendelijke,
-     * partner-neutrale uitleg (een gebruiker die Exact niet kent moet 'm snappen).
-     * Onbekende meldingen gaan ongewijzigd door — nooit info verbergen; de rauwe tekst
-     * blijft via `provider_message` bewaard wanneer we wél her-formuleren.
-     */
     private static function humanizeExactMessage(string $raw): string
     {
         $haystack = mb_strtolower($raw);
 
-        // De datum van het document valt buiten elke boekperiode die de administratie
-        // kent. Exact meldt dat als "Verplicht: Boekjaar" — een lege-veld-melding voor
-        // een veld dat de consumer niet stuurt en niet kán sturen, dus onbruikbaar
-        // zonder deze vertaling. Het boekbare bereik staat er bewust niet in: dat komt
-        // uit een aparte Exact-call, en die hoort niet op een faalpad thuis. De
-        // validate-route levert het wél — zie `exact.period.closed` in
-        // {@see \App\Integrations\Exact\Accounting\ExactReportEnricher}.
         if (str_contains($haystack, 'boekjaar')) {
             return 'De administratie kent geen boekperiode voor de datum van dit document, '
                 .'dus de boeking is geweigerd. Open het boekjaar in de administratie, of '
@@ -221,7 +186,6 @@ final class UpstreamErrorMapper implements MapsUpstreamExceptions
                 .'Controleer het document vooraf om te zien welk bereik wél boekbaar is.';
         }
 
-        // Exact keurt het btw-nummer af (ongeldig controlecijfer / verkeerd formaat).
         if (str_contains($haystack, 'btw-nummer') || str_contains($haystack, 'controlecijfer')) {
             return 'Het btw-nummer is ongeldig. Controleer het en probeer opnieuw — '
                 .'een Nederlands btw-nummer heeft de vorm NL + 9 cijfers + B + 2 cijfers '
@@ -231,9 +195,6 @@ final class UpstreamErrorMapper implements MapsUpstreamExceptions
         return $raw;
     }
 
-    /**
-     * Haalt Exact's OData-foutmelding (`error.message.value`) uit een ruwe response-body.
-     */
     private static function extractODataMessage(string $body): ?string
     {
         if ($body === '') {

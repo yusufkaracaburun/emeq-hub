@@ -12,20 +12,6 @@ use Illuminate\Http\Request;
 use Mollie\Api\Exceptions\ApiException as MollieApiException;
 use Symfony\Component\HttpFoundation\Response;
 
-/**
- * Pass-through controller voor Mollie Refunds (create + list nested
- * onder Payment + get standalone).
- *
- * Beslissingen 05a-CONTEXT.md / 05a-04-PLAN.md: D-01 (per-resource),
- * D-04 (typed SDK-calls), D-13 (Mollie-error-mapping), D-14 (ability-gates).
- *
- * Plan-deviatie (Rule 1): Mollie's RefundEndpointCollection heeft geen
- * `get(string $id)` — alleen `page()` voor list-all-refunds. De
- * standalone-route /v1/mollie/refunds/{id} mapt daarom intern naar
- * `paymentRefunds->getForId($paymentId, $refundId)` en vereist een
- * `?paymentId=tr_xxx` query-parameter. Audit-path blijft het
- * Mollie-REST-endpoint-template `/v2/refunds/{id}`.
- */
 #[Group(name: 'Mollie · Refunds', description: 'Mollie Refunds API (create per-payment + list + get standalone).', weight: 55)]
 class RefundsController extends AbstractMolliePassThroughController
 {

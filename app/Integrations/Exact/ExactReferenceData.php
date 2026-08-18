@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Integrations\Exact;
 
-use App\Integrations\Exact\Accounting\ExactRelationResolver;
 use App\Models\Connection;
 use App\Models\ConnectionAccountingRef;
 use DateTimeImmutable;
@@ -26,37 +25,17 @@ use Saloon\Enums\Method;
 use Saloon\Http\Request as SdkRequest;
 use Throwable;
 
-/**
- * Haalt Exact-referentiedata (BTW-codes, grootboekrekeningen, relaties, dagboeken)
- * op voor de boekhoud-mapping-UI in de admin. Draait server-side op één Connection
- * — geen consumer-request, dus géén ExactForwarder/pass-through-audit — en bindt de
- * SDK per-call zoals ResolveExactAccount + ExactAccountingTarget.
- *
- * De endpoints + response-envelope leven in de emeq/exact-api SDK (named read-requests
- * + Envelope); deze service kiest alleen de `$select` en mapt de records naar UI-labels.
- * Faalt zacht: bij een ontbrekende division, een pending Connection of een Exact-fout
- * levert elke methode een lege lijst, zodat de UI terugvalt op handinvoer.
- */
 final class ExactReferenceData
 {
-    // Voorkomt dat een oneindige `__next`-lus een Octane-worker op het boekingspad vastpint.
     private const MAX_PAGES = 500;
 
-    // Kort genoeg dat een nieuw boekjaar dezelfde dag doorkomt, lang genoeg dat een
-    // backlog-run van honderden validaties er één Exact-call over doet.
     private const PERIOD_CACHE_SECONDS = 3600;
 
-    // ChamberOfCommerce erbij t.o.v. de eerdere relatie-select: alle drie de
-    // ladder-stappen (KvK/btw/naam) mappen naar dezelfde kandidaat-vorm.
     private const RELATION_SELECT = 'ID,Code,Name,IsSales,IsSupplier,Status,VATNumber,ChamberOfCommerce';
 
     public function __construct(private readonly Connection $connection) {}
 
-    /**
-     * BTW-codes: [Code => label]. De Code is de waarde die de mapping als VATCode opslaat.
-     *
-     * @return array<string, string>
-     */
+    /** @return array<string, string> */
     public function vatCodes(): array
     {
         $out = [];
@@ -74,11 +53,7 @@ final class ExactReferenceData
         return $out;
     }
 
-    /**
-     * Grootboekrekeningen: [GUID => label]. De ID (GUID) is de mapping-waarde.
-     *
-     * @return array<string, string>
-     */
+    /** @return array<string, string> */
     public function glAccounts(): array
     {
         $out = [];
@@ -96,11 +71,7 @@ final class ExactReferenceData
         return $out;
     }
 
-    /**
-     * Relaties: [GUID => Naam]. De ID (GUID) is de mapping-waarde (crm/Account-GUID).
-     *
-     * @return array<string, string>
-     */
+    /** @return array<string, string> */
     public function relations(): array
     {
         $out = [];
@@ -118,11 +89,7 @@ final class ExactReferenceData
         return $out;
     }
 
-    /**
-     * Dagboeken: [Code => label]. De Code is de mapping-waarde (Journal).
-     *
-     * @return array<string, string>
-     */
+    /** @return array<string, string> */
     public function journals(): array
     {
         $out = [];
@@ -140,11 +107,7 @@ final class ExactReferenceData
         return $out;
     }
 
-    /**
-     * Kostenplaatsen: [Code => label]. De Code is de mapping-/boekings-waarde (CostCenter).
-     *
-     * @return array<string, string>
-     */
+    /** @return array<string, string> */
     public function costCenters(): array
     {
         $out = [];
@@ -162,11 +125,7 @@ final class ExactReferenceData
         return $out;
     }
 
-    /**
-     * Kostendragers: [Code => label]. De Code is de mapping-/boekings-waarde (CostUnit).
-     *
-     * @return array<string, string>
-     */
+    /** @return array<string, string> */
     public function costUnits(): array
     {
         $out = [];
@@ -184,17 +143,7 @@ final class ExactReferenceData
         return $out;
     }
 
-    /**
-     * De boekperioden die de administratie kent, als datumbereiken.
-     *
-     * Exact levert `FinancialPeriods` zonder status-veld: een periode die er staat is
-     * boekbaar, een datum die in geen enkele periode valt levert bij het boeken
-     * `Verplicht: Boekjaar` op. De lijst wisselt hooguit bij een jaarwisseling, dus hij
-     * wordt kort gecachet in plaats van gespiegeld — een gespiegelde lijst die niemand
-     * ververst zou in januari elk document van het nieuwe jaar onterecht blokkeren.
-     *
-     * @return list<array{start: DateTimeImmutable, end: DateTimeImmutable, fiscal_year: int, period: int}>
-     */
+    /** @return list<array{start: DateTimeImmutable, end: DateTimeImmutable, fiscal_year: int, period: int}> */
     public function financialPeriods(): array
     {
         $division = (string) $this->connection->administratie_id;
@@ -220,13 +169,7 @@ final class ExactReferenceData
         );
     }
 
-    /**
-     * Alleen scalars: de cache serialiseert wat hier uit komt, en een teruggelezen
-     * `DateTimeImmutable` kwam als incomplete object terug zodra de store écht
-     * serialiseert (Redis op productie; de array-store in tests niet).
-     *
-     * @return list<array{start: string, end: string, fiscal_year: int, period: int}>
-     */
+    /** @return list<array{start: string, end: string, fiscal_year: int, period: int}> */
     private function readFinancialPeriods(): array
     {
         $request = new RawExactRequest(
@@ -256,9 +199,6 @@ final class ExactReferenceData
         return $out;
     }
 
-    /**
-     * Exact serialiseert OData-datums als `/Date(1793491200000)/` — milliseconden sinds epoch.
-     */
     private static function odataDate(mixed $value): ?string
     {
         if (! is_string($value) || preg_match('/\/Date\((-?\d+)/', $value, $matches) !== 1) {
@@ -270,13 +210,7 @@ final class ExactReferenceData
             ->format('Y-m-d');
     }
 
-    /**
-     * Rich mirror-rijen voor de reference-sync: stabiele `code` → provider-native `native_id`.
-     * GL: native_id = de GUID. VAT/journal: native_id = de Code (Exact accepteert die direct
-     * op de boeking); `attrs` draagt kind-specifieke velden (percentage / type).
-     *
-     * @return list<array{kind: string, code: string, native_id: string, label: string, attrs: array<string, mixed>}>
-     */
+    /** @return list<array{kind: string, code: string, native_id: string, label: string, attrs: array<string, mixed>}> */
     public function mirrorRows(): array
     {
         return [
@@ -288,9 +222,7 @@ final class ExactReferenceData
         ];
     }
 
-    /**
-     * @return list<array{kind: string, code: string, native_id: string, label: string, attrs: array<string, mixed>}>
-     */
+    /** @return list<array{kind: string, code: string, native_id: string, label: string, attrs: array<string, mixed>}> */
     public function glAccountRows(): array
     {
         $out = [];
@@ -315,9 +247,7 @@ final class ExactReferenceData
         return $out;
     }
 
-    /**
-     * @return list<array{kind: string, code: string, native_id: string, label: string, attrs: array<string, mixed>}>
-     */
+    /** @return list<array{kind: string, code: string, native_id: string, label: string, attrs: array<string, mixed>}> */
     public function vatCodeRows(): array
     {
         $out = [];
@@ -334,7 +264,6 @@ final class ExactReferenceData
                 'code' => $code,
                 'native_id' => $code,
                 'label' => trim((string) ($row['Description'] ?? '')),
-                // Exact draagt Percentage als fractie (0.21) → naar heel-percentage (21) voor de mapping-match.
                 'attrs' => ['percentage' => isset($row['Percentage']) ? (float) $row['Percentage'] * 100 : null],
             ];
         }
@@ -342,9 +271,7 @@ final class ExactReferenceData
         return $out;
     }
 
-    /**
-     * @return list<array{kind: string, code: string, native_id: string, label: string, attrs: array<string, mixed>}>
-     */
+    /** @return list<array{kind: string, code: string, native_id: string, label: string, attrs: array<string, mixed>}> */
     public function journalRows(): array
     {
         $out = [];
@@ -368,12 +295,7 @@ final class ExactReferenceData
         return $out;
     }
 
-    /**
-     * Kostenplaatsen: native_id = Code (Exact accepteert de Code direct op de boekingsregel,
-     * `Edm.String` — anders dan GLAccount/GUID).
-     *
-     * @return list<array{kind: string, code: string, native_id: string, label: string, attrs: array<string, mixed>}>
-     */
+    /** @return list<array{kind: string, code: string, native_id: string, label: string, attrs: array<string, mixed>}> */
     public function costCenterRows(): array
     {
         $out = [];
@@ -397,11 +319,7 @@ final class ExactReferenceData
         return $out;
     }
 
-    /**
-     * Kostendragers: native_id = Code (zie costCenterRows).
-     *
-     * @return list<array{kind: string, code: string, native_id: string, label: string, attrs: array<string, mixed>}>
-     */
+    /** @return list<array{kind: string, code: string, native_id: string, label: string, attrs: array<string, mixed>}> */
     public function costUnitRows(): array
     {
         $out = [];
@@ -425,16 +343,7 @@ final class ExactReferenceData
         return $out;
     }
 
-    /**
-     * KvK-stap van de relatie-resolutie ({@see ExactRelationResolver}).
-     * Twee server-side `$filter`-probes — de rauwe waarde en de alleen-cijfers-variant
-     * (Exact draagt een KvK-nummer soms met spaties/streepjes) — nooit een volledige scan:
-     * deze stap moet goedkoop blijven, hij loopt bij elke boeking op een `company`-party.
-     *
-     * Geeft alle kandidaten terug (0, 1 of meer) — de caller beslist wat "ambigu" betekent.
-     *
-     * @return list<array{id: string, code: string, name: string, is_sales: bool, is_supplier: bool, status: ?string, chamber_of_commerce: ?string, vat_number: ?string}>
-     */
+    /** @return list<array{id: string, code: string, name: string, is_sales: bool, is_supplier: bool, status: ?string, chamber_of_commerce: ?string, vat_number: ?string}> */
     public function relationsByChamberOfCommerce(?string $chamberOfCommerce): array
     {
         $chamberOfCommerce = trim((string) $chamberOfCommerce);
@@ -455,14 +364,7 @@ final class ExactReferenceData
         return $this->mapRelationRows($this->dedupeById(array_merge(...$rows)));
     }
 
-    /**
-     * Btw-stap: eerst dezelfde twee goedkope server-side probes (rauw + genormaliseerd),
-     * en alleen wanneer die niets opleveren de bestaande volledige scan met lokale
-     * normalisatie als vangnet — nodig voor `NL8037.25.802.B01` vs `NL803725802B01`,
-     * waar Exact's `$filter` (letterlijke string-equality) niet voor normaliseert.
-     *
-     * @return list<array{id: string, code: string, name: string, is_sales: bool, is_supplier: bool, status: ?string, chamber_of_commerce: ?string, vat_number: ?string}>
-     */
+    /** @return list<array{id: string, code: string, name: string, is_sales: bool, is_supplier: bool, status: ?string, chamber_of_commerce: ?string, vat_number: ?string}> */
     public function relationsByVatNumber(?string $vatNumber): array
     {
         $normalized = self::normalizeVatNumber($vatNumber);
@@ -497,15 +399,7 @@ final class ExactReferenceData
         )));
     }
 
-    /**
-     * Naam-stap: volledige scan (Exact's `$filter` kan geen rechtsvorm/interpunctie
-     * negeren) + lokale genormaliseerde vergelijking — lowercase, interpunctie weg,
-     * rechtsvorm-suffixen weg ("Acme B.V." matcht zo "Acme BV"). Laatste en duurste
-     * stap van de ladder, bewust: hij draait vlak vóór het enige onomkeerbare moment
-     * (aanmaken in andermans administratie).
-     *
-     * @return list<array{id: string, code: string, name: string, is_sales: bool, is_supplier: bool, status: ?string, chamber_of_commerce: ?string, vat_number: ?string}>
-     */
+    /** @return list<array{id: string, code: string, name: string, is_sales: bool, is_supplier: bool, status: ?string, chamber_of_commerce: ?string, vat_number: ?string}> */
     public function relationsByName(?string $name): array
     {
         $normalized = self::normalizeName((string) $name);
@@ -522,9 +416,7 @@ final class ExactReferenceData
         )));
     }
 
-    /**
-     * @return list<string>
-     */
+    /** @return list<string> */
     private function probeVariants(string $raw, ?string $normalized = null): array
     {
         $raw = trim($raw);
@@ -599,21 +491,12 @@ final class ExactReferenceData
         return mb_strtoupper(preg_replace('/[\s.\-]+/', '', $vatNumber) ?? $vatNumber);
     }
 
-    /**
-     * Rechtsvorm-suffixen die de dedupe-vergelijking negeert — "Acme B.V." en "Acme
-     * Holding" moeten allebei op "Acme" matchen. Vaste lijst i.p.v. een regex-heuristiek:
-     * expliciet houdt de aannames zichtbaar en voorkomt dat een gewone bedrijfsnaam met
-     * bv. "inc" erin per ongeluk wordt afgeknipt.
-     *
-     * @var list<string>
-     */
+    /** @var list<string> */
     private const LEGAL_FORM_SUFFIXES = ['bv', 'nv', 'vof', 'cv', 'bvba', 'gmbh', 'ltd', 'inc', 'holding', 'beheer'];
 
     private static function normalizeName(string $name): string
     {
         $name = mb_strtolower(trim($name));
-        // Punten eerst apart weghalen (zonder spatie): "B.V." moet als één token "bv"
-        // overblijven, niet als de twee losse tokens "b" en "v".
         $name = str_replace('.', '', $name);
         $name = preg_replace('/[^\p{L}\p{N}\s]+/u', ' ', $name) ?? $name;
         $words = preg_split('/\s+/', trim($name), -1, PREG_SPLIT_NO_EMPTY) ?: [];
@@ -622,15 +505,7 @@ final class ExactReferenceData
         return implode(' ', $words);
     }
 
-    /**
-     * Leest de rol-vlaggen van één relatie op GUID — gebruikt om een uit de mirror
-     * herbruikte relatie naar de juiste rol te promoveren vóór de boeking. Fail-soft:
-     * niet leesbaar → null (de caller slaat de promotie dan over en laat de boeking
-     * zelf de fout opleveren). Bewust één pagina: het filter is een unieke sleutel,
-     * dus een tweede pagina kan geen kandidaat verbergen.
-     *
-     * @return array{is_sales: bool, is_supplier: bool, status: ?string}|null
-     */
+    /** @return array{is_sales: bool, is_supplier: bool, status: ?string}|null */
     public function relationRoles(string $guid): ?array
     {
         $guid = trim($guid);
@@ -656,16 +531,6 @@ final class ExactReferenceData
         ];
     }
 
-    /**
-     * Staat deze relatie aantoonbaar niet meer in de administratie?
-     *
-     * Alleen `true` wanneer Exact antwoordde én de relatie er niet bij zat. Elke andere
-     * uitkomst — een fout, een time-out, een ontbrekende division — is `false`: "niet
-     * vastgesteld". Het verschil is wezenlijk, want de caller gooit op `true` een
-     * mirror-koppeling weg. Een transportfout mag dat nooit veroorzaken; dan zou de
-     * eerstvolgende boeking een tweede relatie aanmaken naast een relatie die prima
-     * bestaat.
-     */
     public function relationIsGone(string $guid): bool
     {
         $guid = trim($guid);
@@ -693,17 +558,13 @@ final class ExactReferenceData
         return str_replace("'", "''", $value);
     }
 
-    /**
-     * @return callable(array<string, scalar|null>): SdkRequest
-     */
+    /** @return callable(array<string, scalar|null>): SdkRequest */
     private static function relationRequest(): callable
     {
         return static fn (array $params): SdkRequest => new GetRelations($params);
     }
 
-    /**
-     * @return list<array<string, mixed>>
-     */
+    /** @return list<array<string, mixed>> */
     private function fetch(SdkRequest $request): array
     {
         $division = (string) $this->connection->administratie_id;
@@ -726,14 +587,6 @@ final class ExactReferenceData
     }
 
     /**
-     * Haalt een lees volledig op, pagina voor pagina, via Exact's OData-
-     * continuation-token (`$skiptoken`) — zelfde patroon als
-     * `ExactAccountingTarget::readPage()`. Faalt zacht als `fetch()`: elke fout (ook op een
-     * latere pagina, een `MAX_PAGES`-overschrijding, of een herhaald skiptoken) levert een
-     * lege lijst op, nooit een onvolledige set — een onvolledige set zou de
-     * ambiguïteitsdetectie in de relatie-resolutie ({@see ExactRelationResolver})
-     * een treffer laten missen, en de mirror structureel incompleet vullen.
-     *
      * @param  array<string, scalar|null>  $params
      * @param  callable(array<string, scalar|null>): SdkRequest  $make
      * @return list<array<string, mixed>>

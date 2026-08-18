@@ -14,14 +14,6 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Concerns\StubsMollieClient;
 use Tests\TestCase;
 
-/**
- * Plan 07-06 Task 1 — feature-tests voor POST /v1/account-subscriptions (D-08
- * route, D-09 body-shape, D-10 abilities, D-12 cross-Consumer 404/422, D-14
- * Idempotency-Key forward).
- *
- * Bewijst SC-1 (Create happy) + ability-gating + Form-Request-validatie +
- * Mollie-error-mapping + Idempotency-Key-forward via StubMollieClient-capture.
- */
 class CreateAccountSubscriptionTest extends TestCase
 {
     use RefreshDatabase;
@@ -115,7 +107,6 @@ class CreateAccountSubscriptionTest extends TestCase
     {
         [, $token] = $this->setupMollieConsumer([TokenAbilities::MOLLIE_WRITE]);
 
-        // T-07-04-06: regex blocks negatieve + non-2-decimals waarden.
         $body = $this->validBody(['amount' => ['currency' => 'EUR', 'value' => '10']]);
 
         $this->withHeader('Authorization', "Bearer {$token}")
@@ -126,9 +117,6 @@ class CreateAccountSubscriptionTest extends TestCase
 
     public function test_account_external_id_of_other_consumer_returns_422(): void
     {
-        // Consumer A's PAT met Consumer B's account_external_id → 422 (Rule::exists
-        // faalt door consumer_id-where-clause; T-07-04-03 + D-12 invariant —
-        // 422 niet 404 omdat Form Request vroeg faalt.
         [, $tokenA] = $this->setupMollieConsumer([TokenAbilities::MOLLIE_WRITE], 'school-A');
 
         $consumerB = Consumer::factory()->create();

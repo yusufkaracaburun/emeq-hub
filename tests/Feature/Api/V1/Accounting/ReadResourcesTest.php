@@ -26,10 +26,6 @@ use Saloon\Http\Faking\MockClient;
 use Saloon\Http\Faking\MockResponse;
 use Tests\TestCase;
 
-/**
- * Het provider-onafhankelijke lees-pad. De consumer vraagt canonieke resources op en
- * krijgt overal dezelfde vorm terug: `{data, next_cursor, has_more}`.
- */
 class ReadResourcesTest extends TestCase
 {
     use RefreshDatabase;
@@ -54,15 +50,11 @@ class ReadResourcesTest extends TestCase
         parent::tearDown();
     }
 
-    /**
-     * @return array{0: Consumer, 1: Connection}
-     */
+    /** @return array{0: Consumer, 1: Connection} */
     private function connected(): array
     {
         $consumer = Consumer::factory()->create();
         $account = $consumer->accounts()->create(['external_id' => 'school1', 'display_name' => 'School 1']);
-        // Niet-verlopen token: anders vuurt de SDK een refresh die niet gemockt is en
-        // krijg je een gemaskeerde 502 in plaats van het antwoord dat je test.
         $connection = Connection::factory()->forExact()->for($account)->create([
             'status' => 'active',
             'expires_at' => now()->addSeconds(600),
@@ -108,10 +100,6 @@ class ReadResourcesTest extends TestCase
             ->assertJsonPath('next_cursor', null);
     }
 
-    /**
-     * De canonieke lees-ability noemt geen provider en overleeft dus een migratie
-     * van de eindgebruiker naar een ander boekhoudpakket.
-     */
     public function test_canonical_accounting_read_ability_is_accepted(): void
     {
         [$consumer, $connection] = $this->connected();
@@ -126,10 +114,6 @@ class ReadResourcesTest extends TestCase
             ->assertJsonPath('data.0.code', '0100');
     }
 
-    /**
-     * Geen partner-call: de mirror is de bron. Een lees-endpoint dat Exact belt voor
-     * stabiele referentiedata is verspilling én een extra faalpunt.
-     */
     public function test_reading_the_mirror_does_not_touch_the_partner(): void
     {
         [$consumer, $connection] = $this->connected();
@@ -148,14 +132,10 @@ class ReadResourcesTest extends TestCase
 
         $response = $this->fetch($consumer, 'tax-codes')->assertOk();
 
-        // JSON kent één getaltype; wat telt is dat het een getal is en geen string.
         $this->assertIsNumeric($response->json('data.0.rate'));
         $this->assertEqualsWithDelta(21.0, $response->json('data.0.rate'), 0.001);
     }
 
-    /**
-     * Zonder percentage blijft `rate` null — 0.0 zou "0%" betekenen, en dat bestaat ook.
-     */
     public function test_a_tax_code_without_a_percentage_reports_a_null_rate(): void
     {
         [$consumer, $connection] = $this->connected();
@@ -217,7 +197,6 @@ class ReadResourcesTest extends TestCase
             ->assertOk()
             ->assertJsonPath('data.0.id', 'rel-1')
             ->assertJsonPath('data.0.name', 'Acme BV')
-            // Exact vult Code op met spaties; die horen niet in het canonieke antwoord.
             ->assertJsonPath('data.0.code', '1001')
             ->assertJsonPath('data.0.roles', ['debtor']);
 
@@ -240,9 +219,6 @@ class ReadResourcesTest extends TestCase
         MockClient::global()->assertSent(fn (GetRelations $request): bool => $request->query()->get('$filter') === 'IsSupplier eq true');
     }
 
-    /**
-     * De continuation-token van Exact wordt een ondoorzichtige cursor voor de consumer.
-     */
     public function test_a_live_page_exposes_the_partner_continuation_token_as_a_cursor(): void
     {
         MockClient::global([
@@ -260,10 +236,6 @@ class ReadResourcesTest extends TestCase
         $this->assertStringNotContainsString('skiptoken', (string) $response->json('next_cursor'));
     }
 
-    /**
-     * Een lege lijst teruggeven terwijl de partner plat ligt is een leugen. Dit is het
-     * verschil met ExactReferenceData, dat bewust fail-soft is voor de admin-UI.
-     */
     public function test_an_upstream_failure_surfaces_instead_of_an_empty_list(): void
     {
         MockClient::global([
@@ -277,9 +249,6 @@ class ReadResourcesTest extends TestCase
         $this->assertNull($response->json('data'));
     }
 
-    /**
-     * Bewijst dat de gate op de capability zit en niet op de providernaam.
-     */
     public function test_a_provider_without_the_read_capability_gets_422(): void
     {
         app(AccountingTargetRegistry::class)->register(Provider::Snelstart->value, WriteOnlyReadTarget::class);
@@ -298,9 +267,6 @@ class ReadResourcesTest extends TestCase
             ->assertJsonPath('category', 'UNSUPPORTED_CAPABILITY');
     }
 
-    /**
-     * De leeskant van POST /v1/accounting/documents — zelfde pad, zelfde begrip.
-     */
     public function test_documents_are_read_back_from_the_resource_they_were_written_to(): void
     {
         MockClient::global([
@@ -322,7 +288,6 @@ class ReadResourcesTest extends TestCase
         ]);
         [$consumer, $connection] = $this->connected();
 
-        // Relatienaam komt uit de mirror, niet uit een tweede partner-call.
         ConnectionAccountingRef::query()->create([
             'connection_id' => $connection->getKey(),
             'kind' => ConnectionAccountingRef::KIND_RELATION,
@@ -336,22 +301,16 @@ class ReadResourcesTest extends TestCase
             ->assertJsonPath('data.0.id', 'entry-1')
             ->assertJsonPath('data.0.type', 'sales_invoice')
             ->assertJsonPath('data.0.number', '60001')
-            // YourRef draagt de provenance; hieruit komt de sleutel van de consumer terug.
             ->assertJsonPath('data.0.external_id', 'INV-2026-001')
             ->assertJsonPath('data.0.issue_date', '2026-06-16')
             ->assertJsonPath('data.0.due_date', '2026-07-16')
             ->assertJsonPath('data.0.party.id', 'cust-guid')
             ->assertJsonPath('data.0.party.name', 'Acme BV')
-            // Totaal uit de regels, niet uit een header-veld van de partner.
             ->assertJsonPath('data.0.net_total', 250)
             ->assertJsonCount(2, 'data.0.lines')
             ->assertJsonPath('data.0.lines.0.tax_code', '4');
     }
 
-    /**
-     * Een document dat buiten de Hub om is ingevoerd heeft geen provenance en dus
-     * geen external_id — null is dan het eerlijke antwoord.
-     */
     public function test_a_document_without_provenance_has_no_external_id(): void
     {
         MockClient::global([
@@ -369,18 +328,11 @@ class ReadResourcesTest extends TestCase
             ->assertJsonPath('data.0.net_total', 0);
     }
 
-    /**
-     * Boekingen van vóór de 30-tekengrens dragen een half afgekapte uuid in `YourRef`.
-     * `provider_entity_links` draagt de volledige waarde, geschreven toen de Hub dit
-     * document zelf boekte — de leeskant moet die raadplegen in plaats van de afgekapte
-     * provenance te geloven.
-     */
     public function test_external_id_is_resolved_from_the_provider_entity_link_when_present(): void
     {
         MockClient::global([
             GetSalesEntries::class => MockResponse::make(['d' => ['results' => [[
                 'EntryID' => 'entry-1',
-                // Oude vorm: 'Emeq Hub · ' + een op 50 tekens afgekapte uuid.
                 'YourRef' => 'Emeq Hub · 91dd0bf3-1d3a-4a3e-86a9-dec359140b',
                 'SalesEntryLines' => ['results' => []],
             ]]]], 200),
@@ -399,11 +351,6 @@ class ReadResourcesTest extends TestCase
             ->assertJsonPath('data.0.external_id', '91dd0bf3-1d3a-4a3e-86a9-dec359140b40');
     }
 
-    /**
-     * Een document dat de Hub wél zelf boekte maar waarvoor de link-rij ontbreekt (nog
-     * niet gemigreerd, handmatig verwijderd) valt terug op de afgekapte provenance —
-     * beter dan niets, expliciet als noodgreep.
-     */
     public function test_external_id_falls_back_to_truncated_provenance_without_a_link_row(): void
     {
         MockClient::global([
@@ -420,9 +367,6 @@ class ReadResourcesTest extends TestCase
             ->assertJsonPath('data.0.external_id', '91dd0bf3-1d3a-4a3e-86a9-dec359140b');
     }
 
-    /**
-     * Eén query voor de hele pagina, niet één opzoeking per document.
-     */
     public function test_external_ids_are_resolved_in_a_single_query(): void
     {
         MockClient::global([
@@ -483,12 +427,6 @@ class ReadResourcesTest extends TestCase
             ->assertJsonPath('error', 'invalid_query');
     }
 
-    /**
-     * Zonder type kwamen hier verkoopboekingen terug. Wie om documenten vroeg kreeg
-     * dus één soort, zonder dat iets dat zei. Liever vragen dan stil de verkeerde
-     * helft leveren — boekhoudpakketten houden verkoop en inkoop in gescheiden
-     * collecties met een eigen cursor.
-     */
     public function test_documents_without_a_type_is_rejected_instead_of_defaulting_to_sales(): void
     {
         [$consumer] = $this->connected();
@@ -498,15 +436,6 @@ class ReadResourcesTest extends TestCase
             ->assertJsonPath('error', 'invalid_query');
     }
 
-    /**
-     * Eén query voor alle relatienamen op de pagina; per document opzoeken zou een
-     * N+1 zijn tegen de mirror.
-     */
-    /**
-     * `external_id`, `number`, `from` en `issued_after` werden stil genegeerd: de
-     * consumer kreeg 200 met dezelfde ongefilterde lijst terug. Eerlijk falen is
-     * beter dan een leugen op 200.
-     */
     public function test_an_unsupported_filter_parameter_is_rejected_instead_of_silently_ignored(): void
     {
         [$consumer] = $this->connected();
@@ -552,10 +481,6 @@ class ReadResourcesTest extends TestCase
         $this->assertSame(1, $queries, 'Relatienamen horen in één query opgehaald te worden.');
     }
 
-    /**
-     * De resource waarover de bank-webhooks notificeren. Zonder dit endpoint kreeg een
-     * consumer wel het seintje maar niet de inhoud.
-     */
     public function test_bank_statements_expose_the_lines_the_webhook_notifies_about(): void
     {
         MockClient::global([
@@ -594,7 +519,6 @@ class ReadResourcesTest extends TestCase
             ->assertJsonPath('data.0.closing_balance', 1250)
             ->assertJsonPath('data.0.lines.0.date', '2026-06-16')
             ->assertJsonPath('data.0.lines.0.amount', 250)
-            // Anders dan bij een boeking levert Exact de tegenpartij-naam op de regel.
             ->assertJsonPath('data.0.lines.0.relation.name', 'Acme BV')
             ->assertJsonPath('data.0.lines.0.ledger_account_code', '1300')
             ->assertJsonPath('data.0.lines.0.document_number', '7001');
@@ -637,9 +561,6 @@ class ReadResourcesTest extends TestCase
             ->assertStatus(403);
     }
 
-    /**
-     * De mirror van de ene koppeling mag nooit bij de andere opduiken.
-     */
     public function test_the_mirror_is_scoped_to_the_connection(): void
     {
         [$consumer, $connection] = $this->connected();
@@ -658,7 +579,6 @@ class ReadResourcesTest extends TestCase
     }
 }
 
-/** Adapter die kan boeken maar niets kan lezen. */
 final class WriteOnlyReadTarget implements AccountingTarget
 {
     public function push(FinancialDocument $document, Connection $connection): AccountingResult

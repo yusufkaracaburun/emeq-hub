@@ -9,14 +9,6 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Concerns\StubsMollieClient;
 use Tests\TestCase;
 
-/**
- * MOLL-03 Payment Links — top-level resource.
- *
- * Routes:
- *   GET    /v1/mollie/payment-links
- *   POST   /v1/mollie/payment-links
- *   GET    /v1/mollie/payment-links/{id}
- */
 class PaymentLinksTest extends TestCase
 {
     use RefreshDatabase;

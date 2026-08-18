@@ -10,16 +10,8 @@ use Carbon\CarbonInterface;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
-/*
- * Genereert op de cadans concept-verkoopfacturen uit actieve
- * RecurringInvoice-templates. Gegenereerde facturen zijn Draft + niet geboekt —
- * de boekhouder reviewt + boekt via het bestaande pad (geen ongezien
- * grootboek-effect). De inhaalslag per template is gecapt zodat een lang-
- * gepauzeerde template niet honderden facturen ineens spuit.
- */
 class RecurringInvoiceGenerator
 {
-    /** Max facturen per template per run (inhaal-cap). */
     private const MAX_CATCHUP = 24;
 
     public function generateDue(?CarbonInterface $asOf = null): int
@@ -48,7 +40,6 @@ class RecurringInvoiceGenerator
                 break;
             }
 
-            // Voorbij de einddatum → niets meer boeken, sluit de template.
             if ($template->end_date !== null && $next->gt($template->end_date)) {
                 $template->status = RecurringStatus::Ended;
                 $template->save();
@@ -94,7 +85,6 @@ class RecurringInvoiceGenerator
                 ]);
             }
 
-            // Totalen zijn door de InvoiceLineObserver gezet; verse staat ophalen.
             return $invoice->refresh();
         });
     }

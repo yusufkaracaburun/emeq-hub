@@ -13,14 +13,6 @@ use App\Models\Consumer;
 use Illuminate\Console\Command;
 use Throwable;
 
-/**
- * Verifieert end-to-end of de accounting-sync van één Account-koppeling werkt:
- * post sample-documenten (verkoop/inkoop/income) via de échte AccountingSyncRunner
- * naar het gekoppelde boekhoudpakket en rapporteert per stuk posted/failed.
- *
- * Schrijft ECHTE boekingen in het boekhoudpakket — daarom default alleen in
- * local/testing; `--force` om elders te draaien (bv. tegen een test-administratie).
- */
 class AccountingSmoke extends Command
 {
     protected $signature = 'hub:accounting:smoke
@@ -85,9 +77,7 @@ class AccountingSmoke extends Command
         return $allPosted ? self::SUCCESS : self::FAILURE;
     }
 
-    /**
-     * @return array{0: string, 1: string}
-     */
+    /** @return array{0: string, 1: string} */
     private function push(AccountingSyncRunner $runner, string $type, Connection $connection, Account $account, int $consumerId): array
     {
         try {
@@ -104,9 +94,7 @@ class AccountingSmoke extends Command
         }
     }
 
-    /**
-     * @return array<string, mixed>
-     */
+    /** @return array<string, mixed> */
     private function sampleDocument(string $type): array
     {
         $amount = (float) $this->option('amount');
@@ -135,9 +123,7 @@ class AccountingSmoke extends Command
         ];
     }
 
-    /**
-     * @return list<string>
-     */
+    /** @return list<string> */
     private function resolveTypes(): array
     {
         return array_values(array_filter(array_map(

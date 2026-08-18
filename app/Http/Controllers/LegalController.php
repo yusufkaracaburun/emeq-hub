@@ -14,12 +14,6 @@ use Inertia\Inertia;
 use Inertia\Response;
 use League\CommonMark\Extension\Table\TableExtension;
 
-/**
- * Publieke juridische pagina's (privacyverklaring + algemene voorwaarden). De
- * teksten zijn markdown, beheerd in de admin (ManageLegalPages), en worden hier
- * server-side naar HTML gerenderd. `html_input` op strip + geen unsafe links:
- * admin-content is vertrouwd, maar we laten geen rauwe HTML door.
- */
 class LegalController extends Controller
 {
     public function privacy(LegalSettings $legal): Response
@@ -67,8 +61,6 @@ class LegalController extends Controller
     ): Response {
         $url = route($routeName);
 
-        // Het design nummert secties zelf (CSS-counter in de kantlijn); handmatige
-        // nummers in ##-koppen zouden dubbel tellen.
         $markdown = (string) preg_replace('/^##\s+\d+[.)]\s*/m', '## ', $markdown);
 
         return Inertia::render('legal', [
@@ -92,11 +84,6 @@ class LegalController extends Controller
         ]);
     }
 
-    /**
-     * De datum is vrije tekst uit de admin ("18 juli 2026", "2026-07-18", …).
-     * schema.org eist ISO-8601; bij een onparseerbare waarde laten we het veld
-     * liever weg dan een verzonnen datum te publiceren.
-     */
     private function isoDate(string $value): ?string
     {
         try {
