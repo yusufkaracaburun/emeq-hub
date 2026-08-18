@@ -17,15 +17,6 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
-/**
- * Beheerdrawer per koppeling op de signed connect-pagina: de payload achter de
- * drawer, de boekhoud-mapping opslaan, en relaties herkoppelen/ontkoppelen/zoeken.
- *
- * Zelfde bewijslast als {@see ConnectHandoffController}: `signed`-middleware +
- * Account-binding uit de handtekening, geen eindgebruiker-auth. Alleen zichtbaar
- * voor providers met een AccountingTarget (nu Exact) — de rest krijgt 404, net
- * als een niet-bestaande provider. Zie `.docs/decisions/connection-management-drawer.md`.
- */
 class ConnectManageController extends Controller
 {
     public function __construct(
@@ -57,12 +48,6 @@ class ConnectManageController extends Controller
         ]);
     }
 
-    /**
-     * Bewaart alleen de vier bewerkbare sleutels; alles anders in de request (bv.
-     * `vat_codes`) wordt genegeerd — `validate()` retourneert nooit meer dan de
-     * geregistreerde regels. Elke waarde moet een Code uit de mirror zijn (geen
-     * vrije tekst, zie ADR); leeg = de override wissen.
-     */
     public function updateMapping(Request $request, Account $account, string $provider): JsonResponse
     {
         $connection = $this->resolveConnection($account, $provider);
@@ -110,12 +95,6 @@ class ConnectManageController extends Controller
         return response()->json(['settings' => $this->settingsPayload($connection)]);
     }
 
-    /**
-     * Herkoppelen zet `native_id` op een andere relatie (typisch een kandidaat uit
-     * `searchRelations`). Raakt alleen de lokale mirror-rij — geen Exact-write, dus
-     * geen `ProviderEntityLink`: de klant corrigeert hier alleen waar de Hub naar
-     * wijst, niet de administratie zelf.
-     */
     public function relinkRelation(Request $request, Account $account, string $provider, ConnectionAccountingRef $ref): JsonResponse
     {
         $connection = $this->resolveConnection($account, $provider);
@@ -146,12 +125,6 @@ class ConnectManageController extends Controller
         return response()->json(['deleted' => true]);
     }
 
-    /**
-     * Exacte, genormaliseerde naam-match (zelfde stap als de resolutie-ladder) —
-     * geen fuzzy zoeken. Dit is de dure volledige scan uit
-     * {@see ExactReferenceData::relationsByName()}, dus bewust geen live-typen op
-     * de front-end en een eigen throttle op de route.
-     */
     public function searchRelations(Request $request, Account $account, string $provider): JsonResponse
     {
         $connection = $this->resolveConnection($account, $provider);
@@ -171,28 +144,14 @@ class ConnectManageController extends Controller
         ]);
     }
 
-    /**
-     * @return list<array<string, mixed>>
-     */
-    /**
-     * De laatste boekingen van deze koppeling, uit de audit-rijen van
-     * `POST /v1/accounting/documents`. Elke poging staat er — geslaagd én geweigerd —
-     * zodat de klant ook ziet wat er níet doorging.
-     *
-     * De rij draagt bewust geen document-inhoud (`request_fingerprint` is een hash van
-     * het `external_id`). Het leesbare nummer komt daarom uit `provider_entity_links`:
-     * die fingerprint is deterministisch, dus de kant met de klare tekst rekent 'm uit
-     * en zoekt de match op.
-     *
-     * @return list<array<string, mixed>>
-     */
+    /** @return list<array<string, mixed>> */
     private function bookingRows(Connection $connection): array
     {
         $calls = PassThroughCall::query()
             ->where('connection_id', $connection->getKey())
             ->where('path', '/v1/accounting/documents')
             ->orderByDesc('created_at')
-            ->limit(10)
+            ->limit(200)
             ->get();
 
         if ($calls->isEmpty()) {
@@ -221,13 +180,7 @@ class ConnectManageController extends Controller
         return $rows;
     }
 
-    /**
-     * Wat er tijdens deze boeking in de administratie is gebeurd. Bij een geweigerde
-     * boeking is dat de reden; bij een geslaagde de warnings — dat is de enige plek
-     * waar zichtbaar wordt dat de Hub bijvoorbeeld een relatie heeft aangemaakt.
-     *
-     * @return list<string>
-     */
+    /** @return list<string> */
     private function bookingMessages(PassThroughCall $call): array
     {
         $messages = array_values(array_filter(array_map(
@@ -259,9 +212,7 @@ class ConnectManageController extends Controller
             ->all();
     }
 
-    /**
-     * @return array<string, mixed>
-     */
+    /** @return array<string, mixed> */
     private function relationPayload(ConnectionAccountingRef $ref, Request $request, Account $account, string $provider): array
     {
         return [
@@ -276,9 +227,7 @@ class ConnectManageController extends Controller
         ];
     }
 
-    /**
-     * @return array<string, mixed>
-     */
+    /** @return array<string, mixed> */
     private function settingsPayload(Connection $connection): array
     {
         $mapping = $connection->metadata['accounting_mapping'] ?? [];
@@ -294,12 +243,41 @@ class ConnectManageController extends Controller
                 'purchase_default' => $mapping['gl_accounts']['purchase_default'] ?? null,
                 'options' => $this->refOptions($connection, ConnectionAccountingRef::KIND_GL),
             ],
+            'vat_codes' => $this->vatRows($connection),
         ];
     }
 
-    /**
-     * @return list<array{code: string, label: string}>
-     */
+    /** @return list<array{label: string, value: string}> */
+    private function vatRows(Connection $connection): array
+    {
+        $mapping = $connection->metadata['accounting_mapping']['vat_codes'] ?? [];
+
+        if ($mapping === []) {
+            return [];
+        }
+
+        $labels = ConnectionAccountingRef::query()
+            ->where('connection_id', $connection->getKey())
+            ->where('kind', ConnectionAccountingRef::KIND_VAT)
+            ->pluck('label', 'code');
+
+        $rows = [];
+
+        foreach (['21' => '21%', '9' => '9%', '0' => '0%', 'reverse_charge:21' => '21% verlegd', 'reverse_charge:9' => '9% verlegd'] as $key => $label) {
+            $code = $mapping[$key] ?? null;
+
+            if ($code === null) {
+                continue;
+            }
+
+            $vatLabel = (string) ($labels[$code] ?? '');
+            $rows[] = ['label' => $label, 'value' => $vatLabel === '' ? $code : "{$code} · {$vatLabel}"];
+        }
+
+        return $rows;
+    }
+
+    /** @return list<array{code: string, label: string}> */
     private function refOptions(Connection $connection, string $kind): array
     {
         return ConnectionAccountingRef::query()
@@ -333,11 +311,6 @@ class ConnectManageController extends Controller
         return $connection;
     }
 
-    /**
-     * De handtekening dekt `ref` al (een geruilde id maakt de URL ongeldig), maar
-     * deze check is de expliciete Account-scoping die de rest van deze controller
-     * ook toepast — geen enkele actie leunt op de handtekening alleen.
-     */
     private function authorizeRelationRef(Connection $connection, ConnectionAccountingRef $ref): void
     {
         abort_unless(

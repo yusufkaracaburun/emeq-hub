@@ -40005,58 +40005,58 @@
                 },
                 {
                   "type": "frame",
-                  "id": "YNCnB",
+                  "id": "Pi3jT",
                   "name": "Acties",
                   "gap": "$space-xs",
                   "alignItems": "center",
                   "children": [
                     {
                       "type": "frame",
-                      "id": "M9LNW",
+                      "id": "Tgvia",
                       "name": "Opnieuw koppelen",
+                      "width": 37,
+                      "height": 37,
                       "fill": "$card",
                       "cornerRadius": "$radius-md",
                       "stroke": "$border",
                       "strokeWidth": 1,
-                      "padding": [
-                        10,
-                        14
-                      ],
+                      "justifyContent": "center",
+                      "alignItems": "center",
                       "children": [
                         {
-                          "type": "text",
-                          "id": "tVWSY",
-                          "name": "Label",
-                          "fill": "$foreground",
-                          "content": "Opnieuw koppelen",
-                          "fontFamily": "$font-body",
-                          "fontSize": "$text-sm",
-                          "fontWeight": "600"
+                          "type": "icon",
+                          "id": "TYPqA",
+                          "name": "Opnieuw koppelen Icon",
+                          "width": 16,
+                          "height": 16,
+                          "icon": "refresh-cw",
+                          "library": "lucide",
+                          "fill": "$foreground"
                         }
                       ]
                     },
                     {
                       "type": "frame",
-                      "id": "PWV6X",
+                      "id": "qrowq",
                       "name": "Ontkoppelen",
+                      "width": 37,
+                      "height": 37,
                       "fill": "$card",
                       "cornerRadius": "$radius-md",
                       "stroke": "$border",
                       "strokeWidth": 1,
-                      "padding": [
-                        10,
-                        14
-                      ],
+                      "justifyContent": "center",
+                      "alignItems": "center",
                       "children": [
                         {
-                          "type": "text",
-                          "id": "B01D6",
-                          "name": "Label",
-                          "fill": "$foreground",
-                          "content": "Ontkoppelen",
-                          "fontFamily": "$font-body",
-                          "fontSize": "$text-sm",
-                          "fontWeight": "600"
+                          "type": "icon",
+                          "id": "coKo7",
+                          "name": "Ontkoppelen Icon",
+                          "width": 16,
+                          "height": 16,
+                          "icon": "unlink",
+                          "library": "lucide",
+                          "fill": "$foreground"
                         }
                       ]
                     }
@@ -40907,58 +40907,58 @@
             },
             {
               "type": "frame",
-              "id": "K2iBi",
+              "id": "XFZup",
               "name": "Acties",
               "gap": "$space-xs",
               "alignItems": "center",
               "children": [
                 {
                   "type": "frame",
-                  "id": "t9xle",
+                  "id": "QEuyz",
                   "name": "Opnieuw koppelen",
+                  "width": 37,
+                  "height": 37,
                   "fill": "$card",
                   "cornerRadius": "$radius-md",
                   "stroke": "$border",
                   "strokeWidth": 1,
-                  "padding": [
-                    10,
-                    14
-                  ],
+                  "justifyContent": "center",
+                  "alignItems": "center",
                   "children": [
                     {
-                      "type": "text",
-                      "id": "Mm6Vu",
-                      "name": "Label",
-                      "fill": "$foreground",
-                      "content": "Opnieuw koppelen",
-                      "fontFamily": "$font-body",
-                      "fontSize": "$text-sm",
-                      "fontWeight": "600"
+                      "type": "icon",
+                      "id": "FEVo6",
+                      "name": "Opnieuw koppelen Icon",
+                      "width": 16,
+                      "height": 16,
+                      "icon": "refresh-cw",
+                      "library": "lucide",
+                      "fill": "$foreground"
                     }
                   ]
                 },
                 {
                   "type": "frame",
-                  "id": "tnqcW",
+                  "id": "vWRPC",
                   "name": "Ontkoppelen",
+                  "width": 37,
+                  "height": 37,
                   "fill": "$card",
                   "cornerRadius": "$radius-md",
                   "stroke": "$border",
                   "strokeWidth": 1,
-                  "padding": [
-                    10,
-                    14
-                  ],
+                  "justifyContent": "center",
+                  "alignItems": "center",
                   "children": [
                     {
-                      "type": "text",
-                      "id": "sI7bc",
-                      "name": "Label",
-                      "fill": "$foreground",
-                      "content": "Ontkoppelen",
-                      "fontFamily": "$font-body",
-                      "fontSize": "$text-sm",
-                      "fontWeight": "600"
+                      "type": "icon",
+                      "id": "KlgJn",
+                      "name": "Ontkoppelen Icon",
+                      "width": 16,
+                      "height": 16,
+                      "icon": "unlink",
+                      "library": "lucide",
+                      "fill": "$foreground"
                     }
                   ]
                 }
@@ -41845,58 +41845,58 @@
             },
             {
               "type": "frame",
-              "id": "p03KM",
+              "id": "sC7pJ",
               "name": "Acties",
               "gap": "$space-xs",
               "alignItems": "center",
               "children": [
                 {
                   "type": "frame",
-                  "id": "IGsL0",
+                  "id": "OMwFm",
                   "name": "Opnieuw koppelen",
+                  "width": 37,
+                  "height": 37,
                   "fill": "$card",
                   "cornerRadius": "$radius-md",
                   "stroke": "$border",
                   "strokeWidth": 1,
-                  "padding": [
-                    10,
-                    14
-                  ],
+                  "justifyContent": "center",
+                  "alignItems": "center",
                   "children": [
                     {
-                      "type": "text",
-                      "id": "I8AaoI",
-                      "name": "Label",
-                      "fill": "$foreground",
-                      "content": "Opnieuw koppelen",
-                      "fontFamily": "$font-body",
-                      "fontSize": "$text-sm",
-                      "fontWeight": "600"
+                      "type": "icon",
+                      "id": "AFTdv",
+                      "name": "Opnieuw koppelen Icon",
+                      "width": 16,
+                      "height": 16,
+                      "icon": "refresh-cw",
+                      "library": "lucide",
+                      "fill": "$foreground"
                     }
                   ]
                 },
                 {
                   "type": "frame",
-                  "id": "J9z3Ub",
+                  "id": "Cv5Ud",
                   "name": "Ontkoppelen",
+                  "width": 37,
+                  "height": 37,
                   "fill": "$card",
                   "cornerRadius": "$radius-md",
                   "stroke": "$border",
                   "strokeWidth": 1,
-                  "padding": [
-                    10,
-                    14
-                  ],
+                  "justifyContent": "center",
+                  "alignItems": "center",
                   "children": [
                     {
-                      "type": "text",
-                      "id": "Wp8u0",
-                      "name": "Label",
-                      "fill": "$foreground",
-                      "content": "Ontkoppelen",
-                      "fontFamily": "$font-body",
-                      "fontSize": "$text-sm",
-                      "fontWeight": "600"
+                      "type": "icon",
+                      "id": "Ow3qH",
+                      "name": "Ontkoppelen Icon",
+                      "width": 16,
+                      "height": 16,
+                      "icon": "unlink",
+                      "library": "lucide",
+                      "fill": "$foreground"
                     }
                   ]
                 }
