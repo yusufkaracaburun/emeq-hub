@@ -2908,63 +2908,76 @@
                               "children": [
                                 {
                                   "type": "frame",
-                                  "id": "uFvSO",
-                                  "name": "CTA",
+                                  "id": "XR76c",
+                                  "name": "Opnieuw koppelen",
+                                  "width": 37,
+                                  "height": 37,
                                   "fill": "$card",
                                   "cornerRadius": "$radius-md",
                                   "stroke": "$border",
                                   "strokeWidth": 1,
-                                  "gap": 8,
-                                  "padding": [
-                                    10,
-                                    20
-                                  ],
+                                  "justifyContent": "center",
                                   "alignItems": "center",
                                   "children": [
                                     {
-                                      "type": "text",
-                                      "id": "b4JlFe",
-                                      "name": "Label",
-                                      "fill": "$foreground",
-                                      "content": "Opnieuw koppelen",
-                                      "fontFamily": "$font-body",
-                                      "fontSize": "$text-sm",
-                                      "fontWeight": "600"
-                                    },
-                                    {
-                                      "type": "text",
-                                      "id": "SnpnD",
-                                      "name": "Glyph",
-                                      "fill": "$foreground",
-                                      "content": "→",
-                                      "fontFamily": "$font-body",
-                                      "fontSize": "$text-sm",
-                                      "fontWeight": "500"
+                                      "type": "icon",
+                                      "id": "t5T7oG",
+                                      "name": "Opnieuw koppelen Icon",
+                                      "width": 16,
+                                      "height": 16,
+                                      "icon": "refresh-cw",
+                                      "library": "lucide",
+                                      "fill": "$foreground"
                                     }
                                   ]
                                 },
                                 {
                                   "type": "frame",
-                                  "id": "CKtPl",
-                                  "name": "Ontkoppelen",
+                                  "id": "IivZr",
+                                  "name": "Beheren",
+                                  "width": 37,
+                                  "height": 37,
                                   "fill": "$card",
                                   "cornerRadius": "$radius-md",
                                   "stroke": "$border",
                                   "strokeWidth": 1,
-                                  "padding": [
-                                    10,
-                                    14
-                                  ],
+                                  "justifyContent": "center",
+                                  "alignItems": "center",
                                   "children": [
                                     {
-                                      "type": "text",
-                                      "id": "O3g8Q",
-                                      "name": "Label",
-                                      "fill": "$foreground",
-                                      "content": "Ontkoppelen",
-                                      "fontFamily": "$font-body",
-                                      "fontSize": "$text-sm",
-                                      "fontWeight": "600"
+                                      "type": "icon",
+                                      "id": "ATeuI",
+                                      "name": "Beheren Icon",
+                                      "width": 16,
+                                      "height": 16,
+                                      "icon": "settings-2",
+                                      "library": "lucide",
+                                      "fill": "$foreground"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "S35PZ",
+                                  "name": "Ontkoppelen",
+                                  "width": 37,
+                                  "height": 37,
+                                  "fill": "$card",
+                                  "cornerRadius": "$radius-md",
+                                  "stroke": "$border",
+                                  "strokeWidth": 1,
+                                  "justifyContent": "center",
+                                  "alignItems": "center",
+                                  "children": [
+                                    {
+                                      "type": "icon",
+                                      "id": "qt1n2",
+                                      "name": "Ontkoppelen Icon",
+                                      "width": 16,
+                                      "height": 16,
+                                      "icon": "unlink",
+                                      "library": "lucide",
+                                      "fill": "$foreground"
                                     }
                                   ]
                                 }
