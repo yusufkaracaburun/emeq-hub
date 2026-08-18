@@ -101,10 +101,6 @@ return Application::configure(basePath: dirname(__DIR__))
                 return;
             }
 
-            // Filter op status !== needs_consent: zonder deze guard mailt élke
-            // volgende mislukte call op een al-dode koppeling opnieuw — de
-            // connection blijft stuk tot iemand handmatig her-connect, dus dat
-            // is geen nieuw incident dat een nieuwe mail rechtvaardigt.
             $connection = Connection::query()
                 ->whereKey($e->connectionRef)
                 ->where('provider', Provider::Exact->value)
