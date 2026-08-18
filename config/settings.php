@@ -1,6 +1,6 @@
 <?php
 
-use App\Settings\ExactSettings;
+use App\Integrations\Exact\Settings\ExactSettings;
 use App\Settings\LegalSettings;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelSettings\SettingsCasts\DataCast;
@@ -100,6 +100,7 @@ return [
      */
     'auto_discover_settings' => [
         app_path('Settings'),
+        app_path('Integrations/Exact/Settings'),
     ],
 
     /*

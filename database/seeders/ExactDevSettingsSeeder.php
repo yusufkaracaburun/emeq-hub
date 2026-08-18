@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Settings\ExactSettings;
+use App\Integrations\Exact\Settings\ExactSettings;
 use Illuminate\Database\Seeder;
 
 class ExactDevSettingsSeeder extends Seeder

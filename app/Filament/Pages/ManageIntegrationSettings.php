@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Pages;
 
 use App\Enums\Provider;
-use App\Settings\ExactSettings;
+use App\Integrations\Exact\Settings\ExactSettings;
 use BackedEnum;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;

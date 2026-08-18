@@ -6,7 +6,7 @@ namespace Tests\Feature\Settings;
 
 use App\Filament\Pages\ManageIntegrationSettings;
 use App\Models\User;
-use App\Settings\ExactSettings;
+use App\Integrations\Exact\Settings\ExactSettings;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Spatie\Permission\Models\Role;

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Settings;
 
-use App\Settings\ExactSettings;
+use App\Integrations\Exact\Settings\ExactSettings;
 use Database\Seeders\ExactDevSettingsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;

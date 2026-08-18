@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Settings;
+namespace App\Integrations\Exact\Settings;
 
 use Spatie\LaravelSettings\Settings;
 

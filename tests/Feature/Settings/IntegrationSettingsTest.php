@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Tests\Feature\Settings;
 
 use App\Providers\SettingsHydrationServiceProvider;
-use App\Settings\ExactSettings;
+use App\Integrations\Exact\Settings\ExactSettings;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
