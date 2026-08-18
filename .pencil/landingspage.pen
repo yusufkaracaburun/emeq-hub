@@ -40542,6 +40542,10 @@
                       "id": "UsfZE",
                       "name": "Rij 3",
                       "width": "fill_container",
+                      "stroke": "$border",
+                      "strokeWidth": {
+                        "bottom": 1
+                      },
                       "gap": "$space-xs",
                       "padding": [
                         10,
@@ -40643,6 +40647,828 @@
                               "textGrowth": "fixed-width",
                               "width": "fill_container",
                               "content": "Btw-nummer ontbreekt bij Acme B.V.",
+                              "fontFamily": "$font-body",
+                              "fontSize": "$text-xs2",
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "IRXdJ",
+                      "name": "Rij 4",
+                      "width": "fill_container",
+                      "stroke": "$border",
+                      "strokeWidth": {
+                        "bottom": 1
+                      },
+                      "gap": "$space-xs",
+                      "padding": [
+                        10,
+                        14
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "fMmvI",
+                          "name": "Datum",
+                          "width": 84,
+                          "layout": "vertical",
+                          "gap": 2,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "pPh7p",
+                              "name": "Tekst",
+                              "fill": "$muted-foreground",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "11 aug",
+                              "fontFamily": "$font-body",
+                              "fontSize": "$text-xs2",
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "RbEUB",
+                          "name": "Document",
+                          "width": 188,
+                          "layout": "vertical",
+                          "gap": 2,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "gClni",
+                              "name": "Tekst",
+                              "fill": "$foreground",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "Factuur 2026-0138",
+                              "fontFamily": "$font-body",
+                              "fontSize": "$text-xs2",
+                              "fontWeight": "600"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "i0GLK",
+                          "name": "Status",
+                          "width": 128,
+                          "layout": "vertical",
+                          "gap": 2,
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "xP6hi",
+                              "name": "Pill",
+                              "fill": "$success-soft",
+                              "cornerRadius": "$radius-pill",
+                              "padding": [
+                                2,
+                                8
+                              ],
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "bWDg9",
+                                  "name": "Label",
+                                  "fill": "$success",
+                                  "content": "GEBOEKT",
+                                  "fontFamily": "$font-caption",
+                                  "fontSize": "$text-2xs",
+                                  "fontWeight": "normal",
+                                  "letterSpacing": 1
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "J4YhBx",
+                          "name": "Melding",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 2,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "ag2tb",
+                              "name": "Tekst",
+                              "fill": "$muted-foreground",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "—",
+                              "fontFamily": "$font-body",
+                              "fontSize": "$text-xs2",
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "nznnZ",
+                      "name": "Rij 5",
+                      "width": "fill_container",
+                      "stroke": "$border",
+                      "strokeWidth": {
+                        "bottom": 1
+                      },
+                      "gap": "$space-xs",
+                      "padding": [
+                        10,
+                        14
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "sqNLd",
+                          "name": "Datum",
+                          "width": 84,
+                          "layout": "vertical",
+                          "gap": 2,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "T8itWt",
+                              "name": "Tekst",
+                              "fill": "$muted-foreground",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "10 aug",
+                              "fontFamily": "$font-body",
+                              "fontSize": "$text-xs2",
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "dqQ0x",
+                          "name": "Document",
+                          "width": 188,
+                          "layout": "vertical",
+                          "gap": 2,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "JMA3Z",
+                              "name": "Tekst",
+                              "fill": "$foreground",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "Bon 2026-0087",
+                              "fontFamily": "$font-body",
+                              "fontSize": "$text-xs2",
+                              "fontWeight": "600"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "tUxOb",
+                          "name": "Status",
+                          "width": 128,
+                          "layout": "vertical",
+                          "gap": 2,
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "I25Rki",
+                              "name": "Pill",
+                              "fill": "$success-soft",
+                              "cornerRadius": "$radius-pill",
+                              "padding": [
+                                2,
+                                8
+                              ],
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "zEJZP",
+                                  "name": "Label",
+                                  "fill": "$success",
+                                  "content": "GEBOEKT",
+                                  "fontFamily": "$font-caption",
+                                  "fontSize": "$text-2xs",
+                                  "fontWeight": "normal",
+                                  "letterSpacing": 1
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "oNGc8",
+                          "name": "Melding",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 2,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "bOBih",
+                              "name": "Tekst",
+                              "fill": "$muted-foreground",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "—",
+                              "fontFamily": "$font-body",
+                              "fontSize": "$text-xs2",
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "QXJ2r",
+                      "name": "Rij 6",
+                      "width": "fill_container",
+                      "stroke": "$border",
+                      "strokeWidth": {
+                        "bottom": 1
+                      },
+                      "gap": "$space-xs",
+                      "padding": [
+                        10,
+                        14
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "uw0tk",
+                          "name": "Datum",
+                          "width": 84,
+                          "layout": "vertical",
+                          "gap": 2,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "xf85p",
+                              "name": "Tekst",
+                              "fill": "$muted-foreground",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "10 aug",
+                              "fontFamily": "$font-body",
+                              "fontSize": "$text-xs2",
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "Fm7FJ",
+                          "name": "Document",
+                          "width": 188,
+                          "layout": "vertical",
+                          "gap": 2,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "vgj1B",
+                              "name": "Tekst",
+                              "fill": "$foreground",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "Factuur 2026-0137",
+                              "fontFamily": "$font-body",
+                              "fontSize": "$text-xs2",
+                              "fontWeight": "600"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "jvnxj",
+                          "name": "Status",
+                          "width": 128,
+                          "layout": "vertical",
+                          "gap": 2,
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "NVYle",
+                              "name": "Pill",
+                              "fill": "$success-soft",
+                              "cornerRadius": "$radius-pill",
+                              "padding": [
+                                2,
+                                8
+                              ],
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "Y4Ncc",
+                                  "name": "Label",
+                                  "fill": "$success",
+                                  "content": "GEBOEKT",
+                                  "fontFamily": "$font-caption",
+                                  "fontSize": "$text-2xs",
+                                  "fontWeight": "normal",
+                                  "letterSpacing": 1
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "pLDzf",
+                          "name": "Melding",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 2,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "mbHzA",
+                              "name": "Tekst",
+                              "fill": "$muted-foreground",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "Relatie Bakkerij De Vries gekoppeld op KVK",
+                              "fontFamily": "$font-body",
+                              "fontSize": "$text-xs2",
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "mo0eD",
+                      "name": "Rij 7",
+                      "width": "fill_container",
+                      "stroke": "$border",
+                      "strokeWidth": {
+                        "bottom": 1
+                      },
+                      "gap": "$space-xs",
+                      "padding": [
+                        10,
+                        14
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "wZv1r",
+                          "name": "Datum",
+                          "width": 84,
+                          "layout": "vertical",
+                          "gap": 2,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "KQGAi",
+                              "name": "Tekst",
+                              "fill": "$muted-foreground",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "9 aug",
+                              "fontFamily": "$font-body",
+                              "fontSize": "$text-xs2",
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "BKcbx",
+                          "name": "Document",
+                          "width": 188,
+                          "layout": "vertical",
+                          "gap": 2,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "cZyOw",
+                              "name": "Tekst",
+                              "fill": "$foreground",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "Factuur 2026-0136",
+                              "fontFamily": "$font-body",
+                              "fontSize": "$text-xs2",
+                              "fontWeight": "600"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "SGmj4",
+                          "name": "Status",
+                          "width": 128,
+                          "layout": "vertical",
+                          "gap": 2,
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "vwnLd",
+                              "name": "Pill",
+                              "fill": "$error-soft",
+                              "cornerRadius": "$radius-pill",
+                              "padding": [
+                                2,
+                                8
+                              ],
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "r9CgaA",
+                                  "name": "Label",
+                                  "fill": "$error-deep",
+                                  "content": "GEWEIGERD",
+                                  "fontFamily": "$font-caption",
+                                  "fontSize": "$text-2xs",
+                                  "fontWeight": "normal",
+                                  "letterSpacing": 1
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "VV1Jq",
+                          "name": "Melding",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 2,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "E96Dz",
+                              "name": "Tekst",
+                              "fill": "$muted-foreground",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "Dagboek 70 bestaat niet meer in de administratie",
+                              "fontFamily": "$font-body",
+                              "fontSize": "$text-xs2",
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "R54MzK",
+                      "name": "Rij 8",
+                      "width": "fill_container",
+                      "stroke": "$border",
+                      "strokeWidth": {
+                        "bottom": 1
+                      },
+                      "gap": "$space-xs",
+                      "padding": [
+                        10,
+                        14
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "b5F1g8",
+                          "name": "Datum",
+                          "width": 84,
+                          "layout": "vertical",
+                          "gap": 2,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "EKRFR",
+                              "name": "Tekst",
+                              "fill": "$muted-foreground",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "9 aug",
+                              "fontFamily": "$font-body",
+                              "fontSize": "$text-xs2",
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "hOLcC",
+                          "name": "Document",
+                          "width": 188,
+                          "layout": "vertical",
+                          "gap": 2,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "mim38",
+                              "name": "Tekst",
+                              "fill": "$foreground",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "Bon 2026-0086",
+                              "fontFamily": "$font-body",
+                              "fontSize": "$text-xs2",
+                              "fontWeight": "600"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "eOTG2",
+                          "name": "Status",
+                          "width": 128,
+                          "layout": "vertical",
+                          "gap": 2,
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "Hin93",
+                              "name": "Pill",
+                              "fill": "$success-soft",
+                              "cornerRadius": "$radius-pill",
+                              "padding": [
+                                2,
+                                8
+                              ],
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "f0xc9R",
+                                  "name": "Label",
+                                  "fill": "$success",
+                                  "content": "GEBOEKT",
+                                  "fontFamily": "$font-caption",
+                                  "fontSize": "$text-2xs",
+                                  "fontWeight": "normal",
+                                  "letterSpacing": 1
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "OW7gb",
+                          "name": "Melding",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 2,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "buLfN",
+                              "name": "Tekst",
+                              "fill": "$muted-foreground",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "—",
+                              "fontFamily": "$font-body",
+                              "fontSize": "$text-xs2",
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "VqHtn",
+                      "name": "Rij 9",
+                      "width": "fill_container",
+                      "stroke": "$border",
+                      "strokeWidth": {
+                        "bottom": 1
+                      },
+                      "gap": "$space-xs",
+                      "padding": [
+                        10,
+                        14
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "lfW0k",
+                          "name": "Datum",
+                          "width": 84,
+                          "layout": "vertical",
+                          "gap": 2,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "FG1cW",
+                              "name": "Tekst",
+                              "fill": "$muted-foreground",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "8 aug",
+                              "fontFamily": "$font-body",
+                              "fontSize": "$text-xs2",
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "uontb",
+                          "name": "Document",
+                          "width": 188,
+                          "layout": "vertical",
+                          "gap": 2,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "U8dP7",
+                              "name": "Tekst",
+                              "fill": "$foreground",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "Factuur 2026-0135",
+                              "fontFamily": "$font-body",
+                              "fontSize": "$text-xs2",
+                              "fontWeight": "600"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "JgcHY",
+                          "name": "Status",
+                          "width": 128,
+                          "layout": "vertical",
+                          "gap": 2,
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "f2CP0U",
+                              "name": "Pill",
+                              "fill": "$success-soft",
+                              "cornerRadius": "$radius-pill",
+                              "padding": [
+                                2,
+                                8
+                              ],
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "f25o48",
+                                  "name": "Label",
+                                  "fill": "$success",
+                                  "content": "GEBOEKT",
+                                  "fontFamily": "$font-caption",
+                                  "fontSize": "$text-2xs",
+                                  "fontWeight": "normal",
+                                  "letterSpacing": 1
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "TScb0",
+                          "name": "Melding",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 2,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "pymp6",
+                              "name": "Tekst",
+                              "fill": "$muted-foreground",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "—",
+                              "fontFamily": "$font-body",
+                              "fontSize": "$text-xs2",
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "kKM0o",
+                      "name": "Rij 10",
+                      "width": "fill_container",
+                      "gap": "$space-xs",
+                      "padding": [
+                        10,
+                        14
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "MDmfq",
+                          "name": "Datum",
+                          "width": 84,
+                          "layout": "vertical",
+                          "gap": 2,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "a77gwu",
+                              "name": "Tekst",
+                              "fill": "$muted-foreground",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "8 aug",
+                              "fontFamily": "$font-body",
+                              "fontSize": "$text-xs2",
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "GviyM",
+                          "name": "Document",
+                          "width": 188,
+                          "layout": "vertical",
+                          "gap": 2,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "Uogax",
+                              "name": "Tekst",
+                              "fill": "$foreground",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "Factuur 2026-0134",
+                              "fontFamily": "$font-body",
+                              "fontSize": "$text-xs2",
+                              "fontWeight": "600"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "mBCap",
+                          "name": "Status",
+                          "width": 128,
+                          "layout": "vertical",
+                          "gap": 2,
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "wKG9I",
+                              "name": "Pill",
+                              "fill": "$success-soft",
+                              "cornerRadius": "$radius-pill",
+                              "padding": [
+                                2,
+                                8
+                              ],
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "WpW6m",
+                                  "name": "Label",
+                                  "fill": "$success",
+                                  "content": "GEBOEKT",
+                                  "fontFamily": "$font-caption",
+                                  "fontSize": "$text-2xs",
+                                  "fontWeight": "normal",
+                                  "letterSpacing": 1
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "B7iIl",
+                          "name": "Melding",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 2,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "eJe4y",
+                              "name": "Tekst",
+                              "fill": "$muted-foreground",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "—",
                               "fontFamily": "$font-body",
                               "fontSize": "$text-xs2",
                               "fontWeight": "normal"
