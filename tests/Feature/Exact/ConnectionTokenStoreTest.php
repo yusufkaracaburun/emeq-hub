@@ -77,6 +77,42 @@ class ConnectionTokenStoreTest extends TestCase
         $this->assertFalse($token->isExpired());
     }
 
+    public function test_get_logs_a_start_marker_when_the_returned_token_is_already_expired(): void
+    {
+        $connection = Connection::factory()->forExact()->create([
+            'access_token' => 'acc',
+            'refresh_token' => 'ref',
+            'expires_at' => now()->subMinute(),
+        ]);
+
+        Log::shouldReceive('info')
+            ->once()
+            ->withArgs(function (string $message, array $context) use ($connection): bool {
+                $serialized = $message.json_encode($context);
+
+                return $message === 'exact.oauth.refresh_attempt_started'
+                    && $context['connection_id'] === $connection->id
+                    && $context['refresh_token_fingerprint'] === substr(hash('sha256', 'ref'), 0, 12)
+                    && ! str_contains($serialized, 'acc')
+                    && ! str_contains($serialized, '"ref"');
+            });
+
+        (new ConnectionTokenStore($connection))->get($this->credentials($connection));
+    }
+
+    public function test_get_does_not_log_a_start_marker_when_the_token_is_still_valid(): void
+    {
+        $connection = Connection::factory()->forExact()->create([
+            'access_token' => 'acc',
+            'refresh_token' => 'ref',
+            'expires_at' => now()->addSeconds(600),
+        ]);
+
+        Log::shouldReceive('info')->never();
+
+        (new ConnectionTokenStore($connection))->get($this->credentials($connection));
+    }
+
     public function test_get_returns_null_when_the_connection_row_is_gone(): void
     {
         $connection = Connection::factory()->forExact()->create([

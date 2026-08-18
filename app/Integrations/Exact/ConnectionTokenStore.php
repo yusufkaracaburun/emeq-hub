@@ -42,6 +42,18 @@ final class ConnectionTokenStore implements TokenStore
             ? DateTimeImmutable::createFromInterface($row->expires_at)
             : new DateTimeImmutable('-1 second'); // onbekende expiry → behandel als verlopen
 
+        // Begin-marker: de SDK vraagt de bundel op, ziet 'm verlopen en gaat
+        // refreshen. Zonder deze regel is een half-voltooide rotatie (proces
+        // afgeschoten na deze log, vóór put()) onzichtbaar als "start zonder
+        // succes" — het enige spoor dat de dode-token-hypothese bevestigt (#61).
+        if ($expiresAt <= new DateTimeImmutable) {
+            Log::info('exact.oauth.refresh_attempt_started', [
+                'connection_id' => $this->connection->id,
+                'observed_at' => now()->toIso8601String(),
+                'refresh_token_fingerprint' => self::fingerprint((string) $row->refresh_token),
+            ]);
+        }
+
         return new AccessToken(
             accessToken: (string) $row->access_token,
             refreshToken: (string) $row->refresh_token,
