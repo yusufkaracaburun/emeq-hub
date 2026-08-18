@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Console\Commands\Exact;
+namespace App\Integrations\Exact\Console;
 
 use App\Integrations\Exact\ConnectionTokenStore;
 use App\Integrations\Exact\HubExactCredentialResolver;

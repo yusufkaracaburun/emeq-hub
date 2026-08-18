@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Console\Commands\Exact;
+namespace App\Integrations\Exact\Console;
 
 use App\Enums\Provider;
 use App\Integrations\Exact\ConnectionTokenStore;

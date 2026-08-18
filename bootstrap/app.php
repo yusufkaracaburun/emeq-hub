@@ -42,6 +42,10 @@ return Application::configure(basePath: dirname(__DIR__))
                 ->group(base_path('routes/webhooks.php'));
         },
     )
+    ->withCommands([
+        __DIR__.'/../app/Console/Commands',
+        __DIR__.'/../app/Integrations/Exact/Console',
+    ])
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->trustProxies(at: '*');
 
