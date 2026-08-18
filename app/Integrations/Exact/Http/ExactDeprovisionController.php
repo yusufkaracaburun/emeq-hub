@@ -2,7 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Http\Controllers;
+namespace App\Integrations\Exact\Http;
+
+use App\Http\Controllers\Controller;
 
 use App\Enums\Provider;
 use App\Integrations\Exact\ExactUserId;

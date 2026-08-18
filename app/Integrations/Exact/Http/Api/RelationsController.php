@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\V1\Exact;
+namespace App\Integrations\Exact\Http\Api;
 
 use App\Http\Controllers\Controller;
 use App\Integrations\Exact\PassThrough\ExactForwarder;

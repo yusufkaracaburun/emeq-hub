@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\V1\Exact;
+namespace App\Integrations\Exact\Http\Api;
 
 use App\Http\Controllers\Api\V1\Concerns\GuardsPassThroughRequest;
 use App\Http\Controllers\Controller;

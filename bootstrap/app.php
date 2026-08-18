@@ -8,7 +8,7 @@ use App\Http\Middleware\EnsureProviderEnabled;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\NormalizeApiErrors;
 use App\Http\Middleware\RequireCashierWebhookSecret;
-use App\Http\Middleware\ResolveExactAccount;
+use App\Integrations\Exact\Http\Middleware\ResolveExactAccount;
 use App\Http\Middleware\ResolveMollieAccount;
 use App\Integrations\Snelstart\Http\Middleware\ResolveSnelstartAccount;
 use App\Http\Middleware\SecurityHeaders;

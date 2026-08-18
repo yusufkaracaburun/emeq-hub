@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\V1\OAuth;
+namespace App\Integrations\Exact\Http\OAuth;
 
 use App\Enums\Provider;
 use App\Http\Controllers\Controller;

@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Http\Middleware;
+namespace App\Integrations\Exact\Http\Middleware;
 
 use App\Enums\Provider;
+use App\Http\Middleware\ResolveProviderAccount;
 use App\Integrations\Exact\ConnectionTokenStore;
 use App\Integrations\Exact\HubExactCredentialResolver;
 use App\Models\Connection;

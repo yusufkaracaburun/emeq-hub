@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Http\Controllers\Dev;
+namespace App\Integrations\Exact\Http\Dev;
 
 use Emeq\ExactApi\OData\Envelope;
 use Illuminate\Http\RedirectResponse;

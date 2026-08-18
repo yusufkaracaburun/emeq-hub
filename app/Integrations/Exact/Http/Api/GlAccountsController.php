@@ -1,18 +1,18 @@
 <?php
 
-namespace App\Http\Controllers\Api\V1\Exact;
+namespace App\Integrations\Exact\Http\Api;
 
 use App\Http\Controllers\Controller;
 use App\Integrations\Exact\PassThrough\ExactForwarder;
 use App\Models\Account;
 use App\Models\Connection;
 use Dedoc\Scramble\Attributes\Group;
-use Emeq\ExactApi\Http\Request\Read\GetVatCodes;
+use Emeq\ExactApi\Http\Request\Read\GetGlAccounts;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-#[Group(name: 'Exact · VAT Codes', description: 'BTW-codes van de gekoppelde administratie. Mapt op de Exact OData-endpoint `GET vat/VATCodes` (read-only).', weight: 62)]
-class VatCodesController extends Controller
+#[Group(name: 'Exact · GL Accounts', description: 'Grootboekrekeningen van de gekoppelde administratie. Mapt op de Exact OData-endpoint `GET financial/GLAccounts` (read-only).', weight: 61)]
+class GlAccountsController extends Controller
 {
     public function __construct(private readonly ExactForwarder $forwarder) {}
 
@@ -27,7 +27,7 @@ class VatCodesController extends Controller
             $request,
             $account,
             $connection,
-            new GetVatCodes($request->query()),
+            new GetGlAccounts($request->query()),
         );
     }
 }
