@@ -17,6 +17,24 @@ Prod-deploy + release: zie [`../deployment.md`](../deployment.md).
 
 Volumes: `pgdata`, `redisdata`, `pgadmindata` + een anonymous volume voor de Vite-`node_modules` (maskeert de host-darwin-binaries → container-linux-binaries).
 
+## Afsluiten zonder een refresh te breken
+
+Exact roteert bij elke refresh en trekt het oude token direct in. Wordt een proces
+gekild tussen "Exact heeft geroteerd" en het wegschrijven van de nieuwe bundel, dan
+blijft het verbruikte token in de database staan en nekt de volgende poging de hele
+chain — herstellen kan dan alleen met een nieuwe consent-flow door een mens (#61).
+
+Daarom mag geen enkele container die een refresh kan uitvoeren hard afgeschoten worden:
+
+| Service | `stop_grace_period` | Waarom |
+|---|---|---|
+| `horizon` | `75s` | Horizons master rondt bij SIGTERM de lopende job zelf af en wacht tot de langste supervisor-timeout (60s, `config/horizon.php`). Docker's default van 10s greep daar met SIGKILL doorheen. 75s = die 60s plus marge |
+| `app` | `45s` | Een consumer-pass-through-call kan synchroon een refresh triggeren; de SDK wacht tot 30s op Exacts token-endpoint |
+
+`make prod-up` draait bovendien `horizon:terminate` vóór backup en build, zodat het
+draineren loopt tijdens stappen die toch al tijd kosten. Draait er nog geen horizon
+(eerste deploy), dan wordt die stap overgeslagen in plaats van te falen.
+
 ## Gebruik
 
 ```bash
