@@ -19,7 +19,12 @@ Schedule::command('model:prune', [
 Schedule::command('queue:prune-failed', ['--hours' => 168])->weekly();
 Schedule::command('sanctum:prune-expired', ['--hours' => 24])->dailyAt('03:10');
 Schedule::command('oauth:prune-pending')->dailyAt('03:15');
-Schedule::command('horizon:snapshot')->everyFiveMinutes();
+
+$heartbeatUrl = (string) config('services.betterstack.heartbeat_url');
+
+Schedule::command('horizon:snapshot')
+    ->everyFiveMinutes()
+    ->pingOnSuccessIf($heartbeatUrl !== '', $heartbeatUrl);
 
 Schedule::command('backup:clean')->dailyAt('01:30');
 Schedule::command('backup:run --only-db')->dailyAt('01:45');

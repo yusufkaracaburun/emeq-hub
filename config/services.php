@@ -67,4 +67,8 @@ return [
         ],
     ],
 
+    'betterstack' => [
+        'heartbeat_url' => env('BETTERSTACK_HEARTBEAT_URL'),
+    ],
+
 ];
