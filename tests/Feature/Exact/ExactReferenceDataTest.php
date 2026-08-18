@@ -86,6 +86,35 @@ class ExactReferenceDataTest extends TestCase
         $this->assertSame(['guid-1' => 'Klant BV'], $relations);
     }
 
+    public function test_mirror_rows_read_through_to_the_last_page(): void
+    {
+        MockClient::global([
+            GetGlAccounts::class => $this->fakePagedBackend([
+                ['ID' => 'gl-1', 'Code' => '8000', 'Description' => 'Omzet'],
+                ['ID' => 'gl-2', 'Code' => '4000', 'Description' => 'Kosten'],
+                ['ID' => 'gl-3', 'Code' => '1300', 'Description' => 'Debiteuren'],
+            ], pageSize: 1),
+        ]);
+
+        $rows = (new ExactReferenceData($this->exactConnection()))->glAccountRows();
+
+        $this->assertSame(['8000', '4000', '1300'], array_column($rows, 'code'));
+    }
+
+    public function test_relations_read_through_to_the_last_page(): void
+    {
+        MockClient::global([
+            GetRelations::class => $this->fakePagedBackend([
+                ['ID' => 'guid-1', 'Name' => 'Klant BV', 'Code' => '1'],
+                ['ID' => 'guid-2', 'Name' => 'Andere Klant BV', 'Code' => '2'],
+            ], pageSize: 1),
+        ]);
+
+        $relations = (new ExactReferenceData($this->exactConnection()))->relations();
+
+        $this->assertSame(['guid-1' => 'Klant BV', 'guid-2' => 'Andere Klant BV'], $relations);
+    }
+
     public function test_returns_empty_when_connection_has_no_division(): void
     {
         $connection = $this->exactConnection(['administratie_id' => null]);
@@ -336,6 +365,28 @@ class ExactReferenceDataTest extends TestCase
         $matches = (new ExactReferenceData($this->exactConnection()))->relationsByName('Klant BV');
 
         $this->assertSame([], $matches);
+    }
+
+    /**
+     * Serveert een vaste set rijen in vensters van `$pageSize`, met een `d.__next`-envelope
+     * zolang er nog rijen resten. Geen `$filter`-simulatie — voor de mirror-reads, die
+     * filterloos de hele set ophalen.
+     *
+     * @param  list<array<string, mixed>>  $rows
+     */
+    private function fakePagedBackend(array $rows, int $pageSize): \Closure
+    {
+        return function (PendingRequest $pendingRequest) use ($rows, $pageSize) {
+            $offset = (int) ($pendingRequest->query()->get('$skiptoken') ?? 0);
+            $envelope = ['results' => array_slice($rows, $offset, $pageSize)];
+            $nextOffset = $offset + $pageSize;
+
+            if ($nextOffset < count($rows)) {
+                $envelope['__next'] = 'https://start.exactonline.nl/api/v1/123456/next?$skiptoken='.$nextOffset;
+            }
+
+            return MockResponse::make(['d' => $envelope], 200);
+        };
     }
 
     /**

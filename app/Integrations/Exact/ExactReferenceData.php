@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Integrations\Exact;
 
+use App\Integrations\Exact\Accounting\ExactRelationResolver;
 use App\Models\Connection;
 use App\Models\ConnectionAccountingRef;
 use DateTimeImmutable;
@@ -60,7 +61,7 @@ final class ExactReferenceData
     {
         $out = [];
 
-        foreach ($this->fetch(new GetVatCodes(['$select' => 'Code,Description,Percentage'])) as $row) {
+        foreach ($this->fetchAllPages(['$select' => 'Code,Description,Percentage'], static fn (array $params): SdkRequest => new GetVatCodes($params)) as $row) {
             $code = trim((string) ($row['Code'] ?? ''));
 
             if ($code === '') {
@@ -82,7 +83,7 @@ final class ExactReferenceData
     {
         $out = [];
 
-        foreach ($this->fetch(new GetGlAccounts(['$select' => 'ID,Code,Description'])) as $row) {
+        foreach ($this->fetchAllPages(['$select' => 'ID,Code,Description'], static fn (array $params): SdkRequest => new GetGlAccounts($params)) as $row) {
             $id = (string) ($row['ID'] ?? '');
 
             if ($id === '') {
@@ -104,7 +105,7 @@ final class ExactReferenceData
     {
         $out = [];
 
-        foreach ($this->fetch(new GetRelations(['$select' => 'ID,Name,Code'])) as $row) {
+        foreach ($this->fetchAllPages(['$select' => 'ID,Name,Code'], static fn (array $params): SdkRequest => new GetRelations($params)) as $row) {
             $id = (string) ($row['ID'] ?? '');
 
             if ($id === '') {
@@ -126,7 +127,7 @@ final class ExactReferenceData
     {
         $out = [];
 
-        foreach ($this->fetch(new GetJournals(['$select' => 'Code,Description,Type'])) as $row) {
+        foreach ($this->fetchAllPages(['$select' => 'Code,Description,Type'], static fn (array $params): SdkRequest => new GetJournals($params)) as $row) {
             $code = trim((string) ($row['Code'] ?? ''));
 
             if ($code === '') {
@@ -148,7 +149,7 @@ final class ExactReferenceData
     {
         $out = [];
 
-        foreach ($this->fetch(new GetCostCenters(['$select' => 'Code,Description'])) as $row) {
+        foreach ($this->fetchAllPages(['$select' => 'Code,Description'], static fn (array $params): SdkRequest => new GetCostCenters($params)) as $row) {
             $code = trim((string) ($row['Code'] ?? ''));
 
             if ($code === '') {
@@ -170,7 +171,7 @@ final class ExactReferenceData
     {
         $out = [];
 
-        foreach ($this->fetch(new GetCostUnits(['$select' => 'Code,Description'])) as $row) {
+        foreach ($this->fetchAllPages(['$select' => 'Code,Description'], static fn (array $params): SdkRequest => new GetCostUnits($params)) as $row) {
             $code = trim((string) ($row['Code'] ?? ''));
 
             if ($code === '') {
@@ -294,7 +295,7 @@ final class ExactReferenceData
     {
         $out = [];
 
-        foreach ($this->fetch(new GetGlAccounts(['$select' => 'ID,Code,Description'])) as $row) {
+        foreach ($this->fetchAllPages(['$select' => 'ID,Code,Description'], static fn (array $params): SdkRequest => new GetGlAccounts($params)) as $row) {
             $code = trim((string) ($row['Code'] ?? ''));
             $id = (string) ($row['ID'] ?? '');
 
@@ -321,7 +322,7 @@ final class ExactReferenceData
     {
         $out = [];
 
-        foreach ($this->fetch(new GetVatCodes(['$select' => 'Code,Description,Percentage'])) as $row) {
+        foreach ($this->fetchAllPages(['$select' => 'Code,Description,Percentage'], static fn (array $params): SdkRequest => new GetVatCodes($params)) as $row) {
             $code = trim((string) ($row['Code'] ?? ''));
 
             if ($code === '') {
@@ -348,7 +349,7 @@ final class ExactReferenceData
     {
         $out = [];
 
-        foreach ($this->fetch(new GetJournals(['$select' => 'Code,Description,Type'])) as $row) {
+        foreach ($this->fetchAllPages(['$select' => 'Code,Description,Type'], static fn (array $params): SdkRequest => new GetJournals($params)) as $row) {
             $code = trim((string) ($row['Code'] ?? ''));
 
             if ($code === '') {
@@ -377,7 +378,7 @@ final class ExactReferenceData
     {
         $out = [];
 
-        foreach ($this->fetch(new GetCostCenters(['$select' => 'Code,Description'])) as $row) {
+        foreach ($this->fetchAllPages(['$select' => 'Code,Description'], static fn (array $params): SdkRequest => new GetCostCenters($params)) as $row) {
             $code = trim((string) ($row['Code'] ?? ''));
 
             if ($code === '') {
@@ -405,7 +406,7 @@ final class ExactReferenceData
     {
         $out = [];
 
-        foreach ($this->fetch(new GetCostUnits(['$select' => 'Code,Description'])) as $row) {
+        foreach ($this->fetchAllPages(['$select' => 'Code,Description'], static fn (array $params): SdkRequest => new GetCostUnits($params)) as $row) {
             $code = trim((string) ($row['Code'] ?? ''));
 
             if ($code === '') {
@@ -425,7 +426,7 @@ final class ExactReferenceData
     }
 
     /**
-     * KvK-stap van de relatie-resolutie ({@see \App\Integrations\Exact\Accounting\ExactRelationResolver}).
+     * KvK-stap van de relatie-resolutie ({@see ExactRelationResolver}).
      * Twee server-side `$filter`-probes — de rauwe waarde en de alleen-cijfers-variant
      * (Exact draagt een KvK-nummer soms met spaties/streepjes) — nooit een volledige scan:
      * deze stap moet goedkoop blijven, hij loopt bij elke boeking op een `company`-party.
@@ -448,7 +449,7 @@ final class ExactReferenceData
             $rows[] = $this->fetchAllPages([
                 '$select' => self::RELATION_SELECT,
                 '$filter' => "ChamberOfCommerce eq '".$this->escapeOData($variant)."'",
-            ]);
+            ], self::relationRequest());
         }
 
         return $this->mapRelationRows($this->dedupeById(array_merge(...$rows)));
@@ -476,7 +477,7 @@ final class ExactReferenceData
             $rows[] = $this->fetchAllPages([
                 '$select' => self::RELATION_SELECT,
                 '$filter' => "VATNumber eq '".$this->escapeOData($variant)."'",
-            ]);
+            ], self::relationRequest());
         }
 
         $candidates = $this->dedupeById(array_merge(...$rows));
@@ -488,7 +489,7 @@ final class ExactReferenceData
         $all = $this->fetchAllPages([
             '$select' => self::RELATION_SELECT,
             '$filter' => "VATNumber ne ''",
-        ]);
+        ], self::relationRequest());
 
         return $this->mapRelationRows(array_values(array_filter(
             $all,
@@ -513,7 +514,7 @@ final class ExactReferenceData
             return [];
         }
 
-        $all = $this->fetchAllPages(['$select' => self::RELATION_SELECT]);
+        $all = $this->fetchAllPages(['$select' => self::RELATION_SELECT], self::relationRequest());
 
         return $this->mapRelationRows(array_values(array_filter(
             $all,
@@ -625,7 +626,8 @@ final class ExactReferenceData
      * Leest de rol-vlaggen van één relatie op GUID — gebruikt om een uit de mirror
      * herbruikte relatie naar de juiste rol te promoveren vóór de boeking. Fail-soft:
      * niet leesbaar → null (de caller slaat de promotie dan over en laat de boeking
-     * zelf de fout opleveren).
+     * zelf de fout opleveren). Bewust één pagina: het filter is een unieke sleutel,
+     * dus een tweede pagina kan geen kandidaat verbergen.
      *
      * @return array{is_sales: bool, is_supplier: bool, status: ?string}|null
      */
@@ -660,6 +662,14 @@ final class ExactReferenceData
     }
 
     /**
+     * @return callable(array<string, scalar|null>): SdkRequest
+     */
+    private static function relationRequest(): callable
+    {
+        return static fn (array $params): SdkRequest => new GetRelations($params);
+    }
+
+    /**
      * @return list<array<string, mixed>>
      */
     private function fetch(SdkRequest $request): array
@@ -684,18 +694,19 @@ final class ExactReferenceData
     }
 
     /**
-     * Haalt een `GetRelations`-lees volledig op, pagina voor pagina, via Exact's OData-
+     * Haalt een lees volledig op, pagina voor pagina, via Exact's OData-
      * continuation-token (`$skiptoken`) — zelfde patroon als
      * `ExactAccountingTarget::readPage()`. Faalt zacht als `fetch()`: elke fout (ook op een
      * latere pagina, een `MAX_PAGES`-overschrijding, of een herhaald skiptoken) levert een
      * lege lijst op, nooit een onvolledige set — een onvolledige set zou de
-     * ambiguïteitsdetectie in de relatie-resolutie ({@see \App\Integrations\Exact\Accounting\ExactRelationResolver})
-     * een treffer laten missen.
+     * ambiguïteitsdetectie in de relatie-resolutie ({@see ExactRelationResolver})
+     * een treffer laten missen, en de mirror structureel incompleet vullen.
      *
      * @param  array<string, scalar|null>  $params
+     * @param  callable(array<string, scalar|null>): SdkRequest  $make
      * @return list<array<string, mixed>>
      */
-    private function fetchAllPages(array $params): array
+    private function fetchAllPages(array $params, callable $make): array
     {
         $division = (string) $this->connection->administratie_id;
 
@@ -717,7 +728,7 @@ final class ExactReferenceData
                     $pageParams['$skiptoken'] = $skipToken;
                 }
 
-                $response = $connector->send(new GetRelations($pageParams));
+                $response = $connector->send($make($pageParams));
 
                 if ($response->failed()) {
                     return [];
