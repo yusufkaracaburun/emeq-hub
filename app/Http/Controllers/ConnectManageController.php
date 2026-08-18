@@ -287,7 +287,7 @@ class ConnectManageController extends Controller
             ->get()
             ->map(fn (ConnectionAccountingRef $ref): array => [
                 'code' => $ref->code,
-                'label' => $ref->label !== null && $ref->label !== '' ? "{$ref->code} — {$ref->label}" : $ref->code,
+                'label' => $ref->label !== null && $ref->label !== '' ? "{$ref->code} · {$ref->label}" : $ref->code,
             ])
             ->values()
             ->all();

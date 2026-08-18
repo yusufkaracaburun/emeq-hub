@@ -152,7 +152,7 @@ function BookingsTab({ bookings }: { bookings: BookingRow[] }) {
     return (
         <div className="overflow-hidden rounded-lg border border-border">
             {/* Eigen scrollgebied met sticky kolomkoppen — er kunnen honderden boekingen zijn. */}
-            <div className="max-h-[420px] overflow-y-auto overscroll-contain">
+            <div className="max-h-[438px] overflow-y-auto overscroll-contain">
                 <div className="sticky top-0 z-10 flex gap-2 border-b border-border bg-muted px-3.5 py-2">
                     <ColumnHeader className="w-[84px] shrink-0">Datum</ColumnHeader>
                     <ColumnHeader className="w-[188px] shrink-0">Document</ColumnHeader>
@@ -237,7 +237,7 @@ function RelationRowView({
     return (
         <div className="border-b border-border last:border-b-0">
             <div className="flex items-center gap-2 px-3.5 py-2.5">
-                <span className="w-[180px] shrink-0 truncate font-mono text-xs2 font-semibold text-foreground">{relation.code}</span>
+                <span className="w-[180px] shrink-0 truncate font-data text-xs2 font-semibold text-foreground">{relation.code}</span>
                 <span className={cn('w-[200px] shrink-0 truncate text-xs2', relation.label ? 'text-foreground' : 'text-muted-foreground')}>
                     {relation.label ?? '—'}
                 </span>
@@ -327,7 +327,7 @@ function RelationsTab({
 
     return (
         <div className="overflow-hidden rounded-lg border border-border">
-            <div className="max-h-[420px] overflow-y-auto overscroll-contain">
+            <div className="max-h-[438px] overflow-y-auto overscroll-contain">
                 <div className="sticky top-0 z-10 flex gap-2 border-b border-border bg-muted px-3.5 py-2">
                     <ColumnHeader className="w-[180px] shrink-0">In {app}</ColumnHeader>
                     <ColumnHeader className="w-[200px] shrink-0">In {payload.connection.label}</ColumnHeader>
@@ -374,7 +374,7 @@ function RefSelect({
                 <select
                     value={value ?? ''}
                     onChange={(e) => onChange(e.target.value)}
-                    className="w-full rounded-md border border-border bg-card px-3 py-2.5 font-mono text-xs2 text-foreground"
+                    className="w-full rounded-md border border-border bg-card px-3 py-2.5 font-data text-xs2 text-foreground"
                 >
                     <option value="">— Kies —</option>
                     {options.map((option) => (
@@ -441,7 +441,7 @@ function SettingsTab({ payload, onSaved }: { payload: ManagePayload; onSaved: (s
                 {payload.settings.vat_codes.map((row) => (
                     <div key={row.label} className="flex items-center justify-between">
                         <span className="text-xs text-muted-foreground">{row.label}</span>
-                        <span className="font-mono text-xs text-foreground">{row.value}</span>
+                        <span className="font-data text-xs text-foreground">{row.value}</span>
                     </div>
                 ))}
                 <p className="text-2xs leading-relaxed text-muted-foreground">
@@ -550,7 +550,7 @@ export function ConnectManageDrawer({
                                             {CONNECTION_STATUS_LABELS[payload.connection.status] ?? payload.connection.status}
                                         </Pill>
                                     </div>
-                                    <span className="truncate text-xs2 text-muted-foreground">
+                                    <span className="text-xs2 leading-relaxed text-muted-foreground">
                                         {app} · gekoppeld sinds {formatDate(payload.connection.connected_since)}
                                         {lastExchange && ` · laatste uitwisseling ${formatShortDate(lastExchange)}`}
                                     </span>

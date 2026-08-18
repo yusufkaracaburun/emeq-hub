@@ -80,6 +80,9 @@
     /* Fonts */
     --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
     --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+    /* Design-tokens uit landingspage.pen: caption (pills/eyebrows/kolomkoppen) en data (codes/bedragen) zijn mono. */
+    --font-caption: 'IBM Plex Mono', ui-monospace, monospace;
+    --font-data: 'IBM Plex Mono', ui-monospace, monospace;
 
     /* Schaduwen — de enige twee die het design kent */
     --shadow-btn: 0 1px 3px #0000000f;
