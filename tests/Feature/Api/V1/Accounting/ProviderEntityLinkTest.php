@@ -169,7 +169,8 @@ class ProviderEntityLinkTest extends TestCase
     public function test_repost_after_key_loss_is_deduplicated_not_rebooked(): void
     {
         MockClient::global([
-            CreateSalesEntry::class => MockResponse::make(['d' => ['ID' => 'inv-guid-2', 'EntryNumber' => 88]], 201),
+            GetSalesEntries::class => MockResponse::make(['d' => ['results' => [['EntryID' => '11111111-1111-4111-8111-111111111111']]]], 200),
+            CreateSalesEntry::class => MockResponse::make(['d' => ['ID' => '11111111-1111-4111-8111-111111111111', 'EntryNumber' => 88]], 201),
         ]);
         $this->bindFakeReferences();
 
@@ -184,17 +185,61 @@ class ProviderEntityLinkTest extends TestCase
         $second->assertStatus(200)
             ->assertJsonPath('status', 'posted')
             ->assertJsonPath('deduplicated', true)
-            ->assertJsonPath('external_ref', 'inv-guid-2')
+            ->assertJsonPath('external_ref', '11111111-1111-4111-8111-111111111111')
             ->assertJsonPath('external_number', '88');
 
-        MockClient::global()->assertSentCount(1);
+        MockClient::global()->assertSentCount(2);
+        $this->assertDatabaseCount('provider_entity_links', 1);
+    }
+
+    public function test_repost_after_the_bookkeeping_deleted_the_entry_books_it_again(): void
+    {
+        MockClient::global([
+            GetSalesEntries::class => MockResponse::make(['d' => ['results' => []]], 200),
+            CreateSalesEntry::class => MockResponse::make(['d' => ['ID' => '33333333-3333-4333-8333-333333333333', 'EntryNumber' => 91]], 201),
+        ]);
+        $this->bindFakeReferences();
+
+        [$consumer] = $this->consumerWithExactConnection();
+
+        $this->postDocument($consumer, $this->salesInvoicePayload())->assertStatus(201);
+
+        IdempotencyKey::query()->delete();
+
+        $this->postDocument($consumer, $this->salesInvoicePayload())
+            ->assertStatus(201)
+            ->assertJsonPath('external_ref', '33333333-3333-4333-8333-333333333333');
+
+        MockClient::global()->assertSentCount(3);
+        $this->assertDatabaseCount('provider_entity_links', 1);
+    }
+
+    public function test_repost_stays_deduplicated_when_the_bookkeeping_cannot_answer(): void
+    {
+        MockClient::global([
+            GetSalesEntries::class => MockResponse::make(['error' => ['message' => ['value' => 'stuk']]], 500),
+            CreateSalesEntry::class => MockResponse::make(['d' => ['ID' => '44444444-4444-4444-8444-444444444444', 'EntryNumber' => 44]], 201),
+        ]);
+        $this->bindFakeReferences();
+
+        [$consumer] = $this->consumerWithExactConnection();
+
+        $this->postDocument($consumer, $this->salesInvoicePayload())->assertStatus(201);
+
+        IdempotencyKey::query()->delete();
+
+        $this->postDocument($consumer, $this->salesInvoicePayload())
+            ->assertStatus(200)
+            ->assertJsonPath('deduplicated', true);
+
         $this->assertDatabaseCount('provider_entity_links', 1);
     }
 
     public function test_repost_with_changed_content_is_rejected_with_409(): void
     {
         MockClient::global([
-            CreateSalesEntry::class => MockResponse::make(['d' => ['ID' => 'inv-guid-3']], 201),
+            GetSalesEntries::class => MockResponse::make(['d' => ['results' => [['EntryID' => '22222222-2222-4222-8222-222222222222']]]], 200),
+            CreateSalesEntry::class => MockResponse::make(['d' => ['ID' => '22222222-2222-4222-8222-222222222222']], 201),
         ]);
         $this->bindFakeReferences();
 
@@ -211,9 +256,9 @@ class ProviderEntityLinkTest extends TestCase
             ->assertStatus(409)
             ->assertJsonPath('status', 'rejected')
             ->assertJsonPath('error', 'document_already_posted')
-            ->assertJsonPath('external_ref', 'inv-guid-3');
+            ->assertJsonPath('external_ref', '22222222-2222-4222-8222-222222222222');
 
-        MockClient::global()->assertSentCount(1);
+        MockClient::global()->assertSentCount(2);
     }
 
     public function test_dedupe_is_scoped_per_connection(): void

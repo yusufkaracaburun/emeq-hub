@@ -102,6 +102,14 @@ final readonly class ProviderEntityLinkRecorder
             ->delete();
     }
 
+    public function forgetVanished(ProviderEntityLink $link): void
+    {
+        ProviderEntityLink::query()
+            ->whereKey($link->getKey())
+            ->whereNotNull('provider_entity_id')
+            ->delete();
+    }
+
     public function claimIsStale(ProviderEntityLink $link): bool
     {
         return $link->provider_entity_id === null

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Accounting;
 
+use App\Accounting\Contracts\ConfirmsPostedDocuments;
 use App\Accounting\Contracts\ProbesPostedDocuments;
 use App\Accounting\Enums\SyncStatus;
 use App\Accounting\Exceptions\AccountingMappingException;
@@ -170,6 +171,13 @@ final readonly class AccountingSyncRunner
         }
 
         if ($existing->provider_entity_id !== null) {
+            if ($this->vanishedUpstream($existing, $document, $connection)) {
+                $this->links->forgetVanished($existing);
+
+                return $this->links->claim($document, $connection)
+                    ?? $this->syncInProgress($document, $connection->provider->value, 1);
+            }
+
             return $this->replayExistingLink($existing, $document, $connection->provider->value, $fingerprint);
         }
 
@@ -181,6 +189,29 @@ final readonly class AccountingSyncRunner
 
         return $this->links->claim($document, $connection)
             ?? $this->syncInProgress($document, $connection->provider->value, 1);
+    }
+
+    /**
+     * Only a partner that says outright it no longer knows the entity reopens a
+     * booking. Silence, an error, or a provider that cannot answer all keep the
+     * link, because the cost of being wrong here is a second entry in someone
+     * else's administration.
+     */
+    private function vanishedUpstream(ProviderEntityLink $link, FinancialDocument $document, Connection $connection): bool
+    {
+        try {
+            $target = $this->registry->for($connection->provider->value);
+
+            if (! $target instanceof ConfirmsPostedDocuments) {
+                return false;
+            }
+
+            return $target->postedDocumentStillExists($document, (string) $link->provider_entity_id, $connection) === false;
+        } catch (Throwable $e) {
+            report($e);
+
+            return false;
+        }
     }
 
     /** @return array{0: int, 1: string, 2: array<string, mixed>, 3: array<string, string>} */

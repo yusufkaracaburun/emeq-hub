@@ -9,6 +9,7 @@ use App\Accounting\Attachment;
 use App\Accounting\BankStatement;
 use App\Accounting\BankStatementLine;
 use App\Accounting\Contracts\AccountingTarget;
+use App\Accounting\Contracts\ConfirmsPostedDocuments;
 use App\Accounting\Contracts\EnrichesValidation;
 use App\Accounting\Contracts\ProbesPostedDocuments;
 use App\Accounting\Contracts\ReadsBankStatements;
@@ -57,7 +58,7 @@ use Emeq\ExactApi\OData\Envelope;
 use Saloon\Http\Request as SdkRequest;
 use Throwable;
 
-final class ExactAccountingTarget implements AccountingTarget, EnrichesValidation, ProbesPostedDocuments, ReadsBankStatements, ReadsDocuments, ReadsLedgerAccounts, ReadsRelations, ReadsTaxCodes, SyncsReferenceData, UploadsAttachments
+final class ExactAccountingTarget implements AccountingTarget, ConfirmsPostedDocuments, EnrichesValidation, ProbesPostedDocuments, ReadsBankStatements, ReadsDocuments, ReadsLedgerAccounts, ReadsRelations, ReadsTaxCodes, SyncsReferenceData, UploadsAttachments
 {
     private const YOUR_REF_MAX = 30;
 
@@ -117,6 +118,34 @@ final class ExactAccountingTarget implements AccountingTarget, EnrichesValidatio
             static fn (array $p): SdkRequest => $purchase ? new GetPurchaseEntries($p) : new GetSalesEntries($p),
             fn (array $rows): array => $this->toPostedDocuments($rows, $connection, $purchase, $collection, $partyField),
         );
+    }
+
+    public function postedDocumentStillExists(
+        FinancialDocument $document,
+        string $providerEntityId,
+        Connection $connection,
+    ): ?bool {
+        if (preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i', $providerEntityId) !== 1) {
+            return null;
+        }
+
+        $purchase = in_array($document->type, [DocumentType::PurchaseInvoice, DocumentType::Expense], true);
+
+        $params = [
+            '$select' => 'EntryID',
+            '$filter' => "EntryID eq guid'{$providerEntityId}'",
+            '$top' => 1,
+        ];
+
+        $response = $this->connector($connection)->send(
+            $purchase ? new GetPurchaseEntries($params) : new GetSalesEntries($params),
+        );
+
+        if ($response->failed()) {
+            return null;
+        }
+
+        return Envelope::results((array) $response->json()) !== [];
     }
 
     public function findPostedDocument(FinancialDocument $document, Connection $connection): ?PostedDocument
