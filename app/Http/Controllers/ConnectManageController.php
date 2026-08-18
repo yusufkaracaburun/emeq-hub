@@ -10,6 +10,8 @@ use App\Integrations\Exact\ExactReferenceData;
 use App\Models\Account;
 use App\Models\Connection;
 use App\Models\ConnectionAccountingRef;
+use App\Models\PassThroughCall;
+use App\Models\ProviderEntityLink;
 use App\Support\Connect\ConnectLinkFactory;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -45,14 +47,7 @@ class ConnectManageController extends Controller
                 'reconnect_url' => $this->links->startUrl($request, $account, $provider, 'connect.start'),
                 'disconnect_url' => $this->links->startUrl($request, $account, $provider, 'connect.disconnect'),
             ],
-            // De adapter schrijft `response_body` in `pass_through_calls` alleen bij een
-            // fout (status >= 400, zie PassThroughCall::errorBody()); een geslaagde
-            // boeking laat geen melding na om hier te tonen. Tab bestaat structureel
-            // (het ontwerp), maar draagt bewust geen data tot dat een aparte beslissing
-            // is — zie het sessierapport.
-            'bookings' => [
-                'available' => false,
-            ],
+            'bookings' => $this->bookingRows($connection),
             'relations' => $this->relationRows($connection, $request, $account, $provider),
             'settings' => $this->settingsPayload($connection),
             'urls' => [
@@ -179,6 +174,78 @@ class ConnectManageController extends Controller
     /**
      * @return list<array<string, mixed>>
      */
+    /**
+     * De laatste boekingen van deze koppeling, uit de audit-rijen van
+     * `POST /v1/accounting/documents`. Elke poging staat er — geslaagd én geweigerd —
+     * zodat de klant ook ziet wat er níet doorging.
+     *
+     * De rij draagt bewust geen document-inhoud (`request_fingerprint` is een hash van
+     * het `external_id`). Het leesbare nummer komt daarom uit `provider_entity_links`:
+     * die fingerprint is deterministisch, dus de kant met de klare tekst rekent 'm uit
+     * en zoekt de match op.
+     *
+     * @return list<array<string, mixed>>
+     */
+    private function bookingRows(Connection $connection): array
+    {
+        $calls = PassThroughCall::query()
+            ->where('connection_id', $connection->getKey())
+            ->where('path', '/v1/accounting/documents')
+            ->orderByDesc('created_at')
+            ->limit(10)
+            ->get();
+
+        if ($calls->isEmpty()) {
+            return [];
+        }
+
+        $byFingerprint = ProviderEntityLink::query()
+            ->where('connection_id', $connection->getKey())
+            ->orderByDesc('last_synced_at')
+            ->get()
+            ->keyBy(fn (ProviderEntityLink $link): string => substr(hash('sha256', $link->external_id), 0, 12));
+
+        return $calls
+            ->map(function (PassThroughCall $call) use ($byFingerprint): array {
+                $link = $call->request_fingerprint === null ? null : $byFingerprint->get($call->request_fingerprint);
+
+                return [
+                    'booked_at' => $call->created_at?->toIso8601String(),
+                    'document' => $link?->provider_entity_number ?? $link?->external_id,
+                    'posted' => $call->status < 400,
+                    'messages' => $this->bookingMessages($call),
+                ];
+            })
+            ->values()
+            ->all();
+    }
+
+    /**
+     * Wat er tijdens deze boeking in de administratie is gebeurd. Bij een geweigerde
+     * boeking is dat de reden; bij een geslaagde de warnings — dat is de enige plek
+     * waar zichtbaar wordt dat de Hub bijvoorbeeld een relatie heeft aangemaakt.
+     *
+     * @return list<string>
+     */
+    private function bookingMessages(PassThroughCall $call): array
+    {
+        $messages = array_values(array_filter(array_map(
+            static fn (mixed $warning): ?string => is_array($warning) && isset($warning['message'])
+                ? (string) $warning['message']
+                : null,
+            $call->warnings ?? [],
+        )));
+
+        if ($call->status < 400) {
+            return $messages;
+        }
+
+        $body = json_decode((string) $call->response_body, true);
+        $reason = is_array($body) ? ($body['message'] ?? null) : null;
+
+        return [...$messages, ...($reason === null ? [] : [(string) $reason])];
+    }
+
     private function relationRows(Connection $connection, Request $request, Account $account, string $provider): array
     {
         return ConnectionAccountingRef::query()

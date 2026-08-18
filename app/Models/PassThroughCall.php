@@ -30,6 +30,7 @@ use Illuminate\Support\Facades\Context;
     'response_size_bytes',
     'upstream_error',
     'response_body',
+    'warnings',
     'created_at',
 ])]
 class PassThroughCall extends Model
@@ -117,6 +118,7 @@ class PassThroughCall extends Model
             'status' => 'integer',
             'duration_ms' => 'integer',
             'response_size_bytes' => 'integer',
+            'warnings' => 'array',
             'created_at' => 'datetime',
         ];
     }

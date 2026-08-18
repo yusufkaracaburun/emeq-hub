@@ -341,7 +341,7 @@ export default function Connect({ state, consumerName, accountName, providers, r
                 <SimpleFooter />
             </div>
 
-            <ConnectManageDrawer provider={managing} open={managing !== null} onOpenChange={(open) => !open && setManaging(null)} />
+            <ConnectManageDrawer app={app} provider={managing} open={managing !== null} onOpenChange={(open) => !open && setManaging(null)} />
         </MotionConfig>
     );
 }

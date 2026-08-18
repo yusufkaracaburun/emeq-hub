@@ -32,13 +32,20 @@ interface ManagePayload {
         reconnect_url: string;
         disconnect_url: string;
     };
-    bookings: { available: boolean };
+    bookings: BookingRow[];
     relations: RelationRow[];
     settings: {
         journals: { sales: string | null; purchase: string | null; options: RefOption[] };
         gl_accounts: { sales_default: string | null; purchase_default: string | null; options: RefOption[] };
     };
     urls: { mapping_url: string; relations_search_url: string };
+}
+
+interface BookingRow {
+    booked_at: string | null;
+    document: string | null;
+    posted: boolean;
+    messages: string[];
 }
 
 interface SearchResult {
@@ -48,6 +55,12 @@ interface SearchResult {
 }
 
 type Tab = 'bookings' | 'relations' | 'settings';
+
+const TAB_HINTS: Record<Tab, (app: string) => string> = {
+    bookings: (app) => `Wat ${app} de afgelopen dagen naar je administratie heeft gestuurd.`,
+    relations: (app) => `Zo weet je boekhouding welke klant of leverancier uit ${app} bij welke relatie hoort.`,
+    settings: (app) => `Zo boekt ${app} in je administratie. Wijzig je iets, dan geldt het vanaf de volgende boeking.`,
+};
 
 const TABS: { key: Tab; label: string }[] = [
     { key: 'bookings', label: 'Boekingen' },
@@ -102,16 +115,58 @@ function formatDate(iso: string | null): string {
  * fout (status >= 400). Voor een geslaagde boeking is er dus geen melding om te
  * tonen. Zie het sessierapport voor de volledige onderbouwing.
  */
-function BookingsTab() {
-    return (
-        <div className="flex flex-col items-center gap-2 rounded-lg bg-muted px-5 py-8 text-center">
-            <p className="text-sm font-semibold text-foreground">Nog niet beschikbaar</p>
-            <p className="max-w-[380px] text-xs2 text-muted-foreground">
-                Een overzicht van boekingen met status en melding vraagt meer historie dan de Hub op dit moment
-                bewaart. Dit blok volgt in een latere update.
+function BookingsTab({ bookings }: { bookings: BookingRow[] }) {
+    if (bookings.length === 0) {
+        return (
+            <p className="rounded-lg bg-muted px-5 py-8 text-center text-xs2 text-muted-foreground">
+                Nog niets geboekt. Zodra er een factuur of bon naar je administratie gaat, staat 'ie hier.
             </p>
+        );
+    }
+
+    return (
+        <div className="overflow-hidden rounded-lg border border-border">
+            {bookings.map((booking, index) => (
+                <div
+                    key={`${booking.booked_at}-${index}`}
+                    className={`flex items-start gap-3 px-4 py-3 ${index === bookings.length - 1 ? '' : 'border-b border-border'}`}
+                >
+                    <span className="w-20 shrink-0 pt-0.5 text-xs2 text-muted-foreground">
+                        {formatBookedAt(booking.booked_at)}
+                    </span>
+                    <span className="w-44 shrink-0 pt-0.5 text-xs2 font-semibold text-foreground">
+                        {booking.document ?? '—'}
+                    </span>
+                    <span className="shrink-0">
+                        <StatusPill posted={booking.posted} />
+                    </span>
+                    <span className="flex-1 text-xs2 text-muted-foreground">
+                        {booking.messages.length === 0 ? '—' : booking.messages.join(' · ')}
+                    </span>
+                </div>
+            ))}
         </div>
     );
+}
+
+function StatusPill({ posted }: { posted: boolean }) {
+    return (
+        <span
+            className={`rounded-full px-2 py-0.5 font-caption text-2xs tracking-wide ${
+                posted ? 'bg-success-soft text-success' : 'bg-error-soft text-error-deep'
+            }`}
+        >
+            {posted ? 'GEBOEKT' : 'GEWEIGERD'}
+        </span>
+    );
+}
+
+function formatBookedAt(value: string | null): string {
+    if (value === null) {
+        return '—';
+    }
+
+    return new Date(value).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short' });
 }
 
 function RelationRowView({
@@ -365,10 +420,12 @@ function SettingsTab({ payload, onSaved }: { payload: ManagePayload; onSaved: (s
 }
 
 export function ConnectManageDrawer({
+    app,
     provider,
     open,
     onOpenChange,
 }: {
+    app: string;
     provider: { key: string; label: string; manage_url: string | null } | null;
     open: boolean;
     onOpenChange: (open: boolean) => void;
@@ -399,26 +456,50 @@ export function ConnectManageDrawer({
                         'sm:inset-y-0 sm:right-0 sm:left-auto sm:max-h-none sm:w-full sm:max-w-[480px] sm:rounded-none sm:rounded-l-2xl',
                     )}
                 >
-                    <div className="flex items-start justify-between gap-3">
-                        <div className="flex flex-col gap-1">
-                            <Dialog.Title className="text-lg font-semibold text-foreground">
-                                {payload?.connection.label ?? provider?.label}
-                            </Dialog.Title>
-                            {payload && (
-                                <div className="flex flex-wrap items-center gap-2 text-xs2 text-muted-foreground">
-                                    <span className="rounded-full bg-success-soft px-2 py-[2px] font-mono text-2xs uppercase tracking-[1px] text-success">
-                                        {CONNECTION_STATUS_LABELS[payload.connection.status] ?? payload.connection.status}
-                                    </span>
-                                    <span>Gekoppeld sinds {formatDate(payload.connection.connected_since)}</span>
-                                </div>
-                            )}
-                        </div>
+                    <div className="flex items-center justify-between gap-3">
+                        <Dialog.Close asChild>
+                            <button
+                                type="button"
+                                className="flex items-center gap-2 text-sm font-semibold text-muted-foreground transition hover:text-foreground"
+                            >
+                                <span aria-hidden>←</span> Je koppelingen
+                            </button>
+                        </Dialog.Close>
                         <Dialog.Close asChild>
                             <Button type="button" size="sm" variant="ghost" aria-label="Sluiten">
                                 ✕
                             </Button>
                         </Dialog.Close>
                     </div>
+
+                    <div className="flex flex-col gap-2">
+                        <span className="font-caption text-xs uppercase tracking-[2px] text-brand">Koppeling beheren</span>
+                        <Dialog.Title className="text-2xl font-bold leading-tight text-foreground">
+                            {payload?.connection.label ?? provider?.label}
+                        </Dialog.Title>
+                        <Dialog.Description className="text-sm leading-relaxed text-muted-foreground">
+                            Hieronder zie je wat {app} met je administratie uitwisselt. Klopt er iets niet, dan herstel je
+                            het hier.
+                        </Dialog.Description>
+                    </div>
+
+                    {payload && (
+                        <div className="flex flex-col gap-1 rounded-lg border border-border bg-card px-5 py-4">
+                            <div className="flex flex-wrap items-center gap-2">
+                                <span className="text-md font-semibold text-foreground">
+                                    {payload.connection.administratie_id === null
+                                        ? payload.connection.label
+                                        : `Administratie ${payload.connection.administratie_id}`}
+                                </span>
+                                <span className="rounded-full bg-success-soft px-2 py-[2px] font-caption text-2xs uppercase tracking-[1px] text-success">
+                                    {CONNECTION_STATUS_LABELS[payload.connection.status] ?? payload.connection.status}
+                                </span>
+                            </div>
+                            <span className="text-xs2 text-muted-foreground">
+                                Gekoppeld sinds {formatDate(payload.connection.connected_since)}
+                            </span>
+                        </div>
+                    )}
 
                     {payload && (
                         <div className="flex flex-wrap gap-2">
@@ -471,7 +552,8 @@ export function ConnectManageDrawer({
                         <p className="py-8 text-center text-xs2 text-muted-foreground">Bezig met laden…</p>
                     ) : (
                         <>
-                            {tab === 'bookings' && <BookingsTab />}
+                            <p className="text-xs2 leading-relaxed text-muted-foreground">{TAB_HINTS[tab](app)}</p>
+                            {tab === 'bookings' && <BookingsTab bookings={payload.bookings} />}
                             {tab === 'relations' && (
                                 <RelationsTab
                                     payload={payload}
@@ -481,6 +563,9 @@ export function ConnectManageDrawer({
                             {tab === 'settings' && (
                                 <SettingsTab payload={payload} onSaved={(settings) => setPayload({ ...payload, settings })} />
                             )}
+                            <p className="text-xs text-muted-foreground">
+                                Deze pagina is persoonlijk en verloopt na 15 minuten.
+                            </p>
                         </>
                     )}
                 </Dialog.Content>

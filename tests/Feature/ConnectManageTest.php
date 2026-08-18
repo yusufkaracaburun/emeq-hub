@@ -8,6 +8,8 @@ use App\Models\Account;
 use App\Models\Connection;
 use App\Models\ConnectionAccountingRef;
 use App\Models\Consumer;
+use App\Models\PassThroughCall;
+use App\Models\ProviderEntityLink;
 use App\Support\Connect\ConnectLinkFactory;
 use Emeq\ExactApi\Http\Request\Read\GetRelations;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -70,10 +72,74 @@ class ConnectManageTest extends TestCase
             ->assertOk()
             ->assertJsonPath('connection.provider', 'exact')
             ->assertJsonPath('connection.status', 'active')
-            ->assertJsonPath('bookings.available', false)
+            ->assertJsonCount(0, 'bookings')
             ->assertJsonPath('relations.0.code', 'party-1')
             ->assertJsonPath('relations.0.matched_on', 'kvk')
             ->assertJsonStructure(['settings' => ['journals', 'gl_accounts'], 'urls' => ['mapping_url', 'relations_search_url']]);
+    }
+
+    public function test_the_bookings_tab_shows_what_the_hub_did_in_the_administration(): void
+    {
+        $account = $this->account();
+        $connection = Connection::factory()->forExact()->active()->for($account)->create();
+
+        ProviderEntityLink::query()->create([
+            'connection_id' => $connection->getKey(),
+            'provider' => 'exact',
+            'entity_type' => 'document',
+            'entity_subtype' => 'sales_invoice',
+            'external_id' => 'INV-042',
+            'provider_entity_id' => 'guid-42',
+            'provider_entity_number' => 'Factuur 2026-0042',
+            'origin' => ProviderEntityLink::ORIGIN_HUB,
+            'last_synced_at' => now(),
+        ]);
+
+        PassThroughCall::query()->create([
+            'connection_id' => $connection->getKey(),
+            'consumer_id' => $account->consumer_id,
+            'account_id' => $account->getKey(),
+            'provider' => 'exact',
+            'method' => 'POST',
+            'path' => '/v1/accounting/documents',
+            'status' => 201,
+            'duration_ms' => 120,
+            'request_fingerprint' => substr(hash('sha256', 'INV-042'), 0, 12),
+            'warnings' => [['code' => 'relation.created', 'message' => 'Relatie Acme B.V. is aangemaakt.']],
+            'created_at' => now(),
+        ]);
+
+        $this->getJson($this->manageUrlFor($account, 'exact'))
+            ->assertOk()
+            ->assertJsonPath('bookings.0.document', 'Factuur 2026-0042')
+            ->assertJsonPath('bookings.0.posted', true)
+            ->assertJsonPath('bookings.0.messages.0', 'Relatie Acme B.V. is aangemaakt.');
+    }
+
+    public function test_a_refused_booking_shows_its_reason(): void
+    {
+        $account = $this->account();
+        $connection = Connection::factory()->forExact()->active()->for($account)->create();
+
+        PassThroughCall::query()->create([
+            'connection_id' => $connection->getKey(),
+            'consumer_id' => $account->consumer_id,
+            'account_id' => $account->getKey(),
+            'provider' => 'exact',
+            'method' => 'POST',
+            'path' => '/v1/accounting/documents',
+            'status' => 422,
+            'duration_ms' => 90,
+            'request_fingerprint' => substr(hash('sha256', 'INV-043'), 0, 12),
+            'response_body' => json_encode(['message' => 'Btw-nummer ontbreekt bij Acme B.V.']),
+            'created_at' => now(),
+        ]);
+
+        $this->getJson($this->manageUrlFor($account, 'exact'))
+            ->assertOk()
+            ->assertJsonPath('bookings.0.posted', false)
+            ->assertJsonPath('bookings.0.document', null)
+            ->assertJsonPath('bookings.0.messages.0', 'Btw-nummer ontbreekt bij Acme B.V.');
     }
 
     public function test_the_drawer_payload_is_rejected_without_a_signature(): void

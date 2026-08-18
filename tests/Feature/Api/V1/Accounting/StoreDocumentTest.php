@@ -6,6 +6,7 @@ use App\Accounting\Enums\DocumentType;
 use App\Models\Connection;
 use App\Models\ConnectionAccountingRef;
 use App\Models\Consumer;
+use App\Models\PassThroughCall;
 use App\Models\ProviderEntityLink;
 use App\Sanctum\TokenAbilities;
 use Emeq\ExactApi\Http\Request\Read\GetRelations;
@@ -732,6 +733,17 @@ class StoreDocumentTest extends TestCase
 
         $this->assertSame('relation.created', $response->json('warnings.0.code'));
         $this->assertSame('new-rel-guid', $response->json('warnings.0.context.relation_id'));
+
+        // De auditrij moet het ook dragen: `response_body` blijft leeg bij een geslaagde
+        // boeking, dus zonder deze kolom is achteraf niet te zien dat de Hub een relatie
+        // in de administratie heeft gezet.
+        $this->assertSame(
+            'relation.created',
+            PassThroughCall::query()
+                ->where('path', '/v1/accounting/documents')
+                ->latest('created_at')
+                ->value('warnings')[0]['code'] ?? null,
+        );
 
         MockClient::global()->assertNotSent(GetRelations::class);
 

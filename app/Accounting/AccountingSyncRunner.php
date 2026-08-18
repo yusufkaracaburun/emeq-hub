@@ -450,6 +450,10 @@ final readonly class AccountingSyncRunner
             // De canonieke identiteit is de fingerprint, niet de body: die is hier al
             // gevalideerd en het externalId is wat een rij herleidbaar maakt.
             requestFingerprint: substr(hash('sha256', $document->externalId), 0, 12),
+            // `response_body` blijft voorbehouden aan fouten. De warnings horen ook bij
+            // een geslaagde boeking: zonder deze kolom is achteraf niet te zien dat de
+            // Hub een relatie in de administratie heeft aangemaakt.
+            extra: ($responseBody['warnings'] ?? []) === [] ? [] : ['warnings' => $responseBody['warnings']],
         );
     }
 }
