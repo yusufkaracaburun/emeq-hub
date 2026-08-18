@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\Services;
+namespace Tests\Feature\Integrations\Snelstart;
 
 use App\Integrations\Snelstart\HubSnelstartCredentialResolver;
 use App\Models\Connection;

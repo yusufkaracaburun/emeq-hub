@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\Api\V1\Snelstart;
+namespace Tests\Feature\Integrations\Snelstart\Http\Api;
 
 use App\Models\Account;
 use App\Models\Connection;

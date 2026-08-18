@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Concerns;
+namespace Tests\Feature\Integrations\Snelstart\Concerns;
 
 use App\Models\Connection;
 use DateTimeImmutable;

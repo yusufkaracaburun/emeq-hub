@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\Api\V1\Snelstart;
+namespace Tests\Feature\Integrations\Snelstart\Http\Api;
 
 use App\Models\Account;
 use App\Models\Connection;
@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\DB;
 use Saloon\Http\Faking\MockClient;
 use Saloon\Http\Faking\MockResponse;
 use Saloon\Http\PendingRequest;
-use Tests\Concerns\PrimesSnelstartTokenCache;
+use Tests\Feature\Integrations\Snelstart\Concerns\PrimesSnelstartTokenCache;
 use Tests\TestCase;
 
 class PassThroughOdataRelatiesTest extends TestCase
