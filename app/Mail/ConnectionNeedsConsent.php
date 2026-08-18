@@ -20,12 +20,12 @@ class ConnectionNeedsConsent extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 
-    public function __construct(public Connection $connection) {}
+    public function __construct(public Connection $needsConsentConnection) {}
 
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Koppeling vraagt om her-consent — '.$this->connection->provider->value.' #'.$this->connection->id,
+            subject: 'Koppeling vraagt om her-consent — '.$this->needsConsentConnection->provider->value.' #'.$this->needsConsentConnection->id,
         );
     }
 
