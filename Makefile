@@ -96,6 +96,14 @@ prod-deploy: ## [server] Release vanuit git: pull → prod-up
 
 prod-up: ## [server] Release zonder git (na `prod-rsync`): backup → build → migrate → restart
 	@test -f .env.prod || { echo "  ✖ .env.prod ontbreekt (kopieer .env.prod.example)"; exit 1; }
+	@# Kop-start voor de graceful shutdown (#61): horizon:terminate zet de lopende
+	@# job op afronden terwijl backup+build toch al lopen, zodat de restart hieronder
+	@# meestal niets meer hoeft te draineren. De stop_grace_period op de horizon-
+	@# service in docker-compose.prod.yml vangt de rest af. Geen actieve horizon
+	@# (eerste deploy) → overslaan, niet falen.
+	@if [ -n "$$($(PROD) ps -q horizon 2>/dev/null)" ]; then \
+		$(PROD) exec -T horizon php artisan horizon:terminate; \
+	fi
 	@$(MAKE) --no-print-directory prod-backup
 	$(PROD) up -d --build
 	$(PROD) exec -T app sh -c "php artisan migrate --force && php artisan optimize"
