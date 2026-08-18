@@ -13,6 +13,7 @@ use App\Http\Middleware\ResolveMollieAccount;
 use App\Http\Middleware\ResolveSnelstartAccount;
 use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\SetNoIndexHeaders;
+use App\Mail\ConnectionNeedsConsent;
 use App\Models\Connection;
 use App\Support\Seo\SeoMeta;
 use Emeq\ExactApi\Exceptions\AuthenticationException as ExactAuthenticationException;
@@ -22,6 +23,7 @@ use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Exceptions\InvalidSignatureException;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Laravel\Sanctum\Http\Middleware\CheckAbilities;
@@ -99,10 +101,23 @@ return Application::configure(basePath: dirname(__DIR__))
                 return;
             }
 
-            Connection::query()
+            // Filter op status !== needs_consent: zonder deze guard mailt élke
+            // volgende mislukte call op een al-dode koppeling opnieuw — de
+            // connection blijft stuk tot iemand handmatig her-connect, dus dat
+            // is geen nieuw incident dat een nieuwe mail rechtvaardigt.
+            $connection = Connection::query()
                 ->whereKey($e->connectionRef)
                 ->where('provider', Provider::Exact->value)
-                ->update(['status' => 'needs_consent']);
+                ->where('status', '!=', 'needs_consent')
+                ->first();
+
+            if ($connection === null) {
+                return;
+            }
+
+            $connection->update(['status' => 'needs_consent']);
+
+            Mail::to(config('mail.notify_address'))->send(new ConnectionNeedsConsent($connection));
         });
 
         // Een verlopen of gemanipuleerde handoff-link is voor de eindgebruiker
