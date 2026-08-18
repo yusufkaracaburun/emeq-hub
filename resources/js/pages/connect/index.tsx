@@ -6,7 +6,7 @@ import { Reveal } from '@/components/motion';
 import { Seo } from '@/components/seo';
 import { Button } from '@/components/ui/button';
 import { Eyebrow } from '@/components/ui/eyebrow';
-import { PadlockGlyph } from '@/components/ui/glyphs';
+import { PadlockGlyph, RefreshGlyph, SlidersGlyph, UnlinkGlyph } from '@/components/ui/glyphs';
 import { type SeoMeta } from '@/lib/types';
 import { ConnectManageDrawer } from './manage-drawer';
 
@@ -164,27 +164,57 @@ function ProviderRow({ provider, onManage }: { provider: ConnectProvider; onMana
                 <span className="text-xs2 text-muted-foreground">{provider.tagline}</span>
             </div>
 
-            <div className="flex w-full shrink-0 gap-2 sm:w-auto">
-                <Button
-                    type="button"
-                    size="sm"
-                    variant={isConnected ? 'outline' : 'primary'}
-                    onClick={start}
-                    className="w-full sm:w-auto"
-                >
-                    {isConnected ? 'Opnieuw koppelen' : 'Koppelen'}
-                    <span aria-hidden className="ml-2">
-                        →
-                    </span>
-                </Button>
-                {isConnected && provider.manage_url && (
-                    <Button type="button" size="sm" variant="outline" onClick={() => onManage(provider)}>
-                        Beheren
-                    </Button>
-                )}
-                {isConnected && provider.disconnect_url && (
-                    <Button type="button" size="sm" variant="outline" onClick={() => setConfirming(true)}>
-                        Ontkoppelen
+            {/*
+                Gekoppeld: drie vierkante icoonknoppen — labels blijven via sr-only
+                beschikbaar; op mobiel gestapeld mét zichtbaar label.
+            */}
+            <div className="flex w-full shrink-0 flex-col gap-2 sm:w-auto sm:flex-row">
+                {isConnected ? (
+                    <>
+                        <Button
+                            type="button"
+                            size="sm"
+                            variant="outline"
+                            onClick={start}
+                            title="Opnieuw koppelen"
+                            className="w-full sm:size-[37px] sm:p-0"
+                        >
+                            <RefreshGlyph className="size-4" />
+                            <span className="sm:sr-only">Opnieuw koppelen</span>
+                        </Button>
+                        {provider.manage_url && (
+                            <Button
+                                type="button"
+                                size="sm"
+                                variant="outline"
+                                onClick={() => onManage(provider)}
+                                title="Beheren"
+                                className="w-full sm:size-[37px] sm:p-0"
+                            >
+                                <SlidersGlyph className="size-4" />
+                                <span className="sm:sr-only">Beheren</span>
+                            </Button>
+                        )}
+                        {provider.disconnect_url && (
+                            <Button
+                                type="button"
+                                size="sm"
+                                variant="outline"
+                                onClick={() => setConfirming(true)}
+                                title="Ontkoppelen"
+                                className="w-full sm:size-[37px] sm:p-0"
+                            >
+                                <UnlinkGlyph className="size-4" />
+                                <span className="sm:sr-only">Ontkoppelen</span>
+                            </Button>
+                        )}
+                    </>
+                ) : (
+                    <Button type="button" size="sm" onClick={start} className="w-full sm:w-auto">
+                        Koppelen
+                        <span aria-hidden className="ml-2">
+                            →
+                        </span>
                     </Button>
                 )}
             </div>

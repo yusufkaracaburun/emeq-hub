@@ -190,6 +190,38 @@ function CheckCircleGlyph({ className, ...props }: SvgProps) {
     );
 }
 
+/** Verversen — cirkelpijl (opnieuw koppelen). */
+function RefreshGlyph({ className, ...props }: SvgProps) {
+    return (
+        <Svg viewBox="0 0 18 18" className={cn('size-[18px]', className)} {...props}>
+            <path d="M15 9a6 6 0 1 1-1.76-4.24" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+            <path d="M15.4 1.6v3.4H12" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
+        </Svg>
+    );
+}
+
+/** Twee schuifjes — beheren/instellingen. */
+function SlidersGlyph({ className, ...props }: SvgProps) {
+    return (
+        <Svg viewBox="0 0 18 18" className={cn('size-[18px]', className)} {...props}>
+            <path d="M2 5.5h14M2 12.5h14" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+            <circle cx="6.5" cy="5.5" r="2.1" fill="var(--color-card)" stroke="currentColor" strokeWidth="1.7" />
+            <circle cx="11.5" cy="12.5" r="2.1" fill="var(--color-card)" stroke="currentColor" strokeWidth="1.7" />
+        </Svg>
+    );
+}
+
+/** Verbroken schakel — ontkoppelen. */
+function UnlinkGlyph({ className, ...props }: SvgProps) {
+    return (
+        <Svg viewBox="0 0 18 18" className={cn('size-[18px]', className)} {...props}>
+            <path d="M7 4.8l1.2-1.2a3.3 3.3 0 0 1 4.66 4.66L11.6 9.5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+            <path d="M11 13.2l-1.2 1.2a3.3 3.3 0 0 1-4.66-4.66L6.4 8.5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+            <path d="M3.2 3.2l1.6 1.6M13.2 13.2l1.6 1.6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+        </Svg>
+    );
+}
+
 export {
     AlertGlyph,
     BroadcastGlyph,
@@ -203,6 +235,9 @@ export {
     MergeGlyph,
     PadlockGlyph,
     PctGlyph,
+    RefreshGlyph,
+    SlidersGlyph,
     TextGlyph,
+    UnlinkGlyph,
     UsersGlyph,
 };

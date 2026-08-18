@@ -453,7 +453,7 @@ export function ConnectManageDrawer({
                     className={cn(
                         'fixed z-50 flex flex-col gap-5 overflow-y-auto bg-card p-6 shadow-card',
                         'inset-x-0 bottom-0 max-h-[85vh] rounded-t-2xl',
-                        'sm:inset-y-0 sm:right-0 sm:left-auto sm:max-h-none sm:w-full sm:max-w-[480px] sm:rounded-none sm:rounded-l-2xl',
+                        'sm:inset-y-0 sm:right-0 sm:left-auto sm:max-h-none sm:w-full sm:max-w-[760px] sm:rounded-none sm:rounded-l-2xl',
                     )}
                 >
                     <div className="flex items-center justify-between gap-3">
