@@ -85,20 +85,27 @@ final class IntegrationLayerStructureTest extends TestCase
         }
     }
 
-    public function test_integraties_kennen_de_http_en_admin_laag_niet(): void
+    public function test_alleen_de_http_submap_van_een_provider_kent_de_http_laag(): void
     {
-        $forbidden = ['App\\Http\\Controllers\\', 'App\\Filament\\'];
-
         foreach ($this->phpFilesIn(self::INTEGRATIONS) as $file) {
             $code = $this->codeWithoutComments($file);
+            $path = $this->relative($file);
 
-            foreach ($forbidden as $namespace) {
-                $this->assertStringNotContainsString($namespace, $code, sprintf(
-                    '%s verwijst naar %s. Een integratie wordt aangeroepen, niet andersom.',
-                    $this->relative($file),
-                    rtrim($namespace, '\\'),
-                ));
+            $this->assertStringNotContainsString('App\\Filament\\', $code, sprintf(
+                '%s verwijst naar App\Filament. Een integratie wordt aangeroepen, niet andersom.',
+                $path,
+            ));
+
+            if (preg_match('#^app/Integrations/[^/]+/Http/#', $path) === 1) {
+                continue;
             }
+
+            $this->assertStringNotContainsString('App\\Http\\', $code, sprintf(
+                '%s verwijst naar App\Http maar ligt niet in <Provider>/Http. De kern van een '
+                .'integratie draait ook vanuit een job, een command en het admin-paneel, waar geen '
+                .'request bestaat.',
+                $path,
+            ));
         }
     }
 
