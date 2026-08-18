@@ -33,7 +33,7 @@ use App\Http\Controllers\Api\V1\OAuth\CallbackController;
 use App\Http\Controllers\Api\V1\OAuth\ExactCallbackController;
 use App\Http\Controllers\Api\V1\OAuth\ProviderInitController;
 use App\Http\Controllers\Api\V1\PingController;
-use App\Http\Controllers\Api\V1\Snelstart\PassThroughController;
+use App\Integrations\Snelstart\Http\Api\PassThroughController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth:sanctum')->group(function (): void {

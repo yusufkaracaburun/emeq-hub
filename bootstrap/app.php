@@ -10,7 +10,7 @@ use App\Http\Middleware\NormalizeApiErrors;
 use App\Http\Middleware\RequireCashierWebhookSecret;
 use App\Http\Middleware\ResolveExactAccount;
 use App\Http\Middleware\ResolveMollieAccount;
-use App\Http\Middleware\ResolveSnelstartAccount;
+use App\Integrations\Snelstart\Http\Middleware\ResolveSnelstartAccount;
 use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\SetNoIndexHeaders;
 use App\Mail\ConnectionNeedsConsent;

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\V1\Snelstart;
+namespace App\Integrations\Snelstart\Http\Api;
 
 use App\Enums\Provider;
 use App\Http\Controllers\Api\V1\Concerns\GuardsPassThroughRequest;

@@ -2,7 +2,7 @@
 
 use App\Http\Controllers\Webhooks\ExactWebhookController;
 use App\Http\Controllers\Webhooks\MollieWebhookController;
-use App\Http\Controllers\Webhooks\SnelstartWebhookController;
+use App\Integrations\Snelstart\Http\Webhooks\SnelstartWebhookController;
 use Illuminate\Support\Facades\Route;
 use Laravel\Cashier\Http\Controllers\AftercareWebhookController;
 use Laravel\Cashier\Http\Controllers\FirstPaymentWebhookController;

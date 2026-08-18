@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Http\Controllers\Webhooks;
+namespace App\Integrations\Snelstart\Http\Webhooks;
 
 use App\Enums\Provider;
 use App\Http\Controllers\Controller;

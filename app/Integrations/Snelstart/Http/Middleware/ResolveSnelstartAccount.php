@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Http\Middleware;
+namespace App\Integrations\Snelstart\Http\Middleware;
 
 use App\Enums\Provider;
+use App\Http\Middleware\ResolveProviderAccount;
 use App\Integrations\Snelstart\HubSnelstartCredentialResolver;
 use App\Models\Connection;
 use Emeq\SnelstartApi\Contracts\SnelstartCredentialResolver;
