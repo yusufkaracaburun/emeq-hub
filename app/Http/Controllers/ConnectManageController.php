@@ -205,19 +205,20 @@ class ConnectManageController extends Controller
             ->get()
             ->keyBy(fn (ProviderEntityLink $link): string => substr(hash('sha256', $link->external_id), 0, 12));
 
-        return $calls
-            ->map(function (PassThroughCall $call) use ($byFingerprint): array {
-                $link = $call->request_fingerprint === null ? null : $byFingerprint->get($call->request_fingerprint);
+        $rows = [];
 
-                return [
-                    'booked_at' => $call->created_at?->toIso8601String(),
-                    'document' => $link?->provider_entity_number ?? $link?->external_id,
-                    'posted' => $call->status < 400,
-                    'messages' => $this->bookingMessages($call),
-                ];
-            })
-            ->values()
-            ->all();
+        foreach ($calls as $call) {
+            $link = $call->request_fingerprint === null ? null : $byFingerprint->get($call->request_fingerprint);
+
+            $rows[] = [
+                'booked_at' => $call->created_at?->toIso8601String(),
+                'document' => $link === null ? null : ($link->provider_entity_number ?? $link->external_id),
+                'posted' => $call->status < 400,
+                'messages' => $this->bookingMessages($call),
+            ];
+        }
+
+        return $rows;
     }
 
     /**
@@ -230,7 +231,7 @@ class ConnectManageController extends Controller
     private function bookingMessages(PassThroughCall $call): array
     {
         $messages = array_values(array_filter(array_map(
-            static fn (mixed $warning): ?string => is_array($warning) && isset($warning['message'])
+            static fn (array $warning): ?string => isset($warning['message'])
                 ? (string) $warning['message']
                 : null,
             $call->warnings ?? [],
@@ -321,6 +322,7 @@ class ConnectManageController extends Controller
         abort_if($providerEnum === null, 404);
         abort_unless($this->registry->supports($providerEnum->value), 404);
 
+        /** @var Connection|null $connection */
         $connection = $account->connections()
             ->where('provider', $providerEnum->value)
             ->whereNull('revoked_at')
