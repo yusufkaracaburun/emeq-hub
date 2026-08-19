@@ -24,8 +24,8 @@ export function SecurityBand() {
                         Security &amp; compliance
                     </p>
                     <p className="max-w-[640px] text-lg leading-[1.6] text-muted-foreground">
-                        Veilig integreren zonder concessies. Versleutelde credentials, unieke webhook-secrets en een
-                        complete audit-trail zijn standaard inbegrepen.
+                        Tokens slaan we versleuteld op, elke koppeling krijgt een eigen webhook-secret en elke call
+                        belandt in de audit-log.
                     </p>
                 </Reveal>
 

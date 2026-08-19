@@ -18,7 +18,7 @@ export function IntegrationsTeaser() {
             <Reveal className="flex flex-col items-start justify-between gap-10 rounded-xl border border-border bg-card p-8 lg:flex-row lg:items-center lg:px-12 lg:py-11">
                 <div className="flex flex-col gap-6">
                     <h2 className="text-xl font-bold tracking-[-1px] text-foreground md:text-2xl">
-                        Van je eerste koppeling tot een compleet ecosysteem.
+                        Begin met je boekhouding; de rest van je stack volgt via dezelfde API.
                     </h2>
                     <div className="flex flex-wrap gap-3">
                         {categories.map((category) => (

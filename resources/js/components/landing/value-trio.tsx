@@ -6,20 +6,20 @@ const columns = [
     {
         index: '01',
         icon: MergeGlyph,
-        title: 'Eén API. Elke partner.',
-        body: 'Integreer één keer met het uniforme API-contract van Emeq Hub. Nieuwe partners voeg je toe zonder je productlogica opnieuw te ontwerpen.',
+        title: 'Eén keer integreren is genoeg.',
+        body: 'Je bouwt één keer tegen het API-contract van Emeq Hub. Elke nieuwe partner zet je daarna aan zonder je productcode te verbouwen.',
     },
     {
         index: '02',
         icon: KeyGlyph,
         title: 'OAuth en tokens? Al geregeld.',
-        body: 'Emeq Hub beheert OAuth-flows, bewaart credentials versleuteld en ververst tokens automatisch. Minder onderhoud, minder storingen.',
+        body: 'Emeq Hub regelt de volledige OAuth-flow, slaat tokens versleuteld op en ververst ze automatisch. Je team hoeft er niet meer naar om te kijken.',
     },
     {
         index: '03',
         icon: BroadcastGlyph,
         title: 'Volledige grip op elke koppeling.',
-        body: 'Van webhooks tot audit-trails en tenant-scheiding: je ziet wat er gebeurt en houdt controle op schaal.',
+        body: 'Elke request en elke webhook wordt per klant en per koppeling gelogd. Gaat er iets mis, dan zie je precies waar en bij wie.',
     },
 ];
 

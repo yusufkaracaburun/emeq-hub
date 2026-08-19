@@ -230,7 +230,7 @@ function Disclosure({ app }: { app: string }) {
     const points = [
         `Je logt in bij het systeem zelf. Emeq Hub ziet je wachtwoord nooit.`,
         `${app} wisselt daarna alleen de gegevens uit die voor deze koppeling nodig zijn.`,
-        `Je kunt de koppeling op elk moment intrekken — op deze pagina, of bij de leverancier zelf.`,
+        `Je kunt de koppeling op elk moment intrekken, op deze pagina of bij de leverancier zelf.`,
     ];
 
     return (
@@ -318,8 +318,8 @@ export default function Connect({ state, consumerName, accountName, providers, r
                                     </h1>
                                     <p className="max-w-[560px] text-base leading-[1.55] text-muted-foreground">
                                         {accountName ? <>Je beheert de koppelingen van {accountName}. </> : null}
-                                        Een gekoppeld systeem wisselt automatisch gegevens uit met {app} — je hoeft niets
-                                        meer over te typen.
+                                        Een gekoppeld systeem wisselt automatisch gegevens uit met {app}; overtypen hoeft
+                                        niet meer.
                                     </p>
                                 </div>
 
@@ -356,7 +356,7 @@ export default function Connect({ state, consumerName, accountName, providers, r
                                     </h1>
                                     <p className="max-w-[560px] text-base leading-[1.55] text-muted-foreground">
                                         Een koppellink is 15 minuten geldig. Ga terug naar {APP_FALLBACK} en start de
-                                        koppeling daar opnieuw — je bent zo weer hier.
+                                        koppeling daar opnieuw; je bent zo weer hier.
                                     </p>
                                 </div>
 

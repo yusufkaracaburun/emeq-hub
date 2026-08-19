@@ -16,11 +16,11 @@ export function CodeSplit() {
             <Reveal className="flex max-w-[820px] flex-col gap-4">
                 <Eyebrow>03 — Audit &amp; transparantie</Eyebrow>
                 <h2 className="text-xl font-bold tracking-[-1px] text-foreground md:text-3xl">
-                    Elke API-call aantoonbaar onder controle.
+                    Elke API-call staat in de audit-log.
                 </h2>
                 <p className="max-w-[640px] text-base leading-[1.6] text-muted-foreground">
-                    Krijg direct inzicht in elke request: provider, status, timing en resultaat. Ideaal voor support,
-                    compliance en snelle troubleshooting.
+                    Van elke request leggen we provider, status en timing vast. Belt een klant met een probleem, dan
+                    zoek je de call gewoon op.
                 </p>
             </Reveal>
 

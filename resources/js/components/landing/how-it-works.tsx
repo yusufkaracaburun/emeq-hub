@@ -6,15 +6,15 @@ import { TextGlyph } from '@/components/ui/glyphs';
 const steps = [
     {
         title: 'Maak je API-token aan',
-        body: 'Je start met één token. Geen complexe configuratie, wel direct een veilige basis.',
+        body: 'Vraag een API-token aan en je kunt bouwen. Meer configuratie heb je niet nodig.',
     },
     {
         title: 'Laat je klant veilig autoriseren',
-        body: 'De gebruiker rondt OAuth af; Emeq Hub slaat tokens veilig op en houdt ze automatisch actueel.',
+        body: 'Je stuurt je klant één autorisatielink. Die logt in bij het eigen pakket; Emeq Hub bewaart de tokens versleuteld en ververst ze automatisch.',
     },
     {
-        title: 'Bouw op één betrouwbare API',
-        body: 'Gebruik dezelfde endpoint-structuur voor elke partner. Snel ontwikkelen, veilig schalen.',
+        title: 'Bouw tegen één vaste API',
+        body: 'Dezelfde endpoints en dezelfde foutcodes voor elke partner. Wat je voor de eerste koppeling bouwt, werkt ook voor de volgende.',
     },
 ];
 
@@ -24,7 +24,7 @@ export function HowItWorks() {
             <Reveal className="flex max-w-[760px] flex-col gap-4">
                 <Eyebrow>02 — Zo werkt het</Eyebrow>
                 <h2 className="text-xl font-bold tracking-[-1px] text-foreground md:text-3xl">
-                    Van idee naar live integratie in drie stappen.
+                    Je eerste koppeling draait in drie stappen.
                 </h2>
             </Reveal>
 

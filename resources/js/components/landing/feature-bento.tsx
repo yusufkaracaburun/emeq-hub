@@ -15,14 +15,14 @@ const rowOne: Cell[] = [
         index: 'F01',
         tag: '/v1/{provider}/{path}',
         title: 'Elk partner-endpoint, één route',
-        body: 'Gebruik ieder partner-endpoint via één vaste route. Emeq Hub kiest de juiste koppeling, voegt credentials toe en geeft status en headers transparant terug.',
+        body: 'Elk partner-endpoint bereik je via dezelfde route. Emeq Hub zoekt de juiste koppeling erbij, voegt credentials toe en geeft status en headers ongewijzigd terug.',
         hero: true,
     },
     {
         index: 'F02',
         tag: 'kill-switch',
         title: 'Direct aan of uit, per omgeving',
-        body: 'Schakel koppelingen per omgeving direct in of uit. Zonder release, zonder vertraging.',
+        body: 'Zet een provider per omgeving aan of uit, zonder release. Handig bij onderhoud of een storing bij de partner.',
     },
 ];
 
@@ -31,19 +31,19 @@ const rowTwo: Cell[] = [
         index: 'F03',
         tag: 'Idempotency-Key',
         title: 'Nooit dubbel geboekt',
-        body: 'Voorkom dubbele boekingen bij retries. Idempotency is platformbreed ingebouwd.',
+        body: 'Komt dezelfde request twee keer binnen, dan boeken we hem één keer. De Idempotency-Key-header regelt dat platformbreed.',
     },
     {
         index: 'F04',
         tag: 'canoniek → partner',
         title: 'Eén datamodel, elke partner',
-        body: 'Vertaal data automatisch tussen jouw model en dat van elke aangesloten partner.',
+        body: 'Je levert één canoniek document aan; Emeq Hub vertaalt het naar het formaat van de gekoppelde partner.',
     },
     {
         index: 'F05',
         tag: 'partner → hub',
         title: 'Elke webhook traceerbaar',
-        body: 'Leg elke inkomende webhook gestructureerd vast voor snellere incidentanalyse en betere support.',
+        body: 'Elke inkomende webhook wordt geregistreerd met bron, topic en request-id. Bij een incident zie je direct welk event wanneer binnenkwam.',
     },
 ];
 
@@ -53,7 +53,7 @@ export function FeatureBento() {
             <Reveal className="flex max-w-[820px] flex-col gap-4">
                 <Eyebrow>04 — Platform</Eyebrow>
                 <h2 className="text-xl font-bold tracking-[-1px] text-foreground md:text-3xl">
-                    Alles voor integraties die wél meegroeien.
+                    Alles wat een koppeling in productie nodig heeft.
                 </h2>
             </Reveal>
 

@@ -16,7 +16,7 @@ export function FinalCta() {
                     Klaar om <span className="text-brand">sneller te integreren?</span>
                 </h2>
                 <p className="max-w-[560px] text-lg leading-[1.6] text-muted-foreground">
-                    Maak van koppelingen een groeiversneller in plaats van een ontwikkelproject. Start vandaag met Emeq Hub.
+                    Maak een token aan, laat je klant autoriseren en je eerste koppeling draait. Dat pad blijft hetzelfde voor elke volgende partner.
                 </p>
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
                     <Link href="/koppelen" className={cn(buttonVariants({ variant: 'primary', size: 'lg' }), 'group')}>

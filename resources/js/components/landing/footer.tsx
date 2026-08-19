@@ -43,7 +43,7 @@ export function Footer() {
                         <img src="/img/logo.png" alt="" aria-hidden className="h-[18px] w-auto" />
                         <span className="text-[24px] font-bold tracking-[-0.5px] text-foreground">hub</span>
                     </div>
-                    <p className="text-sm text-muted-foreground">De integratie-API voor software die wil doorgroeien.</p>
+                    <p className="text-sm text-muted-foreground">Emeq Hub is één integratie-API voor Nederlandse boekhoud- en betaalkoppelingen.</p>
                 </div>
 
                 <nav className="flex flex-col items-start gap-3">

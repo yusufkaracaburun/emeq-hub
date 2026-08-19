@@ -31,16 +31,16 @@ export function Hero() {
                         {...enter(0.08)}
                         className="text-2xl font-bold tracking-[-1px] text-foreground md:text-display md:leading-[1.13] md:tracking-[-2px]"
                     >
-                        Integreer <span className="text-brand">zonder grenzen.</span>
+                        Eén API. <span className="text-brand">Elke koppeling.</span>
                         <br />
-                        Eén API voor alle <br className="hidden lg:block" />
-                        externe systemen die <br className="hidden lg:block" />
+                        Voor de boekhoud- en <br className="hidden lg:block" />
+                        betaalsystemen die <br className="hidden lg:block" />
                         je klanten gebruiken.
                     </motion.h1>
 
                     <motion.p {...enter(0.16)} className="text-lg leading-[1.6] text-muted-foreground">
-                        Bouw productintegraties zonder maanden werk aan OAuth, tokenbeheer en webhooks. Emeq Hub is jouw
-                        integratielaag; jij focust op product, klanten en groei.
+                        Emeq Hub is de unified API voor Nederlandse boekhoud- en betaalkoppelingen. Wij verzorgen OAuth,
+                        tokenbeheer en webhooks; jouw team bouwt verder aan het product.
                     </motion.p>
 
                     <motion.div {...enter(0.24)} className="flex flex-col gap-4 sm:flex-row sm:items-center">

@@ -18,9 +18,9 @@ class HomeController extends Controller
         return Inertia::render('home', [
             'providers' => $this->showcase->summaries(),
             'seo' => SeoMeta::make(
-                'Eén API voor al je productintegraties',
-                'Bouw productintegraties zonder maanden werk aan OAuth, tokenbeheer en webhooks. '
-                    .'emeq is de integratielaag achter je product.',
+                'Eén API voor boekhoud- en betaalkoppelingen',
+                'Emeq Hub is de unified API voor Nederlandse boekhoud- en betaalkoppelingen. '
+                    .'OAuth, tokenbeheer en webhooks zijn geregeld; jij bouwt verder aan je product.',
             ),
         ]);
     }

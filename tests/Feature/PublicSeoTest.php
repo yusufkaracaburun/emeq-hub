@@ -78,7 +78,7 @@ class PublicSeoTest extends TestCase
         $this->get('/')
             ->assertOk()
             ->assertInertia(fn (AssertableInertia $page) => $page
-                ->where('seo.title', 'Eén API voor al je productintegraties · '.config('app.name')));
+                ->where('seo.title', 'Eén API voor boekhoud- en betaalkoppelingen · '.config('app.name')));
     }
 
     public function test_partner_detail_exposes_the_integration_as_structured_data(): void
