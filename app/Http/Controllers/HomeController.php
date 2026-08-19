@@ -19,8 +19,8 @@ class HomeController extends Controller
             'providers' => $this->showcase->summaries(),
             'seo' => SeoMeta::make(
                 'Eén API voor al je integraties',
-                'Emeq Hub is het integratieplatform voor Nederlandse software: één unified API '
-                    .'voor elke externe koppeling. OAuth, tokenbeheer en webhooks zijn geregeld.',
+                'Koppel je software via één API aan de systemen die je klanten gebruiken. '
+                    .'Emeq Hub regelt OAuth, token-refresh en webhooks.',
             ),
         ]);
     }

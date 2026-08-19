@@ -23,7 +23,7 @@ class PartnersController extends Controller
         return Inertia::render('partners/index', [
             'providers' => $providers,
             'seo' => SeoMeta::make(
-                'Integraties — '.implode(', ', $labels),
+                'Integraties · '.implode(', ', $labels),
                 'Alle koppelingen die via de emeq Hub beschikbaar zijn: '.implode(', ', $labels)
                     .'. Eén API-contract, ongeacht hoeveel systemen je koppelt.',
             )->schema(
@@ -71,7 +71,7 @@ class PartnersController extends Controller
                 ['name' => $label, 'url' => $url],
             ]),
             Schema::integration(
-                $label.'-koppeling — emeq Hub',
+                $label.'-koppeling · emeq Hub',
                 $detail['summary'],
                 $url,
                 $features,

@@ -15,23 +15,22 @@ class SupportController extends Controller
     private const FAQ = [
         [
             'question' => 'Hoe krijg ik een API-token?',
-            'answer' => 'Vraag een koppeling aan. We beoordelen je use-case, richten je omgeving in '
-                .'en sturen je token — meestal binnen één werkdag.',
+            'answer' => 'Vraag een koppeling aan. We kijken naar wat je wilt bouwen, richten je omgeving in '
+                .'en sturen je token, meestal binnen één werkdag.',
         ],
         [
             'question' => 'Welke koppelingen zijn live?',
-            'answer' => 'Exact Online is de eerste live koppeling. We breiden de Hub uit met nieuwe '
-                .'integraties, terwijl jouw API-contract vertrouwd blijft.',
+            'answer' => 'Exact Online is nu live. Komt er een partner bij, dan verandert het API-contract '
+                .'niet.',
         ],
         [
             'question' => 'Wat kost het?',
-            'answer' => 'Je betaalt passend bij je volume en use-case. Neem contact op voor een '
-                .'voorstel dat met je meegroeit.',
+            'answer' => 'De prijs hangt af van je volume. Neem contact op voor een voorstel.',
         ],
         [
             'question' => 'Hoe zit het met beveiliging?',
-            'answer' => 'Credentials zijn versleuteld, secrets zijn per koppeling gescheiden en elke '
-                .'relevante call is te herleiden in de audit-log.',
+            'answer' => 'Credentials zijn versleuteld, elke koppeling heeft een eigen secret en elke call '
+                .'is terug te vinden in de audit-log.',
         ],
     ];
 

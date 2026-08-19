@@ -24,8 +24,8 @@ class AccessRequestController extends Controller
             'providers' => $showcase->summaries(),
             'seo' => SeoMeta::make(
                 'Start met koppelen',
-                'Vraag een koppeling aan: we beoordelen je use-case, richten je omgeving in en '
-                    .'sturen je API-token — meestal binnen één werkdag.',
+                'Vraag een koppeling aan. We kijken naar wat je wilt bouwen, richten je omgeving in '
+                    .'en sturen je API-token, meestal binnen één werkdag.',
             )->schema(Schema::breadcrumbs([
                 ['name' => 'Home', 'url' => route('home')],
                 ['name' => 'Start met koppelen', 'url' => route('koppelen')],

@@ -90,7 +90,7 @@ final class Schema
                 'availability' => 'https://schema.org/InStock',
                 'priceCurrency' => 'EUR',
                 'price' => '0',
-                'description' => 'Prijs op aanvraag, afhankelijk van volume en use-case.',
+                'description' => 'Prijs op aanvraag, afhankelijk van je volume.',
             ],
         ];
     }

@@ -35,7 +35,7 @@ class RobotsController extends Controller
     {
         $lines = app()->isProduction()
             ? $this->productionRules()
-            : ['# Niet-productie — niet indexeren.', 'User-agent: *', 'Disallow: /'];
+            : ['# Niet-productie, niet indexeren.', 'User-agent: *', 'Disallow: /'];
 
         return response(implode("\n", $lines)."\n", 200, ['Content-Type' => 'text/plain; charset=UTF-8']);
     }

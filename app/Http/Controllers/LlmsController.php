@@ -16,7 +16,7 @@ class LlmsController extends Controller
         $providers = $this->showcase->summaries();
 
         $integrations = array_map(fn (array $provider): string => sprintf(
-            '- [%s](%s): %s — %s. Status: %s.',
+            '- [%s](%s): %s. %s. Status: %s.',
             $provider['label'],
             route('partners.show', $provider['key']),
             $provider['category'],
