@@ -33,14 +33,14 @@ export function Hero() {
                     >
                         Eén API. <span className="text-brand">Elke koppeling.</span>
                         <br />
-                        Voor de boekhoud- en <br className="hidden lg:block" />
-                        betaalsystemen die <br className="hidden lg:block" />
-                        je klanten gebruiken.
+                        Voor elk systeem dat <br className="hidden lg:block" />
+                        je klanten naast jouw <br className="hidden lg:block" />
+                        software gebruiken.
                     </motion.h1>
 
                     <motion.p {...enter(0.16)} className="text-lg leading-[1.6] text-muted-foreground">
-                        Emeq Hub is de unified API voor Nederlandse boekhoud- en betaalkoppelingen. Wij verzorgen OAuth,
-                        tokenbeheer en webhooks; jouw team bouwt verder aan het product.
+                        Emeq Hub is het integratieplatform dat elke externe koppeling achter één unified API zet. Wij
+                        verzorgen OAuth, tokenbeheer en webhooks; jouw team bouwt verder aan het product.
                     </motion.p>
 
                     <motion.div {...enter(0.24)} className="flex flex-col gap-4 sm:flex-row sm:items-center">

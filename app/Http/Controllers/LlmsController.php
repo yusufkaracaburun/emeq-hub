@@ -27,13 +27,14 @@ class LlmsController extends Controller
         $lines = [
             '# emeq Hub',
             '',
-            '> Integratieplatform voor Nederlandse boekhoud- en betaalsoftware. Eén REST-API '
-                .'waarachter de Hub OAuth-koppelingen, tokenbeheer, webhook-routing en '
-                .'audit-logging per eindklant afhandelt, zodat een SaaS-app niet per partner '
-                .'een eigen integratie hoeft te bouwen.',
+            '> Integratieplatform voor Nederlandse software. Eén REST-API waarachter de Hub '
+                .'OAuth-koppelingen, tokenbeheer, webhook-routing en audit-logging per eindklant '
+                .'afhandelt, zodat een SaaS-app niet per partner een eigen integratie hoeft te '
+                .'bouwen. De eerste koppelingen zijn boekhouden en betalen; er komen steeds '
+                .'categorieën bij.',
             '',
-            'Taal: Nederlands. Doelgroep: software-teams die een boekhoud- of betaalkoppeling '
-                .'in hun eigen product willen aanbieden.',
+            'Taal: Nederlands. Doelgroep: software-teams die externe koppelingen in hun '
+                .'eigen product willen aanbieden.',
             '',
             '## Koppelingen',
             '',

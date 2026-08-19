@@ -19,7 +19,7 @@ final class Schema
             'name' => config('app.name'),
             'url' => url('/'),
             'logo' => url('/favicon.svg'),
-            'description' => 'Integratieplatform dat koppelingen met boekhoud- en betaalsoftware '
+            'description' => 'Integratieplatform dat externe koppelingen (boekhouden, betalen en meer) '
                 .'aanbiedt als één API, inclusief OAuth, tokenbeheer en webhooks.',
             'email' => 'info@emeq.nl',
             'areaServed' => 'NL',
