@@ -32,7 +32,7 @@ export default function Legal({ title, html, updatedAt, seo }: LegalProps) {
 
                 <div className="relative flex max-w-[800px] flex-col gap-10">
                     <Reveal className="flex flex-col gap-4">
-                        <Eyebrow>Juridisch — {title}</Eyebrow>
+                        <Eyebrow>Juridisch · {title}</Eyebrow>
                         <h1 className="text-2xl font-bold leading-[1.05] tracking-[-1px] text-foreground md:text-display md:tracking-[-2px]">
                             {title}
                         </h1>

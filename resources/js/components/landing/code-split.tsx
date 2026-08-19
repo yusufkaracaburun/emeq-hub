@@ -14,7 +14,7 @@ export function CodeSplit() {
     return (
         <section className="px-page py-24 lg:py-section-x">
             <Reveal className="flex max-w-[820px] flex-col gap-4">
-                <Eyebrow>03 — Audit &amp; transparantie</Eyebrow>
+                <Eyebrow>03 · Audit &amp; transparantie</Eyebrow>
                 <h2 className="text-xl font-bold tracking-[-1px] text-foreground md:text-3xl">
                     Elke API-call staat in de audit-log.
                 </h2>

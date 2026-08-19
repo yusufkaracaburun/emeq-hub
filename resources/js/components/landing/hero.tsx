@@ -34,13 +34,13 @@ export function Hero() {
                         Eén API. <span className="text-brand">Elke koppeling.</span>
                         <br />
                         Voor elk systeem dat <br className="hidden lg:block" />
-                        je klanten naast jouw <br className="hidden lg:block" />
-                        software gebruiken.
+                        je klanten al <br className="hidden lg:block" />
+                        gebruiken.
                     </motion.h1>
 
                     <motion.p {...enter(0.16)} className="text-lg leading-[1.6] text-muted-foreground">
-                        Emeq Hub is het integratieplatform dat elke externe koppeling achter één unified API zet. Wij
-                        verzorgen OAuth, tokenbeheer en webhooks; jouw team bouwt verder aan het product.
+                        OAuth, token-refresh en webhooks bouw je niet zelf. Je koppelt één keer aan Emeq Hub en houdt
+                        daarna één API over, hoeveel partners er ook bij komen.
                     </motion.p>
 
                     <motion.div {...enter(0.24)} className="flex flex-col gap-4 sm:flex-row sm:items-center">

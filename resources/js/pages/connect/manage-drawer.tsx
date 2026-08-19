@@ -73,7 +73,7 @@ const TABS: { key: Tab; label: string }[] = [
 const MATCHED_ON_LABELS: Record<MatchedOn, string> = {
     kvk: 'KVK',
     vat: 'BTW',
-    name: 'NAAM — CONTROLEER',
+    name: 'NAAM · CONTROLEER',
     created: 'NIEUW AANGEMAAKT',
     pinned: 'HANDMATIG GEKOPPELD',
 };

@@ -8,16 +8,16 @@ export interface IntakeStep {
 /** De drie intake-stappen van /koppelen — ook in de Koppelen-sectie op de partner-detailpagina. */
 export const intakeSteps: IntakeStep[] = [
     {
-        title: 'We brengen je integratievraag scherp',
-        description: 'Een korte intake over systemen, data en gewenste uitkomst.',
+        title: 'We kijken wat je wilt koppelen',
+        description: 'Een kort gesprek over welke systemen het zijn en welke data er langs moet.',
     },
     {
         title: 'Je omgeving staat klaar',
-        description: 'Je ontvangt een veilige omgeving, API-token en heldere onboarding.',
+        description: 'Je krijgt een eigen omgeving en een API-token, met uitleg erbij.',
     },
     {
-        title: 'Je eerste integratie gaat live',
-        description: 'Samen zetten we de eerste koppeling om in resultaat.',
+        title: 'Je eerste koppeling gaat live',
+        description: 'We kijken mee tot hij in productie draait.',
     },
 ];
 

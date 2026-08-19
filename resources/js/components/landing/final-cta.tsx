@@ -13,7 +13,7 @@ export function FinalCta() {
             <Reveal className="relative mx-auto flex max-w-[640px] flex-col items-center gap-6 text-center">
                 <p className="font-mono text-xs2 uppercase tracking-[1.5px] text-muted-foreground">Start vandaag</p>
                 <h2 className="text-xl font-bold tracking-[-1px] text-foreground md:text-display md:tracking-[-2px]">
-                    Klaar om <span className="text-brand">sneller te integreren?</span>
+                    Klaar om <span className="text-brand">te koppelen?</span>
                 </h2>
                 <p className="max-w-[560px] text-lg leading-[1.6] text-muted-foreground">
                     Maak een token aan, laat je klant autoriseren en je eerste koppeling draait. Dat pad blijft hetzelfde voor elke volgende partner.

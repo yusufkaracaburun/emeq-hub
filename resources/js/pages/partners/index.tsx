@@ -47,8 +47,8 @@ export default function PartnersIndex({ providers, seo }: PartnersIndexProps) {
                                 Integraties
                             </h1>
                             <p className="max-w-[660px] text-lg leading-[1.6] text-muted-foreground">
-                                Emeq Hub is de integratiehub achter je product. Start vandaag met Exact Online en voeg nieuwe
-                                systemen toe zonder telkens je architectuur te verbouwen.
+                                Exact Online is live. Komt er een partner bij, dan gebruik je dezelfde API en verandert er niets
+                                in je code.
                             </p>
                         </Reveal>
                     </div>

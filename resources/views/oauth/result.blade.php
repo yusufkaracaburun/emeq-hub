@@ -16,7 +16,7 @@
 
     $reasons = [
         'access_denied' => 'Je hebt bij '.$providerLabel.' geen toestemming gegeven, of de sessie is afgebroken. Er is niets gewijzigd en er zijn geen gegevens uitgewisseld.',
-        'invalid_or_expired_state' => 'De sessie is verlopen of ongeldig. Start de koppeling opnieuw — je bent zo weer terug.',
+        'invalid_or_expired_state' => 'De sessie is verlopen of ongeldig. Start de koppeling opnieuw, je bent zo weer terug.',
         'exchange_failed' => 'De token-uitwisseling met '.$providerLabel.' is mislukt. Probeer het later opnieuw.',
         'missing_parameters' => 'De callback van '.$providerLabel.' miste verplichte parameters. Probeer het opnieuw.',
     ];
@@ -34,7 +34,7 @@
     $hint = match (true) {
         $success && $isConsumerReturn => 'Je wordt automatisch teruggestuurd…',
         $success => 'Je kunt dit venster ook sluiten.',
-        $reason === 'access_denied' => 'Wil je liever niet koppelen? Dan hoef je niets te doen — sluit dit venster.',
+        $reason === 'access_denied' => 'Wil je liever niet koppelen? Dan hoef je niets te doen: sluit dit venster.',
         default => 'Blijft het misgaan? Neem contact op via support@emeq.nl.',
     };
 @endphp

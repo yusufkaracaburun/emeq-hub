@@ -19,10 +19,10 @@ export default function Koppelen({ providers, seo }: KoppelenProps) {
                 title={
                     <>
                         Start met <br />
-                        <span className="text-brand">groeien.</span>
+                        <span className="text-brand">koppelen.</span>
                     </>
                 }
-                intro="Vertel ons welke software je wilt koppelen. We denken mee over de slimste route en zorgen dat je snel kunt starten."
+                intro="Vertel welke software je wilt koppelen. Wij kijken mee welke route het snelst werkt."
                 steps={intakeSteps}
             >
                 <KoppelForm providers={providers.map(({ key, label }) => ({ key, label }))} />

@@ -22,7 +22,7 @@ export function HowItWorks() {
     return (
         <section id="hoe-het-werkt" className="bg-card px-page py-24 lg:py-section-x">
             <Reveal className="flex max-w-[760px] flex-col gap-4">
-                <Eyebrow>02 — Zo werkt het</Eyebrow>
+                <Eyebrow>02 · Zo werkt het</Eyebrow>
                 <h2 className="text-xl font-bold tracking-[-1px] text-foreground md:text-3xl">
                     Je eerste koppeling draait in drie stappen.
                 </h2>

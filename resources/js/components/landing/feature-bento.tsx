@@ -51,7 +51,7 @@ export function FeatureBento() {
     return (
         <section id="platform" className="px-page py-24 lg:py-section-x">
             <Reveal className="flex max-w-[820px] flex-col gap-4">
-                <Eyebrow>04 — Platform</Eyebrow>
+                <Eyebrow>04 · Platform</Eyebrow>
                 <h2 className="text-xl font-bold tracking-[-1px] text-foreground md:text-3xl">
                     Alles wat een koppeling in productie nodig heeft.
                 </h2>

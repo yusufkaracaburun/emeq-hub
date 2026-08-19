@@ -27,11 +27,11 @@ export default function Support({ faq, seo }: SupportProps) {
                     <Reveal className="flex flex-col gap-4">
                         <Eyebrow>Support</Eyebrow>
                         <h1 className="text-2xl font-bold leading-[1.05] tracking-[-1px] text-foreground md:text-display md:tracking-[-2px]">
-                            Support die je integraties vooruithelpt.
+                            Vragen over een koppeling?
                         </h1>
                         <p className="text-base leading-[1.6] text-muted-foreground">
-                            Hulp nodig bij een koppeling, token of technische keuze? Ons team reageert binnen één werkdag met
-                            een helder antwoord.
+                            Stuur een mail met wat er misgaat. Je krijgt binnen één werkdag antwoord van iemand die de Hub
+                            kent.
                         </p>
                     </Reveal>
 

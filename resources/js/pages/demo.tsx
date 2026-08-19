@@ -11,7 +11,7 @@ import { cn } from '@/lib/utils';
 
 const steps = [
     {
-        title: 'Van API-call naar resultaat',
+        title: 'Van API-call naar boeking',
         description: 'Bekijk hoe één request veilig bij de juiste partner terechtkomt.',
     },
     {
@@ -19,8 +19,8 @@ const steps = [
         description: 'Zie precies wat er gebeurt: status, provider, timing en resultaat.',
     },
     {
-        title: 'Een route voor jouw use-case',
-        description: 'We vertalen jouw integratievraag naar een concrete, schaalbare aanpak.',
+        title: 'Wat het voor jou betekent',
+        description: 'We lopen jouw situatie door en zeggen wat wel en niet kan.',
     },
 ];
 
@@ -37,11 +37,11 @@ export default function Demo({ slots, seo }: DemoProps) {
                 eyebrow="Demo"
                 title={
                     <>
-                        Zie hoe je <br />
-                        <span className="text-brand">sneller integreert.</span>
+                        Zie hoe een <br />
+                        <span className="text-brand">koppeling loopt.</span>
                     </>
                 }
-                intro="In 30 minuten zie je hoe Emeq Hub je koppelingen versnelt: van eerste API-call tot audit-inzicht, afgestemd op jouw use-case."
+                intro="In 30 minuten laten we zien hoe een koppeling loopt, van de eerste API-call tot wat je terugziet in de audit-log."
                 steps={steps}
             >
                 <DemoForm slots={slots} />
@@ -186,7 +186,7 @@ function DemoForm({ slots }: { slots: string[] }) {
                 <TextGlyph glyph="→" className="transition-transform duration-150 group-hover:translate-x-0.5" />
             </Button>
             <p className="font-mono text-2xs text-muted-foreground">
-                30 minuten · online · afgestemd op jouw integratievraag
+                30 minuten · online · over jouw koppeling
             </p>
         </form>
     );
