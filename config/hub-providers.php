@@ -4,16 +4,19 @@ declare(strict_types=1);
 
 return [
     'mollie' => [
+        'enabled' => env('HUB_PROVIDER_MOLLIE_ENABLED', false),
         'encrypted_fields' => ['access_token', 'refresh_token'],
         'primary_label' => 'OAuth token',
         'oauth_flow_key' => 'mollie',
     ],
     'snelstart' => [
+        'enabled' => env('HUB_PROVIDER_SNELSTART_ENABLED', false),
         'encrypted_fields' => ['client_key', 'subscription_key'],
         'primary_label' => 'Client key',
         'oauth_flow_key' => null,
     ],
     'exact' => [
+        'enabled' => env('HUB_PROVIDER_EXACT_ENABLED', true),
         'encrypted_fields' => ['access_token', 'refresh_token'],
         'primary_label' => 'OAuth token',
         'oauth_flow_key' => 'exact',

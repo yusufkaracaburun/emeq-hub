@@ -8,7 +8,9 @@ use App\Integrations\Exceptions\ProviderDisabledException;
 use App\Integrations\OAuth\OAuthFlowRegistry;
 use App\Models\Account;
 use App\Models\Consumer;
+use App\Providers\FeatureServiceProvider;
 use App\Sanctum\TokenAbilities;
+use App\Support\Connect\ProviderConnectStatus;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Pennant\Feature;
 use Tests\TestCase;
@@ -95,9 +97,52 @@ class ProviderKillSwitchTest extends TestCase
             ->assertJsonPath('error', 'missing_account_header');
     }
 
+    public function test_a_provider_disabled_in_config_is_not_connectable(): void
+    {
+        $this->disableProviderInConfig('mollie');
+
+        $mollie = collect(app(ProviderConnectStatus::class)->for(null))
+            ->firstWhere('key', 'mollie');
+
+        $this->assertNotNull($mollie);
+        $this->assertFalse($mollie['connectable']);
+    }
+
+    public function test_a_provider_disabled_in_config_returns_503(): void
+    {
+        $this->disableProviderInConfig('mollie');
+
+        [, $token] = $this->consumerWithToken([TokenAbilities::MOLLIE_WRITE]);
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->postJson('/v1/mollie/payments', [])
+            ->assertStatus(503)
+            ->assertJsonPath('error', 'provider_disabled');
+    }
+
+    public function test_a_provider_without_an_enabled_key_stays_disabled(): void
+    {
+        config()->set('hub-providers.mollie', ['oauth_flow_key' => 'mollie']);
+        $this->rebootFeatures();
+
+        $this->assertFalse(Feature::active('provider-mollie-enabled'));
+    }
+
     private function killProvider(string $provider): void
     {
         Feature::define("provider-{$provider}-enabled", fn () => false);
+        Feature::flushCache();
+    }
+
+    private function disableProviderInConfig(string $provider): void
+    {
+        config()->set("hub-providers.{$provider}.enabled", false);
+        $this->rebootFeatures();
+    }
+
+    private function rebootFeatures(): void
+    {
+        (new FeatureServiceProvider($this->app))->boot();
         Feature::flushCache();
     }
 

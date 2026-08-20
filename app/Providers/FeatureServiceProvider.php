@@ -11,8 +11,10 @@ final class FeatureServiceProvider extends ServiceProvider
 {
     public function boot(): void
     {
-        foreach (array_keys(config('hub-providers', [])) as $provider) {
-            Feature::define("provider-{$provider}-enabled", fn () => true);
+        foreach (config('hub-providers', []) as $provider => $settings) {
+            $enabled = (bool) ($settings['enabled'] ?? false);
+
+            Feature::define("provider-{$provider}-enabled", fn (): bool => $enabled);
         }
     }
 }
