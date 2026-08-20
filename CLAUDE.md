@@ -87,7 +87,7 @@ Een SDK-change is edit + commit + push in de SDK-repo zelf, daarna `composer upd
 - Nooit secrets committen. Nooit `.env` aanpassen zonder approval.
 - Nooit meer dan 3 files in één commit zonder approval.
 
-## Werkwijze en skills
+## Agent skills en werkwijze
 
 ai-kit draait als plugin (`.ai-kit-setup`: `tier=full`, `mode=solo-global`). Lifecycle-fase **development** — schema-migraties vrij te wijzigen, geen backwards-compat-eis vóór productie. Solo-repo: feature-/fix-branch → tests groen → ff-merge naar `master`, geen PR-ceremonie. Open en forward-werk staat in GitHub-issues (`P*`/`area/*`-labels; `/ai:next` rankt ze). Entrypoints: `/ai:tdd`, `/ai:diagnose`, `/ai:to-issues`, `/ai:review`. Detail in `docs/agents/workflow.md`.
 
