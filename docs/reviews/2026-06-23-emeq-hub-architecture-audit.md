@@ -91,7 +91,7 @@ Findings under dim 3 (middleware, error-mapper) and dim 5 (job + error-mapper na
 | L3 | Webhook fan-out job naming/namespace asymmetry (Mollie outside `App\Jobs\Webhooks`, no `…Job` suffix) | 🟡 | Standardize to `App\Jobs\Webhooks\Forward{Provider}WebhookToConsumerJob` | Hub/Jobs |
 | A1 | VAT account-map duplicated (`InvoicePoster::REVENUE_BY_RATE` + `BtwService`) | 🟡 | Single `VatAccountMap`/config | Books |
 | A2 | VAT composite-key `reverse_charge:tarief` encoded in 3 classes | 🟡 | Shared `const`/enum prefix + reuse `rateKey()` | Accounting |
-| A3 | Idempotency key stored after Exact write → crash-window double-book (ADR-accepted) | 🟡 | Reserve key before forward (v-next) | Accounting |
+| A3 | Idempotency key stored after Exact write → crash-window double-book (ADR-accepted) | 🟡 | ✅ fixed — `f341c6b` claim-first met de unique index als mutex, `ce07319` races, `b275d3f` scope per account. Lease + `takeOver()` voorkomt een permanent blokkerende sleutel. 37 tests groen | Accounting |
 | A4 | `ExactAccountingTarget::ensureMapping()` couples write path to sync/derive infra | 🟡 | Document coupling; revisit if it grows | Accounting |
 | N1 | `FinancialDocumentLine::fromArray()` loose casts (mooted at edge; public surface unguarded) | 🟢 | Optional: strict coercion in `fromArray()` | Accounting |
 
