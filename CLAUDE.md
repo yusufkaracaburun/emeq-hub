@@ -81,7 +81,9 @@ Een SDK-change is edit + commit + push in de SDK-repo zelf, daarna `composer upd
 
 ## Git policy — hard
 
-- Nooit op `master` werken; de `branch-guard`-hook blokkeert edits daar.
+- Nooit op `master` werken. De `branch-guard`-hook blokkeert daar alleen Edit/Write —
+  bewerkingen via Bash (heredoc, `sed -i`) glippen erlangs, dus de regel geldt ook waar
+  de hook niet vuurt.
 - Nooit `git push` zonder expliciete toestemming.
 - Nooit `--no-verify`, `--no-gpg-sign` of force-push tenzij expliciet gevraagd.
 - Nooit secrets committen. Nooit `.env` aanpassen zonder approval.
