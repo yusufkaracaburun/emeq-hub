@@ -67,14 +67,26 @@ They have neither a partnership nor a line of code behind them.
 
 ## Corrections the live site needs
 
-- Drop "CRM" and "E-commerce" from the integrations teaser, or move them under
-  an explicit roadmap heading with a date.
+Checked against the components on 2026-08-20, not against extracted strings.
+
 - "ISO 27001-hosting" is the hosting provider's certification, not Emeq Hub's.
   Sitting between "GDPR" and "Tokens encrypted at rest" it reads as ours. Say
-  whose it is.
-- The hero promises "alle externe systemen die je klanten gebruiken". Two
-  categories on the same page have no coverage. Either the promise narrows or
-  the categories go.
+  whose it is. Confirmed by the owner.
+- The integrations teaser marks live categories with a green dot and full text
+  colour, and everything else stays muted. The dot is `aria-hidden`, so the
+  distinction is carried by colour alone. A screen reader announces
+  "Boekhouden, Betalen, CRM, E-commerce, + meer" as one flat list with no way
+  to tell which one works today. Give the non-live items a text marker.
+- `Betalen` is `live: false` in `integrations-teaser.tsx` while
+  `app/Integrations/Mollie` holds 53 files. Either the flag is stale or
+  payments are not shippable yet. Resolve before writing anything that leans
+  on payments.
+
+The teaser is honest about coverage. Its heading says "Begin met je
+boekhouding; de rest van je stack volgt via dezelfde API", and only
+Boekhouden carries the live marker. An earlier version of this file claimed
+the page overclaimed a partner network. That was wrong, and it came from
+reading extracted label strings instead of the component.
 
 ## Language
 
