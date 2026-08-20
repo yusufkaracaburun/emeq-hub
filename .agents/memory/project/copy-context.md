@@ -77,14 +77,13 @@ Checked against the components on 2026-08-20, not against extracted strings.
   distinction is carried by colour alone. A screen reader announces
   "Boekhouden, Betalen, CRM, E-commerce, + meer" as one flat list with no way
   to tell which one works today. Give the non-live items a text marker.
-- `Betalen` is `live: false` in `integrations-teaser.tsx`, but the code says
-  payments work. `config/hub-providers.php` registers mollie next to exact and
-  snelstart, `FeatureServiceProvider` defines every registered provider's flag
-  as enabled by default, and `routes/api.php` exposes 19 Mollie route groups
-  behind `feature.provider:mollie`: payments, customers, mandates, refunds,
-  subscriptions, and Mollie Connect onboarding. Either the teaser flag is
-  stale or holding payments back is a go-to-market choice. That call is the
-  owner's, not the writer's. Settle it before any copy leans on payments.
+- `Betalen` is `live: false` in `integrations-teaser.tsx` and that is correct.
+  Payments are not live in the Hub yet, confirmed by the owner on 2026-08-20.
+  The code reads otherwise at a glance: `config/hub-providers.php` registers
+  mollie, `FeatureServiceProvider` defines every registered provider's flag as
+  enabled by default, and `routes/api.php` exposes 19 Mollie route groups. That
+  is plumbing in place, not a partner a customer can use. Do not let the file
+  count or the route count talk you into a payments claim.
 
 The teaser is honest about coverage. Its heading says "Begin met je
 boekhouding; de rest van je stack volgt via dezelfde API", and only
