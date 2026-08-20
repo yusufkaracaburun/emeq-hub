@@ -107,7 +107,14 @@ Register is not settled here yet. The current site uses "je" throughout.
   just signed or just walked: what happened right before you looked for us;
   what had you already tried; how do you describe us to a colleague; what
   nearly made you walk. Record verbatim, never paraphrased.
-- **Time to first successful call.** Not a gap any more, just unrun. The
+- **Time to first successful call.** Measured on production 2026-08-20 and
+  **not publishable**. One connection exists, for exact, with 4.4 days between
+  the connection and its first 2xx. That gap is the owner's own working rhythm,
+  not a customer onboarding time, and a median over one row is not a median.
+  The connection itself is active: 248 pass-through calls sit behind it.
+
+  Re-run when at least five real customer connections exist. Until then the
+  copy carries no onboarding-speed claim. The query, unchanged, is below. The
   `pass_through_calls` table records `connection_id`, the upstream `status`,
   and `created_at`, so the span from connection to first 2xx is one query
   (PostgreSQL):

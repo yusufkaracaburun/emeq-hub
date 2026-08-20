@@ -1,5 +1,5 @@
-import { motion, type Variants } from 'framer-motion';
-import { type ComponentProps, type ReactNode } from 'react';
+import { motion, useInView, type Variants } from 'framer-motion';
+import { useRef, type ComponentProps, type ReactNode } from 'react';
 
 /**
  * Motion-systeem voor de publieke pagina's. Ingetogen en snel, passend bij het
@@ -36,13 +36,20 @@ function Reveal({ children, delay = 0, ...props }: RevealProps) {
     );
 }
 
-/** Container die zijn RevealItem-children met 80ms stagger toont. */
+/**
+ * Container die zijn RevealItem-children met 80ms stagger toont. Gebruikt
+ * `animate` in plaats van `whileInView`, zodat children die later mounten
+ * (bijvoorbeeld na een filterwissel) de zichtbare variant alsnog erven.
+ */
 function RevealGroup({ children, ...props }: ComponentProps<typeof motion.div>) {
+    const ref = useRef<HTMLDivElement>(null);
+    const inView = useInView(ref, { once: true, margin: '-80px' });
+
     return (
         <motion.div
+            ref={ref}
             initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: '-80px' }}
+            animate={inView ? 'visible' : 'hidden'}
             variants={{ visible: { transition: { staggerChildren: 0.08 } } }}
             {...props}
         >
