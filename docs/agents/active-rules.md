@@ -29,5 +29,9 @@ Canonical rules enabled for this project. Source of truth: `~/.local/share/ai-ki
 | mark-recommended-option | always-on | When presenting choices via AskUserQuestion, put the recommended option first and label it "(Recommended)" |
 | minimal-comments | always-on | Default to no comments; only add one when the WHY is non-obvious and would surprise a future reader |
 | phase-scope-discipline | always-on | Stay within the scope of the current phase or task; capture out-of-scope finds as deferred follow-ups instead of doing them inline |
+| release-it | on-demand | Production stability — timeouts, circuit breakers, bulkheads, backpressure |
+| ddd-distilled | on-demand | DDD Distilled — bounded contexts, aggregates, ubiquitous language |
+| api-design | always-on | REST API conventions — resource modelling, status codes, versioning, OpenAPI source-of-truth |
+| laravel-conventions | always-on | Laravel idioms — Eloquent, Artisan, queues, validation, multi-tenancy patterns the framework expects |
 
 <!-- ai-kit:active-rules:end -->
