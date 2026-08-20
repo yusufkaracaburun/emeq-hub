@@ -20,7 +20,7 @@ Wat vandaag draait en gedekt is door tests.
 ### Provider-onafhankelijk schrijfpad
 `POST /v1/accounting/documents` → `AccountingSyncRunner` → `AccountingTargetRegistry`
 → adapter. De controller kent geen providernaam; de registry mapt provider → adapter
-en past de Pennant-kill-switch toe.
+en past de provider-kill-switch toe.
 → `tests/Feature/Api/V1/Accounting/StoreDocumentTest.php` (34 tests)
 
 ### Async schrijfpad
@@ -78,7 +78,7 @@ Een capability is aanwezig dan en slechts dan als de geregistreerde adapter het
 contract implementeert — dus geen lijst in config die kan liegen tegen de code. De
 registry beantwoordt de vraag met reflectie, zonder de adapter te bouwen.
 `GET /v1/accounting/capabilities` geeft `{provider, enabled, capabilities[]}`; `enabled`
-is de losse Pennant-as, want een uitgeschakelde provider declareert nog steeds wat hij
+is de losse kill-switch-as, want een uitgeschakelde provider declareert nog steeds wat hij
 kan. Hiermee zijn beide provider-conditionals uit de accounting-controllers verdwenen,
 en belt de dry-run Exact niet meer terwijl de kill-switch uit staat.
 Bijvangst: `ExactReferenceResolver` → `App\Accounting\Contracts\ReferenceResolver` met

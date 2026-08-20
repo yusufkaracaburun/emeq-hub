@@ -81,7 +81,7 @@ POST /v1/accounting/documents
   → StoreDocumentRequest         edge-validatie (snake_case wire)
   → FinancialDocument::fromArray canoniek object
   → AccountingSyncRunner         dedupe-check op provider_entity_links
-  → AccountingTargetRegistry     provider → adapter, Pennant kill-switch
+  → AccountingTargetRegistry     provider → adapter, provider-kill-switch
   → ExactAccountingTarget        canoniek → Exact-payload
       → ReferenceResolver        canonieke sleutel → Exact-identiteit
       → emeq/exact-api (Saloon)  HTTP
@@ -207,7 +207,7 @@ GET /v1/accounting/capabilities
 }
 ```
 
-`enabled` is de orthogonale as: de Pennant-kill-switch. Een uitgeschakelde provider
+`enabled` is de orthogonale as: de provider-kill-switch. Een uitgeschakelde provider
 *declareert* nog steeds wat hij kan.
 
 ## Referentie-resolutie
@@ -380,7 +380,7 @@ geen statics, geen lekkende proces-globals.
 
 1. SDK-package `emeq/<provider>-api` — HTTP, auth, DTO's. **Geen** Hub-domeinmodellen,
    geen webhook-routing, geen multi-tenancy. Zie skill `add-provider`.
-2. `Provider`-enum-case + `config/hub-providers.php`-entry (credentials + Pennant-vlag).
+2. `Provider`-enum-case + `config/hub-providers.php`-entry (credentials + `enabled`-vlag).
 3. `OAuthFlow`-implementatie, geregistreerd in `AppServiceProvider`.
 4. Adapter `App\Accounting\<Provider>\<Provider>AccountingTarget` die
    `AccountingTarget` implementeert, plus de capability-interfaces die hij écht

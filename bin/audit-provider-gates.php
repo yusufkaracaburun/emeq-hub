@@ -11,11 +11,11 @@ declare(strict_types=1);
  * Reads pre-generated JSON from storage/app/laravel-brain/.
  *
  * Usage:
- *   php bin/audit-pennant-gates.php
- *   php bin/audit-pennant-gates.php /custom/path/to/laravel-brain
+ *   php bin/audit-provider-gates.php
+ *   php bin/audit-provider-gates.php /custom/path/to/laravel-brain
  *
  * Exit codes:
- *   0 — all provider-scoped routes have their Pennant gate
+ *   0 — all provider-scoped routes have their provider gate
  *   1 — one or more routes are missing the gate (printed to stdout)
  *   2 — preconditions failed (missing brain output or provider config)
  */
@@ -102,7 +102,7 @@ if ($missing === []) {
     exit(0);
 }
 
-echo "\nMISSING Pennant gate on ".count($missing)." route(s):\n";
+echo "\nMISSING provider gate on ".count($missing)." route(s):\n";
 foreach ($missing as $line) {
     echo "  - {$line}\n";
 }

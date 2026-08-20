@@ -39,7 +39,6 @@
         <env name="SESSION_DRIVER" value="array"/>
         <env name="PULSE_ENABLED" value="false"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
-        <env name="PENNANT_STORE" value="array"/>
         <env name="HUB_PROVIDER_MOLLIE_ENABLED" value="true"/>
         <env name="HUB_PROVIDER_SNELSTART_ENABLED" value="true"/>
         <env name="HUB_PROVIDER_EXACT_ENABLED" value="true"/>

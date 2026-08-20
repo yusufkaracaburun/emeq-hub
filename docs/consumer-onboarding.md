@@ -126,7 +126,7 @@ ongefilterde pass-through naar de partner-API.
 
 ### A4. Provider-beschikbaarheid
 
-Providers staan aan/uit via Pennant (`feature.provider:{provider}` op `/v1/*`),
+Providers staan aan/uit via de provider-kill-switch (`feature.provider:{provider}` op `/v1/*`),
 afgeleid uit `config/hub-providers.php`. Dit is een **globale kill-switch per
 provider**, geen per-consumer-toggle. Een uitgezette provider geeft `503
 provider_disabled`, ook met een geldige PAT.
@@ -287,13 +287,13 @@ Laravel 13, subdomein per tenant (`klant.voorbeeld.nl`), database per tenant.
 | Gebruiker landt na consent op de Hub i.p.v. de eigen app | `app_url` leeg, of return-host valt buiten het basisdomein |
 | `403` op `init` met een geldige `return_url` | Tenant op een eigen domein → buiten de open-redirect-guard |
 | `return_url` wordt genegeerd | Param heet `return_url` (snake_case), niet `returnUrl` |
-| `503 provider_disabled` | Globale Pennant-kill-switch staat uit voor die provider |
+| `503 provider_disabled` | De globale kill-switch staat uit voor die provider |
 | `403 insufficient_ability` | PAT-preset dekt de aangeroepen route niet |
 | `400` op accounting-calls | `X-Account-Id` ontbreekt |
 | Tenant ziet andermans boekhouding | Account-id kwam uit een client-parameter (B2) |
 | Nieuwe provider verschijnt niet in de UI | Providerlijst hardcoded i.p.v. data-driven (B3) |
 
-Pennant (`feature.provider:{provider}`) is een **globale** kill-switch in Hub
+De kill-switch (`feature.provider:{provider}`) is **globaal** in Hub
 `/admin` / config — geen per-tenant toggle in de consumer-UI.
 
 ## Zie ook
