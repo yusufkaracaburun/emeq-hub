@@ -4,9 +4,9 @@ namespace App\Integrations\OAuth;
 
 use App\Integrations\Contracts\OAuthFlow;
 use App\Integrations\Exceptions\ProviderDisabledException;
+use App\Support\ProviderGate;
 use Illuminate\Contracts\Container\Container;
 use InvalidArgumentException;
-use Laravel\Pennant\Feature;
 
 final class OAuthFlowRegistry
 {
@@ -29,7 +29,7 @@ final class OAuthFlowRegistry
             );
         }
 
-        if (! Feature::active("provider-{$provider}-enabled")) {
+        if (! ProviderGate::enabled($provider)) {
             throw new ProviderDisabledException($provider);
         }
 

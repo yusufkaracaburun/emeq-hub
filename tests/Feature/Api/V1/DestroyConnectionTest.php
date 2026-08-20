@@ -10,7 +10,6 @@ use App\Sanctum\TokenAbilities;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Queue;
-use Laravel\Pennant\Feature;
 use Tests\TestCase;
 
 class DestroyConnectionTest extends TestCase
@@ -116,7 +115,7 @@ class DestroyConnectionTest extends TestCase
     public function test_disabled_provider_still_revokes_locally_without_teardown(): void
     {
         Queue::fake();
-        Feature::define('provider-exact-enabled', fn () => false);
+        $this->disableProvider('exact');
 
         [$consumer, $token] = $this->consumerWithToken([TokenAbilities::EXACT_WRITE]);
         $account = Account::factory()->for($consumer)->create();

@@ -6,8 +6,10 @@ namespace App\Filament\Pages;
 
 use App\Enums\Provider;
 use App\Integrations\Exact\Settings\ExactSettings;
+use App\Settings\ProviderSettings;
 use BackedEnum;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Schemas\Components\Section;
@@ -42,15 +44,22 @@ class ManageIntegrationSettings extends Page
     public function mount(): void
     {
         $exact = app(ExactSettings::class);
+        $providers = app(ProviderSettings::class);
 
-        $this->form->fill([
+        $state = [
             'exact_client_id' => $exact->client_id,
             'exact_client_secret' => $exact->client_secret,
             'exact_redirect_uri' => $exact->redirect_uri,
             'exact_webhook_secret' => $exact->webhook_secret,
             'exact_auth_base_url' => $exact->auth_base_url,
             'exact_api_base_url' => $exact->api_base_url,
-        ]);
+        ];
+
+        foreach (Provider::cases() as $provider) {
+            $state["enabled_{$provider->value}"] = $providers->isEnabled($provider->value);
+        }
+
+        $this->form->fill($state);
     }
 
     public function form(Schema $schema): Schema
@@ -79,6 +88,7 @@ class ManageIntegrationSettings extends Page
                 ->icon(Heroicon::OutlinedClock)
                 ->badge('Binnenkort')
                 ->schema([
+                    $this->availabilitySection($provider),
                     Section::make('Binnenkort beschikbaar')
                         ->description("De {$provider->getLabel()}-integratie kun je nog niet in de Hub configureren. We werken eraan."),
                 ]);
@@ -92,6 +102,7 @@ class ManageIntegrationSettings extends Page
         return Tab::make('Exact Online')
             ->icon(Heroicon::OutlinedBuildingOffice2)
             ->schema([
+                $this->availabilitySection(Provider::Exact),
                 Section::make()
                     ->description('App-credentials uit het Exact App Center. Secrets worden encrypted opgeslagen.')
                     ->columns(2)
@@ -106,9 +117,30 @@ class ManageIntegrationSettings extends Page
             ]);
     }
 
+    private function availabilitySection(Provider $provider): Section
+    {
+        return Section::make('Beschikbaarheid')
+            ->description("Staat deze schakelaar uit, dan bestaat {$provider->getLabel()} niet voor consumers. Hij verdwijnt van de koppelpagina en /v1/{$provider->value}/* antwoordt met 503. Geldt vanaf het eerstvolgende verzoek, zonder deploy.")
+            ->schema([
+                Toggle::make("enabled_{$provider->value}")
+                    ->label('Beschikbaar voor klanten')
+                    ->inline(false),
+            ]);
+    }
+
     public function save(): void
     {
         $data = $this->form->getState();
+
+        $providers = app(ProviderSettings::class);
+        $enabled = $providers->enabled;
+
+        foreach (Provider::cases() as $provider) {
+            $enabled[$provider->value] = (bool) ($data["enabled_{$provider->value}"] ?? false);
+        }
+
+        $providers->enabled = $enabled;
+        $providers->save();
 
         $exact = app(ExactSettings::class);
         $exact->client_id = (string) $data['exact_client_id'];

@@ -7,7 +7,6 @@ use App\Models\Connection;
 use App\Models\Consumer;
 use App\Sanctum\TokenAbilities;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Laravel\Pennant\Feature;
 use Tests\TestCase;
 
 class IntegrationsIndexTest extends TestCase
@@ -67,7 +66,7 @@ class IntegrationsIndexTest extends TestCase
 
     public function test_kill_switched_provider_is_listed_but_not_connectable(): void
     {
-        Feature::define('provider-mollie-enabled', fn () => false);
+        $this->disableProvider('mollie');
         [, $token] = $this->consumerWithToken([TokenAbilities::INTEGRATIONS_MANAGE]);
 
         $mollie = collect($this->withHeader('Authorization', "Bearer {$token}")

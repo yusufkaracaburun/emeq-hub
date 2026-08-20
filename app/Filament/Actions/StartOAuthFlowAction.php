@@ -10,6 +10,7 @@ use App\Integrations\OAuth\OAuthFlowRegistry;
 use App\Models\Account;
 use App\Models\Connection;
 use App\Support\ProviderCredentialDescriptor;
+use App\Support\ProviderGate;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
 use Filament\Notifications\Notification;
@@ -18,7 +19,6 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Redirector;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
-use Laravel\Pennant\Feature;
 
 class StartOAuthFlowAction
 {
@@ -31,7 +31,7 @@ class StartOAuthFlowAction
             if ($descriptor->oauthFlowKey === null) {
                 continue;
             }
-            if (! Feature::active("provider-{$descriptor->key}-enabled")) {
+            if (! ProviderGate::enabled($descriptor->key)) {
                 continue;
             }
             $providers[$descriptor->key] = ucfirst($descriptor->key);

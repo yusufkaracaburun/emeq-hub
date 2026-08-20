@@ -10,9 +10,9 @@ use App\Accounting\Contracts\SyncsReferenceData;
 use App\Accounting\Enums\Capability;
 use App\Integrations\Exceptions\ProviderDisabledException;
 use App\Models\Connection;
+use App\Support\ProviderGate;
 use Illuminate\Contracts\Container\Container;
 use InvalidArgumentException;
-use Laravel\Pennant\Feature;
 
 final class AccountingTargetRegistry
 {
@@ -55,7 +55,7 @@ final class AccountingTargetRegistry
 
     public function enabled(string $provider): bool
     {
-        return Feature::active("provider-{$provider}-enabled");
+        return ProviderGate::enabled($provider);
     }
 
     /** @return list<Capability> */

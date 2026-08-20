@@ -49,7 +49,7 @@ Eén regel bepaalt waar integratiecode landt:
 app/Integrations/
   Contracts/     OAuthFlow · ResolvesCanonicalEvent · MapsUpstreamExceptions
   Errors/        ErrorCode · UpstreamErrorMapperRegistry
-  Exceptions/    ProviderDisabledException (Pennant-kill-switch, alle registries)
+  Exceptions/    ProviderDisabledException (provider-kill-switch, alle registries)
   OAuth/         OAuthFlowRegistry · ReturnUrlResolver · Testing/FakeOAuthFlow
   PassThrough/   PassThroughRecorder (enige schrijfplek van pass_through_calls)
   Webhooks/      CanonicalEvent · CanonicalEventRegistry · ConsumerWebhookHeaders · InboundWebhookRecorder
@@ -132,4 +132,4 @@ SDK-exceptions → Hub-HTTP via mappers; Sentry captured non-mapped. Patronen: 4
 - **No-index:** global `SetNoIndexHeaders` (`X-Robots-Tag: noindex, nofollow`).
 - **API-docs:** `dedoc/scramble` op `/docs/api` — publiek, geen gate. Het endpoint-overzicht is geen geheim; de auth (Sanctum-PAT) wel.
 - **Validation:** Form-Requests aan Hub-rand; SDK krijgt al-gevalideerde payloads.
-- **Feature-flags:** Pennant provider kill-switch (`feature.provider:{provider}`), auto-defined op `config('hub-providers')`; de resolver leest de `enabled`-sleutel per provider en faalt dicht wanneer die ontbreekt. Zie `.docs/decisions/feature-flags-pennant-kill-switch.md`.
+- **Provider-kill-switch:** `ProviderGate::enabled()` op `config('hub-providers.<naam>.enabled')`, gehydrateerd uit `ProviderSettings` (Filament-toggle). Middleware-alias blijft `feature.provider:{provider}`. Faalt dicht bij een ontbrekende sleutel. Zie `.docs/decisions/feature-flags-pennant-kill-switch.md`.

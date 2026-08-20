@@ -7,9 +7,9 @@ namespace App\Support\Connect;
 use App\Models\Account;
 use App\Models\Connection;
 use App\Support\ProviderCredentialDescriptor;
+use App\Support\ProviderGate;
 use App\Support\ProviderShowcase;
 use Illuminate\Support\Collection;
-use Laravel\Pennant\Feature;
 
 class ProviderConnectStatus
 {
@@ -36,7 +36,7 @@ class ProviderConnectStatus
                     'logo' => $summary['logo'],
                     'brand' => $summary['brand'],
                     'connectable' => $descriptor?->oauthFlowKey !== null
-                        && Feature::active("provider-{$key}-enabled"),
+                        && ProviderGate::enabled($key),
                     'status' => match (true) {
                         ! $live => 'disconnected',
                         $connection->status === 'active' => 'connected',

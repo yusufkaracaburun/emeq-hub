@@ -17,7 +17,6 @@ use Emeq\ExactApi\Http\Request\Read\GetGlAccounts;
 use Emeq\ExactApi\Http\Request\Read\GetJournals;
 use Emeq\ExactApi\Http\Request\Read\GetVatCodes;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Laravel\Pennant\Feature;
 use Saloon\Http\Faking\MockClient;
 use Saloon\Http\Faking\MockResponse;
 use Tests\TestCase;
@@ -145,7 +144,7 @@ class MappingApiTest extends TestCase
 
     public function test_sync_returns_503_when_the_provider_is_switched_off(): void
     {
-        Feature::define('provider-exact-enabled', fn () => false);
+        $this->disableProvider('exact');
 
         [$consumer] = $this->setupConnection();
 

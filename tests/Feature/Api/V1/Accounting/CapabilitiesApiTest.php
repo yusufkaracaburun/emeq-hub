@@ -10,7 +10,6 @@ use App\Models\Consumer;
 use App\Sanctum\TokenAbilities;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Testing\TestResponse;
-use Laravel\Pennant\Feature;
 use Tests\TestCase;
 
 class CapabilitiesApiTest extends TestCase
@@ -57,7 +56,7 @@ class CapabilitiesApiTest extends TestCase
 
     public function test_reports_enabled_false_when_the_provider_is_switched_off(): void
     {
-        Feature::define('provider-exact-enabled', fn () => false);
+        $this->disableProvider('exact');
 
         $this->fetchCapabilities($this->consumerWithExactConnection())
             ->assertOk()

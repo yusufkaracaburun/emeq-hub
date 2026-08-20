@@ -16,7 +16,6 @@ use App\Models\Consumer;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Date;
-use Laravel\Pennant\Feature;
 use Livewire\Livewire;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
@@ -332,7 +331,7 @@ class StartOAuthFlowActionTest extends TestCase
     {
         $account = $this->makeAccount();
 
-        Feature::define('provider-mollie-enabled', fn () => false);
+        $this->disableProvider('mollie');
 
         $response = StartOAuthFlowAction::dispatch($account, 'mollie');
 
@@ -343,7 +342,7 @@ class StartOAuthFlowActionTest extends TestCase
 
     public function test_oauth_capable_providers_excludes_disabled_providers(): void
     {
-        Feature::define('provider-mollie-enabled', fn () => false);
+        $this->disableProvider('mollie');
 
         $providers = StartOAuthFlowAction::oauthCapableProviders();
 

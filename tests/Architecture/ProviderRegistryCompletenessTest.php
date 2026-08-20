@@ -122,8 +122,8 @@ final class ProviderRegistryCompletenessTest extends TestCase
 
         foreach (Provider::cases() as $provider) {
             $this->assertContains($provider->value, $configured, sprintf(
-                'Provider %s ontbreekt in config/hub-providers.php. Zonder config-key is '
-                .'de Pennant-kill-switch feature.provider:%s nooit actief.',
+                'Provider %s ontbreekt in config/hub-providers.php. Zonder config-key kent '
+                .'ProviderGate::enabled(\'%s\') hem niet en staat hij permanent uit.',
                 $provider->name,
                 $provider->value,
             ));

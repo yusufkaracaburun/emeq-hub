@@ -15,7 +15,6 @@ use App\Integrations\Exact\Accounting\ExactAccountingTarget;
 use App\Integrations\Exceptions\ProviderDisabledException;
 use App\Models\Connection;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Laravel\Pennant\Feature;
 use Tests\TestCase;
 
 class AccountingTargetRegistryCapabilityTest extends TestCase
@@ -70,7 +69,7 @@ class AccountingTargetRegistryCapabilityTest extends TestCase
 
     public function test_capabilities_are_declared_even_when_the_provider_is_disabled(): void
     {
-        Feature::define('provider-exact-enabled', fn () => false);
+        $this->disableProvider('exact');
 
         $connection = $this->connectionFor(Provider::Exact);
 
@@ -95,7 +94,7 @@ class AccountingTargetRegistryCapabilityTest extends TestCase
 
     public function test_the_typed_getter_honours_the_kill_switch(): void
     {
-        Feature::define('provider-exact-enabled', fn () => false);
+        $this->disableProvider('exact');
 
         $this->expectException(ProviderDisabledException::class);
 

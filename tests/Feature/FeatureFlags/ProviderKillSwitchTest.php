@@ -8,11 +8,11 @@ use App\Integrations\Exceptions\ProviderDisabledException;
 use App\Integrations\OAuth\OAuthFlowRegistry;
 use App\Models\Account;
 use App\Models\Consumer;
-use App\Providers\FeatureServiceProvider;
 use App\Sanctum\TokenAbilities;
+use App\Settings\ProviderSettings;
 use App\Support\Connect\ProviderConnectStatus;
+use App\Support\ProviderGate;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Laravel\Pennant\Feature;
 use Tests\TestCase;
 
 class ProviderKillSwitchTest extends TestCase
@@ -62,7 +62,7 @@ class ProviderKillSwitchTest extends TestCase
             ->assertJsonPath('provider', 'mollie');
     }
 
-    public function test_oauth_flow_registry_throws_provider_disabled_when_feature_inactive(): void
+    public function test_oauth_flow_registry_throws_when_provider_is_off(): void
     {
         $this->killProvider('mollie');
 
@@ -70,7 +70,6 @@ class ProviderKillSwitchTest extends TestCase
         $registry = app(OAuthFlowRegistry::class);
 
         $this->expectException(ProviderDisabledException::class);
-        $this->expectExceptionMessage("Provider 'mollie' is uitgeschakeld via feature-flag.");
 
         $registry->for('mollie');
     }
@@ -97,9 +96,9 @@ class ProviderKillSwitchTest extends TestCase
             ->assertJsonPath('error', 'missing_account_header');
     }
 
-    public function test_a_provider_disabled_in_config_is_not_connectable(): void
+    public function test_a_disabled_provider_is_not_connectable(): void
     {
-        $this->disableProviderInConfig('mollie');
+        $this->killProvider('mollie');
 
         $mollie = collect(app(ProviderConnectStatus::class)->for(null))
             ->firstWhere('key', 'mollie');
@@ -108,42 +107,51 @@ class ProviderKillSwitchTest extends TestCase
         $this->assertFalse($mollie['connectable']);
     }
 
-    public function test_a_provider_disabled_in_config_returns_503(): void
-    {
-        $this->disableProviderInConfig('mollie');
-
-        [, $token] = $this->consumerWithToken([TokenAbilities::MOLLIE_WRITE]);
-
-        $this->withHeader('Authorization', "Bearer {$token}")
-            ->postJson('/v1/mollie/payments', [])
-            ->assertStatus(503)
-            ->assertJsonPath('error', 'provider_disabled');
-    }
-
     public function test_a_provider_without_an_enabled_key_stays_disabled(): void
     {
         config()->set('hub-providers.mollie', ['oauth_flow_key' => 'mollie']);
-        $this->rebootFeatures();
 
-        $this->assertFalse(Feature::active('provider-mollie-enabled'));
+        $settings = app(ProviderSettings::class);
+        $settings->enabled = [];
+        $settings->save();
+
+        $this->assertFalse(ProviderGate::enabled('mollie'));
+    }
+
+    public function test_an_unknown_provider_is_disabled(): void
+    {
+        $this->assertFalse(ProviderGate::enabled('twinfield'));
+    }
+
+    public function test_the_stored_toggle_wins_over_the_config_default(): void
+    {
+        config()->set('hub-providers.mollie.enabled', true);
+
+        $settings = app(ProviderSettings::class);
+        $settings->enabled = ['mollie' => false];
+        $settings->save();
+
+        $this->assertFalse(ProviderGate::enabled('mollie'));
+    }
+
+    public function test_the_config_default_applies_when_nothing_is_stored(): void
+    {
+        config()->set('hub-providers.mollie.enabled', true);
+
+        $settings = app(ProviderSettings::class);
+        $settings->enabled = [];
+        $settings->save();
+
+        $this->assertTrue(ProviderGate::enabled('mollie'));
     }
 
     private function killProvider(string $provider): void
     {
-        Feature::define("provider-{$provider}-enabled", fn () => false);
-        Feature::flushCache();
-    }
-
-    private function disableProviderInConfig(string $provider): void
-    {
-        config()->set("hub-providers.{$provider}.enabled", false);
-        $this->rebootFeatures();
-    }
-
-    private function rebootFeatures(): void
-    {
-        (new FeatureServiceProvider($this->app))->boot();
-        Feature::flushCache();
+        $settings = app(ProviderSettings::class);
+        $enabled = $settings->enabled;
+        $enabled[$provider] = false;
+        $settings->enabled = $enabled;
+        $settings->save();
     }
 
     /**

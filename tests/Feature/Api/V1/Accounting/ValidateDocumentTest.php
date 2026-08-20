@@ -7,7 +7,6 @@ use App\Models\Consumer;
 use App\Sanctum\TokenAbilities;
 use Emeq\ExactApi\Http\Request\Read\GetRelations;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Laravel\Pennant\Feature;
 use Saloon\Http\Faking\MockClient;
 use Saloon\Http\Faking\MockResponse;
 use Tests\TestCase;
@@ -253,7 +252,7 @@ class ValidateDocumentTest extends TestCase
 
     public function test_enrichment_is_skipped_and_no_partner_call_is_made_when_the_provider_is_off(): void
     {
-        Feature::define('provider-exact-enabled', fn () => false);
+        $this->disableProvider('exact');
         MockClient::global([]);
 
         [$consumer] = $this->consumerWithExactConnection();
