@@ -91,7 +91,7 @@ Een SDK-change is edit + commit + push in de SDK-repo zelf, daarna `composer upd
 
 ## Agent skills en werkwijze
 
-ai-kit draait als plugin (`.ai-kit-setup`: `tier=full`, `mode=project-only`). Lifecycle-fase **development** — schema-migraties vrij te wijzigen, geen backwards-compat-eis vóór productie. Solo-repo: feature-/fix-branch → tests groen → ff-merge naar `master`, geen PR-ceremonie. Open en forward-werk staat in GitHub-issues (`P*`/`area/*`-labels; `/ai:next` rankt ze). Entrypoints: `/ai:tdd`, `/ai:diagnose`, `/ai:to-issues`, `/ai:review`. Detail in `docs/agents/workflow.md`.
+ai-kit draait als plugin (`.ai-kit-setup`: `tier=full`, `mode=project-only`). Lifecycle-fase **production** (sinds 2026-08-20, vóór de klantpilot) — migraties zijn additief en forward-only, een gelande migratie wordt niet meer herschreven; het `/v1/*`-contract blijft achterwaarts compatibel; destructieve operaties op prod vragen expliciete bevestiging. Solo-repo: feature-/fix-branch → tests groen → ff-merge naar `master`, geen PR-ceremonie. Open en forward-werk staat in GitHub-issues (`P*`/`area/*`-labels; `/ai:next` rankt ze). Entrypoints: `/ai:tdd`, `/ai:diagnose`, `/ai:to-issues`, `/ai:review`. Detail in `docs/agents/workflow.md`.
 
 Project-skills: **docs-sync** (documentatie-drift; proactief na domein-wijzigingen en vóór commit) · **add-provider** (nieuwe partner-SDK bouwen + aan de Hub koppelen) · **change-sdk** (bestaande SDK wijzigen, met de tabel "raak ik de Hub aan?") · **unified-api-review** (architectuurreview van de Unified-API-kern door de provider-#2-lens; schrijft rapport, wijzigt geen code). Authoritative conventies staan in `.agents/rules/` (auto-loaded: taal, engineering, security); ai-kit canonical rules in `.claude/rules/` (gitignored, aanvullend).
 
