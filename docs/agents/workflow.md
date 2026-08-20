@@ -4,7 +4,7 @@
 
 ## Branch- en merge-policy
 
-- Nooit direct op `master` werken (`.ai/git-policy.md`).
+- Nooit direct op `master` werken (`.agents/git-policy.md`).
 - Feature-/fix-branch → verifier PASS → **ff-merge naar `master`**. Geen
   verplichte PR voor solo-fases.
 - Nooit pushen zonder expliciete toestemming. Nooit `--no-verify` / force-push.

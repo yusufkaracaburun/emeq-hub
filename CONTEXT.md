@@ -48,4 +48,4 @@ Multi-tenant integration-platform: één Laravel-Hub die OAuth-koppelingen, webh
 - Architectuur/lagen: `docs/agents/architecture.md` · domein: `docs/agents/domain.md` · dev: `docs/agents/dev-environment.md` · docker: `docs/agents/docker.md` · workflow: `docs/agents/workflow.md`.
 - Grenzen Hub/SDK/consumer: `docs/architecture-boundaries.md` (lagen *binnen* de Hub staan in `docs/unified-api-architecture.md` § Lagen — andere as).
 - ADRs: `.docs/decisions/` (let op: niet `docs/adr/`). Partner-research: `packages/<sdk>/docs/partners/<provider>/` (in de SDK-repos).
-- Authoritative regels: `.ai/rules/` (auto-loaded).
+- Authoritative regels: `.agents/rules/` (auto-loaded).

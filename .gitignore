@@ -36,8 +36,6 @@
 /storage/pail
 /vendor
 /packages
-/.ai/*
-!/.ai/guidelines/
 /.claude
 /.cursor
 /.junie

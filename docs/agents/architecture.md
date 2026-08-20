@@ -117,7 +117,7 @@ volledigheid van de vier registries over `Provider::cases()`. ADR:
 ## Anti-patterns
 
 - **Query-string Connection-resolutie** (`?connection_id=` / `X-Connection-Id`) → cross-tenant lek. Gebruik `X-Account-Id` + Consumer-scoped lookup.
-- **Hub-domeinmodellen importeren in SDK** → breekt herbruik + `.ai/rules/engineering.md`. Gebruik het `*CredentialResolver`-contract + DTO.
+- **Hub-domeinmodellen importeren in SDK** → breekt herbruik + `.agents/rules/engineering.md`. Gebruik het `*CredentialResolver`-contract + DTO.
 - **Raw secrets in audit/logs** → DB-dump lekt tokens. Gebruik `fingerprint()`.
 - **Path-met-query-string in `pass_through_calls.path`** → blokkeert group-by + privacy. Gebruik endpoint-template + `query_keys`-CSV.
 - **`down()` in bestaande migration editen** → prod heeft 'm al gerund. Nieuwe migration toevoegen.
