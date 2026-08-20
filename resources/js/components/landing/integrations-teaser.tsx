@@ -27,7 +27,10 @@ export function IntegrationsTeaser() {
                                 className="inline-flex items-center gap-2 rounded-pill border border-border px-3.5 py-[7px] text-sm font-medium text-muted-foreground"
                             >
                                 {category.live && <span aria-hidden className="size-1.5 rounded-pill bg-success" />}
-                                <span className={category.live ? 'text-foreground' : undefined}>{category.label}</span>
+                                <span className={category.live ? 'text-foreground' : undefined}>
+                                    {category.label}
+                                    {category.live && <span className="sr-only"> (live)</span>}
+                                </span>
                             </span>
                         ))}
                     </div>
