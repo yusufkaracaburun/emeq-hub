@@ -77,10 +77,14 @@ Checked against the components on 2026-08-20, not against extracted strings.
   distinction is carried by colour alone. A screen reader announces
   "Boekhouden, Betalen, CRM, E-commerce, + meer" as one flat list with no way
   to tell which one works today. Give the non-live items a text marker.
-- `Betalen` is `live: false` in `integrations-teaser.tsx` while
-  `app/Integrations/Mollie` holds 53 files. Either the flag is stale or
-  payments are not shippable yet. Resolve before writing anything that leans
-  on payments.
+- `Betalen` is `live: false` in `integrations-teaser.tsx`, but the code says
+  payments work. `config/hub-providers.php` registers mollie next to exact and
+  snelstart, `FeatureServiceProvider` defines every registered provider's flag
+  as enabled by default, and `routes/api.php` exposes 19 Mollie route groups
+  behind `feature.provider:mollie`: payments, customers, mandates, refunds,
+  subscriptions, and Mollie Connect onboarding. Either the teaser flag is
+  stale or holding payments back is a go-to-market choice. That call is the
+  owner's, not the writer's. Settle it before any copy leans on payments.
 
 The teaser is honest about coverage. Its heading says "Begin met je
 boekhouding; de rest van je stack volgt via dezelfde API", and only
@@ -104,5 +108,27 @@ Register is not settled here yet. The current site uses "je" throughout.
   just signed or just walked: what happened right before you looked for us;
   what had you already tried; how do you describe us to a colleague; what
   nearly made you walk. Record verbatim, never paraphrased.
-- **Time to first successful call.** Lives in the database, not in git. The
-  span between consumer creation and first successful partner call.
+- **Time to first successful call.** Not a gap any more, just unrun. The
+  `pass_through_calls` table records `connection_id`, the upstream `status`,
+  and `created_at`, so the span from connection to first 2xx is one query
+  (PostgreSQL):
+
+  ```sql
+  SELECT c.provider,
+         count(*)                                   AS connections,
+         percentile_cont(0.5) WITHIN GROUP (
+           ORDER BY f.first_ok - c.created_at)       AS median_time_to_first_call,
+         min(f.first_ok - c.created_at)              AS fastest
+  FROM connections c
+  JOIN LATERAL (
+    SELECT min(p.created_at) AS first_ok
+    FROM pass_through_calls p
+    WHERE p.connection_id = c.id
+      AND p.status BETWEEN 200 AND 299
+  ) f ON f.first_ok IS NOT NULL
+  GROUP BY c.provider;
+  ```
+
+  Report the median, not the mean: one abandoned connection drags a mean
+  anywhere. Say how many connections the number covers, because a median over
+  three is not a claim.
