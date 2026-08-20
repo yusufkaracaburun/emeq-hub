@@ -391,29 +391,69 @@ make prod-ps                          # alles up/healthy
 make prod-logs                        # app + horizon + tunnel
 ```
 
-## Monitoring — wat er is, en wat er niet is
+## Monitoring
 
-**Wat er is:**
+Prod wordt sinds 2026-08-18 extern bewaakt. Drie lagen, elk met een eigen blinde vlek.
+
+### Better Stack — beschikbaarheid
+
+- **Monitor** op `https://hub.emeq.nl/up`, type "URL becomes unavailable".
+  Alerting naar Slack en e-mail; geen push-notificaties. `/up` raakt de
+  web-container, Postgres en Redis en geeft
+  `{"status":"up","database":"ok","redis":"ok"}`.
+- **Status-pagina** `status.emeq.nl` — CNAME naar `statuspage.betteruptime.com`,
+  in Cloudflare **DNS-only (grijs)**. Publiek, Nederlandstalig. De component heet
+  `Hub API`, niet de hostname.
+- **Heartbeat** "Hub scheduler (prod)" — verwacht elke 5 minuten, grace 5 minuten.
+  Gevoed door `horizon:snapshot` in `routes/console.php` via
+  `pingOnSuccessIf(config('services.betterstack.heartbeat_url'))`.
+  `BETTERSTACK_HEARTBEAT_URL` staat in `.env.prod`, niet in git.
+  Gedekt door `tests/Feature/Console/ScheduledTasksTest.php`.
+
+De heartbeat staat er niet voor de sier. `/up` blijft groen als de
+`scheduler`-container omvalt, terwijl dan de dagelijkse db-backup en
+`books:generate-recurring-invoices` stilvallen. De compose-healthcheck draait
+`schedule:list` en bewijst alleen dat artisan boot, niet dat `schedule:run` tikt.
+`pingOnSuccessIf` vuurt uitsluitend bij exit-code 0, dus een gecrashte Horizon
+meldt zich niet levend.
+
+### Sentry — exceptions
+
+Actief op `emeq.sentry.io`, project `emeq-hub`. Gewired via `config/sentry.php` en
+`Integration::handles` in `bootstrap/app.php`; DSN staat als `SENTRY_LARAVEL_DSN`
+in `.env.prod`. Verifiëren dat de keten leeft: `php artisan sentry:test`.
+
+### Wat er intern draait
 
 - Container-healthchecks in `docker-compose.prod.yml` — herstarten een omgevallen
-  container, maar melden niets naar buiten.
-- `/up` checkt db + redis en geeft `{"status":"up","database":"ok","redis":"ok"}`.
+  container, melden niets naar buiten.
 - `backup:monitor` — dagelijkse health-check op de backup-keten (zie § Backup & restore).
+- Logs op `LOG_LEVEL=warning` naar `stderr`, en daarmee naar Docker-daemon-rotatie.
+  Geen sink, geen retentie voorbij de rotatie.
 
-**Wat er niet is:**
+### Wat níet bewaakt is
 
-- Geen externe uptime-monitor. Valt de app om, of gaat cloudflared/db/redis onderuit,
-  dan krijgt niemand een seintje — je merkt het pas als je zelf kijkt of iemand belt.
-- Geen error-aggregatie. `sentry/sentry-laravel` zit in de codebase (`config/sentry.php`
-  + `Integration::handles` in `bootstrap/app.php`) maar staat **uit**: er is geen DSN
-  gezet. Dormant, niet actief.
-- Logs gaan op `LOG_LEVEL=warning` naar `stderr` en daarmee naar Docker-daemon-rotatie.
-  Geen sink, geen alerting, geen retentie voorbij de rotatie.
+- **Het webhook-been.** `/webhooks/exact` heeft geen monitor en dat is een harde
+  grens van de gratis Better Stack-tier, geen vergeetachtigheid: keyword-matching
+  en "URL returns HTTP status other than" zitten achter een betaald plan. Een
+  POST-probe op een webhook-endpoint levert een 4xx, en die leest als down —
+  permanent rood. Wil je dit dekken, dan is het een betaald plan of een eigen
+  heartbeat vanuit de Hub.
+- **ICMP-ping op `hub.emeq.nl` is zinloos.** Dat adres wijst naar Cloudflare, niet
+  naar de VPS: geen open poorten, tunnel-only. De ping blijft groen terwijl de host
+  dood is.
+- **Tijdstempel op de status-pagina** staat op UTC met Engelse datumnotatie terwijl
+  het publiek in CEST zit.
 
-Dat gat is bekend en staat open als [#53](https://github.com/yusufkaracaburun/emeq-hub/issues/53).
-Twee besluiten wachten daar op een keuze: welk meldkanaal, en Sentry activeren of de dep
-verwijderen. Niets van dit alles is nu ingeregeld — ga er bij een incident niet vanuit dat
-je gealarmeerd wordt.
+### Faalmodus om te onthouden
+
+Op 2026-08-12 stonden alle queue-jobs stil terwijl `horizon:status` "Horizon is
+running" meldde: de master-supervisor leefde, maar elke worker stierf bij het
+opstarten op `The "stop-when-empty-for" option does not exist` — een
+signature-mismatch tussen Horizon en Laravel 13.20+. Geen gefaalde jobs, geen
+alarm, `/up` groen. Opgelost in `b1d6ec9` (Horizon v5.48.3). Dit is precies het
+gat dat de scheduler-heartbeat sindsdien dicht: een levende master met dode
+workers is van buitenaf niet te zien.
 
 ## Troubleshooting
 
