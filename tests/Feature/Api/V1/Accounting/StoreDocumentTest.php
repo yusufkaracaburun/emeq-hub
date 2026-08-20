@@ -131,6 +131,42 @@ class StoreDocumentTest extends TestCase
         $this->assertDatabaseCount('pass_through_calls', 0);
     }
 
+    public function test_invalid_iban_checksum_is_rejected_at_edge_before_exact(): void
+    {
+        [$consumer] = $this->consumerWithExactConnection();
+        $token = $consumer->createToken('t', [TokenAbilities::EXACT_WRITE])->plainTextToken;
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->withHeader('X-Account-Id', 'school1')
+            ->withHeader('Idempotency-Key', (string) Str::uuid())
+            ->postJson('/v1/accounting/documents', $this->salesInvoicePayload([
+                'party' => ['role' => 'debtor', 'name' => 'Acme BV', 'kind' => 'company', 'external_id' => 'acme-1', 'vat_number' => 'NL000099998B57', 'iban' => 'NL91ABNA0417164301'],
+            ]))
+            ->assertStatus(422)
+            ->assertJsonValidationErrors('party.iban');
+
+        $this->assertDatabaseCount('pass_through_calls', 0);
+    }
+
+    public function test_iban_with_spaces_and_lowercase_still_books(): void
+    {
+        MockClient::global([
+            CreateSalesEntry::class => MockResponse::make(['d' => ['ID' => 'inv-guid-1']], 201),
+        ]);
+        $this->bindFakeReferences();
+
+        [$consumer] = $this->consumerWithExactConnection();
+        $token = $consumer->createToken('t', [TokenAbilities::EXACT_WRITE])->plainTextToken;
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->withHeader('X-Account-Id', 'school1')
+            ->withHeader('Idempotency-Key', (string) Str::uuid())
+            ->postJson('/v1/accounting/documents', $this->salesInvoicePayload([
+                'party' => ['role' => 'debtor', 'name' => 'Acme BV', 'kind' => 'company', 'external_id' => 'acme-1', 'vat_number' => 'NL000099998B57', 'iban' => 'nl91 abna 0417 1643 00'],
+            ]))
+            ->assertStatus(201);
+    }
+
     public function test_response_echoes_exact_entry_number_when_present(): void
     {
         MockClient::global([

@@ -7,6 +7,7 @@ namespace App\Http\Requests\Accounting;
 use App\Accounting\Enums\DocumentType;
 use App\Accounting\Enums\TaxTreatment;
 use App\Accounting\Party;
+use App\Rules\ValidIban;
 use App\Rules\ValidVatNumber;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -37,7 +38,7 @@ class StoreDocumentRequest extends FormRequest
             'party.kind' => ['required', Rule::in([Party::KIND_COMPANY, Party::KIND_PERSON])],
             'party.name' => ['required', 'string', 'max:255'],
             'party.vat_number' => ['nullable', 'string', 'max:64', new ValidVatNumber],
-            'party.iban' => ['nullable', 'string', 'max:64'],
+            'party.iban' => ['nullable', 'string', 'max:64', new ValidIban],
             'party.external_id' => ['required', 'string', 'max:255'],
             'party.relation_id' => ['nullable', 'string', 'max:255'],
 
