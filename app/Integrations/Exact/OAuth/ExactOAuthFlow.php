@@ -11,8 +11,10 @@ use App\Integrations\Exact\Jobs\RegisterExactWebhookSubscriptionsJob;
 use App\Integrations\Exact\Jobs\SyncExactReferenceJob;
 use App\Models\Account;
 use App\Models\Connection;
+use Emeq\ExactApi\Auth\AuthorizeUrlBuilder;
 use Emeq\ExactApi\Contracts\ExactCredentialResolver;
 use Emeq\ExactApi\Contracts\TokenStore;
+use Emeq\ExactApi\Data\AuthorizeUrlParameters;
 use Emeq\ExactApi\Exact;
 use Emeq\ExactApi\OData\Envelope;
 use Illuminate\Contracts\Config\Repository as ConfigRepository;
@@ -23,35 +25,24 @@ final class ExactOAuthFlow implements OAuthFlow
     public function __construct(
         private readonly HttpFactory $http,
         private readonly ConfigRepository $config,
+        private readonly AuthorizeUrlBuilder $authorizeUrlBuilder,
     ) {}
 
     public function getAuthorizationUrl(Account $account, array $scopes, string $state): string
     {
-        $query = [
-            'client_id' => $this->config->get('services.exact.client_id'),
-            'redirect_uri' => $this->config->get('services.exact.redirect_uri'),
-            'response_type' => 'code',
-            'state' => $state,
-        ];
-
-        if ($scopes !== []) {
-            $query['scope'] = implode(' ', $scopes);
-        }
-
-        return $this->authBaseUrl().'/api/oauth2/auth?'.http_build_query($query);
+        return $this->authorizeUrlBuilder->build(new AuthorizeUrlParameters(
+            clientId: (string) $this->config->get('services.exact.client_id'),
+            redirectUri: (string) $this->config->get('services.exact.redirect_uri'),
+            state: $state,
+            scope: $scopes === [] ? null : implode(' ', $scopes),
+        ));
     }
 
     public function exchangeCode(Connection $connection, string $code): Connection
     {
-        $token = $this->http->asForm()->post($this->tokenUrl(), [
-            'grant_type' => 'authorization_code',
-            'code' => $code,
-            'redirect_uri' => $this->config->get('services.exact.redirect_uri'),
-            'client_id' => $this->config->get('services.exact.client_id'),
-            'client_secret' => $this->config->get('services.exact.client_secret'),
-        ])->throw()->json();
+        $token = $this->exactFor($connection)->exchangeAuthorizationCode($code);
 
-        $me = $this->fetchMe((string) $token['access_token']);
+        $me = $this->fetchMe($token->accessToken);
 
         $metadata = $connection->metadata ?? [];
         if ($me['user_id'] !== null) {
@@ -59,9 +50,9 @@ final class ExactOAuthFlow implements OAuthFlow
         }
 
         $connection->fill([
-            'access_token' => $token['access_token'],
-            'refresh_token' => $token['refresh_token'],
-            'expires_at' => now()->addSeconds((int) $token['expires_in']),
+            'access_token' => $token->accessToken,
+            'refresh_token' => $token->refreshToken,
+            'expires_at' => $token->expiresAt,
             'administratie_id' => $me['division'],
             'metadata' => $metadata,
             'status' => 'active',
@@ -79,14 +70,7 @@ final class ExactOAuthFlow implements OAuthFlow
 
     public function refreshToken(Connection $connection): Connection
     {
-        app()->instance(ExactCredentialResolver::class, new HubExactCredentialResolver($connection));
-        app()->instance(TokenStore::class, new ConnectionTokenStore($connection));
-        app()->forgetInstance(Exact::class);
-
-        /** @var Exact $exact */
-        $exact = app(Exact::class);
-
-        $exact->authenticator()->forceRefresh();
+        $this->exactFor($connection)->authenticator()->forceRefresh();
 
         return $connection->refresh();
     }
@@ -116,6 +100,18 @@ final class ExactOAuthFlow implements OAuthFlow
         return true;
     }
 
+    private function exactFor(Connection $connection): Exact
+    {
+        app()->instance(ExactCredentialResolver::class, new HubExactCredentialResolver($connection));
+        app()->instance(TokenStore::class, new ConnectionTokenStore($connection));
+        app()->forgetInstance(Exact::class);
+
+        /** @var Exact $exact */
+        $exact = app(Exact::class);
+
+        return $exact;
+    }
+
     /** @return array{division: ?string, user_id: ?string} */
     private function fetchMe(string $accessToken): array
     {
@@ -134,16 +130,6 @@ final class ExactOAuthFlow implements OAuthFlow
             'division' => $division !== null ? (string) $division : null,
             'user_id' => $userId !== null ? (string) $userId : null,
         ];
-    }
-
-    private function tokenUrl(): string
-    {
-        return $this->authBaseUrl().'/api/oauth2/token';
-    }
-
-    private function authBaseUrl(): string
-    {
-        return rtrim((string) $this->config->get('services.exact.auth_base_url'), '/');
     }
 
     private function apiBaseUrl(): string
