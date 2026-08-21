@@ -6,7 +6,7 @@ Guidance voor Claude Code in deze repo. Framework- en package-guidelines staan i
 
 `emeq-hub` is een multi-tenant integration platform: één Laravel-app die OAuth-koppelingen, webhook-routing en een uniforme pass-through REST-API exposeert naar Nederlandse boekhoud- en betaal-partner-API's. Consumers zijn Emeq's eigen SaaS-apps; v1.0+ ook betalende derden. Partner-specifieke wire-logica leeft in dunne, losse SDK-packages (`emeq/<provider>-api`), niet in de Hub.
 
-Providers: **Exact Online** (live — OAuth2-lifecycle, division-aware pass-through, named read-resources, accounting-sync, webhooks) · **Snelstart** (OData/clientkey) · **Mollie** (Connect + Cashier-subscriptions) · **Moneybird** en **Ibanity** gepland.
+Providers: **Exact Online** (live — OAuth2-lifecycle, division-aware pass-through, named read-resources, accounting-sync, webhooks) · **Snelstart** (OData/clientkey) · **Mollie** (Connect + Cashier-subscriptions) · **Moneybird**, **Ibanity** en **Kadaster KLIC** gepland.
 
 ## Stack
 

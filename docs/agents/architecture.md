@@ -132,4 +132,4 @@ SDK-exceptions → Hub-HTTP via mappers; Sentry captured non-mapped. Patronen: 4
 - **No-index:** global `SetNoIndexHeaders` (`X-Robots-Tag: noindex, nofollow`).
 - **API-docs:** `dedoc/scramble` op `/docs/api` — publiek, geen gate. Het endpoint-overzicht is geen geheim; de auth (Sanctum-PAT) wel.
 - **Validation:** Form-Requests aan Hub-rand; SDK krijgt al-gevalideerde payloads.
-- **Provider-kill-switch:** `ProviderGate::enabled()` op `config('hub-providers.<naam>.enabled')`, gehydrateerd uit `ProviderSettings` (Filament-toggle). Middleware-alias blijft `feature.provider:{provider}`. Faalt dicht bij een ontbrekende sleutel. Zie `.docs/decisions/feature-flags-pennant-kill-switch.md`.
+- **Provider-kill-switch:** `ProviderGate::enabled()` op `config('hub-providers.<naam>.enabled')`, gehydrateerd uit `ProviderSettings` (Filament-toggle). Middleware-alias blijft `feature.provider:{provider}`. Faalt dicht bij een ontbrekende sleutel. Zie `.docs/decisions/provider-kill-switch.md`.
