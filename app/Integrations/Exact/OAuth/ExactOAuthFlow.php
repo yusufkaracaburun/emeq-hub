@@ -16,14 +16,14 @@ use Emeq\ExactApi\Contracts\ExactCredentialResolver;
 use Emeq\ExactApi\Contracts\TokenStore;
 use Emeq\ExactApi\Data\AuthorizeUrlParameters;
 use Emeq\ExactApi\Exact;
+use Emeq\ExactApi\Http\Request\Read\GetMe;
 use Emeq\ExactApi\OData\Envelope;
 use Illuminate\Contracts\Config\Repository as ConfigRepository;
-use Illuminate\Http\Client\Factory as HttpFactory;
+use Throwable;
 
 final class ExactOAuthFlow implements OAuthFlow
 {
     public function __construct(
-        private readonly HttpFactory $http,
         private readonly ConfigRepository $config,
         private readonly AuthorizeUrlBuilder $authorizeUrlBuilder,
     ) {}
@@ -42,7 +42,19 @@ final class ExactOAuthFlow implements OAuthFlow
     {
         $token = $this->exactFor($connection)->exchangeAuthorizationCode($code);
 
-        $me = $this->fetchMe($token->accessToken);
+        // Eerst persisteren: /Me gaat via de SDK-connector, die z'n token uit de
+        // ConnectionTokenStore leest — en die leest de opgeslagen rij.
+        $connection->fill([
+            'access_token' => $token->accessToken,
+            'refresh_token' => $token->refreshToken,
+            'expires_at' => $token->expiresAt,
+            'status' => 'active',
+            'revoked_at' => null,
+            'oauth_state' => null,
+            'oauth_state_expires_at' => null,
+        ])->save();
+
+        $me = $this->fetchMe($connection);
 
         $metadata = $connection->metadata ?? [];
         if ($me['user_id'] !== null) {
@@ -50,15 +62,8 @@ final class ExactOAuthFlow implements OAuthFlow
         }
 
         $connection->fill([
-            'access_token' => $token->accessToken,
-            'refresh_token' => $token->refreshToken,
-            'expires_at' => $token->expiresAt,
             'administratie_id' => $me['division'],
             'metadata' => $metadata,
-            'status' => 'active',
-            'revoked_at' => null,
-            'oauth_state' => null,
-            'oauth_state_expires_at' => null,
         ])->save();
 
         RegisterExactWebhookSubscriptionsJob::dispatch($connection);
@@ -86,7 +91,7 @@ final class ExactOAuthFlow implements OAuthFlow
     {
         $connection = $this->refreshToken($connection);
 
-        $userId = $this->fetchMe((string) $connection->access_token)['user_id'];
+        $userId = $this->fetchMe($connection)['user_id'];
 
         if ($userId === null) {
             return false;
@@ -113,10 +118,13 @@ final class ExactOAuthFlow implements OAuthFlow
     }
 
     /** @return array{division: ?string, user_id: ?string} */
-    private function fetchMe(string $accessToken): array
+    private function fetchMe(Connection $connection): array
     {
-        $response = $this->http->withToken($accessToken)->acceptJson()
-            ->get($this->apiBaseUrl().'/api/v1/current/Me');
+        try {
+            $response = $this->exactFor($connection)->connector('current')->send(new GetMe);
+        } catch (Throwable) {
+            return ['division' => null, 'user_id' => null];
+        }
 
         if ($response->failed()) {
             return ['division' => null, 'user_id' => null];
@@ -130,10 +138,5 @@ final class ExactOAuthFlow implements OAuthFlow
             'division' => $division !== null ? (string) $division : null,
             'user_id' => $userId !== null ? (string) $userId : null,
         ];
-    }
-
-    private function apiBaseUrl(): string
-    {
-        return rtrim((string) $this->config->get('services.exact.api_base_url', $this->config->get('services.exact.auth_base_url')), '/');
     }
 }

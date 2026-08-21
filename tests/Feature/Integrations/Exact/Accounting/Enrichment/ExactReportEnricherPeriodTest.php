@@ -11,7 +11,7 @@ use App\Integrations\Exact\ExactReferenceData;
 use App\Models\Account;
 use App\Models\Connection;
 use App\Models\Consumer;
-use Emeq\ExactApi\Http\Request\RawExactRequest;
+use Emeq\ExactApi\Http\Request\Read\GetFinancialPeriods;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
 use Saloon\Http\Faking\MockClient;
@@ -63,7 +63,7 @@ class ExactReportEnricherPeriodTest extends TestCase
     private function mockPeriods(MockResponse $response): void
     {
         MockClient::destroyGlobal();
-        MockClient::global([RawExactRequest::class => $response]);
+        MockClient::global([GetFinancialPeriods::class => $response]);
     }
 
     private function mockOpenYear2026(): void

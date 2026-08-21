@@ -3,8 +3,11 @@
 namespace Tests\Feature\Integrations\Exact;
 
 use App\Models\Connection;
+use Emeq\ExactApi\Http\Request\Read\GetMe;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
+use Saloon\Http\Faking\MockClient;
+use Saloon\Http\Faking\MockResponse;
 use Tests\TestCase;
 
 class BackfillUserIdsTest extends TestCase
@@ -85,9 +88,7 @@ class BackfillUserIdsTest extends TestCase
 
     public function test_a_failing_me_call_is_reported_and_exits_non_zero(): void
     {
-        Http::fake([
-            'start.exactonline.nl/api/v1/current/Me' => Http::response(status: 500),
-        ]);
+        MockClient::global([GetMe::class => MockResponse::make([], 500)]);
 
         $connection = Connection::factory()->forExact()->create(['metadata' => null]);
 
@@ -98,13 +99,11 @@ class BackfillUserIdsTest extends TestCase
 
     private function fakeMe(string $userId): void
     {
-        Http::fake([
-            'start.exactonline.nl/api/v1/current/Me' => Http::response([
-                'd' => ['results' => [[
-                    'CurrentDivision' => 4471372,
-                    'UserID' => $userId,
-                ]]],
-            ]),
+        MockClient::global([
+            GetMe::class => MockResponse::make(['d' => ['results' => [[
+                'CurrentDivision' => 4471372,
+                'UserID' => $userId,
+            ]]]]),
         ]);
     }
 }

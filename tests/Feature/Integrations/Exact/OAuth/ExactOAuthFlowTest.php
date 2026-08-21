@@ -9,8 +9,8 @@ use App\Models\Account;
 use App\Models\Connection;
 use Emeq\ExactApi\Auth\AuthorizationCodeRequest;
 use Emeq\ExactApi\Auth\RefreshTokenRequest;
+use Emeq\ExactApi\Http\Request\Read\GetMe;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Http;
 use Saloon\Http\Faking\MockClient;
@@ -44,6 +44,7 @@ class ExactOAuthFlowTest extends TestCase
     public function test_exchange_code_writes_tokens_and_division(): void
     {
         Bus::fake([RegisterExactWebhookSubscriptionsJob::class]);
+        Http::fake();
 
         $mock = MockClient::global([
             AuthorizationCodeRequest::class => MockResponse::make([
@@ -52,10 +53,7 @@ class ExactOAuthFlowTest extends TestCase
                 'expires_in' => '600',
                 'refresh_token' => 'ref_xyz',
             ]),
-        ]);
-
-        Http::fake([
-            'start.exactonline.nl/api/v1/current/Me' => Http::response([
+            GetMe::class => MockResponse::make([
                 'd' => ['results' => [[
                     'CurrentDivision' => 4471372,
                     'UserID' => 'd3b3f9a1-9c2e-4b7a-8f7e-2f4a1b6c9d0e',
@@ -89,9 +87,8 @@ class ExactOAuthFlowTest extends TestCase
         );
 
         $mock->assertSent(AuthorizationCodeRequest::class);
-        Http::assertNotSent(
-            fn (Request $request): bool => str_contains($request->url(), '/api/oauth2/token'),
-        );
+        $mock->assertSent(GetMe::class);
+        Http::assertNothingSent();
     }
 
     public function test_exchange_code_normalises_user_id_before_storing(): void
@@ -105,10 +102,7 @@ class ExactOAuthFlowTest extends TestCase
                 'expires_in' => '600',
                 'refresh_token' => 'ref_xyz',
             ]),
-        ]);
-
-        Http::fake([
-            'start.exactonline.nl/api/v1/current/Me' => Http::response([
+            GetMe::class => MockResponse::make([
                 'd' => ['results' => [[
                     'CurrentDivision' => 4471372,
                     'UserID' => '{D3B3F9A1-9C2E-4B7A-8F7E-2F4A1B6C9D0E}',
@@ -142,10 +136,7 @@ class ExactOAuthFlowTest extends TestCase
                 'expires_in' => '600',
                 'refresh_token' => 'ref_xyz',
             ]),
-        ]);
-
-        Http::fake([
-            'start.exactonline.nl/api/v1/current/Me' => Http::response([
+            GetMe::class => MockResponse::make([
                 'd' => ['results' => [['CurrentDivision' => 4471372]]],
             ]),
         ]);
@@ -162,6 +153,35 @@ class ExactOAuthFlowTest extends TestCase
         $connection->refresh();
         $this->assertSame('active', $connection->status);
         $this->assertNull($connection->revoked_at);
+    }
+
+    public function test_a_failing_me_call_still_activates_the_connection(): void
+    {
+        Bus::fake([RegisterExactWebhookSubscriptionsJob::class]);
+
+        MockClient::global([
+            AuthorizationCodeRequest::class => MockResponse::make([
+                'access_token' => 'acc_xyz',
+                'token_type' => 'bearer',
+                'expires_in' => '600',
+                'refresh_token' => 'ref_xyz',
+            ]),
+            GetMe::class => MockResponse::make([], 500),
+        ]);
+
+        $connection = Connection::factory()->forExact()->create([
+            'status' => 'pending',
+            'oauth_state' => 'st',
+            'oauth_state_expires_at' => now()->addMinutes(30),
+            'administratie_id' => null,
+        ]);
+
+        $this->app->make(ExactOAuthFlow::class)->exchangeCode($connection, 'auth_code_abc');
+
+        $connection->refresh();
+        $this->assertSame('active', $connection->status);
+        $this->assertSame('acc_xyz', $connection->access_token);
+        $this->assertNull($connection->administratie_id);
     }
 
     public function test_get_authorization_url_contains_required_params_without_scope(): void

@@ -1177,7 +1177,7 @@ class StoreDocumentTest extends TestCase
             'connection_id' => $connection->getKey(),
             'kind' => ConnectionAccountingRef::KIND_RELATION,
             'code' => 's1',
-            'native_id' => 'cust-guid',
+            'native_id' => 'cccccccc-9999-4aaa-8bbb-cccccccccccc',
             'label' => 'Bouwbedrijf Noord',
         ]);
 
@@ -1347,7 +1347,7 @@ class StoreDocumentTest extends TestCase
                 }
 
                 return MockResponse::make(['d' => ['results' => [[
-                    'ID' => 'nieuwe-guid', 'Code' => 'N001', 'Name' => 'Acme BV', 'IsSales' => true, 'IsSupplier' => false,
+                    'ID' => 'bbbbbbbb-5555-4666-8777-888888888888', 'Code' => 'N001', 'Name' => 'Acme BV', 'IsSales' => true, 'IsSupplier' => false,
                     'Status' => 'C', 'ChamberOfCommerce' => '12345678', 'VATNumber' => '',
                 ]]]], 200);
             },
@@ -1372,7 +1372,7 @@ class StoreDocumentTest extends TestCase
             'connection_id' => $connection->getKey(),
             'kind' => ConnectionAccountingRef::KIND_RELATION,
             'code' => 'acme-1',
-            'native_id' => 'verwijderde-guid',
+            'native_id' => 'aaaaaaaa-1111-4222-8333-444444444444',
         ]);
 
         $token = $consumer->createToken('t', [TokenAbilities::EXACT_WRITE])->plainTextToken;
@@ -1386,16 +1386,16 @@ class StoreDocumentTest extends TestCase
             ->assertStatus(201);
 
         $this->assertSame('relation.relinked', $response->json('warnings.0.code'));
-        $this->assertSame('verwijderde-guid', $response->json('warnings.0.context.previous_relation_id'));
+        $this->assertSame('aaaaaaaa-1111-4222-8333-444444444444', $response->json('warnings.0.context.previous_relation_id'));
 
         MockClient::global()->assertSent(fn ($request): bool => $request instanceof CreateSalesEntry
-            && ($request->body()->all()['Customer'] ?? null) === 'nieuwe-guid');
+            && ($request->body()->all()['Customer'] ?? null) === 'bbbbbbbb-5555-4666-8777-888888888888');
 
         $this->assertDatabaseHas('connection_accounting_refs', [
             'connection_id' => $connection->getKey(),
             'kind' => ConnectionAccountingRef::KIND_RELATION,
             'code' => 'acme-1',
-            'native_id' => 'nieuwe-guid',
+            'native_id' => 'bbbbbbbb-5555-4666-8777-888888888888',
         ]);
     }
 

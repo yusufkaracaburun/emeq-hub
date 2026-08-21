@@ -55,6 +55,8 @@ use Emeq\ExactApi\Http\Request\Write\CreateDocumentAttachment;
 use Emeq\ExactApi\Http\Request\Write\CreatePurchaseEntry;
 use Emeq\ExactApi\Http\Request\Write\CreateSalesEntry;
 use Emeq\ExactApi\OData\Envelope;
+use Emeq\ExactApi\OData\Filter;
+use Emeq\ExactApi\OData\Guid;
 use Saloon\Http\Request as SdkRequest;
 use Throwable;
 
@@ -88,7 +90,7 @@ final class ExactAccountingTarget implements AccountingTarget, ConfirmsPostedDoc
         $params = ['$select' => 'ID,Code,Name,VATNumber,Email,IsSales,IsSupplier'];
 
         if ($role !== null) {
-            $params['$filter'] = $role === Relation::ROLE_CREDITOR ? 'IsSupplier eq true' : 'IsSales eq true';
+            $params['$filter'] = Filter::eq($role === Relation::ROLE_CREDITOR ? 'IsSupplier' : 'IsSales', true)->expression;
         }
 
         return $this->readPage(
@@ -125,7 +127,9 @@ final class ExactAccountingTarget implements AccountingTarget, ConfirmsPostedDoc
         string $providerEntityId,
         Connection $connection,
     ): ?bool {
-        if (preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i', $providerEntityId) !== 1) {
+        $entryId = Guid::tryFrom($providerEntityId);
+
+        if ($entryId === null) {
             return null;
         }
 
@@ -133,7 +137,7 @@ final class ExactAccountingTarget implements AccountingTarget, ConfirmsPostedDoc
 
         $params = [
             '$select' => 'EntryID',
-            '$filter' => "EntryID eq guid'{$providerEntityId}'",
+            '$filter' => Filter::eq('EntryID', $entryId)->expression,
             '$top' => 1,
         ];
 
@@ -163,7 +167,7 @@ final class ExactAccountingTarget implements AccountingTarget, ConfirmsPostedDoc
         $params = [
             '$select' => "EntryID,EntryNumber,{$partyField},EntryDate,DueDate,Journal,Description,YourRef,Currency",
             '$expand' => $collection,
-            '$filter' => "YourRef eq '".str_replace("'", "''", $key)."'",
+            '$filter' => Filter::eq('YourRef', $key)->expression,
             '$top' => 1,
         ];
 

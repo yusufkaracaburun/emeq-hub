@@ -11,6 +11,7 @@ use Emeq\ExactApi\Exceptions\RateLimitException;
 use Emeq\ExactApi\Exceptions\RequestTooBroadException;
 use Emeq\ExactApi\Exceptions\ServerException;
 use Emeq\ExactApi\Exceptions\ValidationException;
+use Emeq\ExactApi\OData\Envelope;
 use Saloon\Exceptions\Request\FatalRequestException;
 use Throwable;
 
@@ -68,7 +69,7 @@ final class UpstreamErrorMapper implements MapsUpstreamExceptions
                 ];
             }
 
-            $rawMessage = self::extractODataMessage($exception->rawBody);
+            $rawMessage = Envelope::errorMessage($exception->rawBody);
 
             if ($rawMessage !== null) {
                 $humanized = self::humanizeExactMessage($rawMessage);
@@ -193,19 +194,5 @@ final class UpstreamErrorMapper implements MapsUpstreamExceptions
         }
 
         return $raw;
-    }
-
-    private static function extractODataMessage(string $body): ?string
-    {
-        if ($body === '') {
-            return null;
-        }
-
-        /** @var array{error?: array{message?: array{value?: string}}}|null $decoded */
-        $decoded = json_decode($body, true);
-
-        $value = $decoded['error']['message']['value'] ?? null;
-
-        return is_string($value) && $value !== '' ? $value : null;
     }
 }

@@ -12,16 +12,18 @@ use Emeq\ExactApi\Contracts\ExactCredentialResolver;
 use Emeq\ExactApi\Contracts\TokenStore;
 use Emeq\ExactApi\Exact;
 use Emeq\ExactApi\Http\ExactConnector;
-use Emeq\ExactApi\Http\Request\RawExactRequest;
 use Emeq\ExactApi\Http\Request\Read\GetCostCenters;
 use Emeq\ExactApi\Http\Request\Read\GetCostUnits;
+use Emeq\ExactApi\Http\Request\Read\GetFinancialPeriods;
 use Emeq\ExactApi\Http\Request\Read\GetGlAccounts;
 use Emeq\ExactApi\Http\Request\Read\GetJournals;
 use Emeq\ExactApi\Http\Request\Read\GetRelations;
 use Emeq\ExactApi\Http\Request\Read\GetVatCodes;
+use Emeq\ExactApi\OData\DateValue;
 use Emeq\ExactApi\OData\Envelope;
+use Emeq\ExactApi\OData\Filter;
+use Emeq\ExactApi\OData\Guid;
 use Illuminate\Support\Facades\Cache;
-use Saloon\Enums\Method;
 use Saloon\Http\Request as SdkRequest;
 use Throwable;
 
@@ -172,17 +174,13 @@ final class ExactReferenceData
     /** @return list<array{start: string, end: string, fiscal_year: int, period: int}> */
     private function readFinancialPeriods(): array
     {
-        $request = new RawExactRequest(
-            method: Method::GET,
-            endpoint: '/financial/FinancialPeriods',
-            query: ['$select' => 'FinYear,FinPeriod,StartDate,EndDate'],
-        );
+        $request = new GetFinancialPeriods(['$select' => 'FinYear,FinPeriod,StartDate,EndDate']);
 
         $out = [];
 
         foreach ($this->fetch($request) as $row) {
-            $start = self::odataDate($row['StartDate'] ?? null);
-            $end = self::odataDate($row['EndDate'] ?? null);
+            $start = DateValue::parse($row['StartDate'] ?? null)?->format('Y-m-d');
+            $end = DateValue::parse($row['EndDate'] ?? null)?->format('Y-m-d');
 
             if ($start === null || $end === null) {
                 continue;
@@ -197,17 +195,6 @@ final class ExactReferenceData
         }
 
         return $out;
-    }
-
-    private static function odataDate(mixed $value): ?string
-    {
-        if (! is_string($value) || preg_match('/\/Date\((-?\d+)/', $value, $matches) !== 1) {
-            return null;
-        }
-
-        return (new DateTimeImmutable('@'.intdiv((int) $matches[1], 1000)))
-            ->setTimezone(new DateTimeZone('UTC'))
-            ->format('Y-m-d');
     }
 
     /** @return list<array{kind: string, code: string, native_id: string, label: string, attrs: array<string, mixed>}> */
@@ -357,7 +344,7 @@ final class ExactReferenceData
         foreach ($this->probeVariants($chamberOfCommerce) as $variant) {
             $rows[] = $this->fetchAllPages([
                 '$select' => self::RELATION_SELECT,
-                '$filter' => "ChamberOfCommerce eq '".$this->escapeOData($variant)."'",
+                '$filter' => Filter::eq('ChamberOfCommerce', $variant)->expression,
             ], self::relationRequest());
         }
 
@@ -378,7 +365,7 @@ final class ExactReferenceData
         foreach ($this->probeVariants((string) $vatNumber, $normalized) as $variant) {
             $rows[] = $this->fetchAllPages([
                 '$select' => self::RELATION_SELECT,
-                '$filter' => "VATNumber eq '".$this->escapeOData($variant)."'",
+                '$filter' => Filter::eq('VATNumber', $variant)->expression,
             ], self::relationRequest());
         }
 
@@ -508,15 +495,15 @@ final class ExactReferenceData
     /** @return array{is_sales: bool, is_supplier: bool, status: ?string}|null */
     public function relationRoles(string $guid): ?array
     {
-        $guid = trim($guid);
+        $id = Guid::tryFrom(trim($guid));
 
-        if ($guid === '') {
+        if ($id === null) {
             return null;
         }
 
         $rows = $this->fetch(new GetRelations([
             '$select' => 'ID,IsSales,IsSupplier,Status',
-            '$filter' => "ID eq guid'".$this->escapeOData($guid)."'",
+            '$filter' => Filter::eq('ID', $id)->expression,
             '$top' => '1',
         ]));
 
@@ -533,17 +520,17 @@ final class ExactReferenceData
 
     public function relationIsGone(string $guid): bool
     {
-        $guid = trim($guid);
+        $id = Guid::tryFrom(trim($guid));
         $division = (string) $this->connection->administratie_id;
 
-        if ($guid === '' || $division === '') {
+        if ($id === null || $division === '') {
             return false;
         }
 
         try {
             $response = $this->connector($division)->send(new GetRelations([
                 '$select' => 'ID',
-                '$filter' => "ID eq guid'".$this->escapeOData($guid)."'",
+                '$filter' => Filter::eq('ID', $id)->expression,
                 '$top' => '1',
             ]));
 
@@ -551,11 +538,6 @@ final class ExactReferenceData
         } catch (Throwable) {
             return false;
         }
-    }
-
-    private function escapeOData(string $value): string
-    {
-        return str_replace("'", "''", $value);
     }
 
     /** @return callable(array<string, scalar|null>): SdkRequest */
