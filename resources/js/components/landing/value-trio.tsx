@@ -32,8 +32,7 @@ export function ValueTrio() {
                     Stop met integraties steeds opnieuw bouwen.
                 </h2>
                 <p className="max-w-[640px] text-base leading-[1.6] text-muted-foreground">
-                    Onze eerste boekhoudkoppeling kostte 23 werkdagen om goed te bouwen. Die dagen hoef jij niet
-                    te maken.
+                    Eén koppeling goed bouwen kost weken werk. Die weken hoef jij niet te maken.
                 </p>
             </Reveal>
 
