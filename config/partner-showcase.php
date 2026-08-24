@@ -11,7 +11,7 @@ return [
         'brand' => '#e1141d',
         'live' => true,
         'summary' => 'Verwerk verkoop- en inkoopboekingen, relaties en grootboekgegevens '
-            .'betrouwbaar en realtime.',
+            .'realtime, met een audit-trail per boeking.',
         'headline' => 'Exact Online koppelen via één API',
         'intro' => 'Boek verkoop- en inkoopfacturen, relaties en grootboekgegevens naar Exact via '
             .'één API. OAuth, tokens en audit-logging lopen via de Hub.',
@@ -28,8 +28,7 @@ return [
             ['title' => 'Emeq Hub host de tokens', 'description' => 'Token-lifecycle, refresh en webhooks regelen wij.'],
             ['title' => 'Eén REST-API', 'description' => 'POST /v1/accounting/documents. Klaar.'],
         ],
-        'connect_pitch' => 'Maak je financiële integratie schaalbaar. Wij regelen de infrastructuur; '
-            .'jij levert de workflow.',
+        'connect_pitch' => 'Wij regelen OAuth, tokens en de audit-log; jij bouwt je product.',
         'meta_description' => 'Koppel je app aan Exact Online zonder zelf OAuth2, token-refresh en '
             .'division-routing te bouwen. De Hub regelt koppeling, tokenopslag en audit-logging.',
         'capabilities' => [

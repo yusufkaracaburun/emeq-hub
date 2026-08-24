@@ -9,10 +9,10 @@ const badges = [
     },
     {
         icon: <img src="/img/badges/gdpr.png" alt="" aria-hidden className="size-5 opacity-70" />,
-        label: 'GDPR',
+        label: 'AVG-verwerkersovereenkomst',
     },
-    { icon: <PadlockGlyph className="size-5 text-muted-foreground" />, label: 'Tokens encrypted at rest' },
-    { icon: <KeyGlyph className="size-5 text-muted-foreground" />, label: 'Per-Connection secrets' },
+    { icon: <PadlockGlyph className="size-5 text-muted-foreground" />, label: 'Tokens versleuteld opgeslagen' },
+    { icon: <KeyGlyph className="size-5 text-muted-foreground" />, label: 'Eigen webhook-secret per koppeling' },
 ];
 
 export function SecurityBand() {

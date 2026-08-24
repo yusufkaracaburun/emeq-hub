@@ -19,7 +19,7 @@ const steps = [
         description: 'Zie precies wat er gebeurt: status, provider, timing en resultaat.',
     },
     {
-        title: 'Wat het voor jou betekent',
+        title: 'Wat wel en niet kan',
         description: 'We lopen jouw situatie door en zeggen wat wel en niet kan.',
     },
 ];

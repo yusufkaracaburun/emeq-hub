@@ -18,7 +18,7 @@ const columns = [
     {
         index: '03',
         icon: BroadcastGlyph,
-        title: 'Volledige grip op elke koppeling.',
+        title: 'Elke request gelogd, per klant.',
         body: 'Elke request en elke webhook wordt per klant en per koppeling gelogd. Gaat er iets mis, dan zie je precies waar en bij wie.',
     },
 ];

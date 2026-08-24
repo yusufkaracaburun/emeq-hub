@@ -80,10 +80,10 @@ export function Footer() {
                 <p className="font-mono text-xs text-muted-foreground">© 2026 emeq. Alle rechten voorbehouden.</p>
                 <div className="flex items-center gap-2">
                     <span className="flex items-center justify-center rounded-xs border border-border p-1.5">
-                        <img src="/img/badges/iso27001.png" alt="ISO 27001" className="size-[18px] opacity-70" />
+                        <img src="/img/badges/iso27001.png" alt="ISO 27001-gecertificeerde hosting" className="size-[18px] opacity-70" />
                     </span>
                     <span className="flex items-center justify-center rounded-xs border border-border p-1.5">
-                        <img src="/img/badges/gdpr.png" alt="GDPR" className="size-[18px] opacity-70" />
+                        <img src="/img/badges/gdpr.png" alt="AVG" className="size-[18px] opacity-70" />
                     </span>
                 </div>
             </div>
