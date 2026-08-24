@@ -66,7 +66,7 @@ final class SeoMeta implements Arrayable, JsonSerializable
             'description' => $this->description,
             'canonical' => $this->canonical,
             'type' => $this->type,
-            'image' => $this->image ?? url('/og-image.png'),
+            'image' => $this->image ?? url('/og-image.png').'?v='.filemtime(public_path('og-image.png')),
             'locale' => 'nl_NL',
             'siteName' => config('app.name'),
             'jsonLd' => [

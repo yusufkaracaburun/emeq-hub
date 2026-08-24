@@ -58,6 +58,17 @@ class PublicSeoTest extends TestCase
                 ->has('seo.jsonLd.@graph'));
     }
 
+    public function test_default_og_image_url_is_versioned_on_file_mtime(): void
+    {
+        $image = $this->get('/')->viewData('page')['props']['seo']['image'];
+
+        $this->assertSame(
+            url('/og-image.png').'?v='.filemtime(public_path('og-image.png')),
+            $image,
+            'Zonder mtime-versie blijven Slack/Cloudflare een oude og-image cachen na een update.',
+        );
+    }
+
     #[DataProvider('publicPages')]
     public function test_public_page_declares_the_emeq_entity(string $path): void
     {
