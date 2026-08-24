@@ -89,7 +89,16 @@ class PublicSeoTest extends TestCase
         $this->get('/')
             ->assertOk()
             ->assertInertia(fn (AssertableInertia $page) => $page
-                ->where('seo.title', 'Eén API voor al je integraties · '.config('app.name')));
+                ->where('seo.title', 'Eén API. Elke koppeling. · '.config('app.name')));
+    }
+
+    public function test_partners_description_only_calls_live_providers_live(): void
+    {
+        $description = $this->get('/partners')->viewData('page')['props']['seo']['description'];
+
+        $this->assertStringContainsString('Exact Online is live', $description);
+        $this->assertStringNotContainsString('beschikbaar zijn', $description);
+        $this->assertStringNotContainsString('Mollie is live', $description);
     }
 
     public function test_partner_detail_exposes_the_integration_as_structured_data(): void

@@ -19,13 +19,19 @@ class PartnersController extends Controller
     {
         $providers = $this->showcase->summaries();
         $labels = array_column($providers, 'label');
+        $live = array_column(array_filter($providers, fn (array $p): bool => $p['live']), 'label');
+        $coming = array_column(array_filter($providers, fn (array $p): bool => ! $p['live']), 'label');
+
+        $status = array_filter([
+            $live === [] ? null : implode(' en ', $live).(count($live) === 1 ? ' is' : ' zijn').' live via de emeq Hub',
+            $coming === [] ? null : implode(' en ', $coming).(count($coming) === 1 ? ' volgt' : ' volgen'),
+        ]);
 
         return Inertia::render('partners/index', [
             'providers' => $providers,
             'seo' => SeoMeta::make(
                 'Integraties · '.implode(', ', $labels),
-                'Alle koppelingen die via de emeq Hub beschikbaar zijn: '.implode(', ', $labels)
-                    .'. Eén API-contract, ongeacht hoeveel systemen je koppelt.',
+                implode('; ', $status).'. Eén API-contract, ongeacht hoeveel systemen je koppelt.',
             )->schema(
                 Schema::breadcrumbs([
                     ['name' => 'Home', 'url' => route('home')],
