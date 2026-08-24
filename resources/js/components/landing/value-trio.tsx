@@ -31,6 +31,10 @@ export function ValueTrio() {
                 <h2 className="text-xl font-bold tracking-[-1px] text-foreground md:text-3xl">
                     Stop met integraties steeds opnieuw bouwen.
                 </h2>
+                <p className="max-w-[640px] text-base leading-[1.6] text-muted-foreground">
+                    Onze eerste boekhoudkoppeling kostte 23 werkdagen om goed te bouwen. Die dagen hoef jij niet
+                    te maken.
+                </p>
             </Reveal>
 
             <RevealGroup className="mt-12 grid gap-10 border-t border-border md:grid-cols-3 md:gap-0">
