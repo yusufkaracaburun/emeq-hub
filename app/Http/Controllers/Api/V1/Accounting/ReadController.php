@@ -25,6 +25,7 @@ use App\Integrations\Errors\UpstreamErrorMapperRegistry;
 use App\Integrations\Exceptions\ProviderDisabledException;
 use App\Sanctum\TokenAbilities;
 use Dedoc\Scramble\Attributes\Group;
+use Dedoc\Scramble\Attributes\QueryParameter;
 use Dedoc\Scramble\Attributes\Response;
 use Exception;
 use Illuminate\Http\JsonResponse;
@@ -43,6 +44,7 @@ class ReadController extends Controller
     ) {}
 
     #[Response(200, type: 'array{data: list<array{id: string, type: string, number: string|null, external_id: string|null, issue_date: string|null, due_date: string|null, reference: string|null, party: array{id: string|null, name: string|null}, journal: string|null, currency: string, net_total: float, lines: list<array{description: string|null, amount: float, tax_code: string|null, ledger_account_id: string|null, cost_center: string|null, cost_unit: string|null}>}>, next_cursor: string|null, has_more: bool}')]
+    #[QueryParameter('type', description: 'Verplicht. Bepaalt welke documentsoort teruggegeven wordt; ontbreekt hij, dan volgt 400 invalid_query.', required: true, type: "'sales_invoice'|'purchase_invoice'|'income'|'expense'|'credit_note'")]
     public function documents(Request $request): JsonResponse
     {
         $type = $request->query('type');
@@ -75,6 +77,7 @@ class ReadController extends Controller
     }
 
     #[Response(200, type: 'array{data: list<array{id: string, kind: string, number: string|null, journal: string|null, financial_year: int|null, financial_period: int|null, opening_balance: float|null, closing_balance: float|null, currency: string, lines: list<array{id: string, date: string|null, amount: float, description: string|null, relation: array{id: string|null, name: string|null}, ledger_account_id: string|null, ledger_account_code: string|null, tax_code: string|null, document_number: string|null}>}>, next_cursor: string|null, has_more: bool}')]
+    #[QueryParameter('kind', description: 'Bank- of kasafschriften. Een andere waarde geeft 400 invalid_query.', required: false, type: "'bank'|'cash'", default: 'bank')]
     public function bankStatements(Request $request): JsonResponse
     {
         $kind = $request->query('kind', BankStatement::KIND_BANK);
