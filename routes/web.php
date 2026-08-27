@@ -23,10 +23,17 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
 Route::get('/up', function () {
+    $redisStatus = 'fail';
+    try {
+        $redisStatus = str_contains((string) Redis::ping(), 'PONG') ? 'ok' : 'fail';
+    } catch (Exception) {
+        //
+    }
+
     return response()->json([
         'status' => 'up',
         'database' => DB::connection()->getPdo() !== null ? 'ok' : 'fail',
-        'redis' => str_contains((string) Redis::ping(), 'PONG') ? 'ok' : 'fail',
+        'redis' => $redisStatus,
     ]);
 });
 
