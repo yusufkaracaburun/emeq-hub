@@ -23,7 +23,11 @@ Werk loopt via de ai-kit-lifecycle + GitHub-issues, niet ad-hoc edits:
 - `/ai:to-issues` / `/ai:to-prd` — plan → issues.
 - `/ai:review` — pre-merge review.
 
-Bron-van-waarheid voor open + forward-werk: **GitHub-issues** (`P*`/`area/*`-labels). Historische GSD-planning (`.planning/`) is verwijderd uit de werkboom; raadpleegbaar via git-history.
+Bron-van-waarheid voor open + forward-werk: **GitHub-issues** (`P*`/`epic/*`/`area/*`-labels). Elk issue draagt precies één epic: `providers`, `lookup`, `books`, `marketing` of `platform`.
+
+`dor-dod-enforcement.yml` bewaakt de checkboxes in de issue-templates. Sluit je een issue met een onafgevinkte Definition of Done, dan heropent hij het met een lijst van wat er nog open staat; werk dat niet meer relevant is sluit je als **not planned**, want die state_reason passeert. Zet je `status:in-progress` terwijl de Definition of Ready nog gaten heeft, dan haalt hij het label er weer af. Issues zonder die secties passeren ongehinderd als legacy.
+
+`.planning/` is terug als lokale, gitignored werkmap voor agent-concepten; de historische GSD-planning onder diezelfde naam zit in git-history.
 
 ## Tests
 
