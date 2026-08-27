@@ -7,12 +7,6 @@ parameters:
 			path: app/Accounting/Validation/DocumentInspector.php
 
 		-
-			message: '#^Binary operation "%%" between non\-falsy\-string and 97 results in an error\.$#'
-			identifier: binaryOp.invalid
-			count: 1
-			path: app/Accounting/Validation/Validators/IbanValidator.php
-
-		-
 			message: '#^Call to function is_string\(\) with string will always evaluate to true\.$#'
 			identifier: function.alreadyNarrowedType
 			count: 2
