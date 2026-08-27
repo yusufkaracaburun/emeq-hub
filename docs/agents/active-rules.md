@@ -33,5 +33,7 @@ Canonical rules enabled for this project. Source of truth: `~/.local/share/ai-ki
 | ddd-distilled | on-demand | DDD Distilled — bounded contexts, aggregates, ubiquitous language |
 | api-design | always-on | REST API conventions — resource modelling, status codes, versioning, OpenAPI source-of-truth |
 | laravel-conventions | always-on | Laravel idioms — Eloquent, Artisan, queues, validation, multi-tenancy patterns the framework expects |
+| pre-write-discipline | always-on | Four gates before the first edit — assumptions, minimum diff, surgical scope, verifiable goal |
+| writing-style | always-on | Strip AI tells from every piece of prose you emit; plain words, no em dashes, no jargon nouns, mechanism over feeling |
 
 <!-- ai-kit:active-rules:end -->
