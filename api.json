@@ -299,8 +299,7 @@
                                                 "type": [
                                                     "string",
                                                     "null"
-                                                ],
-                                                "description": "De publieke sleutel, niet de primary key: dit is precies de waarde\ndie als `X-Connection-Id` terugkomt op de accounting-endpoints."
+                                                ]
                                             }
                                         },
                                         "required": [
@@ -973,7 +972,6 @@
         "/accounting/documents": {
             "post": {
                 "operationId": "accounting.documents.store",
-                "summary": "`AccountingSyncRunner::run()` levert bij succes (posted, deduplicated of\nrecovered-after-timeout) altijd deze vorm; `external_number`/`attachments`/\n`deduplicated`/`recovered` komen er alleen bij als die van toepassing zijn",
                 "tags": [
                     "Accounting Sync"
                 ],
@@ -1149,8 +1147,6 @@
             },
             "get": {
                 "operationId": "accounting.documents.index",
-                "description": "De leeskant van `POST /v1/accounting/documents` \u2014 zelfde pad, zelfde canonieke\nbegrip.\n\n`?type=` is verplicht. Zonder filter kwamen hier verkoopboekingen terug: een\nstille keuze, want de consumer vroeg om documenten en kreeg er \u00e9\u00e9n soort van.\nBoekhoudpakketten houden verkoop en inkoop in gescheiden collecties met een\neigen cursor, dus \"alles\" is niet in \u00e9\u00e9n pagina te leveren zonder te liegen\nover de volgorde.",
-                "summary": "Geboekte documenten uit de gekoppelde administratie",
                 "tags": [
                     "Accounting Read"
                 ],
@@ -1158,8 +1154,17 @@
                     {
                         "name": "type",
                         "in": "query",
+                        "required": true,
+                        "description": "Verplicht. Bepaalt welke documentsoort teruggegeven wordt; ontbreekt hij, dan volgt 400 invalid_query.",
                         "schema": {
-                            "type": "string"
+                            "type": "string",
+                            "enum": [
+                                "sales_invoice",
+                                "purchase_invoice",
+                                "income",
+                                "expense",
+                                "credit_note"
+                            ]
                         }
                     }
                 ],
@@ -1513,8 +1518,6 @@
         "/accounting/capabilities": {
             "get": {
                 "operationId": "accounting.capabilities",
-                "description": "`capabilities` is een platte lijst, geen object van booleans: een capability\ntoevoegen is dan additief voor consumers, terwijl `capabilities.foo === undefined`\nversus `false` een bugfabriek is. `enabled` is de losse as \u2014 een uitgeschakelde\nprovider declareert nog steeds wat hij kan.",
-                "summary": "Wat de gekoppelde boekhoudprovider ondersteunt",
                 "tags": [
                     "Accounting Sync"
                 ],
@@ -1538,7 +1541,6 @@
         "/accounting/sync": {
             "post": {
                 "operationId": "accounting.sync",
-                "summary": "(Her)synchroniseer de referentiedata (grootboek/BTW/dagboeken) naar de mirror",
                 "tags": [
                     "Accounting Sync"
                 ],
@@ -1574,7 +1576,6 @@
         "/accounting/reference-data": {
             "get": {
                 "operationId": "accounting.reference-data",
-                "summary": "De beschikbare referentie-codes uit de mirror \u2014 waaruit een override gekozen kan worden",
                 "tags": [
                     "Accounting Sync"
                 ],
@@ -1674,7 +1675,6 @@
         "/accounting/mapping": {
             "get": {
                 "operationId": "accounting.mapping.show",
-                "summary": "De huidige (auto-derived of overschreven) mapping van de koppeling",
                 "tags": [
                     "Accounting Sync"
                 ],
@@ -1724,7 +1724,6 @@
             },
             "put": {
                 "operationId": "accounting.mapping.update",
-                "summary": "Overschrijf (merge) de mapping \u2014 voor wie de auto-default wil verfijnen",
                 "tags": [
                     "Accounting Sync"
                 ],
@@ -2007,8 +2006,6 @@
         "/accounting/bank-statements": {
             "get": {
                 "operationId": "accounting.bank-statements",
-                "description": "Filter met `?kind=bank|cash`; standaard bank. Dit is de resource waarover de\nbank-webhooks notificeren \u2014 zonder dit endpoint is zo'n melding onbruikbaar.",
-                "summary": "Bank- of kasafschriften met hun mutaties",
                 "tags": [
                     "Accounting Read"
                 ],
@@ -2016,8 +2013,14 @@
                     {
                         "name": "kind",
                         "in": "query",
+                        "description": "Bank- of kasafschriften. Een andere waarde geeft 400 invalid_query.",
                         "schema": {
-                            "type": "string"
+                            "type": "string",
+                            "enum": [
+                                "bank",
+                                "cash"
+                            ],
+                            "default": "bank"
                         }
                     }
                 ],
@@ -2273,7 +2276,6 @@
         "/accounting/ledger-accounts": {
             "get": {
                 "operationId": "accounting.ledger-accounts",
-                "summary": "Grootboekrekeningen van de gekoppelde administratie",
                 "tags": [
                     "Accounting Read"
                 ],
@@ -2409,7 +2411,6 @@
         "/accounting/tax-codes": {
             "get": {
                 "operationId": "accounting.tax-codes",
-                "summary": "Btw-codes van de gekoppelde administratie",
                 "tags": [
                     "Accounting Read"
                 ],
@@ -2552,7 +2553,6 @@
         "/accounting/customers": {
             "get": {
                 "operationId": "accounting.customers",
-                "summary": "Debiteuren (klanten) van de gekoppelde administratie",
                 "tags": [
                     "Accounting Read"
                 ],
@@ -2709,7 +2709,6 @@
         "/accounting/suppliers": {
             "get": {
                 "operationId": "accounting.suppliers",
-                "summary": "Crediteuren (leveranciers) van de gekoppelde administratie",
                 "tags": [
                     "Accounting Read"
                 ],
@@ -3764,8 +3763,6 @@
         "/exact/gl-accounts": {
             "get": {
                 "operationId": "exact.gl-accounts.index",
-                "description": "Forward naar Exact `GET /financial/GLAccounts` met de OAuth-tokens van de\ngekoppelde Account. OData-query (`$select`, `$filter`, `$top`, \u2026) wordt\nongewijzigd doorgegeven; het antwoord is Exact's payload zoals ontvangen.",
-                "summary": "List GL accounts",
                 "tags": [
                     "Exact \u00b7 GL Accounts"
                 ],
@@ -3830,8 +3827,6 @@
         "/exact/vat-codes": {
             "get": {
                 "operationId": "exact.vat-codes.index",
-                "description": "Forward naar Exact `GET /vat/VATCodes` met de OAuth-tokens van de gekoppelde\nAccount. OData-query (`$select`, `$filter`, `$top`, \u2026) wordt ongewijzigd\ndoorgegeven; het antwoord is Exact's payload zoals ontvangen.",
-                "summary": "List VAT codes",
                 "tags": [
                     "Exact \u00b7 VAT Codes"
                 ],
@@ -3896,8 +3891,6 @@
         "/exact/relations": {
             "get": {
                 "operationId": "exact.relations.index",
-                "description": "Forward naar Exact `GET /crm/Accounts` met de OAuth-tokens van de gekoppelde\nAccount. OData-query (`$select`, `$filter`, `$top`, \u2026) wordt ongewijzigd\ndoorgegeven; het antwoord is Exact's payload zoals ontvangen.",
-                "summary": "List relations",
                 "tags": [
                     "Exact \u00b7 Relations"
                 ],
@@ -3962,8 +3955,6 @@
         "/exact/journals": {
             "get": {
                 "operationId": "exact.journals.index",
-                "description": "Forward naar Exact `GET /financial/Journals` met de OAuth-tokens van de\ngekoppelde Account. OData-query (`$select`, `$filter`, `$top`, \u2026) wordt\nongewijzigd doorgegeven; het antwoord is Exact's payload zoals ontvangen.",
-                "summary": "List journals",
                 "tags": [
                     "Exact \u00b7 Journals"
                 ],
@@ -4028,7 +4019,6 @@
         "/account-subscriptions": {
             "post": {
                 "operationId": "account-subscriptions.store",
-                "summary": "Maakt een nieuwe AccountSubscription + Mollie-subscription via de\nmanager. Idempotency-Key header wordt forwarded naar Mollie (D-14)",
                 "tags": [
                     "Account Subscriptions"
                 ],
@@ -4129,9 +4119,19 @@
             },
             "get": {
                 "operationId": "account-subscriptions.index",
-                "summary": "Lijst van AccountSubscriptions voor een Account binnen deze Consumer.\nVereist query-param `account_external_id`. Vreemde-Consumer-account \u2192\nlege list (info-disclosure-protectie per T-07-04-01)",
                 "tags": [
                     "Account Subscriptions"
+                ],
+                "parameters": [
+                    {
+                        "name": "account_external_id",
+                        "in": "query",
+                        "required": true,
+                        "description": "Verplicht. Het external_id van het Account binnen deze Consumer; ontbreekt hij, dan volgt 422. Een Account van een andere Consumer geeft een lege lijst, geen 404.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
                 ],
                 "responses": {
                     "422": {
@@ -4631,7 +4631,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/App.Http.Requests.Admin.Billing.CreateSubscriptionRequest"
+                                "$ref": "#/components/schemas/App.Integrations.Mollie.Http.Admin.Requests.CreateSubscriptionRequest"
                             }
                         }
                     }
@@ -4949,7 +4949,7 @@
                 ],
                 "title": "AccountSubscriptionResource"
             },
-            "App.Http.Requests.Admin.Billing.CreateSubscriptionRequest": {
+            "App.Integrations.Mollie.Http.Admin.Requests.CreateSubscriptionRequest": {
                 "type": "object",
                 "properties": {
                     "consumer_id": {
@@ -4974,7 +4974,7 @@
                     "consumer_id",
                     "plan_slug"
                 ],
-                "title": "App.Http.Requests.Admin.Billing.CreateSubscriptionRequest"
+                "title": "App.Integrations.Mollie.Http.Admin.Requests.CreateSubscriptionRequest"
             },
             "ConnectionResource": {
                 "type": "object",
@@ -4983,8 +4983,7 @@
                         "type": "integer"
                     },
                     "public_id": {
-                        "type": "string",
-                        "description": "De sleutel die overal \u00e9lders naar de consumer gaat: de\nintegrations-lijst, de OAuth-init-respons, de\nconnection_revoked-webhook en X-Connection-Id. Zonder deze kon een\nconsumer die waarde nergens terugvinden op dit endpoint."
+                        "type": "string"
                     },
                     "account_id": {
                         "type": "integer"
@@ -5022,7 +5021,6 @@
             },
             "CreateAccountSubscriptionRequest": {
                 "type": "object",
-                "description": "Edge-validatie voor POST /v1/account-subscriptions \u2014 vangt grove payload-fouten af\nv\u00f3\u00f3r Mollie-roundtrip (lager Mollie-quota-burn). 07-CONTEXT.md D-09 body-shape.\n\nBelangrijk:\n - `Rule::exists('accounts', 'external_id')->where('consumer_id', ...)` zorgt voor\n   cross-Consumer-scoping (T-07-04-03): vreemde-Consumer-account \u2192 422, geen 404.\n - amount.value-regex pin't exact 2 decimals (T-07-04-06 \u2014 quota-burn-protection).\n - currency-rule pin't EUR-only (D-09 + Phase 7 strict-EUR-stance).",
                 "properties": {
                     "account_external_id": {
                         "type": "string"
@@ -5137,7 +5135,6 @@
                                     "string",
                                     "null"
                                 ],
-                                "description": "Vendor Mollie\\Api\\Http\\Data\\Owner accepteert optioneel ?string $locale \u2014\nmoet doorgegeven kunnen worden anders gaat een geldige consumer-payload\n422 (WR-01).",
                                 "maxLength": 10
                             }
                         },
@@ -5167,7 +5164,6 @@
                                     "string",
                                     "null"
                                 ],
-                                "description": "Vendor Mollie\\Api\\Http\\Data\\OwnerAddress accepteert optioneel\n?string $region \u2014 pass-through optioneel veld (WR-01).",
                                 "maxLength": 255
                             },
                             "country": {
@@ -5231,7 +5227,6 @@
             },
             "CreatePaymentLinkRequest": {
                 "type": "object",
-                "description": "Edge-validatie voor POST /v1/mollie/payment-links \u2014 vangt grove\npayload-fouten af v\u00f3\u00f3r Mollie-roundtrip.\n\nRequired-fields per Mollie's Create Payment Link API:\n  description (max 255 chars)\n\nMollie zelf handhaaft mutual-exclusion tussen `amount` en\n`minimumAmount` \u2014 Hub valideert alleen dat per-shape correct is\nwanneer aanwezig.",
                 "properties": {
                     "description": {
                         "type": "string",
@@ -5437,7 +5432,6 @@
                     },
                     "phone": {
                         "type": "string",
-                        "description": "Vendor SDK Mollie\\Api\\Http\\Requests\\CreateProfileRequest::__construct\ntypeert $phone als non-nullable string \u2014 verplicht in Form Request\nanders bubble't een PHP TypeError door als mollie_unknown (502).",
                         "maxLength": 32
                     },
                     "description": {
@@ -5540,7 +5534,6 @@
             },
             "CreateSubscriptionRequest": {
                 "type": "object",
-                "description": "Edge-validatie voor POST /v1/mollie/customers/{id}/subscriptions \u2014\nvangt grove payload-fouten af v\u00f3\u00f3r Mollie-roundtrip (lager\nMollie-quota-burn).\n\nRequired-fields per Mollie's Create Subscription API:\n  amount.currency  (ISO 4217 3-letter)\n  amount.value     (decimal-string met >=2 cijfers achter de komma)\n  interval         (\"N day(s)\" | \"N week(s)\" | \"N month(s)\")\n  description      (max 255 chars)\n\nOptionele velden: startDate, method, metadata, mandateId, webhookUrl,\ntimes. Niet-genoemde Mollie-velden worden niet gevalideerd; Mollie\nzelf valideert ze als ze in de payload zitten.",
                 "properties": {
                     "interval": {
                         "type": "string",
@@ -5623,7 +5616,6 @@
             },
             "Provider": {
                 "type": "string",
-                "description": "Partner-providers waar de Hub mee koppelt. Single source of truth voor de `connections.provider`-waarde, vervangt verspreide `'mollie'`/`'snelstart'`-literals. De backing-waarden komen 1:1 overeen met de keys in config/hub-providers.php; ProviderCredentialDescriptor blijft die config als bron voor credential-metadata lezen \u2014 deze enum dekt alleen de identiteit + presentatie.\n",
                 "enum": [
                     "mollie",
                     "snelstart",
@@ -5701,7 +5693,6 @@
             },
             "StoreDocumentRequest": {
                 "type": "object",
-                "description": "Edge-validatie van het canonical FinancialDocument (Hub-conventie: dunne SDK's,\nvalidatie aan de Hub-rand). De provider-specifieke mapping gebeurt daarn\u00e1 in de adapter.",
                 "properties": {
                     "type": {
                         "type": "string",
@@ -5804,7 +5795,6 @@
                                     "string",
                                     "null"
                                 ],
-                                "description": "Relatiekaart \u2014 optioneel, en alleen van belang wanneer de Hub de\nrelatie aanmaakt. Lengtes volgen de Exact-velden.",
                                 "maxLength": 20
                             },
                             "address_line_1": {
@@ -5953,7 +5943,6 @@
                             "array",
                             "null"
                         ],
-                        "description": "Bijlagen: inline base64. max ~1,4M chars base64 \u2248 1MB binair (ADR < 1MB).\nBegrensd omdat elke bijlage twee partner-calls van 30s kost: zonder\nplafond is de request-duur onbegrensd en is de idempotency-lease\n(config `hub.idempotency.lease_seconds`) niet te onderbouwen.",
                         "items": {
                             "type": "object",
                             "properties": {
@@ -5994,7 +5983,6 @@
             },
             "ValidateDocumentRequest": {
                 "type": "object",
-                "description": "Lenient edge-validatie voor de dry-run /validate. Alleen de envelope wordt gecheckt\n(party/lines zijn arrays); per-veldproblemen laten we bewust door, want d\u00ede vinden is\nde taak van de DocumentInspector. Naast het canonical document accepteert de draft de\nOCR-samenvatting (subtotal/tax_total/total/discount) zodat de bedragen te reconcili\u00ebren\nzijn \u2014 die velden bestaan niet op het boek-contract.",
                 "properties": {
                     "type": {
                         "type": [
@@ -6019,8 +6007,7 @@
                         "type": [
                             "string",
                             "null"
-                        ],
-                        "description": "Factuurdatum. Bewust zonder vormregel: een draft mag hier de rauwe\nOCR-waarde dragen, en het oordeel erover komt uit de findings."
+                        ]
                     },
                     "subtotal": {
                         "type": [

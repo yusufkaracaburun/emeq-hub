@@ -4,19 +4,20 @@ declare(strict_types=1);
 
 namespace App\Integrations\Mollie\Http\AccountSubscriptions;
 
-use App\Integrations\Mollie\Billing\AccountSubscriptionManager;
-use App\Integrations\Mollie\Billing\Dto\CreateAccountSubscriptionDto;
 use App\Billing\Account\Exceptions\InvalidStateTransitionException;
 use App\Enums\Provider;
-use App\Integrations\Mollie\Http\AccountSubscriptions\Concerns\HandlesAccountSubscriptionRequests;
 use App\Http\Controllers\Controller;
-use App\Integrations\Mollie\Http\AccountSubscriptions\Requests\CreateAccountSubscriptionRequest;
 use App\Http\Resources\Api\V1\AccountSubscriptionResource;
+use App\Integrations\Mollie\Billing\AccountSubscriptionManager;
+use App\Integrations\Mollie\Billing\Dto\CreateAccountSubscriptionDto;
+use App\Integrations\Mollie\Http\AccountSubscriptions\Concerns\HandlesAccountSubscriptionRequests;
+use App\Integrations\Mollie\Http\AccountSubscriptions\Requests\CreateAccountSubscriptionRequest;
 use App\Models\Account;
 use App\Models\Connection;
 use App\Models\Consumer;
 use DateTimeImmutable;
 use Dedoc\Scramble\Attributes\Group;
+use Dedoc\Scramble\Attributes\QueryParameter;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -105,6 +106,7 @@ class AccountSubscriptionController extends Controller
             ->setStatusCode(Response::HTTP_CREATED);
     }
 
+    #[QueryParameter('account_external_id', description: 'Verplicht. Het external_id van het Account binnen deze Consumer; ontbreekt hij, dan volgt 422. Een Account van een andere Consumer geeft een lege lijst, geen 404.', required: true, type: 'string')]
     public function index(Request $request): JsonResponse|JsonResource
     {
         /** @var Consumer $consumer */
