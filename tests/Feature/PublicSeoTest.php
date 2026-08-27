@@ -256,6 +256,22 @@ class PublicSeoTest extends TestCase
             ->assertHeader('X-Robots-Tag', 'noindex, nofollow, noarchive, nosnippet');
     }
 
+    public function test_root_template_carries_the_inertia_head_directive(): void
+    {
+        $blade = (string) file_get_contents(resource_path('views/app.blade.php'));
+
+        $this->assertStringContainsString(
+            '@inertiaHead',
+            $blade,
+            'Titel, description, canonical, OpenGraph en JSON-LD bereiken de HTML uitsluitend '
+            .'via @inertiaHead. Haalt iemand die directive weg, dan krijgt een crawler een kale '
+            .'head terwijl elke assertInertia-test groen blijft: die assert props, niet de '
+            .'gerenderde body. SSR draait niet in deze suite (gemeten: geen canonical in '
+            .'$this->get(\'/\')->getContent()), dus dit is de goedkoopste guard die hier past. '
+            .'De runtime-helft bewaakt `make prod-ssr-check` na elke deploy.',
+        );
+    }
+
     /** @return list<array<string, mixed>> */
     private function graph(mixed $seo): array
     {
