@@ -55,6 +55,7 @@ frankenphp-worker.php
 
 # Skill-installer tooling (lokaal, niet projectcode)
 /.agents/skills
+/.agents/worktrees/
 /skills-lock.json
 
 # pg_dump-output van `make prod-backup` (staat op de server, nooit in git)
