@@ -4,8 +4,8 @@ namespace App\Integrations\Mollie\Http\Api;
 
 use App\Enums\Provider;
 use App\Http\Controllers\Api\V1\Concerns\GuardsPassThroughRequest;
-use App\Integrations\Mollie\Http\Api\Concerns\RendersMollieResult;
 use App\Http\Controllers\Controller;
+use App\Integrations\Mollie\Http\Api\Concerns\RendersMollieResult;
 use App\Integrations\PassThrough\PassThroughContext;
 use App\Integrations\PassThrough\PassThroughPipeline;
 use App\Integrations\PassThrough\UpstreamResult;

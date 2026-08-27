@@ -2,9 +2,8 @@
 
 namespace App\Integrations\Mollie\Http\Middleware;
 
-use App\Http\Middleware\ResolveProviderAccount;
-
 use App\Enums\Provider;
+use App\Http\Middleware\ResolveProviderAccount;
 use App\Integrations\Mollie\MollieConnectionContext;
 use App\Models\Connection;
 

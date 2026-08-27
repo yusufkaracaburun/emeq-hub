@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Integrations\Mollie\Http\Admin;
 
-use App\Integrations\Mollie\Billing\PlanResolver;
 use App\Http\Controllers\Controller;
+use App\Integrations\Mollie\Billing\PlanResolver;
 use App\Integrations\Mollie\Http\Admin\Requests\CreateSubscriptionRequest;
 use App\Models\Consumer;
 use Dedoc\Scramble\Attributes\Group;

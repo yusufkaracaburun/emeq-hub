@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace App\Integrations\Exact\Http;
 
-use App\Http\Controllers\Controller;
-
 use App\Enums\Provider;
+use App\Http\Controllers\Controller;
 use App\Integrations\Exact\ExactUserId;
 use App\Integrations\Exact\OAuth\ExactOAuthFlow;
 use App\Integrations\Webhooks\InboundWebhookRecorder;

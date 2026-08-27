@@ -6,9 +6,9 @@ namespace App\Integrations\Mollie\Http\Connect;
 
 use App\Enums\Provider;
 use App\Http\Controllers\Api\V1\Concerns\GuardsPassThroughRequest;
-use App\Integrations\Mollie\Http\Api\Concerns\RendersMollieResult;
 use App\Http\Controllers\Controller;
 use App\Integrations\Mollie\Exceptions\MissingPartnerTokenException;
+use App\Integrations\Mollie\Http\Api\Concerns\RendersMollieResult;
 use App\Integrations\Mollie\MollieAccessTokenResolver;
 use App\Integrations\PassThrough\PassThroughContext;
 use App\Integrations\PassThrough\PassThroughPipeline;

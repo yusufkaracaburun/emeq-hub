@@ -4,10 +4,8 @@ declare(strict_types=1);
 
 namespace App\Integrations\Mollie\Billing;
 
-use App\Billing\Account\Exceptions\InvalidStateTransitionException;
 use App\Billing\Account\StateTransitions;
 use App\Billing\Account\SubscriptionStatus;
-
 use App\Integrations\Mollie\Billing\Dto\CreateAccountSubscriptionDto;
 use App\Integrations\Mollie\MollieConnectionContext;
 use App\Models\Account;

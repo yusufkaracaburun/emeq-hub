@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Integrations\Mollie\Http\AccountSubscriptions;
 
-use App\Integrations\Mollie\Billing\AccountSubscriptionManager;
 use App\Billing\Account\Exceptions\InvalidStateTransitionException;
-use App\Integrations\Mollie\Http\AccountSubscriptions\Concerns\HandlesAccountSubscriptionRequests;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Api\V1\AccountSubscriptionResource;
+use App\Integrations\Mollie\Billing\AccountSubscriptionManager;
+use App\Integrations\Mollie\Http\AccountSubscriptions\Concerns\HandlesAccountSubscriptionRequests;
 use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;

@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Tests\Feature\Settings;
 
 use App\Filament\Pages\ManageIntegrationSettings;
-use App\Models\User;
 use App\Integrations\Exact\Settings\ExactSettings;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Spatie\Permission\Models\Role;

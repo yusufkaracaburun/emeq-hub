@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Integrations\Mollie\Billing;
 
+use App\Billing\Account\SubscriptionStatus;
 use App\Integrations\Mollie\Billing\AccountSubscriptionManager;
 use App\Integrations\Mollie\Billing\Dto\CreateAccountSubscriptionDto;
-use App\Billing\Account\SubscriptionStatus;
 use App\Models\AccountSubscription;
 use App\Sanctum\TokenAbilities;
 use Illuminate\Foundation\Testing\RefreshDatabase;
