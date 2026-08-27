@@ -400,7 +400,11 @@ Prod wordt sinds 2026-08-18 extern bewaakt. Drie lagen, elk met een eigen blinde
 - **Monitor** op `https://hub.emeq.nl/up`, type "URL becomes unavailable".
   Alerting naar Slack en e-mail; geen push-notificaties. `/up` raakt de
   web-container, Postgres en Redis en geeft
-  `{"status":"up","database":"ok","redis":"ok"}`.
+  `{"status":"up","database":"ok","redis":"ok"}`. Valt een van beide weg, dan is
+  het antwoord `503` met `"status":"degraded"` en de falende dependency op
+  `"fail"`. Die status-code is het hele alarm: de gratis tier kan geen
+  keyword-matching, dus een `200` met `"redis":"fail"` in de body zou de monitor
+  groen houden terwijl queue, cache en sessies plat liggen.
 - **Status-pagina** `status.emeq.nl` — CNAME naar `statuspage.betteruptime.com`,
   in Cloudflare **DNS-only (grijs)**. Publiek, Nederlandstalig. De component heet
   `Hub API`, niet de hostname.
@@ -462,7 +466,7 @@ workers is van buitenaf niet te zien.
 | Partner-webhooks komen niet aan (403) | Bot Fight Mode staat aan op de zone — uitzetten (zie § Cloudflare) |
 | `530` / `1033` van Cloudflare | tunnel-connector down: `make prod-logs`, check `CLOUDFLARE_TUNNEL_TOKEN` |
 | `502` van de tunnel | `app` niet healthy — public hostname moet naar `http://app:80` wijzen |
-| `500` op `/up` | db of redis onbereikbaar: `make prod-ps` + `make prod-logs` |
+| `503` op `/up` | db of redis onbereikbaar: `make prod-ps` + `make prod-logs` |
 | `https` werkt niet / redirect-loop | check `APP_URL=https://…` en `SESSION_SECURE_COOKIE=true` |
 | Code-change niet zichtbaar | `restart app horizon scheduler` vergeten — gebruik `make prod-deploy` |
 | Queue draait oude code | idem |

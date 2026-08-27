@@ -23,18 +23,26 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
 Route::get('/up', function () {
-    $redisStatus = 'fail';
+    $dependencies = ['database' => 'fail', 'redis' => 'fail'];
+
     try {
-        $redisStatus = str_contains((string) Redis::ping(), 'PONG') ? 'ok' : 'fail';
-    } catch (Exception) {
-        //
+        $dependencies['database'] = DB::connection()->getPdo() !== null ? 'ok' : 'fail';
+    } catch (Throwable) {
+        $dependencies['database'] = 'fail';
     }
 
-    return response()->json([
-        'status' => 'up',
-        'database' => DB::connection()->getPdo() !== null ? 'ok' : 'fail',
-        'redis' => $redisStatus,
-    ]);
+    try {
+        $dependencies['redis'] = str_contains((string) Redis::ping(), 'PONG') ? 'ok' : 'fail';
+    } catch (Throwable) {
+        $dependencies['redis'] = 'fail';
+    }
+
+    $healthy = ! in_array('fail', $dependencies, true);
+
+    return response()->json(
+        ['status' => $healthy ? 'up' : 'degraded', ...$dependencies],
+        $healthy ? 200 : 503,
+    );
 });
 
 Route::middleware('signed')->group(function (): void {
