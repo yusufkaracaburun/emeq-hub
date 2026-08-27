@@ -1,4 +1,10 @@
 APP := http://hub.emeq.test:8092
+# Bewijs dat de React-tree server-gerenderd is. `rel="canonical"` komt uit
+# <Head> in components/seo.tsx en bereikt de HTML alleen via @inertiaHead,
+# dus alleen als de ssr-service draait. Zonder SSR mist niet alleen deze
+# regel maar de hele head: geen title, geen description, geen JSON-LD.
+# Bewust geen hero-copy: die herschrijft marketing, dit niet.
+SSR_MARKER := rel="canonical"
 TUNNEL := emeq-hub-dev
 TUNNEL_LOG := storage/logs/cloudflared.log
 
@@ -107,7 +113,22 @@ prod-up: ## [server] Release zonder git (na `prod-rsync`): backup → build → 
 	@# in dezelfde lijst: dat proces laadt de SSR-bundel één keer bij boot, dus
 	@# zonder restart serveert het na een deploy nog de vorige build.
 	$(PROD) restart app horizon scheduler ssr
-	@$(PROD) exec -T app curl -fsS http://localhost/up && echo "\n  ✅ deploy ok"
+	@$(PROD) exec -T app curl -fsS http://localhost/up
+	@$(MAKE) --no-print-directory prod-ssr-check
+	@echo "\n  ✅ deploy ok"
+
+prod-ssr-check: ## [server] Controleer of de publieke HTML server-gerenderd is
+	@# /up zegt alleen dat het proces leeft. Valt de ssr-service om, dan rendert
+	@# Inertia stil client-side (throw_on_error=false) en krijgt een crawler een
+	@# lege head — met een groene health-check en een groene testsuite, want die
+	@# assert op Inertia-props, niet op de gerenderde body.
+	@if $(PROD) exec -T app curl -s http://localhost/ | grep -q '$(SSR_MARKER)'; then \
+		echo "  ✅ crawler-view ok — head staat in de HTML."; \
+	else \
+		echo "  ❌ lege head: de ssr-service rendert niet. Crawlers zien geen titel,"; \
+		echo "     canonical of JSON-LD. Check 'make prod-ps' en 'make prod-logs'."; \
+		exit 1; \
+	fi
 
 prod-rsync: ## [lokaal] Push de working tree naar de server (PROD_HOST/PROD_PATH), zonder git
 	rsync -az --delete \
@@ -181,10 +202,10 @@ ssr: ## Draai de publieke site server-rendered (crawler-view; stopt Vite-HMR)
 	@$(MAKE) --no-print-directory ssr-check
 
 ssr-check: ## Controleer of de publieke HTML server-gerenderd is (crawler-view)
-	@if curl -s $(APP)/ | grep -q 'Integreer'; then \
-		echo "OK — hero-copy staat in de HTML; crawlers zonder JS zien de content."; \
+	@if curl -s $(APP)/ | grep -q '$(SSR_MARKER)'; then \
+		echo "OK — head staat in de HTML; crawlers zonder JS zien titel, canonical en JSON-LD."; \
 	else \
-		echo "FOUT — lege body. Draait de ssr-service? (make ssr)"; exit 1; \
+		echo "FOUT — lege head. Draait de ssr-service? (make ssr)"; exit 1; \
 	fi
 
 ssr-off: ## Terug naar normale dev-modus (Vite-HMR, geen SSR)
