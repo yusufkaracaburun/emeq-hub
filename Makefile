@@ -194,6 +194,15 @@ urls: ## Toon de UI-URLs
 # SSR-preview zet Vite daarom stil en draait op gebouwde assets — precies wat
 # prod doet.
 ssr: ## Draai de publieke site server-rendered (crawler-view; stopt Vite-HMR)
+	@# De vite-container installeert node_modules in een anonymous volume, dus na
+	@# elke `make down` die dat volume opruimt draait `npm ci` nog bij het eerste
+	@# `make ssr`. Zonder deze wachtlus faalt de build dan op `vite: not found`.
+	@n=0; until docker compose exec -T vite test -x node_modules/.bin/vite 2>/dev/null; do \
+		n=$$((n+1)); \
+		if [ $$n -gt 60 ]; then echo "  ❌ vite kwam niet op na 120s — check 'docker compose logs vite'"; exit 1; fi; \
+		if [ $$n = 1 ]; then echo "  ⏳ npm ci draait nog in de vite-container, wachten…"; fi; \
+		sleep 2; \
+	done
 	docker compose exec -T vite npm run build
 	docker compose stop vite
 	@rm -f public/hot
