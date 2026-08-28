@@ -3,7 +3,7 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "build": "vite build && vite build --ssr",
+        "build": "node scripts/check-tokens.mjs && vite build && vite build --ssr",
         "dev": "vite"
     },
     "devDependencies": {
