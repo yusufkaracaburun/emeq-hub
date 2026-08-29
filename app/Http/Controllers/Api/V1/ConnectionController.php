@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Actions\Connect\RevokeConnection;
+use App\Enums\Provider;
 use App\Http\Concerns\GuardsTokenAbility;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\StoreConnectionRequest;
@@ -31,6 +32,7 @@ class ConnectionController extends Controller
             TokenAbilities::INTEGRATIONS_MANAGE,
             TokenAbilities::CONSUMER_MANAGE_ACCOUNTS,
             TokenAbilities::SNELSTART_WRITE,
+            TokenAbilities::DATAFORSEO_WRITE,
             TokenAbilities::ADMIN,
         ]);
 
@@ -45,20 +47,29 @@ class ConnectionController extends Controller
             return $this->notFound('account_not_found', 'Account niet gevonden voor deze Consumer.');
         }
 
+        $provider = $request->string('provider')->toString();
+
+        $data = [
+            'provider' => $provider,
+            'status' => 'active',
+            'administratie_id' => $request->input('administratie_id'),
+            'metadata' => null,
+        ];
+
+        if ($provider === Provider::Snelstart->value) {
+            $data['client_key'] = $request->input('credentials.client_key');
+            $data['subscription_key'] = $request->input('credentials.subscription_key');
+            $data['subscription_id'] = $request->input('credentials.subscription_id');
+        } elseif ($provider === Provider::DataForSeo->value) {
+            $data['access_token'] = $request->input('credentials.access_token');
+        }
+
         try {
-            $connection = $account->connections()->create([
-                'provider' => $request->string('provider')->toString(),
-                'status' => 'active',
-                'client_key' => $request->input('credentials.client_key'),
-                'subscription_key' => $request->input('credentials.subscription_key'),
-                'subscription_id' => $request->input('credentials.subscription_id'),
-                'administratie_id' => $request->input('administratie_id'),
-                'metadata' => null,
-            ]);
+            $connection = $account->connections()->create($data);
         } catch (UniqueConstraintViolationException) {
             return response()->json([
                 'error' => 'connection_exists',
-                'message' => 'Een actieve Snelstart-Connection bestaat al voor dit Account.',
+                'message' => 'Een actieve Connection bestaat al voor dit Account.',
             ], Response::HTTP_CONFLICT);
         }
 
@@ -72,6 +83,8 @@ class ConnectionController extends Controller
         $this->guardAbility($request, [
             TokenAbilities::SNELSTART_READ,
             TokenAbilities::SNELSTART_WRITE,
+            TokenAbilities::DATAFORSEO_READ,
+            TokenAbilities::DATAFORSEO_WRITE,
             TokenAbilities::EXACT_READ,
             TokenAbilities::EXACT_WRITE,
             TokenAbilities::INTEGRATIONS_MANAGE,
@@ -94,6 +107,7 @@ class ConnectionController extends Controller
             TokenAbilities::INTEGRATIONS_MANAGE,
             TokenAbilities::CONSUMER_MANAGE_ACCOUNTS,
             TokenAbilities::SNELSTART_WRITE,
+            TokenAbilities::DATAFORSEO_WRITE,
             TokenAbilities::EXACT_WRITE,
             TokenAbilities::ADMIN,
         ]);

@@ -24,11 +24,12 @@ class StoreConnectionRequest extends FormRequest
                 'integer',
                 Rule::exists('accounts', 'id')->where('consumer_id', $consumerId),
             ],
-            'provider' => ['required', 'string', Rule::in([Provider::Snelstart->value])],
+            'provider' => ['required', 'string', Rule::in([Provider::Snelstart->value, Provider::DataForSeo->value])],
             'credentials' => ['required', 'array'],
             'credentials.client_key' => ['required_if:provider,'.Provider::Snelstart->value, 'string', 'min:10'],
             'credentials.subscription_key' => ['required_if:provider,'.Provider::Snelstart->value, 'string', 'min:10'],
             'credentials.subscription_id' => ['nullable', 'string', 'max:255'],
+            'credentials.access_token' => ['required_if:provider,'.Provider::DataForSeo->value, 'string', 'min:5'],
             'administratie_id' => ['nullable', 'string', 'max:255'],
         ];
     }

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "692316231319aaf9fe746db5030b2688",
+    "content-hash": "5ea35df6dd3bd3cdf4e42d1b199ef682",
     "packages": [
         {
             "name": "akaunting/laravel-money",
@@ -1492,11 +1492,17 @@
         },
         {
             "name": "emeq/dataforseo-api",
-            "version": "dev-main",
+            "version": "v0.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/yusufkaracaburun/emeq-dataforseo-api.git",
+                "reference": "7f6726d0e28ad9472313d6013d31fba644e6a73a"
+            },
             "dist": {
-                "type": "path",
-                "url": "/tmp/emeq-dataforseo-api",
-                "reference": "477b028368d1ada595ff3d487f8953ea5afc876b"
+                "type": "zip",
+                "url": "https://api.github.com/repos/yusufkaracaburun/emeq-dataforseo-api/zipball/7f6726d0e28ad9472313d6013d31fba644e6a73a",
+                "reference": "7f6726d0e28ad9472313d6013d31fba644e6a73a",
+                "shasum": ""
             },
             "require": {
                 "ext-json": "*",
@@ -1576,9 +1582,11 @@
                 "saloon",
                 "seo"
             ],
-            "transport-options": {
-                "relative": false
-            }
+            "support": {
+                "source": "https://github.com/yusufkaracaburun/emeq-dataforseo-api/tree/v0.1.0",
+                "issues": "https://github.com/yusufkaracaburun/emeq-dataforseo-api/issues"
+            },
+            "time": "2026-08-29T12:35:22+00:00"
         },
         {
             "name": "emeq/exact-api",
