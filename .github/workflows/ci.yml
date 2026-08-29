@@ -24,6 +24,22 @@ jobs:
           --health-timeout 5s
           --health-retries 5
 
+      # postgres:16-alpine matcht docker-compose.yml — zelfde driver-gedrag als
+      # lokaal/prod i.p.v. sqlite, om drift tussen omgevingen te voorkomen.
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: emeq_hub
+          POSTGRES_USER: emeq_hub
+          POSTGRES_PASSWORD: emeq_hub
+        ports:
+          - 5433:5432
+        options: >-
+          --health-cmd "pg_isready -U emeq_hub -d emeq_hub"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
     steps:
       - uses: actions/checkout@v7
 
@@ -31,7 +47,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.4'
-          extensions: pdo_sqlite, mbstring, intl, bcmath, gd, curl, dom, fileinfo, zip
+          extensions: pdo_pgsql, mbstring, intl, bcmath, gd, curl, dom, fileinfo, zip
           coverage: none
           tools: composer:v2
 
@@ -62,6 +78,11 @@ jobs:
         run: |
           cp .env.example .env
           php artisan key:generate
+
+      # RefreshDatabase draait `migrate:fresh`; een eigen database voorkomt dat
+      # een testrun de "emeq_hub"-database van deze stap zelf leegveegt.
+      - name: Create test database
+        run: PGPASSWORD=emeq_hub psql -h 127.0.0.1 -p 5433 -U emeq_hub -d emeq_hub -c "CREATE DATABASE emeq_hub_testing;"
 
       # api.json staat in git zodat elke contractwijziging een reviewbare diff is.
       # Het script is hermetisch (servers, API_VERSION en database staan vast),
