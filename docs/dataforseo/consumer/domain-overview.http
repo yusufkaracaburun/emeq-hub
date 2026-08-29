@@ -10,7 +10,7 @@
 # 1. Fase 1 groen: partner-API werkt (account geverifieerd bij DataForSEO).
 # 2. Hub: HUB_PROVIDER_DATAFORSEO_ENABLED=true in root-.env; Connection met
 #    login:password voor het Account (admin of POST /v1/connections).
-# 3. PAT met ability `dataforseo:read` (of `*`) in docs/requests/.env:
+# 3. PAT met ability `dataforseo:read` (of `*`) in docs/dataforseo/.env:
 #      VS Code:  EMEQ_HUB_PAT=1|…
 #      PhpStorm: http-client.private.env.json → token, Run with "local"
 #
@@ -27,7 +27,7 @@ Authorization: Bearer {{token}}
 Accept: application/json
 X-Account-Id: {{accountId}}
 ###
-GET {{baseUrl}}/v1/dataforseo/domain-overview?domain=example.com&language_code=en
+GET {{baseUrl}}/v1/dataforseo/domain-overview?domain=example.com&location_name=Netherlands
 Authorization: Bearer {{token}}
 Accept: application/json
 X-Account-Id: {{accountId}}

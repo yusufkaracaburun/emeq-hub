@@ -114,7 +114,7 @@ Presets (`ConsumerResource::PAT_PRESETS`):
 | `accounting-read` | `accounting:read` | Alleen uitlezen |
 | `accounting-write` | `accounting:read`, `accounting:write`, `consumer:manage-accounts` | Boeken zonder zelf te koppelen |
 | `integrations` | `integrations:manage`, `consumer:manage-accounts` | Alleen de koppel-lifecycle |
-| `exact-*` / `mollie-* `/ `snelstart-*` | provider-specifieke read/write/connect | Consumer wil rechtstreekse pass-through op één provider |
+| `exact-*` / `mollie-* `/ `snelstart-*` / `dataforseo-*` | provider-specifieke read/write/connect | Consumer wil rechtstreekse pass-through op één provider |
 | `admin` | `admin` | Intern |
 
 Eén PAT per Consumer, niet per tenant. De tenant-scheiding zit in het Account,

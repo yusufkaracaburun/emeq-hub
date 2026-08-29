@@ -28,12 +28,14 @@ Hub-intern — niet in de consumer-app.
 - [Stap 1 — Account registreren](#stap-1--account-registreren-eenmalig-per-tenant)
 - [Stap 2 — Integraties tonen (discovery)](#stap-2--integraties-tonen-discovery)
 - [Stap 3 — Koppelen](#stap-3--koppelen)
+  - [Koppelen zonder OAuth (credentials)](#koppelen-zonder-oauth-credentials)
 - [Stap 4 — Terugkomst + status](#stap-4--terugkomst--status)
 - [Stap 5 — Loskoppelen](#stap-5--loskoppelen)
 - [Boekhouden — documenten valideren & boeken](#boekhouden--documenten-valideren--boeken)
   - [Categorie of kostendrager?](#categorie-of-kostendrager)
   - [Betalingen horen niet in de boeking](#betalingen-horen-niet-in-de-boeking)
   - [Boekhoud-mapping (zelf-service, optioneel)](#boekhoud-mapping-zelf-service-optioneel)
+- [SEO-data opzoeken (DataForSEO)](#seo-data-opzoeken-dataforseo)
 - [Webhooks ontvangen](#webhooks-ontvangen)
 - [Valkuilen](#valkuilen)
 
@@ -333,6 +335,36 @@ contractueel geborgd via de verwerkersovereenkomst tussen Emeq en jou.
 
 De browser-flow op de Hub zelf (`/koppelen`-intake) heeft een eigen verplichte
 consent-checkbox; die geldt alleen voor dat pad.
+
+### Koppelen zonder OAuth (credentials)
+
+Niet elke provider heeft een consent-scherm. SnelStart en DataForSEO geven geen
+`redirect_url` — daarvoor koppel je met een credential-paar rechtstreeks:
+
+```http
+POST /v1/connections
+{ "account_id": 12, "provider": "dataforseo",
+  "credentials": { "access_token": "login:password" } }
+```
+→ `201` met de aangemaakte Connection, of `409 connection_exists` als er al een
+actieve Connection voor dit Account + provider bestaat.
+
+`account_id` is de **numerieke** `id` uit de `POST /v1/accounts`-respons (Stap 1),
+niet de `external_id`. Voor DataForSEO is `credentials.access_token` je
+DataForSEO-`login:password` in één string (van
+<https://app.dataforseo.com/api-access>), gescheiden door een dubbele punt — niet
+het losse wachtwoord.
+
+**🤖 Agent-prompt**
+
+```text
+Implementeer een koppel-formulier voor credential-providers (bv. DataForSEO):
+vraag de gebruiker om zijn provider-inloggegevens en stuur
+`POST /v1/connections` met `{ account_id, provider, credentials }` via de proxy —
+`account_id` is de numerieke id uit mijn Account-registratie (Stap 1), niet de
+`external_id`. Behandel `201` als gekoppeld en `409 connection_exists` als "al
+gekoppeld, niets doen".
+```
 
 ## Stap 4 — Terugkomst + status
 
@@ -951,6 +983,37 @@ Codes, geen GUIDs). Sla op met `PUT /v1/accounting/mapping` (merge), body
 `{ vat_codes, gl_accounts, journals }` — stuur alleen de gewijzigde velden. Optioneel
 een knop "hersynchroniseren" → `POST /v1/accounting/sync`. Default hoeft de tenant
 niets in te stellen; de Hub auto-derivet bij connect.
+```
+
+## SEO-data opzoeken (DataForSEO)
+
+Los van de boekhoud-koppeling: zodra een Account een DataForSEO-Connection heeft
+(zie [Koppelen zonder OAuth](#koppelen-zonder-oauth-credentials)), kun je een
+domeinoverzicht opvragen.
+
+```http
+GET /v1/dataforseo/domain-overview?domain=example.com
+X-Account-Id: {external_id}
+```
+
+- `domain` is verplicht. `location_name` is optioneel (default `Netherlands`) —
+  géén `language_code`, dat endpoint accepteert dat veld niet.
+- `X-Account-Id` is de `external_id` van het Account, niet het interne id.
+- Ability: `dataforseo:read` (of `dataforseo:write`/`*`).
+
+Foutcodes volgen de generieke [foutenvelope](#foutenvelope-alle-v1-endpoints):
+een DataForSEO-fout (ontbrekende koppeling, ongeldige domain, partner-foutmelding)
+komt terug als `502 upstream_error` met `upstream_status` op de DataForSEO-eigen
+task-statuscode.
+
+**🤖 Agent-prompt**
+
+```text
+Bouw een domeinoverzicht-opvraag tegen de emeq Hub: `GET
+/v1/dataforseo/domain-overview?domain={domain}` via de proxy, met header
+`X-Account-Id: {external_id van de tenant}` (server-side afgeleid, niet uit de
+client). Toon een nette foutmelding bij `502 upstream_error` en bij
+`404 connection_not_found` (geen actieve DataForSEO-Connection voor dit Account).
 ```
 
 ## Webhooks ontvangen
