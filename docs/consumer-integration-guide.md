@@ -996,8 +996,12 @@ GET /v1/dataforseo/domain-overview?domain=example.com
 X-Account-Id: {external_id}
 ```
 
-- `domain` is verplicht. `location_name` is optioneel (default `Netherlands`) —
-  géén `language_code`, dat endpoint accepteert dat veld niet.
+- `domain` is verplicht. `location_name` is optioneel (default `Netherlands`).
+  De Hub stuurt bewust geen `language_code` mee naar DataForSEO — dat veld is
+  daar officieel wél optioneel, maar de combinatie met een verkeerd
+  `location_code` gaf tijdens onze eigen tests een fout; weglaten geeft
+  resultaten voor alle talen. `language_code` als queryparam wordt daarom
+  genegeerd.
 - `X-Account-Id` is de `external_id` van het Account, niet het interne id.
 - Ability: `dataforseo:read` (of `dataforseo:write`/`*`).
 

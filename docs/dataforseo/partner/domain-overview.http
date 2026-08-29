@@ -1,7 +1,10 @@
 # DataForSEO partner-API — domain rank overview (live)
 #
 # Setup: docs/dataforseo/.env (zie .env.example).
-# Gebruik LOCATION_NAME; language_code "nl" geeft 40501 op dit endpoint.
+# Gebruik LOCATION_NAME (niet LOCATION_CODE=2826 — dat is UK, geen NL).
+# language_code=nl + location_code=2826 gaf 40501 (live getest, vermoedelijk
+# de UK+nl-combinatie); language_code is officieel optioneel op dit endpoint,
+# maar we laten 'm hier bewust weg. Zie .env.example voor de bronverwijzing.
 # Succes: tasks_error = 0, tasks[0].status_code = 20000, result gevuld.
 
 @apiBase = {{$dotenv DATAFORSEO_API_URL}}
