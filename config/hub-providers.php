@@ -15,6 +15,12 @@ return [
         'primary_label' => 'Client key',
         'oauth_flow_key' => null,
     ],
+    'dataforseo' => [
+        'enabled' => env('HUB_PROVIDER_DATAFORSEO_ENABLED', false),
+        'encrypted_fields' => ['access_token'],
+        'primary_label' => 'API key (login:password)',
+        'oauth_flow_key' => null,
+    ],
     'exact' => [
         'enabled' => env('HUB_PROVIDER_EXACT_ENABLED', true),
         'encrypted_fields' => ['access_token', 'refresh_token'],

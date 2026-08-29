@@ -9,6 +9,7 @@ use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\NormalizeApiErrors;
 use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\SetNoIndexHeaders;
+use App\Integrations\DataForSeo\Http\Middleware\ResolveDataForSeoAccount;
 use App\Integrations\Exact\Http\Middleware\ResolveExactAccount;
 use App\Integrations\Mollie\Http\Middleware\RequireCashierWebhookSecret;
 use App\Integrations\Mollie\Http\Middleware\ResolveMollieAccount;
@@ -62,6 +63,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'resolve.snelstart.account' => ResolveSnelstartAccount::class,
             'resolve.mollie.account' => ResolveMollieAccount::class,
+            'resolve.dataforseo.account' => ResolveDataForSeoAccount::class,
             'resolve.exact.account' => ResolveExactAccount::class,
             'emeq.admin' => EnsureEmeqAdminToken::class,
             'cashier.webhook.secret' => RequireCashierWebhookSecret::class,

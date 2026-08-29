@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\V1\ConnectSessionController;
 use App\Http\Controllers\Api\V1\IntegrationController;
 use App\Http\Controllers\Api\V1\OAuth\ProviderInitController;
 use App\Http\Controllers\Api\V1\PingController;
+use App\Integrations\DataForSeo\Http\Api\DomainOverviewController as DataForSeoDomainOverviewController;
 use App\Integrations\Exact\Http\Api\GlAccountsController as ExactGlAccountsController;
 use App\Integrations\Exact\Http\Api\JournalsController as ExactJournalsController;
 use App\Integrations\Exact\Http\Api\PassThroughController as ExactPassThroughController;
@@ -63,6 +64,13 @@ Route::middleware('auth:sanctum')->group(function (): void {
         ->where('path', '.*')
         ->middleware(['feature.provider:snelstart', 'resolve.snelstart.account'])
         ->name('api.snelstart.passthrough');
+
+    Route::prefix('dataforseo')
+        ->middleware(['feature.provider:dataforseo', 'resolve.dataforseo.account'])
+        ->group(function (): void {
+            Route::get('/domain-overview', [DataForSeoDomainOverviewController::class, 'show'])
+                ->name('api.dataforseo.domain-overview');
+        });
 
     Route::middleware('feature.provider:exact')->group(function (): void {
         Route::post('/oauth/exact/init', ProviderInitController::class)

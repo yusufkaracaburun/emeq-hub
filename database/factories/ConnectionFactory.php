@@ -64,6 +64,20 @@ class ConnectionFactory extends Factory
         ]);
     }
 
+    public function forDataForSeo(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'provider' => 'dataforseo',
+            'access_token' => 'login:'.Str::random(20).':password_'.Str::random(20),
+            'refresh_token' => null,
+            'expires_at' => null,
+            'scopes' => null,
+            'client_key' => null,
+            'subscription_key' => null,
+            'subscription_id' => null,
+        ]);
+    }
+
     public function pending(): static
     {
         return $this->state(fn (array $attributes) => [

@@ -75,6 +75,7 @@ final class ProviderAccess
             Provider::Mollie => 'Mollie geeft de goedgekeurde scopes mee in de token. De organisatie heeft deze bij het koppelen zelf geaccordeerd.',
             Provider::Exact => 'Exact geeft geen scopes mee in de token. Wat bereikbaar is volgt uit de App Center-registratie van de Hub en de rechten van de Exact-gebruiker die gekoppeld heeft. De Hub laat daarbovenop alleen onderstaande resources door.',
             Provider::Snelstart => 'Snelstart authenticeert met een clientkey en een subscriptionkey en kent geen scopes. Wat de koppeling mag, volgt uit het Snelstart-abonnement van de klant.',
+            Provider::DataForSeo => 'DataForSEO authenticeert met een API-key (login:password) en kent geen scopes. De beschikbare data volgt uit het DataForSEO-abonnement van de klant.',
         };
     }
 }

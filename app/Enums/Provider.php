@@ -12,6 +12,7 @@ enum Provider: string implements HasColor, HasLabel
     case Mollie = 'mollie';
     case Snelstart = 'snelstart';
     case Exact = 'exact';
+    case DataForSeo = 'dataforseo';
 
     /** @return list<string> */
     public static function values(): array
@@ -25,6 +26,7 @@ enum Provider: string implements HasColor, HasLabel
             self::Mollie => 'Mollie',
             self::Snelstart => 'Snelstart',
             self::Exact => 'Exact Online',
+            self::DataForSeo => 'DataForSEO',
         };
     }
 
@@ -34,6 +36,7 @@ enum Provider: string implements HasColor, HasLabel
             self::Mollie => 'success',
             self::Snelstart => 'info',
             self::Exact => 'danger',
+            self::DataForSeo => 'warning',
         };
     }
 }

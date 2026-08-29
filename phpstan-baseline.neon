@@ -601,7 +601,7 @@ parameters:
 			path: app/Support/Connect/ProviderConnectStatus.php
 
 		-
-			message: '#^Parameter \#1 \$keyBy of method Illuminate\\Support\\Collection\<int,Illuminate\\Database\\Eloquent\\Model\>\:\:keyBy\(\) expects \(callable\(Illuminate\\Database\\Eloquent\\Model, int\)\: \(''exact''\|''mollie''\|''snelstart''\)\)\|list\<Closure\|string\>\|string, Closure\(App\\Models\\Connection\)\: \(''exact''\|''mollie''\|''snelstart''\) given\.$#'
+			message: '#^Parameter \#1 \$keyBy of method Illuminate\\Support\\Collection\<int,Illuminate\\Database\\Eloquent\\Model\>\:\:keyBy\(\) expects \(callable\(Illuminate\\Database\\Eloquent\\Model, int\)\: \(''dataforseo''|''exact''|''mollie''|''snelstart''\)\)\|list\<Closure\|string\>\|string, Closure\(App\\Models\\Connection\)\: \(''dataforseo''|''exact''|''mollie''|''snelstart''\) given\.$#'
 			identifier: argument.type
 			count: 1
 			path: app/Support/Connect/ProviderConnectStatus.php
