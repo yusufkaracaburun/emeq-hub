@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\PassThroughCall;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class PassThroughCallInboundScopesTest extends TestCase
@@ -50,12 +51,12 @@ class PassThroughCallInboundScopesTest extends TestCase
 
         $caught = null;
         try {
-            PassThroughCall::factory()
+            DB::transaction(fn () => PassThroughCall::factory()
                 ->inbound()
                 ->create([
                     'provider' => 'snelstart',
                     'event_id' => 'evt-duplicate',
-                ]);
+                ]));
         } catch (QueryException $e) {
             $caught = $e;
         }

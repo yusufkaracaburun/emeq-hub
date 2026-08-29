@@ -43,7 +43,8 @@ class LedgerAccountResourceTest extends TestCase
 
     public function test_create_derives_category_from_type(): void
     {
-        BooksCompany::create(['name' => 'Emeq']);
+        $company = BooksCompany::create(['name' => 'Emeq']);
+        config(['books.company_id' => $company->id]);
 
         Livewire::test(CreateLedgerAccount::class)
             ->fillForm([

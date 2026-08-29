@@ -33,8 +33,6 @@ class ListAccountSubscriptionsTest extends TestCase
             ->getJson('/v1/account-subscriptions?account_external_id=school-a');
 
         $response->assertOk()->assertJsonCount(1, 'data');
-        $this->assertSame($accountA->id, $response->json('data.0.id'))
-            ?: $this->assertNotNull($response->json('data.0.id'));
         $returnedSub = AccountSubscription::query()->where('account_id', $accountA->id)->firstOrFail();
         $this->assertSame($returnedSub->id, $response->json('data.0.id'));
     }

@@ -895,9 +895,15 @@ class StoreDocumentTest extends TestCase
 
     public function test_booking_same_party_twice_creates_one_relation_via_the_mirror(): void
     {
+        $invoiceGuid = 0;
+
         MockClient::global([
             CreateAccount::class => MockResponse::make(['d' => ['ID' => 'new-dup-guid']], 201),
-            CreateSalesEntry::class => MockResponse::make(['d' => ['ID' => 'inv-1']], 201),
+            CreateSalesEntry::class => function () use (&$invoiceGuid) {
+                $invoiceGuid++;
+
+                return MockResponse::make(['d' => ['ID' => "inv-{$invoiceGuid}"]], 201);
+            },
             GetRelations::class => MockResponse::make(['d' => ['results' => [
                 ['ID' => 'new-dup-guid', 'IsSales' => true, 'IsSupplier' => false, 'Status' => 'C'],
             ]]], 200),
