@@ -14,7 +14,7 @@ use Saloon\Http\Faking\MockClient;
 use Saloon\Http\Faking\MockResponse;
 use Tests\TestCase;
 
-final class DomainOverviewSuccessTest extends TestCase
+final class DomainOverviewTaskFailureTest extends TestCase
 {
     use RefreshDatabase;
 
@@ -25,29 +25,17 @@ final class DomainOverviewSuccessTest extends TestCase
         MockClient::destroyGlobal();
     }
 
-    public function test_valid_domain_overview_returns_expected_response(): void
+    public function test_task_level_failure_does_not_return_a_silent_200(): void
     {
         MockClient::global([
             DomainOverviewRequest::class => MockResponse::make(
                 body: [
-                    'tasks_error' => 0,
+                    'tasks_error' => 1,
                     'tasks' => [
                         [
-                            'status_code' => 20000,
-                            'status_message' => 'Ok.',
-                            'result' => [
-                                [
-                                    'domain' => 'example.com',
-                                    'metrics' => [
-                                        'organic' => [
-                                            'count' => 3890,
-                                            'etv' => 12450,
-                                        ],
-                                    ],
-                                    'backlinks_count' => 142000,
-                                    'referring_domains' => 1250,
-                                ],
-                            ],
+                            'status_code' => 40501,
+                            'status_message' => 'Invalid Field: language_code.',
+                            'result' => [],
                         ],
                     ],
                 ],
@@ -63,9 +51,10 @@ final class DomainOverviewSuccessTest extends TestCase
             ->withHeader('X-Account-Id', 'school-A')
             ->getJson('/v1/dataforseo/domain-overview?domain=example.com');
 
-        $response->assertStatus(200)
+        $response->assertStatus(502)
             ->assertJson([
-                'domain' => 'example.com',
+                'error' => 'upstream_error',
+                'upstream_status' => 40501,
             ]);
     }
 
