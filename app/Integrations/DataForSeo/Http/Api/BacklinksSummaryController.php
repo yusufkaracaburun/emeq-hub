@@ -35,19 +35,16 @@ final class BacklinksSummaryController
 
         $extra = [];
 
-        $includeSubdomains = $request->boolean('include_subdomains');
-        if ($includeSubdomains !== false) {
-            $extra['include_subdomains'] = $includeSubdomains;
+        if ($request->has('include_subdomains')) {
+            $extra['include_subdomains'] = $request->boolean('include_subdomains');
         }
 
-        $backlinksStatusType = $request->string('backlinks_status_type')->toString();
-        if ($backlinksStatusType !== '') {
-            $extra['backlinks_status_type'] = $backlinksStatusType;
+        if ($request->has('backlinks_status_type')) {
+            $extra['backlinks_status_type'] = $request->string('backlinks_status_type')->toString();
         }
 
-        $internalListLimit = $request->integer('internal_list_limit');
-        if ($internalListLimit !== 0) {
-            $extra['internal_list_limit'] = $internalListLimit;
+        if ($request->has('internal_list_limit')) {
+            $extra['internal_list_limit'] = $request->integer('internal_list_limit');
         }
 
         /** @var Account $account */

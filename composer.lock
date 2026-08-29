@@ -1492,16 +1492,16 @@
         },
         {
             "name": "emeq/dataforseo-api",
-            "version": "v0.2.0",
+            "version": "v0.2.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/yusufkaracaburun/emeq-dataforseo-api.git",
-                "reference": "6f188287080eba2a0537df4670f7fa4924707d41"
+                "reference": "c6b30bb7f229877570c7d99d800074640a504712"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/yusufkaracaburun/emeq-dataforseo-api/zipball/6f188287080eba2a0537df4670f7fa4924707d41",
-                "reference": "6f188287080eba2a0537df4670f7fa4924707d41",
+                "url": "https://api.github.com/repos/yusufkaracaburun/emeq-dataforseo-api/zipball/c6b30bb7f229877570c7d99d800074640a504712",
+                "reference": "c6b30bb7f229877570c7d99d800074640a504712",
                 "shasum": ""
             },
             "require": {
@@ -1583,10 +1583,10 @@
                 "seo"
             ],
             "support": {
-                "source": "https://github.com/yusufkaracaburun/emeq-dataforseo-api/tree/v0.2.0",
+                "source": "https://github.com/yusufkaracaburun/emeq-dataforseo-api/tree/v0.2.1",
                 "issues": "https://github.com/yusufkaracaburun/emeq-dataforseo-api/issues"
             },
-            "time": "2026-08-29T16:14:21+00:00"
+            "time": "2026-08-29T20:59:51+00:00"
         },
         {
             "name": "emeq/exact-api",
