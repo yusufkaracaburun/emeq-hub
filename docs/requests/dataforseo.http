@@ -1,0 +1,47 @@
+# Emeq Hub × DataForSEO — handmatig testen vanuit de IDE
+#
+# JetBrains HTTP Client (PhpStorm) of VS Code "REST Client"-extensie.
+# Test de HUB-endpoint (/v1/dataforseo/*), niet de SDK direct.
+#
+# ── Setup ────────────────────────────────────────────────────────────────────
+#
+# 1. PAT aanmaken op de Consumer met ability `dataforseo:read` (of `*`), zet
+#    'm in je lokale `.env` (root van dit project — NIET in dit bestand, dit
+#    staat in git):
+#
+#      EMEQ_HUB_PAT=1|xxxxxxxx
+#
+# 2. X-Account-Id is de `external_id` van het Account, niet het interne id.
+# 3. Vereisten voor een 200:
+#    - `HUB_PROVIDER_DATAFORSEO_ENABLED=true` in `.env`
+#    - een actieve Connection met DataForSEO-credentials (login:password)
+#      voor dit Account
+#
+# Conventie: één .http-bestand per partner in deze map. Zie README.md.
+
+@baseUrl = http://hub.emeq.test:8092
+@token = {{$dotenv EMEQ_HUB_PAT}}
+@accountId = 47
+
+### Domain overview — verplicht: domain. Optioneel: language_code (default "nl"), location_code (default 2826)
+GET {{baseUrl}}/v1/dataforseo/domain-overview?domain=example.com
+Authorization: Bearer {{token}}
+Accept: application/json
+X-Account-Id: {{accountId}}
+
+### Domain overview — expliciete taal
+GET {{baseUrl}}/v1/dataforseo/domain-overview?domain=example.com&language_code=en
+Authorization: Bearer {{token}}
+Accept: application/json
+X-Account-Id: {{accountId}}
+
+### Zonder domain → 422 missing_domain
+GET {{baseUrl}}/v1/dataforseo/domain-overview
+Authorization: Bearer {{token}}
+Accept: application/json
+X-Account-Id: {{accountId}}
+
+### Zonder PAT → 401 unauthenticated
+GET {{baseUrl}}/v1/dataforseo/domain-overview?domain=example.com
+Accept: application/json
+X-Account-Id: {{accountId}}
