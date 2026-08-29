@@ -10,6 +10,7 @@ use App\Models\ProviderEntityLink;
 use Illuminate\Contracts\Cache\Lock;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 
 final readonly class ProviderEntityLinkRecorder
 {
@@ -26,7 +27,7 @@ final readonly class ProviderEntityLinkRecorder
     public function claim(FinancialDocument $document, Connection $connection): ?ProviderEntityLink
     {
         try {
-            return ProviderEntityLink::query()->create([
+            return DB::transaction(fn () => ProviderEntityLink::query()->create([
                 'connection_id' => $connection->getKey(),
                 'entity_type' => ProviderEntityLink::ENTITY_FINANCIAL_DOCUMENT,
                 'entity_subtype' => $document->type->value,
@@ -37,7 +38,7 @@ final readonly class ProviderEntityLinkRecorder
                 'payload_fingerprint' => null,
                 'origin' => ProviderEntityLink::ORIGIN_HUB,
                 'last_synced_at' => now(),
-            ]);
+            ]));
         } catch (UniqueConstraintViolationException) {
             return null;
         }
