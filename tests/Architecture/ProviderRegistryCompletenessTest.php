@@ -17,12 +17,14 @@ final class ProviderRegistryCompletenessTest extends TestCase
     /** @var array<string, string> */
     private const OAUTH_EXCEPTIONS = [
         'Snelstart' => 'authenticeert met grant_type=clientkey, zonder redirect-flow',
+        'DataForSeo' => 'API-key-provider (login:password) — geen OAuth-flow',
     ];
 
     /** @var array<string, string> */
     private const ACCOUNTING_EXCEPTIONS = [
         'Mollie' => 'betaalprovider — boekt niets',
         'Snelstart' => 'boekhoudkoppeling nog niet gebouwd',
+        'DataForSeo' => 'SEO-data-API — geen boekhouding',
     ];
 
     public function test_elke_provider_heeft_een_foutmapper(): void
