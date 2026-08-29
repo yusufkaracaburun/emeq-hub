@@ -391,12 +391,6 @@ parameters:
 			path: app/Integrations/DataForSeo/Errors/UpstreamErrorMapper.php
 
 		-
-			message: '#^Strict comparison using \!\=\= between Saloon\\Http\\Response and null will always evaluate to true\.$#'
-			identifier: notIdentical.alwaysTrue
-			count: 2
-			path: app/Integrations/DataForSeo/Errors/UpstreamErrorMapper.php
-
-		-
 			message: '#^Method App\\Integrations\\DataForSeo\\Webhooks\\DataForSeoEventResolver\:\:resolve\(\) never returns null so it can be removed from the return type\.$#'
 			identifier: return.unusedType
 			count: 1

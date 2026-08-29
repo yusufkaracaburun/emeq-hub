@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Integrations\DataForSeo\Errors;
 
 use App\Integrations\Contracts\MapsUpstreamExceptions;
+use Emeq\DataForSeoApi\Exceptions\DataForSeoTaskException;
 use Saloon\Exceptions\Request\FatalRequestException;
 use Saloon\Exceptions\Request\RequestException;
 use Throwable;
@@ -14,6 +15,20 @@ final class UpstreamErrorMapper implements MapsUpstreamExceptions
     /** @return array{status: int, body: array<string, mixed>, headers: array<string, string>, short_code: ?string} */
     public static function mapException(Throwable $exception): array
     {
+        if ($exception instanceof DataForSeoTaskException) {
+            return [
+                'status' => 502,
+                'body' => [
+                    'error' => 'upstream_error',
+                    'message' => $exception->statusMessage,
+                    'upstream_status' => $exception->statusCode,
+                    'upstream_detail' => $exception->statusMessage,
+                ],
+                'headers' => [],
+                'short_code' => 'dataforseo_task_error',
+            ];
+        }
+
         if ($exception instanceof FatalRequestException) {
             return [
                 'status' => 504,
@@ -29,8 +44,8 @@ final class UpstreamErrorMapper implements MapsUpstreamExceptions
 
         if ($exception instanceof RequestException) {
             $response = $exception->getResponse();
-            $status = $response !== null ? $response->status() : 502;
-            $body = $response !== null ? ($response->json() ?: []) : [];
+            $status = $response->status();
+            $body = $response->json() ?: [];
 
             $shortCode = match (true) {
                 $status === 401 || $status === 403 => 'dataforseo_auth',
