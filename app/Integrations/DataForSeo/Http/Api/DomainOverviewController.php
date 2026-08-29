@@ -33,12 +33,19 @@ final class DomainOverviewController
             ], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
+        $languageCode = $request->string('language_code', 'nl')->toString();
+        $locationCode = $request->integer('location_code', 2826);
+
         /** @var Account $account */
         $account = $request->attributes->get('dataforseo_account');
         /** @var Connection $connection */
         $connection = $request->attributes->get('dataforseo_connection');
 
-        $query = ['domain' => $domain];
+        $query = [
+            'domain' => $domain,
+            'language_code' => $languageCode,
+            'location_code' => $locationCode,
+        ];
 
         try {
             $response = $this->pipeline->run(
@@ -51,8 +58,8 @@ final class DomainOverviewController
                     path: '/dataforseo/domain-overview',
                     query: $query,
                 ),
-                function () use ($dataForSeo, $domain): UpstreamResult {
-                    $result = $dataForSeo->domainOverview($domain);
+                function () use ($dataForSeo, $domain, $languageCode, $locationCode): UpstreamResult {
+                    $result = $dataForSeo->domainOverview($domain, $locationCode, $languageCode);
 
                     $body = json_encode($result, JSON_THROW_ON_ERROR);
 

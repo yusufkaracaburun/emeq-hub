@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "f402dd5eff5aa51dda40812b1fbe35cb",
+    "content-hash": "692316231319aaf9fe746db5030b2688",
     "packages": [
         {
             "name": "akaunting/laravel-money",
@@ -1492,11 +1492,11 @@
         },
         {
             "name": "emeq/dataforseo-api",
-            "version": "dev-master",
+            "version": "dev-main",
             "dist": {
                 "type": "path",
                 "url": "/tmp/emeq-dataforseo-api",
-                "reference": "f6a37d542b75d88c2a44e50dc1711a9ce36b5a98"
+                "reference": "477b028368d1ada595ff3d487f8953ea5afc876b"
             },
             "require": {
                 "ext-json": "*",
