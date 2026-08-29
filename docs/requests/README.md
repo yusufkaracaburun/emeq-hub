@@ -16,3 +16,23 @@ Eén `.http`-bestand per partner/provider, voor handmatig testen vanuit de IDE
   `.http`-bestand zelf — dat staat in git.
 - Minstens één werkend voorbeeld per endpoint, plus de belangrijkste
   foutpaden (ontbrekende parameter, geen PAT).
+
+## Thunder Client (VS Code)
+
+Zelfde requests, als Thunder Client-collectie i.p.v. `.http`-bestand — voor
+wie de Thunder Client-extensie i.p.v. REST Client gebruikt.
+
+- `<partner>.thunderclient.json` — één Thunder Client-collectie-export per
+  partner, zelfde "één bestand per partner"-conventie als de `.http`'s.
+  `dataforseo.thunderclient.json` is de eerste.
+- `emeq-hub.thunderclient-env.json` — één gedeelde Thunder Client-omgeving
+  (`baseUrl`, `accountId`, `pat`) voor alle partner-collecties. Niet
+  per-partner: dat zijn dezelfde lokale dev-waarden voor elke provider,
+  net als de herhaalde `@baseUrl`/`@accountId` bovenaan elk `.http`-bestand.
+  `pat` staat als leeg, `secret: true`-veld in git — vul 'm lokaal in na
+  import, nooit committen.
+- Importeren: Thunder Client-icoon in de sidebar → Collections → Import
+  (kies het `.thunderclient.json`-bestand) én Env → Import (kies het
+  `.thunderclient-env.json`-bestand). Geen VS Code-instellingen nodig —
+  dit is Thunder Client's portable export-formaat, geen Git Sync
+  workspace-folder.

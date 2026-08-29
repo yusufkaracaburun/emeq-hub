@@ -1,0 +1,11 @@
+{
+  "client": "Thunder Client",
+  "environmentName": "emeq-hub Local",
+  "dateExported": "2026-08-29T13:45:46.000Z",
+  "version": "1.0",
+  "variables": [
+    { "name": "baseUrl", "value": "http://hub.emeq.test:8092" },
+    { "name": "accountId", "value": "47" },
+    { "name": "pat", "value": "", "secret": true }
+  ]
+}
