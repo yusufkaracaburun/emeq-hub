@@ -66,7 +66,7 @@ Route::middleware('auth:sanctum')->group(function (): void {
         ->name('api.snelstart.passthrough');
 
     Route::prefix('dataforseo')
-        ->middleware(['feature.provider:dataforseo', 'resolve.dataforseo.account'])
+        ->middleware(['feature.provider:dataforseo', 'resolve.dataforseo.account', 'ability:dataforseo:read,dataforseo:write,*'])
         ->group(function (): void {
             Route::get('/domain-overview', [DataForSeoDomainOverviewController::class, 'show'])
                 ->name('api.dataforseo.domain-overview');

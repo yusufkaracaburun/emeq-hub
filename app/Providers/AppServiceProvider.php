@@ -6,6 +6,9 @@ use App\Accounting\AccountingTargetRegistry;
 use App\Accounting\BookingWarnings;
 use App\Accounting\Contracts\ReferenceResolver;
 use App\Enums\Provider;
+use App\Integrations\DataForSeo\Errors\UpstreamErrorMapper as DataForSeoUpstreamErrorMapper;
+use App\Integrations\DataForSeo\Webhooks\DataForSeoEntityResolver;
+use App\Integrations\DataForSeo\Webhooks\DataForSeoEventResolver;
 use App\Integrations\Errors\UpstreamErrorMapperRegistry;
 use App\Integrations\Exact\Accounting\ConnectionMappingExactReferenceResolver;
 use App\Integrations\Exact\Accounting\ExactAccountingTarget;
@@ -62,6 +65,7 @@ class AppServiceProvider extends ServiceProvider
             $registry->register(Provider::Exact->value, ExactUpstreamErrorMapper::class);
             $registry->register(Provider::Mollie->value, MollieUpstreamErrorMapper::class);
             $registry->register(Provider::Snelstart->value, SnelstartUpstreamErrorMapper::class);
+            $registry->register(Provider::DataForSeo->value, DataForSeoUpstreamErrorMapper::class);
 
             return $registry;
         });
@@ -71,6 +75,7 @@ class AppServiceProvider extends ServiceProvider
             $registry->register(Provider::Exact, ExactEventResolver::class);
             $registry->register(Provider::Mollie, MollieEventResolver::class);
             $registry->register(Provider::Snelstart, SnelstartEventResolver::class);
+            $registry->register(Provider::DataForSeo, DataForSeoEventResolver::class);
 
             return $registry;
         });
@@ -87,6 +92,7 @@ class AppServiceProvider extends ServiceProvider
             $registry->register(Provider::Exact, ExactEntityResolver::class);
             $registry->register(Provider::Mollie, MollieEntityResolver::class);
             $registry->register(Provider::Snelstart, SnelstartEntityResolver::class);
+            $registry->register(Provider::DataForSeo, DataForSeoEntityResolver::class);
 
             return $registry;
         });

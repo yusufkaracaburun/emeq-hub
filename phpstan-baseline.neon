@@ -7,72 +7,6 @@ parameters:
 			path: app/Accounting/Validation/DocumentInspector.php
 
 		-
-			message: '#^Call to function is_string\(\) with string will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 2
-			path: app/Integrations/Mollie/Billing/AccountSubscriptionManager.php
-
-		-
-			message: '#^Parameter \#1 \$connection of method App\\Integrations\\Mollie\\MollieConnectionContext\:\:set\(\) expects App\\Models\\Connection, Illuminate\\Database\\Eloquent\\Model\|null given\.$#'
-			identifier: argument.type
-			count: 2
-			path: app/Integrations/Mollie/Billing/AccountSubscriptionManager.php
-
-		-
-			message: '#^Property App\\Models\\AccountSubscription\:\:\$canceled_at \(string\|null\) does not accept Illuminate\\Support\\Carbon\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: app/Integrations/Mollie/Billing/AccountSubscriptionManager.php
-
-		-
-			message: '#^Property App\\Models\\AccountSubscription\:\:\$last_webhook_event_at \(string\|null\) does not accept Illuminate\\Support\\Carbon\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: app/Integrations/Mollie/Billing/AccountSubscriptionManager.php
-
-		-
-			message: '#^Property App\\Models\\AccountSubscription\:\:\$paused_at \(string\|null\) does not accept Illuminate\\Support\\Carbon\.$#'
-			identifier: assign.propertyType
-			count: 2
-			path: app/Integrations/Mollie/Billing/AccountSubscriptionManager.php
-
-		-
-			message: '#^Property App\\Models\\AccountSubscription\:\:\$starts_at \(string\|null\) does not accept Illuminate\\Support\\Carbon\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: app/Integrations/Mollie/Billing/AccountSubscriptionManager.php
-
-		-
-			message: '#^Property App\\Models\\AccountSubscription\:\:\$status \(string\) does not accept App\\Billing\\Account\\SubscriptionStatus\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: app/Integrations/Mollie/Billing/AccountSubscriptionManager.php
-
-		-
-			message: '#^Property Mollie\\Api\\Resources\\Subscription\:\:\$id \(string\) on left side of \?\? is not nullable\.$#'
-			identifier: nullCoalesce.property
-			count: 1
-			path: app/Integrations/Mollie/Billing/AccountSubscriptionManager.php
-
-		-
-			message: '#^Property Mollie\\Api\\Resources\\Subscription\:\:\$status \(string\) on left side of \?\? is not nullable\.$#'
-			identifier: nullCoalesce.property
-			count: 1
-			path: app/Integrations/Mollie/Billing/AccountSubscriptionManager.php
-
-		-
-			message: '#^Result of && is always false\.$#'
-			identifier: booleanAnd.alwaysFalse
-			count: 1
-			path: app/Integrations/Mollie/Billing/AccountSubscriptionManager.php
-
-		-
-			message: '#^Strict comparison using \=\=\= between string and App\\Billing\\Account\\SubscriptionStatus\:\:Active will always evaluate to false\.$#'
-			identifier: identical.alwaysFalse
-			count: 1
-			path: app/Integrations/Mollie/Billing/AccountSubscriptionManager.php
-
-		-
 			message: '#^Method App\\Books\\Enums\\AccountCategory\:\:getLabel\(\) never returns null so it can be removed from the return type\.$#'
 			identifier: return.unusedType
 			count: 1
@@ -385,12 +319,6 @@ parameters:
 			path: app/Filament/Widgets/OperationalHealthWidget.php
 
 		-
-			message: '#^Strict comparison using \!\=\= between mixed and null will always evaluate to true\.$#'
-			identifier: notIdentical.alwaysTrue
-			count: 1
-			path: app/Integrations/Mollie/Http/AccountSubscriptions/AccountSubscriptionController.php
-
-		-
 			message: '#^Anonymous function should return Illuminate\\Support\\Collection\<int, array\{code\: string, label\: string\|null, attrs\: array\<string, mixed\>\|null\}\> but returns Illuminate\\Support\\Collection\<int, array\{code\: string, label\: string\|null, attrs\: array\<string, mixed\>\|null\}\>\.$#'
 			identifier: return.type
 			count: 1
@@ -421,24 +349,6 @@ parameters:
 			path: app/Http/Controllers/Api/V1/IntegrationController.php
 
 		-
-			message: '#^Instanceof between Mollie\\Api\\Resources\\CustomerCollection and Mollie\\Api\\Resources\\BaseCollection will always evaluate to true\.$#'
-			identifier: instanceof.alwaysTrue
-			count: 1
-			path: app/Integrations/Mollie/Http/Api/CustomersController.php
-
-		-
-			message: '#^Call to function is_array\(\) with array will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: app/Integrations/Mollie/Http/Api/PaymentMethodsController.php
-
-		-
-			message: '#^Call to an undefined method Illuminate\\Http\\Request\:\:validated\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: app/Integrations/Mollie/Http/Api/PaymentsController.php
-
-		-
 			message: '#^Parameter \#1 \$account of method App\\Actions\\Connect\\StartProviderConnection\:\:handle\(\) expects App\\Models\\Account, Illuminate\\Database\\Eloquent\\Model given\.$#'
 			identifier: argument.type
 			count: 1
@@ -457,36 +367,6 @@ parameters:
 			path: app/Http/Controllers/ConnectHandoffController.php
 
 		-
-			message: '#^Call to function is_array\(\) with list\<string\|null\> will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: app/Integrations/Exact/Http/Dev/ExactOAuthTracerController.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$consumer\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Integrations/Exact/Http/ExactDeprovisionController.php
-
-		-
-			message: '#^Call to function is_array\(\) with array\<string, mixed\> will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: app/Integrations/Exact/Http/Webhooks/ExactWebhookController.php
-
-		-
-			message: '#^Call to function is_array\(\) with array\<string, mixed\> will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: app/Integrations/Mollie/Http/Webhooks/MollieWebhookController.php
-
-		-
-			message: '#^Call to function is_array\(\) with array\<string, mixed\> will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: app/Integrations/Snelstart/Http/Webhooks/SnelstartWebhookController.php
-
-		-
 			message: '#^Cannot access property \$value on string\.$#'
 			identifier: property.nonObject
 			count: 1
@@ -503,6 +383,24 @@ parameters:
 			identifier: method.nonObject
 			count: 5
 			path: app/Http/Resources/Api/V1/AccountSubscriptionResource.php
+
+		-
+			message: '#^Call to function is_array\(\) with array\<mixed\> will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: app/Integrations/DataForSeo/Errors/UpstreamErrorMapper.php
+
+		-
+			message: '#^Strict comparison using \!\=\= between Saloon\\Http\\Response and null will always evaluate to true\.$#'
+			identifier: notIdentical.alwaysTrue
+			count: 2
+			path: app/Integrations/DataForSeo/Errors/UpstreamErrorMapper.php
+
+		-
+			message: '#^Method App\\Integrations\\DataForSeo\\Webhooks\\DataForSeoEventResolver\:\:resolve\(\) never returns null so it can be removed from the return type\.$#'
+			identifier: return.unusedType
+			count: 1
+			path: app/Integrations/DataForSeo/Webhooks/DataForSeoEventResolver.php
 
 		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$consumer\.$#'
@@ -533,6 +431,126 @@ parameters:
 			identifier: nullCoalesce.offset
 			count: 1
 			path: app/Integrations/Exact/Accounting/ExactRelationResolver.php
+
+		-
+			message: '#^Call to function is_array\(\) with list\<string\|null\> will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: app/Integrations/Exact/Http/Dev/ExactOAuthTracerController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$consumer\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Integrations/Exact/Http/ExactDeprovisionController.php
+
+		-
+			message: '#^Call to function is_array\(\) with array\<string, mixed\> will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: app/Integrations/Exact/Http/Webhooks/ExactWebhookController.php
+
+		-
+			message: '#^Call to function is_string\(\) with string will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 2
+			path: app/Integrations/Mollie/Billing/AccountSubscriptionManager.php
+
+		-
+			message: '#^Parameter \#1 \$connection of method App\\Integrations\\Mollie\\MollieConnectionContext\:\:set\(\) expects App\\Models\\Connection, Illuminate\\Database\\Eloquent\\Model\|null given\.$#'
+			identifier: argument.type
+			count: 2
+			path: app/Integrations/Mollie/Billing/AccountSubscriptionManager.php
+
+		-
+			message: '#^Property App\\Models\\AccountSubscription\:\:\$canceled_at \(string\|null\) does not accept Illuminate\\Support\\Carbon\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: app/Integrations/Mollie/Billing/AccountSubscriptionManager.php
+
+		-
+			message: '#^Property App\\Models\\AccountSubscription\:\:\$last_webhook_event_at \(string\|null\) does not accept Illuminate\\Support\\Carbon\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: app/Integrations/Mollie/Billing/AccountSubscriptionManager.php
+
+		-
+			message: '#^Property App\\Models\\AccountSubscription\:\:\$paused_at \(string\|null\) does not accept Illuminate\\Support\\Carbon\.$#'
+			identifier: assign.propertyType
+			count: 2
+			path: app/Integrations/Mollie/Billing/AccountSubscriptionManager.php
+
+		-
+			message: '#^Property App\\Models\\AccountSubscription\:\:\$starts_at \(string\|null\) does not accept Illuminate\\Support\\Carbon\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: app/Integrations/Mollie/Billing/AccountSubscriptionManager.php
+
+		-
+			message: '#^Property App\\Models\\AccountSubscription\:\:\$status \(string\) does not accept App\\Billing\\Account\\SubscriptionStatus\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: app/Integrations/Mollie/Billing/AccountSubscriptionManager.php
+
+		-
+			message: '#^Property Mollie\\Api\\Resources\\Subscription\:\:\$id \(string\) on left side of \?\? is not nullable\.$#'
+			identifier: nullCoalesce.property
+			count: 1
+			path: app/Integrations/Mollie/Billing/AccountSubscriptionManager.php
+
+		-
+			message: '#^Property Mollie\\Api\\Resources\\Subscription\:\:\$status \(string\) on left side of \?\? is not nullable\.$#'
+			identifier: nullCoalesce.property
+			count: 1
+			path: app/Integrations/Mollie/Billing/AccountSubscriptionManager.php
+
+		-
+			message: '#^Result of && is always false\.$#'
+			identifier: booleanAnd.alwaysFalse
+			count: 1
+			path: app/Integrations/Mollie/Billing/AccountSubscriptionManager.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between string and App\\Billing\\Account\\SubscriptionStatus\:\:Active will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: app/Integrations/Mollie/Billing/AccountSubscriptionManager.php
+
+		-
+			message: '#^Strict comparison using \!\=\= between mixed and null will always evaluate to true\.$#'
+			identifier: notIdentical.alwaysTrue
+			count: 1
+			path: app/Integrations/Mollie/Http/AccountSubscriptions/AccountSubscriptionController.php
+
+		-
+			message: '#^Instanceof between Mollie\\Api\\Resources\\CustomerCollection and Mollie\\Api\\Resources\\BaseCollection will always evaluate to true\.$#'
+			identifier: instanceof.alwaysTrue
+			count: 1
+			path: app/Integrations/Mollie/Http/Api/CustomersController.php
+
+		-
+			message: '#^Call to function is_array\(\) with array will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: app/Integrations/Mollie/Http/Api/PaymentMethodsController.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Http\\Request\:\:validated\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Integrations/Mollie/Http/Api/PaymentsController.php
+
+		-
+			message: '#^Call to function is_array\(\) with array\<string, mixed\> will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: app/Integrations/Mollie/Http/Webhooks/MollieWebhookController.php
+
+		-
+			message: '#^Call to function is_array\(\) with array\<string, mixed\> will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: app/Integrations/Snelstart/Http/Webhooks/SnelstartWebhookController.php
 
 		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$consumer_id\.$#'
@@ -601,7 +619,7 @@ parameters:
 			path: app/Support/Connect/ProviderConnectStatus.php
 
 		-
-			message: '#^Parameter \#1 \$keyBy of method Illuminate\\Support\\Collection\<int,Illuminate\\Database\\Eloquent\\Model\>\:\:keyBy\(\) expects \(callable\(Illuminate\\Database\\Eloquent\\Model, int\)\: \(''dataforseo''|''exact''|''mollie''|''snelstart''\)\)\|list\<Closure\|string\>\|string, Closure\(App\\Models\\Connection\)\: \(''dataforseo''|''exact''|''mollie''|''snelstart''\) given\.$#'
+			message: '#^Parameter \#1 \$keyBy of method Illuminate\\Support\\Collection\<int,Illuminate\\Database\\Eloquent\\Model\>\:\:keyBy\(\) expects \(callable\(Illuminate\\Database\\Eloquent\\Model, int\)\: \(''dataforseo''\|''exact''\|''mollie''\|''snelstart''\)\)\|list\<Closure\|string\>\|string, Closure\(App\\Models\\Connection\)\: \(''dataforseo''\|''exact''\|''mollie''\|''snelstart''\) given\.$#'
 			identifier: argument.type
 			count: 1
 			path: app/Support/Connect/ProviderConnectStatus.php
