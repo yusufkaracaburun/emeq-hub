@@ -9,6 +9,7 @@ use App\Models\IdempotencyKey;
 use Closure;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\Response;
 use Throwable;
 
@@ -82,7 +83,7 @@ class EnsureIdempotency
     private function claim(Request $request, int $consumerId, ?int $accountId, string $key, string $fingerprint): ?IdempotencyKey
     {
         try {
-            return IdempotencyKey::query()->create([
+            return DB::transaction(fn () => IdempotencyKey::query()->create([
                 'consumer_id' => $consumerId,
                 'account_id' => $accountId,
                 'key' => $key,
@@ -94,7 +95,7 @@ class EnsureIdempotency
                 'locked_at' => now(),
                 'expires_at' => now()->addHours((int) config('hub.idempotency.retention_hours', 24)),
                 'created_at' => now(),
-            ]);
+            ]));
         } catch (UniqueConstraintViolationException) {
             return null;
         }
@@ -170,7 +171,7 @@ class EnsureIdempotency
         try {
             $response = $next($request);
         } catch (Throwable $e) {
-            $claim->delete();
+            DB::transaction(fn () => $claim->delete());
 
             throw $e;
         }
@@ -178,7 +179,7 @@ class EnsureIdempotency
         $status = $response->getStatusCode();
 
         if ($status < 200 || $status >= 300) {
-            $claim->delete();
+            DB::transaction(fn () => $claim->delete());
 
             return $response;
         }
