@@ -18,7 +18,9 @@ Fase 1 kan altijd, ook op `master`.
 
 1. `cp .env.example .env` en vul `DATAFORSEO_LOGIN`, `DATAFORSEO_PASSWORD`,
    `DATAFORSEO_BASIC` (base64 van `login:password`).
-2. Draai `partner/domain-overview.http` → verwacht `status_code` **20000** in de JSON.
+2. Draai `partner/domain-overview.http` → verwacht `tasks_error` **0** en
+   `tasks[0].status_code` **20000** (top-level 20000 alleen = request aangekomen).
+   Gebruik `LOCATION_NAME=Netherlands`; `LANGUAGE_CODE` hoort niet bij dit endpoint.
 3. Nieuw account? DataForSEO geeft **40104** tot verificatie in
    [app.dataforseo.com](https://app.dataforseo.com/) klaar is.
 4. Eén bestand per DataForSEO-categorie (zelfde `.env`, geen extra setup):

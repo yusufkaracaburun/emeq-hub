@@ -1,17 +1,7 @@
-# DataForSEO partner-API — fase 1: Backlinks Summary (zonder Hub, zonder Consumer PAT)
+# DataForSEO partner-API — backlinks summary (live)
 #
-# Compleet backlink-profiel van een domein: aantal backlinks, referring domains,
-# spam score, nieuw/verloren links. Live-only endpoint, zelfde vorm als
-# domain_rank_overview in partner/domain-overview.http — geen async/task-flow nodig.
-# Zie issue #85, kandidaat 1.
-#
-# Setup: zie docs/requests/.env.example (DATAFORSEO_API_URL, DATAFORSEO_BASIC).
-#
-# Kosten: $0,024 per request + $0,000036 per rij (max 1000 rijen/request, dus
-# max $0,06/call) — bevestigd op https://dataforseo.com/pricing/backlinks/backlinks.
-#
-# Verwacht bij een nieuw account: status_code 40104 (account nog verifiëren in
-# https://app.dataforseo.com/). Dat is géén fout in je .http-bestand.
+# Setup: docs/dataforseo/.env (zie .env.example).
+# backlinks_status_type: "live" | "all" | "lost" (default hier: live).
 
 @apiBase = {{$dotenv DATAFORSEO_API_URL}}
 @basic = {{$dotenv DATAFORSEO_BASIC}}
@@ -24,23 +14,9 @@ Accept: application/json
 
 [
   {
-    "target": {{domain}},
+    "target": "{{domain}}",
     "internal_list_limit": 10,
     "include_subdomains": true,
     "backlinks_status_type": "live"
-  }
-]
-###
-POST {{apiBase}}/v3/backlinks/summary/live
-Authorization: Basic {{basic}}
-Content-Type: application/json
-Accept: application/json
-
-[
-  {
-    "target": {{domain}},
-    "internal_list_limit": 10,
-    "include_subdomains": true,
-    "backlinks_status_type": "all"
   }
 ]

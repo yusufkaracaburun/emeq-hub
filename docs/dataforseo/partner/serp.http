@@ -1,25 +1,10 @@
-# DataForSEO partner-API — fase 1: SERP / rank tracking (zonder Hub, zonder Consumer PAT)
+# DataForSEO partner-API — SERP organic (async)
 #
-# Organische zoekresultaten per keyword/locatie — basis voor rank tracking.
-# Zie issue #85, kandidaat 3.
-#
-# BELANGRIJK — dit is GEEN synchrone call zoals domain_rank_overview of backlinks
-# summary. SERP task_post/task_get is het "Standard" (async) patroon:
-#   1. POST .../task_post  → maakt een task aan, antwoord bevat tasks[0].id
-#   2. (wacht een paar seconden tot een minuut — DataForSEO verwerkt async)
-#   3. GET  .../task_get/regular/{id} → haalt het resultaat op met dat task-id
-# Er is geen "Live" variant van dit endpoint voor bulk/rank-tracking gebruik.
-# Kopieer na stap 1 de `id` uit de response in @taskId hieronder, en run dan
-# pas de task_get-request.
-#
-# Setup: zie docs/requests/.env.example (DATAFORSEO_API_URL, DATAFORSEO_BASIC).
-#
-# Kosten: niet gevonden op de publieke pricing-pagina (alleen categorienavigatie,
-# geen cijfers) — zelfde conclusie als issue #85. Navragen bij DataForSEO-support
-# of via het dashboard vóór veelvuldig gebruik.
-#
-# Verwacht bij een nieuw account: status_code 40104 (account nog verifiëren in
-# https://app.dataforseo.com/). Dat is géén fout in je .http-bestand.
+# Setup: docs/dataforseo/.env (zie .env.example).
+# Flow: 1) task_post → kopieer tasks[0].id naar @taskId
+#       2) wacht ~5–60s
+#       3) task_get → tasks[0].status_code 20000 = resultaat klaar
+# task_post geeft task-status 20100 ("Task Created"), dat is normaal.
 
 @apiBase = {{$dotenv DATAFORSEO_API_URL}}
 @basic = {{$dotenv DATAFORSEO_BASIC}}
@@ -37,14 +22,10 @@ Accept: application/json
   {
     "keyword": "{{keyword}}",
     "location_code": {{location_code}},
-    "language_code": {{language_code}},
+    "language_code": "{{language_code}}",
     "device": "desktop"
   }
 ]
-###
-GET {{apiBase}}/v3/serp/google/organic/tasks_ready
-Authorization: Basic {{basic}}
-Accept: application/json
 ###
 GET {{apiBase}}/v3/serp/google/organic/task_get/regular/{{taskId}}
 Authorization: Basic {{basic}}
