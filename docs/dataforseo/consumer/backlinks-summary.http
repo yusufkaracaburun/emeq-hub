@@ -1,0 +1,22 @@
+### Backlinks Summary — verplicht: target. Optioneel: include_subdomains, backlinks_status_type, internal_list_limit
+GET {{baseUrl}}/v1/dataforseo/backlinks-summary?target=example.com
+Authorization: Bearer {{token}}
+Accept: application/json
+X-Account-Id: {{accountId}}
+
+### Backlinks Summary — met extra opties
+GET {{baseUrl}}/v1/dataforseo/backlinks-summary?target=example.com&include_subdomains=false&backlinks_status_type=live&internal_list_limit=10
+Authorization: Bearer {{token}}
+Accept: application/json
+X-Account-Id: {{accountId}}
+
+### Zonder target → 422 missing_target
+GET {{baseUrl}}/v1/dataforseo/backlinks-summary
+Authorization: Bearer {{token}}
+Accept: application/json
+X-Account-Id: {{accountId}}
+
+### Zonder PAT → 401 unauthenticated
+GET {{baseUrl}}/v1/dataforseo/backlinks-summary?target=example.com
+Accept: application/json
+X-Account-Id: {{accountId}}

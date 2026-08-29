@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\V1\ConnectSessionController;
 use App\Http\Controllers\Api\V1\IntegrationController;
 use App\Http\Controllers\Api\V1\OAuth\ProviderInitController;
 use App\Http\Controllers\Api\V1\PingController;
+use App\Integrations\DataForSeo\Http\Api\BacklinksSummaryController as DataForSeoBacklinksSummaryController;
 use App\Integrations\DataForSeo\Http\Api\DomainOverviewController as DataForSeoDomainOverviewController;
 use App\Integrations\Exact\Http\Api\GlAccountsController as ExactGlAccountsController;
 use App\Integrations\Exact\Http\Api\JournalsController as ExactJournalsController;
@@ -70,6 +71,8 @@ Route::middleware('auth:sanctum')->group(function (): void {
         ->group(function (): void {
             Route::get('/domain-overview', [DataForSeoDomainOverviewController::class, 'show'])
                 ->name('api.dataforseo.domain-overview');
+            Route::get('/backlinks-summary', [DataForSeoBacklinksSummaryController::class, 'show'])
+                ->name('api.dataforseo.backlinks-summary');
         });
 
     Route::middleware('feature.provider:exact')->group(function (): void {
