@@ -134,6 +134,30 @@ class ConsumerResource extends Resource
                 TokenAbilities::CONSUMER_MANAGE_ACCOUNTS,
             ],
         ],
+        'dataforseo-read' => [
+            'group' => 'DataForSEO',
+            'label' => 'Read-only',
+            'abilities' => [TokenAbilities::DATAFORSEO_READ],
+        ],
+        'dataforseo-write' => [
+            'group' => 'DataForSEO',
+            'label' => 'Read + write',
+            'abilities' => [
+                TokenAbilities::DATAFORSEO_READ,
+                TokenAbilities::DATAFORSEO_WRITE,
+                TokenAbilities::CONSUMER_MANAGE_ACCOUNTS,
+            ],
+        ],
+        'dataforseo-connect' => [
+            'group' => 'DataForSEO',
+            'label' => 'Koppelen + read/write',
+            'abilities' => [
+                TokenAbilities::INTEGRATIONS_MANAGE,
+                TokenAbilities::DATAFORSEO_READ,
+                TokenAbilities::DATAFORSEO_WRITE,
+                TokenAbilities::CONSUMER_MANAGE_ACCOUNTS,
+            ],
+        ],
         'integrations' => [
             'group' => 'Overig',
             'label' => 'Alleen koppelen (alle providers)',

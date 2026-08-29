@@ -18,7 +18,7 @@ class ProviderTest extends TestCase
 
     public function test_values_returns_all_backing_strings(): void
     {
-        $this->assertSame(['mollie', 'snelstart', 'exact'], Provider::values());
+        $this->assertSame(['mollie', 'snelstart', 'exact', 'dataforseo'], Provider::values());
     }
 
     public function test_labels_are_human_readable(): void
