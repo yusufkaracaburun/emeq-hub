@@ -6,6 +6,7 @@ namespace App\Providers;
 
 use App\Integrations\Exact\Settings\ExactSettings;
 use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
 use Throwable;
@@ -31,9 +32,10 @@ class SettingsHydrationServiceProvider extends ServiceProvider
                 'exact.api_base_url' => $exact->api_base_url ?: config('services.exact.api_base_url'),
                 'exact.webhook.secret' => $exact->webhook_secret ?: config('exact.webhook.secret'),
             ]);
-        } catch (QueryException) {
-            // DB onbereikbaar of driver ontbreekt (CI zonder pdo_pgsql, package:discover
-            // vóór de db-service er is) is verwacht buiten productie — geen Sentry-ruis.
+        } catch (QueryException $e) {
+            Log::debug('SettingsHydrationServiceProvider: db onbereikbaar of driver ontbreekt, settings niet gehydrateerd.', [
+                'message' => $e->getMessage(),
+            ]);
         } catch (Throwable $e) {
             report($e);
         }

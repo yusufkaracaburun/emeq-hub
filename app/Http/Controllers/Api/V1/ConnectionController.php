@@ -17,6 +17,7 @@ use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response as HttpResponse;
+use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\Response;
 
 #[Group(name: 'Connections', description: 'OAuth-koppelingen tussen Account en provider (Mollie/Snelstart).', weight: 30)]
@@ -65,7 +66,7 @@ class ConnectionController extends Controller
         }
 
         try {
-            $connection = $account->connections()->create($data);
+            $connection = DB::transaction(fn () => $account->connections()->create($data));
         } catch (UniqueConstraintViolationException) {
             return response()->json([
                 'error' => 'connection_exists',

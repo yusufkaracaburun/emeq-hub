@@ -10,6 +10,8 @@ use App\Integrations\PassThrough\PassThroughPipeline;
 use App\Integrations\PassThrough\UpstreamResult;
 use App\Models\Account;
 use App\Models\Connection;
+use Dedoc\Scramble\Attributes\QueryParameter;
+use Dedoc\Scramble\Attributes\Response as ResponseDoc;
 use Emeq\DataForSeoApi\DataForSeo;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -22,6 +24,10 @@ final class BacklinksSummaryController
         private readonly PassThroughPipeline $pipeline,
     ) {}
 
+    #[QueryParameter('target', description: 'Domein of volledige URL waarvoor backlinks worden opgevraagd.', required: true, type: 'string')]
+    #[QueryParameter('backlinks_status_type', description: 'DataForSEO backlinks-statusfilter.', type: 'string')]
+    #[ResponseDoc(404, 'Geen actieve DataForSEO-Connection voor dit Account.')]
+    #[ResponseDoc(502, 'DataForSEO gaf een foutmelding terug.')]
     public function show(Request $request, DataForSeo $dataForSeo): JsonResponse
     {
         $target = $request->string('target')->toString();

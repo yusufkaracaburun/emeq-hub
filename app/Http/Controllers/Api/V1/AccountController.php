@@ -10,6 +10,7 @@ use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\Response;
 
 #[Group(name: 'Accounts', description: 'Eindgebruiker-tenants per Consumer (external_id-aliasing).', weight: 20)]
@@ -25,10 +26,10 @@ class AccountController extends Controller
         ]);
 
         try {
-            $account = $request->user()->accounts()->create([
+            $account = DB::transaction(fn () => $request->user()->accounts()->create([
                 'external_id' => $request->string('external_id')->toString(),
                 'display_name' => $request->input('display_name'),
-            ]);
+            ]));
         } catch (UniqueConstraintViolationException) {
             return response()->json([
                 'error' => 'account_exists',

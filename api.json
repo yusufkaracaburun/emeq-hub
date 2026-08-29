@@ -4827,6 +4827,23 @@
                             "type": "integer",
                             "default": 0
                         }
+                    },
+                    {
+                        "name": "target",
+                        "in": "query",
+                        "required": true,
+                        "description": "Domein of volledige URL waarvoor backlinks worden opgevraagd.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "backlinks_status_type",
+                        "in": "query",
+                        "description": "DataForSEO backlinks-statusfilter.",
+                        "schema": {
+                            "type": "string"
+                        }
                     }
                 ],
                 "responses": {
@@ -4890,6 +4907,26 @@
                     },
                     "401": {
                         "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "404": {
+                        "description": "Geen actieve DataForSEO-Connection voor dit Account.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "502": {
+                        "description": "DataForSEO gaf een foutmelding terug.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -4899,6 +4936,26 @@
                 "operationId": "dataforseo.domain-overview",
                 "tags": [
                     "DomainOverview"
+                ],
+                "parameters": [
+                    {
+                        "name": "domain",
+                        "in": "query",
+                        "required": true,
+                        "description": "Domein waarvoor het overzicht wordt opgevraagd.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "location_name",
+                        "in": "query",
+                        "description": "DataForSEO-locatienaam.",
+                        "schema": {
+                            "type": "string",
+                            "default": "Netherlands"
+                        }
+                    }
                 ],
                 "responses": {
                     "200": {
@@ -4961,6 +5018,26 @@
                     },
                     "401": {
                         "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "404": {
+                        "description": "Geen actieve DataForSEO-Connection voor dit Account.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "502": {
+                        "description": "DataForSEO gaf een foutmelding terug.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
                     }
                 }
             }
