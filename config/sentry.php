@@ -6,9 +6,6 @@
  * @see https://docs.sentry.io/platforms/php/guides/laravel/configuration/options/
  */
 
-use Sentry\Event;
-use Sentry\EventHint;
-
 return [
 
     // @see https://docs.sentry.io/concepts/key-terms/dsn-explainer/
@@ -58,11 +55,11 @@ return [
     // 'ignore_exceptions' => [],
 
     // @see: https://docs.sentry.io/platforms/php/guides/laravel/configuration/options/#before-send
-    // Drop every event captured while the test suite runs; report() calls in
-    // tests simulate real exceptions on purpose and are not incidents.
-    'before_send' => function (Event $event, ?EventHint $hint): ?Event {
-        return app()->runningUnitTests() ? null : $event;
-    },
+    // `before_send` is deliberately NOT set here: it needs a real Closure,
+    // and `artisan config:cache` var_export()'s this file — closures aren't
+    // serializable (Closure::__set_state() doesn't exist), which crashes
+    // `artisan optimize` in production. It's injected at runtime instead, in
+    // App\Providers\AppServiceProvider::boot(), after config is loaded.
 
     // @see: https://docs.sentry.io/platforms/php/guides/laravel/configuration/options/#ignore_transactions
     'ignore_transactions' => [

@@ -32,6 +32,7 @@ use App\Integrations\Webhooks\CanonicalEntityRegistry;
 use App\Integrations\Webhooks\CanonicalEventRegistry;
 use App\Integrations\Webhooks\HubOriginRegistry;
 use App\Models\User;
+use App\Support\Sentry\SuppressTestEvents;
 use Dedoc\Scramble\Scramble;
 use Dedoc\Scramble\Support\Generator\OpenApi;
 use Dedoc\Scramble\Support\Generator\SecurityScheme;
@@ -44,6 +45,7 @@ use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Cashier\Cashier;
 use Opcodes\LogViewer\Facades\LogViewer;
+use Sentry\State\HubInterface;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -116,6 +118,22 @@ class AppServiceProvider extends ServiceProvider
         ));
 
         Cashier::ignoreRoutes();
+
+        // Set directly on the built Client's Options, never on config():
+        // sentry-laravel's own ServiceProvider::boot() eagerly resolves
+        // HubInterface on every bootstrap (including `artisan config:cache`
+        // itself), so any config()->set() with a real Closure is still
+        // sitting in the repository when config:cache var_export()'s it —
+        // crashes `artisan optimize` in production (Closure has no
+        // __set_state()). Mutating the SDK's own Options object sidesteps
+        // Laravel's config cache entirely.
+        $this->app->booted(function (): void {
+            if ($this->app->bound(HubInterface::class)) {
+                $this->app->make(HubInterface::class)->getClient()
+                    ?->getOptions()
+                    ->setBeforeSendCallback(SuppressTestEvents::handle(...));
+            }
+        });
     }
 
     public function boot(): void
