@@ -1020,6 +1020,38 @@ client). Toon een nette foutmelding bij `502 upstream_error` en bij
 `404 connection_not_found` (geen actieve DataForSEO-Connection voor dit Account).
 ```
 
+### Backlinks opvragen
+
+Zelfde Connection als hierboven; geeft een samenvatting van de backlink-profiel
+van een domein of URL.
+
+```http
+GET /v1/dataforseo/backlinks-summary?target=example.com
+X-Account-Id: {external_id}
+```
+
+- `target` is verplicht — domein of volledige URL. Ontbreekt 'ie, dan komt er
+  `422 missing_target` terug (niet de generieke foutenvelope).
+- `include_subdomains` (boolean, optioneel), `backlinks_status_type` (string,
+  optioneel) en `internal_list_limit` (integer, optioneel) worden ongewijzigd
+  doorgestuurd naar DataForSEO's Backlinks Summary Live-endpoint.
+- `X-Account-Id` is de `external_id` van het Account, niet het interne id.
+- Ability: `dataforseo:read` (of `dataforseo:write`/`*`).
+
+Overige foutcodes volgen de generieke [foutenvelope](#foutenvelope-alle-v1-endpoints):
+een DataForSEO-fout komt terug als `502 upstream_error` met `upstream_status`
+op de DataForSEO-eigen task-statuscode.
+
+**🤖 Agent-prompt**
+
+```text
+Bouw een backlinks-opvraag tegen de emeq Hub: `GET
+/v1/dataforseo/backlinks-summary?target={domein_of_url}` via de proxy, met
+header `X-Account-Id: {external_id van de tenant}` (server-side afgeleid).
+Toon een nette foutmelding bij `422 missing_target`, `502 upstream_error` en
+`404 connection_not_found` (geen actieve DataForSEO-Connection voor dit Account).
+```
+
 ## Webhooks ontvangen
 
 Gebeurt er iets bij de gekoppelde partner, dan POST de Hub naar je
