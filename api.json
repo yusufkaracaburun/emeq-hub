@@ -434,7 +434,7 @@
                                         },
                                         "message": {
                                             "type": "string",
-                                            "const": "Een actieve Snelstart-Connection bestaat al voor dit Account."
+                                            "const": "Een actieve Connection bestaat al voor dit Account."
                                         }
                                     },
                                     "required": [
@@ -4804,6 +4804,87 @@
                     }
                 }
             }
+        },
+        "/dataforseo/domain-overview": {
+            "get": {
+                "operationId": "dataforseo.domain-overview",
+                "tags": [
+                    "DomainOverview"
+                ],
+                "parameters": [
+                    {
+                        "name": "location_code",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "default": 2826
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "const": "serialization_error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "const": "Interne fout bij het serialiseren van het DataForSEO-antwoord."
+                                        }
+                                    },
+                                    "required": [
+                                        "error",
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "const": "missing_domain"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "const": "Query parameter \"domain\" is vereist."
+                                        }
+                                    },
+                                    "required": [
+                                        "error",
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
         }
     },
     "components": {
@@ -5619,7 +5700,8 @@
                 "enum": [
                     "mollie",
                     "snelstart",
-                    "exact"
+                    "exact",
+                    "dataforseo"
                 ],
                 "title": "Provider"
             },
@@ -5653,7 +5735,8 @@
                     "provider": {
                         "type": "string",
                         "enum": [
-                            "snelstart"
+                            "snelstart",
+                            "dataforseo"
                         ]
                     },
                     "administratie_id": {
@@ -5680,6 +5763,10 @@
                                     "null"
                                 ],
                                 "maxLength": 255
+                            },
+                            "access_token": {
+                                "type": "string",
+                                "minLength": 5
                             }
                         }
                     }
