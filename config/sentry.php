@@ -5,6 +5,10 @@
  *
  * @see https://docs.sentry.io/platforms/php/guides/laravel/configuration/options/
  */
+
+use Sentry\Event;
+use Sentry\EventHint;
+
 return [
 
     // @see https://docs.sentry.io/concepts/key-terms/dsn-explainer/
@@ -52,6 +56,13 @@ return [
 
     // @see: https://docs.sentry.io/platforms/php/guides/laravel/configuration/options/#ignore_exceptions
     // 'ignore_exceptions' => [],
+
+    // @see: https://docs.sentry.io/platforms/php/guides/laravel/configuration/options/#before-send
+    // Drop every event captured while the test suite runs; report() calls in
+    // tests simulate real exceptions on purpose and are not incidents.
+    'before_send' => function (Event $event, ?EventHint $hint): ?Event {
+        return app()->runningUnitTests() ? null : $event;
+    },
 
     // @see: https://docs.sentry.io/platforms/php/guides/laravel/configuration/options/#ignore_transactions
     'ignore_transactions' => [
