@@ -1,0 +1,42 @@
+# Emeq Hub × DataForSEO — fase 2: Consumer-contract via de Hub
+#
+# Test /v1/dataforseo/* (Bearer PAT + X-Account-Id). Draai eerst fase 1:
+# partner/domain-overview.http (direct naar api.dataforseo.com).
+#
+# Vereist de Hub-code op branch agent/open-seo (of na merge daarvan).
+#
+# ── Setup ────────────────────────────────────────────────────────────────────
+#
+# 1. Fase 1 groen: partner-API werkt (account geverifieerd bij DataForSEO).
+# 2. Hub: HUB_PROVIDER_DATAFORSEO_ENABLED=true in root-.env; Connection met
+#    login:password voor het Account (admin of POST /v1/connections).
+# 3. PAT met ability `dataforseo:read` (of `*`) in docs/requests/.env:
+#      VS Code:  EMEQ_HUB_PAT=1|…
+#      PhpStorm: http-client.private.env.json → token, Run with "local"
+#
+# 4. X-Account-Id = `external_id` van het Account (niet het interne id).
+#
+# Conventie: één .http-bestand per partner in deze map. Zie README.md.
+
+@baseUrl = http://hub.emeq.test:8092
+@token = {{$dotenv EMEQ_HUB_PAT}}
+@accountId = 47
+###
+GET {{baseUrl}}/v1/dataforseo/domain-overview?domain=example.com
+Authorization: Bearer {{token}}
+Accept: application/json
+X-Account-Id: {{accountId}}
+###
+GET {{baseUrl}}/v1/dataforseo/domain-overview?domain=example.com&language_code=en
+Authorization: Bearer {{token}}
+Accept: application/json
+X-Account-Id: {{accountId}}
+###
+GET {{baseUrl}}/v1/dataforseo/domain-overview
+Authorization: Bearer {{token}}
+Accept: application/json
+X-Account-Id: {{accountId}}
+###
+GET {{baseUrl}}/v1/dataforseo/domain-overview?domain=example.com
+Accept: application/json
+X-Account-Id: {{accountId}}

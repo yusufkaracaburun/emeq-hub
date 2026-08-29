@@ -1,0 +1,72 @@
+# DataForSEO partner-API — fase 1: direct testen (zonder Hub, zonder Consumer PAT)
+#
+# Valideert login, wachtwoord en accountstatus vóór je de Hub-route test.
+# Zelfde endpoint als emeq/dataforseo-api → domainOverview().
+#
+# Setup: vul in docs/requests/.env (zie .env.example):
+#   DATAFORSEO_LOGIN=…
+#   DATAFORSEO_PASSWORD=…
+#   DATAFORSEO_BASIC=…   (base64 van "login:password", optioneel i.p.v. bovenstaande)
+#
+# Verwacht bij een nieuw account: status_code 40104 (account nog verifiëren in
+# https://app.dataforseo.com/). Dat is géén fout in je .http-bestand.
+
+@apiBase = {{$dotenv DATAFORSEO_API_URL}}
+@basic = {{$dotenv DATAFORSEO_BASIC}}
+@location_code = {{$dotenv LOCATION_CODE}}
+@domain = {{$dotenv DOMAIN}}
+@language_code = {{$dotenv LANGUAGE_CODE}}
+###
+POST {{apiBase}}/v3/dataforseo_labs/google/domain_rank_overview/live
+Authorization: Basic {{basic}}
+Content-Type: application/json
+Accept: application/json
+
+[
+  {
+    "target": {{domain}},
+    "location_code": {{location_code}},
+    "language_code": {{language_code}}
+  }
+]
+
+HTTP/1.1 200  - OK
+server: nginx
+date: Sat, 29 Aug 2026 15:31:48 GMT
+content-type: application/json
+content-length: 136
+connection: close
+access-control-allow-origin: *
+access-control-allow-methods: GET,POST,PUT,DELETE,OPTIONS
+access-control-allow-credentials: true
+access-control-allow-headers: X-Requested-With, Content-Type, Access-Control-Allow-Origin, Access-Control-Allow-Methods, Access-Control-Allow-Headers, Authorization
+content-encoding: gzip
+cache-control: no-cache, must-revalidate
+expires: 0
+###
+POST {{apiBase}}/v3/dataforseo_labs/google/domain_rank_overview/live
+Authorization: Basic {{basic}}
+Content-Type: application/json
+Accept: application/json
+
+[
+  {
+    "target": {{domain}},
+    "location_code": {{location_code}},
+    "language_code": {{language_code}}
+  }
+]
+
+HTTP/1.1 200  - OK
+server: nginx
+date: Sat, 29 Aug 2026 15:31:54 GMT
+content-type: application/json
+content-length: 136
+connection: close
+access-control-allow-origin: *
+access-control-allow-methods: GET,POST,PUT,DELETE,OPTIONS
+access-control-allow-credentials: true
+access-control-allow-headers: X-Requested-With, Content-Type, Access-Control-Allow-Origin, Access-Control-Allow-Methods, Access-Control-Allow-Headers, Authorization
+content-encoding: gzip
+cache-control: no-cache, must-revalidate
+expires: 0

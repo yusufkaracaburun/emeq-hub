@@ -1,0 +1,54 @@
+# DataForSEO partner-API — fase 1: Keywords Data / Search Volume (zonder Hub, zonder Consumer PAT)
+#
+# Zoekvolume, competitie en CPC per keyword (Google Ads-databron). Live endpoint,
+# zelfde vorm als domain_rank_overview in partner/domain-overview.http — geen async/task-flow.
+# Zie issue #85, kandidaat 2.
+#
+# Setup: zie docs/requests/.env.example (DATAFORSEO_API_URL, DATAFORSEO_BASIC).
+#
+# Kosten: niet gevonden op de publieke pricing-pagina (alleen categorienavigatie,
+# geen cijfers) — zelfde conclusie als issue #85. Navragen bij DataForSEO-support
+# of via het dashboard vóór veelvuldig gebruik.
+#
+# Verwacht bij een nieuw account: status_code 40104 (account nog verifiëren in
+# https://app.dataforseo.com/). Dat is géén fout in je .http-bestand.
+
+@apiBase = {{$dotenv DATAFORSEO_API_URL}}
+@basic = {{$dotenv DATAFORSEO_BASIC}}
+@location_code = {{$dotenv LOCATION_CODE}}
+@language_code = {{$dotenv LANGUAGE_CODE}}
+###
+POST {{apiBase}}/v3/keywords_data/google_ads/search_volume/live
+Authorization: Basic {{basic}}
+Content-Type: application/json
+Accept: application/json
+
+[
+  {
+    "location_code": {{location_code}},
+    "language_code": {{language_code}},
+    "keywords": [
+      "boekhouding software",
+      "planning tool",
+      "seo tool"
+    ]
+  }
+]
+###
+POST {{apiBase}}/v3/keywords_data/google_ads/search_volume/live
+Authorization: Basic {{basic}}
+Content-Type: application/json
+Accept: application/json
+
+[
+  {
+    "location_code": {{location_code}},
+    "language_code": {{language_code}},
+    "keywords": [
+      "boekhouding software",
+      "planning tool",
+      "seo tool"
+    ],
+    "search_partners": true
+  }
+]

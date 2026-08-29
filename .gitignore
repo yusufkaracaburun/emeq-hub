@@ -2,6 +2,8 @@
 .DS_Store
 .env
 .env.backup
+docs/requests/.env
+docs/requests/http-client.private.env.json
 .env.prod
 .env.production
 .envrc
