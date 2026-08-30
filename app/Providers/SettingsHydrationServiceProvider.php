@@ -33,6 +33,8 @@ class SettingsHydrationServiceProvider extends ServiceProvider
                 'exact.webhook.secret' => $exact->webhook_secret ?: config('exact.webhook.secret'),
             ]);
         } catch (QueryException $e) {
+            // Bevat alleen de connectiefout (host/poort/driver), geen query-bindings of
+            // secrets — veilig om te loggen.
             Log::debug('SettingsHydrationServiceProvider: db onbereikbaar of driver ontbreekt, settings niet gehydrateerd.', [
                 'message' => $e->getMessage(),
             ]);
