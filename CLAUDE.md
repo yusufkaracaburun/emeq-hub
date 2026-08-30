@@ -4,9 +4,9 @@ Guidance voor Claude Code in deze repo. Framework- en package-guidelines staan i
 
 ## Project
 
-`emeq-hub` is een multi-tenant integration platform: één Laravel-app die OAuth-koppelingen, webhook-routing en een uniforme pass-through REST-API exposeert naar Nederlandse boekhoud- en betaal-partner-API's. Consumers zijn Emeq's eigen SaaS-apps; v1.0+ ook betalende derden. Partner-specifieke wire-logica leeft in dunne, losse SDK-packages (`emeq/<provider>-api`), niet in de Hub.
+`emeq-hub` is een multi-tenant integration platform: één Laravel-app die OAuth-koppelingen, webhook-routing en een uniforme pass-through REST-API exposeert naar Nederlandse boekhoud- en betaal-partner-API's, aangevuld met internationale data-partners zoals DataForSEO. Consumers zijn Emeq's eigen SaaS-apps; v1.0+ ook betalende derden. Partner-specifieke wire-logica leeft in dunne, losse SDK-packages (`emeq/<provider>-api`), niet in de Hub.
 
-Providers: **Exact Online** (live — OAuth2-lifecycle, division-aware pass-through, named read-resources, accounting-sync, webhooks) · **Snelstart** (OData/clientkey) · **Mollie** (Connect + Cashier-subscriptions) · **Moneybird**, **Ibanity** en **Kadaster KLIC** gepland.
+Providers: **Exact Online** (live — OAuth2-lifecycle, division-aware pass-through, named read-resources, accounting-sync, webhooks) · **Snelstart** (OData/clientkey, standaard uit) · **Mollie** (Connect + Cashier-subscriptions, standaard uit) · **DataForSEO** (login:password, SEO-/backlink-lookup, standaard uit) · **Moneybird**, **Ibanity** en **Kadaster KLIC** gepland.
 
 ## Stack
 
