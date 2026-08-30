@@ -107,4 +107,20 @@ class ScheduledTasksTest extends TestCase
 
         $this->assertSame([], $this->pingedUrls());
     }
+
+    public function test_backup_commands_are_restricted_to_production(): void
+    {
+        $events = collect(app(Schedule::class)->events())
+            ->filter(fn (Event $event): bool => str_contains((string) $event->command, 'backup:'));
+
+        $this->assertCount(3, $events, 'Verwachtte 3 gescheduled backup:*-commands.');
+
+        $events->each(function (Event $event): void {
+            $this->assertSame(
+                ['production'],
+                $event->environments,
+                "'{$event->command}' moet enkel in production draaien (lokaal geen 24/7-container, dus MaximumAgeInDays-health-check faalt vals-positief)."
+            );
+        });
+    }
 }

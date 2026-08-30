@@ -26,6 +26,6 @@ Schedule::command('horizon:snapshot')
     ->everyFiveMinutes()
     ->pingOnSuccessIf($heartbeatUrl !== '', $heartbeatUrl);
 
-Schedule::command('backup:clean')->dailyAt('01:30');
-Schedule::command('backup:run --only-db')->dailyAt('01:45');
-Schedule::command('backup:monitor')->dailyAt('02:00');
+Schedule::command('backup:clean')->dailyAt('01:30')->environments('production');
+Schedule::command('backup:run --only-db')->dailyAt('01:45')->environments('production');
+Schedule::command('backup:monitor')->dailyAt('02:00')->environments('production');
