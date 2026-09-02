@@ -43,6 +43,10 @@
         <env name="HUB_PROVIDER_SNELSTART_ENABLED" value="true"/>
         <env name="HUB_PROVIDER_DATAFORSEO_ENABLED" value="true"/>
         <env name="HUB_PROVIDER_EXACT_ENABLED" value="true"/>
+        <!-- De rate-gate deelt één cache-store over de hele testsuite zonder
+             tussentijdse flush; het budget zou anders binnen enkele testbestanden
+             al uitgeput raken en elke volgende Exact-call bounded blokkeren. -->
+        <env name="EXACT_RATE_LIMIT_ENABLED" value="false"/>
         <!-- Tests asserteren op de Inertia-props, niet op server-gerenderde HTML;
              een draaiende SSR-node zou de suite bovendien machine-afhankelijk maken. -->
         <env name="INERTIA_SSR_ENABLED" value="false"/>
