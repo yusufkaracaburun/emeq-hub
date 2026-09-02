@@ -57,8 +57,8 @@ class ExactPathWhitelistTest extends TestCase
         $this->assertFalse($this->whitelist()->allows('/'));
     }
 
-    public function test_empty_config_disables_whitelist(): void
+    public function test_empty_config_blocks_everything(): void
     {
-        $this->assertTrue($this->whitelist([])->allows('anything/AtAll'));
+        $this->assertFalse($this->whitelist([])->allows('anything/AtAll'));
     }
 }
