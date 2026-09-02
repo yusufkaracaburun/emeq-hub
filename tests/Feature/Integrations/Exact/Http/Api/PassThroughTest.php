@@ -8,6 +8,7 @@ use App\Sanctum\TokenAbilities;
 use Emeq\ExactApi\Auth\RefreshTokenRequest;
 use Emeq\ExactApi\Http\Request\RawExactRequest;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Log;
 use Saloon\Http\Faking\MockClient;
 use Saloon\Http\Faking\MockResponse;
 use Tests\TestCase;
@@ -356,6 +357,29 @@ class PassThroughTest extends TestCase
 
         [$consumer] = $this->consumerWithExactConnection();
         $token = $consumer->createToken('t', [TokenAbilities::EXACT_READ])->plainTextToken;
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->withHeader('X-Account-Id', 'school1')
+            ->getJson('/v1/exact/subscription/Subscriptions')
+            ->assertOk();
+    }
+
+    public function test_pass_through_kill_switch_logs_a_warning(): void
+    {
+        config(['hub-providers.exact.allowed_paths' => []]);
+
+        MockClient::global([
+            RawExactRequest::class => MockResponse::make(['d' => ['results' => []]], 200),
+        ]);
+
+        [$consumer] = $this->consumerWithExactConnection();
+        $token = $consumer->createToken('t', [TokenAbilities::EXACT_READ])->plainTextToken;
+
+        Log::shouldReceive('warning')
+            ->once()
+            ->withArgs(fn (string $message, array $context): bool => $message === 'exact.passthrough.whitelist_disabled'
+                && $context['consumer_id'] === $consumer->id
+                && $context['path'] === 'subscription/Subscriptions');
 
         $this->withHeader('Authorization', "Bearer {$token}")
             ->withHeader('X-Account-Id', 'school1')

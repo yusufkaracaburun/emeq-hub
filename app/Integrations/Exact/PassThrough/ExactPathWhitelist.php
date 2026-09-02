@@ -9,7 +9,7 @@ final class ExactPathWhitelist
         $allowed = $this->allowedPaths();
 
         if ($allowed === []) {
-            return false;
+            return true;
         }
 
         $normalized = $this->normalize($path);

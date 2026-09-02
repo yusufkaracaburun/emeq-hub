@@ -58,7 +58,13 @@ class PassThroughController extends Controller
         /** @var Connection $connection */
         $connection = $request->attributes->get('exact_connection');
 
-        if (! $this->whitelist->allows($path)) {
+        if ($this->whitelist->allowedPaths() === []) {
+            Log::warning('exact.passthrough.whitelist_disabled', [
+                'consumer_id' => $account->consumer_id ?? null,
+                'method' => $method,
+                'path' => $path,
+            ]);
+        } elseif (! $this->whitelist->allows($path)) {
             Log::warning('exact.passthrough.path_blocked', [
                 'consumer_id' => $account->consumer_id ?? null,
                 'method' => $method,
