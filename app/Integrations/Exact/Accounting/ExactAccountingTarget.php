@@ -44,6 +44,7 @@ use Emeq\ExactApi\Contracts\ExactCredentialResolver;
 use Emeq\ExactApi\Contracts\TokenStore;
 use Emeq\ExactApi\Enums\ExactDocumentType;
 use Emeq\ExactApi\Exact;
+use Emeq\ExactApi\Exceptions\RateLimitException;
 use Emeq\ExactApi\Http\ExactConnector;
 use Emeq\ExactApi\Http\Request\Read\GetBankEntries;
 use Emeq\ExactApi\Http\Request\Read\GetCashEntries;
@@ -57,12 +58,15 @@ use Emeq\ExactApi\Http\Request\Write\CreateSalesEntry;
 use Emeq\ExactApi\OData\Envelope;
 use Emeq\ExactApi\OData\Filter;
 use Emeq\ExactApi\OData\Guid;
+use Illuminate\Support\Facades\Log;
 use Saloon\Http\Request as SdkRequest;
 use Throwable;
 
 final class ExactAccountingTarget implements AccountingTarget, ConfirmsPostedDocuments, EnrichesValidation, ProbesPostedDocuments, ReadsBankStatements, ReadsDocuments, ReadsLedgerAccounts, ReadsRelations, ReadsTaxCodes, SyncsReferenceData, UploadsAttachments
 {
     private const YOUR_REF_MAX = 30;
+
+    private const MAX_ATTACHMENT_RETRY_WAIT_SECONDS = 5;
 
     public function __construct(
         private readonly ReferenceResolver $references,
@@ -537,50 +541,97 @@ final class ExactAccountingTarget implements AccountingTarget, ConfirmsPostedDoc
         ?string $autoDocRef,
     ): array {
         try {
-            $documentRef = $autoDocRef;
+            return $this->sendAttachmentUpload($attachment, $connection, $connector, $document, $type, $subject, $entryId, $autoDocRef);
+        } catch (RateLimitException $e) {
+            if ($e->retryAfterSeconds !== null && $e->retryAfterSeconds <= self::MAX_ATTACHMENT_RETRY_WAIT_SECONDS) {
+                // Exact's per-minute quota needs longer than the SDK-connector's fixed 1s
+                // retry interval to reset. One bounded extra attempt, honoring the
+                // server's own Retry-After, recovers the common case without a queued job.
+                usleep($e->retryAfterSeconds * 1_000_000);
 
-            if ($documentRef === null) {
-                $docResponse = $connector->send(new CreateDocument(
-                    subject: $subject,
-                    type: $type,
-                    account: $this->references->relationRef($document->party, $connection),
-                    financialTransactionEntryId: $entryId,
-                    documentDate: $document->issueDate->format('Y-m-d'),
-                ));
-
-                if ($docResponse->failed()) {
-                    $docResponse->throw();
+                try {
+                    return $this->sendAttachmentUpload($attachment, $connection, $connector, $document, $type, $subject, $entryId, $autoDocRef);
+                } catch (Throwable $retryException) {
+                    $e = $retryException;
                 }
-
-                $documentRef = Envelope::firstId($docResponse->json());
             }
 
-            $attachResponse = $connector->send(new CreateDocumentAttachment(
-                document: (string) $documentRef,
-                fileName: $attachment->filename,
-                attachment: $attachment->content,
+            return $this->failedAttachmentUpload($attachment, $connection, $document, $e);
+        } catch (Throwable $e) {
+            return $this->failedAttachmentUpload($attachment, $connection, $document, $e);
+        }
+    }
+
+    /** @return array{filename: string, status: string, document_ref: ?string, error: ?string} */
+    private function sendAttachmentUpload(
+        Attachment $attachment,
+        Connection $connection,
+        ExactConnector $connector,
+        FinancialDocument $document,
+        int $type,
+        string $subject,
+        ?string $entryId,
+        ?string $autoDocRef,
+    ): array {
+        $documentRef = $autoDocRef;
+
+        if ($documentRef === null) {
+            $docResponse = $connector->send(new CreateDocument(
+                subject: $subject,
+                type: $type,
+                account: $this->references->relationRef($document->party, $connection),
+                financialTransactionEntryId: $entryId,
+                documentDate: $document->issueDate->format('Y-m-d'),
             ));
 
-            if ($attachResponse->failed()) {
-                $attachResponse->throw();
+            if ($docResponse->failed()) {
+                $docResponse->throw();
             }
 
-            return [
-                'filename' => $attachment->filename,
-                'status' => 'uploaded',
-                'document_ref' => $documentRef,
-                'error' => null,
-            ];
-        } catch (Throwable $e) {
-            report($e);
-
-            return [
-                'filename' => $attachment->filename,
-                'status' => 'failed',
-                'document_ref' => null,
-                'error' => $e->getMessage(),
-            ];
+            $documentRef = Envelope::firstId($docResponse->json());
         }
+
+        $attachResponse = $connector->send(new CreateDocumentAttachment(
+            document: (string) $documentRef,
+            fileName: $attachment->filename,
+            attachment: $attachment->content,
+        ));
+
+        if ($attachResponse->failed()) {
+            $attachResponse->throw();
+        }
+
+        return [
+            'filename' => $attachment->filename,
+            'status' => 'uploaded',
+            'document_ref' => $documentRef,
+            'error' => null,
+        ];
+    }
+
+    /** @return array{filename: string, status: string, document_ref: ?string, error: ?string} */
+    private function failedAttachmentUpload(
+        Attachment $attachment,
+        Connection $connection,
+        FinancialDocument $document,
+        Throwable $e,
+    ): array {
+        report($e);
+
+        Log::warning('accounting.attachment_upload_failed', [
+            'connection_id' => $connection->id,
+            'provider' => $connection->provider->value,
+            'external_id' => $document->externalId,
+            'filename' => $attachment->filename,
+            'error' => $e->getMessage(),
+        ]);
+
+        return [
+            'filename' => $attachment->filename,
+            'status' => 'failed',
+            'document_ref' => null,
+            'error' => $e->getMessage(),
+        ];
     }
 
     private function documentTypeId(DocumentType $type): int
