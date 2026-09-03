@@ -144,6 +144,19 @@ class PublicSeoTest extends TestCase
         $this->assertSame('2026-07-18', $webPage['dateModified']);
     }
 
+    public function test_legal_page_does_not_duplicate_the_h1_from_a_leading_markdown_heading(): void
+    {
+        LegalSettings::fake([
+            'privacy_statement' => "# Privacyverklaring · Emeq Hub\n\nInhoud.",
+            'privacy_updated_at' => '2026-07-18',
+        ]);
+
+        $html = $this->get('/privacy')->assertOk()->viewData('page')['props']['html'];
+
+        $this->assertStringNotContainsString('<h1', $html, 'De pagina rendert al een <h1> uit title — de markdown-body mag er geen tweede toevoegen.');
+        $this->assertStringContainsString('Inhoud.', $html);
+    }
+
     public function test_sitemap_lists_every_public_page_and_every_provider(): void
     {
         $response = $this->get('/sitemap.xml')->assertOk();

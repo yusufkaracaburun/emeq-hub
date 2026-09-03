@@ -50,8 +50,9 @@ export function KoppelForm({ providers, preselect }: KoppelFormProps) {
         <form onSubmit={submit} className="flex flex-col gap-4" noValidate>
             <p className="text-lg font-semibold text-foreground">Start je integratie-aanvraag</p>
 
-            <Field label="Naam *" error={form.errors.contact_name}>
+            <Field id="contact_name" label="Naam *" error={form.errors.contact_name}>
                 <TextInput
+                    id="contact_name"
                     value={form.data.contact_name}
                     invalid={Boolean(form.errors.contact_name)}
                     autoComplete="name"
@@ -60,8 +61,9 @@ export function KoppelForm({ providers, preselect }: KoppelFormProps) {
                 />
             </Field>
 
-            <Field label="Werk-e-mail *" error={form.errors.email}>
+            <Field id="email" label="Werk-e-mail *" error={form.errors.email}>
                 <TextInput
+                    id="email"
                     type="email"
                     value={form.data.email}
                     invalid={Boolean(form.errors.email)}
@@ -72,8 +74,9 @@ export function KoppelForm({ providers, preselect }: KoppelFormProps) {
                 />
             </Field>
 
-            <Field label="Bedrijf *" error={form.errors.company}>
+            <Field id="company" label="Bedrijf *" error={form.errors.company}>
                 <TextInput
+                    id="company"
                     value={form.data.company}
                     invalid={Boolean(form.errors.company)}
                     autoComplete="organization"
@@ -82,9 +85,10 @@ export function KoppelForm({ providers, preselect }: KoppelFormProps) {
                 />
             </Field>
 
-            <Field label="Wat wil je koppelen? *" error={form.errors.providers}>
+            <Field id="providers" label="Wat wil je koppelen? *" error={form.errors.providers}>
                 <div className="relative">
                     <select
+                        id="providers"
                         value={form.data.providers[0] ?? ''}
                         onChange={(e) => form.setData('providers', e.target.value ? [e.target.value] : [])}
                         className={cn(
@@ -109,8 +113,9 @@ export function KoppelForm({ providers, preselect }: KoppelFormProps) {
                 </div>
             </Field>
 
-            <Field label="Toelichting (optioneel)" error={form.errors.message}>
+            <Field id="message" label="Toelichting (optioneel)" error={form.errors.message}>
                 <textarea
+                    id="message"
                     value={form.data.message}
                     onChange={(e) => form.setData('message', e.target.value)}
                     placeholder="Welke systemen, datastromen of processen wil je verbinden?"
@@ -159,10 +164,12 @@ export function KoppelForm({ providers, preselect }: KoppelFormProps) {
     );
 }
 
-function Field({ label, error, children }: { label: string; error?: string; children: React.ReactNode }) {
+function Field({ id, label, error, children }: { id: string; label: string; error?: string; children: React.ReactNode }) {
     return (
         <div className="flex flex-col gap-2">
-            <label className="text-xs2 font-medium text-foreground">{label}</label>
+            <label htmlFor={id} className="text-xs2 font-medium text-foreground">
+                {label}
+            </label>
             {children}
             {error && <FieldError message={error} />}
         </div>
@@ -190,15 +197,17 @@ interface TextInputProps {
     value: string;
     onChange: (value: string) => void;
     invalid: boolean;
+    id?: string;
     type?: string;
     placeholder?: string;
     autoComplete?: string;
     mono?: boolean;
 }
 
-function TextInput({ value, onChange, invalid, type = 'text', placeholder, autoComplete, mono = false }: TextInputProps) {
+function TextInput({ value, onChange, invalid, id, type = 'text', placeholder, autoComplete, mono = false }: TextInputProps) {
     return (
         <input
+            id={id}
             type={type}
             value={value}
             onChange={(e) => onChange(e.target.value)}

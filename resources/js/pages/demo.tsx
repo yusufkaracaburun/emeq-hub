@@ -89,8 +89,9 @@ function DemoForm({ slots }: { slots: string[] }) {
         <form onSubmit={submit} className="flex flex-col gap-4" noValidate>
             <p className="text-lg font-semibold text-foreground">Plan je persoonlijke demo</p>
 
-            <Field label="Naam *" error={form.errors.contact_name}>
+            <Field id="contact_name" label="Naam *" error={form.errors.contact_name}>
                 <TextInput
+                    id="contact_name"
                     value={form.data.contact_name}
                     invalid={Boolean(form.errors.contact_name)}
                     autoComplete="name"
@@ -99,8 +100,9 @@ function DemoForm({ slots }: { slots: string[] }) {
                 />
             </Field>
 
-            <Field label="Werk-e-mail *" error={form.errors.email}>
+            <Field id="email" label="Werk-e-mail *" error={form.errors.email}>
                 <TextInput
+                    id="email"
                     type="email"
                     value={form.data.email}
                     invalid={Boolean(form.errors.email)}
@@ -111,8 +113,9 @@ function DemoForm({ slots }: { slots: string[] }) {
                 />
             </Field>
 
-            <Field label="Bedrijf *" error={form.errors.company}>
+            <Field id="company" label="Bedrijf *" error={form.errors.company}>
                 <TextInput
+                    id="company"
                     value={form.data.company}
                     invalid={Boolean(form.errors.company)}
                     autoComplete="organization"
@@ -121,8 +124,9 @@ function DemoForm({ slots }: { slots: string[] }) {
                 />
             </Field>
 
-            <Field label="Wanneer schikt het? *" error={form.errors.preferred_slot}>
+            <Field id="preferred_slot" label="Wanneer schikt het? *" error={form.errors.preferred_slot}>
                 <select
+                    id="preferred_slot"
                     value={form.data.preferred_slot}
                     onChange={(e) => form.setData('preferred_slot', e.target.value)}
                     className={cn(
@@ -142,8 +146,9 @@ function DemoForm({ slots }: { slots: string[] }) {
                 </select>
             </Field>
 
-            <Field label="Toelichting (optioneel)" error={form.errors.message}>
+            <Field id="message" label="Toelichting (optioneel)" error={form.errors.message}>
                 <textarea
+                    id="message"
                     value={form.data.message}
                     onChange={(e) => form.setData('message', e.target.value)}
                     placeholder="Welke systemen of processen wil je tijdens de demo bespreken?"

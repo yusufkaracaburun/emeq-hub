@@ -63,6 +63,10 @@ class LegalController extends Controller
 
         $markdown = (string) preg_replace('/^##\s+\d+[.)]\s*/m', '## ', $markdown);
 
+        // De pagina rendert zelf al een <h1> uit $title; een leidende # in de
+        // markdown-bron zou een tweede <h1> in de body opleveren.
+        $markdown = (string) preg_replace('/^#[ \t]+.*\R+/', '', $markdown, 1);
+
         return Inertia::render('legal', [
             'title' => $title,
             'html' => Str::markdown($markdown, [
