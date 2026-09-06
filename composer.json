@@ -10,10 +10,11 @@
         "akaunting/laravel-money": "^6.0",
         "barryvdh/laravel-dompdf": "^3.1",
         "dedoc/scramble": "^0.13.22",
+        "emeq/dataforseo-api": "^0.2.0",
         "emeq/exact-api": "^0.10.1",
+        "emeq/itheorie-api": "^0.1.0",
         "emeq/mollie-api": "^0.1.0-alpha.1",
         "emeq/snelstart-api": "^0.2.0",
-        "emeq/dataforseo-api": "^0.2.0",
         "filament/filament": "^4.0",
         "inertiajs/inertia-laravel": "^3.1",
         "laravel/framework": "^13.8",
@@ -143,6 +144,10 @@
         {
             "type": "vcs",
             "url": "https://github.com/yusufkaracaburun/emeq-dataforseo-api.git"
+        },
+        {
+            "type": "vcs",
+            "url": "https://github.com/yusufkaracaburun/emeq-itheorie-api.git"
         }
     ]
 }

@@ -6,6 +6,7 @@ namespace App\Filament\Pages;
 
 use App\Enums\Provider;
 use App\Integrations\Exact\Settings\ExactSettings;
+use App\Integrations\Itheorie\Settings\ItheorieSettings;
 use App\Settings\ProviderSettings;
 use BackedEnum;
 use Filament\Forms\Components\TextInput;
@@ -44,9 +45,14 @@ class ManageIntegrationSettings extends Page
     public function mount(): void
     {
         $exact = app(ExactSettings::class);
+        $itheorie = app(ItheorieSettings::class);
         $providers = app(ProviderSettings::class);
 
         $state = [
+            'itheorie_username' => $itheorie->username,
+            'itheorie_password' => $itheorie->password,
+            'itheorie_reseller' => $itheorie->reseller,
+            'itheorie_base_url' => $itheorie->base_url,
             'exact_client_id' => $exact->client_id,
             'exact_client_secret' => $exact->client_secret,
             'exact_redirect_uri' => $exact->redirect_uri,
@@ -77,10 +83,10 @@ class ManageIntegrationSettings extends Page
     /** @return list<Tab> */
     private function providerTabs(): array
     {
-        $tabs = [$this->exactTab()];
+        $tabs = [$this->exactTab(), $this->itheorieTab()];
 
         foreach (Provider::cases() as $provider) {
-            if ($provider === Provider::Exact) {
+            if ($provider === Provider::Exact || $provider === Provider::Itheorie) {
                 continue;
             }
 
@@ -113,6 +119,23 @@ class ManageIntegrationSettings extends Page
                         TextInput::make('exact_webhook_secret')->label('Webhook secret')->password()->revealable()->maxLength(255),
                         TextInput::make('exact_auth_base_url')->label('Auth base URL')->maxLength(255)->placeholder('https://start.exactonline.nl'),
                         TextInput::make('exact_api_base_url')->label('API base URL')->maxLength(255)->placeholder('https://start.exactonline.nl'),
+                    ]),
+            ]);
+    }
+
+    private function itheorieTab(): Tab
+    {
+        return Tab::make('iTheorie')
+            ->schema([
+                $this->availabilitySection(Provider::Itheorie),
+                Section::make()
+                    ->description('Broker-inlog van Emeq zelf. Er is geen koppeling per klant: de Hub koopt namens één reseller-overeenkomst in. Het wachtwoord wordt encrypted opgeslagen.')
+                    ->columns(2)
+                    ->schema([
+                        TextInput::make('itheorie_username')->label('LENS-ID')->maxLength(255),
+                        TextInput::make('itheorie_password')->label('Wachtwoord')->password()->revealable()->maxLength(255),
+                        TextInput::make('itheorie_reseller')->label('Reseller (ULID of KvK-nummer)')->maxLength(64),
+                        TextInput::make('itheorie_base_url')->label('API base URL')->maxLength(255)->placeholder('https://itheorie.nl/api/connect'),
                     ]),
             ]);
     }
@@ -150,6 +173,13 @@ class ManageIntegrationSettings extends Page
         $exact->auth_base_url = (string) $data['exact_auth_base_url'];
         $exact->api_base_url = (string) $data['exact_api_base_url'];
         $exact->save();
+
+        $itheorie = app(ItheorieSettings::class);
+        $itheorie->username = (string) $data['itheorie_username'];
+        $itheorie->password = (string) $data['itheorie_password'];
+        $itheorie->reseller = (string) $data['itheorie_reseller'];
+        $itheorie->base_url = (string) $data['itheorie_base_url'];
+        $itheorie->save();
 
         Notification::make()->title('Providers opgeslagen')->success()->send();
     }

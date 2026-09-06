@@ -21,6 +21,12 @@ return [
         'primary_label' => 'API key (login:password)',
         'oauth_flow_key' => null,
     ],
+    'itheorie' => [
+        'enabled' => env('HUB_PROVIDER_ITHEORIE_ENABLED', false),
+        'encrypted_fields' => [],
+        'primary_label' => 'Broker-inlog (Hub-eigen)',
+        'oauth_flow_key' => null,
+    ],
     'exact' => [
         'enabled' => env('HUB_PROVIDER_EXACT_ENABLED', true),
         'encrypted_fields' => ['access_token', 'refresh_token'],

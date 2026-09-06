@@ -17,6 +17,10 @@ use App\Integrations\Exact\OAuth\ExactOAuthFlow;
 use App\Integrations\Exact\Webhooks\ExactEntityResolver;
 use App\Integrations\Exact\Webhooks\ExactEventResolver;
 use App\Integrations\Exact\Webhooks\ExactHubOriginDetector;
+use App\Integrations\Itheorie\Errors\UpstreamErrorMapper as ItheorieUpstreamErrorMapper;
+use App\Integrations\Itheorie\HubItheorieCredentialResolver;
+use App\Integrations\Itheorie\Webhooks\ItheorieEntityResolver;
+use App\Integrations\Itheorie\Webhooks\ItheorieEventResolver;
 use App\Integrations\Mollie\Errors\UpstreamErrorMapper as MollieUpstreamErrorMapper;
 use App\Integrations\Mollie\HubMollieCredentialResolver;
 use App\Integrations\Mollie\MollieAccessTokenResolver;
@@ -36,6 +40,7 @@ use App\Support\Sentry\SuppressTestEvents;
 use Dedoc\Scramble\Scramble;
 use Dedoc\Scramble\Support\Generator\OpenApi;
 use Dedoc\Scramble\Support\Generator\SecurityScheme;
+use Emeq\ItheorieApi\Contracts\ItheorieCredentialResolver;
 use Emeq\MollieApi\Contracts\MollieCredentialResolver;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Contracts\Foundation\Application;
@@ -54,6 +59,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->scoped(MollieConnectionContext::class);
         $this->app->scoped(BookingWarnings::class);
 
+        $this->app->bind(ItheorieCredentialResolver::class, HubItheorieCredentialResolver::class);
+
         $this->app->singleton(OAuthFlowRegistry::class, function (Application $app): OAuthFlowRegistry {
             $registry = new OAuthFlowRegistry($app);
             $registry->register(Provider::Mollie->value, MollieConnectOAuthFlow::class);
@@ -68,6 +75,7 @@ class AppServiceProvider extends ServiceProvider
             $registry->register(Provider::Mollie->value, MollieUpstreamErrorMapper::class);
             $registry->register(Provider::Snelstart->value, SnelstartUpstreamErrorMapper::class);
             $registry->register(Provider::DataForSeo->value, DataForSeoUpstreamErrorMapper::class);
+            $registry->register(Provider::Itheorie->value, ItheorieUpstreamErrorMapper::class);
 
             return $registry;
         });
@@ -78,6 +86,7 @@ class AppServiceProvider extends ServiceProvider
             $registry->register(Provider::Mollie, MollieEventResolver::class);
             $registry->register(Provider::Snelstart, SnelstartEventResolver::class);
             $registry->register(Provider::DataForSeo, DataForSeoEventResolver::class);
+            $registry->register(Provider::Itheorie, ItheorieEventResolver::class);
 
             return $registry;
         });
@@ -95,6 +104,7 @@ class AppServiceProvider extends ServiceProvider
             $registry->register(Provider::Mollie, MollieEntityResolver::class);
             $registry->register(Provider::Snelstart, SnelstartEntityResolver::class);
             $registry->register(Provider::DataForSeo, DataForSeoEntityResolver::class);
+            $registry->register(Provider::Itheorie, ItheorieEntityResolver::class);
 
             return $registry;
         });

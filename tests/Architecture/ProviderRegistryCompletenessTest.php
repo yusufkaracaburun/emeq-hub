@@ -18,6 +18,7 @@ final class ProviderRegistryCompletenessTest extends TestCase
     private const OAUTH_EXCEPTIONS = [
         'Snelstart' => 'authenticeert met grant_type=clientkey, zonder redirect-flow',
         'DataForSeo' => 'API-key-provider (login:password) — geen OAuth-flow',
+        'Itheorie' => 'broker-inlog van de Hub zelf (basic → bearer) — geen redirect-flow',
     ];
 
     /** @var array<string, string> */
@@ -25,6 +26,7 @@ final class ProviderRegistryCompletenessTest extends TestCase
         'Mollie' => 'betaalprovider — boekt niets',
         'Snelstart' => 'boekhoudkoppeling nog niet gebouwd',
         'DataForSeo' => 'SEO-data-API — geen boekhouding',
+        'Itheorie' => 'inkoop van toegangscodes — geen boekhouding',
     ];
 
     public function test_elke_provider_heeft_een_foutmapper(): void

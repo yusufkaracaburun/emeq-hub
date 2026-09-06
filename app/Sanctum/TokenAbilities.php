@@ -20,6 +20,10 @@ final class TokenAbilities
 
     public const DATAFORSEO_WRITE = 'dataforseo:write';
 
+    public const ITHEORIE_READ = 'itheorie:read';
+
+    public const ITHEORIE_WRITE = 'itheorie:write';
+
     public const ACCOUNTING_READ = 'accounting:read';
 
     public const ACCOUNTING_WRITE = 'accounting:write';
@@ -46,6 +50,8 @@ final class TokenAbilities
             self::EXACT_WRITE,
             self::DATAFORSEO_READ,
             self::DATAFORSEO_WRITE,
+            self::ITHEORIE_READ,
+            self::ITHEORIE_WRITE,
             self::ACCOUNTING_READ,
             self::ACCOUNTING_WRITE,
             self::INTEGRATIONS_MANAGE,

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "dde7935589503ba79dd77f6d8f190cb8",
+    "content-hash": "ccc0afdd5fdbad7fd4f16fcef47813fb",
     "packages": [
         {
             "name": "akaunting/laravel-money",
@@ -1687,6 +1687,100 @@
                 "issues": "https://github.com/yusufkaracaburun/emeq-exact-api/issues"
             },
             "time": "2026-09-02T21:24:24+00:00"
+        },
+        {
+            "name": "emeq/itheorie-api",
+            "version": "v0.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/yusufkaracaburun/emeq-itheorie-api.git",
+                "reference": "4ea84d03ac6a156142a16c4448e7d8baed2ecf2e"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/yusufkaracaburun/emeq-itheorie-api/zipball/4ea84d03ac6a156142a16c4448e7d8baed2ecf2e",
+                "reference": "4ea84d03ac6a156142a16c4448e7d8baed2ecf2e",
+                "shasum": ""
+            },
+            "require": {
+                "ext-json": "*",
+                "illuminate/contracts": "^13.0",
+                "php": "^8.4",
+                "saloonphp/laravel-plugin": "^4.0",
+                "saloonphp/saloon": "^4.0"
+            },
+            "require-dev": {
+                "larastan/larastan": "^3.0",
+                "laravel/pint": "^1.14",
+                "orchestra/testbench": "^11.0",
+                "pestphp/pest": "^4.0",
+                "pestphp/pest-plugin-arch": "^4.0",
+                "pestphp/pest-plugin-laravel": "^4.0",
+                "phpstan/extension-installer": "^1.4",
+                "phpstan/phpstan-deprecation-rules": "^2.0",
+                "phpstan/phpstan-phpunit": "^2.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Emeq\\ItheorieApi\\ItheorieServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Emeq\\ItheorieApi\\": "src/"
+                }
+            },
+            "autoload-dev": {
+                "psr-4": {
+                    "Emeq\\ItheorieApi\\Tests\\": "tests/"
+                }
+            },
+            "scripts": {
+                "post-autoload-dump": [
+                    "@composer run prepare"
+                ],
+                "prepare": [
+                    "@php vendor/bin/testbench package:discover --ansi"
+                ],
+                "analyse": [
+                    "vendor/bin/phpstan analyse"
+                ],
+                "test": [
+                    "vendor/bin/pest"
+                ],
+                "test-coverage": [
+                    "vendor/bin/pest --coverage"
+                ],
+                "format": [
+                    "vendor/bin/pint"
+                ]
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Yusuf Karacaburun",
+                    "email": "info@emeq.nl",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Laravel SDK voor de iTheorie Connect API — Saloon v4, broker-auth met gedeeld bearer-token, DTOs.",
+            "keywords": [
+                "api-client",
+                "emeq",
+                "itheorie",
+                "laravel",
+                "saloon"
+            ],
+            "support": {
+                "source": "https://github.com/yusufkaracaburun/emeq-itheorie-api/tree/v0.1.0",
+                "issues": "https://github.com/yusufkaracaburun/emeq-itheorie-api/issues"
+            },
+            "time": "2026-09-06T10:31:33+00:00"
         },
         {
             "name": "emeq/mollie-api",

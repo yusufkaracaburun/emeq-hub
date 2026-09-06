@@ -18,6 +18,9 @@ use App\Integrations\Exact\Http\Api\PassThroughController as ExactPassThroughCon
 use App\Integrations\Exact\Http\Api\RelationsController as ExactRelationsController;
 use App\Integrations\Exact\Http\Api\VatCodesController as ExactVatCodesController;
 use App\Integrations\Exact\Http\OAuth\ExactCallbackController;
+use App\Integrations\Itheorie\Http\Api\CoursesController as ItheorieCoursesController;
+use App\Integrations\Itheorie\Http\Api\PurchasesController as ItheoriePurchasesController;
+use App\Integrations\Itheorie\Http\Api\StudentsController as ItheorieStudentsController;
 use App\Integrations\Mollie\Http\AccountSubscriptions\AccountSubscriptionController;
 use App\Integrations\Mollie\Http\AccountSubscriptions\PauseController;
 use App\Integrations\Mollie\Http\AccountSubscriptions\ResumeController;
@@ -73,6 +76,18 @@ Route::middleware('auth:sanctum')->group(function (): void {
                 ->name('api.dataforseo.domain-overview');
             Route::get('/backlinks-summary', [DataForSeoBacklinksSummaryController::class, 'show'])
                 ->name('api.dataforseo.backlinks-summary');
+        });
+
+    Route::prefix('itheorie')
+        ->middleware(['feature.provider:itheorie'])
+        ->group(function (): void {
+            Route::get('/courses', [ItheorieCoursesController::class, 'index'])->middleware('ability:itheorie:read,itheorie:write,*')->name('api.itheorie.courses.index');
+            Route::get('/courses/{course}', [ItheorieCoursesController::class, 'show'])->middleware('ability:itheorie:read,itheorie:write,*')->name('api.itheorie.courses.show');
+            Route::get('/purchases', [ItheoriePurchasesController::class, 'index'])->middleware('ability:itheorie:read,itheorie:write,*')->name('api.itheorie.purchases.index');
+            Route::get('/purchases/{purchase}', [ItheoriePurchasesController::class, 'show'])->middleware('ability:itheorie:read,itheorie:write,*')->name('api.itheorie.purchases.show');
+            Route::post('/purchases', [ItheoriePurchasesController::class, 'store'])->middleware(['ability:itheorie:write,*', 'idempotent:required'])->name('api.itheorie.purchases.store');
+            Route::get('/students/{accessCode}', [ItheorieStudentsController::class, 'show'])->middleware('ability:itheorie:read,itheorie:write,*')->name('api.itheorie.students.show');
+            Route::get('/students/{accessCode}/detailed', [ItheorieStudentsController::class, 'showDetailed'])->middleware('ability:itheorie:read,itheorie:write,*')->name('api.itheorie.students.detailed');
         });
 
     Route::middleware('feature.provider:exact')->group(function (): void {

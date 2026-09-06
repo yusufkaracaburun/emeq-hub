@@ -4931,6 +4931,160 @@
                 }
             }
         },
+        "/itheorie/courses": {
+            "get": {
+                "operationId": "itheorie.courses.index",
+                "tags": [
+                    "Courses"
+                ],
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Paginanummer.",
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Aantal cursussen per pagina.",
+                        "schema": {
+                            "type": "integer",
+                            "default": 50
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "const": "serialization_error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "const": "Interne fout bij het serialiseren van het iTheorie-antwoord."
+                                        }
+                                    },
+                                    "required": [
+                                        "error",
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "502": {
+                        "description": "iTheorie gaf een foutmelding terug.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/itheorie/courses/{course}": {
+            "get": {
+                "operationId": "itheorie.courses.show",
+                "tags": [
+                    "Courses"
+                ],
+                "parameters": [
+                    {
+                        "name": "course",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "const": "serialization_error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "const": "Interne fout bij het serialiseren van het iTheorie-antwoord."
+                                        }
+                                    },
+                                    "required": [
+                                        "error",
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "404": {
+                        "description": "Cursus bestaat niet bij iTheorie.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "502": {
+                        "description": "iTheorie gaf een foutmelding terug.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/dataforseo/domain-overview": {
             "get": {
                 "operationId": "dataforseo.domain-overview",
@@ -5031,6 +5185,420 @@
                     },
                     "502": {
                         "description": "DataForSEO gaf een foutmelding terug.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/itheorie/purchases": {
+            "get": {
+                "operationId": "itheorie.purchases.index",
+                "tags": [
+                    "Purchases"
+                ],
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Paginanummer.",
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Aantal aankopen per pagina.",
+                        "schema": {
+                            "type": "integer",
+                            "default": 50
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "const": "serialization_error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "const": "Interne fout bij het serialiseren van het iTheorie-antwoord."
+                                        }
+                                    },
+                                    "required": [
+                                        "error",
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "502": {
+                        "description": "iTheorie gaf een foutmelding terug.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "operationId": "itheorie.purchases.store",
+                "summary": "Koopt \u00e9\u00e9n toegangscode. Onomkeerbaar en gefactureerd, dus Idempotency-Key is verplicht",
+                "tags": [
+                    "Purchases"
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StorePurchaseRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "const": "serialization_error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "const": "Interne fout bij het serialiseren van het iTheorie-antwoord."
+                                        }
+                                    },
+                                    "required": [
+                                        "error",
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "description": "iTheorie wees de aanvraag af.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "description": "Errors overview."
+                                        },
+                                        "errors": {
+                                            "type": "object",
+                                            "description": "A detailed description of each field that failed validation.",
+                                            "additionalProperties": {
+                                                "type": "array",
+                                                "items": {
+                                                    "type": "string"
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "message",
+                                        "errors"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Idempotency-Key ontbreekt of is ongeldig.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "502": {
+                        "description": "iTheorie gaf een foutmelding terug.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/itheorie/purchases/{purchase}": {
+            "get": {
+                "operationId": "itheorie.purchases.show",
+                "tags": [
+                    "Purchases"
+                ],
+                "parameters": [
+                    {
+                        "name": "purchase",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "const": "serialization_error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "const": "Interne fout bij het serialiseren van het iTheorie-antwoord."
+                                        }
+                                    },
+                                    "required": [
+                                        "error",
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "404": {
+                        "description": "Aankoop bestaat niet bij iTheorie.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "502": {
+                        "description": "iTheorie gaf een foutmelding terug.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/itheorie/students/{accessCode}": {
+            "get": {
+                "operationId": "itheorie.students.show",
+                "tags": [
+                    "Students"
+                ],
+                "parameters": [
+                    {
+                        "name": "accessCode",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "const": "serialization_error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "const": "Interne fout bij het serialiseren van het iTheorie-antwoord."
+                                        }
+                                    },
+                                    "required": [
+                                        "error",
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "404": {
+                        "description": "Geen leerling gevonden bij deze toegangscode.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "502": {
+                        "description": "iTheorie gaf een foutmelding terug.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/itheorie/students/{accessCode}/detailed": {
+            "get": {
+                "operationId": "itheorie.students.detailed",
+                "tags": [
+                    "Students"
+                ],
+                "parameters": [
+                    {
+                        "name": "accessCode",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "const": "serialization_error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "const": "Interne fout bij het serialiseren van het iTheorie-antwoord."
+                                        }
+                                    },
+                                    "required": [
+                                        "error",
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "404": {
+                        "description": "Geen leerling gevonden bij deze toegangscode.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "502": {
+                        "description": "iTheorie gaf een foutmelding terug.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -5857,7 +6425,8 @@
                     "mollie",
                     "snelstart",
                     "exact",
-                    "dataforseo"
+                    "dataforseo",
+                    "itheorie"
                 ],
                 "title": "Provider"
             },
@@ -6224,6 +6793,43 @@
                     "lines"
                 ],
                 "title": "StoreDocumentRequest"
+            },
+            "StorePurchaseRequest": {
+                "type": "object",
+                "properties": {
+                    "course": {
+                        "type": "string",
+                        "maxLength": 64
+                    },
+                    "name": {
+                        "type": "string",
+                        "maxLength": 255
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "maxLength": 255
+                    },
+                    "mobile_phone": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "maxLength": 32
+                    },
+                    "permission_to_share_progress": {
+                        "type": [
+                            "boolean",
+                            "null"
+                        ]
+                    }
+                },
+                "required": [
+                    "course",
+                    "name",
+                    "email"
+                ],
+                "title": "StorePurchaseRequest"
             },
             "ValidateDocumentRequest": {
                 "type": "object",

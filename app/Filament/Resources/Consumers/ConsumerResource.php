@@ -158,6 +158,19 @@ class ConsumerResource extends Resource
                 TokenAbilities::CONSUMER_MANAGE_ACCOUNTS,
             ],
         ],
+        'itheorie-read' => [
+            'group' => 'iTheorie',
+            'label' => 'Read-only',
+            'abilities' => [TokenAbilities::ITHEORIE_READ],
+        ],
+        'itheorie-write' => [
+            'group' => 'iTheorie',
+            'label' => 'Read + write (koopt codes)',
+            'abilities' => [
+                TokenAbilities::ITHEORIE_READ,
+                TokenAbilities::ITHEORIE_WRITE,
+            ],
+        ],
         'integrations' => [
             'group' => 'Overig',
             'label' => 'Alleen koppelen (alle providers)',
