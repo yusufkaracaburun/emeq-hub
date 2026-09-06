@@ -10,6 +10,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response as HttpResponse;
 use Illuminate\Support\Facades\Context;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 
 class NormalizeApiErrors
@@ -23,6 +24,19 @@ class NormalizeApiErrors
         }
 
         $status = $response->getStatusCode();
+
+        if ($status === 401 || $status === 403) {
+            $bearer = $request->bearerToken();
+
+            Log::warning('api.auth_rejected', [
+                'status' => $status,
+                'method' => $request->method(),
+                'path' => $request->path(),
+                'consumer_id' => $request->user()?->getKey(),
+                'token_fingerprint' => $bearer ? substr(hash('sha256', $bearer), 0, 12) : null,
+            ]);
+        }
+
         $payload = $this->decode($response);
 
         if ($payload === null || ($payload !== [] && array_is_list($payload))) {
