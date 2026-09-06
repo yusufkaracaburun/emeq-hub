@@ -14,10 +14,14 @@ final class StudentsController
 {
     use ForwardsToItheorie;
 
-    #[ResponseDoc(404, 'Geen leerling gevonden bij deze toegangscode.')]
+    #[ResponseDoc(404, 'Onbekende toegangscode, of een code van een andere consumer.')]
     #[ResponseDoc(502, 'iTheorie gaf een foutmelding terug.')]
     public function show(Request $request, Itheorie $itheorie, string $accessCode): JsonResponse
     {
+        if (! $this->ownsAccessCode($request, $accessCode)) {
+            return $this->notFound();
+        }
+
         return $this->forward(
             $request,
             'GET',
@@ -27,10 +31,14 @@ final class StudentsController
         );
     }
 
-    #[ResponseDoc(404, 'Geen leerling gevonden bij deze toegangscode.')]
+    #[ResponseDoc(404, 'Onbekende toegangscode, of een code van een andere consumer.')]
     #[ResponseDoc(502, 'iTheorie gaf een foutmelding terug.')]
     public function showDetailed(Request $request, Itheorie $itheorie, string $accessCode): JsonResponse
     {
+        if (! $this->ownsAccessCode($request, $accessCode)) {
+            return $this->notFound();
+        }
+
         return $this->forward(
             $request,
             'GET',

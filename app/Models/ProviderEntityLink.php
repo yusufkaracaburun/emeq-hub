@@ -14,6 +14,7 @@ use Illuminate\Support\Carbon;
 /** @property Carbon|null $last_synced_at */
 #[Fillable([
     'connection_id',
+    'consumer_id',
     'provider',
     'administratie_id',
     'entity_type',
@@ -34,6 +35,8 @@ class ProviderEntityLink extends Model
 
     public const ENTITY_RELATION = 'relation';
 
+    public const ENTITY_PURCHASE = 'purchase';
+
     public const ORIGIN_HUB = 'hub';
 
     public const ORIGIN_PROVIDER = 'provider';
@@ -41,6 +44,11 @@ class ProviderEntityLink extends Model
     public function connection(): BelongsTo
     {
         return $this->belongsTo(Connection::class);
+    }
+
+    public function consumer(): BelongsTo
+    {
+        return $this->belongsTo(Consumer::class);
     }
 
     /** @return array<string, string> */

@@ -5196,189 +5196,6 @@
                 }
             }
         },
-        "/itheorie/purchases": {
-            "get": {
-                "operationId": "itheorie.purchases.index",
-                "tags": [
-                    "Purchases"
-                ],
-                "parameters": [
-                    {
-                        "name": "page",
-                        "in": "query",
-                        "description": "Paginanummer.",
-                        "schema": {
-                            "type": "integer",
-                            "default": 1
-                        }
-                    },
-                    {
-                        "name": "limit",
-                        "in": "query",
-                        "description": "Aantal aankopen per pagina.",
-                        "schema": {
-                            "type": "integer",
-                            "default": 50
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "error": {
-                                            "type": "string",
-                                            "const": "serialization_error"
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "const": "Interne fout bij het serialiseren van het iTheorie-antwoord."
-                                        }
-                                    },
-                                    "required": [
-                                        "error",
-                                        "message"
-                                    ]
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "$ref": "#/components/responses/AuthenticationException"
-                    },
-                    "502": {
-                        "description": "iTheorie gaf een foutmelding terug.",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    }
-                }
-            },
-            "post": {
-                "operationId": "itheorie.purchases.store",
-                "summary": "Koopt \u00e9\u00e9n toegangscode. Onomkeerbaar en gefactureerd, dus Idempotency-Key is verplicht",
-                "tags": [
-                    "Purchases"
-                ],
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/StorePurchaseRequest"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "error": {
-                                            "type": "string",
-                                            "const": "serialization_error"
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "const": "Interne fout bij het serialiseren van het iTheorie-antwoord."
-                                        }
-                                    },
-                                    "required": [
-                                        "error",
-                                        "message"
-                                    ]
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "$ref": "#/components/responses/AuthenticationException"
-                    },
-                    "422": {
-                        "description": "iTheorie wees de aanvraag af.",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "description": "Errors overview."
-                                        },
-                                        "errors": {
-                                            "type": "object",
-                                            "description": "A detailed description of each field that failed validation.",
-                                            "additionalProperties": {
-                                                "type": "array",
-                                                "items": {
-                                                    "type": "string"
-                                                }
-                                            }
-                                        }
-                                    },
-                                    "required": [
-                                        "message",
-                                        "errors"
-                                    ]
-                                }
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Idempotency-Key ontbreekt of is ongeldig.",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
-                    "502": {
-                        "description": "iTheorie gaf een foutmelding terug.",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
         "/itheorie/purchases/{purchase}": {
             "get": {
                 "operationId": "itheorie.purchases.show",
@@ -5430,11 +5247,157 @@
                             }
                         }
                     },
+                    "404": {
+                        "description": "Onbekende aankoop, of een aankoop van een andere consumer.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "const": "not_found"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "const": "Onbekend bij iTheorie, of niet van deze consumer."
+                                        }
+                                    },
+                                    "required": [
+                                        "error",
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    },
                     "401": {
                         "$ref": "#/components/responses/AuthenticationException"
                     },
-                    "404": {
-                        "description": "Aankoop bestaat niet bij iTheorie.",
+                    "502": {
+                        "description": "iTheorie gaf een foutmelding terug.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/itheorie/purchases": {
+            "post": {
+                "operationId": "itheorie.purchases.store",
+                "description": "De Idempotency-Key wordt v\u00f3\u00f3r de aankoop duurzaam vastgelegd. Een herhaling\nmet dezelfde sleutel levert de eerste aankoop terug in plaats van een tweede\ncode, ook nadat de idempotency-claim allang is opgeruimd.",
+                "summary": "Koopt \u00e9\u00e9n toegangscode. Onomkeerbaar en gefactureerd",
+                "tags": [
+                    "Purchases"
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StorePurchaseRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "const": "serialization_error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "const": "Interne fout bij het serialiseren van het iTheorie-antwoord."
+                                        }
+                                    },
+                                    "required": [
+                                        "error",
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Een eerdere poging met deze sleutel is halverwege afgebroken.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "const": "purchase_in_flight"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "error",
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "description": "iTheorie wees de aanvraag af.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "description": "Errors overview."
+                                        },
+                                        "errors": {
+                                            "type": "object",
+                                            "description": "A detailed description of each field that failed validation.",
+                                            "additionalProperties": {
+                                                "type": "array",
+                                                "items": {
+                                                    "type": "string"
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "message",
+                                        "errors"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Idempotency-Key ontbreekt of is ongeldig.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -5507,18 +5470,32 @@
                             }
                         }
                     },
-                    "401": {
-                        "$ref": "#/components/responses/AuthenticationException"
-                    },
                     "404": {
-                        "description": "Geen leerling gevonden bij deze toegangscode.",
+                        "description": "Onbekende toegangscode, of een code van een andere consumer.",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "string"
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "const": "not_found"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "const": "Onbekend bij iTheorie, of niet van deze consumer."
+                                        }
+                                    },
+                                    "required": [
+                                        "error",
+                                        "message"
+                                    ]
                                 }
                             }
                         }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
                     },
                     "502": {
                         "description": "iTheorie gaf een foutmelding terug.",
@@ -5584,18 +5561,32 @@
                             }
                         }
                     },
-                    "401": {
-                        "$ref": "#/components/responses/AuthenticationException"
-                    },
                     "404": {
-                        "description": "Geen leerling gevonden bij deze toegangscode.",
+                        "description": "Onbekende toegangscode, of een code van een andere consumer.",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "string"
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "const": "not_found"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "const": "Onbekend bij iTheorie, of niet van deze consumer."
+                                        }
+                                    },
+                                    "required": [
+                                        "error",
+                                        "message"
+                                    ]
                                 }
                             }
                         }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
                     },
                     "502": {
                         "description": "iTheorie gaf een foutmelding terug.",

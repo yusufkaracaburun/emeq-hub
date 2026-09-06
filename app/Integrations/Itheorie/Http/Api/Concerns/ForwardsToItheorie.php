@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Integrations\Itheorie\Http\Api\Concerns;
 
 use App\Enums\Provider;
+use App\Integrations\Itheorie\PurchaseLedger;
 use App\Integrations\PassThrough\PassThroughContext;
 use App\Integrations\PassThrough\PassThroughPipeline;
 use App\Integrations\PassThrough\UpstreamResult;
@@ -15,7 +16,28 @@ use Symfony\Component\HttpFoundation\Response;
 
 trait ForwardsToItheorie
 {
-    public function __construct(private readonly PassThroughPipeline $pipeline) {}
+    public function __construct(
+        private readonly PassThroughPipeline $pipeline,
+        private readonly PurchaseLedger $ledger,
+    ) {}
+
+    private function consumerId(Request $request): int
+    {
+        return (int) $request->user()->getKey();
+    }
+
+    private function ownsAccessCode(Request $request, string $accessCode): bool
+    {
+        return $this->ledger->ownsAccessCode($this->consumerId($request), $accessCode);
+    }
+
+    private function notFound(): JsonResponse
+    {
+        return response()->json([
+            'error' => 'not_found',
+            'message' => 'Onbekend bij iTheorie, of niet van deze consumer.',
+        ], Response::HTTP_NOT_FOUND);
+    }
 
     /** @return array{page: int, limit: int} */
     private function pagination(Request $request): array
@@ -43,7 +65,7 @@ trait ForwardsToItheorie
             $response = $this->pipeline->run(
                 new PassThroughContext(
                     provider: Provider::Itheorie,
-                    consumerId: (int) $request->user()->getKey(),
+                    consumerId: $this->consumerId($request),
                     accountId: null,
                     connectionId: null,
                     method: $method,

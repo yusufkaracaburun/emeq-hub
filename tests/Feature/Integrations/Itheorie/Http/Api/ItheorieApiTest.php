@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Feature\Integrations\Itheorie\Http\Api;
 
 use App\Models\Consumer;
+use App\Models\ProviderEntityLink;
 use App\Sanctum\TokenAbilities;
 use Emeq\ItheorieApi\Contracts\ItheorieCredentialResolver;
 use Emeq\ItheorieApi\Data\ItheorieCredentials;
@@ -152,6 +153,111 @@ final class ItheorieApiTest extends TestCase
         $this->assertSame('/itheorie/courses', $row->path);
         $this->assertStringNotContainsString('geheim', json_encode($row, JSON_THROW_ON_ERROR));
         $this->assertStringNotContainsString('jwt-1', json_encode($row, JSON_THROW_ON_ERROR));
+    }
+
+    public function test_een_herhaling_na_de_idempotency_retentie_koopt_nog_steeds_niets(): void
+    {
+        $mock = MockClient::global([
+            MockResponse::make(['token' => 'jwt-1']),
+            MockResponse::make(['id' => 'p-1', 'accessCode' => 'ABC1234']),
+            MockResponse::make(['id' => 'p-1', 'accessCode' => 'ABC1234']),
+        ]);
+
+        [, $token] = $this->consumerWithToken([TokenAbilities::ITHEORIE_WRITE]);
+        $payload = ['course' => 'c-1', 'name' => 'Jan', 'email' => 'jan@example.com'];
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->withHeader('Idempotency-Key', 'order-99')
+            ->postJson('/v1/itheorie/purchases', $payload)
+            ->assertOk();
+
+        // De idempotency-claim is geprund; alleen het duurzame register rest.
+        DB::table('idempotency_keys')->delete();
+
+        $second = $this->withHeader('Authorization', "Bearer {$token}")
+            ->withHeader('Idempotency-Key', 'order-99')
+            ->postJson('/v1/itheorie/purchases', $payload);
+
+        $second->assertOk()->assertJsonPath('access_code', 'ABC1234');
+
+        // Twee auth + aankoop + ophalen: geen tweede POST naar de partner.
+        $mock->assertSentCount(3);
+        $this->assertSame(1, ProviderEntityLink::where('provider', 'itheorie')->count());
+    }
+
+    public function test_een_afgebroken_poging_wordt_niet_stilletjes_herhaald(): void
+    {
+        [$consumer, $token] = $this->consumerWithToken([TokenAbilities::ITHEORIE_WRITE]);
+
+        ProviderEntityLink::create([
+            'consumer_id' => $consumer->getKey(),
+            'provider' => 'itheorie',
+            'entity_type' => ProviderEntityLink::ENTITY_PURCHASE,
+            'external_id' => 'order-stuk',
+            'origin' => ProviderEntityLink::ORIGIN_HUB,
+        ]);
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->withHeader('Idempotency-Key', 'order-stuk')
+            ->postJson('/v1/itheorie/purchases', ['course' => 'c-1', 'name' => 'Jan', 'email' => 'jan@example.com'])
+            ->assertStatus(409)
+            ->assertJsonPath('error', 'purchase_in_flight');
+    }
+
+    public function test_een_afwijzing_van_de_partner_geeft_de_sleutel_weer_vrij(): void
+    {
+        MockClient::global([
+            MockResponse::make(['token' => 'jwt-1']),
+            MockResponse::make([
+                'status' => 400,
+                'code' => 400003,
+                'message' => 'Incorrect data entered',
+                'violations' => [['code' => 'not_blank', 'message' => 'Leeg', 'propertyPath' => 'email']],
+            ], 400),
+        ]);
+
+        [$consumer, $token] = $this->consumerWithToken([TokenAbilities::ITHEORIE_WRITE]);
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->withHeader('Idempotency-Key', 'order-fout')
+            ->postJson('/v1/itheorie/purchases', ['course' => 'c-1', 'name' => 'Jan', 'email' => 'jan@example.com'])
+            ->assertStatus(422);
+
+        $this->assertSame(0, ProviderEntityLink::where('consumer_id', $consumer->getKey())->count());
+    }
+
+    public function test_een_consumer_ziet_de_aankoop_van_een_andere_consumer_niet(): void
+    {
+        $other = Consumer::factory()->create();
+        ProviderEntityLink::create([
+            'consumer_id' => $other->getKey(),
+            'provider' => 'itheorie',
+            'entity_type' => ProviderEntityLink::ENTITY_PURCHASE,
+            'external_id' => 'order-van-een-ander',
+            'provider_entity_id' => 'p-geheim',
+            'payload_fingerprint' => hash('sha256', 'GEHEIM123'),
+            'origin' => ProviderEntityLink::ORIGIN_HUB,
+        ]);
+
+        [, $token] = $this->consumerWithToken([TokenAbilities::ITHEORIE_READ]);
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->getJson('/v1/itheorie/purchases/p-geheim')
+            ->assertNotFound();
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->getJson('/v1/itheorie/students/GEHEIM123')
+            ->assertNotFound();
+    }
+
+    public function test_de_lijst_van_alle_aankopen_bestaat_niet(): void
+    {
+        [, $token] = $this->consumerWithToken([TokenAbilities::ITHEORIE_READ]);
+
+        // 405 en niet 404: het pad bestaat nog voor de POST, alleen de lijst is weg.
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->getJson('/v1/itheorie/purchases')
+            ->assertStatus(405);
     }
 
     /**

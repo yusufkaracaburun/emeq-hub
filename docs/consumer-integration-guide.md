@@ -36,6 +36,7 @@ Hub-intern — niet in de consumer-app.
   - [Betalingen horen niet in de boeking](#betalingen-horen-niet-in-de-boeking)
   - [Boekhoud-mapping (zelf-service, optioneel)](#boekhoud-mapping-zelf-service-optioneel)
 - [SEO-data opzoeken (DataForSEO)](#seo-data-opzoeken-dataforseo)
+- [Theorie-toegangscodes kopen (iTheorie)](#theorie-toegangscodes-kopen-itheorie)
 - [Webhooks ontvangen](#webhooks-ontvangen)
 - [Valkuilen](#valkuilen)
 
@@ -1050,6 +1051,92 @@ Bouw een backlinks-opvraag tegen de emeq Hub: `GET
 header `X-Account-Id: {external_id van de tenant}` (server-side afgeleid).
 Toon een nette foutmelding bij `422 missing_target`, `502 upstream_error` en
 `404 connection_not_found` (geen actieve DataForSEO-Connection voor dit Account).
+```
+
+## Theorie-toegangscodes kopen (iTheorie)
+
+Anders dan alle andere koppelingen: hier is **geen Connection en geen Account**.
+De Hub koopt namens één reseller-overeenkomst van Emeq, dus je stuurt geen
+`X-Account-Id` mee. Je hebt alleen een PAT met `itheorie:read` of
+`itheorie:write` nodig.
+
+**Een aankoop kost geld en is onomkeerbaar.** Daarom is `Idempotency-Key`
+verplicht op de POST, en legt de Hub die sleutel duurzaam vast — langer dan de
+idempotency-claim zelf leeft.
+
+### Cursussen ophalen
+
+```http
+GET /v1/itheorie/courses?page=1&limit=50
+GET /v1/itheorie/courses/{course}
+```
+
+Ability `itheorie:read`. Elke cursus draagt een `offer` met `current_price`; dat
+is je inkoopprijs, handig als ondergrens-controle vóór je verkoopt.
+
+### Een toegangscode kopen
+
+```http
+POST /v1/itheorie/purchases
+Idempotency-Key: {jouw order-id}
+Content-Type: application/json
+
+{
+  "course": "01GC7ABB22TT7Y6883YPVHFCG5",
+  "name": "Jan Jansen",
+  "email": "jan@example.com",
+  "mobile_phone": "0612345678",
+  "permission_to_share_progress": true
+}
+```
+
+Ability `itheorie:write`. Antwoord bevat `id`, `access_code`, `login_url`,
+`direct_login_url` en `expires_at`. **`expires_at` kan `null` zijn** — toon
+"geldig tot" alleen als het gevuld is.
+
+`permission_to_share_progress` bepaalt of je later de voortgang van deze
+leerling mag opvragen. Zet hem alleen op `true` als de leerling daarmee heeft
+ingestemd.
+
+Bewaar `access_code` en `id` zelf. De Hub bewaart de code niet.
+
+Herhaal je dezelfde `Idempotency-Key`, dan krijg je de eerste aankoop terug en
+wordt er geen tweede code gekocht — ook dagen later nog.
+
+### Wat er gebeurt als het misgaat
+
+| Status | `error` | Betekenis |
+|---|---|---|
+| `400` | `idempotency_key_required` | Header ontbreekt. Er is niets gekocht. |
+| `409` | `purchase_in_flight` | Een eerdere poging met deze sleutel is afgebroken zonder bekende uitkomst. **Niet automatisch opnieuw proberen** — mogelijk is er al een code gekocht. Neem contact op. |
+| `422` | `validation_failed` | iTheorie wees de aanvraag af. Er is niets gekocht; corrigeren en dezelfde sleutel opnieuw gebruiken mag. |
+| `502` | `upstream_auth_failed` / `upstream_config_error` | De inlog of het reseller-account van de Hub is stuk. Niets aan jouw kant; melden. |
+| `502` / `504` | `upstream_error` / `upstream_timeout` | Onbekende uitkomst. De aankoop kán zijn doorgegaan. Dezelfde sleutel opnieuw sturen is veilig: dat geeft `409` in plaats van een tweede aankoop. |
+
+### Een aankoop of leerling terugkijken
+
+```http
+GET /v1/itheorie/purchases/{purchase}
+GET /v1/itheorie/students/{accessCode}
+GET /v1/itheorie/students/{accessCode}/detailed
+```
+
+Ability `itheorie:read`. Je ziet uitsluitend je eigen aankopen: een aankoop van
+een andere consumer geeft `404`, niet `403`. Er is bewust **geen** endpoint dat
+alle aankopen opsomt.
+
+**🤖 Agent-prompt**
+
+```text
+Bouw een aankoop van een theorie-toegangscode tegen de emeq Hub: `POST
+/v1/itheorie/purchases` via de proxy, met een verplichte header
+`Idempotency-Key` die je van je eigen order-id afleidt (dezelfde order = dezelfde
+sleutel, altijd). Stuur geen X-Account-Id. Bewaar `access_code` en `id` uit het
+antwoord in je eigen database.
+
+Behandel `409 purchase_in_flight` NOOIT als "opnieuw proberen": toon een melding
+dat de bestelling handmatig nagekeken moet worden. Bij `502` of `504` mag je
+dezelfde sleutel opnieuw sturen; dat koopt gegarandeerd geen tweede code.
 ```
 
 ## Webhooks ontvangen

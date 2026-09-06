@@ -115,6 +115,7 @@ Presets (`ConsumerResource::PAT_PRESETS`):
 | `accounting-write` | `accounting:read`, `accounting:write`, `consumer:manage-accounts` | Boeken zonder zelf te koppelen |
 | `integrations` | `integrations:manage`, `consumer:manage-accounts` | Alleen de koppel-lifecycle |
 | `exact-*` / `mollie-* `/ `snelstart-*` / `dataforseo-*` | provider-specifieke read/write/connect | Consumer wil rechtstreekse pass-through op één provider |
+| `itheorie-read` / `itheorie-write` | `itheorie:read` (+ `itheorie:write`) | Consumer koopt theorie-toegangscodes. Géén `integrations:manage` of `consumer:manage-accounts`: iTheorie kent geen Connection en geen Account |
 | `admin` | `admin` | Intern |
 
 Eén PAT per Consumer, niet per tenant. De tenant-scheiding zit in het Account,

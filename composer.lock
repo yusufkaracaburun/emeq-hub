@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ccc0afdd5fdbad7fd4f16fcef47813fb",
+    "content-hash": "41c66aad837619cc9eaacf86a16452d0",
     "packages": [
         {
             "name": "akaunting/laravel-money",
@@ -1690,16 +1690,16 @@
         },
         {
             "name": "emeq/itheorie-api",
-            "version": "v0.1.0",
+            "version": "v0.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/yusufkaracaburun/emeq-itheorie-api.git",
-                "reference": "4ea84d03ac6a156142a16c4448e7d8baed2ecf2e"
+                "reference": "ac7776bb4b288e28930c4d838018c77941cf6d6a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/yusufkaracaburun/emeq-itheorie-api/zipball/4ea84d03ac6a156142a16c4448e7d8baed2ecf2e",
-                "reference": "4ea84d03ac6a156142a16c4448e7d8baed2ecf2e",
+                "url": "https://api.github.com/repos/yusufkaracaburun/emeq-itheorie-api/zipball/ac7776bb4b288e28930c4d838018c77941cf6d6a",
+                "reference": "ac7776bb4b288e28930c4d838018c77941cf6d6a",
                 "shasum": ""
             },
             "require": {
@@ -1777,10 +1777,10 @@
                 "saloon"
             ],
             "support": {
-                "source": "https://github.com/yusufkaracaburun/emeq-itheorie-api/tree/v0.1.0",
+                "source": "https://github.com/yusufkaracaburun/emeq-itheorie-api/tree/v0.2.0",
                 "issues": "https://github.com/yusufkaracaburun/emeq-itheorie-api/issues"
             },
-            "time": "2026-09-06T10:31:33+00:00"
+            "time": "2026-09-06T11:32:13+00:00"
         },
         {
             "name": "emeq/mollie-api",
