@@ -118,13 +118,27 @@ final class PurchasesController
                     throw $e;
                 }
 
-                $this->ledger->record($link, (string) $result['id'], $result['access_code'] ?? null);
+                $accessCode = $result['access_code'] ?? null;
 
-                Log::info('itheorie.purchase.completed', [
-                    'consumer_id' => $consumerId,
-                    'reference' => $reference,
-                    'purchase_id' => $result['id'],
-                ]);
+                $this->ledger->record($link, (string) $result['id'], $accessCode);
+
+                if ($accessCode === null || $accessCode === '') {
+                    // Dit is bij iTheorie eerder gebeurd (aankoop 01KC6P19PXV5RXM70B6BX78KR4,
+                    // 11-12-2025) en LENS vond de oorzaak niet. De aankoop is dan wél
+                    // gefactureerd, dus dit is geld zonder tegenprestatie en het lost
+                    // zichzelf niet op.
+                    Log::error('itheorie.purchase.zonder_toegangscode', [
+                        'consumer_id' => $consumerId,
+                        'reference' => $reference,
+                        'purchase_id' => $result['id'],
+                    ]);
+                } else {
+                    Log::info('itheorie.purchase.completed', [
+                        'consumer_id' => $consumerId,
+                        'reference' => $reference,
+                        'purchase_id' => $result['id'],
+                    ]);
+                }
 
                 return $result;
             },

@@ -11,6 +11,7 @@ use Emeq\ItheorieApi\Contracts\ItheorieCredentialResolver;
 use Emeq\ItheorieApi\Data\ItheorieCredentials;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Saloon\Http\Faking\MockClient;
 use Saloon\Http\Faking\MockResponse;
 use Tests\TestCase;
@@ -258,6 +259,30 @@ final class ItheorieApiTest extends TestCase
         $this->withHeader('Authorization', "Bearer {$token}")
             ->getJson('/v1/itheorie/purchases')
             ->assertStatus(405);
+    }
+
+    public function test_een_aankoop_zonder_toegangscode_wordt_als_fout_gelogd(): void
+    {
+        MockClient::global([
+            MockResponse::make(['token' => 'jwt-1']),
+            MockResponse::make(['id' => 'p-leeg', 'accessCode' => null, 'expiresAt' => null]),
+        ]);
+
+        Log::spy();
+
+        [, $token] = $this->consumerWithToken([TokenAbilities::ITHEORIE_WRITE]);
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->withHeader('Idempotency-Key', 'order-leeg')
+            ->postJson('/v1/itheorie/purchases', ['course' => 'c-1', 'name' => 'Jan', 'email' => 'jan@example.com'])
+            ->assertOk()
+            ->assertJsonPath('access_code', null);
+
+        Log::shouldHaveReceived('error')
+            ->withArgs(fn (string $bericht): bool => $bericht === 'itheorie.purchase.zonder_toegangscode');
+
+        // De aankoop is wél gedaan en blijft vastgelegd, anders koopt een herhaling er een tweede bij.
+        $this->assertSame('p-leeg', ProviderEntityLink::where('provider', 'itheorie')->sole()->provider_entity_id);
     }
 
     /**
