@@ -122,13 +122,19 @@ prod-ssr-check: ## [server] Controleer of de publieke HTML server-gerenderd is
 	@# Inertia stil client-side (throw_on_error=false) en krijgt een crawler een
 	@# lege head — met een groene health-check en een groene testsuite, want die
 	@# assert op Inertia-props, niet op de gerenderde body.
-	@if $(PROD) exec -T app curl -s http://localhost/ | grep -q '$(SSR_MARKER)'; then \
-		echo "  ✅ crawler-view ok — head staat in de HTML."; \
-	else \
-		echo "  ❌ lege head: de ssr-service rendert niet. Crawlers zien geen titel,"; \
-		echo "     canonical of JSON-LD. Check 'make prod-ps' en 'make prod-logs'."; \
-		exit 1; \
-	fi
+	@# De ssr-service laadt de bundel bij boot, dus vlak na de restart in prod-up
+	@# is hij nog niet warm. Zonder deze lus faalt de check bij élke deploy, en dan
+	@# leer je de melding negeren — juist wanneer hij een echt kapotte SSR meldt.
+	@for i in $$(seq 1 10); do \
+		if $(PROD) exec -T app curl -s http://localhost/ | grep -q '$(SSR_MARKER)'; then \
+			echo "  ✅ crawler-view ok — head staat in de HTML."; \
+			exit 0; \
+		fi; \
+		sleep 2; \
+	done; \
+	echo "  ❌ lege head: de ssr-service rendert niet. Crawlers zien geen titel,"; \
+	echo "     canonical of JSON-LD. Check 'make prod-ps' en 'make prod-logs'."; \
+	exit 1
 
 prod-rsync: ## [lokaal] Push de working tree naar de server (PROD_HOST/PROD_PATH), zonder git
 	rsync -az --delete \
