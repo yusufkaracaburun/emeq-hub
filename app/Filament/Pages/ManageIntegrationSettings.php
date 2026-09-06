@@ -132,9 +132,18 @@ class ManageIntegrationSettings extends Page
                     ->description('Broker-inlog van Emeq zelf. Er is geen koppeling per klant: de Hub koopt namens één reseller-overeenkomst in. Het wachtwoord wordt encrypted opgeslagen.')
                     ->columns(2)
                     ->schema([
-                        TextInput::make('itheorie_username')->label('LENS-ID')->maxLength(255),
-                        TextInput::make('itheorie_password')->label('Wachtwoord')->password()->revealable()->maxLength(255),
-                        TextInput::make('itheorie_reseller')->label('Reseller (ULID of KvK-nummer)')->maxLength(64),
+                        TextInput::make('itheorie_username')
+                            ->label('LENS-ID')
+                            ->helperText('De gebruikersnaam van de broker-login bij LENS. Bij ons hetzelfde nummer als het resellernummer hiernaast.')
+                            ->maxLength(255),
+                        TextInput::make('itheorie_password')
+                            ->label('Wachtwoord')
+                            ->helperText('Het wachtwoord bij die broker-login. Encrypted opgeslagen.')
+                            ->password()->revealable()->maxLength(255),
+                        TextInput::make('itheorie_reseller')
+                            ->label('Resellernummer')
+                            ->helperText('KvK-nummer of ULID. Staat in elk API-pad; fout invullen geeft 404003.')
+                            ->maxLength(64),
                         TextInput::make('itheorie_base_url')->label('API base URL')->maxLength(255)->placeholder('https://itheorie.nl/api/connect'),
                     ]),
             ]);
