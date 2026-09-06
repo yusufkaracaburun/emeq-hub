@@ -8,13 +8,21 @@ use Spatie\LaravelSettings\Settings;
 
 class ItheorieSettings extends Settings
 {
+    public string $environment;
+
     public string $username;
 
     public string $password;
 
-    public string $reseller;
-
     public string $base_url;
+
+    public string $username_test;
+
+    public string $password_test;
+
+    public string $base_url_test;
+
+    public string $reseller;
 
     public static function group(): string
     {
@@ -24,6 +32,6 @@ class ItheorieSettings extends Settings
     /** @return list<string> */
     public static function encrypted(): array
     {
-        return ['password'];
+        return ['password', 'password_test'];
     }
 }

@@ -15,15 +15,28 @@ final readonly class HubItheorieCredentialResolver implements ItheorieCredential
 
     public function resolve(): ItheorieCredentials
     {
-        if ($this->settings->username === '' || $this->settings->password === '' || $this->settings->reseller === '') {
-            throw new RuntimeException('iTheorie-credentials ontbreken. Vul ze in onder Beheer → Providers.');
+        $test = $this->settings->environment === 'test';
+
+        $username = $test ? $this->settings->username_test : $this->settings->username;
+        $password = $test ? $this->settings->password_test : $this->settings->password;
+        $baseUrl = $test ? $this->settings->base_url_test : $this->settings->base_url;
+
+        if ($username === '' || $password === '' || $baseUrl === '') {
+            throw new RuntimeException(sprintf(
+                'iTheorie-credentials voor de %s-omgeving ontbreken. Vul ze in onder Beheer → Providers.',
+                $test ? 'test' : 'live',
+            ));
+        }
+
+        if ($this->settings->reseller === '') {
+            throw new RuntimeException('iTheorie-resellernummer ontbreekt. Vul het in onder Beheer → Providers.');
         }
 
         return new ItheorieCredentials(
-            username: $this->settings->username,
-            password: $this->settings->password,
+            username: $username,
+            password: $password,
             reseller: $this->settings->reseller,
-            baseUrl: $this->settings->base_url !== '' ? $this->settings->base_url : 'https://itheorie.nl/api/connect',
+            baseUrl: $baseUrl,
         );
     }
 }

@@ -9,6 +9,7 @@ use App\Integrations\Exact\Settings\ExactSettings;
 use App\Integrations\Itheorie\Settings\ItheorieSettings;
 use App\Settings\ProviderSettings;
 use BackedEnum;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
@@ -49,10 +50,14 @@ class ManageIntegrationSettings extends Page
         $providers = app(ProviderSettings::class);
 
         $state = [
+            'itheorie_environment' => $itheorie->environment,
+            'itheorie_reseller' => $itheorie->reseller,
             'itheorie_username' => $itheorie->username,
             'itheorie_password' => $itheorie->password,
-            'itheorie_reseller' => $itheorie->reseller,
             'itheorie_base_url' => $itheorie->base_url,
+            'itheorie_username_test' => $itheorie->username_test,
+            'itheorie_password_test' => $itheorie->password_test,
+            'itheorie_base_url_test' => $itheorie->base_url_test,
             'exact_client_id' => $exact->client_id,
             'exact_client_secret' => $exact->client_secret,
             'exact_redirect_uri' => $exact->redirect_uri,
@@ -128,23 +133,55 @@ class ManageIntegrationSettings extends Page
         return Tab::make('iTheorie')
             ->schema([
                 $this->availabilitySection(Provider::Itheorie),
-                Section::make()
-                    ->description('Broker-inlog van Emeq zelf. Er is geen koppeling per klant: de Hub koopt namens één reseller-overeenkomst in. Het wachtwoord wordt encrypted opgeslagen.')
+                Section::make('Omgeving')
+                    ->description('Bepaalt welke inlog én welke API-URL gebruikt worden. Eén schakelaar, zodat die twee nooit uit elkaar kunnen lopen.')
+                    ->schema([
+                        Select::make('itheorie_environment')
+                            ->label('Actieve omgeving')
+                            ->options(['live' => 'Live — aankopen kosten geld', 'test' => 'Test — sandbox van iTheorie'])
+                            ->selectablePlaceholder(false)
+                            ->required()
+                            ->live()
+                            ->helperText(fn (mixed $state): string => $state === 'test'
+                                ? 'Test staat aan. Aankopen gaan naar de sandbox en kosten niets — maar leveren ook geen bruikbare code aan een echte koper.'
+                                : 'Live staat aan. Elke aankoop kost €9,70 excl. btw en is onomkeerbaar.'),
+                    ]),
+                Section::make('Gedeeld')
+                    ->schema([
+                        TextInput::make('itheorie_reseller')
+                            ->label('Resellernummer')
+                            ->helperText('KvK-nummer of ULID. Staat in elk API-pad; fout invullen geeft 404003. Geldt voor beide omgevingen.')
+                            ->maxLength(64),
+                    ]),
+                Section::make('Live')
                     ->columns(2)
                     ->schema([
                         TextInput::make('itheorie_username')
                             ->label('LENS-ID')
-                            ->helperText('De gebruikersnaam van de broker-login bij LENS. Bij ons hetzelfde nummer als het resellernummer hiernaast.')
+                            ->helperText('De gebruikersnaam van de broker-login bij LENS. Bij ons hetzelfde nummer als het resellernummer.')
                             ->maxLength(255),
                         TextInput::make('itheorie_password')
                             ->label('Wachtwoord')
-                            ->helperText('Het wachtwoord bij die broker-login. Encrypted opgeslagen.')
                             ->password()->revealable()->maxLength(255),
-                        TextInput::make('itheorie_reseller')
-                            ->label('Resellernummer')
-                            ->helperText('KvK-nummer of ULID. Staat in elk API-pad; fout invullen geeft 404003.')
-                            ->maxLength(64),
-                        TextInput::make('itheorie_base_url')->label('API base URL')->maxLength(255)->placeholder('https://itheorie.nl/api/connect'),
+                        TextInput::make('itheorie_base_url')
+                            ->label('API base URL')
+                            ->maxLength(255)
+                            ->placeholder('https://itheorie.nl/api/connect'),
+                    ]),
+                Section::make('Test')
+                    ->description('Aparte inlog voor de sandbox. Leeg laten kan; de Hub weigert dan te starten in test-modus in plaats van stilletjes op live terug te vallen.')
+                    ->columns(2)
+                    ->schema([
+                        TextInput::make('itheorie_username_test')
+                            ->label('LENS-ID (test)')
+                            ->maxLength(255),
+                        TextInput::make('itheorie_password_test')
+                            ->label('Wachtwoord (test)')
+                            ->password()->revealable()->maxLength(255),
+                        TextInput::make('itheorie_base_url_test')
+                            ->label('API base URL (test)')
+                            ->maxLength(255)
+                            ->placeholder('https://test.itheorie.nl/api/connect'),
                     ]),
             ]);
     }
@@ -184,10 +221,14 @@ class ManageIntegrationSettings extends Page
         $exact->save();
 
         $itheorie = app(ItheorieSettings::class);
+        $itheorie->environment = $data['itheorie_environment'] === 'test' ? 'test' : 'live';
+        $itheorie->reseller = (string) $data['itheorie_reseller'];
         $itheorie->username = (string) $data['itheorie_username'];
         $itheorie->password = (string) $data['itheorie_password'];
-        $itheorie->reseller = (string) $data['itheorie_reseller'];
         $itheorie->base_url = (string) $data['itheorie_base_url'];
+        $itheorie->username_test = (string) $data['itheorie_username_test'];
+        $itheorie->password_test = (string) $data['itheorie_password_test'];
+        $itheorie->base_url_test = (string) $data['itheorie_base_url_test'];
         $itheorie->save();
 
         Notification::make()->title('Providers opgeslagen')->success()->send();
