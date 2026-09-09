@@ -13,21 +13,21 @@ use PHPUnit\Framework\TestCase;
 
 class UpstreamErrorMapperTest extends TestCase
 {
-    public function test_401_maps_to_masked_502_with_auth_short_code(): void
+    public function test_401_maps_to_masked_503_with_auth_short_code(): void
     {
         $mapped = UpstreamErrorMapper::mapException(AuthenticationException::apiUnauthorized(401, 'nope'));
 
-        $this->assertSame(502, $mapped['status']);
+        $this->assertSame(503, $mapped['status']);
         $this->assertSame(401, $mapped['body']['upstream_status']);
         $this->assertSame('authentication_failed', $mapped['body']['upstream_detail']);
         $this->assertSame('exact_auth', $mapped['short_code']);
     }
 
-    public function test_403_masks_to_502_but_is_distinct_in_audit(): void
+    public function test_403_masks_to_503_but_is_distinct_in_audit(): void
     {
         $mapped = UpstreamErrorMapper::mapException(AuthenticationException::apiUnauthorized(403, 'forbidden'));
 
-        $this->assertSame(502, $mapped['status']);
+        $this->assertSame(503, $mapped['status']);
         $this->assertSame(403, $mapped['body']['upstream_status']);
         $this->assertSame('forbidden', $mapped['body']['upstream_detail']);
         $this->assertSame('exact_forbidden', $mapped['short_code']);
@@ -74,7 +74,7 @@ class UpstreamErrorMapperTest extends TestCase
     {
         $mapped = UpstreamErrorMapper::mapException(ServerException::fromResponse(500, 'plain text boom'));
 
-        $this->assertSame(502, $mapped['status']);
+        $this->assertSame(503, $mapped['status']);
         $this->assertSame('Upstream returned server error', $mapped['body']['message']);
     }
 
@@ -96,11 +96,11 @@ class UpstreamErrorMapperTest extends TestCase
         $this->assertArrayNotHasKey('Retry-After', $mapped['headers']);
     }
 
-    public function test_408_request_too_broad_maps_to_504_with_hint(): void
+    public function test_408_request_too_broad_maps_to_503_with_hint(): void
     {
         $mapped = UpstreamErrorMapper::mapException(RequestTooBroadException::fromBody('too broad'));
 
-        $this->assertSame(504, $mapped['status']);
+        $this->assertSame(503, $mapped['status']);
         $this->assertSame(408, $mapped['body']['upstream_status']);
         $this->assertSame('exact_request_too_broad', $mapped['short_code']);
         $this->assertStringContainsString('sync-endpoints', $mapped['body']['message']);

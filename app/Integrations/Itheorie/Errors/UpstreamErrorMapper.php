@@ -21,7 +21,7 @@ final class UpstreamErrorMapper implements MapsUpstreamExceptions
 
         if ($exception instanceof FatalRequestException) {
             return [
-                'status' => 504,
+                'status' => 503,
                 'body' => [
                     'error' => 'upstream_timeout',
                     'message' => 'iTheorie did not respond in time',
@@ -33,7 +33,7 @@ final class UpstreamErrorMapper implements MapsUpstreamExceptions
         }
 
         return [
-            'status' => 502,
+            'status' => 503,
             'body' => [
                 'error' => 'upstream_error',
                 'message' => 'Unexpected upstream failure',
@@ -47,7 +47,7 @@ final class UpstreamErrorMapper implements MapsUpstreamExceptions
 
     /**
      * Broker-, token- en reseller-fouten zijn de credential van de Hub zelf, niet die
-     * van de consumer. Die komen daarom terug als 502 en nooit als 401 of 403.
+     * van de consumer. Die komen daarom terug als 503 en nooit als 401 of 403.
      *
      * @return array{status: int, body: array<string, mixed>, headers: array<string, string>, short_code: ?string}
      */
@@ -58,9 +58,9 @@ final class UpstreamErrorMapper implements MapsUpstreamExceptions
             ErrorKind::NotFound => [404, 'not_found', 'itheorie_not_found'],
             ErrorKind::BadRequest => [400, 'bad_request', 'itheorie_bad_request'],
             ErrorKind::ServiceUnavailable => [503, 'upstream_unavailable', 'itheorie_unavailable'],
-            ErrorKind::Token, ErrorKind::Authentication => [502, 'upstream_auth_failed', 'itheorie_auth'],
-            ErrorKind::Forbidden, ErrorKind::Reseller => [502, 'upstream_config_error', 'itheorie_config'],
-            ErrorKind::Unknown => [502, 'upstream_error', 'itheorie_error'],
+            ErrorKind::Token, ErrorKind::Authentication => [503, 'upstream_auth_failed', 'itheorie_auth'],
+            ErrorKind::Forbidden, ErrorKind::Reseller => [503, 'upstream_config_error', 'itheorie_config'],
+            ErrorKind::Unknown => [503, 'upstream_error', 'itheorie_error'],
         };
 
         $body = [

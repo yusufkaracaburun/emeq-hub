@@ -17,7 +17,7 @@ final class UpstreamErrorMapper implements MapsUpstreamExceptions
     {
         if ($exception instanceof DataForSeoTaskException) {
             return [
-                'status' => 502,
+                'status' => 503,
                 'body' => [
                     'error' => 'upstream_error',
                     'message' => $exception->statusMessage,
@@ -31,7 +31,7 @@ final class UpstreamErrorMapper implements MapsUpstreamExceptions
 
         if ($exception instanceof FatalRequestException) {
             return [
-                'status' => 504,
+                'status' => 503,
                 'body' => [
                     'error' => 'upstream_timeout',
                     'message' => 'DataForSEO did not respond in time',
@@ -57,7 +57,7 @@ final class UpstreamErrorMapper implements MapsUpstreamExceptions
             $statusMessage = is_array($body) ? ($body['status_message'] ?? null) : null;
 
             return [
-                'status' => $status >= 500 ? 502 : $status,
+                'status' => $status >= 500 ? 503 : $status,
                 'body' => [
                     'error' => match (true) {
                         $status === 401 || $status === 403 => 'upstream_auth_failed',
@@ -75,7 +75,7 @@ final class UpstreamErrorMapper implements MapsUpstreamExceptions
         }
 
         return [
-            'status' => 502,
+            'status' => 503,
             'body' => [
                 'error' => 'upstream_error',
                 'message' => 'Unexpected upstream failure',

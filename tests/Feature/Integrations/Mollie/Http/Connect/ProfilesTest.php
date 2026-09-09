@@ -138,7 +138,7 @@ class ProfilesTest extends TestCase
             ->assertJsonValidationErrors(['name', 'website', 'email', 'phone']);
     }
 
-    public function test_get_profiles_with_auth_failure_maps_to_502_mollie_auth_failed(): void
+    public function test_get_profiles_with_auth_failure_maps_to_503_mollie_auth_failed(): void
     {
         $this->setPartnerToken('access_partner_prof_004');
         [, $token] = $this->setupMollieConnectConsumer([TokenAbilities::MOLLIE_READ]);
@@ -149,12 +149,12 @@ class ProfilesTest extends TestCase
 
         $response = $this->callMollieConnect($token, 'GET', '/v1/mollie/connect/profiles');
 
-        $response->assertStatus(502)
+        $response->assertStatus(503)
             ->assertJsonPath('error', 'mollie_auth_failed');
 
         $this->assertDatabaseHas('pass_through_calls', [
             'provider' => 'mollie',
-            'status' => 502,
+            'status' => 503,
             'upstream_error' => 'mollie_auth',
             'token_type' => 'partner',
         ]);

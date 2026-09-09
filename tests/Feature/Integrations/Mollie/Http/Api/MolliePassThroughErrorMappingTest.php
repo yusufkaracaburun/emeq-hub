@@ -30,19 +30,19 @@ class MolliePassThroughErrorMappingTest extends TestCase
         ];
     }
 
-    public function test_authentication_exception_maps_to_502_mollie_auth_failed(): void
+    public function test_authentication_exception_maps_to_503_mollie_auth_failed(): void
     {
         [, $token] = $this->setupMollieConsumer([TokenAbilities::MOLLIE_WRITE]);
         $this->bindMollieStub(fn () => new AuthenticationException('upstream auth failure'));
 
         $response = $this->callMollie($token, 'POST', '/v1/mollie/payments', $this->payload());
 
-        $response->assertStatus(502)
+        $response->assertStatus(503)
             ->assertJsonPath('error', 'mollie_auth_failed');
 
         $this->assertDatabaseHas('pass_through_calls', [
             'provider' => 'mollie',
-            'status' => 502,
+            'status' => 503,
             'upstream_error' => 'mollie_auth',
         ]);
     }
@@ -102,48 +102,48 @@ class MolliePassThroughErrorMappingTest extends TestCase
         ]);
     }
 
-    public function test_server_exception_maps_to_502_mollie_unavailable(): void
+    public function test_server_exception_maps_to_503_mollie_unavailable(): void
     {
         [, $token] = $this->setupMollieConsumer([TokenAbilities::MOLLIE_WRITE]);
         $this->bindMollieStub(fn () => new ServerException('mollie 503'));
 
         $response = $this->callMollie($token, 'POST', '/v1/mollie/payments', $this->payload());
 
-        $response->assertStatus(502)
+        $response->assertStatus(503)
             ->assertJsonPath('error', 'mollie_unavailable');
 
         $this->assertDatabaseHas('pass_through_calls', [
             'provider' => 'mollie',
-            'status' => 502,
+            'status' => 503,
             'upstream_error' => 'mollie_5xx',
         ]);
     }
 
-    public function test_unexpected_runtime_exception_maps_to_502_mollie_error(): void
+    public function test_unexpected_runtime_exception_maps_to_503_mollie_error(): void
     {
         [, $token] = $this->setupMollieConsumer([TokenAbilities::MOLLIE_WRITE]);
         $this->bindMollieStub(fn () => new RuntimeException('unexpected boom'));
 
         $response = $this->callMollie($token, 'POST', '/v1/mollie/payments', $this->payload());
 
-        $response->assertStatus(502)
+        $response->assertStatus(503)
             ->assertJsonPath('error', 'mollie_error');
 
         $this->assertDatabaseHas('pass_through_calls', [
             'provider' => 'mollie',
-            'status' => 502,
+            'status' => 503,
             'upstream_error' => 'mollie_unknown',
         ]);
     }
 
-    public function test_mollie_exception_base_maps_to_502_mollie_error(): void
+    public function test_mollie_exception_base_maps_to_503_mollie_error(): void
     {
         [, $token] = $this->setupMollieConsumer([TokenAbilities::MOLLIE_WRITE]);
         $this->bindMollieStub(fn () => new MollieException('base exception fallback'));
 
         $response = $this->callMollie($token, 'POST', '/v1/mollie/payments', $this->payload());
 
-        $response->assertStatus(502)
+        $response->assertStatus(503)
             ->assertJsonPath('error', 'mollie_error');
     }
 }

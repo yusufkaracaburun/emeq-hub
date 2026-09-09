@@ -51,7 +51,7 @@ final class DomainOverviewTaskFailureTest extends TestCase
             ->withHeader('X-Account-Id', 'school-A')
             ->getJson('/v1/dataforseo/domain-overview?domain=example.com');
 
-        $response->assertStatus(502)
+        $response->assertStatus(503)
             ->assertJson([
                 'error' => 'upstream_error',
                 'upstream_status' => 40501,

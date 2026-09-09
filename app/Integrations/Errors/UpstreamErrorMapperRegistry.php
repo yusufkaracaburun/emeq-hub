@@ -36,7 +36,7 @@ final class UpstreamErrorMapperRegistry
 
         if ($mapper === null) {
             return [
-                'status' => 502,
+                'status' => 503,
                 'body' => [
                     'error' => 'upstream_error',
                     'message' => 'Unexpected upstream failure',

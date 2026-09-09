@@ -52,7 +52,7 @@ final class UpstreamErrorMapper implements MapsUpstreamExceptions
 
         if ($exception instanceof AuthenticationException) {
             return [
-                'status' => 502,
+                'status' => 503,
                 'body' => [
                     'error' => 'mollie_auth_failed',
                     'message' => 'Upstream auth failed',
@@ -92,7 +92,7 @@ final class UpstreamErrorMapper implements MapsUpstreamExceptions
 
         if ($exception instanceof ServerException) {
             return [
-                'status' => 502,
+                'status' => 503,
                 'body' => [
                     'error' => 'mollie_unavailable',
                     'message' => 'Mollie returned 5xx',
@@ -105,7 +105,7 @@ final class UpstreamErrorMapper implements MapsUpstreamExceptions
         }
 
         return [
-            'status' => 502,
+            'status' => 503,
             'body' => [
                 'error' => 'mollie_error',
                 'message' => 'Unexpected upstream failure',

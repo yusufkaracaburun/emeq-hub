@@ -41,7 +41,7 @@ class UpstreamErrorMapperRegistryTest extends TestCase
     {
         $mapped = $this->registry()->map('moneybird', new RuntimeException('boom'));
 
-        $this->assertSame(502, $mapped['status']);
+        $this->assertSame(503, $mapped['status']);
         $this->assertSame('unmapped_provider', $mapped['short_code']);
     }
 

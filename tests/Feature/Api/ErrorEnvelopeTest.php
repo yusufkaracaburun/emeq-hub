@@ -218,6 +218,41 @@ class ErrorEnvelopeTest extends TestCase
         $this->assertSame(['a', 'b'], $response->json());
     }
 
+    public function test_an_upstream_failure_never_leaves_as_502_or_504(): void
+    {
+        Route::middleware('api')->get('/v1/__test_bad_gateway', fn () => response()->json([
+            'error' => 'upstream_error',
+            'message' => 'Unexpected upstream failure',
+            'upstream_status' => 403,
+        ], 502));
+
+        Route::middleware('api')->get('/v1/__test_gateway_timeout', fn () => response()->json([
+            'error' => 'upstream_timeout',
+            'message' => 'iTheorie did not respond in time',
+            'upstream_status' => 0,
+        ], 504));
+
+        $this->getJson('/v1/__test_bad_gateway')
+            ->assertStatus(503)
+            ->assertJsonPath('error', 'upstream_error')
+            ->assertJsonPath('upstream_status', 403)
+            ->assertJsonPath('category', ErrorCode::ProviderUnavailable->value)
+            ->assertJsonStructure(['error', 'category', 'retryable', 'message', 'request_id']);
+
+        $this->getJson('/v1/__test_gateway_timeout')
+            ->assertStatus(503)
+            ->assertJsonPath('error', 'upstream_timeout')
+            ->assertJsonPath('category', ErrorCode::ProviderUnavailable->value)
+            ->assertJsonStructure(['error', 'category', 'retryable', 'message', 'request_id']);
+    }
+
+    public function test_a_non_json_upstream_failure_is_still_rewritten(): void
+    {
+        Route::middleware('api')->get('/v1/__test_html_bad_gateway', fn () => response('<html>stuk</html>', 502));
+
+        $this->get('/v1/__test_html_bad_gateway')->assertStatus(503);
+    }
+
     public function test_non_v1_routes_are_untouched(): void
     {
         $this->getJson('/webhooks/exact')->assertStatus(405);

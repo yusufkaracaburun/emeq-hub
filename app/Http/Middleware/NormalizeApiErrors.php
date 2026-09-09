@@ -23,7 +23,7 @@ class NormalizeApiErrors
             return $response;
         }
 
-        $status = $response->getStatusCode();
+        $status = $this->withoutInterceptedStatus($response);
 
         if ($status === 401 || $status === 403) {
             $bearer = $request->bearerToken();
@@ -60,6 +60,24 @@ class NormalizeApiErrors
         $response->setContent((string) json_encode($enveloped));
 
         return $response;
+    }
+
+    /**
+     * Cloudflare vervangt een origin-respons met 502 of 504 door zijn eigen
+     * foutpagina, waarmee de consumer de body en de request_id verliest. 503
+     * draagt dezelfde categorie en komt wel ongeschonden door.
+     */
+    private function withoutInterceptedStatus(Response $response): int
+    {
+        $status = $response->getStatusCode();
+
+        if ($status !== 502 && $status !== 504) {
+            return $status;
+        }
+
+        $response->setStatusCode(503);
+
+        return 503;
     }
 
     /** @return array<mixed>|null */

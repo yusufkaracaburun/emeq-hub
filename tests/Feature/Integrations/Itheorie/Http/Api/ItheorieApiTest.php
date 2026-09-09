@@ -119,7 +119,7 @@ final class ItheorieApiTest extends TestCase
 
         $this->withHeader('Authorization', "Bearer {$token}")
             ->getJson('/v1/itheorie/courses')
-            ->assertStatus(502)
+            ->assertStatus(503)
             ->assertJsonPath('error', 'upstream_auth_failed');
     }
 

@@ -51,7 +51,7 @@ final class BacklinksSummaryTaskFailureTest extends TestCase
             ->withHeader('X-Account-Id', 'school-A')
             ->getJson('/v1/dataforseo/backlinks-summary?target=invalid');
 
-        $response->assertStatus(502)
+        $response->assertStatus(503)
             ->assertJson([
                 'error' => 'upstream_error',
                 'upstream_status' => 40501,

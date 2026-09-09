@@ -409,7 +409,7 @@ class ProviderEntityLinkTest extends TestCase
 
         [$consumer, $connection] = $this->consumerWithExactConnection('school1');
 
-        $this->postDocument($consumer, $this->salesInvoicePayload())->assertStatus(502);
+        $this->postDocument($consumer, $this->salesInvoicePayload())->assertStatus(503);
 
         $document = FinancialDocument::fromArray($this->salesInvoicePayload());
         $lock = app(ProviderEntityLinkRecorder::class)->administrationLock(

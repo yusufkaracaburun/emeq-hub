@@ -65,11 +65,11 @@ final class PassThroughPipelineTest extends TestCase
             fn () => throw new RuntimeException('kapot'),
         );
 
-        $this->assertSame(502, $response->getStatusCode());
+        $this->assertSame(503, $response->getStatusCode());
         $this->assertSame('application/json', $response->headers->get('Content-Type'));
 
         $call = PassThroughCall::sole();
-        $this->assertSame(502, $call->status);
+        $this->assertSame(503, $call->status);
         $this->assertNotNull($call->upstream_error);
     }
 

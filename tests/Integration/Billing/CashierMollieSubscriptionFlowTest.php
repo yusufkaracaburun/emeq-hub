@@ -91,8 +91,8 @@ class CashierMollieSubscriptionFlowTest extends IntegrationTestCase
         $response = $this->withHeader('Authorization', "Bearer {$token}")
             ->deleteJson("/v1/admin/billing/subscriptions/{$subscriptionId}");
 
-        $this->assertContains($response->status(), [204, 502], sprintf(
-            'Cancel-call moet 204 (success) of 502 (subscription_cancel_failed wegens missing '
+        $this->assertContains($response->status(), [204, 503], sprintf(
+            'Cancel-call moet 204 (success) of 503 (subscription_cancel_failed wegens missing '
             .'mollie_subscription_id-koppeling op deze testrow) zijn, kreeg %d: %s',
             $response->status(),
             $response->content(),

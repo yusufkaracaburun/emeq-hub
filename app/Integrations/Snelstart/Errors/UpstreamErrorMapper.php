@@ -20,7 +20,7 @@ final class UpstreamErrorMapper implements MapsUpstreamExceptions
     {
         if ($exception instanceof AuthenticationException) {
             return [
-                'status' => 502,
+                'status' => 503,
                 'body' => [
                     'error' => 'upstream_error',
                     'message' => 'Upstream auth failed',
@@ -34,7 +34,7 @@ final class UpstreamErrorMapper implements MapsUpstreamExceptions
 
         if ($exception instanceof ServerException) {
             return [
-                'status' => 502,
+                'status' => 503,
                 'body' => [
                     'error' => 'upstream_error',
                     'message' => 'Upstream returned server error',
@@ -93,7 +93,7 @@ final class UpstreamErrorMapper implements MapsUpstreamExceptions
 
         if ($exception instanceof FatalRequestException) {
             return [
-                'status' => 504,
+                'status' => 503,
                 'body' => [
                     'error' => 'upstream_timeout',
                     'message' => 'Upstream did not respond in time',
@@ -105,7 +105,7 @@ final class UpstreamErrorMapper implements MapsUpstreamExceptions
         }
 
         return [
-            'status' => 502,
+            'status' => 503,
             'body' => [
                 'error' => 'upstream_error',
                 'message' => 'Unexpected upstream failure',

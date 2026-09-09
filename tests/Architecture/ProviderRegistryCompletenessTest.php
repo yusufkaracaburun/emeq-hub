@@ -36,7 +36,7 @@ final class ProviderRegistryCompletenessTest extends TestCase
         foreach (Provider::cases() as $provider) {
             $this->assertTrue($registry->supports($provider->value), sprintf(
                 'Provider %s heeft geen MapsUpstreamExceptions. Registreer er een in '
-                .'AppServiceProvider, anders wordt elke partner-fout een 502.',
+                .'AppServiceProvider, anders wordt elke partner-fout een 503.',
                 $provider->name,
             ));
         }

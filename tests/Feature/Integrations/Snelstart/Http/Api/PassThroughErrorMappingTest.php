@@ -35,7 +35,7 @@ class PassThroughErrorMappingTest extends TestCase
         parent::tearDown();
     }
 
-    public function test_snelstart_401_maps_to_502_with_snelstart_auth_short_code(): void
+    public function test_snelstart_401_maps_to_503_with_snelstart_auth_short_code(): void
     {
         [, $token, $account] = $this->setupSnelstartConsumer();
 
@@ -47,15 +47,15 @@ class PassThroughErrorMappingTest extends TestCase
             ->withHeader('X-Account-Id', $account->external_id)
             ->getJson('/v1/snelstart/echo/ping');
 
-        $response->assertStatus(502);
+        $response->assertStatus(503);
         $response->assertJsonPath('error', 'upstream_error');
 
         $row = PassThroughCall::query()->first();
         $this->assertSame('snelstart_auth', $row->upstream_error);
-        $this->assertSame(502, $row->status);
+        $this->assertSame(503, $row->status);
     }
 
-    public function test_snelstart_503_maps_to_502_with_snelstart_5xx_short_code(): void
+    public function test_snelstart_503_maps_to_503_with_snelstart_5xx_short_code(): void
     {
         [, $token, $account] = $this->setupSnelstartConsumer();
 
@@ -67,7 +67,7 @@ class PassThroughErrorMappingTest extends TestCase
             ->withHeader('X-Account-Id', $account->external_id)
             ->getJson('/v1/snelstart/echo/ping');
 
-        $response->assertStatus(502);
+        $response->assertStatus(503);
         $response->assertJsonPath('error', 'upstream_error');
 
         $row = PassThroughCall::query()->first();
@@ -140,7 +140,7 @@ class PassThroughErrorMappingTest extends TestCase
         $this->assertNull($row->upstream_error);
     }
 
-    public function test_network_timeout_maps_to_504_with_snelstart_timeout_short_code(): void
+    public function test_network_timeout_maps_to_503_with_snelstart_timeout_short_code(): void
     {
         [, $token, $account] = $this->setupSnelstartConsumer();
 
@@ -157,12 +157,12 @@ class PassThroughErrorMappingTest extends TestCase
             ->withHeader('X-Account-Id', $account->external_id)
             ->getJson('/v1/snelstart/echo/ping');
 
-        $response->assertStatus(504);
+        $response->assertStatus(503);
         $response->assertJsonPath('error', 'upstream_timeout');
 
         $row = PassThroughCall::query()->first();
         $this->assertSame('snelstart_timeout', $row->upstream_error);
-        $this->assertSame(504, $row->status);
+        $this->assertSame(503, $row->status);
     }
 
     /** @return array{0: Consumer, 1: string, 2: Account} */

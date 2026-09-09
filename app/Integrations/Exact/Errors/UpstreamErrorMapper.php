@@ -25,7 +25,7 @@ final class UpstreamErrorMapper implements MapsUpstreamExceptions
             $forbidden = $exception->apiStatus === 403;
 
             return [
-                'status' => 502,
+                'status' => 503,
                 'body' => [
                     'error' => 'upstream_error',
                     'message' => 'Upstream auth failed',
@@ -39,7 +39,7 @@ final class UpstreamErrorMapper implements MapsUpstreamExceptions
 
         if ($exception instanceof RequestTooBroadException) {
             return [
-                'status' => 504,
+                'status' => 503,
                 'body' => [
                     'error' => 'upstream_request_too_broad',
                     'message' => 'Exact weigerde de request als te breed — verfijn de $filter/$select of gebruik de sync-endpoints.',
@@ -94,7 +94,7 @@ final class UpstreamErrorMapper implements MapsUpstreamExceptions
             }
 
             return [
-                'status' => 502,
+                'status' => 503,
                 'body' => [
                     'error' => 'upstream_error',
                     'message' => 'Upstream returned server error',
@@ -152,7 +152,7 @@ final class UpstreamErrorMapper implements MapsUpstreamExceptions
 
         if ($exception instanceof FatalRequestException) {
             return [
-                'status' => 504,
+                'status' => 503,
                 'body' => [
                     'error' => 'upstream_timeout',
                     'message' => 'Upstream did not respond in time',
@@ -164,7 +164,7 @@ final class UpstreamErrorMapper implements MapsUpstreamExceptions
         }
 
         return [
-            'status' => 502,
+            'status' => 503,
             'body' => [
                 'error' => 'upstream_error',
                 'message' => 'Unexpected upstream failure',

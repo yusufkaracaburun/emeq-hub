@@ -225,12 +225,12 @@ class PassThroughTest extends TestCase
         $this->withHeader('Authorization', "Bearer {$token}")
             ->withHeader('X-Account-Id', 'school1')
             ->getJson('/v1/exact/crm/Accounts')
-            ->assertStatus(502)
+            ->assertStatus(503)
             ->assertJsonPath('upstream_status', 403);
 
         $this->assertDatabaseHas('pass_through_calls', [
             'provider' => 'exact',
-            'status' => 502,
+            'status' => 503,
             'upstream_error' => 'exact_forbidden',
         ]);
     }
@@ -248,7 +248,7 @@ class PassThroughTest extends TestCase
             $this->withHeader('Authorization', "Bearer {$token}")
                 ->withHeader('X-Account-Id', 'school1')
                 ->getJson('/v1/exact/crm/Accounts')
-                ->assertStatus(502);
+                ->assertStatus(503);
         }
 
         $this->withHeader('Authorization', "Bearer {$token}")
@@ -296,7 +296,7 @@ class PassThroughTest extends TestCase
         $this->withHeader('Authorization', "Bearer {$token}")
             ->withHeader('X-Account-Id', 'b')
             ->getJson('/v1/exact/crm/Accounts')
-            ->assertStatus(502);
+            ->assertStatus(503);
     }
 
     public function test_pass_through_without_division_returns_409(): void

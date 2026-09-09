@@ -84,7 +84,7 @@ class AdminSubscriptionCreateTest extends TestCase
                 'plan_slug' => 'naschool-license',
             ]);
 
-        $this->assertContains($response->status(), [201, 202, 502], sprintf(
+        $this->assertContains($response->status(), [201, 202, 503], sprintf(
             'Verwachte een handled status maar kreeg %d: %s',
             $response->status(),
             $response->content(),

@@ -99,7 +99,7 @@ class ClientLinksTest extends TestCase
         $this->assertSame('ck-test-xyz', $stub->lastIdempotencyKey);
     }
 
-    public function test_post_client_link_with_mollie_auth_failure_maps_to_502_mollie_auth_failed(): void
+    public function test_post_client_link_with_mollie_auth_failure_maps_to_503_mollie_auth_failed(): void
     {
         $this->setPartnerToken('access_partner_test_auth');
         [, $token] = $this->setupMollieConnectConsumer([TokenAbilities::MOLLIE_WRITE]);
@@ -110,13 +110,13 @@ class ClientLinksTest extends TestCase
 
         $response = $this->callMollieConnect($token, 'POST', '/v1/mollie/connect/client-links', $this->validPayload());
 
-        $response->assertStatus(502)
+        $response->assertStatus(503)
             ->assertJsonPath('error', 'mollie_auth_failed')
             ->assertJsonPath('upstream_status', 401);
 
         $this->assertDatabaseHas('pass_through_calls', [
             'provider' => 'mollie',
-            'status' => 502,
+            'status' => 503,
             'upstream_error' => 'mollie_auth',
             'token_type' => 'partner',
         ]);

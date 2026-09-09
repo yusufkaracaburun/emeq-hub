@@ -25,11 +25,11 @@ class UpstreamErrorMapperTest extends TestCase
         $this->assertNull($result['short_code']);
     }
 
-    public function test_authentication_exception_maps_to_502_with_short_code_mollie_auth(): void
+    public function test_authentication_exception_maps_to_503_with_short_code_mollie_auth(): void
     {
         $result = UpstreamErrorMapper::mapException(new AuthenticationException('401 from Mollie'));
 
-        $this->assertSame(502, $result['status']);
+        $this->assertSame(503, $result['status']);
         $this->assertSame('mollie_auth_failed', $result['body']['error']);
         $this->assertSame('mollie_auth', $result['short_code']);
     }
@@ -52,29 +52,29 @@ class UpstreamErrorMapperTest extends TestCase
         $this->assertNull($result['short_code']);
     }
 
-    public function test_server_exception_maps_to_502_with_short_code_mollie_5xx(): void
+    public function test_server_exception_maps_to_503_with_short_code_mollie_5xx(): void
     {
         $result = UpstreamErrorMapper::mapException(new ServerException('500 from Mollie'));
 
-        $this->assertSame(502, $result['status']);
+        $this->assertSame(503, $result['status']);
         $this->assertSame('mollie_unavailable', $result['body']['error']);
         $this->assertSame('mollie_5xx', $result['short_code']);
     }
 
-    public function test_base_mollie_exception_maps_to_502_mollie_error_unknown(): void
+    public function test_base_mollie_exception_maps_to_503_mollie_error_unknown(): void
     {
         $result = UpstreamErrorMapper::mapException(new MollieException('unknown'));
 
-        $this->assertSame(502, $result['status']);
+        $this->assertSame(503, $result['status']);
         $this->assertSame('mollie_error', $result['body']['error']);
         $this->assertSame('mollie_unknown', $result['short_code']);
     }
 
-    public function test_unexpected_throwable_maps_to_502_mollie_error_unknown(): void
+    public function test_unexpected_throwable_maps_to_503_mollie_error_unknown(): void
     {
         $result = UpstreamErrorMapper::mapException(new \RuntimeException('whoops'));
 
-        $this->assertSame(502, $result['status']);
+        $this->assertSame(503, $result['status']);
         $this->assertSame('mollie_error', $result['body']['error']);
         $this->assertSame('mollie_unknown', $result['short_code']);
     }
