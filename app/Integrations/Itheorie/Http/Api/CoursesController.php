@@ -17,7 +17,7 @@ final class CoursesController
 
     #[QueryParameter('page', description: 'Paginanummer.', type: 'integer', default: 1)]
     #[QueryParameter('limit', description: 'Aantal cursussen per pagina.', type: 'integer', default: 50)]
-    #[ResponseDoc(502, 'iTheorie gaf een foutmelding terug.')]
+    #[ResponseDoc(503, 'iTheorie gaf een foutmelding terug.')]
     public function index(Request $request, Itheorie $itheorie): JsonResponse
     {
         ['page' => $page, 'limit' => $limit] = $this->pagination($request);
@@ -32,7 +32,7 @@ final class CoursesController
     }
 
     #[ResponseDoc(404, 'Cursus bestaat niet bij iTheorie.')]
-    #[ResponseDoc(502, 'iTheorie gaf een foutmelding terug.')]
+    #[ResponseDoc(503, 'iTheorie gaf een foutmelding terug.')]
     public function show(Request $request, Itheorie $itheorie, string $course): JsonResponse
     {
         return $this->forward(

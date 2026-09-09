@@ -15,7 +15,7 @@ final class StudentsController
     use ForwardsToItheorie;
 
     #[ResponseDoc(404, 'Onbekende toegangscode, of een code van een andere consumer.')]
-    #[ResponseDoc(502, 'iTheorie gaf een foutmelding terug.')]
+    #[ResponseDoc(503, 'iTheorie gaf een foutmelding terug.')]
     public function show(Request $request, Itheorie $itheorie, string $accessCode): JsonResponse
     {
         if (! $this->ownsAccessCode($request, $accessCode)) {
@@ -32,7 +32,7 @@ final class StudentsController
     }
 
     #[ResponseDoc(404, 'Onbekende toegangscode, of een code van een andere consumer.')]
-    #[ResponseDoc(502, 'iTheorie gaf een foutmelding terug.')]
+    #[ResponseDoc(503, 'iTheorie gaf een foutmelding terug.')]
     public function showDetailed(Request $request, Itheorie $itheorie, string $accessCode): JsonResponse
     {
         if (! $this->ownsAccessCode($request, $accessCode)) {

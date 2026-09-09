@@ -27,7 +27,7 @@ final class DomainOverviewController
     #[QueryParameter('domain', description: 'Domein waarvoor het overzicht wordt opgevraagd.', required: true, type: 'string')]
     #[QueryParameter('location_name', description: 'DataForSEO-locatienaam.', type: 'string', default: 'Netherlands')]
     #[ResponseDoc(404, 'Geen actieve DataForSEO-Connection voor dit Account.')]
-    #[ResponseDoc(502, 'DataForSEO gaf een foutmelding terug.')]
+    #[ResponseDoc(503, 'DataForSEO gaf een foutmelding terug.')]
     public function show(Request $request, DataForSeo $dataForSeo): JsonResponse
     {
         $domain = $request->string('domain')->toString();

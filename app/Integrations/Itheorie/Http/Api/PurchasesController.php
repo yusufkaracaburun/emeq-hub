@@ -21,7 +21,7 @@ final class PurchasesController
     use ForwardsToItheorie;
 
     #[ResponseDoc(404, 'Onbekende aankoop, of een aankoop van een andere consumer.')]
-    #[ResponseDoc(502, 'iTheorie gaf een foutmelding terug.')]
+    #[ResponseDoc(503, 'iTheorie gaf een foutmelding terug.')]
     public function show(Request $request, Itheorie $itheorie, string $purchase): JsonResponse
     {
         if (! $this->ledger->ownsPurchase($this->consumerId($request), $purchase)) {
@@ -52,7 +52,7 @@ final class PurchasesController
     #[ResponseDoc(400, 'Idempotency-Key ontbreekt of is ongeldig.')]
     #[ResponseDoc(409, 'Een eerdere poging met deze sleutel is halverwege afgebroken.')]
     #[ResponseDoc(422, 'iTheorie wees de aanvraag af.')]
-    #[ResponseDoc(502, 'iTheorie gaf een foutmelding terug.')]
+    #[ResponseDoc(503, 'iTheorie gaf een foutmelding terug.')]
     public function store(StorePurchaseRequest $request, Itheorie $itheorie): JsonResponse
     {
         $validated = $request->validated();
