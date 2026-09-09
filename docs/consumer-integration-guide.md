@@ -925,9 +925,15 @@ blijven retryen op `provider_disabled` levert nooit een resultaat op.
 
 Vuistregel voor retries: alleen `RATE_LIMITED`, `PROVIDER_UNAVAILABLE` en
 `INTERNAL_ERROR` zijn het opnieuw proberen waard (met dezelfde `Idempotency-Key`). De
-rest verandert niet door het nog eens te sturen. Eén uitzondering op die regel:
-`provider_disabled` draagt vandaag `"retryable": true` terwijl het dat niet is —
-kijk daar naar `error`, niet naar `retryable`.
+rest verandert niet door het nog eens te sturen.
+
+Eén uitzondering op die regel: **`provider_disabled` gaat niet vanzelf over,
+ongeacht waar je op brancht.** Het veld `retryable` staat er vandaag ten onrechte
+op `true`, maar dat veld negeren helpt je niet: elke retry-strategie die doorgaat
+op "alles behalve een harde afwijzing" blijft proberen aan een kraan die een
+beheerder heeft dichtgedraaid. Een begrensde veger vangt dat niet af, die laat de
+opdracht alleen stil verlopen als het venster dichtgaat. Vang `provider_disabled`
+apart af en meld hem aan een mens.
 
 `PROVIDER_ERROR` betekent dat de boekhoudpartner het afwees, `INTERNAL_ERROR` dat het
 aan onze kant misging — dat onderscheid bepaalt bij wie je moet zijn.
