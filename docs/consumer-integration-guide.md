@@ -880,7 +880,7 @@ staat in de body — laat je gebruiker kiezen en stuur `party.relation_id`) ·
 `422 upstream_rejected` (het pakket wees de boeking functioneel af, bv. een ongeldig
 btw-nummer — **niet retryen**, corrigeer het document: `message` is een leesbare
 uitleg, `provider_message` de rauwe pakket-tekst) ·
-`503 provider_disabled` · `502/503/504` upstream (pakket onbereikbaar/onderhoud/timeout —
+`503 provider_disabled` · `503` upstream (pakket onbereikbaar/onderhoud/timeout —
 echt transient, mét `Retry-After` waar relevant; **wél** retrybaar).
 Elke fout draagt `{ "status": "failed", "external_id": "…", "error": "…", "message": "…" }`.
 
@@ -907,6 +907,15 @@ endpoint zelf teruggeeft:
 - **`request_id`** — stuur deze mee bij een supportvraag; daarmee is de hele keten
   (jouw request → onze verwerking → de partner-call → de terugmelding) in één keer
   terug te vinden. Je kunt hem ook zelf bepalen door `X-Request-Id` mee te sturen.
+
+**Een upstream-storing komt altijd terug als `503`.** Vroeger waren dat `502` en
+`504`, maar Cloudflare vervangt precies die twee statussen door zijn eigen
+foutpagina — zonder body, zonder `request_id`. De Hub stuurt ze daarom niet meer.
+Welke storing het was staat onverkort in `error`: `upstream_error`,
+`upstream_timeout`, `upstream_auth_failed`, `upstream_config_error` of
+`upstream_unavailable`. Branch op `error` of `category`, nooit op het getal —
+`category` blijft `PROVIDER_UNAVAILABLE` voor alle vijf, precies zoals bij `502`
+en `504`.
 
 Vuistregel voor retries: alleen `RATE_LIMITED`, `PROVIDER_UNAVAILABLE` en
 `INTERNAL_ERROR` zijn het opnieuw proberen waard (met dezelfde `Idempotency-Key`). De
@@ -1008,7 +1017,7 @@ X-Account-Id: {external_id}
 
 Foutcodes volgen de generieke [foutenvelope](#foutenvelope-alle-v1-endpoints):
 een DataForSEO-fout (ontbrekende koppeling, ongeldige domain, partner-foutmelding)
-komt terug als `502 upstream_error` met `upstream_status` op de DataForSEO-eigen
+komt terug als `503 upstream_error` met `upstream_status` op de DataForSEO-eigen
 task-statuscode.
 
 **🤖 Agent-prompt**
@@ -1017,7 +1026,7 @@ task-statuscode.
 Bouw een domeinoverzicht-opvraag tegen de emeq Hub: `GET
 /v1/dataforseo/domain-overview?domain={domain}` via de proxy, met header
 `X-Account-Id: {external_id van de tenant}` (server-side afgeleid, niet uit de
-client). Toon een nette foutmelding bij `502 upstream_error` en bij
+client). Toon een nette foutmelding bij `503 upstream_error` en bij
 `404 connection_not_found` (geen actieve DataForSEO-Connection voor dit Account).
 ```
 
@@ -1040,7 +1049,7 @@ X-Account-Id: {external_id}
 - Ability: `dataforseo:read` (of `dataforseo:write`/`*`).
 
 Overige foutcodes volgen de generieke [foutenvelope](#foutenvelope-alle-v1-endpoints):
-een DataForSEO-fout komt terug als `502 upstream_error` met `upstream_status`
+een DataForSEO-fout komt terug als `503 upstream_error` met `upstream_status`
 op de DataForSEO-eigen task-statuscode.
 
 **🤖 Agent-prompt**
@@ -1049,7 +1058,7 @@ op de DataForSEO-eigen task-statuscode.
 Bouw een backlinks-opvraag tegen de emeq Hub: `GET
 /v1/dataforseo/backlinks-summary?target={domein_of_url}` via de proxy, met
 header `X-Account-Id: {external_id van de tenant}` (server-side afgeleid).
-Toon een nette foutmelding bij `422 missing_target`, `502 upstream_error` en
+Toon een nette foutmelding bij `422 missing_target`, `503 upstream_error` en
 `404 connection_not_found` (geen actieve DataForSEO-Connection voor dit Account).
 ```
 
@@ -1110,8 +1119,8 @@ wordt er geen tweede code gekocht — ook dagen later nog.
 | `400` | `idempotency_key_required` | Header ontbreekt. Er is niets gekocht. |
 | `409` | `purchase_in_flight` | Een eerdere poging met deze sleutel is afgebroken zonder bekende uitkomst. **Niet automatisch opnieuw proberen** — mogelijk is er al een code gekocht. Neem contact op. |
 | `422` | `validation_failed` | iTheorie wees de aanvraag af. Er is niets gekocht; corrigeren en dezelfde sleutel opnieuw gebruiken mag. |
-| `502` | `upstream_auth_failed` / `upstream_config_error` | De inlog of het reseller-account van de Hub is stuk. Niets aan jouw kant; melden. |
-| `502` / `504` | `upstream_error` / `upstream_timeout` | Onbekende uitkomst. De aankoop kán zijn doorgegaan. Dezelfde sleutel opnieuw sturen is veilig: dat geeft `409` in plaats van een tweede aankoop. |
+| `503` | `upstream_auth_failed` / `upstream_config_error` | De inlog of het reseller-account van de Hub is stuk. Niets aan jouw kant; melden. |
+| `503` | `upstream_error` / `upstream_timeout` | Onbekende uitkomst. De aankoop kán zijn doorgegaan. Dezelfde sleutel opnieuw sturen is veilig: dat geeft `409` in plaats van een tweede aankoop. |
 
 ### Een aankoop of leerling terugkijken
 
@@ -1135,7 +1144,7 @@ sleutel, altijd). Stuur geen X-Account-Id. Bewaar `access_code` en `id` uit het
 antwoord in je eigen database.
 
 Behandel `409 purchase_in_flight` NOOIT als "opnieuw proberen": toon een melding
-dat de bestelling handmatig nagekeken moet worden. Bij `502` of `504` mag je
+dat de bestelling handmatig nagekeken moet worden. Bij `503 upstream_error` of `503 upstream_timeout` mag je
 dezelfde sleutel opnieuw sturen; dat koopt gegarandeerd geen tweede code.
 ```
 
