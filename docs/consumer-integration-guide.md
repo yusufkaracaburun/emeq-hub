@@ -917,9 +917,17 @@ Welke storing het was staat onverkort in `error`: `upstream_error`,
 `category` blijft `PROVIDER_UNAVAILABLE` voor alle vijf, precies zoals bij `502`
 en `504`.
 
+**Let op: `503` betekent nu twee verschillende dingen.** De vijf `upstream_*`-codes
+hierboven zijn transient en gaan vanzelf over. `503 provider_disabled` niet: dan
+heeft een beheerder die provider uitgezet, en daar verandert opnieuw proberen niets
+aan. Dat is de tweede reden om op `error` te branchen en niet op het getal —
+blijven retryen op `provider_disabled` levert nooit een resultaat op.
+
 Vuistregel voor retries: alleen `RATE_LIMITED`, `PROVIDER_UNAVAILABLE` en
 `INTERNAL_ERROR` zijn het opnieuw proberen waard (met dezelfde `Idempotency-Key`). De
-rest verandert niet door het nog eens te sturen.
+rest verandert niet door het nog eens te sturen. Eén uitzondering op die regel:
+`provider_disabled` draagt vandaag `"retryable": true` terwijl het dat niet is —
+kijk daar naar `error`, niet naar `retryable`.
 
 `PROVIDER_ERROR` betekent dat de boekhoudpartner het afwees, `INTERNAL_ERROR` dat het
 aan onze kant misging — dat onderscheid bepaalt bij wie je moet zijn.
