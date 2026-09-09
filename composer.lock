@@ -1690,16 +1690,16 @@
         },
         {
             "name": "emeq/itheorie-api",
-            "version": "v0.2.0",
+            "version": "v0.2.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/yusufkaracaburun/emeq-itheorie-api.git",
-                "reference": "ac7776bb4b288e28930c4d838018c77941cf6d6a"
+                "reference": "5190b1182ec9faf5fc278537aaf4e00231ba4a50"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/yusufkaracaburun/emeq-itheorie-api/zipball/ac7776bb4b288e28930c4d838018c77941cf6d6a",
-                "reference": "ac7776bb4b288e28930c4d838018c77941cf6d6a",
+                "url": "https://api.github.com/repos/yusufkaracaburun/emeq-itheorie-api/zipball/5190b1182ec9faf5fc278537aaf4e00231ba4a50",
+                "reference": "5190b1182ec9faf5fc278537aaf4e00231ba4a50",
                 "shasum": ""
             },
             "require": {
@@ -1777,10 +1777,10 @@
                 "saloon"
             ],
             "support": {
-                "source": "https://github.com/yusufkaracaburun/emeq-itheorie-api/tree/v0.2.0",
+                "source": "https://github.com/yusufkaracaburun/emeq-itheorie-api/tree/v0.2.1",
                 "issues": "https://github.com/yusufkaracaburun/emeq-itheorie-api/issues"
             },
-            "time": "2026-09-06T11:32:13+00:00"
+            "time": "2026-09-09T20:46:50+00:00"
         },
         {
             "name": "emeq/mollie-api",
