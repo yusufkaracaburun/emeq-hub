@@ -3,9 +3,11 @@
 #
 # cloudflared bouwt een uitgaande verbinding naar Cloudflare; er hoeft geen poort
 # open te staan en het server-IP blijft verborgen. CF termineert TLS aan de rand en
-# praat versleuteld met de tunnel; de app serveert plain HTTP op :80 binnen het
-# compose-netwerk. Laravel detecteert https via trustProxies (bootstrap/app.php)
-# + APP_URL=https://hub.emeq.nl.
+# praat versleuteld met de tunnel naar traefik, die op :80 naar `app` routeert.
+# Laravel detecteert https via trustProxies (bootstrap/app.php) + APP_URL=
+# https://hub.emeq.nl. Traefik zit ertussen puur voor de health-gated swap
+# tijdens een deploy (`docker rollout`, zie Makefile) — zie zijn eigen comment
+# hieronder voor waarom.
 #
 # Let op: Cloudflare's Bot Fight Mode (free) challenge't server-to-server-verkeer en
 # breekt partner-webhooks. Houd 'm UIT op deze zone — hij kan niet per pad worden
@@ -37,18 +39,33 @@ services:
     # met `make prod-backup` (gitignored, rsync-excluded, OVH-snapshot-gedekt).
     volumes:
       - ./backups:/app/backups
-    # Geen publieke poort: verkeer komt via de tunnel. De loopback-bind is er
-    # alleen voor de smoke-test op de server zelf (curl http://127.0.0.1:8090/up).
-    # 8080 bewust vermeden — dat is op meerdere hosts al van een reverse proxy.
-    ports:
-      - "127.0.0.1:8090:80"
+    # Geen `ports:` — Traefik routeert (zie hieronder) en `docker rollout` (#109)
+    # staat geen host-poort op deze service toe: een tweede instance tijdens de
+    # swap zou botsen op dezelfde bind. Handmatige smoke-test op de server:
+    # `docker compose exec app curl http://localhost/up`.
+    labels:
+      # Expliciete port-label is verplicht: het prod-image EXPOSEt geen poort
+      # (zie Dockerfile `prod`-target), dus Traefik kan 'm niet auto-detecteren.
+      - "traefik.enable=true"
+      - "traefik.http.routers.app.rule=Host(`hub.emeq.nl`)"
+      - "traefik.http.services.app.loadbalancer.server.port=80"
     healthcheck:
       # Expliciet op 200 testen: `curl -fsS` faalt alleen op 4xx/5xx en slikt een
       # 3xx, dus een redirect-lus kwam er als "healthy" doorheen.
-      test: ["CMD-SHELL", "test \"$$(curl -s -o /dev/null -w '%{http_code}' http://localhost/up)\" = 200"]
-      interval: 30s
-      timeout: 5s
-      retries: 3
+      #
+      # `/tmp/drain`-check is er voor container-draining tijdens `docker rollout`
+      # (#109, Makefile `--pre-stop-hook`): zonder dat verdween de oude container
+      # soms terwijl Traefik nog naar 'm routeerde — lokaal gemeten 5 mislukte
+      # requests (502/000) in het venster van "oude container stopt" tot "Traefik
+      # heeft het gemerkt". Met deze check zet de pre-stop-hook de container zelf
+      # eerst op "unhealthy" (Traefik sluit 'm uit, nog vóórdat 'ie stopt) en pas
+      # daarna stopt docker-rollout 'm. interval/retries verlaagd (was 30s/3) zodat
+      # die exclusie snel genoeg is — de pre-stop-hook-sleep in de Makefile moet
+      # langer zijn dan interval × retries.
+      test: ["CMD-SHELL", "test ! -f /tmp/drain && test \"$$(curl -s -o /dev/null -w '%{http_code}' http://localhost/up)\" = 200"]
+      interval: 5s
+      timeout: 3s
+      retries: 2
       start_period: 30s
     depends_on:
       db:
@@ -82,10 +99,44 @@ services:
       retries: 3
       start_period: 15s
 
+  # Health-gated reverse proxy vóór `app`, puur t.b.v. zero-downtime deploys
+  # (#109). cloudflared praat alleen met traefik — geen host-poort nodig, dus
+  # geen groter aanvalsoppervlak dan de bestaande tunnel-only opzet. Traefik's
+  # Docker-provider sluit een container met Docker-healthcheck-status
+  # "starting"/"unhealthy" automatisch uit van routering: dát mechanisme is
+  # waarom `docker rollout app` (zie Makefile `prod-up`) een nieuwe container
+  # pas in het verkeer zet zodra hij gezond is, en de oude pas verwijdert
+  # nadat de nieuwe het overneemt.
+  #
+  # Docker-socket-mount (`:ro`) geeft de container leesrechten op alle
+  # container-metadata inclusief env-vars van andere services — bewuste
+  # afweging, geen dashboard/API aan om het aanvalsoppervlak te beperken.
+  # Hardening-optie voor later: Tecnativa/docker-socket-proxy ertussen.
+  traefik:
+    image: traefik:v3.7.13
+    restart: unless-stopped
+    mem_limit: 256m
+    cpus: 0.5
+    security_opt:
+      - no-new-privileges:true
+    command:
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--ping=true"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    healthcheck:
+      test: ["CMD", "traefik", "healthcheck", "--ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
   # Uitgaande connector naar Cloudflare. Locally-managed: de ingress-regel
-  # (hub.emeq.nl → http://app:80) staat in docker/cloudflared.yml, in git. Het
-  # credentials-bestand is een secret en staat in .cloudflared/ op de server
-  # (gitignored). Zie docs/deployment.md § Tunnel.
+  # (hub.emeq.nl → http://traefik:80) staat in docker/cloudflared.yml, in git.
+  # Het credentials-bestand is een secret en staat in .cloudflared/ op de
+  # server (gitignored). Zie docs/deployment.md § Tunnel.
   cloudflared:
     image: cloudflare/cloudflared:2026.7.1
     restart: unless-stopped
@@ -98,7 +149,7 @@ services:
       - ./docker/cloudflared.yml:/etc/cloudflared/config.yml:ro
       - ./.cloudflared/credentials.json:/etc/cloudflared/credentials.json:ro
     depends_on:
-      app:
+      traefik:
         condition: service_healthy
 
   horizon:

@@ -100,19 +100,31 @@ prod-deploy: ## [server] Release vanuit git: pull → prod-up
 	git pull --ff-only
 	@$(MAKE) --no-print-directory prod-up
 
-prod-up: ## [server] Release zonder git (na `prod-rsync`): backup → build → migrate → restart
+prod-up: ## [server] Release zonder git (na `prod-rsync`): backup → build → migrate → health-gated swap
 	@test -f .env.prod || { echo "  ✖ .env.prod ontbreekt (kopieer .env.prod.example)"; exit 1; }
+	@docker rollout --help >/dev/null 2>&1 || { echo "  ✖ docker-rollout-plugin ontbreekt — zie docs/agents/docker.md § Zero-downtime deploy"; exit 1; }
 	@if [ -n "$$($(PROD) ps -q horizon 2>/dev/null)" ]; then \
 		$(PROD) exec -T horizon php artisan horizon:terminate; \
 	fi
 	@$(MAKE) --no-print-directory prod-backup
-	$(PROD) up -d --build
-	$(PROD) exec -T app sh -c "php artisan migrate --force && php artisan optimize"
-	@# Worker-mode houdt code in geheugen: horizon/scheduler draaien de oude image
-	@# tot een expliciete restart. Altijd samen met app herstarten. `ssr` hoort
-	@# in dezelfde lijst: dat proces laadt de SSR-bundel één keer bij boot, dus
-	@# zonder restart serveert het na een deploy nog de vorige build.
-	$(PROD) restart app horizon scheduler ssr
+	$(PROD) build app
+	@# Migraties draaien vóór de swap, in een wegwerpcontainer op het nieuwe
+	@# image — niet in de nog-levende oude `app`-container (#109). Dat kan
+	@# alleen omdat migraties hier additief/forward-only zijn: de oude code
+	@# blijft nieuwe kolommen/tabellen gewoon negeren tijdens de swap hieronder.
+	@# Een niet-additieve migratie zou deze volgorde breken.
+	$(PROD) run --rm app sh -c "php artisan migrate --force && php artisan optimize"
+	@# docker-rollout (#109): CLI-plugin, eenmalig te installeren op de server,
+	@# zie docs/agents/docker.md § Zero-downtime deploy. --pre-stop-hook: zie
+	@# de healthcheck-comment in docker-compose.prod.yml — sleep (20s) moet
+	@# langer zijn dan interval×retries (5s×2) + marge, anders stopt de oude
+	@# container vóórdat Traefik 'm als unhealthy heeft gezien.
+	docker rollout -f docker-compose.prod.yml --env-file .env.prod app \
+		--pre-stop-hook "touch /tmp/drain && sleep 20"
+	@# horizon/scheduler/ssr hebben geen Traefik-route en geen zero-downtime-eis
+	@# (#109 dekt alleen `/up`) — gewone restart volstaat. `ssr` degradeert
+	@# bewust naar client-side rendering tijdens zijn korte herstart.
+	$(PROD) restart horizon scheduler ssr
 	@$(PROD) exec -T app curl -fsS http://localhost/up
 	@$(MAKE) --no-print-directory prod-ssr-check
 	@echo "\n  ✅ deploy ok"

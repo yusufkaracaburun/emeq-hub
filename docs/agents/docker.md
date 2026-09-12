@@ -35,6 +35,13 @@ Daarom mag geen enkele container die een refresh kan uitvoeren hard afgeschoten 
 draineren loopt tijdens stappen die toch al tijd kosten. Draait er nog geen horizon
 (eerste deploy), dan wordt die stap overgeslagen in plaats van te falen.
 
+## Zero-downtime deploy
+
+`app` in prod wordt geswapt via `docker rollout` (Traefik ertussen als
+health-gated router), niet via een kale `up -d --build` — zie
+[`../deployment.md`](../deployment.md#zero-downtime-deploy-109) voor het mechanisme,
+de installatie-stap en het rollback-pad.
+
 ## Gebruik
 
 ```bash

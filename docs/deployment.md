@@ -10,13 +10,14 @@ Prod draait op een **eigen Ubuntu-server** via `docker-compose.prod.yml`, achter
 internet ──TLS──▶ Cloudflare edge
                        │  versleutelde tunnel (uitgaand opgezet, geen open poort)
                        ▼
-                  cloudflared ──http://app:80──┐
-                                               │  docker compose -f docker-compose.prod.yml
-                                               ├─ app        FrankenPHP worker-mode (Octane), :80
-                                               ├─ horizon    php artisan horizon
-                                               ├─ scheduler  php artisan schedule:work
-                                               ├─ db         postgres:16 (named volume)
-                                               └─ redis      redis:7 (named volume)
+                  cloudflared ──http://traefik:80──┐
+                                                    │  docker compose -f docker-compose.prod.yml
+                                                    ├─ traefik    health-gated routing → app (#109)
+                                                    ├─ app        FrankenPHP worker-mode (Octane), :80
+                                                    ├─ horizon    php artisan horizon
+                                                    ├─ scheduler  php artisan schedule:work
+                                                    ├─ db         postgres:16 (named volume)
+                                                    └─ redis      redis:7 (named volume)
 ```
 
 - **App** = immutable image (`Dockerfile` target `prod`): code + gebouwde assets
@@ -26,8 +27,11 @@ internet ──TLS──▶ Cloudflare edge
   verbinding, dus de server heeft **geen open poort 80/443** en het origin-IP blijft
   verborgen. Laravel vertrouwt de proxy via `trustProxies(at:'*')`
   (`bootstrap/app.php`) → https-detectie + echte client-IP.
-- De app publiceert alleen op `127.0.0.1:8090` — loopback, puur voor de smoke-test
-  op de server zelf.
+- **Traefik** zit tussen cloudflared en `app`, puur voor de health-gated swap
+  tijdens een deploy — zie § Zero-downtime deploy. Geen host-poort, geen
+  dashboard: alleen bereikbaar vanaf cloudflared, binnen het compose-netwerk.
+  `app` heeft daardoor ook geen `127.0.0.1:8090`-loopback meer; handmatige
+  smoke-test op de server is `docker compose exec app curl http://localhost/up`.
 
 ## Cloudflare
 
@@ -217,7 +221,7 @@ docker compose -f docker-compose.prod.yml exec app \
   sh -c "php artisan migrate --force && php artisan optimize"
 ```
 
-Smoke-test op de server: `curl -fsS http://127.0.0.1:8090/up` →
+Smoke-test op de server: `docker compose -f docker-compose.prod.yml exec app curl -fsS http://localhost/up` →
 `{"status":"up","database":"ok","redis":"ok"}`, en `https://hub.emeq.nl/up` via
 Cloudflare.
 
@@ -257,7 +261,9 @@ make prod-deploy
 ```
 
 Dat doet: `git pull --ff-only` → `pg_dump`-backup → image herbouwen → `migrate --force`
-→ `optimize` → **`app` + `horizon` + `scheduler` herstarten** → health-check.
+→ `optimize` (beide in een wegwerpcontainer, vóór de swap) → **health-gated swap van
+`app`** (`docker rollout`, zie § Zero-downtime deploy) → **`horizon` + `scheduler`
+herstarten** → health-check.
 
 ### Zonder git (rsync)
 
@@ -273,15 +279,63 @@ ssh naschool 'cd emeq-hub && make prod-up'
 geen commit-SHA die vertelt wát er draait, en de rollback uit § Rollback (checkout van
 een eerdere SHA) werkt niet. Voor een echte prod-host is de git-route de juiste.
 
-> **Waarom die restart**: worker-mode houdt code in geheugen. `up --build` vervangt de
-> app-container, maar `horizon` en `scheduler` draaien door op de oude image tot een
-> expliciete `restart`. Vergeten = queue draait oude code. `prod-deploy` doet het voor je.
+> **Waarom die restart**: worker-mode houdt code in geheugen. De `app`-swap ververst
+> zichzelf (zie hieronder), maar `horizon` en `scheduler` draaien door op de oude image
+> tot een expliciete `restart`. Vergeten = queue draait oude code. `prod-deploy` doet
+> het voor je.
 
 ### Volgorde-let-op
 
 - **Migraties vóór code-activatie** is alleen veilig bij additieve migraties
   (forward-only, zie CLAUDE.md-invariant). Breaking schema-changes: deploy in twee
-  stappen (expand → contract).
+  stappen (expand → contract). Sinds #109 is dit niet meer alleen een voorzichtigheids-
+  regel maar een harde voorwaarde: de migratie draait vóórdat de oude `app`-container
+  stopt, dus die draait tijdens de swap eventjes tegen het nieuwe schema aan.
+
+## Zero-downtime deploy (#109)
+
+`app` heeft geen `ports:` meer — Traefik (nieuwe service, zie
+`docker-compose.prod.yml`) routeert ertussen en cloudflared praat alleen nog met
+Traefik. `docker rollout` (CLI-plugin, niet in git) vervangt de kale
+`up -d --build` voor deze ene service:
+
+1. Schaalt `app` naar 2 instances op het nieuwe image.
+2. Wacht tot de nieuwe container Docker-gezond is (healthcheck op `/up`). Traefik
+   sluit een container in status "starting"/"unhealthy" automatisch uit van
+   routering — dat is het hele mechanisme, geen aparte Traefik-healthcheck-config
+   nodig.
+3. Zet de **oude** container via `--pre-stop-hook` zelf op "unhealthy"
+   (`touch /tmp/drain`, healthcheck faalt daarna) en wacht 20s, vóórdat 'ie stopt.
+
+**Container-draining is niet optioneel** — zonder de `--pre-stop-hook` in stap 3
+gemeten: 5 mislukte requests (502/`000`) in een lokale test met 400+ requests/s
+tegen `/up` tijdens de swap, exact in het venster tussen "oude container stopt" en
+"Traefik heeft dat gemerkt". Traefik's Docker-provider reageert niet synchroon met
+`docker stop` — er zit propagatie-vertraging tussen. De `/tmp/drain`-check in de
+`app`-healthcheck (`docker-compose.prod.yml`) laat de oude container zichzelf eerst
+als unhealthy melden, zodat Traefik 'm actief uitsluit terwijl 'ie nog leeft en
+openstaande requests afmaakt — pas dáárna stopt `docker rollout` 'm. Zonder deze
+stap is de swap sneller maar niet zero-downtime.
+
+**Eenmalig op de server installeren:**
+
+```bash
+mkdir -p ~/.docker/cli-plugins
+curl https://raw.githubusercontent.com/wowu/docker-rollout/main/docker-rollout \
+  -o ~/.docker/cli-plugins/docker-rollout
+chmod +x ~/.docker/cli-plugins/docker-rollout
+```
+
+**Rollback bij een falende swap** is automatisch: haalt de nieuwe container zijn
+healthcheck niet binnen het timeout (default 60s), dan breekt `docker rollout` af,
+ruimt de nieuwe container op en de oude blijft draaien — `make prod-up` stopt dan
+met een niet-nul exit-code, vóór de `horizon`/`scheduler`-restart. Dit is een ander
+soort rollback dan § Rollback hieronder: dat is voor "de deploy is gelukt maar de
+nieuwe code is stuk", dit is voor "de nieuwe code start niet eens gezond op".
+
+**Buiten scope**: `horizon`, `scheduler` en `ssr` hebben geen Traefik-route en geen
+zero-downtime-eis — #109 dekt alleen wat via `/up` waarneembaar is. `ssr` degradeert
+sowieso al bewust naar client-side rendering tijdens zijn korte herstart.
 
 ## Backup & restore
 
@@ -328,12 +382,16 @@ gunzip -c backups/emeq-hub-<timestamp>.sql.gz \
 
 ## Rollback
 
-Images zijn immutable per commit. Terug naar de vorige werkende staat:
+Images zijn immutable per commit. Terug naar de vorige werkende staat — zelfde
+health-gated swap als een gewone deploy (§ Zero-downtime deploy), dus ook deze
+terugval geeft geen waarneembare downtime op `/up`:
 
 ```bash
 git checkout <vorige-commit-sha>
-docker compose -f docker-compose.prod.yml --env-file .env.prod up -d --build
-docker compose -f docker-compose.prod.yml restart app horizon scheduler
+docker compose -f docker-compose.prod.yml --env-file .env.prod build app
+docker rollout -f docker-compose.prod.yml --env-file .env.prod app \
+  --pre-stop-hook "touch /tmp/drain && sleep 20"
+docker compose -f docker-compose.prod.yml restart horizon scheduler
 ```
 
 Migratie-rollback is **niet** automatisch (forward-only in prod). Een kapotte migratie
@@ -465,10 +523,11 @@ workers is van buitenaf niet te zien.
 |---|---|
 | Partner-webhooks komen niet aan (403) | Bot Fight Mode staat aan op de zone — uitzetten (zie § Cloudflare) |
 | `530` / `1033` van Cloudflare | tunnel-connector down: `make prod-logs`, check `CLOUDFLARE_TUNNEL_TOKEN` |
-| `502` van de tunnel | `app` niet healthy — public hostname moet naar `http://app:80` wijzen |
+| `502` van de tunnel | `traefik` of `app` niet healthy — public hostname moet naar `http://traefik:80` wijzen, en Traefik moet minstens één gezonde `app`-container zien (`docker compose logs traefik`) |
 | `503` op `/up` | db of redis onbereikbaar: `make prod-ps` + `make prod-logs` |
 | `https` werkt niet / redirect-loop | check `APP_URL=https://…` en `SESSION_SECURE_COOKIE=true` |
-| Code-change niet zichtbaar | `restart app horizon scheduler` vergeten — gebruik `make prod-deploy` |
+| Code-change niet zichtbaar in `app` | `docker rollout` timede uit vóórdat de nieuwe container gezond werd — check `make prod-logs` op de healthcheck-fout, de oude container draait dan gewoon door |
+| Code-change niet zichtbaar in horizon/scheduler | `restart horizon scheduler` vergeten — gebruik `make prod-deploy` |
 | Queue draait oude code | idem |
 
 ## Niet committen

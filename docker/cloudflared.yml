@@ -15,10 +15,12 @@ credentials-file: /etc/cloudflared/credentials.json
 loglevel: warn
 
 ingress:
+  # Wijst naar traefik, niet rechtstreeks naar app: dat is de health-gated
+  # swap-laag voor zero-downtime deploys (#109, zie docker-compose.prod.yml).
   # De app serveert plain HTTP binnen het compose-netwerk; TLS eindigt op de
   # Cloudflare-rand. Laravel detecteert https via trustProxies + APP_URL.
   - hostname: hub.emeq.nl
-    service: http://app:80
+    service: http://traefik:80
 
   # Alles wat niet matcht krijgt 404 — een catch-all is verplicht, anders weigert
   # cloudflared te starten.
