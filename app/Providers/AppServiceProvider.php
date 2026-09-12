@@ -44,8 +44,10 @@ use Emeq\ItheorieApi\Contracts\ItheorieCredentialResolver;
 use Emeq\MollieApi\Contracts\MollieCredentialResolver;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Cashier\Cashier;
@@ -160,6 +162,18 @@ class AppServiceProvider extends ServiceProvider
             $limit = (int) config($isWrite ? 'hub.rate_limits.writes_per_minute' : 'hub.rate_limits.reads_per_minute');
 
             return Limit::perMinute(max(1, $limit))->by($scope.':'.($isWrite ? 'write' : 'read'));
+        });
+
+        RateLimiter::for('itheorie-purchases', function (Request $request): Limit {
+            $consumerId = $request->user()?->getKey();
+            $scope = $consumerId ? "consumer:{$consumerId}" : "ip:{$request->ip()}";
+            $limit = (int) config('hub-providers.itheorie.purchase_rate_limit_per_minute');
+
+            return Limit::perMinute(max(1, $limit))->by($scope)->response(function (Request $request, array $headers) use ($scope): JsonResponse {
+                Log::warning('itheorie.purchase.rate_limited', ['scope' => $scope]);
+
+                return response()->json(['message' => 'Too Many Attempts.'], 429, $headers);
+            });
         });
 
         Scramble::configure()

@@ -26,6 +26,7 @@ return [
         'encrypted_fields' => [],
         'primary_label' => 'Broker-inlog (Hub-eigen)',
         'oauth_flow_key' => null,
+        'purchase_rate_limit_per_minute' => (int) env('HUB_ITHEORIE_PURCHASE_RATE_LIMIT_PER_MINUTE', 10),
     ],
     'exact' => [
         'enabled' => env('HUB_PROVIDER_EXACT_ENABLED', true),

@@ -84,7 +84,7 @@ Route::middleware('auth:sanctum')->group(function (): void {
             Route::get('/courses', [ItheorieCoursesController::class, 'index'])->middleware('ability:itheorie:read,itheorie:write,*')->name('api.itheorie.courses.index');
             Route::get('/courses/{course}', [ItheorieCoursesController::class, 'show'])->middleware('ability:itheorie:read,itheorie:write,*')->name('api.itheorie.courses.show');
             Route::get('/purchases/{purchase}', [ItheoriePurchasesController::class, 'show'])->middleware('ability:itheorie:read,itheorie:write,*')->name('api.itheorie.purchases.show');
-            Route::post('/purchases', [ItheoriePurchasesController::class, 'store'])->middleware(['ability:itheorie:write,*', 'idempotent:required'])->name('api.itheorie.purchases.store');
+            Route::post('/purchases', [ItheoriePurchasesController::class, 'store'])->middleware(['throttle:itheorie-purchases', 'ability:itheorie:write,*', 'idempotent:required'])->name('api.itheorie.purchases.store');
             Route::get('/students/{accessCode}', [ItheorieStudentsController::class, 'show'])->middleware('ability:itheorie:read,itheorie:write,*')->name('api.itheorie.students.show');
             Route::get('/students/{accessCode}/detailed', [ItheorieStudentsController::class, 'showDetailed'])->middleware('ability:itheorie:read,itheorie:write,*')->name('api.itheorie.students.detailed');
         });

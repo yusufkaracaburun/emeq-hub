@@ -285,6 +285,34 @@ final class ItheorieApiTest extends TestCase
         $this->assertSame('p-leeg', ProviderEntityLink::where('provider', 'itheorie')->sole()->provider_entity_id);
     }
 
+    public function test_de_aankoop_route_heeft_een_eigen_striktere_rate_limit_dan_throttle_api(): void
+    {
+        config(['hub-providers.itheorie.purchase_rate_limit_per_minute' => 1]);
+
+        Log::spy();
+
+        MockClient::global([
+            MockResponse::make(['token' => 'jwt-1']),
+            MockResponse::make(['id' => 'p-1', 'accessCode' => 'ABC1234']),
+        ]);
+
+        [, $token] = $this->consumerWithToken([TokenAbilities::ITHEORIE_WRITE]);
+        $payload = ['course' => 'c-1', 'name' => 'Jan', 'email' => 'jan@example.com'];
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->withHeader('Idempotency-Key', 'rl-1')
+            ->postJson('/v1/itheorie/purchases', $payload)
+            ->assertOk();
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->withHeader('Idempotency-Key', 'rl-2')
+            ->postJson('/v1/itheorie/purchases', $payload)
+            ->assertStatus(429);
+
+        Log::shouldHaveReceived('warning')
+            ->withArgs(fn (string $bericht): bool => $bericht === 'itheorie.purchase.rate_limited');
+    }
+
     /**
      * @param  list<string>  $abilities
      * @return array{0: Consumer, 1: string}
