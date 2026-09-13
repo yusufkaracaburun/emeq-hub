@@ -358,7 +358,7 @@ class ConsumerResource extends Resource
     }
 
     /** @return array<string, string> */
-    private static function customAbilitiesOptions(): array
+    public static function customAbilitiesOptions(): array
     {
         $options = [];
         foreach (TokenAbilities::all() as $ability) {
