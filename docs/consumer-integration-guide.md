@@ -1,8 +1,8 @@
 # emeq Hub — Consumer-integratiehandleiding
 
 Voor ontwikkelaars die een (multi-tenant) consumer-app aan de emeq Hub koppelen.
-Eén integratie → alle huidige én toekomstige providers (Exact, Mollie, …). Nieuwe
-providers verschijnen vanzelf; je past je code niet aan per provider.
+Eén integratie → alle huidige én toekomstige providers. Nieuwe providers
+verschijnen vanzelf; je past je code niet aan per provider.
 
 Laravel-consumers: gebruik **[`emeq/hub-sdk`](https://github.com/yusufkaracaburun/emeq-hub-sdk)**
 (provider-agnostische Saloon-client). Partner-SDK’s (`emeq/exact-api`, …) blijven
@@ -11,10 +11,8 @@ Hub-intern — niet in de consumer-app.
 > Altijd-actuele API-referentie: **`/docs/api`** (OpenAPI, auto-gegenereerd).
 > Deze handleiding is de narratieve laag eromheen.
 
-> **Live vandaag:** Exact Online en iTheorie. De overige providers in deze gids
-> (Mollie, Snelstart, DataForSEO) staan gedocumenteerd voor zodra ze aanstaan —
-> nog niet actief. `GET /v1/integrations` geeft altijd de actuele status per
-> provider terug; render daarop, niet op deze lijst.
+> **Live vandaag:** Exact Online en iTheorie. `GET /v1/integrations` geeft
+> altijd de actuele status per provider terug; render daarop.
 
 > 🤖 **Agent-prompts** — elke sectie sluit af met een copy-paste-prompt voor je
 > AI-coding-agent. Vervang `{…}`-placeholders, plak in je agent, en laat 'm dat
@@ -33,14 +31,12 @@ Hub-intern — niet in de consumer-app.
 - [Stap 1 — Account registreren](#stap-1--account-registreren-eenmalig-per-tenant)
 - [Stap 2 — Integraties tonen (discovery)](#stap-2--integraties-tonen-discovery)
 - [Stap 3 — Koppelen](#stap-3--koppelen)
-  - [Koppelen zonder OAuth (credentials)](#koppelen-zonder-oauth-credentials)
 - [Stap 4 — Terugkomst + status](#stap-4--terugkomst--status)
 - [Stap 5 — Loskoppelen](#stap-5--loskoppelen)
 - [Boekhouden — documenten valideren & boeken](#boekhouden--documenten-valideren--boeken)
   - [Categorie of kostendrager?](#categorie-of-kostendrager)
   - [Betalingen horen niet in de boeking](#betalingen-horen-niet-in-de-boeking)
   - [Boekhoud-mapping (zelf-service, optioneel)](#boekhoud-mapping-zelf-service-optioneel)
-- [SEO-data opzoeken (DataForSEO)](#seo-data-opzoeken-dataforseo)
 - [Theorie-toegangscodes kopen (iTheorie)](#theorie-toegangscodes-kopen-itheorie)
 - [Webhooks ontvangen](#webhooks-ontvangen)
 - [Valkuilen](#valkuilen)
@@ -126,7 +122,7 @@ in de inkomende request wordt genegeerd en de server-side afleiding wint.
 | **Consumer** | Jouw app (admin.emeq.nl / admin.planny.nl / …). Authentiseert met een PAT. |
 | **Account** | Een eindklant/tenant van jouw app, geïdentificeerd door jouw eigen `external_id` (bv. `bob`, `school1`). |
 | **Connection** | Eén koppeling tussen één Account en één provider. |
-| **Provider** | Boekhoud-/betaalpartner (Exact, Mollie, Snelstart, …). |
+| **Provider** | Boekhoud-/betaalpartner (Exact, …). |
 
 ## Auth — backend-proxy (aanbevolen)
 
@@ -270,18 +266,13 @@ GET /v1/integrations?account_external_id=bob
   { "key": "exact", "label": "Exact Online", "tagline": "Boekhouden — NL/BE",
     "category": "Boekhouden", "logo": "/img/partners/exact.svg", "brand": "#e1141d",
     "connectable": true, "status": "connected",
-    "connection_id": "con_01JQZ8F4XK2N7RVB3TDW6MPYAC" },
-  { "key": "mollie", "label": "Mollie", "connectable": true,
-    "status": "disconnected", "connection_id": null },
-  { "key": "snelstart", "label": "SnelStart", "connectable": false,
-    "status": "disconnected", "connection_id": null }
+    "connection_id": "con_01JQZ8F4XK2N7RVB3TDW6MPYAC" }
 ]
 ```
 
 - Render deze lijst **data-driven** — een nieuwe provider verschijnt automatisch,
   zonder code-wijziging.
-- `connectable: false` → toon als niet-koppelbaar (bv. Snelstart = geen OAuth) of
-  "binnenkort".
+- `connectable: false` → toon als niet-koppelbaar of "binnenkort".
 - `status` ∈ `connected` / `pending` / `disconnected`.
 - `account_external_id` is optioneel: zonder param krijg je de catalogus met
   alles op `disconnected`.
@@ -341,36 +332,6 @@ contractueel geborgd via de verwerkersovereenkomst tussen Emeq en jou.
 
 De browser-flow op de Hub zelf (`/koppelen`-intake) heeft een eigen verplichte
 consent-checkbox; die geldt alleen voor dat pad.
-
-### Koppelen zonder OAuth (credentials)
-
-Niet elke provider heeft een consent-scherm. SnelStart en DataForSEO geven geen
-`redirect_url` — daarvoor koppel je met een credential-paar rechtstreeks:
-
-```http
-POST /v1/connections
-{ "account_id": 12, "provider": "dataforseo",
-  "credentials": { "access_token": "login:password" } }
-```
-→ `201` met de aangemaakte Connection, of `409 connection_exists` als er al een
-actieve Connection voor dit Account + provider bestaat.
-
-`account_id` is de **numerieke** `id` uit de `POST /v1/accounts`-respons (Stap 1),
-niet de `external_id`. Voor DataForSEO is `credentials.access_token` je
-DataForSEO-`login:password` in één string (van
-<https://app.dataforseo.com/api-access>), gescheiden door een dubbele punt — niet
-het losse wachtwoord.
-
-**🤖 Agent-prompt**
-
-```text
-Implementeer een koppel-formulier voor credential-providers (bv. DataForSEO):
-vraag de gebruiker om zijn provider-inloggegevens en stuur
-`POST /v1/connections` met `{ account_id, provider, credentials }` via de proxy —
-`account_id` is de numerieke id uit mijn Account-registratie (Stap 1), niet de
-`external_id`. Behandel `201` als gekoppeld en `409 connection_exists` als "al
-gekoppeld, niets doen".
-```
 
 ## Stap 4 — Terugkomst + status
 
@@ -1014,73 +975,6 @@ een knop "hersynchroniseren" → `POST /v1/accounting/sync`. Default hoeft de te
 niets in te stellen; de Hub auto-derivet bij connect.
 ```
 
-## SEO-data opzoeken (DataForSEO)
-
-Los van de boekhoud-koppeling: zodra een Account een DataForSEO-Connection heeft
-(zie [Koppelen zonder OAuth](#koppelen-zonder-oauth-credentials)), kun je een
-domeinoverzicht opvragen.
-
-```http
-GET /v1/dataforseo/domain-overview?domain=example.com
-X-Account-Id: {external_id}
-```
-
-- `domain` is verplicht. `location_name` is optioneel (default `Netherlands`).
-  De Hub stuurt bewust geen `language_code` mee naar DataForSEO — dat veld is
-  daar officieel wél optioneel, maar de combinatie met een verkeerd
-  `location_code` gaf tijdens onze eigen tests een fout; weglaten geeft
-  resultaten voor alle talen. `language_code` als queryparam wordt daarom
-  genegeerd.
-- `X-Account-Id` is de `external_id` van het Account, niet het interne id.
-- Ability: `dataforseo:read` (of `dataforseo:write`/`*`).
-
-Foutcodes volgen de generieke [foutenvelope](#foutenvelope-alle-v1-endpoints):
-een DataForSEO-fout (ontbrekende koppeling, ongeldige domain, partner-foutmelding)
-komt terug als `503 upstream_error` met `upstream_status` op de DataForSEO-eigen
-task-statuscode.
-
-**🤖 Agent-prompt**
-
-```text
-Bouw een domeinoverzicht-opvraag tegen de emeq Hub: `GET
-/v1/dataforseo/domain-overview?domain={domain}` via de proxy, met header
-`X-Account-Id: {external_id van de tenant}` (server-side afgeleid, niet uit de
-client). Toon een nette foutmelding bij `503 upstream_error` en bij
-`404 connection_not_found` (geen actieve DataForSEO-Connection voor dit Account).
-```
-
-### Backlinks opvragen
-
-Zelfde Connection als hierboven; geeft een samenvatting van de backlink-profiel
-van een domein of URL.
-
-```http
-GET /v1/dataforseo/backlinks-summary?target=example.com
-X-Account-Id: {external_id}
-```
-
-- `target` is verplicht — domein of volledige URL. Ontbreekt 'ie, dan komt er
-  `422 missing_target` terug (niet de generieke foutenvelope).
-- `include_subdomains` (boolean, optioneel), `backlinks_status_type` (string,
-  optioneel) en `internal_list_limit` (integer, optioneel) worden ongewijzigd
-  doorgestuurd naar DataForSEO's Backlinks Summary Live-endpoint.
-- `X-Account-Id` is de `external_id` van het Account, niet het interne id.
-- Ability: `dataforseo:read` (of `dataforseo:write`/`*`).
-
-Overige foutcodes volgen de generieke [foutenvelope](#foutenvelope-alle-v1-endpoints):
-een DataForSEO-fout komt terug als `503 upstream_error` met `upstream_status`
-op de DataForSEO-eigen task-statuscode.
-
-**🤖 Agent-prompt**
-
-```text
-Bouw een backlinks-opvraag tegen de emeq Hub: `GET
-/v1/dataforseo/backlinks-summary?target={domein_of_url}` via de proxy, met
-header `X-Account-Id: {external_id van de tenant}` (server-side afgeleid).
-Toon een nette foutmelding bij `422 missing_target`, `503 upstream_error` en
-`404 connection_not_found` (geen actieve DataForSEO-Connection voor dit Account).
-```
-
 ## Theorie-toegangscodes kopen (iTheorie)
 
 Anders dan alle andere koppelingen: hier is **geen Connection en geen Account**.
@@ -1200,11 +1094,9 @@ ontbreekt betekent "weet ik niet", nooit "nee".
 - **`entity_id`** — het id dat het boekhoudpakket zelf aan de gewijzigde entity
   geeft. Dit is hetzelfde id dat je terugkreeg toen je die boeking via de Hub
   wegschreef, dus hiermee vind je je eigen record terug. Vandaag levert alleen
-  Exact het; bij Snelstart ontbreekt het veld (hun payload-vorm staat nog open bij
-  de partner) en bij Mollie is het de resource-id uit de notificatie.
+  Exact het.
 - **`action`** — wat er met de entity gebeurde: `created`, `updated`, `deleted` of
-  `unmapped`. Los van `event`, dat zegt wélk soort entity het is. Mollie levert
-  geen actie mee, dus daar ontbreekt het veld.
+  `unmapped`. Los van `event`, dat zegt wélk soort entity het is.
 - **`occurred_at`** — wanneer de Hub het event uitstuurde. De meeste partners
   leveren geen eigen tijdstempel; doen alsof van wel zou liegen over de bron.
 - **`hub_authored`** — staat er alleen als hij `true` is, en betekent: **de Hub
@@ -1303,8 +1195,6 @@ Geef mij daarna de URL die ik als `webhook_callback_url` moet doorgeven.
   Betalingen (en betaalsplitsingen zoals een G-rekening) horen op de bankkant van de
   boekhouding, niet in een `income`/`expense`-document — zie
   [Betalingen horen niet in de boeking](#betalingen-horen-niet-in-de-boeking).
-- Snelstart is `connectable: false` (geen OAuth) — toon, maar bied geen
-  OAuth-connect aan.
 - Volledige, altijd-actuele API-referentie: **`/docs/api`** (live gegenereerd).
   Dezelfde spec staat als `api.json` in de repo-root — versioneerd en diffbaar,
   dus je ziet per commit wat er aan het contract wijzigde. CI faalt als die spec
