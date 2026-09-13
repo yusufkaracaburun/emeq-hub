@@ -5,6 +5,7 @@ namespace App\Providers\Filament;
 use App\Filament\Widgets\ConnectionStatsWidget;
 use App\Filament\Widgets\OperationalHealthWidget;
 use App\Filament\Widgets\PlatformScaleWidget;
+use Filament\Auth\MultiFactor\App\AppAuthentication;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -33,12 +34,17 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login()
+            ->profile()
             ->authGuard('web')
             ->brandName('Emeq Hub')
             ->favicon(asset('favicon.ico'))
             ->colors([
                 'primary' => Color::Amber,
             ])
+            ->multiFactorAuthentication([
+                AppAuthentication::make()
+                    ->recoverable(),
+            ], isRequired: app()->isProduction())
             ->viteTheme('resources/css/filament/admin/theme.css')
             ->sidebarCollapsibleOnDesktop()
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
