@@ -20,6 +20,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Component;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
@@ -309,30 +310,9 @@ class ConsumerResource extends Resource
             ->icon(Heroicon::OutlinedKey)
             ->modalHeading('Issue Personal Access Token')
             ->modalSubmitActionLabel('Issue')
-            ->schema([
-                TextInput::make('name')
-                    ->label('Token name')
-                    ->required()
-                    ->maxLength(255),
-                Select::make('preset')
-                    ->label('Preset')
-                    ->options(self::presetOptions())
-                    ->native(false)
-                    ->searchable()
-                    ->required()
-                    ->live(),
-                CheckboxList::make('abilities')
-                    ->label('Abilities')
-                    ->options(self::customAbilitiesOptions())
-                    ->required()
-                    ->visible(fn (Get $get): bool => $get('preset') === 'custom'),
-            ])
+            ->schema(self::patFormSchema())
             ->action(function (Consumer $record, array $data, $livewire): void {
-                $abilities = $data['preset'] === 'custom'
-                    ? array_values($data['abilities'] ?? [])
-                    : self::PAT_PRESETS[$data['preset']]['abilities'];
-
-                $result = $record->createToken($data['name'], $abilities);
+                $result = $record->createToken($data['name'], self::resolvePatAbilities($data));
 
                 $livewireId = $livewire->getId();
                 Cache::put("pat-flash:{$livewireId}", $result->plainTextToken, now()->addSeconds(60));
@@ -343,6 +323,40 @@ class ConsumerResource extends Resource
                     ->success()
                     ->send();
             });
+    }
+
+    /** @return array<int, Component> */
+    public static function patFormSchema(): array
+    {
+        return [
+            TextInput::make('name')
+                ->label('Token name')
+                ->required()
+                ->maxLength(255),
+            Select::make('preset')
+                ->label('Preset')
+                ->options(self::presetOptions())
+                ->native(false)
+                ->searchable()
+                ->required()
+                ->live(),
+            CheckboxList::make('abilities')
+                ->label('Abilities')
+                ->options(self::customAbilitiesOptions())
+                ->required()
+                ->visible(fn (Get $get): bool => $get('preset') === 'custom'),
+        ];
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     * @return list<string>
+     */
+    public static function resolvePatAbilities(array $data): array
+    {
+        return $data['preset'] === 'custom'
+            ? array_values($data['abilities'] ?? [])
+            : self::PAT_PRESETS[$data['preset']]['abilities'];
     }
 
     /** @return array<string, array<string, string>> */

@@ -8,12 +8,8 @@ use App\Filament\Resources\Consumers\ConsumerResource;
 use App\Models\Consumer;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
-use Filament\Forms\Components\CheckboxList;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Resources\RelationManagers\RelationManager;
-use Filament\Schemas\Components\Utilities\Get;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -41,33 +37,12 @@ final class TokensRelationManager extends RelationManager
                     ->authorize(fn (): bool => auth()->user()?->can('manage-consumers') ?? false)
                     ->modalHeading('Issue Personal Access Token')
                     ->modalSubmitActionLabel('Issue')
-                    ->schema([
-                        TextInput::make('name')
-                            ->label('Token name')
-                            ->required()
-                            ->maxLength(255),
-                        Select::make('preset')
-                            ->label('Preset')
-                            ->options(ConsumerResource::presetOptions())
-                            ->native(false)
-                            ->searchable()
-                            ->required()
-                            ->live(),
-                        CheckboxList::make('abilities')
-                            ->label('Abilities')
-                            ->options(ConsumerResource::customAbilitiesOptions())
-                            ->required()
-                            ->visible(fn (Get $get): bool => $get('preset') === 'custom'),
-                    ])
+                    ->schema(ConsumerResource::patFormSchema())
                     ->action(function (array $data): RedirectResponse|Redirector {
                         /** @var Consumer $consumer */
                         $consumer = $this->getOwnerRecord();
 
-                        $abilities = $data['preset'] === 'custom'
-                            ? array_values($data['abilities'] ?? [])
-                            : ConsumerResource::PAT_PRESETS[$data['preset']]['abilities'];
-
-                        $result = $consumer->createToken($data['name'], $abilities);
+                        $result = $consumer->createToken($data['name'], ConsumerResource::resolvePatAbilities($data));
 
                         $userId = auth()->id();
                         Cache::put("pat-flash:user:{$userId}", $result->plainTextToken, now()->addSeconds(60));
