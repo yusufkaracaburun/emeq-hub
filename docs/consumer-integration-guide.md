@@ -11,6 +11,11 @@ Hub-intern — niet in de consumer-app.
 > Altijd-actuele API-referentie: **`/docs/api`** (OpenAPI, auto-gegenereerd).
 > Deze handleiding is de narratieve laag eromheen.
 
+> **Live vandaag:** Exact Online en iTheorie. De overige providers in deze gids
+> (Mollie, Snelstart, DataForSEO) staan gedocumenteerd voor zodra ze aanstaan —
+> nog niet actief. `GET /v1/integrations` geeft altijd de actuele status per
+> provider terug; render daarop, niet op deze lijst.
+
 > 🤖 **Agent-prompts** — elke sectie sluit af met een copy-paste-prompt voor je
 > AI-coding-agent. Vervang `{…}`-placeholders, plak in je agent, en laat 'm dat
 > stuk in je consumer-app bouwen. De harde regels (PAT server-side, account-id
