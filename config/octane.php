@@ -74,7 +74,7 @@ return [
         RequestReceived::class => [
             ...Octane::prepareApplicationForNextOperation(),
             ...Octane::prepareApplicationForNextRequest(),
-            //
+            EnforceRequestScheme::class,
         ],
 
         RequestHandled::class => [
