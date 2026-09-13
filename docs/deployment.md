@@ -32,6 +32,15 @@ internet ──TLS──▶ Cloudflare edge
   dashboard: alleen bereikbaar vanaf cloudflared, binnen het compose-netwerk.
   `app` heeft daardoor ook geen `127.0.0.1:8090`-loopback meer; handmatige
   smoke-test op de server is `docker compose exec app curl http://localhost/up`.
+  Traefik's `web`-entrypoint draait met `forwardedHeaders.insecure=true` —
+  zonder die vlag overschrijft Traefik cloudflared's `X-Forwarded-Proto: https`
+  met `http` (de scheme van zijn eigen, interne verbinding met cloudflared),
+  en detecteert `trustProxies` overal http ondanks een echte https-request.
+  Veilig hier omdat dit entrypoint geen host-poort heeft: alleen cloudflared
+  kan Traefik raken. Symptoom als dit ooit terugkeert (bv. na een Traefik-
+  versie-bump die het gedrag verandert): dynamisch geïmporteerde JS-modules
+  (Filament-wizards, lazy Alpine-componenten) breken met "Failed to fetch
+  dynamically imported module: http://…" — mixed content op een https-pagina.
 
 ## Cloudflare
 
