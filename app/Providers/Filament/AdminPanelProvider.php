@@ -5,6 +5,7 @@ namespace App\Providers\Filament;
 use App\Filament\Widgets\ConnectionStatsWidget;
 use App\Filament\Widgets\OperationalHealthWidget;
 use App\Filament\Widgets\PlatformScaleWidget;
+use App\Http\Middleware\EnsureMultiFactorAuthenticationIsEnabledUnlessOwner;
 use Filament\Auth\MultiFactor\App\AppAuthentication;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -44,10 +45,14 @@ class AdminPanelProvider extends PanelProvider
             ->multiFactorAuthentication([
                 AppAuthentication::make()
                     ->recoverable(),
-            ], isRequired: fn (): bool => app()->isProduction()
-                // Enige gebruiker vandaag; vrijgesteld op eigen verzoek. Blijft
-                // verplicht zodra een tweede admin/staff/boekhouder-account bijkomt.
-                && auth()->user()?->email !== 'info@emeq.nl')
+            ], isRequired: app()->isProduction())
+            // isRequired hierboven is boot-time (route-cache) geëvalueerd, dus
+            // geen auth()->user() beschikbaar voor een per-user uitzondering.
+            // Die uitzondering (info@emeq.nl, enige gebruiker vandaag) zit
+            // daarom in dit per-request middleware i.p.v. in isRequired.
+            ->multiFactorAuthenticationRequiredMiddlewareName(
+                EnsureMultiFactorAuthenticationIsEnabledUnlessOwner::class
+            )
             ->viteTheme('resources/css/filament/admin/theme.css')
             ->sidebarCollapsibleOnDesktop()
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
