@@ -318,6 +318,7 @@ class ConsumerResource extends Resource
                     ->label('Preset')
                     ->options(self::presetOptions())
                     ->native(false)
+                    ->searchable()
                     ->required()
                     ->live(),
                 CheckboxList::make('abilities')

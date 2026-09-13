@@ -137,6 +137,7 @@ class OnboardConsumer extends Page
                                 ->label('Preset')
                                 ->options(ConsumerResource::presetOptions())
                                 ->native(false)
+                                ->searchable()
                                 ->required()
                                 ->live(),
                             CheckboxList::make('pat.abilities')
