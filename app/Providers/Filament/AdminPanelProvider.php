@@ -44,7 +44,10 @@ class AdminPanelProvider extends PanelProvider
             ->multiFactorAuthentication([
                 AppAuthentication::make()
                     ->recoverable(),
-            ], isRequired: app()->isProduction())
+            ], isRequired: fn (): bool => app()->isProduction()
+                // Enige gebruiker vandaag; vrijgesteld op eigen verzoek. Blijft
+                // verplicht zodra een tweede admin/staff/boekhouder-account bijkomt.
+                && auth()->user()?->email !== 'info@emeq.nl')
             ->viteTheme('resources/css/filament/admin/theme.css')
             ->sidebarCollapsibleOnDesktop()
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
