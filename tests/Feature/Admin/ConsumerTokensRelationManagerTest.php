@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Admin;
 
+use App\Filament\Resources\Consumers\ConsumerResource;
 use App\Filament\Resources\Consumers\Pages\ViewConsumer;
 use App\Filament\Resources\Consumers\RelationManagers\TokensRelationManager;
 use App\Models\Consumer;
@@ -11,6 +12,7 @@ use App\Models\User;
 use App\Sanctum\TokenAbilities;
 use Filament\Actions\Testing\TestAction;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Cache;
 use Livewire\Livewire;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
@@ -63,5 +65,30 @@ class ConsumerTokensRelationManagerTest extends TestCase
 
         $this->assertSame(1, $consumer->fresh()->tokens()->count());
         $this->assertNull($consumer->tokens()->where('name', 'gelekt')->first());
+    }
+
+    public function test_pat_kan_worden_uitgegeven_via_header_action(): void
+    {
+        $admin = $this->actAsStaff();
+
+        $consumer = Consumer::factory()->create();
+
+        Livewire::test(TokensRelationManager::class, [
+            'ownerRecord' => $consumer,
+            'pageClass' => ViewConsumer::class,
+        ])
+            ->callAction(TestAction::make('issuePat')->table(), data: [
+                'name' => 'planny-mollie',
+                'preset' => 'mollie-read',
+            ])
+            ->assertHasNoFormErrors()
+            ->assertRedirect(ConsumerResource::getUrl());
+
+        $token = $consumer->fresh()->tokens()->where('name', 'planny-mollie')->first();
+        $this->assertNotNull($token);
+        $this->assertSame([TokenAbilities::MOLLIE_READ], $token->abilities);
+
+        $this->assertIsString(Cache::get('pat-flash:user:'.$admin->id));
+        $this->assertSame('planny-mollie', Cache::get('pat-flash-name:user:'.$admin->id));
     }
 }
