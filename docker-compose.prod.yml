@@ -123,6 +123,11 @@ services:
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
       - "--entrypoints.web.address=:80"
+      # Zonder dit overschrijft Traefik cloudflared's X-Forwarded-Proto: https
+      # met http (de scheme van zijn eigen, interne verbinding met cloudflared),
+      # waardoor Laravel's trustProxies overal http detecteert. Veilig hier:
+      # dit entrypoint heeft geen host-poort, alleen cloudflared kan 'm raken.
+      - "--entrypoints.web.forwardedHeaders.insecure=true"
       - "--ping=true"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro

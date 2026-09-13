@@ -15,29 +15,12 @@ use App\Http\Controllers\SupportController;
 use App\Integrations\Exact\Http\Dev\ExactOAuthTracerController;
 use App\Integrations\Exact\Http\ExactDeprovisionController;
 use App\Models\User;
-use Filament\Support\Facades\FilamentAsset;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
-
-Route::get('/__debug/scheme', function () {
-    return response()->json([
-        'request_scheme' => request()->getScheme(),
-        'request_is_secure' => request()->isSecure(),
-        'server_https' => request()->server->get('HTTPS'),
-        'header_x_forwarded_proto' => request()->header('X-Forwarded-Proto'),
-        'header_x_forwarded_for' => request()->header('X-Forwarded-For'),
-        'trusted_proxies' => request()->getTrustedProxies(),
-        'config_app_url' => config('app.url'),
-        'config_octane_https' => config('octane.https'),
-        'asset_probe' => asset('probe.js'),
-        'url_to_probe' => url('/probe'),
-        'filament_wizard_src' => FilamentAsset::getAlpineComponentSrc('wizard', 'filament/schemas'),
-    ]);
-});
 
 Route::get('/up', function () {
     $dependencies = ['database' => 'fail', 'redis' => 'fail'];
