@@ -4,6 +4,7 @@ use App\Http\Controllers\AccessRequestController;
 use App\Http\Controllers\ConnectHandoffController;
 use App\Http\Controllers\ConnectManageController;
 use App\Http\Controllers\DemoRequestController;
+use App\Http\Controllers\DocsController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LegalController;
 use App\Http\Controllers\LlmsController;
@@ -100,6 +101,9 @@ Route::get('/voorwaarden', [LegalController::class, 'terms'])->name('terms');
 Route::get('/verwerkersovereenkomst', [LegalController::class, 'processorAgreement'])->name('processor-agreement');
 
 Route::get('/support', SupportController::class)->name('support');
+
+Route::get('/docs/integratiegids', [DocsController::class, 'integrationGuide'])
+    ->name('docs.integration-guide');
 
 Route::get('/sitemap.xml', SitemapController::class)->name('sitemap');
 Route::get('/robots.txt', RobotsController::class)->name('robots');
