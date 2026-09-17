@@ -6,6 +6,7 @@ use App\Http\Middleware\EnsureEmeqAdminToken;
 use App\Http\Middleware\EnsureIdempotency;
 use App\Http\Middleware\EnsureProviderEnabled;
 use App\Http\Middleware\HandleInertiaRequests;
+use App\Http\Middleware\LogApiRequest;
 use App\Http\Middleware\NormalizeApiErrors;
 use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\SetNoIndexHeaders;
@@ -55,7 +56,7 @@ return Application::configure(basePath: dirname(__DIR__))
             fn (Request $request): ?string => $request->is('v1/*') ? null : route('login'),
         );
 
-        $middleware->prepend([AssignRequestId::class, NormalizeApiErrors::class]);
+        $middleware->prepend([AssignRequestId::class, LogApiRequest::class, NormalizeApiErrors::class]);
 
         $middleware->append(SecurityHeaders::class);
         $middleware->append(SetNoIndexHeaders::class);

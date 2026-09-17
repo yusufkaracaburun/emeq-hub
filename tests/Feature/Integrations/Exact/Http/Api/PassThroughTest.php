@@ -375,6 +375,7 @@ class PassThroughTest extends TestCase
         [$consumer] = $this->consumerWithExactConnection();
         $token = $consumer->createToken('t', [TokenAbilities::EXACT_READ])->plainTextToken;
 
+        Log::shouldReceive('info');
         Log::shouldReceive('warning')
             ->once()
             ->withArgs(fn (string $message, array $context): bool => $message === 'exact.passthrough.whitelist_disabled'

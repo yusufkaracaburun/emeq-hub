@@ -16,6 +16,7 @@ class AuthRejectionLoggingTest extends TestCase
 
     public function test_a_rejected_token_is_logged_with_a_fingerprint(): void
     {
+        Log::shouldReceive('info');
         Log::shouldReceive('warning')
             ->once()
             ->withArgs(fn (string $event, array $context): bool => $event === 'api.auth_rejected'
@@ -34,6 +35,7 @@ class AuthRejectionLoggingTest extends TestCase
         $consumer = Consumer::factory()->create();
         $token = $consumer->createToken('t', [TokenAbilities::MOLLIE_READ])->plainTextToken;
 
+        Log::shouldReceive('info');
         Log::shouldReceive('warning')
             ->once()
             ->withArgs(fn (string $event, array $context): bool => $event === 'api.auth_rejected'
@@ -45,11 +47,12 @@ class AuthRejectionLoggingTest extends TestCase
             ->assertForbidden();
     }
 
-    public function test_a_successful_request_logs_nothing(): void
+    public function test_a_successful_request_logs_no_auth_rejection(): void
     {
         $consumer = Consumer::factory()->create();
         $token = $consumer->createToken('t', [TokenAbilities::ADMIN])->plainTextToken;
 
+        Log::shouldReceive('info');
         Log::shouldReceive('warning')->never();
 
         $this->withHeader('Authorization', "Bearer {$token}")
