@@ -8,7 +8,7 @@ Canonical rules enabled for this project. Source of truth: `~/.local/share/ai-ki
 | ---- | ---- | ----------- |
 | api-design | always-on | REST API conventions — resource modelling, status codes, versioning, OpenAPI source-of-truth |
 | aposd | on-demand | A Philosophy of Software Design — depth, complexity, naming, abstraction |
-| branch-cleanup-after-merge | always-on | Delete merged feature branches locally and on remote immediately after the PR merges |
+| branch-cleanup-after-merge | on-demand | Delete merged feature branches locally and on remote immediately after the PR merges |
 | bsd-sed-word-boundary | always-on | macOS / BSD sed does not support \b for word boundaries; use [[:<:]] / [[:>:]], grep -w, perl, or awk instead |
 | code-audit | on-demand | Whole-codebase architecture-quality audit checklist — 9 dimensions (patterns, SOLID, DRY, YAGNI, naming+comment-drift, coupling, layering, error-handling, type-safety) |
 | context-discipline | always-on | Token-budget discipline — grep before read, delegate wide exploration, lean on CONTEXT.md |
