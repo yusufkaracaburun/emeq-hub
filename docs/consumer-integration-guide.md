@@ -38,6 +38,7 @@ Hub-intern — niet in de consumer-app.
   - [Betalingen horen niet in de boeking](#betalingen-horen-niet-in-de-boeking)
   - [Boekhoud-mapping (zelf-service, optioneel)](#boekhoud-mapping-zelf-service-optioneel)
 - [Theorie-toegangscodes kopen (iTheorie)](#theorie-toegangscodes-kopen-itheorie)
+- [SEO-data opvragen (DataForSEO)](#seo-data-opvragen-dataforseo)
 - [Webhooks ontvangen](#webhooks-ontvangen)
 - [Valkuilen](#valkuilen)
 
@@ -1060,6 +1061,52 @@ Behandel `409 purchase_in_flight` NOOIT als "opnieuw proberen": toon een melding
 dat de bestelling handmatig nagekeken moet worden. Bij `503 upstream_error` of `503 upstream_timeout` mag je
 dezelfde sleutel opnieuw sturen; dat koopt gegarandeerd geen tweede code.
 ```
+
+## SEO-data opvragen (DataForSEO)
+
+DataForSEO werkt met een Connection per Account: de tenant koppelt zijn eigen
+DataForSEO-login (BYOK), dus je stuurt `X-Account-Id` mee zoals bij de
+boekhoudkoppelingen. Alle endpoints hieronder vragen ability `dataforseo:read`.
+
+**Elke call kost geld op het DataForSEO-saldo van de tenant.** De Hub stuurt
+elke request één op één door en bewaakt (nog) geen budget. Cache resultaten
+aan jouw kant; zoekvolumes en SERPs veranderen niet per minuut.
+
+```http
+GET  /v1/dataforseo/domain-overview?domain=example.nl&location_name=Netherlands
+GET  /v1/dataforseo/backlinks-summary?target=example.nl
+POST /v1/dataforseo/search-volume
+GET  /v1/dataforseo/serp-organic?keyword=theorie+examen&depth=10&device=mobile
+GET  /v1/dataforseo/related-keywords?keyword=theorie+examen&depth=1&limit=100
+```
+
+`search-volume` neemt een JSON-body, omdat 1000 keywords niet in een URL passen:
+
+```json
+{ "keywords": ["theorie examen", "auto theorie"] }
+```
+
+| Endpoint | Verplicht | Optioneel | Antwoord |
+|---|---|---|---|
+| `search-volume` | `keywords` (1 tot 1000, elk max. 80 tekens) | `location_code`, `language_code` | lijst met één rij per keyword |
+| `serp-organic` | `keyword` (max. 700 tekens) | `location_code`, `language_code`, `depth` (1 tot 200), `device` (`desktop`/`mobile`), `load_async_ai_overview` | één SERP-object met `items` |
+| `related-keywords` | `keyword` | `location_code`, `language_code`, `depth` (0 tot 4), `limit` (1 tot 1000) | één object met `items` |
+
+Standaard vraagt de Hub Nederland in het Nederlands op (`location_code` 2528,
+`language_code` `nl`). Het antwoord is het ruwe `result` van DataForSEO,
+zonder eigen mapping.
+
+Wat de prijs opdrijft:
+
+- `serp-organic` rekent per 10 resultaten, dus `depth=100` kost tien keer zoveel als de standaard 10.
+- `load_async_ai_overview=1` kost per call extra.
+- Google Ads (`search-volume`) staat maximaal 12 requests per minuut per DataForSEO-account toe. Bundel keywords in één call in plaats van ze los te sturen: 1 of 1000 keywords kost hetzelfde.
+
+| Status | `error` | Betekenis |
+|---|---|---|
+| `422` | `missing_domain` / `missing_target`, of Laravel-validatie met `errors` per veld bij de drie nieuwere endpoints | Parameter ontbreekt of valt buiten de grenzen hierboven. Er is niets doorgestuurd. |
+| `404` | `account_not_found` / `connection_not_found` | Onbekend Account, of geen actieve DataForSEO-koppeling. |
+| `503` | `upstream_error` | DataForSEO wees de task af; `upstream_status` bevat hun code (bijvoorbeeld `40200` bij leeg saldo). |
 
 ## Webhooks ontvangen
 
