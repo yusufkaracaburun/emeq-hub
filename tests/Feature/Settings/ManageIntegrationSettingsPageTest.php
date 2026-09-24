@@ -32,6 +32,15 @@ class ManageIntegrationSettingsPageTest extends TestCase
         $this->assertTrue(ManageIntegrationSettings::canAccess());
     }
 
+    public function test_dataforseo_tab_points_to_the_account_action(): void
+    {
+        $this->actingAs($this->userWithRole('super-admin'));
+
+        Livewire::test(ManageIntegrationSettings::class)
+            ->assertSee('DataForSEO-inlog instellen')
+            ->assertDontSee('De DataForSEO-integratie kun je nog niet in de Hub configureren');
+    }
+
     public function test_staff_cannot_access(): void
     {
         $this->actingAs($this->userWithRole('staff'));

@@ -88,10 +88,10 @@ class ManageIntegrationSettings extends Page
     /** @return list<Tab> */
     private function providerTabs(): array
     {
-        $tabs = [$this->exactTab(), $this->itheorieTab()];
+        $tabs = [$this->exactTab(), $this->itheorieTab(), $this->dataForSeoTab()];
 
         foreach (Provider::cases() as $provider) {
-            if ($provider === Provider::Exact || $provider === Provider::Itheorie) {
+            if (in_array($provider, [Provider::Exact, Provider::Itheorie, Provider::DataForSeo], true)) {
                 continue;
             }
 
@@ -125,6 +125,16 @@ class ManageIntegrationSettings extends Page
                         TextInput::make('exact_auth_base_url')->label('Auth base URL')->maxLength(255)->placeholder('https://start.exactonline.nl'),
                         TextInput::make('exact_api_base_url')->label('API base URL')->maxLength(255)->placeholder('https://start.exactonline.nl'),
                     ]),
+            ]);
+    }
+
+    private function dataForSeoTab(): Tab
+    {
+        return Tab::make(Provider::DataForSeo->getLabel())
+            ->schema([
+                $this->availabilitySection(Provider::DataForSeo),
+                Section::make('Inlog per account')
+                    ->description('Elke consumer-app gebruikt een eigen DataForSEO-login. Stel die in via Accounts → [account] → Connections → "DataForSEO-inlog instellen". De inlog wordt daar eerst live getest.'),
             ]);
     }
 
