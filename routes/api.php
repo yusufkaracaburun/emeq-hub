@@ -12,6 +12,9 @@ use App\Http\Controllers\Api\V1\OAuth\ProviderInitController;
 use App\Http\Controllers\Api\V1\PingController;
 use App\Integrations\DataForSeo\Http\Api\BacklinksSummaryController as DataForSeoBacklinksSummaryController;
 use App\Integrations\DataForSeo\Http\Api\DomainOverviewController as DataForSeoDomainOverviewController;
+use App\Integrations\DataForSeo\Http\Api\RelatedKeywordsController as DataForSeoRelatedKeywordsController;
+use App\Integrations\DataForSeo\Http\Api\SearchVolumeController as DataForSeoSearchVolumeController;
+use App\Integrations\DataForSeo\Http\Api\SerpOrganicController as DataForSeoSerpOrganicController;
 use App\Integrations\Exact\Http\Api\GlAccountsController as ExactGlAccountsController;
 use App\Integrations\Exact\Http\Api\JournalsController as ExactJournalsController;
 use App\Integrations\Exact\Http\Api\PassThroughController as ExactPassThroughController;
@@ -76,6 +79,12 @@ Route::middleware('auth:sanctum')->group(function (): void {
                 ->name('api.dataforseo.domain-overview');
             Route::get('/backlinks-summary', [DataForSeoBacklinksSummaryController::class, 'show'])
                 ->name('api.dataforseo.backlinks-summary');
+            Route::post('/search-volume', [DataForSeoSearchVolumeController::class, 'store'])
+                ->name('api.dataforseo.search-volume');
+            Route::get('/serp-organic', [DataForSeoSerpOrganicController::class, 'show'])
+                ->name('api.dataforseo.serp-organic');
+            Route::get('/related-keywords', [DataForSeoRelatedKeywordsController::class, 'show'])
+                ->name('api.dataforseo.related-keywords');
         });
 
     Route::prefix('itheorie')
