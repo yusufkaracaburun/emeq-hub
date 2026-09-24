@@ -1,0 +1,39 @@
+# Emeq Hub × DataForSEO: zoekvolume (Google Ads search_volume/live)
+#
+# Setup: zie consumer/domain-overview.http en README.md.
+# Betaalde call. Eén of 1000 keywords kost hetzelfde; DataForSEO staat
+# maximaal 12 requests per minuut per account toe.
+
+@baseUrl = http://hub.emeq.test:8092
+@token = {{$dotenv EMEQ_HUB_PAT}}
+@accountId = 47
+
+### Zoekvolume, defaults location_code 2528 (NL) en language_code nl
+POST {{baseUrl}}/v1/dataforseo/search-volume
+Authorization: Bearer {{token}}
+Accept: application/json
+Content-Type: application/json
+X-Account-Id: {{accountId}}
+
+{
+  "keywords": ["theorie examen", "auto theorie", "rijschool utrecht"]
+}
+
+### Zonder keywords → 422 (validatie)
+POST {{baseUrl}}/v1/dataforseo/search-volume
+Authorization: Bearer {{token}}
+Accept: application/json
+Content-Type: application/json
+X-Account-Id: {{accountId}}
+
+{}
+
+### Zonder PAT → 401 unauthenticated
+POST {{baseUrl}}/v1/dataforseo/search-volume
+Accept: application/json
+Content-Type: application/json
+X-Account-Id: {{accountId}}
+
+{
+  "keywords": ["theorie examen"]
+}

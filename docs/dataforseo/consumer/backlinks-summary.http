@@ -1,3 +1,11 @@
+# Emeq Hub × DataForSEO: backlinks-samenvatting (backlinks/summary/live)
+#
+# Setup: zie consumer/domain-overview.http en README.md.
+
+@baseUrl = http://hub.emeq.test:8092
+@token = {{$dotenv EMEQ_HUB_PAT}}
+@accountId = 47
+
 ### Backlinks Summary — verplicht: target. Optioneel: include_subdomains, backlinks_status_type, internal_list_limit
 GET {{baseUrl}}/v1/dataforseo/backlinks-summary?target=example.com
 Authorization: Bearer {{token}}

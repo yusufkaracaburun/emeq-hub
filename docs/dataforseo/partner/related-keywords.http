@@ -1,27 +1,25 @@
-# DataForSEO partner-API: Google Ads search volume (live)
+# DataForSEO partner-API: related keywords (DataForSEO Labs, live)
 #
 # Setup: docs/dataforseo/.env (zie .env.example).
-# Max 1000 keywords van max 80 tekens per call, max 12 requests per minuut.
-# LOCATION_CODE + LANGUAGE_CODE uit .env.
+# depth 0-4, limit 1-1000 (default 100). Afgerekend per task plus per item.
 
 @apiBase = {{$dotenv DATAFORSEO_API_URL}}
 @basic = {{$dotenv DATAFORSEO_BASIC}}
 @location_code = {{$dotenv LOCATION_CODE}}
 @language_code = {{$dotenv LANGUAGE_CODE}}
+@keyword = boekhouding software
 ###
-POST {{apiBase}}/v3/keywords_data/google_ads/search_volume/live
+POST {{apiBase}}/v3/dataforseo_labs/google/related_keywords/live
 Authorization: Basic {{basic}}
 Content-Type: application/json
 Accept: application/json
 
 [
   {
+    "keyword": "{{keyword}}",
     "location_code": {{location_code}},
     "language_code": "{{language_code}}",
-    "keywords": [
-      "boekhouding software",
-      "planning tool",
-      "seo tool"
-    ]
+    "depth": 1,
+    "limit": 10
   }
 ]

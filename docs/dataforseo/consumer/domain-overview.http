@@ -3,8 +3,6 @@
 # Test /v1/dataforseo/* (Bearer PAT + X-Account-Id). Draai eerst fase 1:
 # partner/domain-overview.http (direct naar api.dataforseo.com).
 #
-# Vereist de Hub-code op branch agent/open-seo (of na merge daarvan).
-#
 # ── Setup ────────────────────────────────────────────────────────────────────
 #
 # 1. Fase 1 groen: partner-API werkt (account geverifieerd bij DataForSEO).

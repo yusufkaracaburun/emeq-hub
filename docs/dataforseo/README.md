@@ -11,8 +11,8 @@ of VS Code "REST Client"). Deze map is de DataForSEO-invulling van dat patroon.
 | **1 · partner** | `partner/*.http` | Jouw credentials → `api.dataforseo.com` (geen Hub, geen PAT) |
 | **2 · consumer** | `consumer/*.http` | Consumer-contract → Hub `/v1/dataforseo/*` (PAT + Connection) |
 
-Fase 2 vereist de Hub-implementatie op branch `agent/open-seo` (of na merge).
-Fase 1 kan altijd, ook op `master`.
+Beide fasen werken op `master`. Alle requests behalve de 401/422-foutpaden zijn
+betaalde calls op het DataForSEO-saldo.
 
 ### Fase 1 — `partner/` checklist
 
@@ -23,20 +23,32 @@ Fase 1 kan altijd, ook op `master`.
    Gebruik `LOCATION_NAME=Netherlands`; `LANGUAGE_CODE` hoort niet bij dit endpoint.
 3. Nieuw account? DataForSEO geeft **40104** tot verificatie in
    [app.dataforseo.com](https://app.dataforseo.com/) klaar is.
-4. Eén bestand per DataForSEO-categorie (zelfde `.env`, geen extra setup):
-   `partner/domain-overview.http`, `partner/backlinks.http`, `partner/keywords.http`,
-   `partner/serp.http`. Die laatste is **async** (task_post → task_get met een
-   task-id), geen synchrone call — zie de kop van dat bestand.
+4. Eén bestand per DataForSEO-endpoint (zelfde `.env`, geen extra setup):
+   `partner/domain-overview.http`, `partner/backlinks.http`, `partner/keywords.http`
+   (search volume), `partner/related-keywords.http` en `partner/serp.http`. Dat
+   laatste bevat eerst `live/advanced` (wat de Hub gebruikt) en daarna de async
+   variant (task_post → task_get met een task-id), zie de kop van dat bestand.
 
 ### Fase 2 — `consumer/` checklist
 
-1. Checkout `agent/open-seo` (of merge), `composer install`, Hub draait.
+1. `composer install`, Hub draait.
 2. Root-`.env`: `HUB_PROVIDER_DATAFORSEO_ENABLED=true`.
 3. Connection met DataForSEO login:password voor een Account (zelfde credentials
    als fase 1, opgeslagen encrypted op de Connection).
 4. `EMEQ_HUB_PAT` in `docs/dataforseo/.env`; `@accountId` = `external_id` van dat
    Account in `consumer/domain-overview.http`.
-5. Draai `consumer/domain-overview.http`.
+5. Draai `consumer/domain-overview.http`, daarna per endpoint:
+
+| Bestand | Hub-route |
+| --- | --- |
+| `consumer/domain-overview.http` | `GET /v1/dataforseo/domain-overview` |
+| `consumer/backlinks-summary.http` | `GET /v1/dataforseo/backlinks-summary` |
+| `consumer/search-volume.http` | `POST /v1/dataforseo/search-volume` |
+| `consumer/serp-organic.http` | `GET /v1/dataforseo/serp-organic` |
+| `consumer/related-keywords.http` | `GET /v1/dataforseo/related-keywords` |
+
+Parameters, kosten en foutcodes staan in `docs/consumer-integration-guide.md`,
+sectie "SEO-data opvragen (DataForSEO)".
 
 ## Secrets (alleen deze map)
 

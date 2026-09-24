@@ -1,6 +1,12 @@
-# DataForSEO partner-API — SERP organic (async)
+# DataForSEO partner-API: SERP organic
 #
 # Setup: docs/dataforseo/.env (zie .env.example).
+#
+# Eerste request: live/advanced, synchroon. Dit endpoint gebruikt de Hub
+# voor /v1/dataforseo/serp-organic. depth 1-200 (default 10), afgerekend
+# per 10 resultaten.
+#
+# Daarna de async variant, goedkoper maar met wachttijd:
 # Flow: 1) task_post → kopieer tasks[0].id naar @taskId
 #       2) wacht ~5–60s
 #       3) task_get → tasks[0].status_code 20000 = resultaat klaar
@@ -12,6 +18,21 @@
 @language_code = {{$dotenv LANGUAGE_CODE}}
 @keyword = boekhouding software
 @taskId = VUL-HIER-DE-ID-UIT-STAP-1-IN
+###
+POST {{apiBase}}/v3/serp/google/organic/live/advanced
+Authorization: Basic {{basic}}
+Content-Type: application/json
+Accept: application/json
+
+[
+  {
+    "keyword": "{{keyword}}",
+    "location_code": {{location_code}},
+    "language_code": "{{language_code}}",
+    "device": "desktop",
+    "depth": 10
+  }
+]
 ###
 POST {{apiBase}}/v3/serp/google/organic/task_post
 Authorization: Basic {{basic}}

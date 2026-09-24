@@ -1,0 +1,33 @@
+# Emeq Hub × DataForSEO: gerelateerde zoektermen (dataforseo_labs/google/related_keywords/live)
+#
+# Setup: zie consumer/domain-overview.http en README.md.
+# Betaalde call: prijs per task plus per teruggegeven item, dus limit
+# (1-1000, default 100) en depth (0-4) bepalen de kosten.
+
+@baseUrl = http://hub.emeq.test:8092
+@token = {{$dotenv EMEQ_HUB_PAT}}
+@accountId = 47
+
+### Gerelateerde zoektermen, defaults location_code 2528 (NL) en language_code nl
+GET {{baseUrl}}/v1/dataforseo/related-keywords?keyword=theorie+examen
+Authorization: Bearer {{token}}
+Accept: application/json
+X-Account-Id: {{accountId}}
+
+### Met depth en limit
+GET {{baseUrl}}/v1/dataforseo/related-keywords?keyword=theorie+examen&depth=2&limit=50
+Authorization: Bearer {{token}}
+Accept: application/json
+X-Account-Id: {{accountId}}
+
+### depth boven 4 → 422 (validatie)
+GET {{baseUrl}}/v1/dataforseo/related-keywords?keyword=theorie+examen&depth=5
+Authorization: Bearer {{token}}
+Accept: application/json
+X-Account-Id: {{accountId}}
+
+### Zonder keyword → 422 (validatie)
+GET {{baseUrl}}/v1/dataforseo/related-keywords
+Authorization: Bearer {{token}}
+Accept: application/json
+X-Account-Id: {{accountId}}
