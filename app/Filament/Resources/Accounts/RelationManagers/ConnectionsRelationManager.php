@@ -4,18 +4,24 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Accounts\RelationManagers;
 
+use App\Enums\Provider;
 use App\Filament\Actions\StartOAuthFlowAction;
 use App\Filament\Resources\Connections\ConnectionResource;
+use App\Integrations\DataForSeo\HubDataForSeoCredentialResolver;
 use App\Models\Account;
 use App\Models\Connection;
+use Emeq\DataForSeoApi\DataForSeo;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Notifications\Notification;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Redirector;
+use Saloon\Exceptions\Request\Statuses\UnauthorizedException;
 
 final class ConnectionsRelationManager extends RelationManager
 {
@@ -46,6 +52,46 @@ final class ConnectionsRelationManager extends RelationManager
                         $account = $this->getOwnerRecord();
 
                         return StartOAuthFlowAction::dispatch($account, $data['provider']);
+                    }),
+                Action::make('dataForSeoCredentials')
+                    ->label('DataForSEO-inlog instellen')
+                    ->icon('heroicon-o-key')
+                    ->modalDescription('De inlog wordt eerst live bij DataForSEO getest. Het wachtwoord is na opslaan niet meer zichtbaar.')
+                    ->schema([
+                        TextInput::make('login')
+                            ->label('API-login')
+                            ->required()
+                            ->regex('/^[^:]+$/'),
+                        TextInput::make('password')
+                            ->label('API-wachtwoord')
+                            ->password()
+                            ->required(),
+                    ])
+                    ->modalSubmitActionLabel('Testen en opslaan')
+                    ->visible(fn (): bool => auth()->user()?->hasRole('super-admin') ?? false)
+                    ->action(function (array $data, Action $action): void {
+                        $accessToken = $data['login'].':'.$data['password'];
+                        $resolver = new HubDataForSeoCredentialResolver(new Connection(['access_token' => $accessToken]));
+
+                        try {
+                            $userData = (new DataForSeo($resolver))->userData();
+                        } catch (UnauthorizedException) {
+                            Notification::make()->danger()->title('DataForSEO weigert deze inlog')->body('Niets opgeslagen.')->send();
+                            $action->halt();
+                        }
+
+                        /** @var Account $account */
+                        $account = $this->getOwnerRecord();
+                        $account->connections()->updateOrCreate(
+                            ['provider' => Provider::DataForSeo->value, 'revoked_at' => null],
+                            ['status' => 'active', 'access_token' => $accessToken],
+                        );
+
+                        Notification::make()
+                            ->success()
+                            ->title('DataForSEO-inlog opgeslagen')
+                            ->body(sprintf('Saldo: $%.2f', $userData['money']['balance'] ?? 0))
+                            ->send();
                     }),
             ])
             ->recordUrl(fn (Connection $record): string => ConnectionResource::getUrl('view', ['record' => $record]))
