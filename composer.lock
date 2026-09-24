@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "13f71074ed350410c5ae24ac98c307fe",
+    "content-hash": "afade262bca5dac5e47a6d4bb63c0249",
     "packages": [
         {
             "name": "anourvalar/eloquent-serialize",
@@ -1424,16 +1424,16 @@
         },
         {
             "name": "emeq/dataforseo-api",
-            "version": "v0.2.1",
+            "version": "v0.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/yusufkaracaburun/emeq-dataforseo-api.git",
-                "reference": "c6b30bb7f229877570c7d99d800074640a504712"
+                "reference": "330a1be3b6061cefcdfc7bafc086c70bc63a26bf"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/yusufkaracaburun/emeq-dataforseo-api/zipball/c6b30bb7f229877570c7d99d800074640a504712",
-                "reference": "c6b30bb7f229877570c7d99d800074640a504712",
+                "url": "https://api.github.com/repos/yusufkaracaburun/emeq-dataforseo-api/zipball/330a1be3b6061cefcdfc7bafc086c70bc63a26bf",
+                "reference": "330a1be3b6061cefcdfc7bafc086c70bc63a26bf",
                 "shasum": ""
             },
             "require": {
@@ -1515,10 +1515,10 @@
                 "seo"
             ],
             "support": {
-                "source": "https://github.com/yusufkaracaburun/emeq-dataforseo-api/tree/v0.2.1",
+                "source": "https://github.com/yusufkaracaburun/emeq-dataforseo-api/tree/v0.3.0",
                 "issues": "https://github.com/yusufkaracaburun/emeq-dataforseo-api/issues"
             },
-            "time": "2026-08-29T20:59:51+00:00"
+            "time": "2026-09-24T15:12:42+00:00"
         },
         {
             "name": "emeq/exact-api",
