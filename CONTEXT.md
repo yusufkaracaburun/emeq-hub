@@ -31,6 +31,9 @@ Multi-tenant integration-platform: één Laravel-Hub die OAuth-koppelingen, webh
 | **AccountingTarget** | Provider-adapter die canonical → boekhoudpakket-body mapt, geresolved via `AccountingTargetRegistry` (spiegel van `OAuthFlowRegistry` + dezelfde provider-gate). |
 | **Brondocument / Afhandeling** | Sync-grens: brondocumenten (facturen, losse income/expense) worden gesynct; afhandelingen (de betaling van een al-gesynct document) niet — die boekt de provider via bankreconciliatie. |
 | **EnsureIdempotency** | Hub-brede write-idempotentie (middleware-alias `idempotent`). Consumer stuurt een `Idempotency-Key`-header; de Hub bewaart de eerste 2xx-respons per `(consumer, key)` in `idempotency_keys` en herhaalt die bij retry i.p.v. opnieuw uit te voeren. `idempotent:required` waar dubbel-uitvoeren schadelijk is (accounting); één alias, herbruikbaar op elke write-route — geen partner-duplicatie. |
+| **ExtractionProfile** | Het JSON-schema waarin een Consumer een document uitgelezen wil hebben (bv. `timesheet`). Van de Consumer, niet van de Hub: de Hub weet niet wat een urenregel is. Elke versie is onveranderlijk; een wijziging is een nieuwe versie. |
+| **ExtractionRun** | Eén keer een document uitlezen tegen één ExtractionProfile-versie. Het resultaat gaat alleen naar de Consumer; de Hub bewaart het document noch het resultaat, alleen dat de run bestond en hoe hij afliep. |
+| **Extractie-hint** | Wat een Account over de eigen documenten vertelt (kolomnamen, bekende medewerker- en projectcodes) om het uitlezen te verbeteren. Stuurt het model, verandert nooit de vorm van het resultaat; die blijft van het ExtractionProfile. |
 
 ## Grenzen / invariants
 
