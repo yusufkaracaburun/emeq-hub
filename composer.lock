@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "5f29492f7d08eb8bf108006d88c1b3ae",
+    "content-hash": "29c6d72ddb5c87505dd7b0bce3234812",
     "packages": [
         {
             "name": "anourvalar/eloquent-serialize",
@@ -1522,16 +1522,16 @@
         },
         {
             "name": "emeq/exact-api",
-            "version": "v0.10.1",
+            "version": "v0.11.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/yusufkaracaburun/emeq-exact-api.git",
-                "reference": "f82165a831ff13fd067be9acd0b8ba8b20a5abfc"
+                "reference": "7d85b63f9ef8eb060d7b0c740d00f43e2897071f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/yusufkaracaburun/emeq-exact-api/zipball/f82165a831ff13fd067be9acd0b8ba8b20a5abfc",
-                "reference": "f82165a831ff13fd067be9acd0b8ba8b20a5abfc",
+                "url": "https://api.github.com/repos/yusufkaracaburun/emeq-exact-api/zipball/7d85b63f9ef8eb060d7b0c740d00f43e2897071f",
+                "reference": "7d85b63f9ef8eb060d7b0c740d00f43e2897071f",
                 "shasum": ""
             },
             "require": {
@@ -1615,10 +1615,10 @@
                 "saloon"
             ],
             "support": {
-                "source": "https://github.com/yusufkaracaburun/emeq-exact-api/tree/v0.10.1",
+                "source": "https://github.com/yusufkaracaburun/emeq-exact-api/tree/v0.11.0",
                 "issues": "https://github.com/yusufkaracaburun/emeq-exact-api/issues"
             },
-            "time": "2026-09-02T21:24:24+00:00"
+            "time": "2026-09-30T11:44:03+00:00"
         },
         {
             "name": "emeq/itheorie-api",
