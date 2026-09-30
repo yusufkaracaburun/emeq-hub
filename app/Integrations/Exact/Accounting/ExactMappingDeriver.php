@@ -20,7 +20,6 @@ final class ExactMappingDeriver
         $derived = [
             'vat_codes' => $this->deriveVat($refs),
             'journals' => $this->deriveJournals($refs),
-            'gl_accounts' => $this->deriveGl($refs),
         ];
 
         $metadata = $connection->metadata ?? [];
@@ -86,34 +85,6 @@ final class ExactMappingDeriver
 
         if ($purchase !== null) {
             $out['purchase'] = $purchase->code;
-        }
-
-        return $out;
-    }
-
-    /**
-     * @param  Collection<int, ConnectionAccountingRef>  $refs
-     * @return array<string, string>
-     */
-    private function deriveGl(Collection $refs): array
-    {
-        $gl = $refs->where('kind', ConnectionAccountingRef::KIND_GL)->sortBy('code');
-        $out = [];
-
-        $omzet = $gl->first(fn (ConnectionAccountingRef $r) => str_starts_with($r->code, '8'));
-        $kosten = $gl->first(fn (ConnectionAccountingRef $r) => str_starts_with($r->code, '4'));
-
-        if ($omzet !== null) {
-            $out['omzet'] = $omzet->code;
-            $out['sales_default'] = $omzet->code;
-        }
-
-        if ($kosten !== null) {
-            $out['kosten'] = $kosten->code;
-            $out['purchase_default'] = $kosten->code;
-            $out['_default'] = $kosten->code;
-        } elseif ($omzet !== null) {
-            $out['_default'] = $omzet->code;
         }
 
         return $out;
