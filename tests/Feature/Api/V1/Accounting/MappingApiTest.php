@@ -17,6 +17,7 @@ use Emeq\ExactApi\Http\Request\Read\GetGlAccounts;
 use Emeq\ExactApi\Http\Request\Read\GetJournals;
 use Emeq\ExactApi\Http\Request\Read\GetVatCodes;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Log;
 use Saloon\Http\Faking\MockClient;
 use Saloon\Http\Faking\MockResponse;
 use Tests\TestCase;
@@ -93,7 +94,7 @@ class MappingApiTest extends TestCase
         $mapping = $connection->fresh()->metadata['accounting_mapping'];
         $this->assertSame('3', $mapping['vat_codes']['21']);
         $this->assertSame('80', $mapping['journals']['sales']);
-        $this->assertSame('8000', $mapping['gl_accounts']['omzet']);
+        $this->assertArrayNotHasKey('gl_accounts', $mapping);
     }
 
     public function test_reference_data_lists_mirror_codes(): void
@@ -114,15 +115,60 @@ class MappingApiTest extends TestCase
     public function test_put_mapping_merges_override(): void
     {
         [$consumer, $connection] = $this->setupConnection();
-        $connection->metadata = ['accounting_mapping' => ['gl_accounts' => ['omzet' => 'auto']]];
+        $connection->metadata = ['accounting_mapping' => ['gl_accounts' => ['omzet' => '8000']]];
         $connection->save();
+        foreach (['8100', '4000'] as $code) {
+            ConnectionAccountingRef::query()->create([
+                'connection_id' => $connection->getKey(), 'kind' => 'gl', 'code' => $code, 'native_id' => "gl-{$code}",
+            ]);
+        }
 
         $this->withHeader('Authorization', "Bearer {$this->token($consumer)}")
             ->withHeader('X-Account-Id', 'school1')
-            ->putJson('/v1/accounting/mapping', ['gl_accounts' => ['omzet' => 'override', 'kosten' => '4000']])
+            ->putJson('/v1/accounting/mapping', ['gl_accounts' => ['omzet' => '8100', 'kosten' => '4000']])
             ->assertOk()
-            ->assertJsonPath('mapping.gl_accounts.omzet', 'override')
+            ->assertJsonPath('mapping.gl_accounts.omzet', '8100')
             ->assertJsonPath('mapping.gl_accounts.kosten', '4000');
+    }
+
+    public function test_put_mapping_is_audited_with_the_consumer_as_actor(): void
+    {
+        [$consumer, $connection] = $this->setupConnection();
+        ConnectionAccountingRef::query()->create([
+            'connection_id' => $connection->getKey(), 'kind' => 'gl', 'code' => '4000', 'native_id' => 'gl-4000',
+        ]);
+        Log::spy();
+
+        $this->withHeader('Authorization', "Bearer {$this->token($consumer)}")
+            ->withHeader('X-Account-Id', 'school1')
+            ->putJson('/v1/accounting/mapping', ['gl_accounts' => ['kosten' => '4000']])
+            ->assertOk();
+
+        Log::shouldHaveReceived('info')->with('accounting.mapping.changed', [
+            'connection_id' => $connection->getKey(),
+            'section' => 'gl_accounts',
+            'key' => 'kosten',
+            'old' => null,
+            'new' => '4000',
+            'actor' => 'consumer:'.$consumer->getKey(),
+        ])->once();
+    }
+
+    public function test_put_mapping_rejects_gl_code_outside_the_mirror(): void
+    {
+        [$consumer, $connection] = $this->setupConnection();
+        ConnectionAccountingRef::query()->create([
+            'connection_id' => $connection->getKey(), 'kind' => 'gl', 'code' => '4000', 'native_id' => 'gl-4000',
+        ]);
+
+        $this->withHeader('Authorization', "Bearer {$this->token($consumer)}")
+            ->withHeader('X-Account-Id', 'school1')
+            ->putJson('/v1/accounting/mapping', ['gl_accounts' => ['kosten' => '4000', 'huisvesting' => '9999', 'suspense' => '9998']])
+            ->assertStatus(422)
+            ->assertJsonValidationErrors(['gl_accounts.huisvesting', 'gl_accounts.suspense'])
+            ->assertJsonMissingValidationErrors(['gl_accounts.kosten']);
+
+        $this->assertNull($connection->fresh()->metadata['accounting_mapping'] ?? null);
     }
 
     public function test_sync_returns_422_when_the_provider_cannot_sync_references(): void

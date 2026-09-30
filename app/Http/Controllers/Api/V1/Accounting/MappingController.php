@@ -17,6 +17,7 @@ use Dedoc\Scramble\Attributes\Group;
 use Dedoc\Scramble\Attributes\Response;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 #[Group(name: 'Accounting Sync', description: 'Beheer de boekhoud-referentie-mirror en de optionele mapping-override van een Account-koppeling.', weight: 51)]
 class MappingController extends Controller
@@ -127,11 +128,17 @@ class MappingController extends Controller
 
         [, $connection] = $resolved;
 
+        $glCodes = ConnectionAccountingRef::query()
+            ->where('connection_id', $connection->getKey())
+            ->where('kind', ConnectionAccountingRef::KIND_GL)
+            ->pluck('code')
+            ->all();
+
         $validated = $request->validate([
             'vat_codes' => ['array'],
             'vat_codes.*' => ['string'],
             'gl_accounts' => ['array'],
-            'gl_accounts.*' => ['string'],
+            'gl_accounts.*' => ['string', Rule::in($glCodes)],
             'journals' => ['array'],
             'journals.*' => ['string'],
         ]);
