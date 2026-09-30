@@ -37,10 +37,10 @@ final class ConnectionMappingExactReferenceResolver implements ReferenceResolver
         return $treatment->vatCodeKey($this->rateKey($taxRate));
     }
 
-    public function glAccountRef(?string $category, DocumentType $type, Connection $connection): string
+    public function glAccountRef(?string $category, DocumentType $type, Connection $connection, ?string $categoryLabel = null): string
     {
         $code = $this->glAccountCodeOrNull($category, $type, $connection)
-            ?? throw new AccountingMappingException($this->missingGlAccountMessage($category, $type));
+            ?? throw new AccountingMappingException($this->missingGlAccountMessage($category, $type, $categoryLabel));
 
         return $this->mirrorNativeId($connection, ConnectionAccountingRef::KIND_GL, $code)
             ?? throw new AccountingMappingException("Grootboek-code '{$code}' niet in de mirror — draai POST /v1/accounting/sync.");
@@ -62,12 +62,14 @@ final class ConnectionMappingExactReferenceResolver implements ReferenceResolver
         return isset($this->section($connection, 'gl_accounts')[$category]);
     }
 
-    public function missingGlAccountMessage(?string $category, DocumentType $type): string
+    public function missingGlAccountMessage(?string $category, DocumentType $type, ?string $categoryLabel = null): string
     {
         $where = 'via PUT /v1/accounting/mapping of de beheerpagina van deze koppeling.';
 
         if ($category !== null) {
-            return "Categorie '{$category}' heeft geen grootboek in de mapping. Koppel deze categorie aan een grootboek (gl_accounts.{$category}), of stel een tussenrekening (gl_accounts.suspense) in {$where}";
+            $named = $categoryLabel !== null ? "'{$categoryLabel}' ({$category})" : "'{$category}'";
+
+            return "Categorie {$named} heeft geen grootboek in de mapping. Koppel deze categorie aan een grootboek (gl_accounts.{$category}), of stel een tussenrekening (gl_accounts.suspense) in {$where}";
         }
 
         $bookings = $this->journalFamily($type) === 'sales' ? 'verkoopboekingen' : 'inkoopboekingen';

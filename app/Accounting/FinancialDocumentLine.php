@@ -18,6 +18,7 @@ final readonly class FinancialDocumentLine
         public ?string $costCenter = null,
         public ?string $costUnit = null,
         public TaxTreatment $taxTreatment = TaxTreatment::Standard,
+        public ?string $categoryLabel = null,
     ) {}
 
     public function netAmount(): float
@@ -43,6 +44,7 @@ final readonly class FinancialDocumentLine
             costCenter: isset($data['cost_center']) ? (string) $data['cost_center'] : null,
             costUnit: isset($data['cost_unit']) ? (string) $data['cost_unit'] : null,
             taxTreatment: TaxTreatment::tryFrom((string) ($data['tax_treatment'] ?? '')) ?? TaxTreatment::Standard,
+            categoryLabel: isset($data['category_label']) ? (string) $data['category_label'] : null,
         );
     }
 }

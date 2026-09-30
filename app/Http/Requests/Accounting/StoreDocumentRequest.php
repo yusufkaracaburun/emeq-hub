@@ -61,6 +61,7 @@ class StoreDocumentRequest extends FormRequest
             'lines.*.tax_rate' => ['required', 'numeric', 'min:0'],
             'lines.*.tax_treatment' => ['nullable', Rule::in(TaxTreatment::values())],
             'lines.*.category' => ['nullable', 'string', 'max:255'],
+            'lines.*.category_label' => ['nullable', 'string', 'max:255'],
             'lines.*.cost_center' => ['nullable', 'string', 'max:255'],
             'lines.*.cost_unit' => ['nullable', 'string', 'max:255'],
 

@@ -33,7 +33,7 @@ trait BindsFakeAccountingReferences
                     return $taxRate >= 21.0 ? '4' : '2';
                 }
 
-                public function glAccountRef(?string $category, DocumentType $type, Connection $connection): ?string
+                public function glAccountRef(?string $category, DocumentType $type, Connection $connection, ?string $categoryLabel = null): ?string
                 {
                     return 'gl-guid';
                 }

@@ -698,6 +698,43 @@ class StoreDocumentTest extends TestCase
         MockClient::global()->assertNotSent(CreateSalesEntry::class);
     }
 
+    public function test_mapping_failed_names_the_category_label_next_to_the_key(): void
+    {
+        MockClient::global([
+            CreateSalesEntry::class => MockResponse::make(['d' => ['ID' => 'inv-1']], 201),
+        ]);
+
+        [$consumer, $connection] = $this->consumerWithExactConnection([
+            'metadata' => ['accounting_mapping' => [
+                'vat_codes' => ['21' => '4'],
+                'gl_accounts' => ['sales_default' => 'gl-omzet'],
+                'journals' => ['sales' => '70'],
+            ]],
+        ]);
+        ConnectionAccountingRef::query()->create([
+            'connection_id' => $connection->getKey(),
+            'kind' => ConnectionAccountingRef::KIND_RELATION,
+            'code' => 'acme-1',
+            'native_id' => 'cust-real',
+        ]);
+
+        $token = $consumer->createToken('t', [TokenAbilities::EXACT_WRITE])->plainTextToken;
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->withHeader('X-Account-Id', 'school1')
+            ->withHeader('Idempotency-Key', (string) Str::uuid())
+            ->postJson('/v1/accounting/documents', $this->salesInvoicePayload([
+                'lines' => [
+                    ['description' => 'Tanken', 'amount' => 50, 'tax_rate' => 21, 'category' => 'expense:12', 'category_label' => 'Brandstof'],
+                ],
+            ]))
+            ->assertStatus(422)
+            ->assertJsonPath('error', 'mapping_failed')
+            ->assertJsonPath('message', fn (string $message): bool => str_contains($message, "Categorie 'Brandstof' (expense:12) heeft geen grootboek"));
+
+        MockClient::global()->assertNotSent(CreateSalesEntry::class);
+    }
+
     public function test_auto_created_relation_carries_the_whole_relation_card(): void
     {
         MockClient::global([

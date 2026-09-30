@@ -15,7 +15,7 @@ interface ReferenceResolver
 
     public function vatCode(float $taxRate, TaxTreatment $treatment, Connection $connection): string;
 
-    public function glAccountRef(?string $category, DocumentType $type, Connection $connection): ?string;
+    public function glAccountRef(?string $category, DocumentType $type, Connection $connection, ?string $categoryLabel = null): ?string;
 
     public function journal(DocumentType $type, Connection $connection): string;
 

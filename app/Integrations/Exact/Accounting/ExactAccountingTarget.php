@@ -708,7 +708,7 @@ final class ExactAccountingTarget implements AccountingTarget, ConfirmsPostedDoc
                 'description' => $line->description,
                 'amount' => $line->netAmount(),
                 'vatCode' => $this->references->vatCode($line->taxRate, $line->taxTreatment, $connection),
-                'glAccount' => $this->references->glAccountRef($line->category, $document->type, $connection),
+                'glAccount' => $this->references->glAccountRef($line->category, $document->type, $connection, $line->categoryLabel),
                 'costCenter' => $this->references->costCenter($line->costCenter, $connection),
                 'costUnit' => $this->references->costUnit($line->costUnit, $connection),
             ],
