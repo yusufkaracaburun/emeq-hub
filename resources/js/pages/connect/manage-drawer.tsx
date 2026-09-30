@@ -1,7 +1,8 @@
 import { router, useHttp } from '@inertiajs/react';
 import { Dialog } from 'radix-ui';
-import { useEffect, useState } from 'react';
+import { useEffect, useId, useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { Combobox } from '@/components/ui/combobox';
 import { RefreshGlyph, UnlinkGlyph } from '@/components/ui/glyphs';
 import { cn } from '@/lib/utils';
 
@@ -36,9 +37,19 @@ interface ManagePayload {
     bookings: BookingRow[];
     relations: RelationRow[];
     settings: {
+        mode: 'view' | 'manage';
         journals: { sales: string | null; purchase: string | null; options: RefOption[] };
-        gl_accounts: { sales_default: string | null; purchase_default: string | null; options: RefOption[] };
-        vat_codes: { label: string; value: string }[];
+        gl_accounts: { invoice: string | null; self_billing: string | null; suspense: string | null; options: RefOption[] };
+        vat_codes: { key: '21' | '9' | '0' | 'reverse_charge:21' | 'reverse_charge:9'; label: string; value: string | null }[];
+        vat_options: RefOption[];
+        categories: {
+            key: string;
+            label: string;
+            type: 'expense' | 'income' | null;
+            gl_account: string | null;
+            suggestion: string | null;
+            orphaned: boolean;
+        }[];
     };
     urls: { mapping_url: string; relations_search_url: string };
 }
@@ -354,110 +365,312 @@ function RelationsTab({
     );
 }
 
-function RefSelect({
+type Settings = ManagePayload['settings'];
+type CategoryRow = Settings['categories'][number];
+
+interface MappingForm {
+    journals: { sales: string | null; purchase: string | null };
+    gl_accounts: Record<string, string | null>;
+    vat_codes: Record<string, string | null>;
+}
+
+const CATEGORY_TYPE_LABELS: Record<'expense' | 'income', string> = {
+    expense: 'Kosten',
+    income: 'Omzet',
+};
+
+function mappingForm(settings: Settings): MappingForm {
+    return {
+        journals: { sales: settings.journals.sales, purchase: settings.journals.purchase },
+        gl_accounts: {
+            invoice: settings.gl_accounts.invoice,
+            self_billing: settings.gl_accounts.self_billing,
+            suspense: settings.gl_accounts.suspense,
+            ...Object.fromEntries(settings.categories.map((category) => [category.key, category.gl_account])),
+        },
+        vat_codes: Object.fromEntries(settings.vat_codes.map((row) => [row.key, row.value])),
+    };
+}
+
+function SettingsSection({ title, description, children }: { title: string; description?: string; children: React.ReactNode }) {
+    return (
+        <section className="flex flex-col gap-3">
+            <div className="flex flex-col gap-1">
+                <h3 className="text-sm font-semibold text-foreground">{title}</h3>
+                {description && <p className="text-xs2 leading-relaxed text-muted-foreground">{description}</p>}
+            </div>
+            {children}
+        </section>
+    );
+}
+
+function FieldError({ id, message }: { id: string; message: string | undefined }) {
+    return message ? (
+        <span id={id} className="text-xs text-error-deep">
+            {message}
+        </span>
+    ) : null;
+}
+
+function MappingField({
     label,
     value,
     options,
+    error,
+    readOnly,
     onChange,
 }: {
     label: string;
     value: string | null;
     options: RefOption[];
-    onChange: (value: string) => void;
+    error: string | undefined;
+    readOnly: boolean;
+    onChange: (code: string | null) => void;
 }) {
+    const id = useId();
+
     return (
-        <label className="flex w-full flex-col gap-1">
-            <span className="text-xs2 text-muted-foreground">{label}</span>
-            {options.length === 0 ? (
-                <span className="text-xs2 text-muted-foreground">Nog niets gesynchroniseerd.</span>
-            ) : (
-                <select
-                    value={value ?? ''}
-                    onChange={(e) => onChange(e.target.value)}
-                    className="w-full rounded-md border border-border bg-card px-3 py-2.5 font-data text-xs2 text-foreground"
-                >
-                    <option value="">— Kies —</option>
-                    {options.map((option) => (
-                        <option key={option.code} value={option.code}>
-                            {option.label}
-                        </option>
-                    ))}
-                </select>
-            )}
-        </label>
+        <div className="flex min-w-0 flex-col gap-1">
+            <span id={`${id}-label`} className="text-xs2 text-muted-foreground">
+                {label}
+            </span>
+            <Combobox
+                value={value}
+                options={options}
+                onChange={onChange}
+                disabled={readOnly}
+                invalid={error !== undefined}
+                labelledBy={`${id}-label`}
+                describedBy={error ? `${id}-error` : undefined}
+            />
+            <FieldError id={`${id}-error`} message={error} />
+        </div>
     );
 }
 
-function SettingsTab({ payload, onSaved }: { payload: ManagePayload; onSaved: (settings: ManagePayload['settings']) => void }) {
-    const mapping = useHttp<
-        { journals: { sales: string; purchase: string }; gl_accounts: { sales_default: string; purchase_default: string } },
-        { settings: ManagePayload['settings'] }
-    >({
-        journals: { sales: payload.settings.journals.sales ?? '', purchase: payload.settings.journals.purchase ?? '' },
-        gl_accounts: {
-            sales_default: payload.settings.gl_accounts.sales_default ?? '',
-            purchase_default: payload.settings.gl_accounts.purchase_default ?? '',
-        },
-    });
-
-    const save = () => {
-        mapping.put(payload.urls.mapping_url, {
-            onSuccess: (data) => onSaved(data.settings),
-        });
-    };
+function CategoryRowView({
+    category,
+    value,
+    options,
+    error,
+    readOnly,
+    onChange,
+}: {
+    category: CategoryRow;
+    value: string | null;
+    options: RefOption[];
+    error: string | undefined;
+    readOnly: boolean;
+    onChange: (code: string | null) => void;
+}) {
+    const id = useId();
+    const suggestion =
+        category.suggestion !== null && category.gl_account === null && value === null
+            ? (options.find((option) => option.code === category.suggestion) ?? { code: category.suggestion, label: category.suggestion })
+            : null;
 
     return (
-        <div className="flex flex-col gap-3">
-            <RefSelect
-                label="Dagboek verkoopfacturen"
-                value={mapping.data.journals.sales}
-                options={payload.settings.journals.options}
-                onChange={(value) => mapping.setData('journals', { ...mapping.data.journals, sales: value })}
-            />
-            <RefSelect
-                label="Dagboek inkoopfacturen"
-                value={mapping.data.journals.purchase}
-                options={payload.settings.journals.options}
-                onChange={(value) => mapping.setData('journals', { ...mapping.data.journals, purchase: value })}
-            />
-            <RefSelect
-                label="Standaard omzetrekening"
-                value={mapping.data.gl_accounts.sales_default}
-                options={payload.settings.gl_accounts.options}
-                onChange={(value) => mapping.setData('gl_accounts', { ...mapping.data.gl_accounts, sales_default: value })}
-            />
-            <RefSelect
-                label="Standaard kostenrekening"
-                value={mapping.data.gl_accounts.purchase_default}
-                options={payload.settings.gl_accounts.options}
-                onChange={(value) => mapping.setData('gl_accounts', { ...mapping.data.gl_accounts, purchase_default: value })}
-            />
-
-            <div className="flex flex-col gap-2 rounded-lg bg-muted p-4">
-                <div className="flex items-center justify-between">
-                    <span className="text-xs2 font-semibold text-foreground">Btw-codes</span>
-                    <Pill className="border border-border bg-card text-muted-foreground">Automatisch</Pill>
+        <div className="flex flex-col gap-2 border-b border-border px-3.5 py-3 last:border-b-0 sm:flex-row sm:items-start sm:gap-4">
+            <div className="flex min-w-0 flex-1 flex-col gap-1">
+                <span id={`${id}-label`} className="text-xs2 font-semibold text-foreground">
+                    {category.label}
+                </span>
+                <div className="flex flex-wrap items-center gap-1.5">
+                    {category.type && <span className="text-2xs text-muted-foreground">{CATEGORY_TYPE_LABELS[category.type]}</span>}
+                    {category.orphaned ? (
+                        <Pill className="bg-muted text-muted-foreground">Niet meer in je categorielijst</Pill>
+                    ) : (
+                        category.gl_account === null && <Pill className="bg-warning-soft text-warning-deep">Nog niet gekoppeld</Pill>
+                    )}
                 </div>
-                {payload.settings.vat_codes.map((row) => (
-                    <div key={row.label} className="flex items-center justify-between">
-                        <span className="text-xs text-muted-foreground">{row.label}</span>
-                        <span className="font-data text-xs text-foreground">{row.value}</span>
-                    </div>
-                ))}
-                <p className="text-2xs leading-relaxed text-muted-foreground">
-                    Afgeleid uit de btw-codes van je administratie. Klopt dit niet, pas het aan in {payload.connection.label}.
-                </p>
             </div>
-
-            <div className="mt-1 flex items-center gap-3">
-                <Button type="button" size="sm" onClick={save} disabled={mapping.processing}>
-                    {mapping.processing ? 'Opslaan…' : 'Opslaan'}
-                </Button>
-                {mapping.recentlySuccessful && <span className="text-xs text-success">Opgeslagen</span>}
+            <div className="flex w-full flex-col gap-1 sm:w-[300px] sm:shrink-0">
+                <Combobox
+                    value={value}
+                    options={options}
+                    onChange={onChange}
+                    disabled={readOnly}
+                    invalid={error !== undefined}
+                    labelledBy={`${id}-label`}
+                    describedBy={error ? `${id}-error` : undefined}
+                />
+                <FieldError id={`${id}-error`} message={error} />
+                {suggestion && !readOnly && (
+                    <button
+                        type="button"
+                        onClick={() => onChange(suggestion.code)}
+                        className="self-start truncate text-left text-xs2 font-semibold text-brand-deep underline-offset-2 transition-colors hover:underline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring"
+                    >
+                        Voorstel: <span className="font-data">{suggestion.label}</span>
+                    </button>
+                )}
             </div>
         </div>
     );
 }
+
+function SettingsTab({ app, payload, onSaved }: { app: string; payload: ManagePayload; onSaved: (settings: Settings) => void }) {
+    const settings = payload.settings;
+    const readOnly = settings.mode === 'view';
+    const mapping = useHttp<MappingForm, { settings: Settings }>(mappingForm(settings));
+    const [saved, setSaved] = useState(false);
+    const [failed, setFailed] = useState(false);
+    const errors = mapping.errors as Record<string, string | undefined>;
+    const errorCount = Object.keys(errors).length;
+    const glOptions = settings.gl_accounts.options;
+
+    const update = (section: keyof MappingForm, key: string, code: string | null) => {
+        mapping.setData((previous) => ({ ...previous, [section]: { ...previous[section], [key]: code } }));
+        setSaved(false);
+    };
+
+    const save = () => {
+        setSaved(false);
+        setFailed(false);
+        mapping.put(payload.urls.mapping_url, {
+            onSuccess: (data) => {
+                onSaved(data.settings);
+                setSaved(true);
+            },
+            onHttpException: () => {
+                setFailed(true);
+            },
+            onNetworkError: () => {
+                setFailed(true);
+            },
+            // The callbacks above already report every failure; the rejected promise would only surface as an unhandled error.
+        }).catch(() => undefined);
+    };
+
+    return (
+        <div className="flex flex-col gap-7">
+            {readOnly && (
+                <p className="rounded-lg bg-muted px-4 py-3 text-xs2 text-muted-foreground">
+                    <span className="font-semibold text-foreground">Alleen-lezen.</span> Je kunt deze instellingen bekijken maar niet wijzigen.
+                </p>
+            )}
+
+            <SettingsSection title="Basis">
+                <div className="grid gap-3 sm:grid-cols-2">
+                    <MappingField
+                        label="Dagboek verkoopfacturen"
+                        value={mapping.data.journals.sales}
+                        options={settings.journals.options}
+                        error={errors['journals.sales']}
+                        readOnly={readOnly}
+                        onChange={(code) => update('journals', 'sales', code)}
+                    />
+                    <MappingField
+                        label="Dagboek inkoopfacturen"
+                        value={mapping.data.journals.purchase}
+                        options={settings.journals.options}
+                        error={errors['journals.purchase']}
+                        readOnly={readOnly}
+                        onChange={(code) => update('journals', 'purchase', code)}
+                    />
+                    <MappingField
+                        label="Grootboek verkoopfacturen"
+                        value={mapping.data.gl_accounts.invoice ?? null}
+                        options={glOptions}
+                        error={errors['gl_accounts.invoice']}
+                        readOnly={readOnly}
+                        onChange={(code) => update('gl_accounts', 'invoice', code)}
+                    />
+                    <MappingField
+                        label="Grootboek self-billing"
+                        value={mapping.data.gl_accounts.self_billing ?? null}
+                        options={glOptions}
+                        error={errors['gl_accounts.self_billing']}
+                        readOnly={readOnly}
+                        onChange={(code) => update('gl_accounts', 'self_billing', code)}
+                    />
+                </div>
+            </SettingsSection>
+
+            <SettingsSection title="Btw" description={`Welke btw-code uit ${payload.connection.label} hoort bij elk tarief.`}>
+                <div className="grid gap-3 sm:grid-cols-2">
+                    {settings.vat_codes.map((row) => (
+                        <MappingField
+                            key={row.key}
+                            label={row.label}
+                            value={mapping.data.vat_codes[row.key] ?? null}
+                            options={settings.vat_options}
+                            error={errors[`vat_codes.${row.key}`]}
+                            readOnly={readOnly}
+                            onChange={(code) => update('vat_codes', row.key, code)}
+                        />
+                    ))}
+                </div>
+            </SettingsSection>
+
+            <SettingsSection
+                title="Categorieën"
+                description={`Op welke grootboekrekening elke categorie uit ${app} geboekt wordt.`}
+            >
+                {settings.categories.length === 0 ? (
+                    <EmptyState>Nog geen categorieën ontvangen. Die komen mee zodra je app de koppelpagina opent.</EmptyState>
+                ) : (
+                    <div className="rounded-lg border border-border">
+                        {settings.categories.map((category) => (
+                            <CategoryRowView
+                                key={category.key}
+                                category={category}
+                                value={mapping.data.gl_accounts[category.key] ?? null}
+                                options={glOptions}
+                                error={errors[`gl_accounts.${category.key}`]}
+                                readOnly={readOnly}
+                                onChange={(code) => update('gl_accounts', category.key, code)}
+                            />
+                        ))}
+                    </div>
+                )}
+            </SettingsSection>
+
+            <SettingsSection
+                title="Tussenrekening"
+                description="Optioneel. Met een tussenrekening boekt een categorie zonder koppeling op die rekening. Zonder tussenrekening wacht het document tot de categorie gekoppeld is."
+            >
+                <div className="grid gap-3 sm:grid-cols-2">
+                    <MappingField
+                        label="Tussenrekening"
+                        value={mapping.data.gl_accounts.suspense ?? null}
+                        options={glOptions}
+                        error={errors['gl_accounts.suspense']}
+                        readOnly={readOnly}
+                        onChange={(code) => update('gl_accounts', 'suspense', code)}
+                    />
+                </div>
+            </SettingsSection>
+
+            {!readOnly && (
+                <div className="flex flex-col gap-2 border-t border-border pt-5">
+                    <div className="flex flex-wrap items-center gap-3">
+                        <Button type="button" size="sm" onClick={save} disabled={mapping.processing}>
+                            {mapping.processing ? 'Bezig…' : 'Bevestigen'}
+                        </Button>
+                        {saved && (
+                            <span role="status" className="text-xs2 text-success">
+                                Opgeslagen. Documenten die wachtten, kun je nu opnieuw boeken vanuit {app}.
+                            </span>
+                        )}
+                    </div>
+                    {errorCount > 0 && (
+                        <p role="alert" className="text-xs2 text-error-deep">
+                            Niets opgeslagen. {errorCount === 1 ? 'Eén veld klopt' : `${errorCount} velden kloppen`} niet, zie hierboven.
+                            {errors.gl_accounts && ` ${errors.gl_accounts}`}
+                        </p>
+                    )}
+                    {failed && (
+                        <p role="alert" className="text-xs2 text-error-deep">
+                            Opslaan is niet gelukt. Probeer het opnieuw.
+                        </p>
+                    )}
+                </div>
+            )}
+        </div>
+    );
+}
+
 
 export function ConnectManageDrawer({
     app,
@@ -620,7 +833,7 @@ export function ConnectManageDrawer({
                                     />
                                 )}
                                 {tab === 'settings' && (
-                                    <SettingsTab payload={payload} onSaved={(settings) => setPayload({ ...payload, settings })} />
+                                    <SettingsTab app={app} payload={payload} onSaved={(settings) => setPayload({ ...payload, settings })} />
                                 )}
                             </div>
 
