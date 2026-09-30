@@ -2,11 +2,13 @@
 
 namespace App\Models;
 
+use App\Accounting\AccountingMappingObserver;
 use App\Enums\Provider;
 use App\Support\ProviderCredentialDescriptor;
 use Database\Factories\ConnectionFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -42,6 +44,7 @@ use Illuminate\Support\Str;
     'oauth_return_url',
 ])]
 #[Hidden(['access_token', 'refresh_token', 'client_key', 'subscription_key'])]
+#[ObservedBy(AccountingMappingObserver::class)]
 class Connection extends Model
 {
     /** @use HasFactory<ConnectionFactory> */
