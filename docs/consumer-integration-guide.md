@@ -322,6 +322,49 @@ bewaar de teruggegeven `connection_id`. Handel `404`/`503`/`403` af met een nett
 melding.
 ```
 
+### Gehoste koppelpagina (`POST /v1/connect-sessions`)
+
+In plaats van een eigen koppel-UI kun je de gebruiker naar de koppelpagina van de
+Hub sturen. Die toont de providers, start en verbreekt koppelingen en heeft een
+beheerscherm voor de boekhoud-mapping. Ability: `integrations:manage`.
+
+```http
+POST /v1/connect-sessions
+{
+  "account_external_id": "bob",
+  "display_name": "Rijschool Bob",
+  "return_url": "https://bob.emeq.nl/instellingen?emeq=return",
+  "mode": "manage",
+  "actor": { "name": "Jan Jansen", "email": "jan@rijschool-bob.nl" },
+  "categories": [
+    { "key": "expense:12", "label": "Brandstof", "type": "expense" },
+    { "key": "income:3", "label": "Lesgeld", "type": "income" }
+  ]
+}
+```
+→ `{ "url": "https://hub.emeq.nl/connect/…?signature=…", "expires_at": "…" }`
+
+Alleen `account_external_id` is verplicht. De link is 15 minuten geldig en
+ondertekend: wie een parameter in de URL wijzigt of weghaalt, krijgt `403`.
+
+- `mode`: `manage` (standaard) of `view`. Met `view` kan de gebruiker alles zien
+  maar niets wijzigen. De Hub weigert dan elke wijziging met `403`: koppelen,
+  loskoppelen, mapping opslaan en een relatie herkoppelen of ontkoppelen. Dat
+  geldt ook als iemand de knoppen in de pagina omzeilt.
+- `actor`: wie de link gebruikt, met `name` en `email` (beide verplicht als je
+  `actor` meestuurt). Bij een mapping-wijziging via de koppelpagina logt de Hub
+  alleen een vingerafdruk van het e-mailadres (`consumer:` plus de eerste 12
+  tekens van sha256 over het e-mailadres in kleine letters), nooit naam of
+  e-mailadres zelf. Ook in de link staat alleen die vingerafdruk.
+- `categories`: jouw categorieën voor de boekhoud-mapping, elk met `key` (uniek
+  in de lijst), `label` en `type` (`expense` of `income`). De Hub bewaart de lijst
+  per Account als momentopname: een nieuwe link mét `categories` vervangt de
+  vorige lijst, een link zonder dit veld laat hem staan. De Hub leidt niets af
+  uit de vorm van `key`.
+
+Fout in een van de velden → `422` met een fout per veld (bijvoorbeeld
+`categories.1.label`).
+
 ### Privacy-akkoord (verplicht)
 
 `POST /v1/oauth/{provider}/init` is server-to-server: er is **geen door de Hub
@@ -584,6 +627,10 @@ de provider:
   weg in plaats van te gokken — een fout adres is erger dan geen adres.
 - `lines[].amount` = **netto** regelbedrag (leidend); `tax_rate` = percentage (0/9/21).
   `quantity`/`unit_price` optioneel/informatief; `category` = GL-hint.
+- `lines[].category_label` (optioneel, max 255) = de naam van de categorie zoals je
+  gebruiker die kent. De Hub gebruikt hem alleen in de melding bij `422 mapping_failed`
+  (`Categorie 'Brandstof' (expense:12) heeft geen grootboek …`); hij wordt niet
+  bewaard en niet naar het boekhoudpakket gestuurd.
 - `lines[].tax_treatment` (optioneel, default `standard`) = BTW-behandeling. Zet
   `reverse_charge` voor verlegde BTW (onderaanneming / intra-EU B2B): hetzelfde
   `tax_rate` mapt dan naar de **verlegd**-VATCode i.p.v. de gewone. Vereist dat de

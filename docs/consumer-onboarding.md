@@ -228,7 +228,14 @@ Vijf stappen, uitgeschreven met request/response in
 1. **Account registreren** — `POST /v1/accounts`. `409` = bestaat al, geen fout.
    Optioneel: `init` provisiont het Account desnoods zelf.
 2. **Integraties tonen** — `GET /v1/integrations?account_external_id=…`
-3. **Koppelen** — `POST /v1/oauth/{provider}/init` → browser naar `redirect_url`
+3. **Koppelen** — `POST /v1/oauth/{provider}/init` → browser naar `redirect_url`.
+   Of de gehoste koppelpagina: `POST /v1/connect-sessions` → browser naar `url`.
+   Geef met `mode: "view"` een alleen-lezen link aan gebruikers die niets mogen
+   wijzigen; de Hub weigert dan elke wijziging met `403`. Zonder `mode` (of met
+   `manage`) werkt de link zoals altijd. Stuur `actor` (`name`, `email`) mee zodat
+   mapping-wijzigingen in het audit-log herleidbaar zijn (de Hub logt alleen een
+   vingerafdruk van het e-mailadres), en `categories` om je
+   categorieën als momentopname op het Account te zetten.
 4. **Terugkomst** — poll `GET /v1/connections/{id}` tot `status: "active"` en
    `revoked_at: null`
 5. **Loskoppelen** — `DELETE /v1/connections/{id}` → `204`. De Hub doet de
