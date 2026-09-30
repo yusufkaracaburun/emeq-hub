@@ -131,6 +131,61 @@ class MappingApiTest extends TestCase
             ->assertJsonPath('mapping.gl_accounts.kosten', '4000');
     }
 
+    public function test_put_mapping_keeps_numeric_vat_keys_when_adding_one(): void
+    {
+        [$consumer, $connection] = $this->setupConnection();
+        $connection->metadata = ['accounting_mapping' => ['vat_codes' => ['21' => 'A', '9' => 'B']]];
+        $connection->save();
+
+        $this->withHeader('Authorization', "Bearer {$this->token($consumer)}")
+            ->withHeader('X-Account-Id', 'school1')
+            ->putJson('/v1/accounting/mapping', ['vat_codes' => ['0' => 'C']])
+            ->assertOk();
+
+        $vatCodes = $connection->fresh()->metadata['accounting_mapping']['vat_codes'];
+        $this->assertEquals(['21' => 'A', '9' => 'B', '0' => 'C'], $vatCodes);
+        $this->assertSame('A', $vatCodes['21']);
+    }
+
+    public function test_put_mapping_overwrites_an_existing_numeric_vat_key(): void
+    {
+        [$consumer, $connection] = $this->setupConnection();
+        $connection->metadata = ['accounting_mapping' => ['vat_codes' => ['21' => 'A', '9' => 'B']]];
+        $connection->save();
+
+        $this->withHeader('Authorization', "Bearer {$this->token($consumer)}")
+            ->withHeader('X-Account-Id', 'school1')
+            ->putJson('/v1/accounting/mapping', ['vat_codes' => ['21' => 'Z']])
+            ->assertOk();
+
+        $this->assertEquals(
+            ['21' => 'Z', '9' => 'B'],
+            $connection->fresh()->metadata['accounting_mapping']['vat_codes'],
+        );
+    }
+
+    public function test_put_mapping_keeps_numeric_gl_category_keys(): void
+    {
+        [$consumer, $connection] = $this->setupConnection();
+        $connection->metadata = ['accounting_mapping' => ['gl_accounts' => ['omzet' => '8000', '4500' => '4000']]];
+        $connection->save();
+        foreach (['8000', '4000', '4100'] as $code) {
+            ConnectionAccountingRef::query()->create([
+                'connection_id' => $connection->getKey(), 'kind' => 'gl', 'code' => $code, 'native_id' => "gl-{$code}",
+            ]);
+        }
+
+        $this->withHeader('Authorization', "Bearer {$this->token($consumer)}")
+            ->withHeader('X-Account-Id', 'school1')
+            ->putJson('/v1/accounting/mapping', ['gl_accounts' => ['4600' => '4100']])
+            ->assertOk();
+
+        $this->assertEquals(
+            ['omzet' => '8000', '4500' => '4000', '4600' => '4100'],
+            $connection->fresh()->metadata['accounting_mapping']['gl_accounts'],
+        );
+    }
+
     public function test_put_mapping_is_audited_with_the_consumer_as_actor(): void
     {
         [$consumer, $connection] = $this->setupConnection();

@@ -148,7 +148,7 @@ class MappingController extends Controller
 
         foreach (['vat_codes', 'gl_accounts', 'journals'] as $section) {
             if (isset($validated[$section])) {
-                $mapping[$section] = array_merge($mapping[$section] ?? [], $validated[$section]);
+                $mapping[$section] = array_replace($mapping[$section] ?? [], $validated[$section]);
             }
         }
 
