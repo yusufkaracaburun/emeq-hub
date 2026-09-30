@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Integrations\Exact\Accounting;
 
+use App\Accounting\Enums\DocumentType;
 use App\Accounting\Enums\TaxTreatment;
 use App\Accounting\Party;
 use App\Accounting\Validation\Finding;
@@ -36,6 +37,7 @@ final class ExactReportEnricher
     {
         return [
             ...$this->vatCodeFindings($payload, $connection),
+            ...$this->glAccountFindings($payload, $connection),
             ...$this->relationFindings($payload, $connection),
             ...$this->costDimensionFindings($payload, $connection),
             ...$this->periodFindings($payload, $connection),
@@ -144,6 +146,76 @@ final class ExactReportEnricher
                 current: $line['tax_rate'] ?? null,
                 suggestion: null,
             );
+        }
+
+        return $findings;
+    }
+
+    /**
+     * @param  array<string, mixed>  $payload
+     * @return list<Finding>
+     */
+    private function glAccountFindings(array $payload, Connection $connection): array
+    {
+        $type = DocumentType::tryFrom((string) $this->scalarString($payload['type'] ?? null));
+        $lines = is_array($payload['lines'] ?? null) ? $payload['lines'] : [];
+
+        if ($type === null) {
+            return [];
+        }
+
+        $findings = [];
+        $seen = [];
+
+        foreach ($lines as $index => $line) {
+            if (! is_array($line)) {
+                continue;
+            }
+
+            $category = $this->scalarString($line['category'] ?? null);
+            $key = $category ?? '';
+
+            if (isset($seen[$key]) || ($category !== null && $this->resolver->glCategoryMapped($category, $connection))) {
+                continue;
+            }
+
+            $seen[$key] = true;
+            $code = $this->resolver->glAccountCodeOrNull($category, $type, $connection);
+            $path = "lines.{$index}.category";
+
+            if ($code !== null && $category === null) {
+                continue;
+            }
+
+            $findings[] = match (true) {
+                $category === null => new Finding(
+                    code: 'exact.gl_account.missing_default',
+                    severity: Severity::Warning,
+                    blocking: true,
+                    path: $path,
+                    message: $this->resolver->missingGlAccountMessage(null, $type).' Zonder grootboek wordt de boeking geweigerd.',
+                    current: null,
+                    suggestion: null,
+                ),
+                $code === null => new Finding(
+                    code: 'exact.gl_account.unmapped_category',
+                    severity: Severity::Error,
+                    blocking: true,
+                    path: $path,
+                    message: $this->resolver->missingGlAccountMessage($category, $type).' Tot dan wordt de boeking geweigerd.',
+                    current: $category,
+                    suggestion: null,
+                ),
+                default => new Finding(
+                    code: 'exact.gl_account.unmapped_category',
+                    severity: Severity::Warning,
+                    blocking: false,
+                    path: $path,
+                    message: "Categorie '{$category}' heeft geen grootboek in de mapping. De regel wordt geboekt op tussenrekening {$code}. Koppel de categorie aan een grootboek als dat niet klopt.",
+                    current: $category,
+                    suggestion: null,
+                ),
+            };
         }
 
         return $findings;

@@ -62,7 +62,7 @@ class ValidateDocumentTest extends TestCase
             'account_id' => $account->id,
             'status' => 'active',
             'expires_at' => now()->addSeconds(600),
-            'metadata' => ['accounting_mapping' => array_merge(['vat_codes' => ['21' => '4']], $mappingOverrides)],
+            'metadata' => ['accounting_mapping' => array_merge(['vat_codes' => ['21' => '4'], 'gl_accounts' => ['_default' => '4999']], $mappingOverrides)],
         ]);
 
         return [$consumer];
@@ -203,6 +203,40 @@ class ValidateDocumentTest extends TestCase
             ->assertJsonPath('summary.errors', 0)
             ->assertJsonPath('summary.blocking', 1)
             ->assertJsonFragment(['code' => 'exact.vat_code.unmapped', 'severity' => 'warning', 'blocking' => true]);
+    }
+
+    public function test_missing_gl_default_blocks_the_draft(): void
+    {
+        [$consumer] = $this->consumerWithExactConnection(['gl_accounts' => []]);
+        $token = $consumer->createToken('t', [TokenAbilities::EXACT_READ])->plainTextToken;
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->withHeader('X-Account-Id', 'school1')
+            ->postJson('/v1/accounting/documents/validate', [
+                'type' => 'purchase_invoice',
+                'party' => ['role' => 'creditor', 'name' => 'NL Leverancier BV', 'vat_number' => 'NL000099998B57'],
+                'lines' => [['description' => 'Huur', 'amount' => 100, 'tax_rate' => 21]],
+            ])
+            ->assertStatus(200)
+            ->assertJsonPath('valid', false)
+            ->assertJsonFragment(['code' => 'exact.gl_account.missing_default', 'severity' => 'warning', 'blocking' => true]);
+    }
+
+    public function test_unmapped_category_without_suspense_blocks_the_draft(): void
+    {
+        [$consumer] = $this->consumerWithExactConnection();
+        $token = $consumer->createToken('t', [TokenAbilities::EXACT_READ])->plainTextToken;
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->withHeader('X-Account-Id', 'school1')
+            ->postJson('/v1/accounting/documents/validate', [
+                'type' => 'purchase_invoice',
+                'party' => ['role' => 'creditor', 'name' => 'NL Leverancier BV', 'vat_number' => 'NL000099998B57'],
+                'lines' => [['description' => 'Huur', 'amount' => 100, 'tax_rate' => 21, 'category' => 'huisvesting']],
+            ])
+            ->assertStatus(200)
+            ->assertJsonPath('valid', false)
+            ->assertJsonFragment(['code' => 'exact.gl_account.unmapped_category', 'severity' => 'error', 'blocking' => true]);
     }
 
     public function test_new_supplier_is_reported_as_info_since_the_hub_creates_it(): void
