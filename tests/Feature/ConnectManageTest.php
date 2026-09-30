@@ -10,9 +10,11 @@ use App\Models\ConnectionAccountingRef;
 use App\Models\Consumer;
 use App\Models\PassThroughCall;
 use App\Models\ProviderEntityLink;
+use App\Sanctum\TokenAbilities;
 use App\Support\Connect\ConnectLinkFactory;
 use Emeq\ExactApi\Http\Request\Read\GetRelations;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\URL;
 use Saloon\Http\Faking\MockClient;
 use Saloon\Http\Faking\MockResponse;
@@ -316,6 +318,125 @@ class ConnectManageTest extends TestCase
             ->assertJsonPath('results.0.name', 'Acme B.V.');
     }
 
+    public function test_a_view_link_refuses_every_mutation(): void
+    {
+        $account = $this->account();
+        $connection = Connection::factory()->forExact()->active()->for($account)->create();
+        $this->syncedJournalAndGl($connection);
+        ConnectionAccountingRef::query()->create([
+            'connection_id' => $connection->getKey(),
+            'kind' => ConnectionAccountingRef::KIND_RELATION,
+            'code' => 'party-1',
+            'native_id' => 'guid-1',
+            'synced_at' => now(),
+        ]);
+
+        $exact = collect($this->getPageProps($this->mintViaApi($account, ['mode' => 'view']))['providers'])
+            ->firstWhere('key', 'exact');
+        $drawer = $this->getJson($exact['manage_url'])->assertOk()->json();
+
+        $this->post($exact['start_url'])->assertForbidden();
+        $this->delete($exact['disconnect_url'])->assertForbidden();
+        $this->putJson($drawer['urls']['mapping_url'], ['journals' => ['sales' => '70']])->assertForbidden();
+        $this->patchJson($drawer['relations'][0]['relink_url'], ['native_id' => 'guid-new'])->assertForbidden();
+        $this->deleteJson($drawer['relations'][0]['unlink_url'])->assertForbidden();
+
+        $this->assertNull($connection->fresh()->revoked_at);
+        $this->assertArrayNotHasKey('accounting_mapping', $connection->fresh()->metadata ?? []);
+        $this->assertDatabaseHas('connection_accounting_refs', ['code' => 'party-1', 'native_id' => 'guid-1']);
+    }
+
+    public function test_stripping_or_changing_the_view_mode_breaks_the_signature(): void
+    {
+        $account = $this->account();
+        $connection = Connection::factory()->forExact()->active()->for($account)->create();
+        $this->syncedJournalAndGl($connection);
+
+        $exact = collect($this->getPageProps($this->mintViaApi($account, ['mode' => 'view']))['providers'])
+            ->firstWhere('key', 'exact');
+        $mappingUrl = $this->getJson($exact['manage_url'])->assertOk()->json('urls.mapping_url');
+
+        $stripped = preg_replace('/mode=view&?/', '', $mappingUrl);
+        $changed = str_replace('mode=view', 'mode=manage', $mappingUrl);
+
+        foreach ([$stripped, $changed] as $tampered) {
+            $this->assertNotSame($mappingUrl, $tampered);
+            $this->assertStringNotContainsString('mode=view', $tampered);
+            $this->putJson($tampered, ['journals' => ['sales' => '70']])->assertForbidden();
+        }
+
+        $this->assertArrayNotHasKey('accounting_mapping', $connection->fresh()->metadata ?? []);
+    }
+
+    public function test_a_manage_link_still_allows_mutations(): void
+    {
+        $account = $this->account();
+        $connection = Connection::factory()->forExact()->active()->for($account)->create();
+        $this->syncedJournalAndGl($connection);
+
+        $exact = collect($this->getPageProps($this->mintViaApi($account, ['mode' => 'manage']))['providers'])
+            ->firstWhere('key', 'exact');
+        $drawer = $this->getJson($exact['manage_url'])->assertOk()->json();
+
+        $this->putJson($drawer['urls']['mapping_url'], ['journals' => ['sales' => '70']])->assertOk();
+        $this->assertSame('70', $connection->fresh()->metadata['accounting_mapping']['journals']['sales']);
+    }
+
+    public function test_a_mapping_change_via_the_drawer_logs_the_actor_from_the_link(): void
+    {
+        $account = $this->account();
+        $connection = Connection::factory()->forExact()->active()->for($account)->create();
+        $this->syncedJournalAndGl($connection);
+        $actor = ['name' => 'Jan Jansen', 'email' => ' Jan@Rijschool.test '];
+
+        $exact = collect($this->getPageProps($this->mintViaApi($account, ['actor' => $actor]))['providers'])
+            ->firstWhere('key', 'exact');
+        $mappingUrl = $this->getJson($exact['manage_url'])->assertOk()->json('urls.mapping_url');
+
+        foreach ([$exact['manage_url'], $mappingUrl] as $url) {
+            $this->assertStringNotContainsStringIgnoringCase('rijschool.test', urldecode($url));
+            $this->assertStringNotContainsStringIgnoringCase('jansen', urldecode($url));
+        }
+
+        $forged = preg_replace('/actor=[^&]+/', 'actor=consumer%3Aforged', $mappingUrl);
+        $this->assertNotSame($mappingUrl, $forged);
+        $this->putJson($forged, ['journals' => ['sales' => '70']])->assertForbidden();
+
+        Log::spy();
+
+        $this->putJson($mappingUrl, ['journals' => ['sales' => '70']])->assertOk();
+
+        $fingerprint = 'consumer:'.substr(hash('sha256', 'jan@rijschool.test'), 0, 12);
+
+        Log::shouldHaveReceived('info')->with('accounting.mapping.changed', \Mockery::on(function (array $context) use ($connection, $fingerprint): bool {
+            $flat = strtolower((string) json_encode($context));
+
+            return $context === [
+                'connection_id' => $connection->getKey(),
+                'section' => 'journals',
+                'key' => 'sales',
+                'old' => null,
+                'new' => '70',
+                'actor' => $fingerprint,
+            ] && ! str_contains($flat, 'rijschool.test') && ! str_contains($flat, 'jan jansen');
+        }))->once();
+    }
+
+    public function test_the_actor_survives_the_redirect_after_a_disconnect(): void
+    {
+        $account = $this->account();
+        Connection::factory()->forExact()->active()->for($account)->create();
+
+        $exact = collect($this->getPageProps($this->mintViaApi($account, ['actor' => ['name' => 'Jan', 'email' => 'jan@rijschool.test']]))['providers'])
+            ->firstWhere('key', 'exact');
+        parse_str((string) parse_url($exact['disconnect_url'], PHP_URL_QUERY), $query);
+
+        $redirect = $this->delete($exact['disconnect_url'])->assertRedirect()->headers->get('Location');
+        parse_str((string) parse_url($redirect, PHP_URL_QUERY), $redirectQuery);
+
+        $this->assertSame($query['actor'], $redirectQuery['actor'] ?? null);
+    }
+
     private function syncedJournalAndGl(Connection $connection): void
     {
         ConnectionAccountingRef::query()->create([
@@ -350,6 +471,17 @@ class ConnectManageTest extends TestCase
     {
         return collect($this->getPageProps($this->linkFor($account))['providers'])
             ->firstWhere('key', $provider)['manage_url'];
+    }
+
+    /** @param  array<string, mixed>  $payload */
+    private function mintViaApi(Account $account, array $payload = []): string
+    {
+        $token = $account->consumer->createToken('t', [TokenAbilities::INTEGRATIONS_MANAGE])->plainTextToken;
+
+        return $this->withHeader('Authorization', "Bearer {$token}")
+            ->postJson('/v1/connect-sessions', ['account_external_id' => $account->external_id, ...$payload])
+            ->assertOk()
+            ->json('url');
     }
 
     /** @return array<string, mixed> */

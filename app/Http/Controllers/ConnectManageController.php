@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Accounting\AccountingMappingObserver;
 use App\Accounting\AccountingTargetRegistry;
 use App\Enums\Provider;
 use App\Integrations\Exact\ExactReferenceData;
@@ -15,6 +16,7 @@ use App\Models\ProviderEntityLink;
 use App\Support\Connect\ConnectLinkFactory;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Context;
 use Illuminate\Validation\Rule;
 
 class ConnectManageController extends Controller
@@ -50,6 +52,8 @@ class ConnectManageController extends Controller
 
     public function updateMapping(Request $request, Account $account, string $provider): JsonResponse
     {
+        abort_if($this->links->isViewOnly($request), 403);
+
         $connection = $this->resolveConnection($account, $provider);
 
         $journalCodes = ConnectionAccountingRef::query()
@@ -90,6 +94,8 @@ class ConnectManageController extends Controller
 
         $metadata['accounting_mapping'] = $mapping;
         $connection->metadata = $metadata;
+
+        Context::addHidden(AccountingMappingObserver::ACTOR, $this->links->actor($request));
         $connection->save();
 
         return response()->json(['settings' => $this->settingsPayload($connection)]);
@@ -97,6 +103,8 @@ class ConnectManageController extends Controller
 
     public function relinkRelation(Request $request, Account $account, string $provider, ConnectionAccountingRef $ref): JsonResponse
     {
+        abort_if($this->links->isViewOnly($request), 403);
+
         $connection = $this->resolveConnection($account, $provider);
         $this->authorizeRelationRef($connection, $ref);
 
@@ -117,6 +125,8 @@ class ConnectManageController extends Controller
 
     public function unlinkRelation(Request $request, Account $account, string $provider, ConnectionAccountingRef $ref): JsonResponse
     {
+        abort_if($this->links->isViewOnly($request), 403);
+
         $connection = $this->resolveConnection($account, $provider);
         $this->authorizeRelationRef($connection, $ref);
 

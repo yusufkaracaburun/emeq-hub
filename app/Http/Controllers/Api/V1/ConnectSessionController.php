@@ -12,6 +12,7 @@ use App\Sanctum\TokenAbilities;
 use App\Support\Connect\ConnectLinkFactory;
 use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 #[Group(name: 'Integrations', description: 'Welke providers een Account kan koppelen, met live status.', weight: 25)]
 class ConnectSessionController extends Controller
@@ -34,6 +35,14 @@ class ConnectSessionController extends Controller
             'account_external_id' => ['required', 'string'],
             'display_name' => ['nullable', 'string', 'max:255'],
             'return_url' => ['nullable', 'url'],
+            'categories' => ['sometimes', 'array'],
+            'categories.*.key' => ['required', 'string', 'max:255', 'distinct'],
+            'categories.*.label' => ['required', 'string', 'max:255'],
+            'categories.*.type' => ['required', Rule::in(['expense', 'income'])],
+            'mode' => ['sometimes', Rule::in(['manage', ConnectLinkFactory::MODE_VIEW])],
+            'actor' => ['sometimes', 'array'],
+            'actor.name' => ['required_with:actor', 'string', 'max:255'],
+            'actor.email' => ['required_with:actor', 'email', 'max:255'],
         ]);
 
         /** @var Consumer $consumer */
@@ -48,9 +57,14 @@ class ConnectSessionController extends Controller
             $account->update(['display_name' => $validated['display_name']]);
         }
 
+        if (array_key_exists('categories', $validated)) {
+            $account->update(['accounting_categories' => $validated['categories']]);
+        }
+
         $link = $links->mint(
             $account,
             $returnUrls->resolveHandoff($consumer, $validated['return_url'] ?? null, $request->headers->get('Origin')),
+            carried: $links->sessionParameters($validated['mode'] ?? 'manage', $validated['actor'] ?? null),
         );
 
         return [

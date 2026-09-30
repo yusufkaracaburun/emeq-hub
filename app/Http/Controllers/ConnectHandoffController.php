@@ -68,6 +68,8 @@ class ConnectHandoffController extends Controller
         string $provider,
         StartProviderConnection $startConnection,
     ): HttpResponse {
+        abort_if($this->links->isViewOnly($request), 403);
+
         $providerEnum = Provider::tryFrom($provider);
 
         abort_if($providerEnum === null, 404);
@@ -89,6 +91,8 @@ class ConnectHandoffController extends Controller
         string $provider,
         RevokeConnection $revokeConnection,
     ): RedirectResponse {
+        abort_if($this->links->isViewOnly($request), 403);
+
         $providerEnum = Provider::tryFrom($provider);
 
         abort_if($providerEnum === null, 404);
@@ -112,6 +116,7 @@ class ConnectHandoffController extends Controller
             $account,
             $this->returnUrl($request),
             $this->links->inheritedExpiry($request),
+            $this->links->carried($request),
         )['url']);
     }
 

@@ -106,6 +106,62 @@ class ConnectSessionTest extends TestCase
             ->assertStatus(422);
     }
 
+    public function test_categories_are_stored_as_a_snapshot_on_the_account(): void
+    {
+        [$consumer, $token] = $this->consumerWithToken([TokenAbilities::INTEGRATIONS_MANAGE]);
+        $first = [
+            ['key' => 'expense:12', 'label' => 'Brandstof', 'type' => 'expense'],
+            ['key' => 'income:3', 'label' => 'Lesgeld', 'type' => 'income'],
+        ];
+        $second = [['key' => 'expense:14', 'label' => 'Onderhoud', 'type' => 'expense']];
+
+        $mint = fn (array $payload) => $this->withHeader('Authorization', "Bearer {$token}")
+            ->postJson('/v1/connect-sessions', ['account_external_id' => 'school1', ...$payload])
+            ->assertOk();
+        $snapshot = fn (): ?array => $consumer->accounts()->where('external_id', 'school1')->sole()->accounting_categories;
+
+        $mint(['categories' => $first]);
+        $this->assertSame($first, $snapshot());
+
+        $mint(['categories' => $second]);
+        $this->assertSame($second, $snapshot());
+
+        $mint([]);
+        $this->assertSame($second, $snapshot());
+    }
+
+    public function test_invalid_categories_are_rejected_per_field(): void
+    {
+        [$consumer, $token] = $this->consumerWithToken([TokenAbilities::INTEGRATIONS_MANAGE]);
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->postJson('/v1/connect-sessions', [
+                'account_external_id' => 'school1',
+                'categories' => [
+                    ['key' => 'expense:12', 'label' => 'Brandstof', 'type' => 'asset'],
+                    ['key' => 'expense:12', 'type' => 'expense'],
+                ],
+            ])
+            ->assertStatus(422)
+            ->assertJsonValidationErrors(['categories.0.type', 'categories.0.key', 'categories.1.key', 'categories.1.label']);
+
+        $this->assertSame(0, $consumer->accounts()->count());
+    }
+
+    public function test_invalid_mode_and_actor_are_rejected_per_field(): void
+    {
+        [, $token] = $this->consumerWithToken([TokenAbilities::INTEGRATIONS_MANAGE]);
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->postJson('/v1/connect-sessions', [
+                'account_external_id' => 'school1',
+                'mode' => 'edit',
+                'actor' => ['name' => 'Jan'],
+            ])
+            ->assertStatus(422)
+            ->assertJsonValidationErrors(['mode', 'actor.email']);
+    }
+
     /** @return array{0: Consumer, 1: string} */
     private function consumerWithToken(array $abilities): array
     {

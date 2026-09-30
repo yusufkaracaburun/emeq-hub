@@ -6,10 +6,13 @@ namespace App\Accounting;
 
 use App\Models\Connection;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Context;
 use Illuminate\Support\Facades\Log;
 
 final class AccountingMappingObserver
 {
+    public const ACTOR = 'accounting_mapping_actor';
+
     public function updating(Connection $connection): void
     {
         if (! $connection->isDirty('metadata')) {
@@ -24,7 +27,8 @@ final class AccountingMappingObserver
         }
 
         $user = Auth::user();
-        $actor = $user !== null ? mb_strtolower(class_basename($user)).':'.$user->getAuthIdentifier() : null;
+        $actor = Context::getHidden(self::ACTOR)
+            ?? ($user !== null ? mb_strtolower(class_basename($user)).':'.$user->getAuthIdentifier() : null);
 
         foreach (array_unique([...array_keys($old), ...array_keys($new)]) as $section) {
             $before = is_array($old[$section] ?? null) ? $old[$section] : [];
