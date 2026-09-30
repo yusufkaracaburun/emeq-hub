@@ -13,9 +13,11 @@ use App\Models\ProviderEntityLink;
 use App\Sanctum\TokenAbilities;
 use App\Support\Connect\ConnectLinkFactory;
 use Emeq\ExactApi\Http\Request\Read\GetRelations;
+use Emeq\ExactApi\Http\Request\Write\CreateSalesEntry;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Str;
 use Saloon\Http\Faking\MockClient;
 use Saloon\Http\Faking\MockResponse;
 use Tests\TestCase;
@@ -181,28 +183,269 @@ class ConnectManageTest extends TestCase
         $this->getJson($url)->assertNotFound();
     }
 
-    public function test_saving_the_mapping_only_keeps_the_four_allowed_keys(): void
+    public function test_the_settings_payload_carries_the_basis_accounts_and_the_mode(): void
     {
         $account = $this->account();
-        $connection = Connection::factory()->forExact()->active()->for($account)->create();
+        $connection = Connection::factory()->forExact()->active()->for($account)->create([
+            'metadata' => ['accounting_mapping' => [
+                'journals' => ['sales' => '70'],
+                'gl_accounts' => ['invoice' => 'gl-8000', 'suspense' => 'gl-4000', 'sales_default' => 'gl-8000', 'purchase_default' => 'gl-4000'],
+            ]],
+        ]);
+        $this->syncedJournalAndGl($connection);
+
+        $this->getJson($this->manageUrlFor($account, 'exact'))
+            ->assertOk()
+            ->assertJsonPath('settings.mode', 'manage')
+            ->assertJsonPath('settings.journals.sales', '70')
+            ->assertJsonPath('settings.gl_accounts.invoice', 'gl-8000')
+            ->assertJsonPath('settings.gl_accounts.self_billing', null)
+            ->assertJsonPath('settings.gl_accounts.suspense', 'gl-4000')
+            ->assertJsonPath('settings.gl_accounts.options.0.code', 'gl-4000')
+            ->assertJsonMissingPath('settings.gl_accounts.sales_default')
+            ->assertJsonMissingPath('settings.gl_accounts.purchase_default');
+    }
+
+    public function test_the_vat_rows_list_every_fixed_rate_with_the_mirror_options(): void
+    {
+        $account = $this->account();
+        $connection = Connection::factory()->forExact()->active()->for($account)->create([
+            'metadata' => ['accounting_mapping' => ['vat_codes' => ['21' => '4']]],
+        ]);
+        $this->syncedVat($connection);
+
+        $settings = $this->getJson($this->manageUrlFor($account, 'exact'))->assertOk()->json('settings');
+
+        $this->assertSame([
+            ['key' => '21', 'label' => '21%', 'value' => '4'],
+            ['key' => '9', 'label' => '9%', 'value' => null],
+            ['key' => '0', 'label' => '0%', 'value' => null],
+            ['key' => 'reverse_charge:21', 'label' => '21% verlegd', 'value' => null],
+            ['key' => 'reverse_charge:9', 'label' => '9% verlegd', 'value' => null],
+        ], $settings['vat_codes']);
+        $this->assertSame([
+            ['code' => '4', 'label' => '4 · BTW 21%'],
+            ['code' => '6', 'label' => '6 · BTW 21% verlegd'],
+        ], $settings['vat_options']);
+    }
+
+    public function test_the_categories_list_unmapped_first_with_a_name_suggestion_and_shows_orphans(): void
+    {
+        $account = $this->account();
+        $account->update(['accounting_categories' => [
+            ['key' => 'income:1', 'label' => 'Omzet', 'type' => 'income'],
+            ['key' => 'expense:12', 'label' => 'Brandstof', 'type' => 'expense'],
+            ['key' => 'expense:13', 'label' => 'Telefoon', 'type' => 'expense'],
+            ['key' => 'expense:14', 'label' => 'Kantoor huur', 'type' => 'expense'],
+            ['key' => 'expense:15', 'label' => 'Café', 'type' => 'expense'],
+            ['key' => 'expense:16', 'label' => 'Tol en parking', 'type' => 'expense'],
+        ]]);
+        $connection = Connection::factory()->forExact()->active()->for($account)->create([
+            'metadata' => ['accounting_mapping' => ['gl_accounts' => [
+                'income:1' => '8000',
+                'expense:99' => '4800',
+                'invoice' => '8000',
+                'self_billing' => '8000',
+                'suspense' => '4800',
+                'sales_default' => '8000',
+                'purchase_default' => '4800',
+                '_default' => '8000',
+            ]]],
+        ]);
+        foreach (['4400' => 'Huur pand', '4410' => 'Kantoor', '4500' => "Brandstof auto's", '4700' => 'Cafe bezoek', '4800' => 'Rente en kosten', '8000' => 'Omzet'] as $code => $label) {
+            ConnectionAccountingRef::query()->create([
+                'connection_id' => $connection->getKey(), 'kind' => ConnectionAccountingRef::KIND_GL,
+                'code' => (string) $code, 'native_id' => "guid-{$code}", 'label' => $label,
+            ]);
+        }
+
+        $this->assertSame([
+            ['key' => 'expense:12', 'label' => 'Brandstof', 'type' => 'expense', 'gl_account' => null, 'suggestion' => '4500', 'orphaned' => false],
+            ['key' => 'expense:13', 'label' => 'Telefoon', 'type' => 'expense', 'gl_account' => null, 'suggestion' => null, 'orphaned' => false],
+            ['key' => 'expense:14', 'label' => 'Kantoor huur', 'type' => 'expense', 'gl_account' => null, 'suggestion' => '4400', 'orphaned' => false],
+            ['key' => 'expense:15', 'label' => 'Café', 'type' => 'expense', 'gl_account' => null, 'suggestion' => '4700', 'orphaned' => false],
+            ['key' => 'expense:16', 'label' => 'Tol en parking', 'type' => 'expense', 'gl_account' => null, 'suggestion' => null, 'orphaned' => false],
+            ['key' => 'income:1', 'label' => 'Omzet', 'type' => 'income', 'gl_account' => '8000', 'suggestion' => null, 'orphaned' => false],
+            ['key' => 'expense:99', 'label' => 'expense:99', 'type' => null, 'gl_account' => '4800', 'suggestion' => null, 'orphaned' => true],
+        ], $this->getJson($this->manageUrlFor($account, 'exact'))->assertOk()->json('settings.categories'));
+    }
+
+    public function test_the_categories_are_empty_without_a_snapshot_or_category_entries(): void
+    {
+        $account = $this->account();
+        Connection::factory()->forExact()->active()->for($account)->create([
+            'metadata' => ['accounting_mapping' => ['gl_accounts' => ['invoice' => 'gl-8000', 'sales_default' => 'gl-8000']]],
+        ]);
+
+        $this->getJson($this->manageUrlFor($account, 'exact'))
+            ->assertOk()
+            ->assertJsonPath('settings.categories', []);
+    }
+
+    public function test_a_view_link_reports_view_mode_in_the_settings(): void
+    {
+        $account = $this->account();
+        Connection::factory()->forExact()->active()->for($account)->create();
+
+        $exact = collect($this->getPageProps($this->mintViaApi($account, ['mode' => 'view']))['providers'])
+            ->firstWhere('key', 'exact');
+
+        $this->getJson($exact['manage_url'])->assertOk()->assertJsonPath('settings.mode', 'view');
+    }
+
+    public function test_saving_the_mapping_leaves_the_type_defaults_untouched(): void
+    {
+        $account = $this->account();
+        $connection = Connection::factory()->forExact()->active()->for($account)->create([
+            'metadata' => ['accounting_mapping' => ['gl_accounts' => ['sales_default' => 'gl-8000']]],
+        ]);
         $this->syncedJournalAndGl($connection);
 
         $payload = $this->getJson($this->manageUrlFor($account, 'exact'))->json();
 
         $this->putJson($payload['urls']['mapping_url'], [
             'journals' => ['sales' => '70', 'purchase' => '80'],
-            'gl_accounts' => ['sales_default' => 'gl-8000', 'purchase_default' => 'gl-4000'],
-            'vat_codes' => ['21' => '3'],
+            'gl_accounts' => ['sales_default' => 'gl-4000', 'purchase_default' => 'gl-4000'],
         ])
             ->assertOk()
             ->assertJsonPath('settings.journals.sales', '70')
-            ->assertJsonPath('settings.journals.purchase', '80')
-            ->assertJsonPath('settings.gl_accounts.sales_default', 'gl-8000')
-            ->assertJsonPath('settings.gl_accounts.purchase_default', 'gl-4000');
+            ->assertJsonMissingPath('settings.gl_accounts.sales_default');
 
         $mapping = $connection->fresh()->metadata['accounting_mapping'];
-        $this->assertArrayNotHasKey('vat_codes', $mapping);
         $this->assertSame('70', $mapping['journals']['sales']);
+        $this->assertSame(['sales_default' => 'gl-8000'], $mapping['gl_accounts']);
+    }
+
+    public function test_confirming_writes_journals_vat_codes_and_gl_accounts_in_one_update(): void
+    {
+        $account = $this->account();
+        $connection = Connection::factory()->forExact()->active()->for($account)->create([
+            'metadata' => ['accounting_mapping' => ['gl_accounts' => ['expense:7' => 'gl-4000', 'sales_default' => 'gl-8000']]],
+        ]);
+        $this->syncedJournalAndGl($connection);
+        $this->syncedVat($connection);
+
+        $mappingUrl = $this->getJson($this->manageUrlFor($account, 'exact'))->json('urls.mapping_url');
+
+        $this->putJson($mappingUrl, [
+            'journals' => ['sales' => '70', 'purchase' => '80'],
+            'vat_codes' => ['21' => '4', 'reverse_charge:21' => '6', 'unknown' => '4'],
+            'gl_accounts' => ['invoice' => 'gl-8000', 'self_billing' => 'gl-4000', 'suspense' => 'gl-4000', 'expense:12' => 'gl-4000', 'expense:7' => null],
+        ])->assertOk();
+
+        $this->assertEquals([
+            'gl_accounts' => ['sales_default' => 'gl-8000', 'invoice' => 'gl-8000', 'self_billing' => 'gl-4000', 'suspense' => 'gl-4000', 'expense:12' => 'gl-4000'],
+            'journals' => ['sales' => '70', 'purchase' => '80'],
+            'vat_codes' => ['21' => '4', 'reverse_charge:21' => '6'],
+        ], $connection->fresh()->metadata['accounting_mapping']);
+    }
+
+    public function test_confirming_with_codes_outside_the_mirror_saves_nothing_and_names_each_field(): void
+    {
+        $account = $this->account();
+        $connection = Connection::factory()->forExact()->active()->for($account)->create();
+        $this->syncedJournalAndGl($connection);
+        $this->syncedVat($connection);
+
+        $mappingUrl = $this->getJson($this->manageUrlFor($account, 'exact'))->json('urls.mapping_url');
+
+        $this->putJson($mappingUrl, [
+            'journals' => ['sales' => '70'],
+            'vat_codes' => ['21' => '99'],
+            'gl_accounts' => ['invoice' => 'gl-8000', 'expense:12' => 'gl-9999'],
+        ])
+            ->assertStatus(422)
+            ->assertJsonValidationErrors(['vat_codes.21', 'gl_accounts.expense:12'])
+            ->assertJsonMissingValidationErrors(['journals.sales', 'gl_accounts.invoice']);
+
+        $this->assertArrayNotHasKey('accounting_mapping', $connection->fresh()->metadata ?? []);
+    }
+
+    public function test_a_category_key_with_a_dot_is_rejected(): void
+    {
+        $account = $this->account();
+        $connection = Connection::factory()->forExact()->active()->for($account)->create();
+        $this->syncedJournalAndGl($connection);
+
+        $mappingUrl = $this->getJson($this->manageUrlFor($account, 'exact'))->json('urls.mapping_url');
+
+        $this->putJson($mappingUrl, ['gl_accounts' => ['expense.12' => 'gl-4000']])
+            ->assertStatus(422)
+            ->assertJsonValidationErrors(['gl_accounts']);
+
+        $this->assertArrayNotHasKey('accounting_mapping', $connection->fresh()->metadata ?? []);
+    }
+
+    public function test_a_multi_key_confirm_logs_one_change_per_key_with_the_actor(): void
+    {
+        $account = $this->account();
+        $connection = Connection::factory()->forExact()->active()->for($account)->create();
+        $this->syncedJournalAndGl($connection);
+
+        $exact = collect($this->getPageProps($this->mintViaApi($account, ['actor' => ['name' => 'Jan', 'email' => 'jan@rijschool.test']]))['providers'])
+            ->firstWhere('key', 'exact');
+        $mappingUrl = $this->getJson($exact['manage_url'])->json('urls.mapping_url');
+
+        Log::spy();
+
+        $this->putJson($mappingUrl, [
+            'journals' => ['sales' => '70'],
+            'gl_accounts' => ['suspense' => 'gl-4000', 'expense:12' => 'gl-4000'],
+        ])->assertOk();
+
+        $actor = 'consumer:'.substr(hash('sha256', 'jan@rijschool.test'), 0, 12);
+
+        foreach ([['journals', 'sales'], ['gl_accounts', 'suspense'], ['gl_accounts', 'expense:12']] as [$section, $key]) {
+            Log::shouldHaveReceived('info')->with('accounting.mapping.changed', \Mockery::on(
+                fn (array $context): bool => $context['section'] === $section && $context['key'] === $key && $context['actor'] === $actor,
+            ))->once();
+        }
+
+        Log::shouldHaveReceived('info')->with('accounting.mapping.changed', \Mockery::any())->times(3);
+    }
+
+    public function test_a_category_mapped_in_the_drawer_books_on_the_chosen_gl_account(): void
+    {
+        MockClient::global([
+            CreateSalesEntry::class => MockResponse::make(['d' => ['ID' => 'inv-1']], 201),
+        ]);
+
+        $account = $this->account();
+        $connection = Connection::factory()->forExact()->active()->for($account)->create([
+            'expires_at' => now()->addMinutes(10),
+            'metadata' => ['accounting_mapping' => ['vat_codes' => ['21' => '4'], 'journals' => ['sales' => '70']]],
+        ]);
+        ConnectionAccountingRef::query()->create([
+            'connection_id' => $connection->getKey(), 'kind' => ConnectionAccountingRef::KIND_GL,
+            'code' => '4500', 'native_id' => 'guid-4500', 'label' => 'Brandstof',
+        ]);
+        ConnectionAccountingRef::query()->create([
+            'connection_id' => $connection->getKey(), 'kind' => ConnectionAccountingRef::KIND_RELATION,
+            'code' => 'acme-1', 'native_id' => 'cust-real',
+        ]);
+
+        $token = $account->consumer->createToken('t', [TokenAbilities::EXACT_WRITE])->plainTextToken;
+        $book = fn () => $this->withHeader('Authorization', "Bearer {$token}")
+            ->withHeader('X-Account-Id', $account->external_id)
+            ->withHeader('Idempotency-Key', (string) Str::uuid())
+            ->postJson('/v1/accounting/documents', [
+                'type' => 'sales_invoice',
+                'external_id' => 'INV-2026-001',
+                'issue_date' => '2026-06-16',
+                'party' => ['role' => 'debtor', 'name' => 'Acme BV', 'kind' => 'company', 'external_id' => 'acme-1', 'vat_number' => 'NL000099998B57'],
+                'lines' => [
+                    ['description' => 'Tanken', 'amount' => 50, 'tax_rate' => 21, 'category' => 'expense:12', 'category_label' => 'Brandstof'],
+                ],
+            ]);
+
+        $book()->assertStatus(422)->assertJsonPath('error', 'mapping_failed');
+
+        $mappingUrl = $this->getJson($this->manageUrlFor($account, 'exact'))->json('urls.mapping_url');
+        $this->putJson($mappingUrl, ['gl_accounts' => ['expense:12' => '4500']])->assertOk();
+
+        $book()->assertStatus(201);
+
+        MockClient::global()->assertSent(fn (CreateSalesEntry $request): bool => $request->body()->all()['SalesEntryLines'][0]['GLAccount'] === 'guid-4500');
     }
 
     public function test_saving_the_mapping_rejects_a_code_that_is_not_in_the_mirror(): void
@@ -455,6 +698,16 @@ class ConnectManageTest extends TestCase
             'connection_id' => $connection->getKey(), 'kind' => ConnectionAccountingRef::KIND_GL,
             'code' => 'gl-4000', 'native_id' => 'gl-4000', 'label' => 'Kosten',
         ]);
+    }
+
+    private function syncedVat(Connection $connection): void
+    {
+        foreach (['4' => 'BTW 21%', '6' => 'BTW 21% verlegd'] as $code => $label) {
+            ConnectionAccountingRef::query()->create([
+                'connection_id' => $connection->getKey(), 'kind' => ConnectionAccountingRef::KIND_VAT,
+                'code' => (string) $code, 'native_id' => (string) $code, 'label' => $label,
+            ]);
+        }
     }
 
     private function account(): Account
