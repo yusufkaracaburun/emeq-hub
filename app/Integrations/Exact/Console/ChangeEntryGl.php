@@ -215,7 +215,7 @@ final class ChangeEntryGl extends Command
         $purchase = in_array($type, [DocumentType::PurchaseInvoice, DocumentType::Expense], true);
         $collection = $purchase ? 'PurchaseEntryLines' : 'SalesEntryLines';
         $params = [
-            '$select' => 'EntryID,EntryNumber',
+            '$select' => "EntryID,EntryNumber,{$collection}",
             '$filter' => Filter::eq('EntryID', $entryId)->expression,
             '$expand' => $collection,
             '$top' => 1,

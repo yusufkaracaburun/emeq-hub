@@ -9,6 +9,7 @@ use App\Models\Connection;
 use App\Models\ConnectionAccountingRef;
 use App\Models\Consumer;
 use App\Models\ProviderEntityLink;
+use Emeq\ExactApi\Http\Request\Read\GetPurchaseEntries;
 use Emeq\ExactApi\Http\Request\Write\UpdatePurchaseEntryLine;
 use Emeq\ExactApi\Http\Request\Write\UpdateSalesEntryLine;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -61,6 +62,8 @@ class ExactChangeEntryGlTest extends TestCase
 
         $mock->assertNotSent(UpdatePurchaseEntryLine::class);
         $mock->assertNotSent(UpdateSalesEntryLine::class);
+        $mock->assertSent(fn ($request): bool => $request instanceof GetPurchaseEntries
+            && in_array('PurchaseEntryLines', explode(',', (string) $request->query()->get('$select')), true));
     }
 
     private function exactConnection(): Connection
