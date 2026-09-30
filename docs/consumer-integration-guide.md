@@ -624,11 +624,15 @@ de relatie en het BTW-tarief; stuur je ze als GL-hint mee, dan staat de boeking 
 balans en klopt de openstaande post niet meer.
 
 Let op het verschil in faalgedrag. Een `cost_center` of `cost_unit` die niet in de
-administratie bestaat, wordt geweigerd met `422`. Een `category` die niet in de mapping staat
-**faalt niet**: die valt stil terug op de standaard-grootboekrekening van het documenttype.
-Een typefout in een categorienaam levert dus een geslaagde boeking op de verkeerde rekening
-op. Laat gebruikers hun categorieën daarom expliciet mappen in plaats van te vertrouwen op de
-afgeleide default.
+administratie bestaat, wordt geweigerd met `422`. Een `category` die niet in `gl_accounts`
+staat, valt **niet** terug op een standaard-grootboek. De boeking weigert met
+`422 mapping_failed`, tenzij de tenant een tussenrekening heeft ingesteld
+(`gl_accounts.suspense`): dan boekt de regel daarop en ruimt de boekhouder hem later op.
+Houd een geweigerd document vast en bied het opnieuw aan zodra de categorie gekoppeld is.
+Alleen een regel **zonder** `category` gebruikt het standaard-grootboek:
+`gl_accounts.sales_default` of `gl_accounts.purchase_default` (naar documenttype), dan
+`gl_accounts._default`; ontbreken die, dan ook `422 mapping_failed`. De Hub leidt
+grootboekrekeningen niet zelf af: laat gebruikers hun categorieën expliciet mappen.
 
 ### Betalingen horen niet in de boeking
 
@@ -746,6 +750,9 @@ zonder Exact-jargon, met de consequentie en de handeling erin. Stuur je logica o
 | `exact.relation.ambiguous` | warning | ja | Meerdere relaties met hetzelfde KvK- of btw-nummer. Het boeken geeft een `409`; laat je gebruiker kiezen en stuur `party.relation_id` |
 | `exact.cost_center.matched` / `exact.cost_unit.matched` | info | nee | Opgegeven kostenplaats/-drager bestaat in de administratie |
 | `exact.cost_center.unmapped` / `exact.cost_unit.unmapped` | warning | ja | Kostenplaats/-drager onbekend — de boeking weigert hierop. Corrigeer de Code of draai `POST /v1/accounting/sync` |
+| `exact.gl_account.unmapped_category` | error | ja | `category` staat niet in `gl_accounts` en er is geen tussenrekening. Het boeken geeft `422 mapping_failed` |
+| `exact.gl_account.unmapped_category` | warning | nee | `category` staat niet in `gl_accounts`; de regel boekt op de tussenrekening (`gl_accounts.suspense`) uit de melding |
+| `exact.gl_account.missing_default` | warning | ja | Regel zonder `category` en geen `sales_default`/`purchase_default`/`_default`. Het boeken geeft `422 mapping_failed` |
 
 > `exact.*` verschijnen alleen bij een Exact-connection; de rest is provider-agnostisch.
 
@@ -960,6 +967,8 @@ PUT-body — alle velden optioneel, **merge** (bestaande waarden blijven):
 
 - `vat_codes`/`gl_accounts`/`journals` = stabiele **Codes** uit `reference-data`
   (geen GUIDs — de Hub resolvet die lokaal).
+- Een `gl_accounts`-Code die niet in `reference-data` staat, geeft `422` met een
+  validatiefout op dat veld. Nieuw grootboek in Exact aangemaakt? Draai eerst `POST /v1/accounting/sync`.
 
 > Merge-only: een bestaande key verwijderen kan niet via PUT — stuur een nieuwe waarde.
 
@@ -972,8 +981,11 @@ en de huidige mapping met `GET /v1/accounting/mapping`. Laat de tenant per BTW-t
 een VATCode, per categorie een GL-Code en per dagboek-type een Journal kiezen (alles
 Codes, geen GUIDs). Sla op met `PUT /v1/accounting/mapping` (merge), body
 `{ vat_codes, gl_accounts, journals }` — stuur alleen de gewijzigde velden. Optioneel
-een knop "hersynchroniseren" → `POST /v1/accounting/sync`. Default hoeft de tenant
-niets in te stellen; de Hub auto-derivet bij connect.
+een knop "hersynchroniseren" → `POST /v1/accounting/sync`. BTW-codes en dagboeken
+leidt de Hub bij connect zelf af, grootboekrekeningen niet: laat de tenant elke categorie
+koppelen, plus `gl_accounts.sales_default` en `gl_accounts.purchase_default` (of `_default`)
+voor regels zonder categorie. Optioneel `gl_accounts.suspense` als tussenrekening voor
+nog niet gekoppelde categorieën; zonder die weigert zo'n boeking met `422 mapping_failed`.
 ```
 
 ## Theorie-toegangscodes kopen (iTheorie)
