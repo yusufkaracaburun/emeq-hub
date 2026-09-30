@@ -37,18 +37,42 @@ final class ConnectionMappingExactReferenceResolver implements ReferenceResolver
         return $treatment->vatCodeKey($this->rateKey($taxRate));
     }
 
-    public function glAccountRef(?string $category, DocumentType $type, Connection $connection): ?string
+    public function glAccountRef(?string $category, DocumentType $type, Connection $connection): string
+    {
+        $code = $this->glAccountCodeOrNull($category, $type, $connection)
+            ?? throw new AccountingMappingException($this->missingGlAccountMessage($category, $type));
+
+        return $this->mirrorNativeId($connection, ConnectionAccountingRef::KIND_GL, $code)
+            ?? throw new AccountingMappingException("Grootboek-code '{$code}' niet in de mirror — draai POST /v1/accounting/sync.");
+    }
+
+    public function glAccountCodeOrNull(?string $category, DocumentType $type, Connection $connection): ?string
     {
         $accounts = $this->section($connection, 'gl_accounts');
-        $defaultKey = $this->glAccountDefaultKey($type);
-        $code = $accounts[$category ?? $defaultKey] ?? $accounts[$defaultKey] ?? $accounts['_default'] ?? null;
 
-        if ($code === null) {
-            return null;
+        $code = $category !== null
+            ? $accounts[$category] ?? $accounts['suspense'] ?? null
+            : $accounts[$this->glAccountDefaultKey($type)] ?? $accounts['_default'] ?? null;
+
+        return $code !== null ? (string) $code : null;
+    }
+
+    public function glCategoryMapped(string $category, Connection $connection): bool
+    {
+        return isset($this->section($connection, 'gl_accounts')[$category]);
+    }
+
+    public function missingGlAccountMessage(?string $category, DocumentType $type): string
+    {
+        $where = 'via PUT /v1/accounting/mapping of de beheerpagina van deze koppeling.';
+
+        if ($category !== null) {
+            return "Categorie '{$category}' heeft geen grootboek in de mapping. Koppel deze categorie aan een grootboek (gl_accounts.{$category}), of stel een tussenrekening (gl_accounts.suspense) in {$where}";
         }
 
-        return $this->mirrorNativeId($connection, ConnectionAccountingRef::KIND_GL, (string) $code)
-            ?? throw new AccountingMappingException("Grootboek-code '{$code}' niet in de mirror — draai POST /v1/accounting/sync.");
+        $bookings = $this->journalFamily($type) === 'sales' ? 'verkoopboekingen' : 'inkoopboekingen';
+
+        return "Geen standaard-grootboek voor {$bookings}. Stel gl_accounts.{$this->glAccountDefaultKey($type)} of gl_accounts._default in {$where}";
     }
 
     public function costCenter(?string $code, Connection $connection): ?string

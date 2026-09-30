@@ -91,13 +91,12 @@ class ConnectionMappingExactReferenceResolverTest extends TestCase
         $this->assertSame('20', $resolver->journal(DocumentType::Expense, $connection));
     }
 
-    public function test_gl_code_falls_back_to_default_and_resolves_via_mirror(): void
+    public function test_line_without_category_falls_back_to_default_and_resolves_via_mirror(): void
     {
         $resolver = $this->resolver();
         $connection = $this->fullMapping();
         $this->seedRef($connection, ConnectionAccountingRef::KIND_GL, 'gl-def', 'gl-def-id');
 
-        $this->assertSame('gl-def-id', $resolver->glAccountRef('onbekende-categorie', DocumentType::SalesInvoice, $connection));
         $this->assertSame('gl-def-id', $resolver->glAccountRef(null, DocumentType::SalesInvoice, $connection));
     }
 
@@ -146,6 +145,45 @@ class ConnectionMappingExactReferenceResolverTest extends TestCase
         $this->assertSame('gl-def-id', $resolver->glAccountRef(null, DocumentType::PurchaseInvoice, $connection));
         $this->assertSame('gl-def-id', $resolver->glAccountRef(null, DocumentType::Income, $connection));
         $this->assertSame('gl-def-id', $resolver->glAccountRef(null, DocumentType::Expense, $connection));
+    }
+
+    public function test_unmapped_category_is_held_instead_of_falling_back_to_a_default(): void
+    {
+        $resolver = $this->resolver();
+        $connection = $this->connection(['gl_accounts' => ['omzet' => 'gl-omzet', 'purchase_default' => 'gl-purchase', '_default' => 'gl-def']]);
+        $this->seedRef($connection, ConnectionAccountingRef::KIND_GL, 'gl-purchase', 'gl-purchase-id');
+        $this->seedRef($connection, ConnectionAccountingRef::KIND_GL, 'gl-def', 'gl-def-id');
+
+        $this->expectException(AccountingMappingException::class);
+        $this->expectExceptionMessage("Categorie 'kosten'");
+        $this->expectExceptionMessage('gl_accounts.suspense');
+        $resolver->glAccountRef('kosten', DocumentType::PurchaseInvoice, $connection);
+    }
+
+    public function test_unmapped_category_books_on_the_suspense_account_when_one_is_set(): void
+    {
+        $resolver = $this->resolver();
+        $connection = $this->connection(['gl_accounts' => ['suspense' => 'gl-tussen', '_default' => 'gl-def']]);
+        $this->seedRef($connection, ConnectionAccountingRef::KIND_GL, 'gl-tussen', 'gl-tussen-id');
+
+        $this->assertSame('gl-tussen-id', $resolver->glAccountRef('kosten', DocumentType::PurchaseInvoice, $connection));
+    }
+
+    public function test_suspense_account_is_not_used_for_a_line_without_category(): void
+    {
+        $resolver = $this->resolver();
+
+        $this->expectException(AccountingMappingException::class);
+        $resolver->glAccountRef(null, DocumentType::PurchaseInvoice, $this->connection(['gl_accounts' => ['suspense' => 'gl-tussen']]));
+    }
+
+    public function test_throws_when_line_without_category_has_no_gl_default(): void
+    {
+        $resolver = $this->resolver();
+
+        $this->expectException(AccountingMappingException::class);
+        $this->expectExceptionMessage('gl_accounts.sales_default');
+        $resolver->glAccountRef(null, DocumentType::SalesInvoice, $this->connection(null));
     }
 
     public function test_vat_code_or_null_returns_code_or_null(): void

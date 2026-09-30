@@ -534,7 +534,7 @@ class StoreDocumentTest extends TestCase
         [$consumer, $connection] = $this->consumerWithExactConnection([
             'metadata' => ['accounting_mapping' => [
                 'vat_codes' => ['21' => '4'],
-                'gl_accounts' => ['_default' => 'gl-def'],
+                'gl_accounts' => ['omzet' => 'gl-def', '_default' => 'gl-def'],
                 'journals' => ['sales' => '70'],
             ]],
         ]);
@@ -659,6 +659,45 @@ class StoreDocumentTest extends TestCase
         MockClient::global()->assertSent(fn (CreatePurchaseEntry $request): bool => $request->body()->all()['PurchaseEntryLines'][0]['GLAccount'] === 'gl-kosten-guid');
     }
 
+    public function test_unmapped_category_is_held_with_mapping_failed_instead_of_booking_on_a_guessed_account(): void
+    {
+        MockClient::global([
+            CreateSalesEntry::class => MockResponse::make(['d' => ['ID' => 'inv-1']], 201),
+        ]);
+
+        [$consumer, $connection] = $this->consumerWithExactConnection([
+            'metadata' => ['accounting_mapping' => [
+                'vat_codes' => ['21' => '4'],
+                'gl_accounts' => ['sales_default' => 'gl-omzet', '_default' => 'gl-omzet'],
+                'journals' => ['sales' => '70'],
+            ]],
+        ]);
+        ConnectionAccountingRef::query()->create([
+            'connection_id' => $connection->getKey(),
+            'kind' => ConnectionAccountingRef::KIND_GL,
+            'code' => 'gl-omzet',
+            'native_id' => 'gl-omzet-guid',
+        ]);
+        ConnectionAccountingRef::query()->create([
+            'connection_id' => $connection->getKey(),
+            'kind' => ConnectionAccountingRef::KIND_RELATION,
+            'code' => 'acme-1',
+            'native_id' => 'cust-real',
+        ]);
+
+        $token = $consumer->createToken('t', [TokenAbilities::EXACT_WRITE])->plainTextToken;
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->withHeader('X-Account-Id', 'school1')
+            ->withHeader('Idempotency-Key', (string) Str::uuid())
+            ->postJson('/v1/accounting/documents', $this->salesInvoicePayload())
+            ->assertStatus(422)
+            ->assertJsonPath('error', 'mapping_failed')
+            ->assertJsonPath('message', fn (string $message): bool => str_contains($message, "Categorie 'omzet'") && str_contains($message, 'gl_accounts.suspense'));
+
+        MockClient::global()->assertNotSent(CreateSalesEntry::class);
+    }
+
     public function test_auto_created_relation_carries_the_whole_relation_card(): void
     {
         MockClient::global([
@@ -670,7 +709,7 @@ class StoreDocumentTest extends TestCase
         [$consumer, $connection] = $this->consumerWithExactConnection([
             'metadata' => ['accounting_mapping' => [
                 'vat_codes' => ['21' => '4'],
-                'gl_accounts' => ['_default' => 'gl-def'],
+                'gl_accounts' => ['omzet' => 'gl-def', '_default' => 'gl-def'],
                 'journals' => ['sales' => '70'],
             ]],
         ]);
@@ -742,7 +781,7 @@ class StoreDocumentTest extends TestCase
         [$consumer, $connection] = $this->consumerWithExactConnection([
             'metadata' => ['accounting_mapping' => [
                 'vat_codes' => ['21' => '4'],
-                'gl_accounts' => ['_default' => 'gl-def'],
+                'gl_accounts' => ['omzet' => 'gl-def', '_default' => 'gl-def'],
                 'journals' => ['sales' => '70'],
             ]],
         ]);
@@ -820,7 +859,7 @@ class StoreDocumentTest extends TestCase
         [$consumer, $connection] = $this->consumerWithExactConnection([
             'metadata' => ['accounting_mapping' => [
                 'vat_codes' => ['21' => '4'],
-                'gl_accounts' => ['_default' => 'gl-def'],
+                'gl_accounts' => ['omzet' => 'gl-def', '_default' => 'gl-def'],
                 'journals' => ['purchase' => '70'],
             ]],
         ]);
@@ -912,7 +951,7 @@ class StoreDocumentTest extends TestCase
         [$consumer, $connection] = $this->consumerWithExactConnection([
             'metadata' => ['accounting_mapping' => [
                 'vat_codes' => ['21' => '4'],
-                'gl_accounts' => ['_default' => 'gl-def'],
+                'gl_accounts' => ['omzet' => 'gl-def', '_default' => 'gl-def'],
                 'journals' => ['sales' => '70'],
             ]],
         ]);
@@ -1265,7 +1304,7 @@ class StoreDocumentTest extends TestCase
         [$consumer, $connection] = $this->consumerWithExactConnection([
             'metadata' => ['accounting_mapping' => [
                 'vat_codes' => ['21' => '4'],
-                'gl_accounts' => ['_default' => 'gl-def'],
+                'gl_accounts' => ['omzet' => 'gl-def', '_default' => 'gl-def'],
                 'journals' => ['sales' => '70'],
             ]],
         ]);
@@ -1313,7 +1352,7 @@ class StoreDocumentTest extends TestCase
         [$consumer, $connection] = $this->consumerWithExactConnection([
             'metadata' => ['accounting_mapping' => [
                 'vat_codes' => ['21' => '4'],
-                'gl_accounts' => ['_default' => 'gl-def'],
+                'gl_accounts' => ['omzet' => 'gl-def', '_default' => 'gl-def'],
                 'journals' => ['sales' => '70'],
             ]],
         ]);
@@ -1363,7 +1402,7 @@ class StoreDocumentTest extends TestCase
         [$consumer, $connection] = $this->consumerWithExactConnection([
             'metadata' => ['accounting_mapping' => [
                 'vat_codes' => ['21' => '4'],
-                'gl_accounts' => ['_default' => 'gl-def'],
+                'gl_accounts' => ['omzet' => 'gl-def', '_default' => 'gl-def'],
                 'journals' => ['sales' => '70'],
             ]],
         ]);
@@ -1415,7 +1454,7 @@ class StoreDocumentTest extends TestCase
         [$consumer, $connection] = $this->consumerWithExactConnection([
             'metadata' => ['accounting_mapping' => [
                 'vat_codes' => ['21' => '4'],
-                'gl_accounts' => ['_default' => 'gl-def'],
+                'gl_accounts' => ['omzet' => 'gl-def', '_default' => 'gl-def'],
                 'journals' => ['sales' => '70'],
             ]],
         ]);
@@ -1470,7 +1509,7 @@ class StoreDocumentTest extends TestCase
         [$consumer, $connection] = $this->consumerWithExactConnection([
             'metadata' => ['accounting_mapping' => [
                 'vat_codes' => ['21' => '4'],
-                'gl_accounts' => ['_default' => 'gl-def'],
+                'gl_accounts' => ['omzet' => 'gl-def', '_default' => 'gl-def'],
                 'journals' => ['sales' => '70'],
             ]],
         ]);
@@ -1524,7 +1563,7 @@ class StoreDocumentTest extends TestCase
         [$consumer, $connection] = $this->consumerWithExactConnection([
             'metadata' => ['accounting_mapping' => [
                 'vat_codes' => ['21' => '4'],
-                'gl_accounts' => ['_default' => 'gl-def'],
+                'gl_accounts' => ['omzet' => 'gl-def', '_default' => 'gl-def'],
                 'journals' => ['sales' => '70'],
             ]],
         ]);
@@ -1568,7 +1607,7 @@ class StoreDocumentTest extends TestCase
         [$consumer, $connection] = $this->consumerWithExactConnection([
             'metadata' => ['accounting_mapping' => [
                 'vat_codes' => ['21' => '4'],
-                'gl_accounts' => ['_default' => 'gl-def'],
+                'gl_accounts' => ['omzet' => 'gl-def', '_default' => 'gl-def'],
                 'journals' => ['sales' => '70'],
             ]],
         ]);
