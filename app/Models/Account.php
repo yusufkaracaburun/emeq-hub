@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['consumer_id', 'external_id', 'display_name'])]
+#[Fillable(['consumer_id', 'external_id', 'display_name', 'accounting_categories'])]
 class Account extends Model
 {
     /** @use HasFactory<AccountFactory> */
@@ -28,5 +28,13 @@ class Account extends Model
     public function accountSubscriptions(): HasMany
     {
         return $this->hasMany(AccountSubscription::class);
+    }
+
+    /** @return array<string, string> */
+    protected function casts(): array
+    {
+        return [
+            'accounting_categories' => 'array',
+        ];
     }
 }
